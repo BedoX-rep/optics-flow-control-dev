@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -29,99 +29,95 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Eye, Search, Calendar } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
+import { useAuth } from '@/components/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Dummy data
-const initialSubscriptions = [
-  { 
-    id: '1', 
-    email: 'test@example.com', 
-    displayName: 'Test User', 
-    startDate: '01/01/2023', 
-    endDate: '12/31/2023', 
-    type: 'Monthly' as const,
-    status: 'Active' as const,
-    isRecurring: true,
-    trialUsed: true
-  },
-  { 
-    id: '2', 
-    email: 'optician@example.com', 
-    displayName: 'Optician Shop', 
-    startDate: '03/15/2023', 
-    endDate: '03/14/2024', 
-    type: 'Quarterly' as const,
-    status: 'Active' as const,
-    isRecurring: true,
-    trialUsed: true
-  },
-  { 
-    id: '3', 
-    email: 'demo@example.com', 
-    displayName: 'Demo Account', 
-    startDate: '05/01/2023', 
-    endDate: '05/30/2023', 
-    type: 'Trial' as const,
-    status: 'Expired' as const,
-    isRecurring: false,
-    trialUsed: true
-  },
-  { 
-    id: '4', 
-    email: 'store@example.com', 
-    displayName: 'Eyewear Store', 
-    startDate: '02/10/2023', 
-    endDate: '02/09/2024', 
-    type: 'Lifetime' as const,
-    status: 'Active' as const,
-    isRecurring: false,
-    trialUsed: true
-  },
-  { 
-    id: '5', 
-    email: 'glasses@example.com', 
-    displayName: 'Glasses Shop', 
-    startDate: null, 
-    endDate: null, 
-    type: 'Trial' as const,
-    status: 'inActive' as const,
-    isRecurring: false,
-    trialUsed: false
-  },
-];
+// Define interfaces
+interface Subscription {
+  id: string;
+  email: string;
+  display_name: string;
+  start_date: string | null;
+  end_date: string | null;
+  subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
+  subscription_status: 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+  is_recurring: boolean;
+  trial_used: boolean;
+}
 
 const Subscriptions = () => {
-  const [subscriptions, setSubscriptions] = useState(initialSubscriptions);
+  const { user, subscription: userSubscription, refreshSubscription } = useAuth();
+  const { toast } = useToast();
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Only admins would be able to see all subscriptions, 
+        // regular users only see their own subscription
+        // For demo, we'll fetch just the user's subscription
+        
+        if (!user) return;
+        
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        setSubscriptions(data || []);
+        refreshSubscription(); // Refresh the user's subscription status in context
+      } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load subscriptions. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSubscriptions();
+  }, [user, toast, refreshSubscription]);
   
   const filteredSubscriptions = subscriptions.filter(subscription => 
-    (subscription.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (subscription.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subscription.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (statusFilter === 'all' || statusFilter === subscription.status) &&
-    (typeFilter === 'all' || typeFilter === subscription.type)
+    (statusFilter === 'all' || statusFilter === subscription.subscription_status) &&
+    (typeFilter === 'all' || typeFilter === subscription.subscription_type)
   );
 
   const viewSubscriptionDetails = (id: string) => {
-    // Logic to view subscription details
+    // Logic to view subscription details (would open a modal in a real app)
     console.log(`View subscription details for ID: ${id}`);
   };
 
-  // Current user subscription is the first one in the list (for demo)
-  const currentSubscription = subscriptions[0];
+  // Current user subscription
+  const currentSubscription = userSubscription || (subscriptions.length > 0 ? subscriptions[0] : null);
 
   return (
     <div>
       <PageTitle title="Subscriptions" subtitle="Manage your subscription plans" />
       
-      {currentSubscription.status !== 'Active' && (
+      {currentSubscription && currentSubscription.subscription_status !== 'Active' && (
         <Card className="mb-6 bg-yellow-50 border-yellow-200">
           <CardContent className="p-6">
             <div className="flex items-start">
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-yellow-800 mb-2">Subscription Required</h3>
                 <p className="text-yellow-700">
-                  Your subscription is currently {currentSubscription.status.toLowerCase()}. 
+                  Your subscription is currently {currentSubscription.subscription_status.toLowerCase()}. 
                   Please contact an administrator to activate your subscription and gain full access.
                 </p>
               </div>
@@ -133,51 +129,57 @@ const Subscriptions = () => {
         </Card>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Current Plan</p>
-                <h3 className="text-xl font-bold mt-1">{currentSubscription.type}</h3>
+      {currentSubscription && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Current Plan</p>
+                  <h3 className="text-xl font-bold mt-1">{currentSubscription.subscription_type}</h3>
+                </div>
+                <SubscriptionBadge status={currentSubscription.subscription_status} />
               </div>
-              <SubscriptionBadge status={currentSubscription.status} />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Start Date</p>
-                <h3 className="text-xl font-bold mt-1">
-                  {currentSubscription.startDate || 'Not Started'}
-                </h3>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Start Date</p>
+                  <h3 className="text-xl font-bold mt-1">
+                    {currentSubscription.start_date ? 
+                      new Date(currentSubscription.start_date).toLocaleDateString() : 
+                      'Not Started'}
+                  </h3>
+                </div>
+                <div className="p-2 rounded-full bg-optics-100 text-optics-600">
+                  <Calendar className="h-5 w-5" />
+                </div>
               </div>
-              <div className="p-2 rounded-full bg-optics-100 text-optics-600">
-                <Calendar className="h-5 w-5" />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Expiration Date</p>
+                  <h3 className="text-xl font-bold mt-1">
+                    {currentSubscription.end_date ? 
+                      new Date(currentSubscription.end_date).toLocaleDateString() : 
+                      'Not Set'}
+                  </h3>
+                </div>
+                <div className="p-2 rounded-full bg-optics-100 text-optics-600">
+                  <Calendar className="h-5 w-5" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Expiration Date</p>
-                <h3 className="text-xl font-bold mt-1">
-                  {currentSubscription.endDate || 'Not Set'}
-                </h3>
-              </div>
-              <div className="p-2 rounded-full bg-optics-100 text-optics-600">
-                <Calendar className="h-5 w-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-4 items-center mb-6">
         <div className="relative flex-1 min-w-[200px]">
@@ -235,47 +237,72 @@ const Subscriptions = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredSubscriptions.map((subscription) => (
-              <TableRow key={subscription.id}>
-                <TableCell>{subscription.email}</TableCell>
-                <TableCell className="font-medium">{subscription.displayName}</TableCell>
-                <TableCell>{subscription.startDate || '-'}</TableCell>
-                <TableCell>{subscription.endDate || '-'}</TableCell>
-                <TableCell>{subscription.type}</TableCell>
-                <TableCell>
-                  <SubscriptionBadge status={subscription.status} />
-                </TableCell>
-                <TableCell>{subscription.isRecurring ? 'Yes' : 'No'}</TableCell>
-                <TableCell>{subscription.trialUsed ? 'Yes' : 'No'}</TableCell>
-                <TableCell className="text-right">
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => viewSubscriptionDetails(subscription.id)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center py-10">
+                  Loading subscriptions...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredSubscriptions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center py-10">
+                  No subscriptions found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSubscriptions.map((subscription) => (
+                <TableRow key={subscription.id}>
+                  <TableCell>{subscription.email}</TableCell>
+                  <TableCell className="font-medium">{subscription.display_name}</TableCell>
+                  <TableCell>
+                    {subscription.start_date ? 
+                      new Date(subscription.start_date).toLocaleDateString() : 
+                      '-'}
+                  </TableCell>
+                  <TableCell>
+                    {subscription.end_date ? 
+                      new Date(subscription.end_date).toLocaleDateString() : 
+                      '-'}
+                  </TableCell>
+                  <TableCell>{subscription.subscription_type}</TableCell>
+                  <TableCell>
+                    <SubscriptionBadge status={subscription.subscription_status} />
+                  </TableCell>
+                  <TableCell>{subscription.is_recurring ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{subscription.trial_used ? 'Yes' : 'No'}</TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => viewSubscriptionDetails(subscription.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
 
       <div className="mt-8 bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium mb-4">SQL Statements for Tables</h3>
+        <h3 className="text-lg font-medium text-gray-700 mb-4">SQL Statements for Tables</h3>
         <pre className="bg-gray-100 p-4 rounded-lg overflow-auto text-xs">
 {`-- Products Table
 CREATE TABLE products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
   name TEXT NOT NULL,
   price DECIMAL NOT NULL,
+  position INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Clients Table
 CREATE TABLE clients (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -284,6 +311,7 @@ CREATE TABLE clients (
 -- Receipts Table
 CREATE TABLE receipts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
   client_id UUID REFERENCES clients(id),
   right_eye_sph DECIMAL,
   right_eye_cyl DECIMAL,
@@ -293,14 +321,20 @@ CREATE TABLE receipts (
   left_eye_axe INTEGER,
   subtotal DECIMAL NOT NULL,
   tax DECIMAL NOT NULL,
-  discount DECIMAL NOT NULL,
+  discount_percentage DECIMAL,
+  discount_amount DECIMAL,
   total DECIMAL NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  advance_payment DECIMAL DEFAULT 0,
+  balance DECIMAL NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  delivery_status TEXT NOT NULL DEFAULT 'Undelivered',
+  montage_status TEXT NOT NULL DEFAULT 'UnOrdered'
 );
 
 -- Receipt Items Table
 CREATE TABLE receipt_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
   receipt_id UUID REFERENCES receipts(id),
   product_id UUID REFERENCES products(id),
   custom_item_name TEXT,
@@ -337,19 +371,19 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Products table RLS policy
 CREATE POLICY "Users can CRUD their own products" ON products
-  FOR ALL USING (auth.uid() = auth.uid());
+  FOR ALL USING (auth.uid() = user_id);
 
 -- Clients table RLS policy
 CREATE POLICY "Users can CRUD their own clients" ON clients
-  FOR ALL USING (auth.uid() = auth.uid());
+  FOR ALL USING (auth.uid() = user_id);
 
 -- Receipts table RLS policy
 CREATE POLICY "Users can CRUD their own receipts" ON receipts
-  FOR ALL USING (auth.uid() = auth.uid());
+  FOR ALL USING (auth.uid() = user_id);
 
 -- Receipt items table RLS policy
 CREATE POLICY "Users can CRUD their own receipt items" ON receipt_items
-  FOR ALL USING (auth.uid() = auth.uid());
+  FOR ALL USING (auth.uid() = user_id);
 
 -- Subscriptions table RLS policy - can only read their own subscription
 CREATE POLICY "Users can read their own subscription" ON subscriptions
@@ -360,7 +394,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.subscriptions (user_id, email, display_name, start_date, end_date, subscription_status)
-  VALUES (new.id, new.email, new.email, NULL, NULL, 'inActive');
+  VALUES (new.id, new.email, coalesce(new.raw_user_meta_data->>'display_name', new.email), NULL, NULL, 'inActive');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -368,9 +402,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- Edge Function to check subscription status every 2 minutes
--- This would be implemented separately in the Supabase Edge Functions
 
 -- SQL Function to update subscription status based on dates
 CREATE OR REPLACE FUNCTION update_subscription_status()
@@ -410,7 +441,6 @@ BEGIN
   WHERE start_date <= NOW() AND end_date > NOW() AND subscription_status = 'inActive';
   
   -- Handle recurring subscriptions that are about to expire
-  -- This is a simplified version - real implementation would need payment processing
   UPDATE subscriptions
   SET end_date = end_date + INTERVAL '1 month'
   WHERE is_recurring = TRUE AND subscription_type = 'Monthly' AND end_date <= NOW() + INTERVAL '1 day';

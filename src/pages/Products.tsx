@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -21,60 +21,147 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash, Search } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Dummy data
-const initialProducts = [
-  { id: '1', name: '1.5 BLUE INDO', price: 300 },
-  { id: '2', name: '1.6 BLUE PROTECTION GLASS', price: 350 },
-  { id: '3', name: '1.5 GREEN PROTECTION GLASS', price: 250 },
-  { id: '4', name: '1.5 INDO TABLE F', price: 275 },
-  { id: '5', name: '1.6 WHITE PROTECTION INDO', price: 375 },
-  { id: '6', name: 'Progressive Blue UV 455', price: 600 },
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
 
 const Products = () => {
-  const [products, setProducts] = useState(initialProducts);
+  const { toast } = useToast();
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<null | { 
-    id: string; 
-    name: string; 
-    price: number 
-  }>(null);
+  const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [newProduct, setNewProduct] = useState({ name: '', price: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (newProduct.name && newProduct.price > 0) {
-      if (editingProduct) {
-        // Update existing product
-        setProducts(products.map(p => 
-          p.id === editingProduct.id ? { ...p, ...newProduct } : p
-        ));
-      } else {
-        // Add new product
-        setProducts([...products, { 
-          id: (products.length + 1).toString(),
-          ...newProduct
-        }]);
+      try {
+        setIsSubmitting(true);
+        
+        if (editingProduct) {
+          // Update existing product
+          const { error } = await supabase
+            .from('products')
+            .update({ 
+              name: newProduct.name,
+              price: newProduct.price
+            })
+            .eq('id', editingProduct.id);
+            
+          if (error) throw error;
+          
+          toast({
+            title: "Success",
+            description: "Product updated successfully",
+          });
+        } else {
+          // Add new product
+          const { error } = await supabase
+            .from('products')
+            .insert({ 
+              name: newProduct.name,
+              price: newProduct.price
+            });
+            
+          if (error) throw error;
+          
+          toast({
+            title: "Success",
+            description: "Product added successfully",
+          });
+        }
+        
+        setNewProduct({ name: '', price: 0 });
+        setEditingProduct(null);
+        setIsOpen(false);
+        fetchProducts();
+      } catch (error) {
+        console.error('Error saving product:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save product. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-      setNewProduct({ name: '', price: 0 });
-      setEditingProduct(null);
-      setIsOpen(false);
+    } else {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a name and a price greater than 0.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleEditProduct = (product: typeof products[0]) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setNewProduct({ name: product.name, price: product.price });
     setIsOpen(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter(product => product.id !== id));
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      try {
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', id);
+          
+        if (error) throw error;
+        
+        setProducts(products.filter(product => product.id !== id));
+        toast({
+          title: "Success",
+          description: "Product deleted successfully",
+        });
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete product. It might be used in receipts.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
@@ -139,14 +226,16 @@ const Products = () => {
                   setEditingProduct(null);
                   setNewProduct({ name: '', price: 0 });
                 }}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button 
                 className="bg-optics-600 hover:bg-optics-700"
                 onClick={handleAddProduct}
+                disabled={isSubmitting}
               >
-                {editingProduct ? 'Update' : 'Add'}
+                {isSubmitting ? 'Saving...' : (editingProduct ? 'Update' : 'Add')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -164,31 +253,45 @@ const Products = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((product, index) => (
-              <TableRow key={product.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell className="text-right">{product.price.toFixed(2)} DH</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleEditProduct(product)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleDeleteProduct(product.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-10">
+                  Loading products...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-10">
+                  No products found. Add your first product to get started.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredProducts.map((product, index) => (
+                <TableRow key={product.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell className="text-right">{product.price.toFixed(2)} DH</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEditProduct(product)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

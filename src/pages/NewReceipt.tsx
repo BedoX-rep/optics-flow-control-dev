@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -24,38 +25,96 @@ import {
 } from "@/components/ui/tabs";
 import { Plus, Trash } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Dummy data
-const products = [
-  { id: '1', name: '1.5 BLUE INDO', price: 300 },
-  { id: '2', name: '1.6 BLUE PROTECTION GLASS', price: 350 },
-  { id: '3', name: '1.5 GREEN PROTECTION GLASS', price: 250 },
-  { id: '4', name: '1.5 INDO TABLE F', price: 275 },
-  { id: '5', name: '1.6 WHITE PROTECTION INDO', price: 375 },
-  { id: '6', name: 'Progressive Blue UV 455', price: 600 },
-];
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
 
-const clients = [
-  { id: '1', name: 'AHMED KORDALI' },
-  { id: '2', name: 'FLAURENT LAMBI' },
-  { id: '3', name: 'ABD RAHIM NAKHMAL' },
-  { id: '4', name: 'ABD ALLAH DHIOT' },
-  { id: '5', name: 'ABD AZIZ DIHAJ' },
-];
+interface Client {
+  id: string;
+  name: string;
+}
+
+interface ReceiptItem {
+  id: string;
+  productId?: string;
+  customName?: string;
+  quantity: number;
+  price: number;
+}
 
 const NewReceipt = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedClient, setSelectedClient] = useState('');
-  const [items, setItems] = useState<Array<{
-    id: string;
-    productId?: string;
-    customName?: string;
-    quantity: number;
-    price: number;
-  }>>([]);
+  const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
   const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Check subscription status first
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/auth');
+          return;
+        }
+
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('subscription_status')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!subscription || subscription.subscription_status !== 'Active') {
+          toast({
+            title: "Subscription Required",
+            description: "You need an active subscription to access this feature.",
+            variant: "destructive",
+          });
+          navigate('/subscriptions');
+          return;
+        }
+
+        // Fetch products and clients
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (productsError) throw productsError;
+        setProducts(productsData || []);
+
+        const { data: clientsData, error: clientsError } = await supabase
+          .from('clients')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (clientsError) throw clientsError;
+        setClients(clientsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load data. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchData();
+  }, [navigate, toast]);
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
@@ -76,7 +135,7 @@ const NewReceipt = () => {
           const product = products.find(p => p.id === value);
           return { 
             ...item, 
-            [field]: value,
+            [field]: value.toString(),  // Ensure productId is always a string
             price: product ? product.price : 0 
           };
         }
@@ -90,6 +149,85 @@ const NewReceipt = () => {
   const taxAmount = (subtotal * tax) / 100;
   const discountAmount = (subtotal * discount) / 100;
   const total = subtotal + taxAmount - discountAmount;
+
+  const handleSaveReceipt = async () => {
+    if (!selectedClient) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a client before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "Missing Items",
+        description: "Please add at least one item to the receipt.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // First insert the receipt
+      const { data: receipt, error: receiptError } = await supabase
+        .from('receipts')
+        .insert({
+          client_id: selectedClient,
+          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+          subtotal,
+          tax: taxAmount,
+          discount_amount: discountAmount,
+          discount_percentage: discount,
+          total,
+          delivery_status: 'Undelivered',
+          montage_status: 'UnOrdered'
+        })
+        .select()
+        .single();
+
+      if (receiptError) throw receiptError;
+
+      // Then insert each receipt item
+      const receiptItems = items.map(item => ({
+        receipt_id: receipt.id,
+        product_id: item.productId || null,
+        custom_item_name: item.customName || null,
+        quantity: item.quantity,
+        price: item.price
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('receipt_items')
+        .insert(receiptItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Success",
+        description: "Receipt saved successfully.",
+      });
+
+      navigate('/receipts');
+    } catch (error) {
+      console.error('Error saving receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save receipt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -119,7 +257,7 @@ const NewReceipt = () => {
               </div>
               <div>
                 <Label>&nbsp;</Label>
-                <Button className="w-full">Add New Client</Button>
+                <Button className="w-full" onClick={() => navigate('/clients')}>Add New Client</Button>
               </div>
             </div>
           </CardContent>
@@ -336,7 +474,7 @@ const NewReceipt = () => {
                     
                     <div>
                       <Label htmlFor="payment-method">Payment Method</Label>
-                      <Select>
+                      <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                         <SelectTrigger id="payment-method">
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
@@ -375,8 +513,20 @@ const NewReceipt = () => {
                 </div>
                 
                 <div className="mt-8 flex justify-end space-x-4">
-                  <Button variant="outline">Cancel</Button>
-                  <Button className="bg-optics-600 hover:bg-optics-700">Save Receipt</Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate('/receipts')}
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    className="bg-optics-600 hover:bg-optics-700" 
+                    onClick={handleSaveReceipt}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Saving..." : "Save Receipt"}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
