@@ -9,7 +9,236 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          position: number
+          price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          position?: number
+          price: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          position?: number
+          price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      receipt_items: {
+        Row: {
+          created_at: string | null
+          custom_item_name: string | null
+          id: string
+          price: number
+          product_id: string | null
+          quantity: number
+          receipt_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_item_name?: string | null
+          id?: string
+          price: number
+          product_id?: string | null
+          quantity: number
+          receipt_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_item_name?: string | null
+          id?: string
+          price?: number
+          product_id?: string | null
+          quantity?: number
+          receipt_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_items_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipts: {
+        Row: {
+          advance_payment: number | null
+          balance: number
+          client_id: string | null
+          created_at: string | null
+          delivery_status: string
+          discount_amount: number | null
+          discount_percentage: number | null
+          id: string
+          left_eye_axe: number | null
+          left_eye_cyl: number | null
+          left_eye_sph: number | null
+          montage_status: string
+          right_eye_axe: number | null
+          right_eye_cyl: number | null
+          right_eye_sph: number | null
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          advance_payment?: number | null
+          balance?: number
+          client_id?: string | null
+          created_at?: string | null
+          delivery_status?: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
+          montage_status?: string
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Update: {
+          advance_payment?: number | null
+          balance?: number
+          client_id?: string | null
+          created_at?: string | null
+          delivery_status?: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
+          montage_status?: string
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
+          subtotal?: number
+          tax?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          email: string
+          end_date: string | null
+          id: string
+          is_recurring: boolean | null
+          price: number | null
+          start_date: string | null
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          subscription_type:
+            | Database["public"]["Enums"]["subscription_type"]
+            | null
+          trial_used: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string
+          email?: string
+          end_date?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          price?: number | null
+          start_date?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          subscription_type?:
+            | Database["public"]["Enums"]["subscription_type"]
+            | null
+          trial_used?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          email?: string
+          end_date?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          price?: number | null
+          start_date?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          subscription_type?:
+            | Database["public"]["Enums"]["subscription_type"]
+            | null
+          trial_used?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +247,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_status:
+        | "Active"
+        | "Suspended"
+        | "Cancelled"
+        | "inActive"
+        | "Expired"
+      subscription_type: "Trial" | "Monthly" | "Quarterly" | "Lifetime"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +368,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_status: [
+        "Active",
+        "Suspended",
+        "Cancelled",
+        "inActive",
+        "Expired",
+      ],
+      subscription_type: ["Trial", "Monthly", "Quarterly", "Lifetime"],
+    },
   },
 } as const
