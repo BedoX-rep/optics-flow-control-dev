@@ -56,16 +56,18 @@ serve(async (req) => {
         
         // If recurring, we would normally renew here
         if (subscription.is_recurring) {
-          // In a real app, this would process payment and then extend
-          // the end_date, but for this demo we'll just extend it
+          // Process renewal based on subscription type
           const newEndDate = new Date()
           if (subscription.subscription_type === 'Monthly') {
             newEndDate.setMonth(newEndDate.getMonth() + 1)
           } else if (subscription.subscription_type === 'Quarterly') {
             newEndDate.setMonth(newEndDate.getMonth() + 3)
-          } else {
+          } else if (subscription.subscription_type === 'Lifetime') {
             // For lifetime, extend far into the future
             newEndDate.setFullYear(newEndDate.getFullYear() + 100)
+          } else {
+            // For trial, extend only a short period
+            newEndDate.setDate(newEndDate.getDate() + 7)
           }
           
           // Update subscription with new end date
@@ -83,7 +85,8 @@ serve(async (req) => {
             updatedSubscriptions.push({
               id: subscription.id,
               action: 'renewed',
-              new_end_date: newEndDate.toISOString()
+              new_end_date: newEndDate.toISOString(),
+              subscription_type: subscription.subscription_type
             })
           }
         } else {
@@ -102,6 +105,30 @@ serve(async (req) => {
               previous_status: 'Active'
             })
           }
+        }
+      }
+      
+      // For inActive subscriptions, check if they should be activated
+      if (subscription.subscription_status === 'inActive' && 
+          subscription.start_date && 
+          new Date(subscription.start_date) <= now &&
+          subscription.end_date && 
+          new Date(subscription.end_date) > now) {
+        
+        // Activate the subscription
+        const { error: activateError } = await supabaseClient
+          .from('subscriptions')
+          .update({ subscription_status: 'Active' })
+          .eq('id', subscription.id)
+        
+        if (activateError) {
+          console.error(`Error activating subscription ${subscription.id}:`, activateError)
+        } else {
+          updatedSubscriptions.push({
+            id: subscription.id,
+            action: 'activated',
+            previous_status: 'inActive'
+          })
         }
       }
     }
