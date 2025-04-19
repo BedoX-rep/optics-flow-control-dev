@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { 
   Table, 
@@ -40,7 +39,7 @@ const SUBSCRIPTION_PRICES = {
 };
 
 const Subscriptions = () => {
-  const { user, subscription: userSubscription, refreshSubscription } = useAuth();
+  const { user, subscription: userSubscription } = useAuth();
   const { toast } = useToast();
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +49,11 @@ const Subscriptions = () => {
       try {
         setIsLoading(true);
         
-        if (!user) return;
+        if (!user) {
+          setCurrentSubscription(null);
+          setIsLoading(false);
+          return;
+        }
         
         const { data, error } = await supabase
           .from('subscriptions')
@@ -58,10 +61,16 @@ const Subscriptions = () => {
           .eq('user_id', user.id)
           .single();
           
-        if (error) throw error;
-        
-        setCurrentSubscription(data || null);
-        refreshSubscription(); // Refresh the user's subscription status in context
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No rows returned, set to null
+            setCurrentSubscription(null);
+          } else {
+            throw error;
+          }
+        } else {
+          setCurrentSubscription(data);
+        }
       } catch (error) {
         console.error('Error fetching subscription:', error);
         toast({
@@ -75,7 +84,7 @@ const Subscriptions = () => {
     };
     
     fetchSubscription();
-  }, [user, toast, refreshSubscription]);
+  }, [user, toast]);
   
   const contactAdmin = () => {
     toast({
@@ -87,9 +96,6 @@ const Subscriptions = () => {
   const updateSubscription = async (type: 'Monthly' | 'Quarterly' | 'Lifetime', isRecurring: boolean) => {
     try {
       if (!user || !currentSubscription) return;
-      
-      // In a real application, this would integrate with a payment processor
-      // For demo purposes, we'll just update the subscription directly
       
       const now = new Date();
       const endDate = new Date();
@@ -118,15 +124,12 @@ const Subscriptions = () => {
         
       if (error) throw error;
       
-      // Refresh subscription data
-      refreshSubscription();
-      
       toast({
         title: "Subscription Updated",
         description: `You are now subscribed to the ${type} plan.`,
       });
       
-      // Reload subscription data
+      // Refetch the subscription to ensure we have the latest data
       const { data, error: fetchError } = await supabase
         .from('subscriptions')
         .select('*')
@@ -147,9 +150,7 @@ const Subscriptions = () => {
     }
   };
   
-  // Generate subscription cards
   const renderSubscriptionPlans = () => {
-    // Only show subscription options if user is not on an active paid plan
     if (currentSubscription?.subscription_status === 'Active' && 
         currentSubscription?.subscription_type !== 'Trial') {
       return null;
@@ -352,8 +353,6 @@ const Subscriptions = () => {
             <Button
               variant="outline" 
               onClick={() => {
-                // This would normally open a dialog to confirm changing the renewal status
-                // For now we'll just show a toast
                 toast({
                   title: "Feature Not Available",
                   description: "Changing auto-renewal settings is not available in this demo.",
