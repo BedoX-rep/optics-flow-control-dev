@@ -1,115 +1,140 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+serve(async (req) => {
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Create Supabase client with admin privileges
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Create a Supabase client with the Auth context of the function
+    const supabaseClient = createClient(
+      // Supabase API URL - env var exported by default.
+      Deno.env.get('SUPABASE_URL') ?? '',
+      // Supabase API ANON KEY - env var exported by default.
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      // Create client with Auth context of the user that called the function.
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! },
+        },
+      }
+    )
 
-    // Update expired subscriptions
-    const { error: expiredError } = await supabase
-      .from("subscriptions")
-      .update({ subscription_status: "Expired" })
-      .eq("subscription_status", "Active")
-      .lt("end_date", new Date().toISOString());
+    // Get all subscriptions that need to be checked
+    const { data: subscriptions, error: fetchError } = await supabaseClient
+      .from('subscriptions')
+      .select('*')
+      .or('subscription_status.eq.Active,subscription_status.eq.inActive')
 
-    if (expiredError) throw expiredError;
-
-    // Update newly active subscriptions
-    const { error: activeError } = await supabase
-      .from("subscriptions")
-      .update({ subscription_status: "Active" })
-      .eq("subscription_status", "inActive")
-      .lte("start_date", new Date().toISOString())
-      .gt("end_date", new Date().toISOString());
-
-    if (activeError) throw activeError;
-
-    // Renew monthly subscriptions about to expire
-    const { data: monthlySubscriptions, error: monthlyError } = await supabase
-      .from("subscriptions")
-      .select("id, end_date")
-      .eq("is_recurring", true)
-      .eq("subscription_type", "Monthly")
-      .eq("subscription_status", "Active")
-      .lte("end_date", new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString()); // within 24 hours
-
-    if (monthlyError) throw monthlyError;
-
-    for (const sub of monthlySubscriptions || []) {
-      const newEndDate = new Date(new Date(sub.end_date).getTime() + 30 * 24 * 60 * 60 * 1000); // Add 30 days
-      
-      const { error: updateError } = await supabase
-        .from("subscriptions")
-        .update({ end_date: newEndDate.toISOString() })
-        .eq("id", sub.id);
-        
-      if (updateError) throw updateError;
+    if (fetchError) {
+      throw fetchError
     }
 
-    // Renew quarterly subscriptions about to expire
-    const { data: quarterlySubscriptions, error: quarterlyError } = await supabase
-      .from("subscriptions")
-      .select("id, end_date")
-      .eq("is_recurring", true)
-      .eq("subscription_type", "Quarterly")
-      .eq("subscription_status", "Active")
-      .lte("end_date", new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString()); // within 24 hours
+    const now = new Date()
+    const updatedSubscriptions = []
 
-    if (quarterlyError) throw quarterlyError;
-
-    for (const sub of quarterlySubscriptions || []) {
-      const newEndDate = new Date(new Date(sub.end_date).getTime() + 90 * 24 * 60 * 60 * 1000); // Add 90 days
+    // Process each subscription
+    for (const subscription of subscriptions) {
+      let newStatus = subscription.subscription_status
       
-      const { error: updateError } = await supabase
-        .from("subscriptions")
-        .update({ end_date: newEndDate.toISOString() })
-        .eq("id", sub.id);
+      // For Active subscriptions, check if they've expired
+      if (subscription.subscription_status === 'Active' && 
+          subscription.end_date && 
+          new Date(subscription.end_date) < now) {
         
-      if (updateError) throw updateError;
+        // If recurring, we would normally renew here
+        if (subscription.is_recurring) {
+          // In a real app, this would process payment and then extend
+          // the end_date, but for this demo we'll just extend it
+          const newEndDate = new Date()
+          if (subscription.subscription_type === 'Monthly') {
+            newEndDate.setMonth(newEndDate.getMonth() + 1)
+          } else if (subscription.subscription_type === 'Quarterly') {
+            newEndDate.setMonth(newEndDate.getMonth() + 3)
+          } else {
+            // For lifetime, extend far into the future
+            newEndDate.setFullYear(newEndDate.getFullYear() + 100)
+          }
+          
+          // Update subscription with new end date
+          const { error: updateError } = await supabaseClient
+            .from('subscriptions')
+            .update({ 
+              start_date: new Date().toISOString(),
+              end_date: newEndDate.toISOString() 
+            })
+            .eq('id', subscription.id)
+          
+          if (updateError) {
+            console.error(`Error updating subscription ${subscription.id}:`, updateError)
+          } else {
+            updatedSubscriptions.push({
+              id: subscription.id,
+              action: 'renewed',
+              new_end_date: newEndDate.toISOString()
+            })
+          }
+        } else {
+          // Non-recurring subscriptions expire
+          const { error: expireError } = await supabaseClient
+            .from('subscriptions')
+            .update({ subscription_status: 'Expired' })
+            .eq('id', subscription.id)
+          
+          if (expireError) {
+            console.error(`Error expiring subscription ${subscription.id}:`, expireError)
+          } else {
+            updatedSubscriptions.push({
+              id: subscription.id,
+              action: 'expired',
+              previous_status: 'Active'
+            })
+          }
+        }
+      }
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Subscription statuses updated successfully",
-        timestamp: new Date().toISOString()
-      }), 
+      JSON.stringify({
+        success: true,
+        message: `Processed ${subscriptions.length} subscriptions`,
+        updated: updatedSubscriptions
+      }),
       { 
         headers: { 
-          "Content-Type": "application/json",
-          ...corsHeaders 
-        } 
-      }
-    );
+          ...corsHeaders,
+          'Content-Type': 'application/json' 
+        },
+        status: 200 
+      },
+    )
   } catch (error) {
-    console.error("Error updating subscriptions:", error);
+    console.error('Error processing subscriptions:', error)
     
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: error.message 
-      }), 
+      }),
       { 
-        status: 500, 
         headers: { 
-          "Content-Type": "application/json",
-          ...corsHeaders 
-        } 
-      }
-    );
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 400 
+      },
+    )
   }
-});
+})

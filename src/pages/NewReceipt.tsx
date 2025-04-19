@@ -27,6 +27,7 @@ import { Plus, Trash } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Product {
   id: string;
@@ -50,6 +51,7 @@ interface ReceiptItem {
 const NewReceipt = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -65,8 +67,8 @@ const NewReceipt = () => {
     const fetchData = async () => {
       try {
         // Check subscription status first
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) {
           navigate('/auth');
           return;
         }
@@ -74,7 +76,7 @@ const NewReceipt = () => {
         const { data: subscription } = await supabase
           .from('subscriptions')
           .select('subscription_status')
-          .eq('user_id', user.id)
+          .eq('user_id', currentUser.id)
           .single();
 
         if (!subscription || subscription.subscription_status !== 'Active') {
@@ -91,6 +93,7 @@ const NewReceipt = () => {
         const { data: productsData, error: productsError } = await supabase
           .from('products')
           .select('*')
+          .eq('user_id', currentUser.id)
           .order('created_at', { ascending: false });
 
         if (productsError) throw productsError;
@@ -99,6 +102,7 @@ const NewReceipt = () => {
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
           .select('*')
+          .eq('user_id', currentUser.id)
           .order('name', { ascending: true });
 
         if (clientsError) throw clientsError;
@@ -151,6 +155,15 @@ const NewReceipt = () => {
   const total = subtotal + taxAmount - discountAmount;
 
   const handleSaveReceipt = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to save receipts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedClient) {
       toast({
         title: "Missing Information",
@@ -176,6 +189,7 @@ const NewReceipt = () => {
       const { data: receipt, error: receiptError } = await supabase
         .from('receipts')
         .insert({
+          user_id: user.id,
           client_id: selectedClient,
           right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
           right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
@@ -188,6 +202,7 @@ const NewReceipt = () => {
           discount_amount: discountAmount,
           discount_percentage: discount,
           total,
+          balance: total, // Default balance is the total amount
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered'
         })
@@ -198,6 +213,7 @@ const NewReceipt = () => {
 
       // Then insert each receipt item
       const receiptItems = items.map(item => ({
+        user_id: user.id,
         receipt_id: receipt.id,
         product_id: item.productId || null,
         custom_item_name: item.customName || null,

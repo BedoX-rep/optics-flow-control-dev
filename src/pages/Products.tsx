@@ -23,6 +23,7 @@ import { Plus, Pencil, Trash, Search } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/AuthProvider';
 
 interface Product {
   id: string;
@@ -32,6 +33,7 @@ interface Product {
 
 const Products = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -43,9 +45,12 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
+      if (!user) return;
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -65,13 +70,15 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [user]);
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddProduct = async () => {
+    if (!user) return;
+    
     if (newProduct.name && newProduct.price > 0) {
       try {
         setIsSubmitting(true);
@@ -84,7 +91,8 @@ const Products = () => {
               name: newProduct.name,
               price: newProduct.price
             })
-            .eq('id', editingProduct.id);
+            .eq('id', editingProduct.id)
+            .eq('user_id', user.id);
             
           if (error) throw error;
           
@@ -98,7 +106,8 @@ const Products = () => {
             .from('products')
             .insert({ 
               name: newProduct.name,
-              price: newProduct.price
+              price: newProduct.price,
+              user_id: user.id
             });
             
           if (error) throw error;
@@ -139,12 +148,15 @@ const Products = () => {
   };
 
   const handleDeleteProduct = async (id: string) => {
+    if (!user) return;
+    
     if (confirm("Are you sure you want to delete this product?")) {
       try {
         const { error } = await supabase
           .from('products')
           .delete()
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', user.id);
           
         if (error) throw error;
         
