@@ -39,10 +39,10 @@ interface Product {
 }
 
 const DEFAULT_FILTERS = {
-  category: "",
-  index: "",
-  treatment: "",
-  company: "",
+  category: "all_categories",
+  index: "all_indexes",
+  treatment: "all_treatments",
+  company: "all_companies",
   sort: "arrange",
 };
 
@@ -71,10 +71,19 @@ const Products = () => {
         .select('*')
         .eq('user_id', user.id);
 
-      if (filters.category) query = query.eq('category', filters.category);
-      if (filters.index) query = query.eq('index', filters.index);
-      if (filters.treatment) query = query.eq('treatment', filters.treatment);
-      if (filters.company) query = query.eq('company', filters.company);
+      // Only apply filters if they are not set to "all_*"
+      if (filters.category && filters.category !== "all_categories") {
+        query = query.eq('category', filters.category);
+      }
+      if (filters.index && filters.index !== "all_indexes") {
+        query = query.eq('index', filters.index);
+      }
+      if (filters.treatment && filters.treatment !== "all_treatments") {
+        query = query.eq('treatment', filters.treatment);
+      }
+      if (filters.company && filters.company !== "all_companies") {
+        query = query.eq('company', filters.company);
+      }
 
       if (filters.sort === "latest") {
         query = query.order('created_at', { ascending: false });

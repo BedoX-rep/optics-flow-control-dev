@@ -32,12 +32,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
     <div className="flex gap-4 flex-wrap mb-4">
       <div>
         <Label>Category</Label>
-        <Select value={filters.category || ""} onValueChange={v => onChange({ ...filters, category: v })}>
+        <Select value={filters.category || ""} onValueChange={v => onChange({ category: v })}>
           <SelectTrigger>
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all_categories">All</SelectItem>
             {CATEGORY_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
@@ -46,12 +46,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </div>
       <div>
         <Label>Index</Label>
-        <Select value={filters.index || ""} onValueChange={v => onChange({ ...filters, index: v })}>
+        <Select value={filters.index || ""} onValueChange={v => onChange({ index: v })}>
           <SelectTrigger>
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all_indexes">All</SelectItem>
             {INDEX_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
@@ -60,12 +60,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </div>
       <div>
         <Label>Treatment</Label>
-        <Select value={filters.treatment || ""} onValueChange={v => onChange({ ...filters, treatment: v })}>
+        <Select value={filters.treatment || ""} onValueChange={v => onChange({ treatment: v })}>
           <SelectTrigger>
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all_treatments">All</SelectItem>
             {TREATMENT_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
@@ -74,12 +74,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </div>
       <div>
         <Label>Company</Label>
-        <Select value={filters.company || ""} onValueChange={v => onChange({ ...filters, company: v })}>
+        <Select value={filters.company || ""} onValueChange={v => onChange({ company: v })}>
           <SelectTrigger>
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all_companies">All</SelectItem>
             {COMPANY_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
@@ -88,7 +88,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </div>
       <div>
         <Label>Sort</Label>
-        <Select value={filters.sort || "arrange"} onValueChange={v => onChange({ ...filters, sort: v })}>
+        <Select value={filters.sort || "arrange"} onValueChange={v => onChange({ sort: v })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
