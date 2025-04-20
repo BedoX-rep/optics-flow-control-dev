@@ -15,7 +15,6 @@ import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import ContactSalesDialog from '@/components/ContactSalesDialog';
 
 // Define interfaces
 interface Subscription {
@@ -44,7 +43,6 @@ const Subscriptions = () => {
   const { toast } = useToast();
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
   
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -89,9 +87,69 @@ const Subscriptions = () => {
   }, [user, toast]);
   
   const contactAdmin = () => {
-    setContactDialogOpen(true);
+    toast({
+      title: "Contact Request Sent",
+      description: "An administrator will contact you shortly about your subscription.",
+    });
   };
 
+  const updateSubscription = async (type: 'Monthly' | 'Quarterly' | 'Lifetime', isRecurring: boolean) => {
+    try {
+      if (!user || !currentSubscription) return;
+      
+      const now = new Date();
+      const endDate = new Date();
+      
+      if (type === 'Monthly') {
+        endDate.setMonth(endDate.getMonth() + 1);
+      } else if (type === 'Quarterly') {
+        endDate.setMonth(endDate.getMonth() + 3);
+      } else {
+        // Lifetime subscription set to 100 years
+        endDate.setFullYear(endDate.getFullYear() + 100);
+      }
+      
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({
+          subscription_type: type,
+          is_recurring: isRecurring,
+          start_date: now.toISOString(),
+          end_date: endDate.toISOString(),
+          subscription_status: 'Active',
+          trial_used: true,
+          price: SUBSCRIPTION_PRICES[type]
+        })
+        .eq('id', currentSubscription.id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Subscription Updated",
+        description: `You are now subscribed to the ${type} plan.`,
+      });
+      
+      // Refetch the subscription to ensure we have the latest data
+      const { data, error: fetchError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      setCurrentSubscription(data);
+      
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subscription. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   const renderSubscriptionPlans = () => {
     if (currentSubscription?.subscription_status === 'Active' && 
         currentSubscription?.subscription_type !== 'Trial') {
@@ -114,7 +172,7 @@ const Subscriptions = () => {
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
             <Button 
-              onClick={contactAdmin}
+              onClick={() => updateSubscription('Monthly', true)}
               className="bg-optics-600 hover:bg-optics-700 w-full"
             >
               Subscribe Now
@@ -138,7 +196,7 @@ const Subscriptions = () => {
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
             <Button 
-              onClick={contactAdmin}
+              onClick={() => updateSubscription('Quarterly', true)}
               className="bg-optics-600 hover:bg-optics-700 w-full"
             >
               Subscribe Now
@@ -162,7 +220,7 @@ const Subscriptions = () => {
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
             <Button 
-              onClick={contactAdmin}
+              onClick={() => updateSubscription('Lifetime', false)}
               className="bg-optics-600 hover:bg-optics-700 w-full"
             >
               Buy Lifetime
@@ -306,11 +364,6 @@ const Subscriptions = () => {
           </div>
         </div>
       )}
-
-      <ContactSalesDialog 
-        isOpen={contactDialogOpen} 
-        onClose={() => setContactDialogOpen(false)} 
-      />
     </div>
   );
 };

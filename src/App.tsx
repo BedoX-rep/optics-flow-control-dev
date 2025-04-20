@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,8 +33,6 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
   
-  // Only redirect to subscriptions if an active subscription is required AND
-  // the subscription status is not 'Active'
   if (requiresActiveSubscription && 
       subscription && 
       subscription.subscription_status !== 'Active') {
