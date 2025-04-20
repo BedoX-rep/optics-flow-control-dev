@@ -37,7 +37,8 @@ const ProtectedRoute = ({
   // Only redirect to subscriptions if an active subscription is required AND
   // the subscription status is not 'Active'
   if (requiresActiveSubscription && 
-      (!subscription || subscription.subscription_status !== 'Active')) {
+      subscription && 
+      subscription.subscription_status !== 'Active') {
     return <Navigate to="/subscriptions" replace />;
   }
   
