@@ -135,13 +135,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         <Label htmlFor="category">Category</Label>
         <Select
           value={form.category ?? ""}
-          onValueChange={v => setForm(f => ({ ...f, category: v === "" ? undefined : v }))}
+          onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
         >
           <SelectTrigger className="col-span-3" id="category">
             <SelectValue placeholder="Select Category" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none_selected">None</SelectItem>
             {CATEGORY_OPTIONS.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.value}</SelectItem>
             ))}
@@ -154,13 +154,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             <Label htmlFor="index">Index</Label>
             <Select
               value={form.index ?? ""}
-              onValueChange={v => setForm(f => ({ ...f, index: v === "" ? undefined : v }))}
+              onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
             >
               <SelectTrigger className="col-span-3" id="index">
                 <SelectValue placeholder="Select Index" />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none_selected">None</SelectItem>
                 {INDEX_OPTIONS.map(opt => (
                   <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                 ))}
@@ -171,13 +171,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             <Label htmlFor="treatment">Treatment</Label>
             <Select
               value={form.treatment ?? ""}
-              onValueChange={v => setForm(f => ({ ...f, treatment: v === "" ? undefined : v }))}
+              onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
             >
               <SelectTrigger className="col-span-3" id="treatment">
                 <SelectValue placeholder="Select Treatment" />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none_selected">None</SelectItem>
                 {TREATMENT_OPTIONS.map(opt => (
                   <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                 ))}
@@ -190,13 +190,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         <Label htmlFor="company">Company</Label>
         <Select
           value={form.company ?? ""}
-          onValueChange={v => setForm(f => ({ ...f, company: v === "" ? undefined : v }))}
+          onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
         >
           <SelectTrigger className="col-span-3" id="company">
             <SelectValue placeholder="Select Company" />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none_selected">None</SelectItem>
             {COMPANY_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
