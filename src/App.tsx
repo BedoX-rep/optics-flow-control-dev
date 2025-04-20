@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +16,6 @@ import { AuthProvider, useAuth } from "./components/AuthProvider";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ 
   children, 
   requiresActiveSubscription = true 
@@ -28,18 +26,15 @@ const ProtectedRoute = ({
   const { user, subscription, isLoading } = useAuth();
   
   if (isLoading) {
-    // Show loading state
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
   if (!user) {
-    // Redirect to login if not authenticated
     return <Navigate to="/auth" replace />;
   }
   
   if (requiresActiveSubscription && 
       (!subscription || subscription.subscription_status !== 'Active')) {
-    // Redirect to subscriptions page if subscription is not active
     return <Navigate to="/subscriptions" replace />;
   }
   
