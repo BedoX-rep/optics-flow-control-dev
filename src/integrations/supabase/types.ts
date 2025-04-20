@@ -35,27 +35,42 @@ export type Database = {
       }
       products: {
         Row: {
+          category: string | null
+          company: string | null
           created_at: string | null
           id: string
+          image: string | null
+          index: string | null
           name: string
           position: number
           price: number
+          treatment: string | null
           user_id: string
         }
         Insert: {
+          category?: string | null
+          company?: string | null
           created_at?: string | null
           id?: string
+          image?: string | null
+          index?: string | null
           name: string
           position?: number
           price: number
+          treatment?: string | null
           user_id: string
         }
         Update: {
+          category?: string | null
+          company?: string | null
           created_at?: string | null
           id?: string
+          image?: string | null
+          index?: string | null
           name?: string
           position?: number
           price?: number
+          treatment?: string | null
           user_id?: string
         }
         Relationships: []
@@ -182,6 +197,44 @@ export type Database = {
           },
         ]
       }
+      subscription_logs: {
+        Row: {
+          change_type: string
+          changed_by: string
+          created_at: string | null
+          id: string
+          new_data: Json | null
+          previous_data: Json | null
+          subscription_id: string
+        }
+        Insert: {
+          change_type: string
+          changed_by: string
+          created_at?: string | null
+          id?: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          subscription_id: string
+        }
+        Update: {
+          change_type?: string
+          changed_by?: string
+          created_at?: string | null
+          id?: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_logs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string | null
@@ -189,6 +242,7 @@ export type Database = {
           email: string
           end_date: string | null
           id: string
+          is_admin: boolean
           is_recurring: boolean | null
           price: number | null
           start_date: string | null
@@ -207,6 +261,7 @@ export type Database = {
           email?: string
           end_date?: string | null
           id?: string
+          is_admin?: boolean
           is_recurring?: boolean | null
           price?: number | null
           start_date?: string | null
@@ -225,6 +280,7 @@ export type Database = {
           email?: string
           end_date?: string | null
           id?: string
+          is_admin?: boolean
           is_recurring?: boolean | null
           price?: number | null
           start_date?: string | null
@@ -247,6 +303,21 @@ export type Database = {
       check_and_renew_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_subscription_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_count: number
+          total_revenue: number
+          monthly_revenue: number
+          quarterly_revenue: number
+          lifetime_revenue: number
+          trial_count: number
+        }[]
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

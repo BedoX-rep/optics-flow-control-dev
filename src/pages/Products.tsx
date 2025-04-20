@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -24,12 +23,27 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import ProductForm, { ProductFormValues } from "@/components/ProductForm";
+import ProductFilters from "@/components/ProductFilters";
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  category?: string | null;
+  index?: string | null;
+  treatment?: string | null;
+  company?: string | null;
+  image?: string | null;
 }
+
+const DEFAULT_FILTERS = {
+  category: "",
+  index: "",
+  treatment: "",
+  company: "",
+  sort: "arrange",
+};
 
 const Products = () => {
   const { toast } = useToast();
@@ -38,26 +52,42 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
-  const [newProduct, setNewProduct] = useState({ name: '', price: 0 });
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({
+    name: '', price: 0
+  });
 
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
       if (!user) return;
-      
-      const { data, error } = await supabase
+
+      let query = supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-        
+        .eq('user_id', user.id);
+
+      if (filters.category) query = query.eq('category', filters.category);
+      if (filters.index) query = query.eq('index', filters.index);
+      if (filters.treatment) query = query.eq('treatment', filters.treatment);
+      if (filters.company) query = query.eq('company', filters.company);
+
+      if (filters.sort === "latest") {
+        query = query.order('created_at', { ascending: false });
+      } else {
+        query = query
+          .order('category', { ascending: true })
+          .order('index', { ascending: true })
+          .order('treatment', { ascending: true })
+          .order('company', { ascending: true });
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
-      
       setProducts(data || []);
     } catch (error) {
-      console.error('Error fetching products:', error);
       toast({
         title: "Error",
         description: "Failed to load products. Please try again.",
@@ -70,86 +100,65 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [user]);
+  }, [user, filters]);
 
-  const filteredProducts = products.filter(product => 
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddProduct = async () => {
-    if (!user) return;
-    
-    if (newProduct.name && newProduct.price > 0) {
-      try {
-        setIsSubmitting(true);
-        
-        if (editingProduct) {
-          // Update existing product
-          const { error } = await supabase
-            .from('products')
-            .update({ 
-              name: newProduct.name,
-              price: newProduct.price
-            })
-            .eq('id', editingProduct.id)
-            .eq('user_id', user.id);
-            
-          if (error) throw error;
-          
-          toast({
-            title: "Success",
-            description: "Product updated successfully",
-          });
-        } else {
-          // Add new product
-          const { error } = await supabase
-            .from('products')
-            .insert({ 
-              name: newProduct.name,
-              price: newProduct.price,
-              user_id: user.id
-            });
-            
-          if (error) throw error;
-          
-          toast({
-            title: "Success",
-            description: "Product added successfully",
-          });
-        }
-        
-        setNewProduct({ name: '', price: 0 });
-        setEditingProduct(null);
-        setIsOpen(false);
-        fetchProducts();
-      } catch (error) {
-        console.error('Error saving product:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save product. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      toast({
-        title: "Validation Error",
-        description: "Please enter a name and a price greater than 0.",
-        variant: "destructive",
-      });
-    }
+  const handleOpen = (editing: Product | null = null) => {
+    setEditingProduct(editing);
+    setFormInitial(editing ? {
+      name: editing.name,
+      price: editing.price,
+      category: editing.category ?? undefined,
+      index: editing.index ?? undefined,
+      treatment: editing.treatment ?? undefined,
+      company: editing.company ?? undefined,
+      image: editing.image ?? undefined,
+    } : { name: '', price: 0 });
+    setIsOpen(true);
   };
 
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setNewProduct({ name: product.name, price: product.price });
-    setIsOpen(true);
+  const handleFormSubmit = async (form: ProductFormValues) => {
+    if (!user) return;
+    try {
+      setIsSubmitting(true);
+      if (editingProduct) {
+        const updates: any = { ...form };
+        delete updates.id;
+        const { error } = await supabase
+          .from('products')
+          .update(updates)
+          .eq('id', editingProduct.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        toast({ title: "Success", description: "Product updated successfully" });
+      } else {
+        const { error } = await supabase
+          .from('products')
+          .insert({ ...form, user_id: user.id });
+        if (error) throw error;
+        toast({ title: "Success", description: "Product added successfully" });
+      }
+      setIsOpen(false);
+      setEditingProduct(null);
+      setFormInitial({ name: '', price: 0 });
+      fetchProducts();
+    } catch (error) {
+      console.error('Error saving product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (!user) return;
-    
     if (confirm("Are you sure you want to delete this product?")) {
       try {
         const { error } = await supabase
@@ -157,9 +166,7 @@ const Products = () => {
           .delete()
           .eq('id', id)
           .eq('user_id', user.id);
-          
         if (error) throw error;
-        
         setProducts(products.filter(product => product.id !== id));
         toast({
           title: "Success",
@@ -179,87 +186,52 @@ const Products = () => {
   return (
     <div>
       <PageTitle title="Products" subtitle="Manage your inventory" />
-      
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
         <div className="relative w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder="Search products..." 
+          <Input
+            type="text"
+            placeholder="Search products..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-optics-600 hover:bg-optics-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  className="col-span-3"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  className="col-span-3"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsOpen(false);
-                  setEditingProduct(null);
-                  setNewProduct({ name: '', price: 0 });
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                className="bg-optics-600 hover:bg-optics-700"
-                onClick={handleAddProduct}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Saving...' : (editingProduct ? 'Update' : 'Add')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button
+          className="bg-optics-600 hover:bg-optics-700"
+          onClick={() => handleOpen(null)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Product
+        </Button>
       </div>
-      
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <ProductFilters filters={filters} onChange={setFilters} />
+      <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? 'Edit Product' : 'Add New Product'}
+            </DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            initialValues={formInitial}
+            onSubmit={handleFormSubmit}
+            onCancel={() => setIsOpen(false)}
+            disabled={isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
+      <div className="bg-white rounded-lg shadow overflow-x-auto mt-4">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
+              <TableHead>Image</TableHead>
               <TableHead>Name</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Index</TableHead>
+              <TableHead>Treatment</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead className="text-right">Price</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -267,13 +239,13 @@ const Products = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
+                <TableCell colSpan={9} className="text-center py-10">
                   Loading products...
                 </TableCell>
               </TableRow>
             ) : filteredProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10">
+                <TableCell colSpan={9} className="text-center py-10">
                   No products found. Add your first product to get started.
                 </TableCell>
               </TableRow>
@@ -281,14 +253,27 @@ const Products = () => {
               filteredProducts.map((product, index) => (
                 <TableRow key={product.id}>
                   <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-14 h-14 object-cover rounded border" />
+                    ) : (
+                      <div className="w-14 h-14 rounded border flex items-center justify-center text-gray-300">
+                        <span>No image</span>
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="text-right">{product.price.toFixed(2)} DH</TableCell>
+                  <TableCell>{product.category || "-"}</TableCell>
+                  <TableCell>{product.index || "-"}</TableCell>
+                  <TableCell>{product.treatment || "-"}</TableCell>
+                  <TableCell>{product.company || "-"}</TableCell>
+                  <TableCell className="text-right">{Number(product.price).toFixed(2)} DH</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => handleEditProduct(product)}
+                        onClick={() => handleOpen(product)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
