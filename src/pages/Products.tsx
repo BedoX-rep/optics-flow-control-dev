@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -54,6 +55,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({
     name: '', price: 0
@@ -183,6 +185,13 @@ const Products = () => {
     }
   };
 
+  const handleFilterChange = (newFilters: Record<string, string>) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      ...newFilters
+    }));
+  };
+
   return (
     <div>
       <PageTitle title="Products" subtitle="Manage your inventory" />
@@ -205,7 +214,7 @@ const Products = () => {
           Add Product
         </Button>
       </div>
-      <ProductFilters filters={filters} onChange={setFilters} />
+      <ProductFilters filters={filters} onChange={handleFilterChange} />
       <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
