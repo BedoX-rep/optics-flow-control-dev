@@ -1,0 +1,241 @@
+-- Required Extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- ENUM TYPES
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_type') THEN
+    CREATE TYPE subscription_type AS ENUM ('Trial', 'Monthly', 'Quarterly', 'Lifetime');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_status') THEN
+    CREATE TYPE subscription_status AS ENUM ('Active', 'Suspended', 'Cancelled', 'inActive', 'Expired');
+  END IF;
+END $$;
+
+-- PRODUCTS TABLE
+CREATE TABLE IF NOT EXISTS public.products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  name TEXT NOT NULL,
+  price DECIMAL NOT NULL,
+  position INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- CLIENTS TABLE
+CREATE TABLE IF NOT EXISTS public.clients (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RECEIPTS TABLE
+CREATE TABLE IF NOT EXISTS public.receipts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  client_id UUID REFERENCES clients(id),
+  right_eye_sph DECIMAL,
+  right_eye_cyl DECIMAL,
+  right_eye_axe INTEGER,
+  left_eye_sph DECIMAL,
+  left_eye_cyl DECIMAL,
+  left_eye_axe INTEGER,
+  discount_percentage DECIMAL,
+  discount_amount DECIMAL,
+  total DECIMAL NOT NULL,
+  advance_payment DECIMAL DEFAULT 0,
+  balance DECIMAL NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  delivery_status TEXT NOT NULL DEFAULT 'Undelivered',
+  montage_status TEXT NOT NULL DEFAULT 'UnOrdered'
+);
+
+-- RECEIPT ITEMS TABLE
+CREATE TABLE IF NOT EXISTS public.receipt_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  receipt_id UUID REFERENCES receipts(id),
+  product_id UUID REFERENCES products(id),
+  custom_item_name TEXT,
+  quantity INTEGER NOT NULL,
+  price DECIMAL NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- SUBSCRIPTIONS TABLE
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  email TEXT NOT NULL DEFAULT 'defaultemail',
+  display_name TEXT NOT NULL DEFAULT 'OLD',
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ,
+  subscription_type subscription_type DEFAULT 'Trial',
+  trial_used BOOLEAN DEFAULT FALSE,
+  subscription_status subscription_status DEFAULT 'Active',
+  is_recurring BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  price DECIMAL DEFAULT 0
+);
+
+-- RLS POLICIES
+ALTER TABLE public.products       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clients        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receipts       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receipt_items  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscriptions  ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can CRUD their own products" ON products;
+DROP POLICY IF EXISTS "Users can CRUD their own clients" ON clients;
+DROP POLICY IF EXISTS "Users can CRUD their own receipts" ON receipts;
+DROP POLICY IF EXISTS "Users can CRUD their own receipt items" ON receipt_items;
+DROP POLICY IF EXISTS "Users can read their own subscription" ON subscriptions;
+
+CREATE POLICY "Users can CRUD their own products"
+  ON products FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can CRUD their own clients"
+  ON clients FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can CRUD their own receipts"
+  ON receipts FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can CRUD their own receipt items"
+  ON receipt_items FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can read their own subscription"
+  ON subscriptions FOR SELECT USING (auth.uid() = user_id);
+
+-- FUNCTION: Handle new user -> create inactive subscription
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.subscriptions (
+    user_id,
+    email,
+    display_name,
+    start_date,
+    end_date,
+    subscription_status
+  )
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.email),
+    NULL,
+    NULL,
+    'inActive'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- FUNCTION: Set subscription price by type
+CREATE OR REPLACE FUNCTION set_subscription_price()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.price := CASE
+    WHEN NEW.subscription_type = 'Monthly' THEN 150
+    WHEN NEW.subscription_type = 'Quarterly' THEN 400
+    WHEN NEW.subscription_type = 'Lifetime' THEN 1500
+    ELSE 0
+  END;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_subscription_price_trigger ON subscriptions;
+
+CREATE TRIGGER set_subscription_price_trigger
+BEFORE INSERT OR UPDATE OF subscription_type ON subscriptions
+FOR EACH ROW EXECUTE FUNCTION set_subscription_price();
+
+-- FUNCTION: Update subscription status based on dates
+CREATE OR REPLACE FUNCTION update_subscription_status()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (NEW.subscription_status = 'Active' OR NEW.subscription_status = 'Expired') THEN
+    IF NEW.end_date IS NOT NULL AND NEW.end_date < NOW() THEN
+      NEW.subscription_status := 'Expired';
+    ELSIF NEW.start_date IS NOT NULL AND NEW.start_date > NOW() THEN
+      NEW.subscription_status := 'inActive';
+    ELSIF NEW.start_date IS NOT NULL AND NEW.end_date IS NOT NULL AND
+          NEW.start_date <= NOW() AND NEW.end_date > NOW() THEN
+      NEW.subscription_status := 'Active';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS before_subscription_update ON subscriptions;
+
+CREATE TRIGGER before_subscription_update
+BEFORE UPDATE ON subscriptions
+FOR EACH ROW EXECUTE FUNCTION update_subscription_status();
+
+-- FUNCTION: Check and renew recurring subscriptions
+CREATE OR REPLACE FUNCTION check_and_renew_subscriptions()
+RETURNS void AS $$
+DECLARE
+  sub RECORD;
+  new_end_date TIMESTAMPTZ;
+BEGIN
+  FOR sub IN 
+    SELECT * FROM subscriptions 
+    WHERE 
+      (subscription_status = 'Active' AND end_date IS NOT NULL AND end_date < (NOW() + INTERVAL '1 hour'))
+      OR (subscription_status = 'Expired' AND is_recurring = TRUE)
+  LOOP
+    IF sub.is_recurring = TRUE THEN
+      IF sub.subscription_type = 'Monthly' THEN
+        new_end_date := CASE WHEN sub.subscription_status = 'Expired'
+                             THEN NOW() + INTERVAL '1 month'
+                             ELSE sub.end_date + INTERVAL '1 month' END;
+      ELSIF sub.subscription_type = 'Quarterly' THEN
+        new_end_date := CASE WHEN sub.subscription_status = 'Expired'
+                             THEN NOW() + INTERVAL '3 months'
+                             ELSE sub.end_date + INTERVAL '3 months' END;
+      ELSIF sub.subscription_type = 'Lifetime' THEN
+        new_end_date := NOW() + INTERVAL '100 years';
+      ELSE
+        new_end_date := CASE WHEN sub.subscription_status = 'Expired'
+                             THEN NOW() + INTERVAL '7 days'
+                             ELSE sub.end_date + INTERVAL '7 days' END;
+      END IF;
+
+      UPDATE subscriptions
+      SET start_date = NOW(),
+          end_date = new_end_date,
+          subscription_status = 'Active'
+      WHERE id = sub.id;
+    END IF;
+  END LOOP;
+
+  -- Expire active subs that passed their end date and are not recurring
+  UPDATE subscriptions
+  SET subscription_status = 'Expired'
+  WHERE subscription_status = 'Active'
+    AND end_date IS NOT NULL
+    AND end_date < NOW()
+    AND (is_recurring = FALSE OR is_recurring IS NULL);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- CRON JOB: Schedule the renewal function to run every minute
+SELECT cron.schedule(
+  'check-subscriptions-every-minute',
+  '* * * * *',
+  $$ SELECT check_and_renew_subscriptions(); $$
+);
