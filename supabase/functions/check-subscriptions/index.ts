@@ -1,8 +1,4 @@
 
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -36,7 +32,7 @@ serve(async (req) => {
     const { data: subscriptions, error: fetchError } = await supabaseClient
       .from('subscriptions')
       .select('*')
-      .or('subscription_status.eq.Active,subscription_status.eq.inActive')
+      .or('subscription_status.eq.Active,subscription_status.eq.Expired')
 
     if (fetchError) {
       throw fetchError
@@ -107,30 +103,6 @@ serve(async (req) => {
           }
         }
       }
-      
-      // For inActive subscriptions, check if they should be activated
-      if (subscription.subscription_status === 'inActive' && 
-          subscription.start_date && 
-          new Date(subscription.start_date) <= now &&
-          subscription.end_date && 
-          new Date(subscription.end_date) > now) {
-        
-        // Activate the subscription
-        const { error: activateError } = await supabaseClient
-          .from('subscriptions')
-          .update({ subscription_status: 'Active' })
-          .eq('id', subscription.id)
-        
-        if (activateError) {
-          console.error(`Error activating subscription ${subscription.id}:`, activateError)
-        } else {
-          updatedSubscriptions.push({
-            id: subscription.id,
-            action: 'activated',
-            previous_status: 'inActive'
-          })
-        }
-      }
     }
 
     return new Response(
@@ -165,3 +137,4 @@ serve(async (req) => {
     )
   }
 })
+
