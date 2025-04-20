@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,8 +15,17 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 
-const queryClient = new QueryClient();
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
+// Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
   requiresActiveSubscription = true 
@@ -26,7 +36,14 @@ const ProtectedRoute = ({
   const { user, subscription, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-24 bg-gray-200 rounded-md mb-4"></div>
+          <div className="h-2 w-16 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+    );
   }
   
   if (!user) {
@@ -42,6 +59,7 @@ const ProtectedRoute = ({
   return <>{children}</>;
 };
 
+// App Routes
 const AppRoutes = () => (
   <Routes>
     <Route path="/auth" element={<Auth />} />
@@ -86,6 +104,7 @@ const AppRoutes = () => (
   </Routes>
 );
 
+// Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -101,3 +120,4 @@ const App = () => (
 );
 
 export default App;
+

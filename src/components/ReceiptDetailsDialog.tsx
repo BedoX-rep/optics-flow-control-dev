@@ -4,8 +4,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { FileText, Printer, User, Phone, Receipt } from "lucide-react"
 
 interface ReceiptDetailsDialogProps {
   isOpen: boolean
@@ -20,65 +23,120 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Receipt Details</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Receipt className="h-5 w-5 text-primary" />
+            Receipt Details
+          </DialogTitle>
         </DialogHeader>
         <div className="mt-4 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-medium mb-2">Client Information</h3>
-              <p>Name: {receipt.client_name}</p>
-              <p>Phone: {receipt.client_phone}</p>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-gray-50/80 p-4 rounded-lg">
+              <div className="flex items-start gap-3 mb-3">
+                <User className="h-5 w-5 text-gray-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium mb-1 text-gray-900">Client Information</h3>
+                  <p className="text-sm text-gray-600">Name: <span className="font-medium">{receipt.client_name}</span></p>
+                  <p className="text-sm text-gray-600">Phone: <span className="font-medium">{receipt.client_phone}</span></p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-medium mb-2">Payment Details</h3>
-              <p>Subtotal: {receipt.subtotal.toFixed(2)} DH</p>
-              <p>Tax: {receipt.tax.toFixed(2)} DH</p>
-              {receipt.discount_amount && (
-                <p>Discount: {receipt.discount_amount.toFixed(2)} DH</p>
-              )}
-              <p className="font-bold mt-2">Total: {receipt.total.toFixed(2)} DH</p>
+            <div className="bg-gray-50/80 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <FileText className="h-5 w-5 text-gray-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium mb-1 text-gray-900">Payment Details</h3>
+                  <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || '0.00'} DH</span></p>
+                  <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || '0.00'} DH</span></p>
+                  {receipt.discount_amount && (
+                    <p className="text-sm text-gray-600">Discount: <span className="font-medium">{receipt.discount_amount.toFixed(2)} DH</span></p>
+                  )}
+                  <p className="text-sm text-gray-800 font-medium mt-1.5">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div>
-            <h3 className="font-medium mb-2">Status</h3>
+          <div className="bg-gray-50/80 p-4 rounded-lg">
+            <h3 className="font-medium mb-3 text-gray-900">Status Information</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Delivery Status</p>
-                <p>{receipt.delivery_status}</p>
+                <p className="text-sm text-gray-500 mb-1">Delivery Status</p>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                  receipt.delivery_status === 'Completed' 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {receipt.delivery_status}
+                </span>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Montage Status</p>
-                <p>{receipt.montage_status}</p>
+                <p className="text-sm text-gray-500 mb-1">Montage Status</p>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                  receipt.montage_status === 'Completed' 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {receipt.montage_status}
+                </span>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Balance</p>
-                <p>{receipt.balance.toFixed(2)} DH</p>
+                <p className="text-sm text-gray-500 mb-1">Balance</p>
+                <p className="text-sm font-medium">{receipt.balance.toFixed(2)} DH</p>
               </div>
             </div>
           </div>
 
-          <div>
-            <h3 className="font-medium mb-2">Prescription</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-medium">Right Eye</p>
-                <p>SPH: {receipt.right_eye_sph || 'N/A'}</p>
-                <p>CYL: {receipt.right_eye_cyl || 'N/A'}</p>
-                <p>AXE: {receipt.right_eye_axe || 'N/A'}</p>
+          <div className="bg-gray-50/80 p-4 rounded-lg">
+            <h3 className="font-medium mb-3 text-gray-900">Prescription</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-md p-3 border border-gray-100">
+                <p className="font-medium text-gray-800 mb-2">Right Eye</p>
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">SPH</p>
+                    <p className="font-medium">{receipt.right_eye_sph || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">CYL</p>
+                    <p className="font-medium">{receipt.right_eye_cyl || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">AXE</p>
+                    <p className="font-medium">{receipt.right_eye_axe || 'N/A'}</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-medium">Left Eye</p>
-                <p>SPH: {receipt.left_eye_sph || 'N/A'}</p>
-                <p>CYL: {receipt.left_eye_cyl || 'N/A'}</p>
-                <p>AXE: {receipt.left_eye_axe || 'N/A'}</p>
+              <div className="bg-white rounded-md p-3 border border-gray-100">
+                <p className="font-medium text-gray-800 mb-2">Left Eye</p>
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">SPH</p>
+                    <p className="font-medium">{receipt.left_eye_sph || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">CYL</p>
+                    <p className="font-medium">{receipt.left_eye_cyl || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">AXE</p>
+                    <p className="font-medium">{receipt.left_eye_axe || 'N/A'}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button className="primary-gradient text-white">
+            <Printer className="h-4 w-4 mr-2" />
+            Print Receipt
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
 
 export default ReceiptDetailsDialog
+
