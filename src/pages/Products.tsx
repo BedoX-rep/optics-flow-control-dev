@@ -18,7 +18,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Pencil, Trash, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,7 @@ import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
+import ProductImage from "@/components/ProductImage";
 
 interface Product {
   id: string;
@@ -56,10 +57,20 @@ const Products = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [isLoading, setIsLoading] = useState(false);
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0 });
+  const [editingCell, setEditingCell] = useState<{ id: string; field: "name" | "price" } | null>(null);
+  const [cellEditValue, setCellEditValue] = useState<string>('');
 
-  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({
-    name: '', price: 0
-  });
+  useEffect(() => {
+    const storageKey = "lensly_products_filters";
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) {
+      setFilters(JSON.parse(saved));
+    }
+  }, []);
+  useEffect(() => {
+    sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
+  }, [filters]);
 
   const fetchProducts = async () => {
     try {
@@ -200,50 +211,111 @@ const Products = () => {
     }));
   };
 
+  const startInlineEdit = (product: Product, field: "name" | "price") => {
+    setEditingCell({ id: product.id, field });
+    setCellEditValue(field === "price" ? String(product.price) : product.name);
+  };
+
+  const endInlineEdit = async (product: Product) => {
+    if (!editingCell) return;
+    const val = editingCell.field === "price" ? Number(cellEditValue) : cellEditValue.trim();
+    if (val === product[editingCell.field]) {
+      setEditingCell(null);
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const updates = { ...product, [editingCell.field]: val };
+      delete updates.id;
+      const { error } = await supabase
+        .from('products')
+        .update({ [editingCell.field]: val })
+        .eq('id', product.id)
+        .eq('user_id', user.id);
+      if (error) throw error;
+      toast({ title: "Updated", description: `Product ${editingCell.field} updated.` });
+      setProducts(prev => prev.map(p =>
+        p.id === product.id ? { ...p, [editingCell.field]: val } : p
+      ));
+    } catch {
+      toast({ title: "Error", description: "Could not update." });
+    } finally {
+      setEditingCell(null);
+      setIsSubmitting(false);
+    }
+  };
+
+  const removeProductImage = async (product: Product) => {
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('products')
+        .update({ image: null })
+        .eq('id', product.id)
+        .eq('user_id', user.id);
+      if (error) throw error;
+      setProducts(prev => prev.map(p =>
+        p.id === product.id ? { ...p, image: null } : p
+      ));
+      toast({ title: "Image Removed" });
+    } catch {
+      toast({ title: "Error", description: "Could not remove image." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (!editingCell) return;
+      if (e.key === "Escape") setEditingCell(null);
+      if (e.key === "Enter") {
+        const prod = products.find(p => p.id === editingCell.id);
+        if (prod) endInlineEdit(prod);
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [editingCell, cellEditValue, products]);
+
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 items-center mb-6 gap-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-poppins font-semibold text-[#0B6E63] leading-snug">Products</h1>
-            <span className="bg-[#f6ad55]/20 text-[#f6ad55] text-xs font-semibold px-2 py-0.5 rounded-full ml-2 tracking-wide">Manage Inventory</span>
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+          <div>
+            <h1 className="text-3xl font-poppins font-semibold text-black leading-snug flex items-baseline gap-3 mb-0">
+              Products
+              <span className="bg-[#F6AD55]/20 text-[#F6AD55] text-xs font-semibold px-2 py-0.5 rounded-full tracking-wide">Manage Inventory</span>
+            </h1>
+            <p className="mt-1 text-gray-500 text-sm font-inter">All your products and inventory in one place.</p>
           </div>
-          <p className="mt-1 text-gray-500 max-w-lg">
-            All your products and inventory in one place.
-          </p>
-        </div>
-        <div className="flex items-center justify-between md:justify-end gap-3">
-          <ProductStatsSummary products={products} />
-          <Button
-            className="bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white font-medium shadow-lg hover:scale-105 transition-transform duration-150 ml-2"
-            onClick={() => handleOpen(null)}
-          >
-            <span className="flex items-center gap-2">
-              <span className="rounded-full bg-[#f6ad55]/90 p-1 flex items-center justify-center mr-1">
-                <svg width="16" height="16" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-              </span>
+          <div className="flex items-center gap-5">
+            <ProductStatsSummary products={products} />
+            <Button
+              className="bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-150 ml-2 px-4 py-2 rounded-full gap-2 flex items-center"
+              onClick={() => handleOpen(null)}
+            >
+              <Plus size={18} className="inline-block mr-1 -ml-1" />
               Add Product
-            </span>
-          </Button>
+            </Button>
+          </div>
+        </div>
+        <div className="flex w-full items-center justify-between gap-2 flex-wrap">
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pl-8 pr-2 bg-white border rounded-full font-inter h-9 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex-grow flex justify-end">
+            <ProductFilters filters={filters} onChange={handleFilterChange} />
+          </div>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4">
-        <div className="relative w-64">
-          <svg className="absolute left-2 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <Input
-            type="text"
-            placeholder="Search products..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      <ProductFilters filters={filters} onChange={handleFilterChange} />
       <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -260,19 +332,19 @@ const Products = () => {
         </DialogContent>
       </Dialog>
       <div className="overflow-x-auto mt-4">
-        <div className="min-w-full bg-white rounded-[10px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
+        <div className="min-w-full bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
           <Table>
             <TableHeader>
-              <TableRow className="bg-[#F7FAFC]">
-                <TableHead className="text-[#38B2AC] font-semibold">#</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Image</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Name</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Category</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Index</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Treatment</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold">Company</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold text-right">Price</TableHead>
-                <TableHead className="text-[#38B2AC] font-semibold text-right">Actions</TableHead>
+              <TableRow className="bg-[#FAFAFA] border-b">
+                <TableHead className="text-[#0B6E63] text-xs font-bold w-8">#</TableHead>
+                <TableHead className="text-[#0B6E63] text-xs font-bold w-14">Image</TableHead>
+                <TableHead className="text-[#0B6E63] text-xs font-bold min-w-[180px]">Name</TableHead>
+                <TableHead className="text-[#0B6E63] text-xs font-bold text-right w-28">Price</TableHead>
+                <TableHead className="text-[#999] text-xs font-bold w-36">Category</TableHead>
+                <TableHead className="text-[#999] text-xs font-bold w-16">Index</TableHead>
+                <TableHead className="text-[#999] text-xs font-bold w-32">Treatment</TableHead>
+                <TableHead className="text-[#999] text-xs font-bold w-32">Company</TableHead>
+                <TableHead className="text-[#0B6E63] text-xs font-bold text-right w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -292,72 +364,110 @@ const Products = () => {
                 filteredProducts.map((product, index) => (
                   <TableRow
                     key={product.id}
-                    className="hover:bg-[#E6F6F4]/60 transition-all"
+                    className="hover:bg-[#F8F9FB] transition-all group"
                   >
-                    <TableCell className="font-bold text-[#0B6E63]">{index + 1}</TableCell>
+                    <TableCell className="font-semibold text-slate-700">{index + 1}</TableCell>
                     <TableCell>
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-14 h-14 object-cover rounded-lg border border-gray-200 shadow-sm hover:scale-105 transition-all bg-white"
+                      <ProductImage
+                        src={typeof product.image === "string" ? product.image : undefined}
+                        alt={product.name}
+                        removable={!!product.image}
+                        onRemove={() => removeProductImage(product)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {editingCell?.id === product.id && editingCell.field === "name" ? (
+                        <input
+                          type="text"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          className="border rounded px-2 py-1 text-sm w-full"
+                          autoFocus
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-lg border border-dashed border-gray-200 flex items-center justify-center text-gray-300 bg-gray-50 font-poppins text-xs">
-                          No image
-                        </div>
+                        <span
+                          className="font-medium text-slate-900 cursor-pointer transition hover:underline"
+                          onDoubleClick={() => startInlineEdit(product, "name")}
+                          title="Double click to edit"
+                        >
+                          {product.name}
+                        </span>
                       )}
                     </TableCell>
-                    <TableCell className="font-medium text-slate-700">{product.name}</TableCell>
+                    <TableCell className="text-right">
+                      {editingCell?.id === product.id && editingCell.field === "price" ? (
+                        <input
+                          type="number"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          className="border rounded px-2 py-1 text-sm text-right w-20"
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className="font-semibold text-[#0B6E63] cursor-pointer transition hover:underline"
+                          onDoubleClick={() => startInlineEdit(product, "price")}
+                          title="Double click to edit"
+                        >
+                          {Number(product.price).toFixed(2)} DH
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
-                      <span className="bg-[#E6F6F4] text-[#0B6E63] px-2 py-0.5 rounded-full text-xs font-bold">
-                        {product.category || "-"}
-                      </span>
+                      {product.category ? (
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-bold text-black bg-[#F9FAFB] border-gray-200">
+                          {product.category}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs font-medium">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {product.index ? (
-                        <span className="bg-[#F1F1F1] text-slate-600 px-2 py-0.5 rounded-full text-xs">{product.index}</span>
-                      ) : "-"}
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#F1F1F1] border-gray-200 text-gray-700">{product.index}</span>
+                      ) : (
+                        <span className="text-gray-300">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {product.treatment ? (
-                        <span className="bg-[#F6AD55]/20 text-[#F6AD55] px-2 py-0.5 rounded-full text-xs">{product.treatment}</span>
-                      ) : "-"}
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#FCF3E9] border-gray-100 text-[#f6ad55]">
+                          {product.treatment}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {product.company ? (
-                        <span className="bg-[#E4FFFC]/80 text-[#38B2AC] px-2 py-0.5 rounded-full text-xs">
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#ECFFFC] border-gray-100 text-[#38b2ac]">
                           {product.company}
                         </span>
-                      ) : "-"}
+                      ) : (
+                        <span className="text-gray-300">-</span>
+                      )}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-[#0B6E63]">{Number(product.price).toFixed(2)} DH</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="hover:bg-[#E4FFFC]"
+                          className="hover:bg-gray-100"
                           onClick={() => handleOpen(product)}
                           aria-label="Edit"
                         >
-                          <svg width="18" height="18" stroke="#0B6E63" fill="none" strokeWidth="2" viewBox="0 0 24 24">
-                            <path d="M16.475 3.977a2.5 2.5 0 1 1 3.535 3.535l-11.064 11.06a2 2 0 0 1-.707.443l-3.429 1.143a1 1 0 0 1-1.265-1.265l1.143-3.43a2 2 0 0 1 .443-.706l11.06-11.06Z"/>
-                          </svg>
+                          <Edit size={16} className="text-[#0B6E63]" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="hover:bg-red-50"
+                          className="hover:bg-red-100"
                           onClick={() => handleDeleteProduct(product.id)}
                           aria-label="Delete"
                         >
-                          <svg width="18" height="18" stroke="#e53e3e" fill="none" strokeWidth="2" viewBox="0 0 24 24">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
+                          <Trash2 size={16} className="text-[#e53e3e]" />
                         </Button>
                       </div>
                     </TableCell>
