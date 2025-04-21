@@ -10,6 +10,7 @@ interface ProductImageProps {
   className?: string;
 }
 
+// Show subtle no-image state: just an icon in a neutral box, no "no image" text
 const ProductImage: React.FC<ProductImageProps> = ({
   src,
   alt = "",
@@ -18,7 +19,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`relative w-12 h-12 rounded-lg bg-[#F5F6F7] border border-gray-200 flex items-center justify-center overflow-hidden ${className}`}>
+    <div className={`relative w-12 h-12 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden ${className}`}>
       {src ? (
         <>
           <img
@@ -30,7 +31,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
             <button
               type="button"
               onClick={e => { e.stopPropagation(); onRemove && onRemove(); }}
-              className="absolute top-0 right-0 bg-white/80 hover:bg-white text-neutral-500 rounded-full shadow p-0.5"
+              className="absolute top-0 right-0 bg-white/80 hover:bg-white text-neutral-600 rounded-full shadow p-0.5"
               aria-label="Remove Image"
             >
               <X size={14} />
@@ -38,7 +39,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
           )}
         </>
       ) : (
-        <div className="flex flex-col items-center text-gray-300">
+        <div className="flex flex-col items-center justify-center h-full w-full text-neutral-200">
           <Image size={26} />
         </div>
       )}

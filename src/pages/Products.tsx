@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -60,13 +60,13 @@ const Products = () => {
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0 });
   const [editingCell, setEditingCell] = useState<{ id: string; field: "name" | "price" } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
+  const [pageReady, setPageReady] = useState(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    const storageKey = "lensly_products_filters";
-    const saved = sessionStorage.getItem(storageKey);
-    if (saved) {
-      setFilters(JSON.parse(saved));
-    }
+    setPageReady(true);
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
   }, []);
   useEffect(() => {
     sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
@@ -107,7 +107,7 @@ const Products = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      setProducts(data || []);
+      if (mountedRef.current) setProducts(data || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -279,39 +279,36 @@ const Products = () => {
   }, [editingCell, cellEditValue, products]);
 
   return (
-    <div>
-      <div className="flex flex-col gap-0">
-        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+    <div className="pt-8 pb-4 px-0 md:px-3 max-w-6xl mx-auto">
+      <div className="flex flex-col gap-0 mb-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
           <div>
-            <h1 className="text-3xl font-poppins font-semibold text-black leading-snug flex items-baseline gap-3 mb-0">
-              Products
-              <span className="bg-[#F6AD55]/20 text-[#F6AD55] text-xs font-semibold px-2 py-0.5 rounded-full tracking-wide">Manage Inventory</span>
-            </h1>
-            <p className="mt-1 text-gray-500 text-sm font-inter">All your products and inventory in one place.</p>
+            <h1 className="text-2xl font-poppins font-semibold text-black mb-0 leading-tight tracking-tight">Products</h1>
+            <p className="mt-0.5 text-neutral-500 text-sm font-inter">Manage your inventory efficiently and elegantly.</p>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-end gap-4">
             <ProductStatsSummary products={products} />
             <Button
-              className="bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-150 ml-2 px-4 py-2 rounded-full gap-2 flex items-center"
+              className="ml-2 px-5 py-2 rounded-full font-medium bg-black text-white hover:bg-neutral-900 transition duration-150 shadow-none border border-black/5"
               onClick={() => handleOpen(null)}
             >
-              <Plus size={18} className="inline-block mr-1 -ml-1" />
+              <span className="mr-1.5 -ml-0.5"><Plus size={18}/></span>
               Add Product
             </Button>
           </div>
         </div>
-        <div className="flex w-full items-center justify-between gap-2 flex-wrap">
-          <div className="relative w-full md:w-72">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+        <div className="flex w-full items-center flex-wrap gap-0">
+          <div className="relative w-full md:w-64 mr-2 mb-2 md:mb-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />
             <Input
               type="text"
               placeholder="Search products..."
-              className="pl-8 pr-2 bg-white border rounded-full font-inter h-9 text-sm"
+              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex-grow flex justify-end">
+          <div className="flex-1 flex justify-end">
             <ProductFilters filters={filters} onChange={handleFilterChange} />
           </div>
         </div>
@@ -332,19 +329,19 @@ const Products = () => {
         </DialogContent>
       </Dialog>
       <div className="overflow-x-auto mt-4">
-        <div className="min-w-full bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
+        <div className="min-w-full bg-white rounded-2xl border border-neutral-200 shadow-[0_6px_24px_rgba(0,0,0,0.04)]">
           <Table>
             <TableHeader>
-              <TableRow className="bg-[#FAFAFA] border-b">
-                <TableHead className="text-[#0B6E63] text-xs font-bold w-8">#</TableHead>
-                <TableHead className="text-[#0B6E63] text-xs font-bold w-14">Image</TableHead>
-                <TableHead className="text-[#0B6E63] text-xs font-bold min-w-[180px]">Name</TableHead>
-                <TableHead className="text-[#0B6E63] text-xs font-bold text-right w-28">Price</TableHead>
-                <TableHead className="text-[#999] text-xs font-bold w-36">Category</TableHead>
-                <TableHead className="text-[#999] text-xs font-bold w-16">Index</TableHead>
-                <TableHead className="text-[#999] text-xs font-bold w-32">Treatment</TableHead>
-                <TableHead className="text-[#999] text-xs font-bold w-32">Company</TableHead>
-                <TableHead className="text-[#0B6E63] text-xs font-bold text-right w-24">Actions</TableHead>
+              <TableRow className="border-b border-neutral-100">
+                <TableHead className="text-black text-xs font-semibold w-8">#</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[180px]">Name</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right w-24">Price</TableHead>
+                <TableHead className="text-neutral-500 text-xs font-medium w-36">Category</TableHead>
+                <TableHead className="text-neutral-400 text-xs font-medium w-16">Index</TableHead>
+                <TableHead className="text-neutral-400 text-xs font-medium w-32">Treatment</TableHead>
+                <TableHead className="text-neutral-400 text-xs font-medium w-32">Company</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right w-20">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -356,17 +353,17 @@ const Products = () => {
                 </TableRow>
               ) : filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10 text-gray-400">
-                    No products found. Add your first product to get started.
+                  <TableCell colSpan={9} className="text-center py-10 text-neutral-400 font-medium">
+                    No products found.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredProducts.map((product, index) => (
                   <TableRow
                     key={product.id}
-                    className="hover:bg-[#F8F9FB] transition-all group"
+                    className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
                   >
-                    <TableCell className="font-semibold text-slate-700">{index + 1}</TableCell>
+                    <TableCell className="font-medium text-neutral-800">{index + 1}</TableCell>
                     <TableCell>
                       <ProductImage
                         src={typeof product.image === "string" ? product.image : undefined}
@@ -375,19 +372,19 @@ const Products = () => {
                         onRemove={() => removeProductImage(product)}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="align-middle">
                       {editingCell?.id === product.id && editingCell.field === "name" ? (
                         <input
                           type="text"
                           value={cellEditValue}
                           onChange={e => setCellEditValue(e.target.value)}
                           onBlur={() => endInlineEdit(product)}
-                          className="border rounded px-2 py-1 text-sm w-full"
+                          className="border border-neutral-200 bg-[#F7F7F7] rounded-lg px-2 py-1 text-sm w-full focus:ring-2 focus:ring-black"
                           autoFocus
                         />
                       ) : (
                         <span
-                          className="font-medium text-slate-900 cursor-pointer transition hover:underline"
+                          className="font-semibold text-black cursor-pointer transition hover:underline"
                           onDoubleClick={() => startInlineEdit(product, "name")}
                           title="Double click to edit"
                         >
@@ -395,19 +392,20 @@ const Products = () => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="align-middle text-right">
                       {editingCell?.id === product.id && editingCell.field === "price" ? (
                         <input
                           type="number"
                           value={cellEditValue}
                           onChange={e => setCellEditValue(e.target.value)}
                           onBlur={() => endInlineEdit(product)}
-                          className="border rounded px-2 py-1 text-sm text-right w-20"
+                          className="border border-neutral-200 bg-[#F7F7F7] rounded-lg px-2 py-1 text-sm text-right w-full focus:ring-2 focus:ring-black"
+                          min={0}
                           autoFocus
                         />
                       ) : (
                         <span
-                          className="font-semibold text-[#0B6E63] cursor-pointer transition hover:underline"
+                          className="font-semibold text-black cursor-pointer transition hover:underline"
                           onDoubleClick={() => startInlineEdit(product, "price")}
                           title="Double click to edit"
                         >
@@ -417,57 +415,53 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {product.category ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-bold text-black bg-[#F9FAFB] border-gray-200">
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-semibold text-black bg-white border-black/10">
                           {product.category}
                         </span>
                       ) : (
-                        <span className="text-gray-400 text-xs font-medium">-</span>
+                        <span className="text-neutral-300 text-xs font-medium">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {product.index ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#F1F1F1] border-gray-200 text-gray-700">{product.index}</span>
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700">{product.index}</span>
                       ) : (
-                        <span className="text-gray-300">-</span>
+                        <span className="text-neutral-300">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {product.treatment ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#FCF3E9] border-gray-100 text-[#f6ad55]">
-                          {product.treatment}
-                        </span>
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">{product.treatment}</span>
                       ) : (
-                        <span className="text-gray-300">-</span>
+                        <span className="text-neutral-300">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {product.company ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-[#ECFFFC] border-gray-100 text-[#38b2ac]">
-                          {product.company}
-                        </span>
+                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600">{product.company}</span>
                       ) : (
-                        <span className="text-gray-300">-</span>
+                        <span className="text-neutral-300">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
+                      <div className="flex justify-end space-x-1">
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="hover:bg-gray-100"
+                          className="hover:bg-black/10"
                           onClick={() => handleOpen(product)}
                           aria-label="Edit"
                         >
-                          <Edit size={16} className="text-[#0B6E63]" />
+                          <Edit size={16} className="text-black" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="hover:bg-red-100"
+                          className="hover:bg-[#222]/10"
                           onClick={() => handleDeleteProduct(product.id)}
                           aria-label="Delete"
                         >
-                          <Trash2 size={16} className="text-[#e53e3e]" />
+                          <Trash2 size={16} className="text-red-600" />
                         </Button>
                       </div>
                     </TableCell>

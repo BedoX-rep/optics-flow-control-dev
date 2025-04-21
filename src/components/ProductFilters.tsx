@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ChevronDown, Filter } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CATEGORY_OPTIONS = [
@@ -26,7 +26,7 @@ export interface ProductFiltersProps {
   onChange: (filters: Record<string, string>) => void;
 }
 
-const FilterPill = ({
+const FilterSelect = ({
   value,
   placeholder,
   children,
@@ -38,11 +38,11 @@ const FilterPill = ({
   onChange: (newValue: string) => void;
 }) => (
   <Select value={value} onValueChange={onChange}>
-    <SelectTrigger className="rounded-full shadow-xs border-gray-200 min-w-[94px] text-sm h-9 pr-7 bg-white">
+    <SelectTrigger className="rounded-full border border-black/15 min-w-[96px] text-[13px] h-9 pr-8 bg-white focus:ring-2 focus:ring-black shadow-none font-inter font-medium aria-expanded:ring-2 aria-expanded:ring-black/50 transition">
       <SelectValue placeholder={placeholder} />
       <ChevronDown className="w-4 h-4 ml-1 opacity-50" />
     </SelectTrigger>
-    <SelectContent className="z-50 bg-white">
+    <SelectContent className="z-[60] bg-white shadow-xl border border-black/10 rounded-[.9em] min-w-[140px]">
       {children}
     </SelectContent>
   </Select>
@@ -50,11 +50,8 @@ const FilterPill = ({
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
   return (
-    <div className="flex gap-2 flex-wrap mb-2 items-center">
-      <span className="hidden md:inline-flex items-center text-xs font-medium text-gray-600 bg-[#F7FAFC] py-1 px-2 rounded-full border border-gray-200 mr-2">
-        <Filter size={14} className="mr-1" /> Filters
-      </span>
-      <FilterPill
+    <div className="flex gap-2 flex-wrap items-center">
+      <FilterSelect
         value={filters.category || "all_categories"}
         placeholder="Category"
         onChange={v => onChange({ category: v })}
@@ -63,8 +60,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         {CATEGORY_OPTIONS.map(opt => (
           <SelectItem key={opt} value={opt}>{opt}</SelectItem>
         ))}
-      </FilterPill>
-      <FilterPill
+      </FilterSelect>
+      <FilterSelect
         value={filters.index || "all_indexes"}
         placeholder="Index"
         onChange={v => onChange({ index: v })}
@@ -73,8 +70,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         {INDEX_OPTIONS.map(opt => (
           <SelectItem key={opt} value={opt}>{opt}</SelectItem>
         ))}
-      </FilterPill>
-      <FilterPill
+      </FilterSelect>
+      <FilterSelect
         value={filters.treatment || "all_treatments"}
         placeholder="Treatment"
         onChange={v => onChange({ treatment: v })}
@@ -83,8 +80,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         {TREATMENT_OPTIONS.map(opt => (
           <SelectItem key={opt} value={opt}>{opt}</SelectItem>
         ))}
-      </FilterPill>
-      <FilterPill
+      </FilterSelect>
+      <FilterSelect
         value={filters.company || "all_companies"}
         placeholder="Company"
         onChange={v => onChange({ company: v })}
@@ -93,15 +90,15 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         {COMPANY_OPTIONS.map(opt => (
           <SelectItem key={opt} value={opt}>{opt}</SelectItem>
         ))}
-      </FilterPill>
-      <FilterPill
+      </FilterSelect>
+      <FilterSelect
         value={filters.sort || "arrange"}
         placeholder="Sort"
         onChange={v => onChange({ sort: v })}
       >
-        <SelectItem value="arrange">By Category/Spec</SelectItem>
-        <SelectItem value="latest">Latest</SelectItem>
-      </FilterPill>
+        <SelectItem value="arrange">Sort: Category</SelectItem>
+        <SelectItem value="latest">Sort: Latest</SelectItem>
+      </FilterSelect>
     </div>
   );
 };

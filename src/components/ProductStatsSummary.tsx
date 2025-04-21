@@ -14,15 +14,6 @@ const CATEGORY_LABELS = [
   "Accessories",
 ];
 
-const CATEGORY_COLORS: { [key: string]: string } = {
-  "Single Vision Lenses": "border-gray-300 text-gray-800",
-  "Progressive Lenses": "border-gray-300 text-gray-800",
-  "Frames": "border-gray-400 text-gray-900",
-  "Sunglasses": "border-gray-400 text-gray-800",
-  "Contact Lenses": "border-gray-300 text-gray-800",
-  "Accessories": "border-gray-300 text-gray-800",
-};
-
 const ProductStatsSummary: React.FC<ProductStatsSummaryProps> = ({ products }) => {
   const total = products.length;
   const countsByCategory = CATEGORY_LABELS
@@ -33,16 +24,16 @@ const ProductStatsSummary: React.FC<ProductStatsSummaryProps> = ({ products }) =
     .filter((entry) => entry.count > 0);
 
   return (
-    <div className="flex flex-col items-end">
-      <div className="flex items-center gap-2">
-        <span className="text-2xl font-bold text-black">{total}</span>
-        <span className="text-gray-400 text-xs font-medium">Products</span>
+    <div className="flex flex-col items-end gap-0.5 w-max min-w-[130px]">
+      <div className="flex items-center gap-1">
+        <span className="text-[1.5rem] font-bold text-black">{total}</span>
+        <span className="text-gray-400 text-xs font-medium">listed</span>
       </div>
-      <div className="flex flex-wrap gap-2 mt-1">
+      <div className="flex flex-wrap gap-1 mt-0.5">
         {countsByCategory.map(({ label, count }) => (
           <span
             key={label}
-            className={`border px-2 py-0.5 rounded-full bg-white font-semibold text-xs ${CATEGORY_COLORS[label] || "border-gray-300"}`}
+            className="border border-black/20 px-2 py-0.5 rounded-full bg-white font-medium text-xs text-black/80"
           >
             {label.replace(/Lenses|Frames|Glasses|Accessories/, match => match[0])}: {count}
           </span>
