@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -61,6 +60,7 @@ const Products = () => {
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
   const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
     setPageReady(true);
@@ -75,6 +75,8 @@ const Products = () => {
     function handleSidebar() {
       const el = document.querySelector('.sidebar-gradient');
       if (el) {
+        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || el.style.width === '48px');
+        setSidebarExpanded(expanded);
         setSidebarWidth(el.clientWidth || 256);
       }
     }
@@ -293,67 +295,52 @@ const Products = () => {
 
   return (
     <div
-      className="pt-8 pb-6 px-1 md:px-6"
+      className="py-4 px-1 md:px-6 flex flex-col h-[calc(100svh-68px)]"
       style={{
-        maxWidth: `calc(100vw - ${sidebarWidth + 56}px)`,
+        maxWidth: `calc(100vw - ${sidebarWidth ? sidebarWidth + 20 : 20}px)`,
         marginLeft: "auto",
         marginRight: "auto",
         transition: "max-width 0.2s",
+        minHeight: "calc(100svh - 68px)",
       }}
     >
-      <div className="flex items-end justify-between gap-4 flex-wrap mb-2">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-2 w-full">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <Button
-            className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black transition-shadow shadow"
+            className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
             onClick={() => handleOpen(null)}
           >
-            <Plus size={18} className="mr-2" /> Add Product
+            <span className="mr-2 flex items-center"><Plus size={18} /></span>
+            Add Product
           </Button>
-          <span className="ml-3 md:ml-4">
+          <span>
             <ProductStatsSummary products={products} />
           </span>
         </div>
-        <div className="flex items-center gap-1 w-full md:w-auto justify-end mt-2 md:mt-0">
+        <div className="flex-grow flex items-end justify-end">
           <ProductFilters filters={filters} onChange={handleFilterChange} />
         </div>
       </div>
 
-      <div className="mt-1 flex flex-row-reverse md:flex-row items-center w-full gap-2 mb-2">
-        <div className="flex-1 mx-0 md:mx-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="flex items-center gap-2 mb-2" style={{ minHeight: 0 }}>
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search products..."
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            tabIndex={0}
+          />
         </div>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
-            </DialogTitle>
-          </DialogHeader>
-          <ProductForm
-            initialValues={formInitial}
-            onSubmit={handleFormSubmit}
-            onCancel={() => setIsOpen(false)}
-            disabled={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <div className="overflow-x-auto mt-2 pb-4">
-        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm">
+      <div className="flex-grow min-h-0 flex flex-col">
+        <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
           <Table className="table-fixed min-w-[980px]">
             <TableHeader>
-              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7]">
+              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
                 <TableHead className="text-black text-xs font-semibold w-7">#</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[230px]">Name</TableHead>
@@ -438,100 +425,24 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10 cursor-pointer hover:underline"
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "category")}
-                        >
-                          {product.category || <span className="text-neutral-300">-</span>}
-                        </span>
-                      )}
+                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10">
+                        {product.category || "-"}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className={
-                            product.index
-                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700 cursor-pointer hover:underline"
-                              : "text-neutral-300"
-                          }
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "index")}
-                        >
-                          {product.index || "-"}
-                        </span>
-                      )}
+                      <span className={product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700" : "text-neutral-300"}>
+                        {product.index || "-"}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className={
-                            product.treatment
-                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700 cursor-pointer hover:underline"
-                              : "text-neutral-300"
-                          }
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "treatment")}
-                        >
-                          {product.treatment || "-"}
-                        </span>
-                      )}
+                      <span className={product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-300"}>
+                        {product.treatment || "-"}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className={
-                            product.company
-                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600 cursor-pointer hover:underline"
-                              : "text-neutral-300"
-                          }
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "company")}
-                        >
-                          {product.company || "-"}
-                        </span>
-                      )}
+                      <span className={product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-300"}>
+                        {product.company || "-"}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
@@ -562,6 +473,22 @@ const Products = () => {
           </Table>
         </div>
       </div>
+
+      <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? 'Edit Product' : 'Add New Product'}
+            </DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            initialValues={formInitial}
+            onSubmit={handleFormSubmit}
+            onCancel={() => setIsOpen(false)}
+            disabled={isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
