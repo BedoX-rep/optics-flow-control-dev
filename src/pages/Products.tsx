@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -23,6 +24,7 @@ import ProductForm, { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: string;
@@ -318,15 +320,16 @@ const Products = () => {
 
       <div className="mt-1 flex flex-row-reverse md:flex-row items-center w-full gap-2 mb-2">
         <div className="flex-1 mx-0 md:mx-2">
-          <Input
-            type="text"
-            placeholder="Search products..."
-            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
-            style={{ backgroundPosition: "8px 9px", backgroundRepeat: "no-repeat" }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            prefix={<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />}
-          />
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
@@ -476,7 +479,7 @@ const Products = () => {
                           title="Edit"
                           onClick={() => startInlineEdit(product, "index")}
                         >
-                          {product.index || <span className="text-neutral-300">-</span>}
+                          {product.index || "-"}
                         </span>
                       )}
                     </TableCell>
@@ -501,7 +504,7 @@ const Products = () => {
                           title="Edit"
                           onClick={() => startInlineEdit(product, "treatment")}
                         >
-                          {product.treatment || <span className="text-neutral-300">-</span>}
+                          {product.treatment || "-"}
                         </span>
                       )}
                     </TableCell>
@@ -526,7 +529,7 @@ const Products = () => {
                           title="Edit"
                           onClick={() => startInlineEdit(product, "company")}
                         >
-                          {product.company || <span className="text-neutral-300">-</span>}
+                          {product.company || "-"}
                         </span>
                       )}
                     </TableCell>
