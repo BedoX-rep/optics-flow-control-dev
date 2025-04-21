@@ -14,13 +14,9 @@ import {
   DialogContent, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
-import PageTitle from '@/components/PageTitle';
-import { supabase } from '@/integrations/supabase/client';
+import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
@@ -58,10 +54,11 @@ const Products = () => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [isLoading, setIsLoading] = useState(false);
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0 });
-  const [editingCell, setEditingCell] = useState<{ id: string; field: "name" | "price" } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
 
   useEffect(() => {
     setPageReady(true);
@@ -71,6 +68,24 @@ const Products = () => {
   useEffect(() => {
     sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
   }, [filters]);
+
+  useEffect(() => {
+    function handleSidebar() {
+      const el = document.querySelector('.sidebar-gradient');
+      if (el) {
+        setSidebarWidth(el.clientWidth || 256);
+      }
+    }
+    window.addEventListener('resize', handleSidebar);
+    handleSidebar();
+    const observer = new MutationObserver(handleSidebar);
+    const sidebarEl = document.querySelector('.sidebar-gradient');
+    if (sidebarEl) observer.observe(sidebarEl, { attributes: true, attributeFilter: ['class', 'style'] });
+    return () => {
+      window.removeEventListener('resize', handleSidebar);
+      observer.disconnect();
+    }
+  }, []);
 
   const fetchProducts = async () => {
     try {
@@ -211,32 +226,28 @@ const Products = () => {
     }));
   };
 
-  const startInlineEdit = (product: Product, field: "name" | "price") => {
+  const startInlineEdit = (product: Product, field: keyof Product) => {
     setEditingCell({ id: product.id, field });
-    setCellEditValue(field === "price" ? String(product.price) : product.name);
+    setCellEditValue(String(product[field] ?? ''));
   };
 
   const endInlineEdit = async (product: Product) => {
     if (!editingCell) return;
-    const val = editingCell.field === "price" ? Number(cellEditValue) : cellEditValue.trim();
-    if (val === product[editingCell.field]) {
+    let val: string | number = cellEditValue;
+    if (editingCell.field === "price") val = Number(cellEditValue);
+    if (val === (product[editingCell.field] ?? '')) {
       setEditingCell(null);
       return;
     }
     try {
       setIsSubmitting(true);
-      const updates = { ...product, [editingCell.field]: val };
-      delete updates.id;
-      const { error } = await supabase
+      await supabase
         .from('products')
-        .update({ [editingCell.field]: val })
+        .update({ [editingCell.field]: val === "" ? null : val })
         .eq('id', product.id)
         .eq('user_id', user.id);
-      if (error) throw error;
-      toast({ title: "Updated", description: `Product ${editingCell.field} updated.` });
-      setProducts(prev => prev.map(p =>
-        p.id === product.id ? { ...p, [editingCell.field]: val } : p
-      ));
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, [editingCell.field]: val } : p));
+      toast({ title: "Updated", description: `Product updated.` });
     } catch {
       toast({ title: "Error", description: "Could not update." });
     } finally {
@@ -279,40 +290,46 @@ const Products = () => {
   }, [editingCell, cellEditValue, products]);
 
   return (
-    <div className="pt-8 pb-4 px-0 md:px-3 max-w-6xl mx-auto">
-      <div className="flex flex-col gap-0 mb-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-          <div>
-            <h1 className="text-2xl font-poppins font-semibold text-black mb-0 leading-tight tracking-tight">Products</h1>
-            <p className="mt-0.5 text-neutral-500 text-sm font-inter">Manage your inventory efficiently and elegantly.</p>
-          </div>
-          <div className="flex items-end gap-4">
+    <div
+      className="pt-8 pb-6 px-1 md:px-6"
+      style={{
+        maxWidth: `calc(100vw - ${sidebarWidth + 56}px)`,
+        marginLeft: "auto",
+        marginRight: "auto",
+        transition: "max-width 0.2s",
+      }}
+    >
+      <div className="flex items-end justify-between gap-4 flex-wrap mb-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black transition-shadow shadow"
+            onClick={() => handleOpen(null)}
+          >
+            <Plus size={18} className="mr-2" /> Add Product
+          </Button>
+          <span className="ml-3 md:ml-4">
             <ProductStatsSummary products={products} />
-            <Button
-              className="ml-2 px-5 py-2 rounded-full font-medium bg-black text-white hover:bg-neutral-900 transition duration-150 shadow-none border border-black/5"
-              onClick={() => handleOpen(null)}
-            >
-              <span className="mr-1.5 -ml-0.5"><Plus size={18}/></span>
-              Add Product
-            </Button>
-          </div>
+          </span>
         </div>
-        <div className="flex w-full items-center flex-wrap gap-0">
-          <div className="relative w-full md:w-64 mr-2 mb-2 md:mb-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex-1 flex justify-end">
-            <ProductFilters filters={filters} onChange={handleFilterChange} />
-          </div>
+        <div className="flex items-center gap-1 w-full md:w-auto justify-end mt-2 md:mt-0">
+          <ProductFilters filters={filters} onChange={handleFilterChange} />
         </div>
       </div>
+
+      <div className="mt-1 flex flex-row-reverse md:flex-row items-center w-full gap-2 mb-2">
+        <div className="flex-1 mx-0 md:mx-2">
+          <Input
+            type="text"
+            placeholder="Search products..."
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
+            style={{ backgroundPosition: "8px 9px", backgroundRepeat: "no-repeat" }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            prefix={<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400" />}
+          />
+        </div>
+      </div>
+
       <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -328,20 +345,21 @@ const Products = () => {
           />
         </DialogContent>
       </Dialog>
-      <div className="overflow-x-auto mt-4">
-        <div className="min-w-full bg-white rounded-2xl border border-neutral-200 shadow-[0_6px_24px_rgba(0,0,0,0.04)]">
-          <Table>
+
+      <div className="overflow-x-auto mt-2 pb-4">
+        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm">
+          <Table className="table-fixed min-w-[980px]">
             <TableHeader>
-              <TableRow className="border-b border-neutral-100">
-                <TableHead className="text-black text-xs font-semibold w-8">#</TableHead>
+              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7]">
+                <TableHead className="text-black text-xs font-semibold w-7">#</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[180px]">Name</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right w-24">Price</TableHead>
-                <TableHead className="text-neutral-500 text-xs font-medium w-36">Category</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[230px]">Name</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-20 text-right">Price</TableHead>
+                <TableHead className="text-neutral-500 text-xs font-medium w-32">Category</TableHead>
                 <TableHead className="text-neutral-400 text-xs font-medium w-16">Index</TableHead>
-                <TableHead className="text-neutral-400 text-xs font-medium w-32">Treatment</TableHead>
-                <TableHead className="text-neutral-400 text-xs font-medium w-32">Company</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right w-20">Actions</TableHead>
+                <TableHead className="text-neutral-400 text-xs font-medium w-24">Treatment</TableHead>
+                <TableHead className="text-neutral-400 text-xs font-medium w-28">Company</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right w-18">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -363,84 +381,153 @@ const Products = () => {
                     key={product.id}
                     className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
                   >
-                    <TableCell className="font-medium text-neutral-800">{index + 1}</TableCell>
+                    <TableCell className="font-medium text-neutral-700">{index + 1}</TableCell>
                     <TableCell>
                       <ProductImage
                         src={typeof product.image === "string" ? product.image : undefined}
                         alt={product.name}
                         removable={!!product.image}
                         onRemove={() => removeProductImage(product)}
+                        className="!w-11 !h-11"
                       />
                     </TableCell>
-                    <TableCell className="align-middle">
+                    <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "name" ? (
                         <input
                           type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
                           value={cellEditValue}
                           onChange={e => setCellEditValue(e.target.value)}
                           onBlur={() => endInlineEdit(product)}
-                          className="border border-neutral-200 bg-[#F7F7F7] rounded-lg px-2 py-1 text-sm w-full focus:ring-2 focus:ring-black"
                           autoFocus
                         />
                       ) : (
                         <span
-                          className="font-semibold text-black cursor-pointer transition hover:underline"
-                          onDoubleClick={() => startInlineEdit(product, "name")}
-                          title="Double click to edit"
+                          className="font-semibold text-black hover:underline cursor-pointer"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "name")}
                         >
                           {product.name}
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="align-middle text-right">
+                    <TableCell className="text-right">
                       {editingCell?.id === product.id && editingCell.field === "price" ? (
                         <input
                           type="number"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
+                          min={0}
                           value={cellEditValue}
                           onChange={e => setCellEditValue(e.target.value)}
                           onBlur={() => endInlineEdit(product)}
-                          className="border border-neutral-200 bg-[#F7F7F7] rounded-lg px-2 py-1 text-sm text-right w-full focus:ring-2 focus:ring-black"
-                          min={0}
                           autoFocus
                         />
                       ) : (
                         <span
-                          className="font-semibold text-black cursor-pointer transition hover:underline"
-                          onDoubleClick={() => startInlineEdit(product, "price")}
-                          title="Double click to edit"
+                          className="font-semibold text-black hover:underline cursor-pointer"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "price")}
                         >
                           {Number(product.price).toFixed(2)} DH
                         </span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {product.category ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-semibold text-black bg-white border-black/10">
-                          {product.category}
+                      {editingCell?.id === product.id && editingCell.field === "category" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10 cursor-pointer hover:underline"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "category")}
+                        >
+                          {product.category || <span className="text-neutral-300">-</span>}
                         </span>
-                      ) : (
-                        <span className="text-neutral-300 text-xs font-medium">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {product.index ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700">{product.index}</span>
+                      {editingCell?.id === product.id && editingCell.field === "index" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
                       ) : (
-                        <span className="text-neutral-300">-</span>
+                        <span
+                          className={
+                            product.index
+                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700 cursor-pointer hover:underline"
+                              : "text-neutral-300"
+                          }
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "index")}
+                        >
+                          {product.index || <span className="text-neutral-300">-</span>}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {product.treatment ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">{product.treatment}</span>
+                      {editingCell?.id === product.id && editingCell.field === "treatment" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
                       ) : (
-                        <span className="text-neutral-300">-</span>
+                        <span
+                          className={
+                            product.treatment
+                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700 cursor-pointer hover:underline"
+                              : "text-neutral-300"
+                          }
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "treatment")}
+                        >
+                          {product.treatment || <span className="text-neutral-300">-</span>}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {product.company ? (
-                        <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600">{product.company}</span>
+                      {editingCell?.id === product.id && editingCell.field === "company" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-xs w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
                       ) : (
-                        <span className="text-neutral-300">-</span>
+                        <span
+                          className={
+                            product.company
+                              ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600 cursor-pointer hover:underline"
+                              : "text-neutral-300"
+                          }
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "company")}
+                        >
+                          {product.company || <span className="text-neutral-300">-</span>}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

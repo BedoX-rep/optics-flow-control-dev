@@ -10,7 +10,7 @@ interface ProductImageProps {
   className?: string;
 }
 
-// Show subtle no-image state: just an icon in a neutral box, no "no image" text
+// Refined: minimal, elegant empty state (just icon, centered, NO borders/text)
 const ProductImage: React.FC<ProductImageProps> = ({
   src,
   alt = "",
@@ -19,7 +19,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`relative w-12 h-12 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden ${className}`}>
+    <div className={`relative w-11 h-11 flex items-center justify-center overflow-hidden rounded-lg bg-neutral-50 border border-neutral-200 ${className}`}>
       {src ? (
         <>
           <img
@@ -31,17 +31,18 @@ const ProductImage: React.FC<ProductImageProps> = ({
             <button
               type="button"
               onClick={e => { e.stopPropagation(); onRemove && onRemove(); }}
-              className="absolute top-0 right-0 bg-white/80 hover:bg-white text-neutral-600 rounded-full shadow p-0.5"
+              className="absolute top-0 right-0 bg-white/60 hover:bg-white text-neutral-600 rounded-full p-0.5"
               aria-label="Remove Image"
+              style={{ boxShadow: "0 0 4px 0 rgba(0,0,0,0.05)" }}
             >
               <X size={14} />
             </button>
           )}
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full w-full text-neutral-200">
-          <Image size={26} />
-        </div>
+        <span className="flex items-center justify-center w-full h-full text-neutral-200">
+          <Image size={22} />
+        </span>
       )}
     </div>
   );
