@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Dialog, 
   DialogContent, 
@@ -447,18 +448,38 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                        <Select
                           value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
+                          onValueChange={(v) => {
+                            setCellEditValue(v);
+                            setTimeout(() => endInlineEdit(product), 0);
+                          }}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select or type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <input
+                              type="text"
+                              className="flex h-8 w-full border-0 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') endInlineEdit(product);
+                              }}
+                            />
+                            {CATEGORY_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.value}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
-                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
-                          onClick={() => startInlineEdit(product, "category")}
+                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
+                          onClick={() => {
+                            startInlineEdit(product, "category");
+                            setCellEditValue(product.category || '');
+                          }}
                         >
                           {product.category || "-"}
                         </span>
@@ -466,18 +487,38 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                        <Select
                           value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
+                          onValueChange={(v) => {
+                            setCellEditValue(v);
+                            setTimeout(() => endInlineEdit(product), 0);
+                          }}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select or type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <input
+                              type="text"
+                              className="flex h-8 w-full border-0 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') endInlineEdit(product);
+                              }}
+                            />
+                            {INDEX_OPTIONS.map(opt => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
-                          className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => startInlineEdit(product, "index")}
+                          className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => {
+                            startInlineEdit(product, "index");
+                            setCellEditValue(product.index || '');
+                          }}
                         >
                           {product.index || "-"}
                         </span>
@@ -485,18 +526,38 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                        <Select
                           value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
+                          onValueChange={(v) => {
+                            setCellEditValue(v);
+                            setTimeout(() => endInlineEdit(product), 0);
+                          }}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select or type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <input
+                              type="text"
+                              className="flex h-8 w-full border-0 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') endInlineEdit(product);
+                              }}
+                            />
+                            {TREATMENT_OPTIONS.map(opt => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
-                          className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => startInlineEdit(product, "treatment")}
+                          className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => {
+                            startInlineEdit(product, "treatment");
+                            setCellEditValue(product.treatment || '');
+                          }}
                         >
                           {product.treatment || "-"}
                         </span>
@@ -504,14 +565,42 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                        <Select
                           value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
+                          onValueChange={(v) => {
+                            setCellEditValue(v);
+                            setTimeout(() => endInlineEdit(product), 0);
+                          }}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select or type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <input
+                              type="text"
+                              className="flex h-8 w-full border-0 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') endInlineEdit(product);
+                              }}
+                            />
+                            {COMPANY_OPTIONS.map(opt => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span
+                          className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => {
+                            startInlineEdit(product, "company");
+                            setCellEditValue(product.company || '');
+                          }}
+                        >
+                          {product.company || "-"}
+                        </span>
+                      )}
                       ) : (
                         <span
                           className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
