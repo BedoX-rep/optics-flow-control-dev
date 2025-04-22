@@ -488,6 +488,9 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
+                      <span className="text-neutral-600 text-sm">
+                        {product.category || '-'}
+                      </span>
                       <Select
                         value={product.category || ""}
                         onValueChange={async (value) => {
@@ -523,6 +526,9 @@ const Products = () => {
                       </Select>
                     </TableCell>
                     <TableCell>
+                      <span className="text-neutral-600 text-sm">
+                        {product.index || '-'}
+                      </span>
                       <Select
                         value={product.index || ""}
                         onValueChange={async (value) => {
@@ -558,6 +564,9 @@ const Products = () => {
                       </Select>
                     </TableCell>
                     <TableCell>
+                      <span className="text-neutral-600 text-sm">
+                        {product.treatment || '-'}
+                      </span>
                       <Select
                         value={product.treatment || ""}
                         onValueChange={async (value) => {
@@ -593,6 +602,9 @@ const Products = () => {
                       </Select>
                     </TableCell>
                     <TableCell>
+                      <span className="text-neutral-600 text-sm">
+                        {product.company || '-'}
+                      </span>
                       <Select
                         value={product.company || ""}
                         onValueChange={async (value) => {
