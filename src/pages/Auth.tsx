@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -38,7 +37,7 @@ const Auth = () => {
         navigate('/');
       }
     };
-    
+
     checkSession();
   }, [navigate]);
 
@@ -61,12 +60,12 @@ const Auth = () => {
       });
 
       if (error) throw error;
-      
+
       toast({
         title: "Success",
         description: "Logged in successfully.",
       });
-      
+
       navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
@@ -113,12 +112,12 @@ const Auth = () => {
       });
 
       if (error) throw error;
-      
+
       toast({
         title: "Success",
         description: "Account created successfully. You may need to verify your email before logging in.",
       });
-      
+
       setActiveTab('login');
     } catch (error: any) {
       console.error('Signup error:', error);
@@ -181,7 +180,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-optics-600 hover:bg-optics-700"
+                  className="w-full bg-primary text-white hover:bg-primary/80"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
