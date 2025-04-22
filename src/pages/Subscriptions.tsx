@@ -44,16 +44,15 @@ const Subscriptions = () => {
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        setIsLoading(true);
-        
-        if (!user) {
-          setCurrentSubscription(null);
-          setIsLoading(false);
-          return;
-        }
+  const fetchSubscription = async () => {
+    try {
+      setIsLoading(true);
+      
+      if (!user) {
+        setCurrentSubscription(null);
+        setIsLoading(false);
+        return;
+      }
         
         const { data, error } = await supabase
           .from('subscriptions')
@@ -83,8 +82,11 @@ const Subscriptions = () => {
       }
     };
     
-    fetchSubscription();
-  }, [user, toast]);
+    useEffect(() => {
+    if (user) {
+      fetchSubscription();
+    }
+  }, []);
   
   const contactAdmin = () => {
     toast({
