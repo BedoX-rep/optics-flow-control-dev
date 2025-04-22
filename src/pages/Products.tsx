@@ -35,6 +35,7 @@ interface Product {
   treatment?: string | null;
   company?: string | null;
   image?: string | null;
+  created_at?: string | null; // Added created_at
 }
 
 const DEFAULT_FILTERS = {
@@ -176,6 +177,7 @@ const Products = () => {
       treatment: editing.treatment ?? undefined,
       company: editing.company ?? undefined,
       image: editing.image ?? undefined,
+      created_at: editing.created_at ?? undefined, //added created_at
     } : { name: '', price: 0 });
     setIsOpen(true);
   };
@@ -258,14 +260,14 @@ const Products = () => {
   const endInlineEdit = async (product: Product) => {
     if (!editingCell || !user) return;
     let val: string | number | null = cellEditValue;
-    
+
     // Handle special cases
     if (editingCell.field === "price") {
       val = Number(cellEditValue);
     } else if (cellEditValue === "none_selected" || cellEditValue === "") {
       val = null;
     }
-    
+
     // Don't update if value hasn't changed
     if (val === (product[editingCell.field] ?? null)) {
       setEditingCell(null);
@@ -279,9 +281,9 @@ const Products = () => {
         .update({ [editingCell.field]: val })
         .eq('id', product.id)
         .eq('user_id', user.id);
-        
+
       if (error) throw error;
-      
+
       setProducts(prev => prev.map(p => 
         p.id === product.id ? { ...p, [editingCell.field]: val } : p
       ));
@@ -389,18 +391,19 @@ const Products = () => {
                 <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right w-[84px]">Actions</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-28">Created At</TableHead> {/* Added Created At header */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={10} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={10} className="text-center py-10 text-neutral-400 font-medium">
                     No products found.
                   </TableCell>
                 </TableRow>
@@ -675,6 +678,11 @@ const Products = () => {
                           {product.company || "-"}
                         </span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-neutral-600 text-xs">
+                        {product.created_at ? new Date(product.created_at).toLocaleDateString() : '-'}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
