@@ -13,14 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Dialog, 
   DialogContent, 
-  DialogFooter, 
   DialogHeader, 
   DialogTitle
 } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
-import ProductForm, { ProductFormValues } from "@/components/ProductForm";
+import ProductForm from "@/components/ProductForm";
+import type { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
@@ -30,12 +30,13 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock?: number;
   category?: string | null;
   index?: string | null;
   treatment?: string | null;
   company?: string | null;
   image?: string | null;
-  created_at?: string | null; // Added created_at
+  created_at?: string | null;
 }
 
 const DEFAULT_FILTERS = {
@@ -57,13 +58,7 @@ const CATEGORY_OPTIONS = [
 
 const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
 const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
+const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
 
 const Products = () => {
   const { toast } = useToast();
@@ -78,39 +73,16 @@ const Products = () => {
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0 });
   const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
-  const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
-  const [sidebarWidth, setSidebarWidth] = useState(256);
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
-    setPageReady(true);
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
-  useEffect(() => {
-    sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
-  }, [filters]);
 
   useEffect(() => {
-    function handleSidebar() {
-      const el = document.querySelector('.sidebar-gradient');
-      if (el) {
-        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || el.style.width === '48px');
-        setSidebarExpanded(expanded);
-        setSidebarWidth(el.clientWidth || 256);
-      }
-    }
-    window.addEventListener('resize', handleSidebar);
-    handleSidebar();
-    const observer = new MutationObserver(handleSidebar);
-    const sidebarEl = document.querySelector('.sidebar-gradient');
-    if (sidebarEl) observer.observe(sidebarEl, { attributes: true, attributeFilter: ['class', 'style'] });
-    return () => {
-      window.removeEventListener('resize', handleSidebar);
-      observer.disconnect();
-    }
-  }, []);
+    fetchProducts();
+  }, [user, filters]);
 
   const fetchProducts = async () => {
     try {
@@ -159,10 +131,6 @@ const Products = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [user, filters]);
-
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -177,7 +145,6 @@ const Products = () => {
       treatment: editing.treatment ?? undefined,
       company: editing.company ?? undefined,
       image: editing.image ?? undefined,
-      created_at: editing.created_at ?? undefined, //added created_at
     } : { name: '', price: 0 });
     setIsOpen(true);
   };
@@ -187,8 +154,7 @@ const Products = () => {
     try {
       setIsSubmitting(true);
       if (editingProduct) {
-        const updates: any = { ...form };
-        delete updates.id;
+        const updates = { ...form };
         const { error } = await supabase
           .from('products')
           .update(updates)
@@ -238,7 +204,7 @@ const Products = () => {
         console.error('Error deleting product:', error);
         toast({
           title: "Error",
-          description: "Failed to delete product. It might be used in receipts.",
+          description: "Failed to delete product. Please try again.",
           variant: "destructive",
         });
       }
@@ -261,17 +227,10 @@ const Products = () => {
     if (!editingCell || !user) return;
     let val: string | number | null = cellEditValue;
 
-    // Handle special cases
     if (editingCell.field === "price") {
       val = Number(cellEditValue);
     } else if (cellEditValue === "none_selected" || cellEditValue === "") {
       val = null;
-    }
-
-    // Don't update if value hasn't changed
-    if (val === (product[editingCell.field] ?? null)) {
-      setEditingCell(null);
-      return;
     }
 
     try {
@@ -301,50 +260,8 @@ const Products = () => {
     }
   };
 
-  const removeProductImage = async (product: Product) => {
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ image: null })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      setProducts(prev => prev.map(p =>
-        p.id === product.id ? { ...p, image: null } : p
-      ));
-      toast({ title: "Image Removed" });
-    } catch {
-      toast({ title: "Error", description: "Could not remove image." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (!editingCell) return;
-      if (e.key === "Escape") setEditingCell(null);
-      if (e.key === "Enter") {
-        const prod = products.find(p => p.id === editingCell.id);
-        if (prod) endInlineEdit(prod);
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [editingCell, cellEditValue, products]);
-
   return (
-    <div
-      className="flex flex-col h-[calc(100svh-68px)]"
-      style={{
-        width: "100%",
-        paddingLeft: "1rem",
-        paddingRight: "1rem",
-        transition: "all 0.2s ease",
-        minHeight: "calc(100svh - 68px)",
-      }}
-    >
+    <div className="flex flex-col h-[calc(100svh-68px)] p-4">
       <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-2 w-full">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Button
@@ -363,7 +280,7 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-2" style={{ minHeight: 0 }}>
+      <div className="flex items-center gap-2 mb-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input
@@ -408,17 +325,15 @@ const Products = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product, index) => (
+                filteredProducts.map((product) => (
                   <TableRow
                     key={product.id}
                     className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
                   >
                     <TableCell>
                       <ProductImage
-                        src={typeof product.image === "string" ? product.image : undefined}
+                        src={product.image}
                         alt={product.name}
-                        removable={!!product.image}
-                        onRemove={() => removeProductImage(product)}
                         className="!w-11 !h-11"
                       />
                     </TableCell>
@@ -498,7 +413,7 @@ const Products = () => {
                               .update({ category: value || null })
                               .eq('id', product.id)
                               .eq('user_id', user.id);
-                            
+
                             if (error) throw error;
                             setProducts(prev => prev.map(p => 
                               p.id === product.id ? { ...p, category: value } : p
@@ -534,7 +449,7 @@ const Products = () => {
                               .update({ index: value || null })
                               .eq('id', product.id)
                               .eq('user_id', user.id);
-                            
+
                             if (error) throw error;
                             setProducts(prev => prev.map(p => 
                               p.id === product.id ? { ...p, index: value } : p
@@ -570,7 +485,7 @@ const Products = () => {
                               .update({ treatment: value || null })
                               .eq('id', product.id)
                               .eq('user_id', user.id);
-                            
+
                             if (error) throw error;
                             setProducts(prev => prev.map(p => 
                               p.id === product.id ? { ...p, treatment: value } : p
@@ -606,7 +521,7 @@ const Products = () => {
                               .update({ company: value || null })
                               .eq('id', product.id)
                               .eq('user_id', user.id);
-                            
+
                             if (error) throw error;
                             setProducts(prev => prev.map(p => 
                               p.id === product.id ? { ...p, company: value } : p
@@ -643,7 +558,6 @@ const Products = () => {
                           size="icon"
                           className="hover:bg-black/10"
                           onClick={() => handleOpen(product)}
-                          aria-label="Edit"
                         >
                           <Edit size={16} className="text-black" />
                         </Button>
@@ -652,7 +566,6 @@ const Products = () => {
                           size="icon"
                           className="hover:bg-[#222]/10"
                           onClick={() => handleDeleteProduct(product.id)}
-                          aria-label="Delete"
                         >
                           <Trash2 size={16} className="text-red-600" />
                         </Button>
