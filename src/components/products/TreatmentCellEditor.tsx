@@ -9,21 +9,19 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
-
 const TreatmentCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}
-    onValueChange={v => onChange(v === "Custom" ? null : v)}
+    onValueChange={onChange}
     disabled={disabled}
   >
-    <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+    <SelectTrigger className="w-full h-8 bg-[#fafafa] border border-neutral-300 rounded text-xs font-medium px-2">
       <SelectValue placeholder="Select treatment" />
     </SelectTrigger>
     <SelectContent className="z-50 bg-white">
       {TREATMENT_OPTIONS.map(treat => (
         <SelectItem key={treat} value={treat}>{treat}</SelectItem>
       ))}
-      <SelectItem value="Custom">Custom</SelectItem>
     </SelectContent>
   </Select>
 );

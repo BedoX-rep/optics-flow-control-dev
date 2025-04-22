@@ -26,15 +26,11 @@ import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
 
-import CategoryCellEditor from "@/components/products/CategoryCellEditor";
-import IndexCellEditor from "@/components/products/IndexCellEditor";
-import TreatmentCellEditor from "@/components/products/TreatmentCellEditor";
-import CompanyCellEditor from "@/components/products/CompanyCellEditor";
-import CellDropdownEditor from "@/components/products/CellDropdownEditor";
-import { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
-import { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
-import { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
-import { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
+import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
+import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
+import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
+import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
+
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
 
 interface Product extends ProductSortable {
@@ -507,10 +503,9 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <CellDropdownEditor
+                        <CategoryCellEditor
                           value={product.category}
                           options={CATEGORY_OPTIONS}
-                          placeholder="Category"
                           disabled={isSubmitting}
                           onChange={val =>
                             val === product.category
@@ -530,10 +525,9 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <CellDropdownEditor
+                        <IndexCellEditor
                           value={product.index}
                           options={INDEX_OPTIONS}
-                          placeholder="Index"
                           disabled={isSubmitting}
                           onChange={val =>
                             val === product.index
@@ -553,10 +547,9 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <CellDropdownEditor
+                        <TreatmentCellEditor
                           value={product.treatment}
                           options={TREATMENT_OPTIONS}
-                          placeholder="Treatment"
                           disabled={isSubmitting}
                           onChange={val =>
                             val === product.treatment
@@ -576,10 +569,9 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <CellDropdownEditor
+                        <CompanyCellEditor
                           value={product.company}
                           options={COMPANY_OPTIONS}
-                          placeholder="Company"
                           disabled={isSubmitting}
                           onChange={val =>
                             val === product.company

@@ -9,21 +9,19 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
-
 const IndexCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}
-    onValueChange={v => onChange(v === "Custom" ? null : v)}
+    onValueChange={onChange}
     disabled={disabled}
   >
-    <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+    <SelectTrigger className="w-full h-8 bg-[#fafafa] border border-neutral-300 rounded text-xs font-medium px-2">
       <SelectValue placeholder="Select index" />
     </SelectTrigger>
     <SelectContent className="z-50 bg-white">
       {INDEX_OPTIONS.map(idx => (
         <SelectItem key={idx} value={idx}>{idx}</SelectItem>
       ))}
-      <SelectItem value="Custom">Custom</SelectItem>
     </SelectContent>
   </Select>
 );
