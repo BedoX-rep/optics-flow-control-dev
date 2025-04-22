@@ -488,11 +488,6 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-neutral-600 text-xs">
-                        {product.created_at ? new Date(product.created_at).toLocaleString() : '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
                         <>
                           {cellEditValue === "Custom" ? (
@@ -685,6 +680,11 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
+                      <span className="text-neutral-600 text-xs">
+                        {product.created_at ? new Date(product.created_at).toLocaleDateString() : '-'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
                         <Button 
                           variant="ghost" 
