@@ -341,14 +341,14 @@ const Products = () => {
           <Table className="table-fixed min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold w-7">#</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[230px]">Name</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-20 text-right">Price</TableHead>
-                <TableHead className="text-neutral-500 text-xs font-medium w-32">Category</TableHead>
-                <TableHead className="text-neutral-400 text-xs font-medium w-16">Index</TableHead>
-                <TableHead className="text-neutral-400 text-xs font-medium w-24">Treatment</TableHead>
-                <TableHead className="text-neutral-400 text-xs font-medium w-28">Company</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-20 text-right">Stock</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-32">Category</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-16">Index</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right w-18">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -371,7 +371,6 @@ const Products = () => {
                     key={product.id}
                     className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
                   >
-                    <TableCell className="font-medium text-neutral-700">{index + 1}</TableCell>
                     <TableCell>
                       <ProductImage
                         src={typeof product.image === "string" ? product.image : undefined}
@@ -421,6 +420,28 @@ const Products = () => {
                           onClick={() => startInlineEdit(product, "price")}
                         >
                           {Number(product.price).toFixed(2)} DH
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingCell?.id === product.id && editingCell.field === "stock" ? (
+                        <input
+                          type="number"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
+                          min={0}
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className="font-semibold text-black hover:underline cursor-pointer"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "stock")}
+                        >
+                          {product.stock || 0}
                         </span>
                       )}
                     </TableCell>
