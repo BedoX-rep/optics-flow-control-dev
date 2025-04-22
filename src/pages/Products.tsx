@@ -496,26 +496,14 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
                         <div className="min-w-[150px]">
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              onKeyDown={e => {
-                                if (e.key === "Escape") setEditingCell(null);
-                                if (e.key === "Enter") endInlineEdit(product);
-                              }}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
+                          <Select
                               value={cellEditValue || ""}
                               onValueChange={(value) => {
-                                setCellEditValue(value);
-                                if (value !== "Custom") {
-                                  setTimeout(() => endInlineEdit(product), 0);
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
                                 }
                               }}
                             >
@@ -523,13 +511,12 @@ const Products = () => {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
                                 {CATEGORY_OPTIONS.map(cat => (
                                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                                 ))}
+                                <SelectItem value="Custom">Custom</SelectItem>
                               </SelectContent>
                             </Select>
-                          )}
                         </div>
                       ) : (
                         <span
@@ -546,36 +533,27 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
                         <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
+                          <Select
+                              value={cellEditValue || ""}
                               onValueChange={(value) => {
-                                setCellEditValue(value);
-                                if (value !== "Custom") {
-                                  setTimeout(() => endInlineEdit(product), 0);
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
                                 }
                               }}
                             >
                               <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select index"}</SelectValue>
+                                <SelectValue placeholder="Select index" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
                                 {INDEX_OPTIONS.map(idx => (
                                   <SelectItem key={idx} value={idx}>{idx}</SelectItem>
                                 ))}
+                                <SelectItem value="Custom">Custom</SelectItem>
                               </SelectContent>
                             </Select>
-                          )}
                         </>
                       ) : (
                         <span
@@ -592,36 +570,27 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
                         <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
+                          <Select
+                              value={cellEditValue || ""}
                               onValueChange={(value) => {
-                                setCellEditValue(value);
-                                if (value !== "Custom") {
-                                  setTimeout(() => endInlineEdit(product), 0);
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
                                 }
                               }}
                             >
                               <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select treatment"}</SelectValue>
+                                <SelectValue placeholder="Select treatment" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
                                 {TREATMENT_OPTIONS.map(treat => (
                                   <SelectItem key={treat} value={treat}>{treat}</SelectItem>
                                 ))}
+                                <SelectItem value="Custom">Custom</SelectItem>
                               </SelectContent>
                             </Select>
-                          )}
                         </>
                       ) : (
                         <span
@@ -638,36 +607,27 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
                         <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
+                          <Select
+                              value={cellEditValue || ""}
                               onValueChange={(value) => {
-                                setCellEditValue(value);
-                                if (value !== "Custom") {
-                                  setTimeout(() => endInlineEdit(product), 0);
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
                                 }
                               }}
                             >
                               <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select company"}</SelectValue>
+                                <SelectValue placeholder="Select company" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
                                 {COMPANY_OPTIONS.map(comp => (
                                   <SelectItem key={comp} value={comp}>{comp}</SelectItem>
                                 ))}
+                                <SelectItem value="Custom">Custom</SelectItem>
                               </SelectContent>
                             </Select>
-                          )}
                         </>
                       ) : (
                         <span
