@@ -47,12 +47,11 @@ const Receipts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchReceipts = async () => {
-      if (!user) return;
+  const fetchReceipts = async () => {
+    if (!user) return;
 
-      try {
-        setIsLoading(true);
+    try {
+      setIsLoading(true);
         
         // Fetch receipts with client information
         const { data: receiptsData, error: receiptsError } = await supabase
@@ -89,8 +88,10 @@ const Receipts = () => {
       }
     };
 
-    fetchReceipts();
-  }, [user, toast]);
+    if (user) {
+      fetchReceipts();
+    }
+  }, [searchTerm, dateFilter]);
 
   const handleDeleteReceipt = async (id: string) => {
     try {
