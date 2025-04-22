@@ -297,10 +297,11 @@ const Products = () => {
     <div
       className="py-4 px-1 md:px-6 flex flex-col h-[calc(100svh-68px)]"
       style={{
-        maxWidth: `calc(100vw - ${sidebarWidth ? sidebarWidth + 20 : 20}px)`,
+        width: "100%",
+        maxWidth: `calc(100vw - ${sidebarWidth ? sidebarWidth + 12 : 12}px)`,
         marginLeft: "auto",
         marginRight: "auto",
-        transition: "max-width 0.2s",
+        transition: "all 0.2s ease",
         minHeight: "calc(100svh - 68px)",
       }}
     >
@@ -338,7 +339,7 @@ const Products = () => {
 
       <div className="flex-grow min-h-0 flex flex-col">
         <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-          <Table className="table-fixed min-w-[980px]">
+          <Table className="table-fixed min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
                 <TableHead className="text-black text-xs font-semibold w-7">#</TableHead>
