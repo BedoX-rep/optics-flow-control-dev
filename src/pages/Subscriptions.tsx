@@ -82,11 +82,12 @@ const Subscriptions = () => {
       }
     };
     
+    // Fetch on mount and when user changes
     useEffect(() => {
-    if (user) {
-      fetchSubscription();
-    }
-  }, []);
+      if (user) {
+        fetchSubscription();
+      }
+    }, [user]); // Only re-run if user changes
   
   const contactAdmin = () => {
     toast({
