@@ -490,7 +490,7 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <>
+                        <div className="min-w-[150px]">
                           {cellEditValue === "Custom" ? (
                             <input
                               type="text"
@@ -498,11 +498,15 @@ const Products = () => {
                               value={cellEditValue}
                               onChange={e => setCellEditValue(e.target.value)}
                               onBlur={() => endInlineEdit(product)}
+                              onKeyDown={e => {
+                                if (e.key === "Escape") setEditingCell(null);
+                                if (e.key === "Enter") endInlineEdit(product);
+                              }}
                               autoFocus
                             />
                           ) : (
                             <Select
-                              value={cellEditValue}
+                              value={cellEditValue || ""}
                               onValueChange={(value) => {
                                 if (value === "Custom") {
                                   setCellEditValue("");
@@ -512,8 +516,8 @@ const Products = () => {
                                 }
                               }}
                             >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select category"}</SelectValue>
+                              <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+                                <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="Custom">Custom</SelectItem>
@@ -523,7 +527,7 @@ const Products = () => {
                               </SelectContent>
                             </Select>
                           )}
-                        </>
+                        </div>
                       ) : (
                         <span
                           className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
