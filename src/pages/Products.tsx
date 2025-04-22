@@ -349,7 +349,7 @@ const Products = () => {
                 <TableHead className="text-black text-xs font-semibold w-16">Index</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right w-18">Actions</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right w-[84px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
