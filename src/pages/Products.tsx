@@ -269,6 +269,11 @@ const Products = () => {
       val = null;
     }
 
+    // Handle category, index, treatment, and company fields
+    if (["category", "index", "treatment", "company"].includes(editingCell.field)) {
+      val = cellEditValue === "Custom" ? null : cellEditValue;
+    }
+
     // Don't update if value hasn't changed
     if (val === (product[editingCell.field] ?? null)) {
       setEditingCell(null);
