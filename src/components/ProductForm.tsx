@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -49,6 +48,7 @@ export interface ProductFormValues {
   treatment?: string;
   company?: string;
   image?: string;
+  created_at?: string; // Added this field to match what's being passed in Products.tsx
 }
 
 interface ProductFormProps {

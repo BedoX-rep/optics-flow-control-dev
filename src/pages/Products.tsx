@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -115,7 +114,6 @@ const Products = () => {
     }
   }, []);
 
-  // Add visibility change event to track tab changes
   useEffect(() => {
     // We're not setting up a visibilitychange event listener 
     // to avoid calling the subscription API when tab switching
@@ -144,11 +142,6 @@ const Products = () => {
         query = query.eq('company', filters.company);
       }
 
-      // Order by the fields as requested:
-      // 1. Category first
-      // 2. Index second
-      // 3. Treatment third
-      // 4. Company fourth
       if (filters.sort === "latest") {
         query = query.order('created_at', { ascending: false });
       } else {
@@ -277,19 +270,16 @@ const Products = () => {
     if (!editingCell || !user) return;
     let val: string | number | null = cellEditValue;
 
-    // Handle special cases
     if (editingCell.field === "price") {
       val = Number(cellEditValue);
     } else if (cellEditValue === "none_selected" || cellEditValue === "") {
       val = null;
     }
 
-    // Handle category, index, treatment, and company fields
     if (["category", "index", "treatment", "company"].includes(editingCell.field)) {
       val = cellEditValue === "Custom" ? null : cellEditValue;
     }
 
-    // Don't update if value hasn't changed
     if (val === (product[editingCell.field] ?? null)) {
       setEditingCell(null);
       return;
@@ -711,4 +701,3 @@ const Products = () => {
 };
 
 export default Products;
-
