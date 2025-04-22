@@ -488,196 +488,148 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select category"}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
-                                {CATEGORY_OPTIONS.map(cat => (
-                                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </>
-                      ) : (
-                        <span
-                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
-                          onClick={() => {
-                            startInlineEdit(product, "category");
-                            setCellEditValue(product.category || "");
-                          }}
-                        >
-                          {product.category || "-"}
-                        </span>
-                      )}
+                      <Select
+                        value={product.category || ""}
+                        onValueChange={async (value) => {
+                          if (!user) return;
+                          try {
+                            const { error } = await supabase
+                              .from('products')
+                              .update({ category: value || null })
+                              .eq('id', product.id)
+                              .eq('user_id', user.id);
+                            
+                            if (error) throw error;
+                            setProducts(prev => prev.map(p => 
+                              p.id === product.id ? { ...p, category: value } : p
+                            ));
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update category",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 hover:bg-gray-50 h-auto min-h-0">
+                          <SelectValue placeholder="-" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {CATEGORY_OPTIONS.map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select index"}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
-                                {INDEX_OPTIONS.map(idx => (
-                                  <SelectItem key={idx} value={idx}>{idx}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </>
-                      ) : (
-                        <span
-                          className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "index");
-                            setCellEditValue(product.index || "");
-                          }}
-                        >
-                          {product.index || "-"}
-                        </span>
-                      )}
+                      <Select
+                        value={product.index || ""}
+                        onValueChange={async (value) => {
+                          if (!user) return;
+                          try {
+                            const { error } = await supabase
+                              .from('products')
+                              .update({ index: value || null })
+                              .eq('id', product.id)
+                              .eq('user_id', user.id);
+                            
+                            if (error) throw error;
+                            setProducts(prev => prev.map(p => 
+                              p.id === product.id ? { ...p, index: value } : p
+                            ));
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update index",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700 hover:bg-gray-100 h-auto min-h-0">
+                          <SelectValue placeholder="-" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {INDEX_OPTIONS.map(idx => (
+                            <SelectItem key={idx} value={idx}>{idx}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select treatment"}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
-                                {TREATMENT_OPTIONS.map(treat => (
-                                  <SelectItem key={treat} value={treat}>{treat}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </>
-                      ) : (
-                        <span
-                          className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "treatment");
-                            setCellEditValue(product.treatment || "");
-                          }}
-                        >
-                          {product.treatment || "-"}
-                        </span>
-                      )}
+                      <Select
+                        value={product.treatment || ""}
+                        onValueChange={async (value) => {
+                          if (!user) return;
+                          try {
+                            const { error } = await supabase
+                              .from('products')
+                              .update({ treatment: value || null })
+                              .eq('id', product.id)
+                              .eq('user_id', user.id);
+                            
+                            if (error) throw error;
+                            setProducts(prev => prev.map(p => 
+                              p.id === product.id ? { ...p, treatment: value } : p
+                            ));
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update treatment",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700 hover:bg-gray-100 h-auto min-h-0">
+                          <SelectValue placeholder="-" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {TREATMENT_OPTIONS.map(treat => (
+                            <SelectItem key={treat} value={treat}>{treat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <>
-                          {cellEditValue === "Custom" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(product)}
-                              autoFocus
-                            />
-                          ) : (
-                            <Select
-                              value={cellEditValue}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue>{cellEditValue || "Select company"}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Custom">Custom</SelectItem>
-                                {COMPANY_OPTIONS.map(comp => (
-                                  <SelectItem key={comp} value={comp}>{comp}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </>
-                      ) : (
-                        <span
-                          className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "company");
-                            setCellEditValue(product.company || "");
-                          }}
-                        >
-                          {product.company || "-"}
-                        </span>
-                      )}
+                      <Select
+                        value={product.company || ""}
+                        onValueChange={async (value) => {
+                          if (!user) return;
+                          try {
+                            const { error } = await supabase
+                              .from('products')
+                              .update({ company: value || null })
+                              .eq('id', product.id)
+                              .eq('user_id', user.id);
+                            
+                            if (error) throw error;
+                            setProducts(prev => prev.map(p => 
+                              p.id === product.id ? { ...p, company: value } : p
+                            ));
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update company",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700 hover:bg-gray-100 h-auto min-h-0">
+                          <SelectValue placeholder="-" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {COMPANY_OPTIONS.map(comp => (
+                            <SelectItem key={comp} value={comp}>{comp}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       <span className="text-neutral-600 text-xs">
