@@ -43,6 +43,7 @@ const COMPANY_OPTIONS = [
 export interface ProductFormValues {
   name: string;
   price: number;
+  stock?: number;
   category?: string;
   index?: string;
   treatment?: string;
@@ -213,6 +214,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
           min={0}
           required
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-3">
+        <Label htmlFor="stock">Stock</Label>
+        <Input
+          id="stock"
+          type="number"
+          className="col-span-3"
+          value={form.stock ?? 0}
+          onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
+          min={0}
         />
       </div>
       <div className="grid grid-cols-4 items-center gap-3">

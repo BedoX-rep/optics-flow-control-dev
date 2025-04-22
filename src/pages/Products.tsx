@@ -30,12 +30,13 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  stock?: number | null;
   category?: string | null;
   index?: string | null;
   treatment?: string | null;
   company?: string | null;
   image?: string | null;
-  created_at?: string | null; // Added created_at
+  created_at?: string | null;
 }
 
 const DEFAULT_FILTERS = {
@@ -390,8 +391,8 @@ const Products = () => {
                 <TableHead className="text-black text-xs font-semibold w-16">Index</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-28">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right w-[84px]">Actions</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-28">Created At</TableHead> {/* Added Created At header */}
               </TableRow>
             </TableHeader>
             <TableBody>
