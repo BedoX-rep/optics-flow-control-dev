@@ -66,6 +66,24 @@ const COMPANY_OPTIONS = [
   "Optifak"
 ];
 
+const sortByDropdownOrder = (a: Product, b: Product) => {
+  const idx = (arr: string[], val?: string | null) =>
+    val && arr.includes(val) ? arr.indexOf(val) : 999;
+
+  const compareChain = [
+    [CATEGORY_OPTIONS, "category"],
+    [INDEX_OPTIONS, "index"],
+    [TREATMENT_OPTIONS, "treatment"],
+    [COMPANY_OPTIONS, "company"]
+  ] as const;
+
+  for (const [options, key] of compareChain) {
+    const cmp = idx(options, a[key]) - idx(options, b[key]);
+    if (cmp !== 0) return cmp;
+  }
+  return 0;
+};
+
 const Products = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -172,9 +190,9 @@ const Products = () => {
     }
   }, [filters]);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = [...products]
+    .filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort(sortByDropdownOrder);
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -500,29 +518,23 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <div className="min-w-[150px]">
-                          <Select
-                              value={cellEditValue || ""}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8 bg-[#fafafa]">
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {CATEGORY_OPTIONS.map(cat => (
-                                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                                <SelectItem value="Custom">Custom</SelectItem>
-                              </SelectContent>
-                            </Select>
-                        </div>
+                        <Select
+                          value={cellEditValue || ""}
+                          onValueChange={async (value) => {
+                            setCellEditValue(value === "Custom" ? "" : value);
+                            await endInlineEdit({ ...product, category: value === "Custom" ? null : value });
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50 bg-white">
+                            {CATEGORY_OPTIONS.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                            <SelectItem value="Custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
                           className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
@@ -530,6 +542,7 @@ const Products = () => {
                             startInlineEdit(product, "category");
                             setCellEditValue(product.category || "");
                           }}
+                          tabIndex={0}
                         >
                           {product.category || "-"}
                         </span>
@@ -537,29 +550,23 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <>
-                          <Select
-                              value={cellEditValue || ""}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue placeholder="Select index" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {INDEX_OPTIONS.map(idx => (
-                                  <SelectItem key={idx} value={idx}>{idx}</SelectItem>
-                                ))}
-                                <SelectItem value="Custom">Custom</SelectItem>
-                              </SelectContent>
-                            </Select>
-                        </>
+                        <Select
+                          value={cellEditValue || ""}
+                          onValueChange={async (value) => {
+                            setCellEditValue(value === "Custom" ? "" : value);
+                            await endInlineEdit({ ...product, index: value === "Custom" ? null : value });
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+                            <SelectValue placeholder="Select index" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50 bg-white">
+                            {INDEX_OPTIONS.map(idx => (
+                              <SelectItem key={idx} value={idx}>{idx}</SelectItem>
+                            ))}
+                            <SelectItem value="Custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
                           className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
@@ -567,6 +574,7 @@ const Products = () => {
                             startInlineEdit(product, "index");
                             setCellEditValue(product.index || "");
                           }}
+                          tabIndex={0}
                         >
                           {product.index || "-"}
                         </span>
@@ -574,29 +582,23 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <>
-                          <Select
-                              value={cellEditValue || ""}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue placeholder="Select treatment" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {TREATMENT_OPTIONS.map(treat => (
-                                  <SelectItem key={treat} value={treat}>{treat}</SelectItem>
-                                ))}
-                                <SelectItem value="Custom">Custom</SelectItem>
-                              </SelectContent>
-                            </Select>
-                        </>
+                        <Select
+                          value={cellEditValue || ""}
+                          onValueChange={async (value) => {
+                            setCellEditValue(value === "Custom" ? "" : value);
+                            await endInlineEdit({ ...product, treatment: value === "Custom" ? null : value });
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+                            <SelectValue placeholder="Select treatment" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50 bg-white">
+                            {TREATMENT_OPTIONS.map(treat => (
+                              <SelectItem key={treat} value={treat}>{treat}</SelectItem>
+                            ))}
+                            <SelectItem value="Custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
                           className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
@@ -604,6 +606,7 @@ const Products = () => {
                             startInlineEdit(product, "treatment");
                             setCellEditValue(product.treatment || "");
                           }}
+                          tabIndex={0}
                         >
                           {product.treatment || "-"}
                         </span>
@@ -611,29 +614,23 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <>
-                          <Select
-                              value={cellEditValue || ""}
-                              onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
-                                }
-                              }}
-                            >
-                              <SelectTrigger className="w-full h-8">
-                                <SelectValue placeholder="Select company" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {COMPANY_OPTIONS.map(comp => (
-                                  <SelectItem key={comp} value={comp}>{comp}</SelectItem>
-                                ))}
-                                <SelectItem value="Custom">Custom</SelectItem>
-                              </SelectContent>
-                            </Select>
-                        </>
+                        <Select
+                          value={cellEditValue || ""}
+                          onValueChange={async (value) => {
+                            setCellEditValue(value === "Custom" ? "" : value);
+                            await endInlineEdit({ ...product, company: value === "Custom" ? null : value });
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
+                            <SelectValue placeholder="Select company" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50 bg-white">
+                            {COMPANY_OPTIONS.map(comp => (
+                              <SelectItem key={comp} value={comp}>{comp}</SelectItem>
+                            ))}
+                            <SelectItem value="Custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <span
                           className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
@@ -641,6 +638,7 @@ const Products = () => {
                             startInlineEdit(product, "company");
                             setCellEditValue(product.company || "");
                           }}
+                          tabIndex={0}
                         >
                           {product.company || "-"}
                         </span>
