@@ -47,50 +47,60 @@ const Receipts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const fetchReceipts = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Fetch receipts with client information
+      const { data: receiptsData, error: receiptsError } = await supabase
+        .from('receipts')
+        .select(`
+          *,
+          clients (
+            name,
+            phone
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (receiptsError) throw receiptsError;
+
+      // Transform the data to include client information
+      const formattedReceipts = receiptsData.map(receipt => ({
+        ...receipt,
+        client_name: receipt.clients?.name || 'No Client',
+        client_phone: receipt.clients?.phone || 'N/A'
+      }));
+
+      setReceipts(formattedReceipts);
+    } catch (error) {
+      console.error('Error fetching receipts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load receipts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch on mount
   useEffect(() => {
-    const fetchReceipts = async () => {
-      if (!user) return;
+    if (user) {
+      fetchReceipts();
+    }
+  }, []);
 
-      try {
-        setIsLoading(true);
-        
-        // Fetch receipts with client information
-        const { data: receiptsData, error: receiptsError } = await supabase
-          .from('receipts')
-          .select(`
-            *,
-            clients (
-              name,
-              phone
-            )
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (receiptsError) throw receiptsError;
-
-        // Transform the data to include client information
-        const formattedReceipts = receiptsData.map(receipt => ({
-          ...receipt,
-          client_name: receipt.clients?.name || 'No Client',
-          client_phone: receipt.clients?.phone || 'N/A'
-        }));
-
-        setReceipts(formattedReceipts);
-      } catch (error) {
-        console.error('Error fetching receipts:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load receipts. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReceipts();
-  }, [user, toast]);
+  // Fetch when filters change
+  useEffect(() => {
+    if (user) {
+      fetchReceipts();
+    }
+  }, [dateFilter]);
 
   const handleDeleteReceipt = async (id: string) => {
     try {
@@ -261,4 +271,3 @@ const Receipts = () => {
 };
 
 export default Receipts;
-
