@@ -5,14 +5,19 @@ import { TREATMENT_OPTIONS } from "./TreatmentCellEditor";
 import { COMPANY_OPTIONS } from "./CompanyCellEditor";
 
 export interface ProductSortable {
+  id: string;
+  name: string;
+  price: number;
+  stock?: number | null;
   category?: string | null;
   index?: string | null;
   treatment?: string | null;
   company?: string | null;
-  // the rest fields can exist but are ignored for sorting
+  image?: string | null;
+  created_at?: string | null;
 }
 
-function idxOrLast<T extends string>(arr: T[], v?: string | null) {
+function idxOrLast(arr: string[], v?: string | null) {
   if (!v) return arr.length; // null/undefined after all explicit options
   const i = arr.indexOf(v);
   return i === -1 ? arr.length : i;

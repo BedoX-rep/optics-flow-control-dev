@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -26,23 +27,14 @@ import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
 
-import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
-import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
-import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
-import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
-import { sortProducts } from "@/components/products/sortProducts";
+import CategoryCellEditor from "@/components/products/CategoryCellEditor";
+import IndexCellEditor from "@/components/products/IndexCellEditor";
+import TreatmentCellEditor from "@/components/products/TreatmentCellEditor";
+import CompanyCellEditor from "@/components/products/CompanyCellEditor";
+import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock?: number | null;
-  category?: string | null;
-  index?: string | null;
-  treatment?: string | null;
-  company?: string | null;
-  image?: string | null;
-  created_at?: string | null;
+interface Product extends ProductSortable {
+  // All properties are already defined in ProductSortable
 }
 
 const DEFAULT_FILTERS = {
