@@ -256,7 +256,7 @@ const Products = () => {
   };
 
   const endInlineEdit = async (product: Product) => {
-    if (!editingCell || !user) return;
+    if (!editingCell) return;
     let val: string | number = cellEditValue;
     if (editingCell.field === "price") val = Number(cellEditValue);
     if (val === (product[editingCell.field] ?? '')) {
@@ -265,23 +265,15 @@ const Products = () => {
     }
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
+      await supabase
         .from('products')
         .update({ [editingCell.field]: val === "" ? null : val })
         .eq('id', product.id)
         .eq('user_id', user.id);
-      
-      if (error) throw error;
-      
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, [editingCell.field]: val } : p));
-      toast({ title: "Updated", description: `Product updated successfully.` });
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast({ 
-        title: "Error", 
-        description: "Could not update product. Please try again.", 
-        variant: "destructive" 
-      });
+      toast({ title: "Updated", description: `Product updated.` });
+    } catch {
+      toast({ title: "Error", description: "Could not update." });
     } finally {
       setEditingCell(null);
       setIsSubmitting(false);
