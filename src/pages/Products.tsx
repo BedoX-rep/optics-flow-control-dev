@@ -643,7 +643,7 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       <span className="text-neutral-600 text-xs">
-                        {product.created_at ? new Date(product.created_at).toLocaleDateString() : '-'}
+                        {product.created_at ? new Date(product.created_at).toLocaleString() : '-'}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
