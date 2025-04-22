@@ -513,11 +513,9 @@ const Products = () => {
                             <Select
                               value={cellEditValue || ""}
                               onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
+                                setCellEditValue(value);
+                                if (value !== "Custom") {
+                                  setTimeout(() => endInlineEdit(product), 0);
                                 }
                               }}
                             >
@@ -561,11 +559,9 @@ const Products = () => {
                             <Select
                               value={cellEditValue}
                               onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
+                                setCellEditValue(value);
+                                if (value !== "Custom") {
+                                  setTimeout(() => endInlineEdit(product), 0);
                                 }
                               }}
                             >
@@ -609,11 +605,9 @@ const Products = () => {
                             <Select
                               value={cellEditValue}
                               onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
+                                setCellEditValue(value);
+                                if (value !== "Custom") {
+                                  setTimeout(() => endInlineEdit(product), 0);
                                 }
                               }}
                             >
@@ -657,11 +651,9 @@ const Products = () => {
                             <Select
                               value={cellEditValue}
                               onValueChange={(value) => {
-                                if (value === "Custom") {
-                                  setCellEditValue("");
-                                } else {
-                                  setCellEditValue(value);
-                                  endInlineEdit(product);
+                                setCellEditValue(value);
+                                if (value !== "Custom") {
+                                  setTimeout(() => endInlineEdit(product), 0);
                                 }
                               }}
                             >
