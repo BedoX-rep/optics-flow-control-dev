@@ -41,8 +41,10 @@ const Clients = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchClients();
-  }, []);
+    if (user) {
+      fetchClients();
+    }
+  }, [user]);
 
   const fetchClients = async () => {
     if (!user) return;
