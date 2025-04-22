@@ -26,6 +26,12 @@ import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
 
+import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
+import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
+import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
+import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
+import { sortProducts } from "@/components/products/sortProducts";
+
 interface Product {
   id: string;
   name: string;
@@ -45,43 +51,6 @@ const DEFAULT_FILTERS = {
   treatment: "all_treatments",
   company: "all_companies",
   sort: "arrange",
-};
-
-const CATEGORY_OPTIONS = [
-  "Single Vision Lenses",
-  "Progressive Lenses",
-  "Frames",
-  "Sunglasses",
-  "Contact Lenses",
-  "Accessories"
-];
-
-const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
-
-const sortByDropdownOrder = (a: Product, b: Product) => {
-  const idx = (arr: string[], val?: string | null) =>
-    val && arr.includes(val) ? arr.indexOf(val) : 999;
-
-  const compareChain = [
-    [CATEGORY_OPTIONS, "category"],
-    [INDEX_OPTIONS, "index"],
-    [TREATMENT_OPTIONS, "treatment"],
-    [COMPANY_OPTIONS, "company"]
-  ] as const;
-
-  for (const [options, key] of compareChain) {
-    const cmp = idx(options, a[key]) - idx(options, b[key]);
-    if (cmp !== 0) return cmp;
-  }
-  return 0;
 };
 
 const Products = () => {
@@ -130,11 +99,6 @@ const Products = () => {
       window.removeEventListener('resize', handleSidebar);
       observer.disconnect();
     }
-  }, []);
-
-  useEffect(() => {
-    // We're not setting up a visibilitychange event listener 
-    // to avoid calling the subscription API when tab switching
   }, []);
 
   const fetchProducts = async () => {
@@ -189,10 +153,6 @@ const Products = () => {
       fetchProducts();
     }
   }, [filters]);
-
-  const filteredProducts = [...products]
-    .filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort(sortByDropdownOrder);
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -363,6 +323,39 @@ const Products = () => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [editingCell, cellEditValue, products]);
 
+  const filteredProducts = sortProducts(
+    products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  async function handleInlineUpdate(product: Product, field: keyof Product, newValue: string | null) {
+    if (!user) return;
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('products')
+        .update({ [field]: newValue })
+        .eq('id', product.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setProducts(prev =>
+        prev.map(p => p.id === product.id ? { ...p, [field]: newValue } : p)
+      );
+      toast({ title: "Updated", description: "Product updated successfully" });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update product. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setEditingCell(null);
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div
       className="flex flex-col h-[calc(100svh-68px)]"
@@ -518,30 +511,15 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <Select
-                          value={cellEditValue || ""}
-                          onValueChange={async (value) => {
-                            setCellEditValue(value === "Custom" ? "" : value);
-                            await endInlineEdit({ ...product, category: value === "Custom" ? null : value });
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 bg-white">
-                            {CATEGORY_OPTIONS.map(cat => (
-                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                            <SelectItem value="Custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <CategoryCellEditor
+                          value={product.category}
+                          onChange={value => handleInlineUpdate(product, "category", value)}
+                          disabled={isSubmitting}
+                        />
                       ) : (
                         <span
                           className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
-                          onClick={() => {
-                            startInlineEdit(product, "category");
-                            setCellEditValue(product.category || "");
-                          }}
+                          onClick={() => setEditingCell({ id: product.id, field: "category" })}
                           tabIndex={0}
                         >
                           {product.category || "-"}
@@ -550,30 +528,15 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <Select
-                          value={cellEditValue || ""}
-                          onValueChange={async (value) => {
-                            setCellEditValue(value === "Custom" ? "" : value);
-                            await endInlineEdit({ ...product, index: value === "Custom" ? null : value });
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
-                            <SelectValue placeholder="Select index" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 bg-white">
-                            {INDEX_OPTIONS.map(idx => (
-                              <SelectItem key={idx} value={idx}>{idx}</SelectItem>
-                            ))}
-                            <SelectItem value="Custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <IndexCellEditor
+                          value={product.index}
+                          onChange={value => handleInlineUpdate(product, "index", value)}
+                          disabled={isSubmitting}
+                        />
                       ) : (
                         <span
                           className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "index");
-                            setCellEditValue(product.index || "");
-                          }}
+                          onClick={() => setEditingCell({ id: product.id, field: "index" })}
                           tabIndex={0}
                         >
                           {product.index || "-"}
@@ -582,30 +545,15 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <Select
-                          value={cellEditValue || ""}
-                          onValueChange={async (value) => {
-                            setCellEditValue(value === "Custom" ? "" : value);
-                            await endInlineEdit({ ...product, treatment: value === "Custom" ? null : value });
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
-                            <SelectValue placeholder="Select treatment" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 bg-white">
-                            {TREATMENT_OPTIONS.map(treat => (
-                              <SelectItem key={treat} value={treat}>{treat}</SelectItem>
-                            ))}
-                            <SelectItem value="Custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <TreatmentCellEditor
+                          value={product.treatment}
+                          onChange={value => handleInlineUpdate(product, "treatment", value)}
+                          disabled={isSubmitting}
+                        />
                       ) : (
                         <span
                           className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "treatment");
-                            setCellEditValue(product.treatment || "");
-                          }}
+                          onClick={() => setEditingCell({ id: product.id, field: "treatment" })}
                           tabIndex={0}
                         >
                           {product.treatment || "-"}
@@ -614,30 +562,15 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <Select
-                          value={cellEditValue || ""}
-                          onValueChange={async (value) => {
-                            setCellEditValue(value === "Custom" ? "" : value);
-                            await endInlineEdit({ ...product, company: value === "Custom" ? null : value });
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8 bg-[#fafafa]">
-                            <SelectValue placeholder="Select company" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 bg-white">
-                            {COMPANY_OPTIONS.map(comp => (
-                              <SelectItem key={comp} value={comp}>{comp}</SelectItem>
-                            ))}
-                            <SelectItem value="Custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <CompanyCellEditor
+                          value={product.company}
+                          onChange={value => handleInlineUpdate(product, "company", value)}
+                          disabled={isSubmitting}
+                        />
                       ) : (
                         <span
                           className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => {
-                            startInlineEdit(product, "company");
-                            setCellEditValue(product.company || "");
-                          }}
+                          onClick={() => setEditingCell({ id: product.id, field: "company" })}
                           tabIndex={0}
                         >
                           {product.company || "-"}
