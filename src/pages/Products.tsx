@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -31,6 +30,11 @@ import CategoryCellEditor from "@/components/products/CategoryCellEditor";
 import IndexCellEditor from "@/components/products/IndexCellEditor";
 import TreatmentCellEditor from "@/components/products/TreatmentCellEditor";
 import CompanyCellEditor from "@/components/products/CompanyCellEditor";
+import CellDropdownEditor from "@/components/products/CellDropdownEditor";
+import { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
+import { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
+import { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
+import { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
 
 interface Product extends ProductSortable {
@@ -503,10 +507,16 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <CategoryCellEditor
+                        <CellDropdownEditor
                           value={product.category}
-                          onChange={value => handleInlineUpdate(product, "category", value)}
+                          options={CATEGORY_OPTIONS}
+                          placeholder="Category"
                           disabled={isSubmitting}
+                          onChange={val =>
+                            val === product.category
+                              ? setEditingCell(null)
+                              : handleInlineUpdate(product, "category", val)
+                          }
                         />
                       ) : (
                         <span
@@ -520,10 +530,16 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <IndexCellEditor
+                        <CellDropdownEditor
                           value={product.index}
-                          onChange={value => handleInlineUpdate(product, "index", value)}
+                          options={INDEX_OPTIONS}
+                          placeholder="Index"
                           disabled={isSubmitting}
+                          onChange={val =>
+                            val === product.index
+                              ? setEditingCell(null)
+                              : handleInlineUpdate(product, "index", val)
+                          }
                         />
                       ) : (
                         <span
@@ -537,10 +553,16 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <TreatmentCellEditor
+                        <CellDropdownEditor
                           value={product.treatment}
-                          onChange={value => handleInlineUpdate(product, "treatment", value)}
+                          options={TREATMENT_OPTIONS}
+                          placeholder="Treatment"
                           disabled={isSubmitting}
+                          onChange={val =>
+                            val === product.treatment
+                              ? setEditingCell(null)
+                              : handleInlineUpdate(product, "treatment", val)
+                          }
                         />
                       ) : (
                         <span
@@ -554,10 +576,16 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <CompanyCellEditor
+                        <CellDropdownEditor
                           value={product.company}
-                          onChange={value => handleInlineUpdate(product, "company", value)}
+                          options={COMPANY_OPTIONS}
+                          placeholder="Company"
                           disabled={isSubmitting}
+                          onChange={val =>
+                            val === product.company
+                              ? setEditingCell(null)
+                              : handleInlineUpdate(product, "company", val)
+                          }
                         />
                       ) : (
                         <span
