@@ -48,8 +48,8 @@ const Layout = ({ children }: LayoutProps) => {
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="max-w-7xl mx-auto animate-fade-in">
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full animate-fade-in">
             {children}
           </div>
         </main>

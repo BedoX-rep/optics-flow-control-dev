@@ -295,12 +295,11 @@ const Products = () => {
 
   return (
     <div
-      className="py-4 px-1 md:px-6 flex flex-col h-[calc(100svh-68px)]"
+      className="flex flex-col h-[calc(100svh-68px)]"
       style={{
         width: "100%",
-        maxWidth: `calc(100vw - ${sidebarWidth ? sidebarWidth + 12 : 12}px)`,
-        marginLeft: "auto",
-        marginRight: "auto",
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
         transition: "all 0.2s ease",
         minHeight: "calc(100svh - 68px)",
       }}
