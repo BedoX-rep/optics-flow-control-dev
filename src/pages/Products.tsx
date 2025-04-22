@@ -161,8 +161,10 @@ const Products = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [user, filters]);
+    if (user) {
+      fetchProducts();
+    }
+  }, [filters]);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
