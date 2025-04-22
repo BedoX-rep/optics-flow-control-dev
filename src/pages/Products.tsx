@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Table, 
@@ -97,7 +98,8 @@ const Products = () => {
     function handleSidebar() {
       const el = document.querySelector('.sidebar-gradient');
       if (el) {
-        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || el.style.width === '48px');
+        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || 
+                          (el instanceof HTMLElement && el.style.width === '48px'));
         setSidebarExpanded(expanded);
         setSidebarWidth(el.clientWidth || 256);
       }
@@ -111,6 +113,12 @@ const Products = () => {
       window.removeEventListener('resize', handleSidebar);
       observer.disconnect();
     }
+  }, []);
+
+  // Add visibility change event to track tab changes
+  useEffect(() => {
+    // We're not setting up a visibilitychange event listener 
+    // to avoid calling the subscription API when tab switching
   }, []);
 
   const fetchProducts = async () => {
@@ -136,6 +144,11 @@ const Products = () => {
         query = query.eq('company', filters.company);
       }
 
+      // Order by the fields as requested:
+      // 1. Category first
+      // 2. Index second
+      // 3. Treatment third
+      // 4. Company fourth
       if (filters.sort === "latest") {
         query = query.order('created_at', { ascending: false });
       } else {
@@ -180,7 +193,7 @@ const Products = () => {
       treatment: editing.treatment ?? undefined,
       company: editing.company ?? undefined,
       image: editing.image ?? undefined,
-      created_at: editing.created_at ?? undefined, //added created_at
+      created_at: editing.created_at ?? undefined,
     } : { name: '', price: 0 });
     setIsOpen(true);
   };
@@ -698,3 +711,4 @@ const Products = () => {
 };
 
 export default Products;
+

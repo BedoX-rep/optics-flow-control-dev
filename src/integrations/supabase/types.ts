@@ -37,6 +37,7 @@ export type Database = {
         Row: {
           category: string | null
           company: string | null
+          Cost: number
           created_at: string | null
           id: string
           image: string | null
@@ -44,12 +45,14 @@ export type Database = {
           name: string
           position: number
           price: number
+          stock: number
           treatment: string | null
           user_id: string
         }
         Insert: {
           category?: string | null
           company?: string | null
+          Cost?: number
           created_at?: string | null
           id?: string
           image?: string | null
@@ -57,12 +60,14 @@ export type Database = {
           name: string
           position?: number
           price: number
+          stock?: number
           treatment?: string | null
           user_id: string
         }
         Update: {
           category?: string | null
           company?: string | null
+          Cost?: number
           created_at?: string | null
           id?: string
           image?: string | null
@@ -70,6 +75,7 @@ export type Database = {
           name?: string
           position?: number
           price?: number
+          stock?: number
           treatment?: string | null
           user_id?: string
         }

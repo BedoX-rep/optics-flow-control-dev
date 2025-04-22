@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Refresh subscription when user changes
+  // Refresh subscription when user changes - but DON'T refresh on tab changes
   useEffect(() => {
     if (user) {
       refreshSubscription();
