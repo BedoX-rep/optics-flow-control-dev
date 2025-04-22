@@ -446,24 +446,80 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10">
-                        {product.category || "-"}
-                      </span>
+                      {editingCell?.id === product.id && editingCell.field === "category" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-black/90 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
+                          onClick={() => startInlineEdit(product, "category")}
+                        >
+                          {product.category || "-"}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <span className={product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700" : "text-neutral-300"}>
-                        {product.index || "-"}
-                      </span>
+                      {editingCell?.id === product.id && editingCell.field === "index" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-gray-700" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => startInlineEdit(product, "index")}
+                        >
+                          {product.index || "-"}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <span className={product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-300"}>
-                        {product.treatment || "-"}
-                      </span>
+                      {editingCell?.id === product.id && editingCell.field === "treatment" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => startInlineEdit(product, "treatment")}
+                        >
+                          {product.treatment || "-"}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <span className={product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-300"}>
-                        {product.company || "-"}
-                      </span>
+                      {editingCell?.id === product.id && editingCell.field === "company" ? (
+                        <input
+                          type="text"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-600" : "text-neutral-300"} cursor-pointer hover:bg-gray-100`}
+                          onClick={() => startInlineEdit(product, "company")}
+                        >
+                          {product.company || "-"}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
