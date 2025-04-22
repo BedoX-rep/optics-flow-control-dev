@@ -45,6 +45,25 @@ const DEFAULT_FILTERS = {
   sort: "arrange",
 };
 
+const CATEGORY_OPTIONS = [
+  "Single Vision Lenses",
+  "Progressive Lenses",
+  "Frames",
+  "Sunglasses",
+  "Contact Lenses",
+  "Accessories"
+];
+
+const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
+const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
+const COMPANY_OPTIONS = [
+  "Indo",
+  "ABlens",
+  "Essilor",
+  "GLASSANDLENS",
+  "Optifak"
+];
+
 const Products = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -448,23 +467,40 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <Select
-                          value={cellEditValue}
-                          onValueChange={(value) => {
-                            setCellEditValue(value);
-                            endInlineEdit(product);
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue>{cellEditValue || "Select category"}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Manual">Manual</SelectItem>
-                            {Array.from(new Set(products.map(p => p.category).filter(Boolean))).map(cat => (
-                              <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <>
+                          {cellEditValue === "Custom" ? (
+                            <input
+                              type="text"
+                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onBlur={() => endInlineEdit(product)}
+                              autoFocus
+                            />
+                          ) : (
+                            <Select
+                              value={cellEditValue}
+                              onValueChange={(value) => {
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full h-8">
+                                <SelectValue>{cellEditValue || "Select category"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Custom">Custom</SelectItem>
+                                {CATEGORY_OPTIONS.map(cat => (
+                                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </>
                       ) : (
                         <span
                           className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
@@ -479,23 +515,40 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <Select
-                          value={cellEditValue}
-                          onValueChange={(value) => {
-                            setCellEditValue(value);
-                            endInlineEdit(product);
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue>{cellEditValue || "Select index"}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Manual">Manual</SelectItem>
-                            {Array.from(new Set(products.map(p => p.index).filter(Boolean))).map(idx => (
-                              <SelectItem key={idx} value={idx!}>{idx}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <>
+                          {cellEditValue === "Custom" ? (
+                            <input
+                              type="text"
+                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onBlur={() => endInlineEdit(product)}
+                              autoFocus
+                            />
+                          ) : (
+                            <Select
+                              value={cellEditValue}
+                              onValueChange={(value) => {
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full h-8">
+                                <SelectValue>{cellEditValue || "Select index"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Custom">Custom</SelectItem>
+                                {INDEX_OPTIONS.map(idx => (
+                                  <SelectItem key={idx} value={idx}>{idx}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </>
                       ) : (
                         <span
                           className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
@@ -510,23 +563,40 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <Select
-                          value={cellEditValue}
-                          onValueChange={(value) => {
-                            setCellEditValue(value);
-                            endInlineEdit(product);
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue>{cellEditValue || "Select treatment"}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Manual">Manual</SelectItem>
-                            {Array.from(new Set(products.map(p => p.treatment).filter(Boolean))).map(treat => (
-                              <SelectItem key={treat} value={treat!}>{treat}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <>
+                          {cellEditValue === "Custom" ? (
+                            <input
+                              type="text"
+                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onBlur={() => endInlineEdit(product)}
+                              autoFocus
+                            />
+                          ) : (
+                            <Select
+                              value={cellEditValue}
+                              onValueChange={(value) => {
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full h-8">
+                                <SelectValue>{cellEditValue || "Select treatment"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Custom">Custom</SelectItem>
+                                {TREATMENT_OPTIONS.map(treat => (
+                                  <SelectItem key={treat} value={treat}>{treat}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </>
                       ) : (
                         <span
                           className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
@@ -541,23 +611,40 @@ const Products = () => {
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <Select
-                          value={cellEditValue}
-                          onValueChange={(value) => {
-                            setCellEditValue(value);
-                            endInlineEdit(product);
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-8">
-                            <SelectValue>{cellEditValue || "Select company"}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Manual">Manual</SelectItem>
-                            {Array.from(new Set(products.map(p => p.company).filter(Boolean))).map(comp => (
-                              <SelectItem key={comp} value={comp!}>{comp}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <>
+                          {cellEditValue === "Custom" ? (
+                            <input
+                              type="text"
+                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                              value={cellEditValue}
+                              onChange={e => setCellEditValue(e.target.value)}
+                              onBlur={() => endInlineEdit(product)}
+                              autoFocus
+                            />
+                          ) : (
+                            <Select
+                              value={cellEditValue}
+                              onValueChange={(value) => {
+                                if (value === "Custom") {
+                                  setCellEditValue("");
+                                } else {
+                                  setCellEditValue(value);
+                                  endInlineEdit(product);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full h-8">
+                                <SelectValue>{cellEditValue || "Select company"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Custom">Custom</SelectItem>
+                                {COMPANY_OPTIONS.map(comp => (
+                                  <SelectItem key={comp} value={comp}>{comp}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </>
                       ) : (
                         <span
                           className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
