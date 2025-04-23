@@ -479,7 +479,7 @@ const Products = () => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "stock" ? (
                         <input
                           type="number"
@@ -491,14 +491,40 @@ const Products = () => {
                           autoFocus
                         />
                       ) : (
-                        <span
-                          className="font-semibold text-black hover:underline cursor-pointer"
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "stock")}
-                        >
-                          {product.stock || 0}
-                        </span>
+                        <div className="flex items-center justify-between px-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newStock = Math.max(0, (product.stock || 0) - 1);
+                              handleInlineUpdate(product, "stock", String(newStock));
+                            }}
+                          >
+                            -
+                          </Button>
+                          <span
+                            className={`font-semibold ${(product.stock || 0) === 0 ? 'text-red-600' : 'text-black'} cursor-pointer mx-2`}
+                            tabIndex={0}
+                            title="Edit"
+                            onClick={() => startInlineEdit(product, "stock")}
+                          >
+                            {(product.stock || 0) === 0 ? "Out of stock" : product.stock}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newStock = (product.stock || 0) + 1;
+                              handleInlineUpdate(product, "stock", String(newStock));
+                            }}
+                          >
+                            +
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                     <TableCell>
