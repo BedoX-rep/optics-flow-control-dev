@@ -254,8 +254,8 @@ const Clients = () => {
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold" colSpan={2}>Client Name</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
-              <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-full"></TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold pr-28">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -278,8 +278,11 @@ const Clients = () => {
                   </TableCell>
                   <TableCell className="py-3 pl-0 hidden">
                   </TableCell>
-                  <TableCell className="py-3">{client.phone}</TableCell>
-                  <TableCell className="py-3 text-right">
+                  <TableCell className="py-3">
+                    <span className="text-xs text-gray-500 mr-2">Phone Number:</span>
+                    {client.phone}
+                  </TableCell>
+                  <TableCell className="py-3">
                     <div className="flex justify-end space-x-1">
                       <Button 
                         variant="ghost" 
