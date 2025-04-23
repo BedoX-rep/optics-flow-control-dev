@@ -31,6 +31,14 @@ interface Client {
   name: string;
   phone: string;
   gender: "Mr" | "Mme" | "Enf";
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  Add?: number;
+  notes?: string;
 }
 
 const Clients = () => {
@@ -38,10 +46,18 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [newClient, setNewClient] = useState<{ name: string; phone: string; gender: "Mr" | "Mme" | "Enf" }>({ 
+  const [newClient, setNewClient] = useState<Omit<Client, 'id'>>({ 
     name: '', 
     phone: '', 
-    gender: 'Mr' 
+    gender: 'Mr',
+    right_eye_sph: undefined,
+    right_eye_cyl: undefined,
+    right_eye_axe: undefined,
+    left_eye_sph: undefined,
+    left_eye_cyl: undefined,
+    left_eye_axe: undefined,
+    Add: undefined,
+    notes: ''
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -226,6 +242,77 @@ const Clients = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Right Eye</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Input
+                      type="number"
+                      placeholder="SPH"
+                      value={newClient.right_eye_sph || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_sph: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="CYL"
+                      value={newClient.right_eye_cyl || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="AXE"
+                      value={newClient.right_eye_axe || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_axe: parseInt(e.target.value) || undefined })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Left Eye</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Input
+                      type="number"
+                      placeholder="SPH"
+                      value={newClient.left_eye_sph || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_sph: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="CYL"
+                      value={newClient.left_eye_cyl || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="AXE"
+                      value={newClient.left_eye_axe || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_axe: parseInt(e.target.value) || undefined })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="add" className="text-right">
+                  Add
+                </Label>
+                <Input
+                  id="add"
+                  type="number"
+                  className="col-span-3"
+                  value={newClient.Add || ''}
+                  onChange={(e) => setNewClient({ ...newClient, Add: parseFloat(e.target.value) || undefined })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-right">
+                  Notes
+                </Label>
+                <Input
+                  id="notes"
+                  className="col-span-3"
+                  value={newClient.notes || ''}
+                  onChange={(e) => setNewClient({ ...newClient, notes: e.target.value })}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button 
@@ -262,6 +349,7 @@ const Clients = () => {
               <TableHead className="text-black text-xs font-semibold">Left Eye CYL</TableHead>
               <TableHead className="text-black text-xs font-semibold">Left Eye AXE</TableHead>
               <TableHead className="text-black text-xs font-semibold">Add</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -289,6 +377,7 @@ const Clients = () => {
                   <TableCell className="py-3">{client.left_eye_cyl || '-'}</TableCell>
                   <TableCell className="py-3">{client.left_eye_axe || '-'}</TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
+                  <TableCell className="py-3">{client.notes || '-'}</TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
