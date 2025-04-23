@@ -23,12 +23,12 @@ const StockCellEditor: React.FC<StockCellEditorProps> = ({
         size="icon" 
         onClick={onDecrease}
         disabled={disabled || value <= 0}
-        className="h-6 w-6 p-1 flex-shrink-0"
+        className="h-6 w-6 p-1"
       >
         <Minus size={16} />
       </Button>
       <span 
-        className={`text-sm font-medium flex-grow text-center ${value === 0 ? 'text-red-600' : 'text-neutral-700'}`}
+        className={`text-sm font-medium ${value === 0 ? 'text-red-600' : 'text-neutral-700'}`}
       >
         {value === 0 ? 'Out of stock' : value}
       </span>
@@ -37,7 +37,7 @@ const StockCellEditor: React.FC<StockCellEditorProps> = ({
         size="icon" 
         onClick={onIncrease}
         disabled={disabled}
-        className="h-6 w-6 p-1 flex-shrink-0"
+        className="h-6 w-6 p-1"
       >
         <Plus size={16} />
       </Button>

@@ -25,14 +25,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ReceiptDetailsDialog from '@/components/ReceiptDetailsDialog';
 import { Card, CardContent } from '@/components/ui/card';
-import GenderIcon from '@/components/clients/GenderIcon';
 
 interface Receipt {
   id: string;
   client_id: string | null;
   client_name?: string;
   client_phone?: string;
-  client_gender?: string;
   created_at: string;
   total: number;
   delivery_status: string;
@@ -62,8 +60,7 @@ const Receipts = () => {
           *,
           clients (
             name,
-            phone,
-            gender
+            phone
           )
         `)
         .eq('user_id', user.id)
@@ -75,8 +72,7 @@ const Receipts = () => {
       const formattedReceipts = receiptsData.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || 'No Client',
-        client_phone: receipt.clients?.phone || 'N/A',
-        client_gender: receipt.clients?.gender || 'Mr'
+        client_phone: receipt.clients?.phone || 'N/A'
       }));
 
       setReceipts(formattedReceipts);
@@ -206,70 +202,63 @@ const Receipts = () => {
           </Link>
         </div>
       ) : (
-        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-          <Table className="table-fixed min-w-[980px] w-full">
-            <TableHeader>
-              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold py-4">Date</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-10"></TableHead>
-                <TableHead className="text-black text-xs font-semibold">Client</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Phone</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Total</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Balance</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredReceipts.map((receipt) => (
-                <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group py-4">
-                  <TableCell className="py-4 font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded">
-                      <GenderIcon gender={receipt.client_gender || 'Mr'} size={18} />
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold text-black">{receipt.client_name}</TableCell>
-                  <TableCell>{receipt.client_phone}</TableCell>
-                  <TableCell className="font-medium">{receipt.total.toFixed(2)} DH</TableCell>
-                  <TableCell>{receipt.balance.toFixed(2)} DH</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.delivery_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {receipt.delivery_status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.montage_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {receipt.montage_status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-1">
+        <Card className="border border-gray-100 card-shadow overflow-hidden">
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50/80">
+                  <TableHead>Date</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead>Delivery Status</TableHead>
+                  <TableHead>Montage Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredReceipts.map((receipt) => (
+                  <TableRow key={receipt.id} className="hover:bg-gray-50/50 transition-colors">
+                    <TableCell className="font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{receipt.client_name}</TableCell>
+                    <TableCell>{receipt.client_phone}</TableCell>
+                    <TableCell className="font-medium">{receipt.total.toFixed(2)} DH</TableCell>
+                    <TableCell>{receipt.balance.toFixed(2)} DH</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        receipt.delivery_status === 'Completed' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {receipt.delivery_status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        receipt.montage_status === 'Completed' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {receipt.montage_status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Button 
                         variant="ghost" 
                         size="icon"
                         onClick={() => setSelectedReceipt(receipt)}
-                        className="h-8 w-8 hover:bg-black/10"
-                        aria-label="View Receipt Details"
+                        className="hover:bg-gray-100 rounded-full"
                       >
-                        <Eye size={16} className="text-black" />
+                        <Eye className="h-4 w-4 text-gray-600" />
                       </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       )}
 
       <ReceiptDetailsDialog
