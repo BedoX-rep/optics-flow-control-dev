@@ -253,8 +253,7 @@ const Clients = () => {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold">Gender</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
+              <TableHead className="text-black text-xs font-semibold" colSpan={2}>Client Name</TableHead>
               <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
@@ -269,14 +268,13 @@ const Clients = () => {
             ) : (
               filteredClients.map((client) => (
                 <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
-                  <TableCell className="py-3">
+                  <TableCell className="py-3 pr-0">
                     <div className="flex items-center gap-2">
                       <ClientAvatar gender={client.gender} name={client.name} />
-                      <span>{client.gender}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3">
-                    <span className="font-medium text-black">{client.name}</span>
+                  <TableCell className="py-3 pl-0">
+                    <span className="font-medium text-black">{client.gender} {client.name}</span>
                   </TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
                   <TableCell className="py-3 text-right">
