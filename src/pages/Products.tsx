@@ -504,9 +504,7 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
                         <CategoryCellEditor
-                          value={product.category}
-                          options={CATEGORY_OPTIONS}
-                          disabled={isSubmitting}
+                          value={product.category || ""}
                           onChange={val =>
                             val === product.category
                               ? setEditingCell(null)
@@ -526,9 +524,7 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
                         <IndexCellEditor
-                          value={product.index}
-                          options={INDEX_OPTIONS}
-                          disabled={isSubmitting}
+                          value={product.index || ""}
                           onChange={val =>
                             val === product.index
                               ? setEditingCell(null)
@@ -548,9 +544,7 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
                         <TreatmentCellEditor
-                          value={product.treatment}
-                          options={TREATMENT_OPTIONS}
-                          disabled={isSubmitting}
+                          value={product.treatment || ""}
                           onChange={val =>
                             val === product.treatment
                               ? setEditingCell(null)
@@ -570,9 +564,7 @@ const Products = () => {
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
                         <CompanyCellEditor
-                          value={product.company}
-                          options={COMPANY_OPTIONS}
-                          disabled={isSubmitting}
+                          value={product.company || ""}
                           onChange={val =>
                             val === product.company
                               ? setEditingCell(null)

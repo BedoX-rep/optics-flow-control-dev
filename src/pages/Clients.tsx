@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -18,7 +19,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Pencil, Trash, Search, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -152,12 +153,12 @@ const Clients = () => {
       <PageTitle title="Clients" subtitle="Manage your client directory" />
       
       <div className="flex justify-between items-center mb-6">
-        <div className="relative w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input 
             type="text" 
-            placeholder="Search by name or phone..." 
-            className="pl-8"
+            placeholder="Search clients..."
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -165,7 +166,7 @@ const Clients = () => {
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-optics-600 hover:bg-optics-700">
+            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Add Client
             </Button>
@@ -212,7 +213,7 @@ const Clients = () => {
                 Cancel
               </Button>
               <Button 
-                className="bg-optics-600 hover:bg-optics-700"
+                className="bg-black hover:bg-neutral-800 text-white"
                 onClick={handleAddClient}
               >
                 {editingClient ? 'Update' : 'Add'}
@@ -222,42 +223,52 @@ const Clients = () => {
         </Dialog>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-100">
-        <Table>
+      <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
+        <Table className="w-full">
           <TableHeader>
-            <TableRow className="bg-gray-50/80">
-              <TableHead>Client Name</TableHead>
-              <TableHead>Phone Number</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
+              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredClients.map((client) => (
-              <TableRow key={client.id} className="hover:bg-gray-50/50 transition-colors">
-                <TableCell className="py-3 font-medium">{client.name}</TableCell>
-                <TableCell className="py-3">{client.phone}</TableCell>
-                <TableCell className="py-3 text-right">
-                  <div className="flex justify-end space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleEditClient(client)}
-                      className="hover:bg-gray-100 rounded-full"
-                    >
-                      <Pencil className="h-4 w-4 text-gray-600" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => handleDeleteClient(client.id)}
-                      className="hover:bg-gray-100 rounded-full"
-                    >
-                      <Trash className="h-4 w-4 text-gray-600" />
-                    </Button>
-                  </div>
+            {filteredClients.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-10 text-neutral-400 font-medium">
+                  No clients found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredClients.map((client) => (
+                <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
+                  <TableCell className="py-3 font-medium text-black">{client.name}</TableCell>
+                  <TableCell className="py-3">{client.phone}</TableCell>
+                  <TableCell className="py-3 text-right">
+                    <div className="flex justify-end space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="hover:bg-black/10"
+                        onClick={() => handleEditClient(client)}
+                        aria-label="Edit"
+                      >
+                        <Pencil size={16} className="text-black" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="hover:bg-[#222]/10"
+                        onClick={() => handleDeleteClient(client.id)}
+                        aria-label="Delete"
+                      >
+                        <Trash2 size={16} className="text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

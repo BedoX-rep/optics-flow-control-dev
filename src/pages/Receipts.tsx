@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -131,7 +132,7 @@ const Receipts = () => {
 
   const pageActions = (
     <Link to="/new-receipt">
-      <Button className="primary-gradient text-white hover:shadow-md transition-shadow">
+      <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
         <Plus className="h-4 w-4 mr-2" />
         New Receipt
       </Button>
@@ -150,11 +151,11 @@ const Receipts = () => {
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 min-w-[240px]">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <Input 
                 type="text" 
                 placeholder="Search by client or phone..." 
-                className="pl-9 pr-4 py-2 border-gray-200"
+                className="pl-9 pr-4 py-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -163,7 +164,7 @@ const Receipts = () => {
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-gray-500" />
               <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-[180px] border-gray-200">
+                <SelectTrigger className="w-[180px] border-gray-200 h-9">
                   <SelectValue placeholder="Filter by date" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,40 +181,40 @@ const Receipts = () => {
       </Card>
       
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-12 text-center animate-pulse">
+        <div className="bg-white rounded-xl shadow-sm p-12 text-center animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
           <div className="h-4 bg-gray-100 rounded w-1/2 mx-auto"></div>
         </div>
       ) : filteredReceipts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-medium text-gray-800 mb-2">No receipts found</h3>
           <p className="text-gray-500 mb-6">Create your first receipt to get started.</p>
           <Link to="/new-receipt">
-            <Button className="primary-gradient text-white">
+            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Create Receipt
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-100">
-          <Table>
+        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
+          <Table className="min-w-[980px] w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50/80">
-                <TableHead>Date</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Delivery Status</TableHead>
-                <TableHead>Montage Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
+                <TableHead className="text-black text-xs font-semibold">Date</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Client</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Phone</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Total</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Balance</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredReceipts.map((receipt) => (
-                <TableRow key={receipt.id} className="hover:bg-gray-50/50 transition-colors">
+                <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
                   <TableCell className="py-3 font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="py-3">{receipt.client_name}</TableCell>
                   <TableCell className="py-3">{receipt.client_phone}</TableCell>
@@ -242,9 +243,9 @@ const Receipts = () => {
                       variant="ghost" 
                       size="icon"
                       onClick={() => setSelectedReceipt(receipt)}
-                      className="hover:bg-gray-100 rounded-full"
+                      className="hover:bg-black/10"
                     >
-                      <Eye className="h-4 w-4 text-gray-600" />
+                      <Eye className="h-4 w-4 text-black" />
                     </Button>
                   </TableCell>
                 </TableRow>
