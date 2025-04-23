@@ -40,8 +40,24 @@ const ProductImage: React.FC<ProductImageProps> = ({
           )}
         </>
       ) : (
-        <span className="flex items-center justify-center w-full h-full text-neutral-200">
-          <Image size={22} />
+        <span className="flex items-center justify-center w-full h-full">
+          {alt ? (
+            <img 
+              src={`/attached_assets/Icons categories/${
+                alt === "Single Vision Lenses" ? "Single VIsion.png" :
+                alt === "Progressive Lenses" ? "Progressive.png" :
+                alt === "Frames" ? "Frames.png" :
+                alt === "Sunglasses" ? "Sunglasses.png" :
+                alt === "Contact Lenses" ? "contactlens.png" :
+                alt === "Accessories" ? "Accessories.png" :
+                ""
+              }`}
+              alt={alt}
+              className="w-7 h-7 opacity-40"
+            />
+          ) : (
+            <Image size={22} className="text-neutral-200" />
+          )}
         </span>
       )}
     </div>

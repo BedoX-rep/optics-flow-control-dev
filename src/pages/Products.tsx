@@ -430,7 +430,7 @@ const Products = () => {
                     <TableCell>
                       <ProductImage
                         src={typeof product.image === "string" ? product.image : undefined}
-                        alt={product.name}
+                        alt={product.category || product.name}
                         removable={!!product.image}
                         onRemove={() => removeProductImage(product)}
                         className="!w-11 !h-11"
