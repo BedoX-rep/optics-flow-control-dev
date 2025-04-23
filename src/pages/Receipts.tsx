@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -53,7 +52,6 @@ const Receipts = () => {
     try {
       setIsLoading(true);
       
-      // Fetch receipts with client information
       const { data: receiptsData, error: receiptsError } = await supabase
         .from('receipts')
         .select(`
@@ -68,7 +66,6 @@ const Receipts = () => {
 
       if (receiptsError) throw receiptsError;
 
-      // Transform the data to include client information
       const formattedReceipts = receiptsData.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || 'No Client',
@@ -88,14 +85,12 @@ const Receipts = () => {
     }
   };
 
-  // Fetch on mount
   useEffect(() => {
     if (user) {
       fetchReceipts();
     }
   }, []);
 
-  // Fetch when filters change
   useEffect(() => {
     if (user) {
       fetchReceipts();
@@ -202,63 +197,61 @@ const Receipts = () => {
           </Link>
         </div>
       ) : (
-        <Card className="border border-gray-100 card-shadow overflow-hidden">
-          <div className="overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50/80">
-                  <TableHead>Date</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Delivery Status</TableHead>
-                  <TableHead>Montage Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+        <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-100">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50/80">
+                <TableHead>Date</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Balance</TableHead>
+                <TableHead>Delivery Status</TableHead>
+                <TableHead>Montage Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredReceipts.map((receipt) => (
+                <TableRow key={receipt.id} className="hover:bg-gray-50/50 transition-colors">
+                  <TableCell className="py-3 font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="py-3">{receipt.client_name}</TableCell>
+                  <TableCell className="py-3">{receipt.client_phone}</TableCell>
+                  <TableCell className="py-3 font-medium">{receipt.total.toFixed(2)} DH</TableCell>
+                  <TableCell className="py-3">{receipt.balance.toFixed(2)} DH</TableCell>
+                  <TableCell className="py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      receipt.delivery_status === 'Completed' 
+                        ? 'bg-emerald-100 text-emerald-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {receipt.delivery_status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      receipt.montage_status === 'Completed' 
+                        ? 'bg-emerald-100 text-emerald-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {receipt.montage_status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-3 text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setSelectedReceipt(receipt)}
+                      className="hover:bg-gray-100 rounded-full"
+                    >
+                      <Eye className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReceipts.map((receipt) => (
-                  <TableRow key={receipt.id} className="hover:bg-gray-50/50 transition-colors">
-                    <TableCell className="font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>{receipt.client_name}</TableCell>
-                    <TableCell>{receipt.client_phone}</TableCell>
-                    <TableCell className="font-medium">{receipt.total.toFixed(2)} DH</TableCell>
-                    <TableCell>{receipt.balance.toFixed(2)} DH</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        receipt.delivery_status === 'Completed' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {receipt.delivery_status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        receipt.montage_status === 'Completed' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {receipt.montage_status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => setSelectedReceipt(receipt)}
-                        className="hover:bg-gray-100 rounded-full"
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <ReceiptDetailsDialog

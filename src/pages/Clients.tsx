@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -223,10 +222,10 @@ const Clients = () => {
         </Dialog>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-100">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gray-50/80">
               <TableHead>Client Name</TableHead>
               <TableHead>Phone Number</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -234,24 +233,26 @@ const Clients = () => {
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
-              <TableRow key={client.id}>
-                <TableCell className="font-medium">{client.name}</TableCell>
-                <TableCell>{client.phone}</TableCell>
-                <TableCell className="text-right">
+              <TableRow key={client.id} className="hover:bg-gray-50/50 transition-colors">
+                <TableCell className="py-3 font-medium">{client.name}</TableCell>
+                <TableCell className="py-3">{client.phone}</TableCell>
+                <TableCell className="py-3 text-right">
                   <div className="flex justify-end space-x-2">
                     <Button 
                       variant="ghost" 
                       size="icon"
                       onClick={() => handleEditClient(client)}
+                      className="hover:bg-gray-100 rounded-full"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-4 w-4 text-gray-600" />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
                       onClick={() => handleDeleteClient(client.id)}
+                      className="hover:bg-gray-100 rounded-full"
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash className="h-4 w-4 text-gray-600" />
                     </Button>
                   </div>
                 </TableCell>
