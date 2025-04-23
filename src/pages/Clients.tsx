@@ -332,15 +332,15 @@ const Clients = () => {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold" colSpan={2}>Client Name</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye AXE</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye AXE</TableHead>
-              <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center" colSpan={2}>Client Name</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Phone Number</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Right Eye SPH</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Right Eye CYL</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Right Eye AXE</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Left Eye SPH</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Left Eye CYL</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Left Eye AXE</TableHead>
+              <TableHead className="text-black text-xs font-semibold text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -361,14 +361,14 @@ const Clients = () => {
                   </TableCell>
                   <TableCell className="py-3 pl-0 hidden">
                   </TableCell>
-                  <TableCell className="py-3">{client.phone}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_axe || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_axe || '-'}</TableCell>
-                  <TableCell className="py-3 text-right">
+                  <TableCell className="py-3 text-center">{client.phone}</TableCell>
+                  <TableCell className="py-3 text-center">{client.right_eye_sph || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">{client.right_eye_cyl || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">{client.right_eye_axe || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">{client.left_eye_sph || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">{client.left_eye_cyl || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">{client.left_eye_axe || '-'}</TableCell>
+                  <TableCell className="py-3 text-center">
                     <div className="flex justify-end space-x-1">
                       <Button 
                         variant="ghost" 
