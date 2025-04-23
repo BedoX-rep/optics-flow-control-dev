@@ -9,6 +9,7 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
+
 const TreatmentCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}

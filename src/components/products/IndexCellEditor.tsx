@@ -9,6 +9,7 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
+
 const IndexCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}

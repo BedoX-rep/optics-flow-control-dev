@@ -3,11 +3,9 @@ import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const CATEGORY_OPTIONS = [
-  "Single Vision Lenses",
-  "Progressive Lenses",
-  "Frames",
-  "Sunglasses",
-  "Contact Lenses",
+  "Eyeglasses", 
+  "Sunglasses", 
+  "Contact Lenses", 
   "Accessories"
 ];
 
@@ -16,6 +14,7 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
+
 const CategoryCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}
