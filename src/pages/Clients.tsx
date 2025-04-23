@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -23,24 +24,19 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
-import GenderIcon from '@/components/clients/GenderIcon';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Client {
   id: string;
   name: string;
   phone: string;
-  gender: string;
 }
-
-const GENDER_OPTIONS = ["Mr", "Mme", "Enf"];
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [newClient, setNewClient] = useState({ name: '', phone: '', gender: 'Mr' });
+  const [newClient, setNewClient] = useState({ name: '', phone: '' });
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -78,7 +74,6 @@ const Clients = () => {
           .update({
             name: newClient.name,
             phone: newClient.phone,
-            gender: newClient.gender,
           })
           .eq('id', editingClient.id);
 
@@ -94,7 +89,6 @@ const Clients = () => {
           .insert({
             name: newClient.name,
             phone: newClient.phone,
-            gender: newClient.gender,
             user_id: user.id,
           });
 
@@ -106,7 +100,7 @@ const Clients = () => {
         });
       }
 
-      setNewClient({ name: '', phone: '', gender: 'Mr' });
+      setNewClient({ name: '', phone: '' });
       setEditingClient(null);
       setIsOpen(false);
       fetchClients();
@@ -121,7 +115,7 @@ const Clients = () => {
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
-    setNewClient({ name: client.name, phone: client.phone, gender: client.gender });
+    setNewClient({ name: client.name, phone: client.phone });
     setIsOpen(true);
   };
 
@@ -185,29 +179,6 @@ const Clients = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="gender" className="text-right">
-                  Gender
-                </Label>
-                <Select
-                  value={newClient.gender}
-                  onValueChange={(value) => setNewClient({ ...newClient, gender: value })}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GENDER_OPTIONS.map((gender) => (
-                      <SelectItem key={gender} value={gender}>
-                        <div className="flex items-center">
-                          <GenderIcon gender={gender} size={16} />
-                          <span className="ml-2">{gender}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
                   Name
                 </Label>
@@ -236,7 +207,7 @@ const Clients = () => {
                 onClick={() => {
                   setIsOpen(false);
                   setEditingClient(null);
-                  setNewClient({ name: '', phone: '', gender: 'Mr' });
+                  setNewClient({ name: '', phone: '' });
                 }}
               >
                 Cancel
@@ -255,22 +226,15 @@ const Clients = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-neutral-100 bg-[#f6f6f7]">
-              <TableHead className="text-black text-xs font-semibold">Gender</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
+            <TableRow>
+              <TableHead>Client Name</TableHead>
+              <TableHead>Phone Number</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
-              <TableRow key={client.id} className="py-4 hover:bg-[#FAFAFA] transition-all">
-                <TableCell>
-                  <div className="flex items-center">
-                    <GenderIcon gender={client.gender || 'Mr'} size={20} />
-                    <span className="ml-2">{client.gender || 'Mr'}</span>
-                  </div>
-                </TableCell>
+              <TableRow key={client.id}>
                 <TableCell className="font-medium">{client.name}</TableCell>
                 <TableCell>{client.phone}</TableCell>
                 <TableCell className="text-right">
