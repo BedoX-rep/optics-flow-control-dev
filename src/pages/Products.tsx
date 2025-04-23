@@ -30,7 +30,6 @@ import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/Cate
 import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
 import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
 import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
-import StockCellEditor from "@/components/products/StockCellEditor";
 
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
 
@@ -303,56 +302,6 @@ const Products = () => {
     }
   };
 
-  const handleStockIncrease = async (product: Product) => {
-    if (!user) return;
-    try {
-      const newStock = (product.stock || 0) + 1;
-      const { error } = await supabase
-        .from('products')
-        .update({ stock: newStock })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setProducts(prev => 
-        prev.map(p => p.id === product.id ? { ...p, stock: newStock } : p)
-      );
-      toast({ title: "Stock Updated", description: `Stock increased to ${newStock}` });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update stock",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleStockDecrease = async (product: Product) => {
-    if (!user || (product.stock || 0) <= 0) return;
-    try {
-      const newStock = Math.max(0, (product.stock || 0) - 1);
-      const { error } = await supabase
-        .from('products')
-        .update({ stock: newStock })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setProducts(prev => 
-        prev.map(p => p.id === product.id ? { ...p, stock: newStock } : p)
-      );
-      toast({ title: "Stock Updated", description: `Stock decreased to ${newStock}` });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update stock",
-        variant: "destructive"
-      });
-    }
-  };
-
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (!editingCell) return;
@@ -407,7 +356,7 @@ const Products = () => {
         paddingLeft: "1rem",
         paddingRight: "1rem",
         transition: "all 0.2s ease",
-        minHeight: "calc(100svh - 68px + 16px)",
+        minHeight: "calc(100svh - 68px)",
       }}
     >
       <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-2 w-full">
@@ -476,7 +425,7 @@ const Products = () => {
                 filteredProducts.map((product, index) => (
                   <TableRow
                     key={product.id}
-                    className="hover:bg-[#FAFAFA] transition-all group rounded-lg py-4"
+                    className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
                   >
                     <TableCell>
                       <ProductImage
@@ -542,12 +491,14 @@ const Products = () => {
                           autoFocus
                         />
                       ) : (
-                        <StockCellEditor
-                          value={product.stock || 0}
-                          onIncrease={() => handleStockIncrease(product)}
-                          onDecrease={() => handleStockDecrease(product)}
-                          disabled={isSubmitting}
-                        />
+                        <span
+                          className="font-semibold text-black hover:underline cursor-pointer"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "stock")}
+                        >
+                          {product.stock || 0}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>

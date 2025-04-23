@@ -15,7 +15,6 @@ interface Props {
   onChange: (newValue: string | null) => void;
   disabled?: boolean;
 }
-
 const CompanyCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
   <Select
     value={value || ""}
