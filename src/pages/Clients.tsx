@@ -253,8 +253,8 @@ const Clients = () => {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
               <TableHead className="text-black text-xs font-semibold">Gender</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
               <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
@@ -272,10 +272,12 @@ const Clients = () => {
                   <TableCell className="py-3">
                     <div className="flex items-center gap-2">
                       <ClientAvatar gender={client.gender} name={client.name} />
-                      <span className="font-medium text-black">{client.name}</span>
+                      <span>{client.gender}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3">{client.gender}</TableCell>
+                  <TableCell className="py-3">
+                    <span className="font-medium text-black">{client.name}</span>
+                  </TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
