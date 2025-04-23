@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -54,6 +55,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
           user_id: user?.id,
           name: values.name,
           phone: values.phone,
+          gender: values.gender,
         })
         .select()
         .single()
