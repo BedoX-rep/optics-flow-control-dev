@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -97,6 +96,7 @@ const Clients = () => {
           .insert({
             name: newClient.name,
             phone: newClient.phone,
+            gender: newClient.gender, // Added gender field here
             user_id: user.id,
           });
 
@@ -108,7 +108,7 @@ const Clients = () => {
         });
       }
 
-      setNewClient({ name: '', phone: '' });
+      setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
       setEditingClient(null);
       setIsOpen(false);
       fetchClients();
@@ -140,7 +140,7 @@ const Clients = () => {
         title: "Success",
         description: "Client deleted successfully",
       });
-      
+
       fetchClients();
     } catch (error) {
       toast({
@@ -159,7 +159,7 @@ const Clients = () => {
   return (
     <div>
       <PageTitle title="Clients" subtitle="Manage your client directory" />
-      
+
       <div className="flex justify-between items-center mb-6">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
@@ -171,7 +171,7 @@ const Clients = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
@@ -233,7 +233,7 @@ const Clients = () => {
                 onClick={() => {
                   setIsOpen(false);
                   setEditingClient(null);
-                  setNewClient({ name: '', phone: '' });
+                  setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
                 }}
               >
                 Cancel
@@ -248,7 +248,7 @@ const Clients = () => {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
         <Table className="w-full">
           <TableHeader>
