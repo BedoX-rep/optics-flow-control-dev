@@ -43,7 +43,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     defaultValues: {
       name: "",
       phone: "",
-      gender: "Mr",
+      gender: undefined,
     },
   })
 
