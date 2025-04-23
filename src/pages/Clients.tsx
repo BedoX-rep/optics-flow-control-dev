@@ -31,12 +31,6 @@ interface Client {
   name: string;
   phone: string;
   gender: "Mr" | "Mme" | "Enf";
-  right_eye_sph?: number;
-  right_eye_cyl?: number;
-  right_eye_axe?: number;
-  left_eye_sph?: number;
-  left_eye_cyl?: number;
-  left_eye_axe?: number;
 }
 
 const Clients = () => {
@@ -44,7 +38,7 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [newClient, setNewClient] = useState<{ name: string; phone: string; gender: "Mr" | "Mme" | "Enf"; right_eye_sph?: number; right_eye_cyl?: number; right_eye_axe?: number; left_eye_sph?: number; left_eye_cyl?: number; left_eye_axe?: number }>({ 
+  const [newClient, setNewClient] = useState<{ name: string; phone: string; gender: "Mr" | "Mme" | "Enf" }>({ 
     name: '', 
     phone: '', 
     gender: 'Mr' 
@@ -87,12 +81,6 @@ const Clients = () => {
             name: newClient.name,
             phone: newClient.phone,
             gender: newClient.gender,
-            right_eye_sph: newClient.right_eye_sph,
-            right_eye_cyl: newClient.right_eye_cyl,
-            right_eye_axe: newClient.right_eye_axe,
-            left_eye_sph: newClient.left_eye_sph,
-            left_eye_cyl: newClient.left_eye_cyl,
-            left_eye_axe: newClient.left_eye_axe,
           })
           .eq('id', editingClient.id);
 
@@ -108,14 +96,8 @@ const Clients = () => {
           .insert({
             name: newClient.name,
             phone: newClient.phone,
-            gender: newClient.gender, 
+            gender: newClient.gender, // Added gender field here
             user_id: user.id,
-            right_eye_sph: newClient.right_eye_sph,
-            right_eye_cyl: newClient.right_eye_cyl,
-            right_eye_axe: newClient.right_eye_axe,
-            left_eye_sph: newClient.left_eye_sph,
-            left_eye_cyl: newClient.left_eye_cyl,
-            left_eye_axe: newClient.left_eye_axe,
           });
 
         if (error) throw error;
@@ -126,7 +108,7 @@ const Clients = () => {
         });
       }
 
-      setNewClient({ name: '', phone: '', gender: 'Mr' }); 
+      setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
       setEditingClient(null);
       setIsOpen(false);
       fetchClients();
@@ -141,7 +123,7 @@ const Clients = () => {
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
-    setNewClient({ ...client });
+    setNewClient({ name: client.name, phone: client.phone, gender: client.gender });
     setIsOpen(true);
   };
 
@@ -244,67 +226,6 @@ const Clients = () => {
                   </SelectContent>
                 </Select>
               </div>
-              {/* Add input fields for eye prescription */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="right_eye_sph" className="text-right">Right Eye SPH</Label>
-                <Input
-                  id="right_eye_sph"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.right_eye_sph || ''}
-                  onChange={(e) => setNewClient({ ...newClient, right_eye_sph: parseFloat(e.target.value) || undefined })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="right_eye_cyl" className="text-right">Right Eye CYL</Label>
-                <Input
-                  id="right_eye_cyl"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.right_eye_cyl || ''}
-                  onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: parseFloat(e.target.value) || undefined })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="right_eye_axe" className="text-right">Right Eye AXE</Label>
-                <Input
-                  id="right_eye_axe"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.right_eye_axe || ''}
-                  onChange={(e) => setNewClient({ ...newClient, right_eye_axe: parseInt(e.target.value, 10) || undefined })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="left_eye_sph" className="text-right">Left Eye SPH</Label>
-                <Input
-                  id="left_eye_sph"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.left_eye_sph || ''}
-                  onChange={(e) => setNewClient({ ...newClient, left_eye_sph: parseFloat(e.target.value) || undefined })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="left_eye_cyl" className="text-right">Left Eye CYL</Label>
-                <Input
-                  id="left_eye_cyl"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.left_eye_cyl || ''}
-                  onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: parseFloat(e.target.value) || undefined })}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="left_eye_axe" className="text-right">Left Eye AXE</Label>
-                <Input
-                  id="left_eye_axe"
-                  type="number"
-                  className="col-span-3"
-                  value={newClient.left_eye_axe || ''}
-                  onChange={(e) => setNewClient({ ...newClient, left_eye_axe: parseInt(e.target.value, 10) || undefined })}
-                />
-              </div>
             </div>
             <DialogFooter>
               <Button 
@@ -312,7 +233,7 @@ const Clients = () => {
                 onClick={() => {
                   setIsOpen(false);
                   setEditingClient(null);
-                  setNewClient({ name: '', phone: '', gender: 'Mr' }); 
+                  setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
                 }}
               >
                 Cancel
@@ -332,43 +253,33 @@ const Clients = () => {
         <Table className="w-full">
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold text-center" colSpan={2}>Client Name</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Phone Number</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Right Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Right Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Right Eye AXE</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Left Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Left Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Left Eye AXE</TableHead>
-              <TableHead className="text-black text-xs font-semibold text-center">Actions</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Gender</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-10 text-neutral-400 font-medium">
+                <TableCell colSpan={3} className="text-center py-10 text-neutral-400 font-medium">
                   No clients found.
                 </TableCell>
               </TableRow>
             ) : (
               filteredClients.map((client) => (
                 <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
-                  <TableCell className="py-3 pr-0">
+                  <TableCell className="py-3">
                     <div className="flex items-center gap-2">
                       <ClientAvatar gender={client.gender} name={client.name} />
-                      <span className="font-medium text-black">{client.name}</span>
+                      <span>{client.gender}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3 pl-0 hidden">
+                  <TableCell className="py-3">
+                    <span className="font-medium text-black">{client.name}</span>
                   </TableCell>
-                  <TableCell className="py-3 text-center">{client.phone}</TableCell>
-                  <TableCell className="py-3 text-center">{client.right_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">{client.right_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">{client.right_eye_axe || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">{client.left_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">{client.left_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">{client.left_eye_axe || '-'}</TableCell>
-                  <TableCell className="py-3 text-center">
+                  <TableCell className="py-3">{client.phone}</TableCell>
+                  <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
                         variant="ghost" 
