@@ -53,7 +53,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
                 ""
               }`}
               alt={alt}
-              className="w-7 h-7 opacity-40"
+              className="w-7 h-7"
             />
           ) : (
             <Image size={22} className="text-neutral-200" />
