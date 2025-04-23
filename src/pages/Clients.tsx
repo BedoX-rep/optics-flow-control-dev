@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClientAvatar } from '@/components/ClientAvatar';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +31,7 @@ interface Client {
   id: string;
   name: string;
   phone: string;
+  gender: "Mr" | "Mme" | "Enf";
 }
 
 const Clients = () => {
@@ -228,6 +231,7 @@ const Clients = () => {
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Gender</TableHead>
               <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
@@ -242,7 +246,13 @@ const Clients = () => {
             ) : (
               filteredClients.map((client) => (
                 <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
-                  <TableCell className="py-3 font-medium text-black">{client.name}</TableCell>
+                  <TableCell className="py-3">
+                    <div className="flex items-center gap-2">
+                      <ClientAvatar gender={client.gender} name={client.name} />
+                      <span className="font-medium text-black">{client.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3">{client.gender}</TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">

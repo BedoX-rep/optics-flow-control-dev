@@ -25,6 +25,7 @@ import { useAuth } from "@/components/AuthProvider"
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
+  gender: z.enum(["Mr", "Mme", "Enf"])
 })
 
 interface AddClientDialogProps {
@@ -41,6 +42,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     defaultValues: {
       name: "",
       phone: "",
+      gender: "Mr",
     },
   })
 
@@ -109,6 +111,26 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormControl>
                     <Input {...field} type="tel" />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gender</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Mr">Mr</SelectItem>
+                      <SelectItem value="Mme">Mme</SelectItem>
+                      <SelectItem value="Enf">Enf</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
