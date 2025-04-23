@@ -255,6 +255,13 @@ const Clients = () => {
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
               <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Right Eye SPH</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Right Eye CYL</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Right Eye AXE</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Left Eye SPH</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Left Eye CYL</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Left Eye AXE</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Add</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -275,6 +282,13 @@ const Clients = () => {
                     </div>
                   </TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
+                  <TableCell className="py-3">{client.right_eye_sph || '-'}</TableCell>
+                  <TableCell className="py-3">{client.right_eye_cyl || '-'}</TableCell>
+                  <TableCell className="py-3">{client.right_eye_axe || '-'}</TableCell>
+                  <TableCell className="py-3">{client.left_eye_sph || '-'}</TableCell>
+                  <TableCell className="py-3">{client.left_eye_cyl || '-'}</TableCell>
+                  <TableCell className="py-3">{client.left_eye_axe || '-'}</TableCell>
+                  <TableCell className="py-3">{client.Add || '-'}</TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
