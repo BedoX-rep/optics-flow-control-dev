@@ -39,7 +39,11 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [newClient, setNewClient] = useState({ name: '', phone: '', gender: 'Mr' });
+  const [newClient, setNewClient] = useState<{ name: string; phone: string; gender: "Mr" | "Mme" | "Enf" }>({ 
+    name: '', 
+    phone: '', 
+    gender: 'Mr' 
+  });
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -77,6 +81,7 @@ const Clients = () => {
           .update({
             name: newClient.name,
             phone: newClient.phone,
+            gender: newClient.gender,
           })
           .eq('id', editingClient.id);
 
@@ -118,7 +123,7 @@ const Clients = () => {
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
-    setNewClient({ name: client.name, phone: client.phone });
+    setNewClient({ name: client.name, phone: client.phone, gender: client.gender });
     setIsOpen(true);
   };
 
