@@ -30,8 +30,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  
+  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-  const refreshSubscription = async () => {
+  const refreshSubscription = async (force: boolean = false) => {
+    const now = Date.now();
+    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently refreshed
+    }
     try {
       if (!user) return;
       
@@ -43,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) throw error;
       setSubscription(data);
+      setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);

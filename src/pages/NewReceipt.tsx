@@ -66,18 +66,10 @@ const NewReceipt = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Check subscription status first
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        if (!currentUser) {
+        if (!user) {
           navigate('/auth');
           return;
         }
-
-        const { data: subscription } = await supabase
-          .from('subscriptions')
-          .select('subscription_status')
-          .eq('user_id', currentUser.id)
-          .single();
 
         if (!subscription || subscription.subscription_status !== 'Active') {
           toast({
