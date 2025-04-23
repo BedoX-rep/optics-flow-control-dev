@@ -39,7 +39,7 @@ const Clients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [newClient, setNewClient] = useState({ name: '', phone: '' });
+  const [newClient, setNewClient] = useState({ name: '', phone: '', gender: 'Mr' });
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -202,6 +202,24 @@ const Clients = () => {
                   value={newClient.phone}
                   onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
                 />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="gender" className="text-right">
+                  Gender
+                </Label>
+                <Select
+                  value={newClient.gender}
+                  onValueChange={(value) => setNewClient({ ...newClient, gender: value })}
+                >
+                  <SelectTrigger id="gender" className="col-span-3">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mr">Mr</SelectItem>
+                    <SelectItem value="Mme">Mme</SelectItem>
+                    <SelectItem value="Enf">Enf</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
