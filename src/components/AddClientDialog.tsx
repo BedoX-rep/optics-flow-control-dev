@@ -49,14 +49,16 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const clientData = {
+        user_id: user?.id,
+        name: values.name,
+        phone: values.phone,
+        gender: values.gender,
+      }
+
       const { data, error } = await supabase
         .from("clients")
-        .insert({
-          user_id: user?.id,
-          name: values.name,
-          phone: values.phone,
-          gender: values.gender,
-        })
+        .insert(clientData)
         .select()
         .single()
 
