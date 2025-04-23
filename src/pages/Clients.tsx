@@ -97,6 +97,14 @@ const Clients = () => {
             name: newClient.name,
             phone: newClient.phone,
             gender: newClient.gender,
+            right_eye_sph: newClient.right_eye_sph,
+            right_eye_cyl: newClient.right_eye_cyl,
+            right_eye_axe: newClient.right_eye_axe,
+            left_eye_sph: newClient.left_eye_sph,
+            left_eye_cyl: newClient.left_eye_cyl,
+            left_eye_axe: newClient.left_eye_axe,
+            Add: newClient.Add,
+            notes: newClient.notes,
           })
           .eq('id', editingClient.id);
 
@@ -112,7 +120,15 @@ const Clients = () => {
           .insert({
             name: newClient.name,
             phone: newClient.phone,
-            gender: newClient.gender, // Added gender field here
+            gender: newClient.gender,
+            right_eye_sph: newClient.right_eye_sph,
+            right_eye_cyl: newClient.right_eye_cyl,
+            right_eye_axe: newClient.right_eye_axe,
+            left_eye_sph: newClient.left_eye_sph,
+            left_eye_cyl: newClient.left_eye_cyl,
+            left_eye_axe: newClient.left_eye_axe,
+            Add: newClient.Add,
+            notes: newClient.notes,
             user_id: user.id,
           });
 
@@ -124,7 +140,7 @@ const Clients = () => {
         });
       }
 
-      setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
+      setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '' }); 
       setEditingClient(null);
       setIsOpen(false);
       fetchClients();
@@ -139,7 +155,7 @@ const Clients = () => {
 
   const handleEditClient = (client: Client) => {
     setEditingClient(client);
-    setNewClient({ name: client.name, phone: client.phone, gender: client.gender });
+    setNewClient({ ...client, id: undefined });
     setIsOpen(true);
   };
 
@@ -320,7 +336,7 @@ const Clients = () => {
                 onClick={() => {
                   setIsOpen(false);
                   setEditingClient(null);
-                  setNewClient({ name: '', phone: '', gender: 'Mr' }); //Fixed initial state reset
+                  setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '' }); 
                 }}
               >
                 Cancel
