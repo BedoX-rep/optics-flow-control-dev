@@ -269,12 +269,14 @@ const Clients = () => {
               filteredClients.map((client) => (
                 <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
                   <TableCell className="py-3 pr-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <ClientAvatar gender={client.gender} name={client.name} />
+                      <span className="font-medium text-black">
+                        <span className="text-gray-500">(</span>{client.gender}<span className="text-gray-500">)</span> {client.name}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3 pl-0">
-                    <span className="font-medium text-black">{client.gender} {client.name}</span>
+                  <TableCell className="py-3 pl-0 hidden">
                   </TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
                   <TableCell className="py-3 text-right">
