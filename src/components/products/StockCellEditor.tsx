@@ -17,7 +17,7 @@ const StockCellEditor: React.FC<StockCellEditorProps> = ({
   disabled = false 
 }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 min-w-[140px]">
       <Button 
         variant="ghost" 
         size="icon" 

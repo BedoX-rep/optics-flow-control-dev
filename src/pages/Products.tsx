@@ -25,6 +25,7 @@ import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
+import CategoryIcon from '@/components/products/CategoryIcon';
 
 import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
 import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
@@ -447,7 +448,7 @@ const Products = () => {
           <Table className="table-fixed min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-14 py-4">Image</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[230px]">Name</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-20 text-right">Price</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-20 text-right">Stock</TableHead>
@@ -473,19 +474,25 @@ const Products = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product, index) => (
+                filteredProducts.map((product) => (
                   <TableRow
                     key={product.id}
-                    className="hover:bg-[#FAFAFA] transition-all group rounded-lg py-4"
+                    className="hover:bg-[#FAFAFA] transition-all group py-4"
                   >
-                    <TableCell>
-                      <ProductImage
-                        src={typeof product.image === "string" ? product.image : undefined}
-                        alt={product.name}
-                        removable={!!product.image}
-                        onRemove={() => removeProductImage(product)}
-                        className="!w-11 !h-11"
-                      />
+                    <TableCell className="py-4">
+                      {product.image ? (
+                        <ProductImage
+                          src={product.image}
+                          alt={product.name}
+                          removable={!!product.image}
+                          onRemove={() => removeProductImage(product)}
+                          className="!w-11 !h-11"
+                        />
+                      ) : (
+                        <div className="w-11 h-11 flex items-center justify-center bg-gray-100 rounded">
+                          <CategoryIcon category={product.category} size={20} />
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       {editingCell?.id === product.id && editingCell.field === "name" ? (
@@ -554,13 +561,8 @@ const Products = () => {
                       {editingCell?.id === product.id && editingCell.field === "category" ? (
                         <CategoryCellEditor
                           value={product.category}
-                          options={CATEGORY_OPTIONS}
+                          onChange={val => handleInlineUpdate(product, "category", val)}
                           disabled={isSubmitting}
-                          onChange={val =>
-                            val === product.category
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "category", val)
-                          }
                         />
                       ) : (
                         <span
@@ -576,13 +578,8 @@ const Products = () => {
                       {editingCell?.id === product.id && editingCell.field === "index" ? (
                         <IndexCellEditor
                           value={product.index}
-                          options={INDEX_OPTIONS}
+                          onChange={val => handleInlineUpdate(product, "index", val)}
                           disabled={isSubmitting}
-                          onChange={val =>
-                            val === product.index
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "index", val)
-                          }
                         />
                       ) : (
                         <span
@@ -598,13 +595,8 @@ const Products = () => {
                       {editingCell?.id === product.id && editingCell.field === "treatment" ? (
                         <TreatmentCellEditor
                           value={product.treatment}
-                          options={TREATMENT_OPTIONS}
+                          onChange={val => handleInlineUpdate(product, "treatment", val)}
                           disabled={isSubmitting}
-                          onChange={val =>
-                            val === product.treatment
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "treatment", val)
-                          }
                         />
                       ) : (
                         <span
@@ -620,13 +612,8 @@ const Products = () => {
                       {editingCell?.id === product.id && editingCell.field === "company" ? (
                         <CompanyCellEditor
                           value={product.company}
-                          options={COMPANY_OPTIONS}
+                          onChange={val => handleInlineUpdate(product, "company", val)}
                           disabled={isSubmitting}
-                          onChange={val =>
-                            val === product.company
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "company", val)
-                          }
                         />
                       ) : (
                         <span
