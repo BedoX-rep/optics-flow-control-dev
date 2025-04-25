@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -175,12 +174,15 @@ const Clients = () => {
 
   const endInlineEdit = async (client: Client) => {
     if (!editingCell || !user) return;
-    
+
     try {
       setIsSubmitting(true);
+      // Convert empty strings to undefined, preserve zero values
+      const valueToUpdate = cellEditValue === '' ? undefined : parseFloat(cellEditValue) || cellEditValue;
+
       const { error } = await supabase
         .from('clients')
-        .update({ [editingCell.field]: cellEditValue })
+        .update({ [editingCell.field]: valueToUpdate })
         .eq('id', client.id);
 
       if (error) throw error;
