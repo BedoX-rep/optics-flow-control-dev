@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -162,19 +163,8 @@ const Clients = () => {
   };
 
   const handleEditClient = (client: Client) => {
-    // Ensure numeric fields are treated as numbers, including zero values
-    const processedClient = {
-      ...client,
-      right_eye_sph: client.right_eye_sph === undefined ? undefined : Number(client.right_eye_sph),
-      right_eye_cyl: client.right_eye_cyl === undefined ? undefined : Number(client.right_eye_cyl),
-      right_eye_axe: client.right_eye_axe === undefined ? undefined : Number(client.right_eye_axe),
-      left_eye_sph: client.left_eye_sph === undefined ? undefined : Number(client.left_eye_sph),
-      left_eye_cyl: client.left_eye_cyl === undefined ? undefined : Number(client.left_eye_cyl),
-      left_eye_axe: client.left_eye_axe === undefined ? undefined : Number(client.left_eye_axe),
-      Add: client.Add === undefined ? undefined : Number(client.Add),
-    };
     setEditingClient(client);
-    setNewClient({ ...processedClient, id: undefined });
+    setNewClient({ ...client, id: undefined });
     setIsOpen(true);
   };
 
@@ -185,15 +175,12 @@ const Clients = () => {
 
   const endInlineEdit = async (client: Client) => {
     if (!editingCell || !user) return;
-
+    
     try {
       setIsSubmitting(true);
-      // Convert empty strings to undefined, preserve zero values
-      const valueToUpdate = cellEditValue === '' ? undefined : parseFloat(cellEditValue) || cellEditValue;
-
       const { error } = await supabase
         .from('clients')
-        .update({ [editingCell.field]: valueToUpdate })
+        .update({ [editingCell.field]: cellEditValue })
         .eq('id', client.id);
 
       if (error) throw error;
