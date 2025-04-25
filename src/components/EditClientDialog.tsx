@@ -34,7 +34,7 @@ const formSchema = z.object({
   left_eye_sph: z.number().optional(),
   left_eye_cyl: z.number().optional(),
   left_eye_axe: z.number().optional(),
-  notes: z.string().optional()
+  notes: z.string().nullable().optional()
 })
 
 interface EditClientDialogProps {
