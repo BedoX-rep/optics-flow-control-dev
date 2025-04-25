@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -27,6 +28,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  Cost: number;
 }
 
 interface Client {
@@ -41,6 +43,7 @@ interface ReceiptItem {
   customName?: string;
   quantity: number;
   price: number;
+  cost: number;
 }
 
 const NewReceipt = () => {
@@ -55,13 +58,14 @@ const NewReceipt = () => {
   const [prescriptionOpen, setPrescriptionOpen] = useState(true);
   const [paymentOpen, setPaymentOpen] = useState(true);
   const [discount, setDiscount] = useState(0);
+  const [numericDiscount, setNumericDiscount] = useState(0);
   const [tax, setTax] = useState(0);
+  const [taxIndicator, setTaxIndicator] = useState(0.4);
   const [products, setProducts] = useState<Product[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('');
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
 
   useEffect(() => {
@@ -113,9 +117,9 @@ const NewReceipt = () => {
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
-      setItems([...items, { id: `item-${Date.now()}`, quantity: 1, price: 0 }]);
+      setItems([...items, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
     } else {
-      setItems([...items, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0 }]);
+      setItems([...items, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
     }
   };
 
@@ -131,7 +135,8 @@ const NewReceipt = () => {
           return { 
             ...item, 
             [field]: value.toString(),
-            price: product ? product.price : 0 
+            price: product ? product.price : 0,
+            cost: product ? product.Cost : 0
           };
         }
         return { ...item, [field]: value };
@@ -141,9 +146,25 @@ const NewReceipt = () => {
   };
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const taxAmount = (subtotal * tax) / 100;
+  const totalCost = items.reduce((sum, item) => sum + (item.cost * item.quantity), 0);
+  
+  // Calculate percentage-based discount
   const discountAmount = (subtotal * discount) / 100;
-  const total = subtotal + taxAmount - discountAmount;
+  
+  // Calculate numeric discount (direct amount)
+  const totalDiscount = discountAmount + numericDiscount;
+  
+  // Calculate purchasing amount (subtotal - discount)
+  const purchasingAmount = subtotal - totalDiscount;
+  
+  // Calculate tax based on amount above purchasing amount
+  const taxAmount = tax > purchasingAmount ? (tax - purchasingAmount) * taxIndicator : 0;
+  
+  // Calculate final total
+  const total = purchasingAmount + taxAmount;
+  
+  // Calculate profit
+  const profit = total - totalCost;
 
   const fetchClientPrescription = async (clientId: string) => {
     if (!user) return;
@@ -231,7 +252,8 @@ const NewReceipt = () => {
           add: add ? parseFloat(add) : null,
           subtotal,
           tax: taxAmount,
-          discount_amount: discountAmount,
+          cost: totalCost,
+          discount_amount: totalDiscount,
           discount_percentage: discount,
           total,
           balance: total,
@@ -278,6 +300,8 @@ const NewReceipt = () => {
 
   return (
     <div>
+      <PageTitle title="New Receipt" subtitle="Create a new receipt for a client" />
+      
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
@@ -403,6 +427,15 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <div className="flex justify-end space-x-2">
+                <Button onClick={() => addItem('product')} variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-1" /> Add Product
+                </Button>
+                <Button onClick={() => addItem('custom')} variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-1" /> Add Custom Item
+                </Button>
+              </div>
+              
               {items.map((item) => (
                 <div key={item.id} className="flex items-end gap-4 p-4 border rounded-md">
                   {item.customName !== undefined ? (
@@ -457,6 +490,20 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
                     />
                   </div>
+                  
+                  {item.customName !== undefined && (
+                    <div className="w-32">
+                      <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+                      <Input
+                        id={`cost-${item.id}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.cost}
+                        onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                      />
+                    </div>
+                  )}
 
                   <div className="w-32">
                     <Label>Total</Label>
@@ -495,14 +542,28 @@ const NewReceipt = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="tax">Tax (%)</Label>
+                  <Label htmlFor="tax">Tax Base Amount (DH)</Label>
                   <Input
                     id="tax"
                     type="number"
                     min="0"
-                    max="100"
                     value={tax}
                     onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                    placeholder="Amount above which tax applies"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="taxIndicator">Tax Rate</Label>
+                  <Input
+                    id="taxIndicator"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={taxIndicator}
+                    onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
+                    placeholder="Tax rate (e.g. 0.4 for 40%)"
                   />
                 </div>
 
@@ -519,17 +580,14 @@ const NewReceipt = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="payment-method">Payment Method</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger id="payment-method">
-                      <SelectValue placeholder="Select payment method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="card">Card</SelectItem>
-                      <SelectItem value="bank">Bank Transfer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="numericDiscount">Discount Amount (DH)</Label>
+                  <Input
+                    id="numericDiscount"
+                    type="number"
+                    min="0"
+                    value={numericDiscount}
+                    onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
+                  />
                 </div>
               </div>
 
@@ -542,18 +600,28 @@ const NewReceipt = () => {
                 </div>
 
                 <div className="flex justify-between py-2 border-b">
-                  <span>Tax ({tax}%):</span>
-                  <span>{taxAmount.toFixed(2)} DH</span>
+                  <span>Discount ({discount}% + {numericDiscount} DH):</span>
+                  <span>-{totalDiscount.toFixed(2)} DH</span>
                 </div>
 
                 <div className="flex justify-between py-2 border-b">
-                  <span>Discount ({discount}%):</span>
-                  <span>-{discountAmount.toFixed(2)} DH</span>
+                  <span>Tax:</span>
+                  <span>{taxAmount.toFixed(2)} DH</span>
                 </div>
 
-                <div className="flex justify-between py-2 font-bold text-lg">
+                <div className="flex justify-between py-2 border-b text-lg font-semibold">
                   <span>Total:</span>
                   <span>{total.toFixed(2)} DH</span>
+                </div>
+                
+                <div className="flex justify-between py-2 border-b text-red-500">
+                  <span>Cost:</span>
+                  <span>{totalCost.toFixed(2)} DH</span>
+                </div>
+                
+                <div className="flex justify-between py-2 font-bold text-green-600">
+                  <span>Profit:</span>
+                  <span>{profit.toFixed(2)} DH</span>
                 </div>
               </div>
             </div>

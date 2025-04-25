@@ -174,6 +174,7 @@ export type Database = {
           advance_payment: number | null
           balance: number
           client_id: string | null
+          cost: number | null
           created_at: string | null
           delivery_status: string
           discount_amount: number | null
@@ -197,6 +198,7 @@ export type Database = {
           advance_payment?: number | null
           balance?: number
           client_id?: string | null
+          cost?: number | null
           created_at?: string | null
           delivery_status?: string
           discount_amount?: number | null
@@ -220,6 +222,7 @@ export type Database = {
           advance_payment?: number | null
           balance?: number
           client_id?: string | null
+          cost?: number | null
           created_at?: string | null
           delivery_status?: string
           discount_amount?: number | null
