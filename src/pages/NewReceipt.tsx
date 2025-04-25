@@ -27,7 +27,6 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
-import AddClientDialog from '@/components/AddClientDialog';
 
 interface Product {
   id: string;
@@ -38,7 +37,6 @@ interface Product {
 interface Client {
   id: string;
   name: string;
-  Add?: string; // Added Add field to Client interface
 }
 
 interface ReceiptItem {
@@ -63,12 +61,6 @@ const NewReceipt = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [showAddClient, setShowAddClient] = useState(false);
-
-  const handleClientAdded = (client: { id: string; name: string }) => {
-    setSelectedClient(client.id);
-    setShowAddClient(false);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -256,7 +248,7 @@ const NewReceipt = () => {
                   <SelectContent>
                     {clients.map(client => (
                       <SelectItem key={client.id} value={client.id}>
-                        {client.name} {client.Add ? `(Add: ${client.Add})` : ''}
+                        {client.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -264,7 +256,7 @@ const NewReceipt = () => {
               </div>
               <div>
                 <Label>&nbsp;</Label>
-                <Button className="w-full" onClick={() => setShowAddClient(true)}>Add New Client</Button>
+                <Button className="w-full" onClick={() => navigate('/clients')}>Add New Client</Button>
               </div>
             </div>
           </CardContent>
@@ -530,11 +522,6 @@ const NewReceipt = () => {
           </Button>
         </div>
       </div>
-      <AddClientDialog 
-        isOpen={showAddClient}
-        onClose={() => setShowAddClient(false)}
-        onClientAdded={handleClientAdded}
-      />
     </div>
   );
 };

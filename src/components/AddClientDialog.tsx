@@ -25,17 +25,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
-  gender: z.enum(["Mr", "Mme", "Enf"]),
-  Add: z.number().optional()
+  gender: z.enum(["Mr", "Mme", "Enf"])
 })
 
 interface AddClientDialogProps {
-  client?: any;
-  onClose: () => void;
-  onSuccess: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onClientAdded: (client: { id: string; name: string }) => void
 }
 
-const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) => {
+const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,7 +60,6 @@ const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) =
         name: values.name,
         phone: values.phone,
         gender: values.gender,
-        Add: values.Add,
         right_eye_sph: values.right_eye_sph,
         right_eye_cyl: values.right_eye_cyl,
         right_eye_axe: values.right_eye_axe,
@@ -83,9 +81,12 @@ const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) =
         description: "Client added successfully",
       })
 
-      onSuccess()
-      form.reset()
+      onClientAdded({
+        id: data.id,
+        name: data.name,
+      })
       onClose()
+      form.reset()
     } catch (error) {
       console.error("Error adding client:", error)
       toast({
@@ -98,12 +99,12 @@ const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[400px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -125,26 +126,6 @@ const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) =
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input {...field} type="tel" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="Add"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Add</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? undefined : Number(e.target.value);
-                        field.onChange(value);
-                      }}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
