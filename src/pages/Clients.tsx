@@ -233,15 +233,29 @@ const Clients = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+      <div className="flex items-center gap-3 flex-wrap mb-6">
+        <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+            <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+              This Month: {clients.filter(client => {
+                const clientDate = new Date(client.created_at);
+                const now = new Date();
+                return clientDate.getMonth() === now.getMonth() && 
+                       clientDate.getFullYear() === now.getFullYear();
+              }).length}
+            </span>
+            <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+              Favorites: {clients.filter(client => client.favorite).length}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 mb-6">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center w-fit">
@@ -401,26 +415,6 @@ const Clients = () => {
           </DialogContent>
         </Dialog>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
-            <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
-          </div>
-          <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-            This Month: {clients.filter(client => {
-              const clientDate = new Date(client.created_at);
-              const now = new Date();
-              return clientDate.getMonth() === now.getMonth() && 
-                     clientDate.getFullYear() === now.getFullYear();
-            }).length}
-          </span>
-          <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-            Favorites: {clients.filter(client => client.favorite).length}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex mb-6">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input 
