@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -175,7 +174,7 @@ const Clients = () => {
 
   const endInlineEdit = async (client: Client) => {
     if (!editingCell || !user) return;
-    
+
     try {
       setIsSubmitting(true);
       const { error } = await supabase
@@ -317,20 +316,20 @@ const Clients = () => {
                     <Input
                       type="number"
                       placeholder="SPH"
-                      value={newClient.right_eye_sph || ''}
-                      onChange={(e) => setNewClient({ ...newClient, right_eye_sph: parseFloat(e.target.value) || undefined })}
+                      value={newClient.right_eye_sph ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_sph: e.target.value === '' ? undefined : parseFloat(e.target.value) })}
                     />
                     <Input
                       type="number"
                       placeholder="CYL"
-                      value={newClient.right_eye_cyl || ''}
-                      onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: parseFloat(e.target.value) || undefined })}
+                      value={newClient.right_eye_cyl ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: e.target.value === '' ? undefined : parseFloat(e.target.value) })}
                     />
                     <Input
                       type="number"
                       placeholder="AXE"
-                      value={newClient.right_eye_axe || ''}
-                      onChange={(e) => setNewClient({ ...newClient, right_eye_axe: parseInt(e.target.value) || undefined })}
+                      value={newClient.right_eye_axe ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_axe: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -340,20 +339,20 @@ const Clients = () => {
                     <Input
                       type="number"
                       placeholder="SPH"
-                      value={newClient.left_eye_sph || ''}
-                      onChange={(e) => setNewClient({ ...newClient, left_eye_sph: parseFloat(e.target.value) || undefined })}
+                      value={newClient.left_eye_sph ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_sph: e.target.value === '' ? undefined : parseFloat(e.target.value) })}
                     />
                     <Input
                       type="number"
                       placeholder="CYL"
-                      value={newClient.left_eye_cyl || ''}
-                      onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: parseFloat(e.target.value) || undefined })}
+                      value={newClient.left_eye_cyl ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: e.target.value === '' ? undefined : parseFloat(e.target.value) })}
                     />
                     <Input
                       type="number"
                       placeholder="AXE"
-                      value={newClient.left_eye_axe || ''}
-                      onChange={(e) => setNewClient({ ...newClient, left_eye_axe: parseInt(e.target.value) || undefined })}
+                      value={newClient.left_eye_axe ?? ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_axe: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -366,8 +365,8 @@ const Clients = () => {
                   id="add"
                   type="number"
                   className="col-span-3"
-                  value={newClient.Add || ''}
-                  onChange={(e) => setNewClient({ ...newClient, Add: parseFloat(e.target.value) || undefined })}
+                  value={newClient.Add ?? ''}
+                  onChange={(e) => setNewClient({ ...newClient, Add: e.target.value === '' ? undefined : parseFloat(e.target.value) })}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
