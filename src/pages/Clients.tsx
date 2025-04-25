@@ -196,30 +196,26 @@ const Clients = () => {
 
   return (
     <div>
-      <div className="flex gap-3 mb-6">
-        <StatCard 
-          title="Total Clients"
-          value={clients.length}
-          icon={<Users className="h-4 w-4" />}
-          className="flex-1"
-        />
-        <StatCard 
-          title="New Clients This Month"
-          value={clients.filter(client => {
-            const clientDate = new Date(client.created_at);
-            const now = new Date();
-            return clientDate.getMonth() === now.getMonth() && 
-                   clientDate.getFullYear() === now.getFullYear();
-          }).length}
-          icon={<Users className="h-4 w-4" />}
-          className="flex-1"
-        />
-        <StatCard 
-          title="Favorite Clients"
-          value={clients.filter(client => client.favorite).length}
-          icon={<Users className="h-4 w-4" />}
-          className="flex-1"
-        />
+      <div className="flex items-center gap-3 flex-wrap mb-6">
+        <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+            <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+              This Month: {clients.filter(client => {
+                const clientDate = new Date(client.created_at);
+                const now = new Date();
+                return clientDate.getMonth() === now.getMonth() && 
+                       clientDate.getFullYear() === now.getFullYear();
+              }).length}
+            </span>
+            <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+              Favorites: {clients.filter(client => client.favorite).length}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 mb-6">
@@ -398,13 +394,12 @@ const Clients = () => {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye Prescription</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye Prescription</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Add</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[240px]">Client Info</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[140px]">Right Eye</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[140px]">Left Eye</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-16">Add</TableHead>
               <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
-              <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold w-[84px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -420,18 +415,20 @@ const Clients = () => {
                   <TableCell className="py-3">
                     <div className="flex items-center gap-2">
                       <ClientAvatar gender={client.gender} name={client.name} />
-                      <span className="font-medium text-black">{client.name}</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-black">{client.name}</span>
+                        <span className="text-sm text-gray-500">{client.phone}</span>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3">{client.phone}</TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="py-3 text-sm">
                     {client.right_eye_sph ? 
-                      `${client.right_eye_sph} (${client.right_eye_cyl || 0} a ${client.right_eye_axe || 0})` 
+                      <span className="whitespace-nowrap">{client.right_eye_sph} ({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})</span>
                       : '-'}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className="py-3 text-sm">
                     {client.left_eye_sph ? 
-                      `${client.left_eye_sph} (${client.left_eye_cyl || 0} a ${client.left_eye_axe || 0})` 
+                      <span className="whitespace-nowrap">{client.left_eye_sph} ({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})</span>
                       : '-'}
                   </TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
