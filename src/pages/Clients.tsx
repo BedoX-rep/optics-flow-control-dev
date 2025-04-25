@@ -232,8 +232,8 @@ const Clients = () => {
 
   return (
     <div>
-      <div className="mt-8 mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center w-fit">
@@ -243,7 +243,19 @@ const Clients = () => {
             </DialogTrigger>
           </Dialog>
 
-          <div className="flex flex-col items-end gap-0.5">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
+            <Input 
+              type="text" 
+              placeholder="Search clients..."
+              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-0.5">
           <div className="flex items-baseline gap-1">
             <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
             <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
@@ -261,17 +273,6 @@ const Clients = () => {
               Favorites: {clients.filter(client => client.favorite).length}
             </span>
           </div>
-        </div>
-
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
-          <Input 
-            type="text" 
-            placeholder="Search clients..."
-            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
       </div>
 
