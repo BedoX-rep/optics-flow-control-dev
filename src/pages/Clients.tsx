@@ -162,8 +162,19 @@ const Clients = () => {
   };
 
   const handleEditClient = (client: Client) => {
+    // Ensure numeric fields are treated as numbers, including zero values
+    const processedClient = {
+      ...client,
+      right_eye_sph: client.right_eye_sph === undefined ? undefined : Number(client.right_eye_sph),
+      right_eye_cyl: client.right_eye_cyl === undefined ? undefined : Number(client.right_eye_cyl),
+      right_eye_axe: client.right_eye_axe === undefined ? undefined : Number(client.right_eye_axe),
+      left_eye_sph: client.left_eye_sph === undefined ? undefined : Number(client.left_eye_sph),
+      left_eye_cyl: client.left_eye_cyl === undefined ? undefined : Number(client.left_eye_cyl),
+      left_eye_axe: client.left_eye_axe === undefined ? undefined : Number(client.left_eye_axe),
+      Add: client.Add === undefined ? undefined : Number(client.Add),
+    };
     setEditingClient(client);
-    setNewClient({ ...client, id: undefined });
+    setNewClient({ ...processedClient, id: undefined });
     setIsOpen(true);
   };
 
