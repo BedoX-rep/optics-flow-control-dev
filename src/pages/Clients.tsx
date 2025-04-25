@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -232,30 +233,8 @@ const Clients = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center w-fit">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Client
-              </Button>
-            </DialogTrigger>
-          </Dialog>
-
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
-            <Input 
-              type="text" 
-              placeholder="Search clients..."
-              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end gap-0.5">
+      <div className="flex items-center gap-3 flex-wrap mb-6">
+        <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
           <div className="flex items-baseline gap-1">
             <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
             <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
@@ -276,7 +255,179 @@ const Clients = () => {
         </div>
       </div>
 
-      <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
+      <div className="flex flex-col gap-4 mb-6">
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center w-fit">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingClient ? 'Edit Client' : 'Add New Client'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  className="col-span-3"
+                  value={newClient.name}
+                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  className="col-span-3"
+                  value={newClient.phone}
+                  onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="gender" className="text-right">
+                  Gender
+                </Label>
+                <Select
+                  value={newClient.gender}
+                  onValueChange={(value) => setNewClient({ ...newClient, gender: value as "Mr" | "Mme" | "Enf" })}
+                >
+                  <SelectTrigger id="gender" className="col-span-3">
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mr">Mr</SelectItem>
+                    <SelectItem value="Mme">Mme</SelectItem>
+                    <SelectItem value="Enf">Enf</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Right Eye</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Input
+                      type="number"
+                      placeholder="SPH"
+                      value={newClient.right_eye_sph || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_sph: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="CYL"
+                      value={newClient.right_eye_cyl || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="AXE"
+                      value={newClient.right_eye_axe || ''}
+                      onChange={(e) => setNewClient({ ...newClient, right_eye_axe: parseInt(e.target.value) || undefined })}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Left Eye</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    <Input
+                      type="number"
+                      placeholder="SPH"
+                      value={newClient.left_eye_sph || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_sph: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="CYL"
+                      value={newClient.left_eye_cyl || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: parseFloat(e.target.value) || undefined })}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="AXE"
+                      value={newClient.left_eye_axe || ''}
+                      onChange={(e) => setNewClient({ ...newClient, left_eye_axe: parseInt(e.target.value) || undefined })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="add" className="text-right">
+                  Add
+                </Label>
+                <Input
+                  id="add"
+                  type="number"
+                  className="col-span-3"
+                  value={newClient.Add || ''}
+                  onChange={(e) => setNewClient({ ...newClient, Add: parseFloat(e.target.value) || undefined })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-right">
+                  Notes
+                </Label>
+                <Input
+                  id="notes"
+                  className="col-span-3"
+                  value={newClient.notes || ''}
+                  onChange={(e) => setNewClient({ ...newClient, notes: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="favorite" className="text-right">
+                  Favorite
+                </Label>
+                <input
+                  type="checkbox"
+                  id="favorite"
+                  className="col-span-3"
+                  checked={newClient.favorite || false}
+                  onChange={(e) => setNewClient({ ...newClient, favorite: e.target.checked })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsOpen(false);
+                  setEditingClient(null);
+                  setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '', favorite: false }); 
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="bg-black hover:bg-neutral-800 text-white"
+                onClick={handleAddClient}
+              >
+                {editingClient ? 'Update' : 'Add'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
+          <Input 
+            type="text" 
+            placeholder="Search clients..."
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
@@ -433,159 +584,6 @@ const Clients = () => {
           </TableBody>
         </Table>
       </div>
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingClient ? 'Edit Client' : 'Add New Client'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                className="col-span-3"
-                value={newClient.name}
-                onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phone" className="text-right">
-                Phone
-              </Label>
-              <Input
-                id="phone"
-                className="col-span-3"
-                value={newClient.phone}
-                onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="gender" className="text-right">
-                Gender
-              </Label>
-              <Select
-                value={newClient.gender}
-                onValueChange={(value) => setNewClient({ ...newClient, gender: value as "Mr" | "Mme" | "Enf" })}
-              >
-                <SelectTrigger id="gender" className="col-span-3">
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mr">Mr</SelectItem>
-                  <SelectItem value="Mme">Mme</SelectItem>
-                  <SelectItem value="Enf">Enf</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Right Eye</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <Input
-                    type="number"
-                    placeholder="SPH"
-                    value={newClient.right_eye_sph || ''}
-                    onChange={(e) => setNewClient({ ...newClient, right_eye_sph: parseFloat(e.target.value) || undefined })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="CYL"
-                    value={newClient.right_eye_cyl || ''}
-                    onChange={(e) => setNewClient({ ...newClient, right_eye_cyl: parseFloat(e.target.value) || undefined })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="AXE"
-                    value={newClient.right_eye_axe || ''}
-                    onChange={(e) => setNewClient({ ...newClient, right_eye_axe: parseInt(e.target.value) || undefined })}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label>Left Eye</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <Input
-                    type="number"
-                    placeholder="SPH"
-                    value={newClient.left_eye_sph || ''}
-                    onChange={(e) => setNewClient({ ...newClient, left_eye_sph: parseFloat(e.target.value) || undefined })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="CYL"
-                    value={newClient.left_eye_cyl || ''}
-                    onChange={(e) => setNewClient({ ...newClient, left_eye_cyl: parseFloat(e.target.value) || undefined })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="AXE"
-                    value={newClient.left_eye_axe || ''}
-                    onChange={(e) => setNewClient({ ...newClient, left_eye_axe: parseInt(e.target.value) || undefined })}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="add" className="text-right">
-                Add
-              </Label>
-              <Input
-                id="add"
-                type="number"
-                className="col-span-3"
-                value={newClient.Add || ''}
-                onChange={(e) => setNewClient({ ...newClient, Add: parseFloat(e.target.value) || undefined })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-right">
-                Notes
-              </Label>
-              <Input
-                id="notes"
-                className="col-span-3"
-                value={newClient.notes || ''}
-                onChange={(e) => setNewClient({ ...newClient, notes: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="favorite" className="text-right">
-                Favorite
-              </Label>
-              <input
-                type="checkbox"
-                id="favorite"
-                className="col-span-3"
-                checked={newClient.favorite || false}
-                onChange={(e) => setNewClient({ ...newClient, favorite: e.target.checked })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsOpen(false);
-                setEditingClient(null);
-                setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '', favorite: false }); 
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="bg-black hover:bg-neutral-800 text-white"
-              onClick={handleAddClient}
-            >
-              {editingClient ? 'Update' : 'Add'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
