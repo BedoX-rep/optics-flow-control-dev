@@ -2,15 +2,19 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
+// Define subscription status with correct casing to match what the app uses
+type SubscriptionStatus = 'active' | 'Active' | 'suspended' | 'Suspended' | 'cancelled' | 'Cancelled' | 'inactive' | 'inActive' | 'expired' | 'Expired';
 
 interface SubscriptionBadgeProps {
   status: SubscriptionStatus;
 }
 
 const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
+  // Normalize status to lowercase for consistent class mapping
+  const normalizedStatus = status.toLowerCase() as Lowercase<typeof status>;
+  
   const getStatusClasses = () => {
-    switch (status) {
+    switch (normalizedStatus) {
       case 'active':
         return 'status-badge status-active';
       case 'suspended':
@@ -28,7 +32,7 @@ const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
 
   return (
     <span className={cn(getStatusClasses())}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
     </span>
   );
 };

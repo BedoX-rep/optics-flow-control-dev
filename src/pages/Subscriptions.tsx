@@ -16,6 +16,9 @@ import SubscriptionBadge from '@/components/SubscriptionBadge';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
+                         'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+
 interface Subscription {
   id: string;
   email: string;
@@ -23,7 +26,7 @@ interface Subscription {
   start_date: string | null;
   end_date: string | null;
   subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
-  subscription_status: 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+  subscription_status: SubscriptionStatus;
   is_recurring: boolean;
   trial_used: boolean;
   price?: number;
@@ -114,7 +117,7 @@ const Subscriptions = () => {
           is_recurring: isRecurring,
           start_date: now.toISOString(),
           end_date: endDate.toISOString(),
-          subscription_status: 'active',
+          subscription_status: 'Active',
           trial_used: true,
           price: SUBSCRIPTION_PRICES[type]
         })

@@ -1,27 +1,17 @@
-
 import React from 'react';
 
 interface PageTitleProps {
   title: string;
   subtitle?: string;
-  actions?: React.ReactNode;
 }
 
-const PageTitle = ({ title, subtitle, actions }: PageTitleProps) => {
+const PageTitle: React.FC<PageTitleProps> = ({ title, subtitle }) => {
   return (
-    <div className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">{title}</h1>
-        {subtitle && <p className="mt-1 text-gray-500 max-w-2xl">{subtitle}</p>}
-      </div>
-      {actions && (
-        <div className="flex flex-wrap gap-3 items-center justify-start sm:justify-end">
-          {actions}
-        </div>
-      )}
+    <div className="mb-6">
+      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+      {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
     </div>
   );
 };
 
 export default PageTitle;
-

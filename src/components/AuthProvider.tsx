@@ -1,9 +1,9 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
+                         'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
 interface UserSubscription {
   subscription_status: SubscriptionStatus;
@@ -20,7 +20,7 @@ interface AuthContextType {
   subscription: UserSubscription | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
-  refreshSubscription: () => Promise<void>;
+  refreshSubscription: (force?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,11 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) throw error;
       
-      // Convert status to lowercase to match our expected type
       if (data) {
         const formattedSubscription: UserSubscription = {
           ...data,
-          subscription_status: data.subscription_status.toLowerCase() as SubscriptionStatus
+          subscription_status: data.subscription_status as SubscriptionStatus
         };
         setSubscription(formattedSubscription);
       }

@@ -55,9 +55,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Fix the clientData by ensuring name is included and not optional
       const clientData = {
         user_id: user?.id,
-        ...values
+        name: values.name, // Explicitly include name to satisfy TypeScript
+        phone: values.phone,
+        gender: values.gender,
+        right_eye_sph: values.right_eye_sph,
+        right_eye_cyl: values.right_eye_cyl,
+        right_eye_axe: values.right_eye_axe,
+        left_eye_sph: values.left_eye_sph,
+        left_eye_cyl: values.left_eye_cyl,
+        left_eye_axe: values.left_eye_axe
       }
 
       const { data, error } = await supabase

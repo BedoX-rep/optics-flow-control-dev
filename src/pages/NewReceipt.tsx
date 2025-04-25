@@ -168,7 +168,8 @@ const NewReceipt = () => {
           cyl: clientData.left_eye_cyl?.toString() || '',
           axe: clientData.left_eye_axe?.toString() || ''
         });
-        setAdd(clientData.add?.toString() || '');
+        const addValue = clientData.Add || 0;
+        setAdd(addValue.toString());
       }
     } catch (error) {
       console.error('Error fetching client prescription:', error);
