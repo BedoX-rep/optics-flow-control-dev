@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -75,7 +74,7 @@ const NewReceipt = () => {
         const { data: productsData, error: productsError } = await supabase
           .from('products')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (productsError) throw productsError;
@@ -84,7 +83,7 @@ const NewReceipt = () => {
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', user.id)
           .order('name', { ascending: true });
 
         if (clientsError) throw clientsError;
@@ -166,7 +165,7 @@ const NewReceipt = () => {
 
     try {
       setIsLoading(true);
-      
+
       // First insert the receipt
       const { data: receipt, error: receiptError } = await supabase
         .from('receipts')
@@ -230,7 +229,7 @@ const NewReceipt = () => {
   return (
     <div>
       <PageTitle title="New Receipt" subtitle="Create a new prescription receipt" />
-      
+
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
@@ -267,7 +266,7 @@ const NewReceipt = () => {
             <TabsTrigger value="items">Items</TabsTrigger>
             <TabsTrigger value="payment">Payment</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="prescription">
             <Card>
               <CardHeader>
@@ -304,7 +303,7 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-medium mb-3">Left Eye</h3>
                     <div className="grid grid-cols-3 gap-4">
@@ -338,7 +337,7 @@ const NewReceipt = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="items">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -387,7 +386,7 @@ const NewReceipt = () => {
                           </Select>
                         </div>
                       )}
-                      
+
                       <div className="w-20">
                         <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
                         <Input
@@ -398,7 +397,7 @@ const NewReceipt = () => {
                           onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                         />
                       </div>
-                      
+
                       <div className="w-32">
                         <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
                         <Input
@@ -410,14 +409,14 @@ const NewReceipt = () => {
                           onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
                         />
                       </div>
-                      
+
                       <div className="w-32">
                         <Label>Total</Label>
                         <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
                           {(item.price * item.quantity).toFixed(2)} DH
                         </div>
                       </div>
-                      
+
                       <Button 
                         variant="ghost" 
                         size="icon"
@@ -427,7 +426,7 @@ const NewReceipt = () => {
                       </Button>
                     </div>
                   ))}
-                  
+
                   {items.length === 0 && (
                     <div className="text-center p-8 text-gray-500">
                       <p>No items added yet. Click the buttons above to add items.</p>
@@ -437,7 +436,7 @@ const NewReceipt = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="payment">
             <Card>
               <CardHeader>
@@ -457,7 +456,7 @@ const NewReceipt = () => {
                         onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="discount">Discount (%)</Label>
                       <Input
@@ -469,7 +468,7 @@ const NewReceipt = () => {
                         onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
                       />
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="payment-method">Payment Method</Label>
                       <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -484,32 +483,32 @@ const NewReceipt = () => {
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                     <h3 className="font-medium text-lg">Summary</h3>
-                    
+
                     <div className="flex justify-between py-2 border-b">
                       <span>Subtotal:</span>
                       <span>{subtotal.toFixed(2)} DH</span>
                     </div>
-                    
+
                     <div className="flex justify-between py-2 border-b">
                       <span>Tax ({tax}%):</span>
                       <span>{taxAmount.toFixed(2)} DH</span>
                     </div>
-                    
+
                     <div className="flex justify-between py-2 border-b">
                       <span>Discount ({discount}%):</span>
                       <span>-{discountAmount.toFixed(2)} DH</span>
                     </div>
-                    
+
                     <div className="flex justify-between py-2 font-bold text-lg">
                       <span>Total:</span>
                       <span>{total.toFixed(2)} DH</span>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-8 flex justify-end space-x-4">
                   <Button 
                     variant="outline" 
