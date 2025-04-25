@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -18,10 +19,10 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Users } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ClientAvatar } from '@/components/ClientAvatar';
-import PageTitle from '@/components/PageTitle';
+import StatCard from '@/components/StatCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
@@ -39,7 +40,8 @@ interface Client {
   left_eye_axe?: number;
   Add?: number;
   notes?: string;
-  favorite?: boolean; // Added favorite field
+  favorite?: boolean;
+  created_at?: string;
 }
 
 const Clients = () => {
@@ -59,7 +61,7 @@ const Clients = () => {
     left_eye_axe: undefined,
     Add: undefined,
     notes: '',
-    favorite: false // Added favorite field
+    favorite: false
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -107,7 +109,7 @@ const Clients = () => {
             left_eye_axe: newClient.left_eye_axe,
             Add: newClient.Add,
             notes: newClient.notes,
-            favorite: newClient.favorite, // Added favorite field
+            favorite: newClient.favorite,
           })
           .eq('id', editingClient.id);
 
@@ -133,7 +135,7 @@ const Clients = () => {
             Add: newClient.Add,
             notes: newClient.notes,
             user_id: user.id,
-            favorite: newClient.favorite, // Added favorite field
+            favorite: newClient.favorite,
           });
 
         if (error) throw error;
@@ -225,26 +227,7 @@ const Clients = () => {
               Add Client
             </Button>
           </DialogTrigger>
-        
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
-          <Input 
-            type="text" 
-            placeholder="Search clients..."
-            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>
                 {editingClient ? 'Edit Client' : 'Add New Client'}
@@ -279,7 +262,7 @@ const Clients = () => {
                 </Label>
                 <Select
                   value={newClient.gender}
-                  onValueChange={(value) => setNewClient({ ...newClient, gender: value })}
+                  onValueChange={(value) => setNewClient({ ...newClient, gender: value as "Mr" | "Mme" | "Enf" })}
                 >
                   <SelectTrigger id="gender" className="col-span-3">
                     <SelectValue placeholder="Select gender" />
@@ -362,7 +345,7 @@ const Clients = () => {
                   onChange={(e) => setNewClient({ ...newClient, notes: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4"> {/* Added favorite input */}
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="favorite" className="text-right">
                   Favorite
                 </Label>
@@ -395,10 +378,21 @@ const Clients = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
+          <Input 
+            type="text" 
+            placeholder="Search clients..."
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-        <Table className="w-full">
+        <Table>
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
@@ -413,7 +407,7 @@ const Clients = () => {
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-10 text-neutral-400 font-medium">
+                <TableCell colSpan={7} className="text-center py-10 text-neutral-400 font-medium">
                   No clients found.
                 </TableCell>
               </TableRow>
