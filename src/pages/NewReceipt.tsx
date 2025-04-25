@@ -273,9 +273,28 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3">
-                <Label htmlFor="client">Select Client</Label>
-                <Select value={selectedClient} onValueChange={handleClientSelect}>
+              <div className="md:col-span-3 space-y-4">
+                <div>
+                  <Label htmlFor="client-search">Search Client</Label>
+                  <Input
+                    id="client-search"
+                    type="text"
+                    placeholder="Search by name or phone..."
+                    className="mb-2"
+                    onChange={(e) => {
+                      const searchTerm = e.target.value.toLowerCase();
+                      setClients(prevClients => 
+                        prevClients.filter(client => 
+                          client.name.toLowerCase().includes(searchTerm) ||
+                          (client.phone && client.phone.includes(searchTerm))
+                        )
+                      );
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="client">Select Client</Label>
+                  <Select value={selectedClient} onValueChange={handleClientSelect}>
                   <SelectTrigger id="client">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
