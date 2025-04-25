@@ -231,6 +231,256 @@ const NewReceipt = () => {
       <PageTitle title="New Receipt" subtitle="Create a new prescription receipt" />
 
       <div className="grid grid-cols-1 gap-6">
+        <Tabs defaultValue="prescription" className="mb-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="prescription">Prescription</TabsTrigger>
+            <TabsTrigger value="items-payment">Items & Payment</TabsTrigger>
+          </TabsList>
+          <TabsContent value="prescription">
+            <Card>
+              <CardHeader>
+                <CardTitle>Prescription Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Right Eye</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="rightSph">SPH</Label>
+                        <Input 
+                          id="rightSph"
+                          value={rightEye.sph}
+                          onChange={(e) => setRightEye({ ...rightEye, sph: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rightCyl">CYL</Label>
+                        <Input 
+                          id="rightCyl"
+                          value={rightEye.cyl}
+                          onChange={(e) => setRightEye({ ...rightEye, cyl: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rightAxe">AXE</Label>
+                        <Input 
+                          id="rightAxe"
+                          value={rightEye.axe}
+                          onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Left Eye</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="leftSph">SPH</Label>
+                        <Input 
+                          id="leftSph"
+                          value={leftEye.sph}
+                          onChange={(e) => setLeftEye({ ...leftEye, sph: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="leftCyl">CYL</Label>
+                        <Input 
+                          id="leftCyl"
+                          value={leftEye.cyl}
+                          onChange={(e) => setLeftEye({ ...leftEye, cyl: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="leftAxe">AXE</Label>
+                        <Input 
+                          id="leftAxe"
+                          value={leftEye.axe}
+                          onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="items-payment">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="md:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Receipt Items</CardTitle>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" onClick={() => addItem('custom')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Custom Item
+                    </Button>
+                    <Button onClick={() => addItem('product')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Product
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex items-end gap-4 p-4 border rounded-md">
+                        {item.customName !== undefined ? (
+                          <div className="flex-1">
+                            <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
+                            <Input
+                              id={`custom-${item.id}`}
+                              value={item.customName || ''}
+                              onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-1">
+                            <Label htmlFor={`product-${item.id}`}>Product</Label>
+                            <Select 
+                              value={item.productId} 
+                              onValueChange={(value) => updateItem(item.id, 'productId', value)}
+                            >
+                              <SelectTrigger id={`product-${item.id}`}>
+                                <SelectValue placeholder="Select a product" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {products.map(product => (
+                                  <SelectItem key={product.id} value={product.id}>
+                                    {product.name} - {product.price.toFixed(2)} DH
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+
+                        <div className="w-20">
+                          <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                          <Input
+                            id={`quantity-${item.id}`}
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                          />
+                        </div>
+
+                        <div className="w-32">
+                          <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
+                          <Input
+                            id={`price-${item.id}`}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.price}
+                            onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+
+                        <div className="w-32">
+                          <Label>Total</Label>
+                          <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                            {(item.price * item.quantity).toFixed(2)} DH
+                          </div>
+                        </div>
+
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+
+                    {items.length === 0 && (
+                      <div className="text-center p-8 text-gray-500">
+                        <p>No items added yet. Click the buttons above to add items.</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Payment Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="tax">Tax (%)</Label>
+                        <Input
+                          id="tax"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={tax}
+                          onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="discount">Discount (%)</Label>
+                        <Input
+                          id="discount"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={discount}
+                          onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="payment-method">Payment Method</Label>
+                        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                          <SelectTrigger id="payment-method">
+                            <SelectValue placeholder="Select payment method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="cash">Cash</SelectItem>
+                            <SelectItem value="card">Card</SelectItem>
+                            <SelectItem value="bank">Bank Transfer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-medium text-lg">Summary</h3>
+
+                      <div className="flex justify-between py-2 border-b">
+                        <span>Subtotal:</span>
+                        <span>{subtotal.toFixed(2)} DH</span>
+                      </div>
+
+                      <div className="flex justify-between py-2 border-b">
+                        <span>Tax ({tax}%):</span>
+                        <span>{taxAmount.toFixed(2)} DH</span>
+                      </div>
+
+                      <div className="flex justify-between py-2 border-b">
+                        <span>Discount ({discount}%):</span>
+                        <span>-{discountAmount.toFixed(2)} DH</span>
+                      </div>
+
+                      <div className="flex justify-between py-2 font-bold text-lg">
+                        <span>Total:</span>
+                        <span>{total.toFixed(2)} DH</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
         <Card>
           <CardHeader>
             <CardTitle>Client Information</CardTitle>
@@ -260,15 +510,7 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
 
-        <div className="flex justify-center mb-4"> {/*Added div for tabs*/}
-          <div className="w-full max-w-3xl"> {/*Added div for tabs*/}
-            <Tabs defaultValue="prescription">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="prescription">Prescription</TabsTrigger>
-                <TabsTrigger value="items">Items</TabsTrigger>
-                <TabsTrigger value="payment">Payment</TabsTrigger>
-              </TabsList>
-              <TabsContent value="prescription">
+        <div className="mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Prescription Details</CardTitle>
