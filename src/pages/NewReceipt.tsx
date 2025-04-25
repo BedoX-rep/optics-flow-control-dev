@@ -50,6 +50,9 @@ const NewReceipt = () => {
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
   const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
+  const [add, setAdd] = useState('');
+  const [prescriptionOpen, setPrescriptionOpen] = useState(true);
+  const [paymentOpen, setPaymentOpen] = useState(true);
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -171,6 +174,7 @@ const NewReceipt = () => {
           left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
           left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
           left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+          add: add ? parseFloat(add) : null,
           subtotal,
           tax: taxAmount,
           discount_amount: discountAmount,
@@ -251,10 +255,13 @@ const NewReceipt = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Prescription Details</CardTitle>
+          <CardHeader className="cursor-pointer" onClick={() => setPrescriptionOpen(!prescriptionOpen)}>
+            <div className="flex justify-between items-center">
+              <CardTitle>Prescription Details</CardTitle>
+              <ChevronDown className={`h-4 w-4 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className={`${prescriptionOpen ? '' : 'hidden'}`}>
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-3">Right Eye</h3>
@@ -314,6 +321,15 @@ const NewReceipt = () => {
                     />
                   </div>
                 </div>
+              </div>
+              <div className="mt-6">
+                <Label htmlFor="add">ADD</Label>
+                <Input
+                  id="add"
+                  value={add}
+                  onChange={(e) => setAdd(e.target.value)}
+                  placeholder="Enter ADD value"
+                />
               </div>
             </div>
           </CardContent>
@@ -417,10 +433,13 @@ const NewReceipt = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Payment Details</CardTitle>
+          <CardHeader className="cursor-pointer" onClick={() => setPaymentOpen(!paymentOpen)}>
+            <div className="flex justify-between items-center">
+              <CardTitle>Payment Details</CardTitle>
+              <ChevronDown className={`h-4 w-4 transition-transform ${paymentOpen ? 'transform rotate-180' : ''}`} />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className={`${paymentOpen ? '' : 'hidden'}`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>

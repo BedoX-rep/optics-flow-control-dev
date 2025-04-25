@@ -123,6 +123,10 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                   </div>
                 </div>
               </div>
+              <div className="mt-4">
+                <p className="text-gray-500">ADD</p>
+                <p className="font-medium">{receipt.add || 'N/A'}</p>
+              </div>
             </div>
           </div>
         </div>
