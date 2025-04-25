@@ -194,9 +194,38 @@ const Clients = () => {
 
   return (
     <div>
-      <PageTitle title="Clients" subtitle="Manage your client directory" />
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <StatCard 
+          title="Total Clients"
+          value={clients.length}
+          icon={<Users className="h-4 w-4" />}
+        />
+        <StatCard 
+          title="New Clients This Month"
+          value={clients.filter(client => {
+            const clientDate = new Date(client.created_at);
+            const now = new Date();
+            return clientDate.getMonth() === now.getMonth() && 
+                   clientDate.getFullYear() === now.getFullYear();
+          }).length}
+          icon={<Users className="h-4 w-4" />}
+        />
+        <StatCard 
+          title="Favorite Clients"
+          value={clients.filter(client => client.favorite).length}
+          icon={<Users className="h-4 w-4" />}
+        />
+      </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 mb-6">
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center w-fit">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </DialogTrigger>
+        
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input 
@@ -378,7 +407,6 @@ const Clients = () => {
               <TableHead className="text-black text-xs font-semibold">Left Eye Prescription</TableHead>
               <TableHead className="text-black text-xs font-semibold">Add</TableHead>
               <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
-              <TableHead className="text-right text-black text-xs font-semibold">Favorite</TableHead> {/* Added Favorite Header */}
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -411,47 +439,45 @@ const Clients = () => {
                   </TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
                   <TableCell className="py-3">{client.notes || '-'}</TableCell>
-                  <TableCell className="py-3">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="hover:bg-black/10"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const newFavorite = !client.favorite;
-                        const { error } = await supabase
-                          .from('clients')
-                          .update({ favorite: newFavorite })
-                          .eq('id', client.id);
-
-                        if (error) {
-                          toast({
-                            title: "Error",
-                            description: "Failed to update favorite status",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-
-                        setClients(clients.map(c => 
-                          c.id === client.id ? {...c, favorite: newFavorite} : c
-                        ));
-                      }}
-                    >
-                      <svg 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill={client.favorite ? "#FFD700" : "none"}
-                        stroke={client.favorite ? "#FFD700" : "currentColor"}
-                        strokeWidth="2"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    </Button>
-                  </TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="hover:bg-black/10"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newFavorite = !client.favorite;
+                          const { error } = await supabase
+                            .from('clients')
+                            .update({ favorite: newFavorite })
+                            .eq('id', client.id);
+
+                          if (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update favorite status",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+
+                          setClients(clients.map(c => 
+                            c.id === client.id ? {...c, favorite: newFavorite} : c
+                          ));
+                        }}
+                      >
+                        <svg 
+                          width="20" 
+                          height="20" 
+                          viewBox="0 0 24 24" 
+                          fill={client.favorite ? "#FFD700" : "none"}
+                          stroke={client.favorite ? "#FFD700" : "currentColor"}
+                          strokeWidth="2"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      </Button>
                       <Button 
                         variant="ghost" 
                         size="icon"
