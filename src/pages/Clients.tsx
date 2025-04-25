@@ -21,7 +21,7 @@ import { Plus, Pencil, Trash2, Search, Users } from 'lucide-react';
 import { ClientAvatar } from '@/components/ClientAvatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
 import EditClientDialog from '@/components/EditClientDialog';
 
@@ -29,7 +29,7 @@ interface Client {
   id: string;
   name: string;
   phone: string;
-  gender: string;
+  gender: "Mr" | "Mme" | "Enf";
   right_eye_sph?: number;
   right_eye_cyl?: number;
   right_eye_axe?: number;
@@ -40,7 +40,7 @@ interface Client {
   notes?: string;
   favorite?: boolean;
   created_at?: string;
-  is_deleted?: boolean;
+  is_deleted?: boolean; // Added is_deleted field
 }
 
 const Clients = () => {
@@ -66,7 +66,7 @@ const Clients = () => {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
-      .eq('is_deleted', false)
+      .eq('is_deleted', false) // Added filter for deleted clients
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -86,7 +86,7 @@ const Clients = () => {
     try {
       const { error } = await supabase
         .from('clients')
-        .update({ is_deleted: true })
+        .update({ is_deleted: true }) // Soft delete
         .eq('id', id);
 
       if (error) throw error;

@@ -1,54 +1,125 @@
 
-import { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import Layout from "@/components/Layout";
-import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
-import Products from "@/pages/Products";
-import Clients from "@/pages/Clients";
-import Receipts from "@/pages/Receipts";
-import Dashboard from "@/pages/Dashboard";
-import Subscriptions from "@/pages/Subscriptions";
-import NewReceipt from "@/pages/NewReceipt";
-import NotFound from "@/pages/NotFound";
-import { AuthProvider } from "@/context/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import Products from "./pages/Products";
+import Clients from "./pages/Clients";
+import Receipts from "./pages/Receipts";
+import NewReceipt from "./pages/NewReceipt";
+import Subscriptions from "./pages/Subscriptions";
+import Auth from "./pages/Auth";
+import NotFound from "./pages/NotFound";
+import { AuthProvider, useAuth } from "./components/AuthProvider";
 
-function App() {
-  const { toast } = useToast();
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
-  useEffect(() => {
-    toast({
-      title: "Welcome 🚀",
-      description: "Ready to create something amazing?",
-    });
-  }, [toast]);
+// Protected route wrapper
+const ProtectedRoute = ({ 
+  children, 
+  requiresActiveSubscription = true 
+}: { 
+  children: React.ReactNode;
+  requiresActiveSubscription?: boolean;
+}) => {
+  const { user, subscription, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-24 bg-gray-200 rounded-md mb-4"></div>
+          <div className="h-2 w-16 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (requiresActiveSubscription) {
+    // Check if subscription exists and is active, accounting for potential case variations
+    const status = subscription?.subscription_status?.toLowerCase();
+    if (!subscription || status !== 'active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
+  }
+  
+  return <>{children}</>;
+};
 
-  return (
-    <BrowserRouter>
+// App Routes
+const AppRoutes = () => (
+  <Routes>
+    <Route path="/auth" element={<Auth />} />
+    
+    <Route path="/" element={
+      <ProtectedRoute>
+        <Layout><Dashboard /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/products" element={
+      <ProtectedRoute>
+        <Layout><Products /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/clients" element={
+      <ProtectedRoute>
+        <Layout><Clients /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/receipts" element={
+      <ProtectedRoute>
+        <Layout><Receipts /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/new-receipt" element={
+      <ProtectedRoute>
+        <Layout><NewReceipt /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/subscriptions" element={
+      <ProtectedRoute requiresActiveSubscription={false}>
+        <Layout><Subscriptions /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
+// Main App Component
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          
-          <Route element={<Layout><Outlet /></Layout>}>
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/receipts" element={<Receipts />} />
-              <Route path="/new-receipt" element={<NewReceipt />} />
-            </Route>
-            <Route path="/subscriptions" element={<Subscriptions />} />
-          </Route>
-          
-          <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
       </AuthProvider>
-    </BrowserRouter>
-  );
-}
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
+

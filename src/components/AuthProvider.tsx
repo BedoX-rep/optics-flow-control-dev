@@ -3,13 +3,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-// Use both lowercase and uppercase versions to handle both formats
-type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' | 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
-type SubscriptionType = 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
 
 interface UserSubscription {
   subscription_status: SubscriptionStatus;
-  subscription_type: SubscriptionType;
+  subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
   start_date: string | null;
   end_date: string | null;
   is_recurring: boolean;
@@ -51,11 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       if (error) throw error;
-      
-      if (data) {
-        setSubscription(data as UserSubscription);
-        setLastRefreshTime(Date.now());
-      }
+      setSubscription(data);
+      setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
