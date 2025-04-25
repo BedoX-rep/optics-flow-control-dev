@@ -446,7 +446,9 @@ const Clients = () => {
           />
         </div>
       </div>
-      <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
+      {/* Table Container */}
+      <div className="mt-6">
+        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
