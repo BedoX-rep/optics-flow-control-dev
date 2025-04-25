@@ -27,6 +27,7 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import AddClientDialog from '@/components/AddClientDialog';
 
 interface Product {
   id: string;
@@ -62,6 +63,11 @@ const NewReceipt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [showAddClient, setShowAddClient] = useState(false);
+
+  const handleClientAdded = (client: { id: string; name: string }) => {
+    setSelectedClient(client.id);
+    setShowAddClient(false);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -523,6 +529,11 @@ const NewReceipt = () => {
           </Button>
         </div>
       </div>
+      <AddClientDialog 
+        isOpen={showAddClient}
+        onClose={() => setShowAddClient(false)}
+        onClientAdded={handleClientAdded}
+      />
     </div>
   );
 };
