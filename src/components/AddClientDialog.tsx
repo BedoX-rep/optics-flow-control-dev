@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -25,7 +26,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
-  gender: z.enum(["Mr", "Mme", "Enf"])
+  gender: z.enum(["Mr", "Mme", "Enf"]),
+  right_eye_sph: z.number().optional(),
+  right_eye_cyl: z.number().optional(),
+  right_eye_axe: z.number().optional(),
+  left_eye_sph: z.number().optional(),
+  left_eye_cyl: z.number().optional(),
+  left_eye_axe: z.number().optional(),
 })
 
 interface AddClientDialogProps {
@@ -43,13 +50,6 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       name: "",
       phone: "",
       gender: undefined,
-      right_eye_sph: undefined,
-      right_eye_cyl: undefined,
-      right_eye_axe: undefined,
-      left_eye_sph: undefined,
-      left_eye_cyl: undefined,
-      left_eye_axe: undefined,
-
     },
   })
 
@@ -57,15 +57,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     try {
       const clientData = {
         user_id: user?.id,
-        name: values.name,
-        phone: values.phone,
-        gender: values.gender,
-        right_eye_sph: values.right_eye_sph,
-        right_eye_cyl: values.right_eye_cyl,
-        right_eye_axe: values.right_eye_axe,
-        left_eye_sph: values.left_eye_sph,
-        left_eye_cyl: values.left_eye_cyl,
-        left_eye_axe: values.left_eye_axe,
+        ...values
       }
 
       const { data, error } = await supabase
@@ -99,38 +91,40 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-[600px] p-6">
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="tel" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="tel" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="gender"
@@ -151,133 +145,142 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </FormItem>
               )}
             />
-            <div>
-              <h3>Right Eye</h3>
-              <FormField
-                control={form.control}
-                name="right_eye_sph"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sph</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="right_eye_cyl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cyl</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="right_eye_axe"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Axe</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium">Right Eye</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="right_eye_sph"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Sph</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="right_eye_cyl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Cyl</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="right_eye_axe"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Axe</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium">Left Eye</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="left_eye_sph"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Sph</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="left_eye_cyl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Cyl</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="left_eye_axe"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Axe</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              field.onChange(value);
+                            }} 
+                            className="h-8"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <h3>Left Eye</h3>
-              <FormField
-                control={form.control}
-                name="left_eye_sph"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sph</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="left_eye_cyl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cyl</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="left_eye_axe"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Axe</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          field.onChange(value);
-                        }} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex justify-end gap-4">
+
+            <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
