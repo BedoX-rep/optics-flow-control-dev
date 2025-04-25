@@ -51,7 +51,9 @@ const ProtectedRoute = ({
   }
   
   if (requiresActiveSubscription) {
-    if (!subscription || subscription.subscription_status.toLowerCase() !== 'active') {
+    // Check if subscription exists and is active, accounting for potential case variations
+    const status = subscription?.subscription_status?.toLowerCase();
+    if (!subscription || status !== 'active') {
       return <Navigate to="/subscriptions" replace />;
     }
   }

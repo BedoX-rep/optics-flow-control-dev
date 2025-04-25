@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-type SubscriptionStatus = 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
 
 interface UserSubscription {
   subscription_status: SubscriptionStatus;

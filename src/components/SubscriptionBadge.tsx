@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type SubscriptionStatus = 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
 
 interface SubscriptionBadgeProps {
   status: SubscriptionStatus;

@@ -119,7 +119,7 @@ const Subscriptions = () => {
           is_recurring: isRecurring,
           start_date: now.toISOString(),
           end_date: endDate.toISOString(),
-          subscription_status: 'Active',
+          subscription_status: 'active',
           trial_used: true,
           price: SUBSCRIPTION_PRICES[type]
         })
