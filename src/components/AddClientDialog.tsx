@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { useAuth } from "@/components/AuthProvider"
+import { useAuth } from "@/context/AuthContext"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const formSchema = z.object({
@@ -49,15 +49,25 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     defaultValues: {
       name: "",
       phone: "",
-      gender: undefined,
+      gender: "Mr" as const,
     },
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (!user) return;
+      
       const clientData = {
-        user_id: user?.id,
-        ...values
+        user_id: user.id,
+        name: values.name, // Ensuring name is included and required
+        phone: values.phone,
+        gender: values.gender,
+        right_eye_sph: values.right_eye_sph,
+        right_eye_cyl: values.right_eye_cyl,
+        right_eye_axe: values.right_eye_axe,
+        left_eye_sph: values.left_eye_sph,
+        left_eye_cyl: values.left_eye_cyl,
+        left_eye_axe: values.left_eye_axe
       }
 
       const { data, error } = await supabase

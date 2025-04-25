@@ -4,8 +4,12 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
+// Use both lowercase and uppercase versions to handle both formats
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' | 
+                        'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+
 interface SubscriptionDetails {
-  subscription_status: 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+  subscription_status: SubscriptionStatus;
   subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
   end_date: string | null;
 }

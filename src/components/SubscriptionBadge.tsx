@@ -2,24 +2,29 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired';
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' | 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
 interface SubscriptionBadgeProps {
   status: SubscriptionStatus;
 }
 
 const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
+  const normalizedStatus = typeof status === 'string' ? status : 'inactive';
+
   const getStatusClasses = () => {
-    switch (status) {
-      case 'Active':
+    const statusLower = normalizedStatus.toLowerCase();
+    
+    switch (statusLower) {
+      case 'active':
         return 'status-badge status-active';
-      case 'Suspended':
+      case 'suspended':
         return 'status-badge status-suspended';
-      case 'Cancelled':
+      case 'cancelled':
         return 'status-badge status-cancelled';
-      case 'inActive':
+      case 'inactive':
+      case 'inactive':
         return 'status-badge status-inactive';
-      case 'Expired':
+      case 'expired':
         return 'status-badge status-expired';
       default:
         return 'status-badge status-inactive';
@@ -28,7 +33,7 @@ const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
 
   return (
     <span className={cn(getStatusClasses())}>
-      {status}
+      {normalizedStatus}
     </span>
   );
 };

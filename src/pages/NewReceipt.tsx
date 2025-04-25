@@ -1,3 +1,6 @@
+
+// In this file we'll fix line 171, changing `clientData.add` to `clientData.Add`
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -168,7 +171,7 @@ const NewReceipt = () => {
           cyl: clientData.left_eye_cyl?.toString() || '',
           axe: clientData.left_eye_axe?.toString() || ''
         });
-        setAdd(clientData.add?.toString() || '');
+        setAdd(clientData.Add?.toString() || '');
       }
     } catch (error) {
       console.error('Error fetching client prescription:', error);
