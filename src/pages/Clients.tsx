@@ -39,6 +39,7 @@ interface Client {
   left_eye_axe?: number;
   Add?: number;
   notes?: string;
+  favorite?: boolean; // Added favorite field
 }
 
 const Clients = () => {
@@ -57,7 +58,8 @@ const Clients = () => {
     left_eye_cyl: undefined,
     left_eye_axe: undefined,
     Add: undefined,
-    notes: ''
+    notes: '',
+    favorite: false // Added favorite field
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -105,6 +107,7 @@ const Clients = () => {
             left_eye_axe: newClient.left_eye_axe,
             Add: newClient.Add,
             notes: newClient.notes,
+            favorite: newClient.favorite, // Added favorite field
           })
           .eq('id', editingClient.id);
 
@@ -130,6 +133,7 @@ const Clients = () => {
             Add: newClient.Add,
             notes: newClient.notes,
             user_id: user.id,
+            favorite: newClient.favorite, // Added favorite field
           });
 
         if (error) throw error;
@@ -140,7 +144,7 @@ const Clients = () => {
         });
       }
 
-      setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '' }); 
+      setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '', favorite: false }); 
       setEditingClient(null);
       setIsOpen(false);
       fetchClients();
@@ -329,6 +333,18 @@ const Clients = () => {
                   onChange={(e) => setNewClient({ ...newClient, notes: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4"> {/* Added favorite input */}
+                <Label htmlFor="favorite" className="text-right">
+                  Favorite
+                </Label>
+                <input
+                  type="checkbox"
+                  id="favorite"
+                  className="col-span-3"
+                  checked={newClient.favorite || false}
+                  onChange={(e) => setNewClient({ ...newClient, favorite: e.target.checked })}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button 
@@ -336,7 +352,7 @@ const Clients = () => {
                 onClick={() => {
                   setIsOpen(false);
                   setEditingClient(null);
-                  setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '' }); 
+                  setNewClient({ name: '', phone: '', gender: 'Mr', right_eye_sph: undefined, right_eye_cyl: undefined, right_eye_axe: undefined, left_eye_sph: undefined, left_eye_cyl: undefined, left_eye_axe: undefined, Add: undefined, notes: '', favorite: false }); 
                 }}
               >
                 Cancel
@@ -362,6 +378,7 @@ const Clients = () => {
               <TableHead className="text-black text-xs font-semibold">Left Eye Prescription</TableHead>
               <TableHead className="text-black text-xs font-semibold">Add</TableHead>
               <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold">Favorite</TableHead> {/* Added Favorite Header */}
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -394,6 +411,45 @@ const Clients = () => {
                   </TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
                   <TableCell className="py-3">{client.notes || '-'}</TableCell>
+                  <TableCell className="py-3">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="hover:bg-black/10"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const newFavorite = !client.favorite;
+                        const { error } = await supabase
+                          .from('clients')
+                          .update({ favorite: newFavorite })
+                          .eq('id', client.id);
+
+                        if (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to update favorite status",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        setClients(clients.map(c => 
+                          c.id === client.id ? {...c, favorite: newFavorite} : c
+                        ));
+                      }}
+                    >
+                      <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill={client.favorite ? "#FFD700" : "none"}
+                        stroke={client.favorite ? "#FFD700" : "currentColor"}
+                        strokeWidth="2"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </Button>
+                  </TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
