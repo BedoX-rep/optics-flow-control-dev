@@ -33,12 +33,14 @@ const formSchema = z.object({
   left_eye_sph: z.number().optional(),
   left_eye_cyl: z.number().optional(),
   left_eye_axe: z.number().optional(),
+  Add: z.number().optional()
 })
 
 interface AddClientDialogProps {
   isOpen: boolean
   onClose: () => void
   onClientAdded: (client: { id: string; name: string }) => void
+  client?: any
 }
 
 const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {
@@ -47,9 +49,16 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      phone: "",
-      gender: undefined,
+      name: client?.name || "",
+      phone: client?.phone || "",
+      gender: client?.gender,
+      right_eye_sph: client?.right_eye_sph,
+      right_eye_cyl: client?.right_eye_cyl,
+      right_eye_axe: client?.right_eye_axe,
+      left_eye_sph: client?.left_eye_sph,
+      left_eye_cyl: client?.left_eye_cyl,
+      left_eye_axe: client?.left_eye_axe,
+      Add: client?.Add,
     },
   })
 
@@ -60,11 +69,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         ...values
       }
 
-      const { data, error } = await supabase
-        .from("clients")
-        .insert(clientData)
-        .select()
-        .single()
+      const { data, error } = client?.id 
+        ? await supabase
+            .from("clients")
+            .update(clientData)
+            .eq('id', client.id)
+            .select()
+            .single()
+        : await supabase
+            .from("clients")
+            .insert(clientData)
+            .select()
+            .single()
 
       if (error) throw error
 
@@ -279,6 +295,27 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </div>
               </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="Add"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : Number(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
