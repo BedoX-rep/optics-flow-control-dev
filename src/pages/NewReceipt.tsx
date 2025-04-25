@@ -134,6 +134,46 @@ const NewReceipt = () => {
   const discountAmount = (subtotal * discount) / 100;
   const total = subtotal + taxAmount - discountAmount;
 
+  const fetchClientPrescription = async (clientId: string) => {
+    if (!user) return;
+    
+    try {
+      const { data: clientData, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      if (error) throw error;
+
+      if (clientData) {
+        setRightEye({
+          sph: clientData.right_eye_sph?.toString() || '',
+          cyl: clientData.right_eye_cyl?.toString() || '',
+          axe: clientData.right_eye_axe?.toString() || ''
+        });
+        setLeftEye({
+          sph: clientData.left_eye_sph?.toString() || '',
+          cyl: clientData.left_eye_cyl?.toString() || '',
+          axe: clientData.left_eye_axe?.toString() || ''
+        });
+        setAdd(clientData.add?.toString() || '');
+      }
+    } catch (error) {
+      console.error('Error fetching client prescription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load client prescription",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClient(clientId);
+    fetchClientPrescription(clientId);
+  };
+
   const handleSaveReceipt = async () => {
     if (!user) {
       toast({
@@ -235,7 +275,7 @@ const NewReceipt = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-3">
                 <Label htmlFor="client">Select Client</Label>
-                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                <Select value={selectedClient} onValueChange={handleClientSelect}>
                   <SelectTrigger id="client">
                     <SelectValue placeholder="Select a client" />
                   </SelectTrigger>
