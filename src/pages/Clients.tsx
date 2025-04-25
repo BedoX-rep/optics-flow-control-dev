@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
+import EditClientDialog from '@/components/EditClientDialog';
 
 interface Client {
   id: string;
@@ -361,18 +362,32 @@ const Clients = () => {
         </div>
       </div>
 
-      <AddClientDialog
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-          setEditingClient(null);
-        }}
-        onClientAdded={(client) => {
-          fetchClients();
-          setIsOpen(false);
-          setEditingClient(null);
-        }}
-      />
+      {editingClient ? (
+        <EditClientDialog
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+            setEditingClient(null);
+          }}
+          onClientUpdated={() => {
+            fetchClients();
+            setIsOpen(false);
+            setEditingClient(null);
+          }}
+          client={editingClient}
+        />
+      ) : (
+        <AddClientDialog
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          onClientAdded={(client) => {
+            fetchClients();
+            setIsOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };
