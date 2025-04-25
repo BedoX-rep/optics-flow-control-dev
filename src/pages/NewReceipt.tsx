@@ -71,6 +71,16 @@ const NewReceipt = () => {
           return;
         }
 
+        if (!subscription || subscription.subscription_status !== 'Active') {
+          toast({
+            title: "Subscription Required",
+            description: "You need an active subscription to access this feature.",
+            variant: "destructive",
+          });
+          navigate('/subscriptions');
+          return;
+        }
+
         // Fetch products and clients
         const { data: productsData, error: productsError } = await supabase
           .from('products')
