@@ -52,7 +52,8 @@ const ProtectedRoute = ({
   
   if (requiresActiveSubscription) {
     // Check if subscription exists and is active, using lowercase for consistent comparison
-    if (!subscription || subscription.subscription_status !== 'active') {
+    const subStatus = subscription?.subscription_status.toLowerCase();
+    if (!subscription || subStatus !== 'active') {
       return <Navigate to="/subscriptions" replace />;
     }
   }

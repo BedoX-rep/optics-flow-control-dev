@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       
       if (data) {
+        // Ensure we're using the actual data with its original case
         const formattedSubscription: UserSubscription = {
           ...data,
           subscription_status: data.subscription_status as SubscriptionStatus
