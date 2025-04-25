@@ -15,7 +15,7 @@ interface StatCardProps {
 const StatCard = ({ title, value, change, icon, className }: StatCardProps) => {
   return (
     <Card className={cn("overflow-hidden card-shadow border border-gray-100 hover-scale", className)}>
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium text-gray-500">{title}</h3>
           {icon && (

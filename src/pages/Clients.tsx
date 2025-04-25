@@ -196,11 +196,12 @@ const Clients = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="flex gap-3 mb-6">
         <StatCard 
           title="Total Clients"
           value={clients.length}
           icon={<Users className="h-4 w-4" />}
+          className="flex-1"
         />
         <StatCard 
           title="New Clients This Month"
@@ -211,11 +212,13 @@ const Clients = () => {
                    clientDate.getFullYear() === now.getFullYear();
           }).length}
           icon={<Users className="h-4 w-4" />}
+          className="flex-1"
         />
         <StatCard 
           title="Favorite Clients"
           value={clients.filter(client => client.favorite).length}
           icon={<Users className="h-4 w-4" />}
+          className="flex-1"
         />
       </div>
 
