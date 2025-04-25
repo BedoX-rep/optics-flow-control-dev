@@ -61,6 +61,7 @@ const NewReceipt = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [showAddClient, setShowAddClient] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -256,7 +257,7 @@ const NewReceipt = () => {
               </div>
               <div>
                 <Label>&nbsp;</Label>
-                <Button className="w-full" onClick={() => navigate('/clients')}>Add New Client</Button>
+                <Button className="w-full" onClick={() => setShowAddClient(true)}>Add New Client</Button>
               </div>
             </div>
           </CardContent>
