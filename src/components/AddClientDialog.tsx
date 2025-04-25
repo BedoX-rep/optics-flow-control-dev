@@ -160,7 +160,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Sph</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,7 +180,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Cyl</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,7 +200,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Axe</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -202,7 +223,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Sph</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -215,7 +243,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Cyl</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -228,7 +263,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormItem>
                     <FormLabel>Axe</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : Number(e.target.value);
+                          field.onChange(value);
+                        }} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
