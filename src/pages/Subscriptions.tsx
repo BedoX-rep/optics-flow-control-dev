@@ -16,8 +16,7 @@ import SubscriptionBadge from '@/components/SubscriptionBadge';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
-type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
-                         'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+type SubscriptionStatus = 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
 interface Subscription {
   id: string;
@@ -117,7 +116,7 @@ const Subscriptions = () => {
           is_recurring: isRecurring,
           start_date: now.toISOString(),
           end_date: endDate.toISOString(),
-          subscription_status: 'active',
+          subscription_status: 'Active',
           trial_used: true,
           price: SUBSCRIPTION_PRICES[type]
         })
