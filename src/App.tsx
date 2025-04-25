@@ -50,10 +50,10 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
   
-  if (requiresActiveSubscription && 
-      subscription && 
-      subscription.subscription_status !== 'Active') {
-    return <Navigate to="/subscriptions" replace />;
+  if (requiresActiveSubscription) {
+    if (!subscription || subscription.subscription_status !== 'Active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
   }
   
   return <>{children}</>;
