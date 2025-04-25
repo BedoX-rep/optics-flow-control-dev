@@ -427,8 +427,8 @@ const Clients = () => {
         </div>
       </div>
 
-      <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-        <Table className="max-w-5xl mx-auto">
+      <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto px-4">
+        <Table>
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold w-[200px]">Client Info</TableHead>
