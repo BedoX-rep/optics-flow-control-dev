@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash } from 'lucide-react';
+import { Plus, Trash, ChevronDown } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
