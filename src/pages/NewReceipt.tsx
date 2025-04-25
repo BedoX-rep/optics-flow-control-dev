@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -33,6 +32,7 @@ interface Product {
 interface Client {
   id: string;
   name: string;
+  phone?: string;
 }
 
 interface ReceiptItem {
@@ -58,6 +58,8 @@ const NewReceipt = () => {
   const [tax, setTax] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -87,6 +89,7 @@ const NewReceipt = () => {
 
         if (clientsError) throw clientsError;
         setClients(clientsData || []);
+        setFilteredClients(clientsData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -99,6 +102,14 @@ const NewReceipt = () => {
 
     fetchData();
   }, [navigate, toast, user]);
+
+  useEffect(() => {
+    const filtered = clients.filter(client => 
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.phone && client.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredClients(filtered);
+  }, [searchTerm, clients]);
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
@@ -136,7 +147,7 @@ const NewReceipt = () => {
 
   const fetchClientPrescription = async (clientId: string) => {
     if (!user) return;
-    
+
     try {
       const { data: clientData, error } = await supabase
         .from('clients')
@@ -273,20 +284,32 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3">
-                <Label htmlFor="client">Select Client</Label>
-                <Select value={selectedClient} onValueChange={handleClientSelect}>
-                  <SelectTrigger id="client">
-                    <SelectValue placeholder="Select a client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="md:col-span-3 space-y-4">
+                <div>
+                  <Label htmlFor="client-search">Search Client</Label>
+                  <Input
+                    id="client-search"
+                    placeholder="Search by name or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mb-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="client">Select Client</Label>
+                  <Select value={selectedClient} onValueChange={handleClientSelect}>
+                    <SelectTrigger id="client">
+                      <SelectValue placeholder="Select a client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredClients.map(client => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <Label>&nbsp;</Label>
@@ -376,20 +399,9 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <Card>
+          <CardHeader>
             <CardTitle>Receipt Items</CardTitle>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={() => addItem('custom')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Custom Item
-              </Button>
-              <Button onClick={() => addItem('product')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -568,31 +580,31 @@ const NewReceipt = () => {
       </div>
 
       <AddClientDialog
-        isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
-        onClientAdded={async (client) => {
-          if (!user) return;
-          try {
-            const { data: clientsData, error: clientsError } = await supabase
-              .from('clients')
-              .select('*')
-              .eq('user_id', user.id)
-              .order('name', { ascending: true });
+          isOpen={isAddClientOpen}
+          onClose={() => setIsAddClientOpen(false)}
+          onClientAdded={async (client) => {
+            if (!user) return;
+            try {
+              const { data: clientsData, error: clientsError } = await supabase
+                .from('clients')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('name', { ascending: true });
 
-            if (clientsError) throw clientsError;
-            setClients(clientsData || []);
-            setSelectedClient(client.id);
-            setIsAddClientOpen(false);
-          } catch (error) {
-            console.error('Error fetching clients:', error);
-            toast({
-              title: "Error",
-              description: "Failed to refresh clients list",
-              variant: "destructive",
-            });
-          }
-        }}
-      />
+              if (clientsError) throw clientsError;
+              setClients(clientsData || []);
+              setSelectedClient(client.id);
+              setIsAddClientOpen(false);
+            } catch (error) {
+              console.error('Error fetching clients:', error);
+              toast({
+                title: "Error",
+                description: "Failed to refresh clients list",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
     </div>
   );
 };
