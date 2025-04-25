@@ -101,7 +101,8 @@ const Products = () => {
       let query = supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('is_deleted', false);
 
       if (filters.category && filters.category !== "all_categories") {
         query = query.eq('category', filters.category);
@@ -204,7 +205,7 @@ const Products = () => {
       try {
         const { error } = await supabase
           .from('products')
-          .delete()
+          .update({ is_deleted: true })
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;

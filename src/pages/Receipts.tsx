@@ -63,6 +63,7 @@ const Receipts = () => {
           )
         `)
         .eq('user_id', user.id)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
       if (receiptsError) throw receiptsError;
@@ -102,7 +103,7 @@ const Receipts = () => {
     try {
       const { error } = await supabase
         .from('receipts')
-        .delete()
+        .update({ is_deleted: true })
         .eq('id', id);
 
       if (error) throw error;

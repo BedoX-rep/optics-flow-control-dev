@@ -39,6 +39,7 @@ interface Client {
   notes?: string;
   favorite?: boolean;
   created_at?: string;
+  is_deleted?: boolean; // Added is_deleted field
 }
 
 const Clients = () => {
@@ -64,6 +65,7 @@ const Clients = () => {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
+      .eq('is_deleted', false) // Added filter for deleted clients
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -83,7 +85,7 @@ const Clients = () => {
     try {
       const { error } = await supabase
         .from('clients')
-        .delete()
+        .update({ is_deleted: true }) // Soft delete
         .eq('id', id);
 
       if (error) throw error;
