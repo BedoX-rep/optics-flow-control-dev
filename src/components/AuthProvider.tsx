@@ -34,22 +34,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-  const refreshSubscription = async (force: boolean = false) => {
-    const now = Date.now();
-    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
-      return; // Skip if recently refreshed
-    }
+  const fetchSubscription = async (userId: string) => {
     try {
-      if (!user) return;
-      
       const { data, error } = await supabase
         .from('subscriptions')
         .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single();
       
       if (error) throw error;
-      setSubscription(data);
+      
+      // Convert status to lowercase to match our expected type
+      if (data) {
+        const formattedSubscription: UserSubscription = {
+          ...data,
+          subscription_status: data.subscription_status.toLowerCase() as SubscriptionStatus
+        };
+        setSubscription(formattedSubscription);
+      }
+      
       setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error fetching subscription:', error);
@@ -57,12 +60,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshSubscription = async (force: boolean = false) => {
+    const now = Date.now();
+    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently refreshed
+    }
+    
+    if (!user) return;
+    await fetchSubscription(user.id);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   useEffect(() => {
-    // Set up auth state listener
+    // First set up auth state listener to catch changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
@@ -71,22 +84,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Clear subscription data on sign out
         if (event === 'SIGNED_OUT') {
           setSubscription(null);
+          setIsLoading(false);
+        } 
+        // Fetch subscription on sign in or token refresh
+        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
+          // Use setTimeout to avoid potential deadlock with Supabase auth
+          setTimeout(() => {
+            fetchSubscription(newSession.user!.id);
+            setIsLoading(false);
+          }, 0);
         }
-        
-        setIsLoading(false);
       }
     );
 
-    // Check for existing session
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
       if (currentSession?.user) {
-        // Fetch subscription status after a slight delay to avoid race conditions
-        setTimeout(() => {
-          refreshSubscription();
-        }, 0);
+        fetchSubscription(currentSession.user.id);
       }
       
       setIsLoading(false);
@@ -96,13 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authSubscription.unsubscribe();
     };
   }, []);
-
-  // Refresh subscription when user changes - but DON'T refresh on tab changes
-  useEffect(() => {
-    if (user) {
-      refreshSubscription();
-    }
-  }, [user]);
 
   return (
     <AuthContext.Provider value={{ 

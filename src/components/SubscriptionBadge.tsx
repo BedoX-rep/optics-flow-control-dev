@@ -11,15 +11,15 @@ interface SubscriptionBadgeProps {
 const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
   const getStatusClasses = () => {
     switch (status) {
-      case 'Active':
+      case 'active':
         return 'status-badge status-active';
-      case 'Suspended':
+      case 'suspended':
         return 'status-badge status-suspended';
-      case 'Cancelled':
+      case 'cancelled':
         return 'status-badge status-cancelled';
-      case 'inActive':
+      case 'inactive':
         return 'status-badge status-inactive';
-      case 'Expired':
+      case 'expired':
         return 'status-badge status-expired';
       default:
         return 'status-badge status-inactive';
@@ -28,7 +28,7 @@ const SubscriptionBadge = ({ status }: SubscriptionBadgeProps) => {
 
   return (
     <span className={cn(getStatusClasses())}>
-      {status}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 };

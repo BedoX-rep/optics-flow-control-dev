@@ -16,7 +16,6 @@ import SubscriptionBadge from '@/components/SubscriptionBadge';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
-// Define interfaces
 interface Subscription {
   id: string;
   email: string;
@@ -30,7 +29,6 @@ interface Subscription {
   price?: number;
 }
 
-// Define subscription pricing
 const SUBSCRIPTION_PRICES = {
   Trial: 0,
   Monthly: 150,
@@ -62,7 +60,6 @@ const Subscriptions = () => {
           
         if (error) {
           if (error.code === 'PGRST116') {
-            // No rows returned, set to null
             setCurrentSubscription(null);
           } else {
             throw error;
@@ -82,12 +79,11 @@ const Subscriptions = () => {
       }
     };
     
-    // Fetch on mount and when user changes
     useEffect(() => {
       if (user) {
         fetchSubscription();
       }
-    }, [user]); // Only re-run if user changes
+    }, [user]);
   
   const contactAdmin = () => {
     toast({
@@ -108,7 +104,6 @@ const Subscriptions = () => {
       } else if (type === 'Quarterly') {
         endDate.setMonth(endDate.getMonth() + 3);
       } else {
-        // Lifetime subscription set to 100 years
         endDate.setFullYear(endDate.getFullYear() + 100);
       }
       
@@ -132,7 +127,6 @@ const Subscriptions = () => {
         description: `You are now subscribed to the ${type} plan.`,
       });
       
-      // Refetch the subscription to ensure we have the latest data
       const { data, error: fetchError } = await supabase
         .from('subscriptions')
         .select('*')

@@ -11,27 +11,57 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          Add: number | null
           created_at: string | null
+          favorite: boolean
           gender: string | null
           id: string
+          is_deleted: boolean | null
+          left_eye_axe: number | null
+          left_eye_cyl: number | null
+          left_eye_sph: number | null
           name: string
+          notes: string | null
           phone: string
+          right_eye_axe: number | null
+          right_eye_cyl: number | null
+          right_eye_sph: number | null
           user_id: string
         }
         Insert: {
+          Add?: number | null
           created_at?: string | null
+          favorite?: boolean
           gender?: string | null
           id?: string
+          is_deleted?: boolean | null
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name: string
+          notes?: string | null
           phone: string
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id: string
         }
         Update: {
+          Add?: number | null
           created_at?: string | null
+          favorite?: boolean
           gender?: string | null
           id?: string
+          is_deleted?: boolean | null
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name?: string
+          notes?: string | null
           phone?: string
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id?: string
         }
         Relationships: []
@@ -45,6 +75,7 @@ export type Database = {
           id: string
           image: string | null
           index: string | null
+          is_deleted: boolean | null
           name: string
           position: number
           price: number
@@ -60,6 +91,7 @@ export type Database = {
           id?: string
           image?: string | null
           index?: string | null
+          is_deleted?: boolean | null
           name: string
           position?: number
           price: number
@@ -75,6 +107,7 @@ export type Database = {
           id?: string
           image?: string | null
           index?: string | null
+          is_deleted?: boolean | null
           name?: string
           position?: number
           price?: number
@@ -89,6 +122,7 @@ export type Database = {
           created_at: string | null
           custom_item_name: string | null
           id: string
+          is_deleted: boolean | null
           price: number
           product_id: string | null
           quantity: number
@@ -99,6 +133,7 @@ export type Database = {
           created_at?: string | null
           custom_item_name?: string | null
           id?: string
+          is_deleted?: boolean | null
           price: number
           product_id?: string | null
           quantity: number
@@ -109,6 +144,7 @@ export type Database = {
           created_at?: string | null
           custom_item_name?: string | null
           id?: string
+          is_deleted?: boolean | null
           price?: number
           product_id?: string | null
           quantity?: number
@@ -134,6 +170,7 @@ export type Database = {
       }
       receipts: {
         Row: {
+          add: number | null
           advance_payment: number | null
           balance: number
           client_id: string | null
@@ -142,6 +179,7 @@ export type Database = {
           discount_amount: number | null
           discount_percentage: number | null
           id: string
+          is_deleted: boolean | null
           left_eye_axe: number | null
           left_eye_cyl: number | null
           left_eye_sph: number | null
@@ -149,13 +187,13 @@ export type Database = {
           right_eye_axe: number | null
           right_eye_cyl: number | null
           right_eye_sph: number | null
-          add: number | null
           subtotal: number
           tax: number
           total: number
           user_id: string
         }
         Insert: {
+          add?: number | null
           advance_payment?: number | null
           balance?: number
           client_id?: string | null
@@ -164,6 +202,7 @@ export type Database = {
           discount_amount?: number | null
           discount_percentage?: number | null
           id?: string
+          is_deleted?: boolean | null
           left_eye_axe?: number | null
           left_eye_cyl?: number | null
           left_eye_sph?: number | null
@@ -177,6 +216,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          add?: number | null
           advance_payment?: number | null
           balance?: number
           client_id?: string | null
@@ -185,6 +225,7 @@ export type Database = {
           discount_amount?: number | null
           discount_percentage?: number | null
           id?: string
+          is_deleted?: boolean | null
           left_eye_axe?: number | null
           left_eye_cyl?: number | null
           left_eye_sph?: number | null

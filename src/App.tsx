@@ -51,9 +51,8 @@ const ProtectedRoute = ({
   }
   
   if (requiresActiveSubscription) {
-    // Check if subscription exists and is active, accounting for potential case variations
-    const status = subscription?.subscription_status?.toLowerCase();
-    if (!subscription || status !== 'active') {
+    // Check if subscription exists and is active, using lowercase for consistent comparison
+    if (!subscription || subscription.subscription_status !== 'active') {
       return <Navigate to="/subscriptions" replace />;
     }
   }
@@ -122,4 +121,3 @@ const App = () => (
 );
 
 export default App;
-
