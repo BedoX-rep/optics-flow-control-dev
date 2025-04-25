@@ -30,12 +30,12 @@ const formSchema = z.object({
 })
 
 interface AddClientDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onClientAdded: (client: { id: string; name: string }) => void
+  client?: any;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
-const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {
+const AddClientDialog = ({ client, onClose, onSuccess }: AddClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,12 +83,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         description: "Client added successfully",
       })
 
-      onClientAdded({
-        id: data.id,
-        name: data.name,
-      })
-      onClose()
+      onSuccess()
       form.reset()
+      onClose()
     } catch (error) {
       console.error("Error adding client:", error)
       toast({
@@ -101,12 +98,12 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="name"
