@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -44,6 +43,13 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       name: "",
       phone: "",
       gender: undefined,
+      right_eye_sph: undefined,
+      right_eye_cyl: undefined,
+      right_eye_axe: undefined,
+      left_eye_sph: undefined,
+      left_eye_cyl: undefined,
+      left_eye_axe: undefined,
+
     },
   })
 
@@ -54,6 +60,12 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         name: values.name,
         phone: values.phone,
         gender: values.gender,
+        right_eye_sph: values.right_eye_sph,
+        right_eye_cyl: values.right_eye_cyl,
+        right_eye_axe: values.right_eye_axe,
+        left_eye_sph: values.left_eye_sph,
+        left_eye_cyl: values.left_eye_cyl,
+        left_eye_axe: values.left_eye_axe,
       }
 
       const { data, error } = await supabase
@@ -139,6 +151,90 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </FormItem>
               )}
             />
+            <div>
+              <h3>Right Eye</h3>
+              <FormField
+                control={form.control}
+                name="right_eye_sph"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sph</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="right_eye_cyl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cyl</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="right_eye_axe"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Axe</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div>
+              <h3>Left Eye</h3>
+              <FormField
+                control={form.control}
+                name="left_eye_sph"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sph</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="left_eye_cyl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cyl</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="left_eye_axe"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Axe</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="flex justify-end gap-4">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
