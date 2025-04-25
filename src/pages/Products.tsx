@@ -355,6 +355,7 @@ const Products = () => {
         width: "100%",
         paddingLeft: "1rem",
         paddingRight: "1rem",
+        paddingTop: "1.5rem",
         transition: "all 0.2s ease",
         minHeight: "calc(100svh - 68px)",
       }}
