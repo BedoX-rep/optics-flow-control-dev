@@ -48,6 +48,9 @@ const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Client } | null>(null);
+  const [cellEditValue, setCellEditValue] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [newClient, setNewClient] = useState<Omit<Client, 'id'>>({ 
     name: '', 
@@ -163,6 +166,40 @@ const Clients = () => {
     setEditingClient(client);
     setNewClient({ ...client, id: undefined });
     setIsOpen(true);
+  };
+
+  const startInlineEdit = (client: Client, field: keyof Client) => {
+    setEditingCell({ id: client.id, field });
+    setCellEditValue(String(client[field] ?? ''));
+  };
+
+  const endInlineEdit = async (client: Client) => {
+    if (!editingCell || !user) return;
+    
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('clients')
+        .update({ [editingCell.field]: cellEditValue })
+        .eq('id', client.id);
+
+      if (error) throw error;
+
+      setClients(prev => prev.map(c => 
+        c.id === client.id ? { ...c, [editingCell.field]: cellEditValue } : c
+      ));
+      toast({ title: "Updated", description: "Client updated successfully" });
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to update client",
+        variant: "destructive"
+      });
+    } finally {
+      setEditingCell(null);
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteClient = async (id: string) => {
