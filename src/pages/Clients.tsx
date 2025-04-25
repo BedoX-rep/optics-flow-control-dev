@@ -391,15 +391,15 @@ const Clients = () => {
       </div>
 
       <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-        <Table>
+        <Table className="max-w-5xl mx-auto">
           <TableHeader>
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-              <TableHead className="text-black text-xs font-semibold w-[240px]">Client Info</TableHead>
-              <TableHead className="text-black text-xs font-semibold w-[140px]">Right Eye</TableHead>
-              <TableHead className="text-black text-xs font-semibold w-[140px]">Left Eye</TableHead>
-              <TableHead className="text-black text-xs font-semibold w-16">Add</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[200px]">Client Info</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[120px]">Right Eye</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-[120px]">Left Eye</TableHead>
+              <TableHead className="text-black text-xs font-semibold w-14">Add</TableHead>
               <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
-              <TableHead className="text-right text-black text-xs font-semibold w-[84px]">Actions</TableHead>
+              <TableHead className="text-right text-black text-xs font-semibold w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -415,9 +415,39 @@ const Clients = () => {
                   <TableCell className="py-3">
                     <div className="flex items-center gap-2">
                       <ClientAvatar gender={client.gender} name={client.name} />
-                      <div className="flex flex-col">
-                        <span className="font-medium text-black">{client.name}</span>
-                        <span className="text-sm text-gray-500">{client.phone}</span>
+                      <div className="flex flex-col gap-1">
+                        {editingCell?.id === client.id && editingCell.field === "name" ? (
+                          <input
+                            type="text"
+                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                            value={cellEditValue}
+                            onChange={e => setCellEditValue(e.target.value)}
+                            onBlur={() => endInlineEdit(client)}
+                            onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            className="font-medium text-black hover:underline cursor-pointer"
+                            onClick={() => startInlineEdit(client, "name")}
+                          >{client.name}</span>
+                        )}
+                        {editingCell?.id === client.id && editingCell.field === "phone" ? (
+                          <input
+                            type="text"
+                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                            value={cellEditValue}
+                            onChange={e => setCellEditValue(e.target.value)}
+                            onBlur={() => endInlineEdit(client)}
+                            onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
+                            autoFocus
+                          />
+                        ) : (
+                          <span
+                            className="text-sm text-gray-500 hover:underline cursor-pointer"
+                            onClick={() => startInlineEdit(client, "phone")}
+                          >{client.phone}</span>
+                        )}
                       </div>
                     </div>
                   </TableCell>
@@ -432,7 +462,26 @@ const Clients = () => {
                       : '-'}
                   </TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
-                  <TableCell className="py-3">{client.notes || '-'}</TableCell>
+                  <TableCell className="py-3">
+                    {editingCell?.id === client.id && editingCell.field === "notes" ? (
+                      <input
+                        type="text"
+                        className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                        value={cellEditValue}
+                        onChange={e => setCellEditValue(e.target.value)}
+                        onBlur={() => endInlineEdit(client)}
+                        onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
+                        autoFocus
+                      />
+                    ) : (
+                      <span
+                        className="hover:underline cursor-pointer"
+                        onClick={() => startInlineEdit(client, "notes")}
+                      >
+                        {client.notes || '-'}
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="py-3 text-right">
                     <div className="flex justify-end space-x-1">
                       <Button 
