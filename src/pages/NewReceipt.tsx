@@ -22,7 +22,6 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
-import AddClientDialog from '@/components/AddClientDialog';
 
 interface Product {
   id: string;
@@ -60,7 +59,6 @@ const NewReceipt = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -250,7 +248,7 @@ const NewReceipt = () => {
               </div>
               <div>
                 <Label>&nbsp;</Label>
-                <Button className="w-full" onClick={() => setIsAddClientOpen(true)}>Add New Client</Button>
+                <Button className="w-full" onClick={() => navigate('/clients')}>Add New Client</Button>
               </div>
             </div>
           </CardContent>
@@ -526,33 +524,6 @@ const NewReceipt = () => {
           </Button>
         </div>
       </div>
-
-      <AddClientDialog
-        isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
-        onClientAdded={async (client) => {
-          if (!user) return;
-          try {
-            const { data: clientsData, error: clientsError } = await supabase
-              .from('clients')
-              .select('*')
-              .eq('user_id', user.id)
-              .order('name', { ascending: true });
-
-            if (clientsError) throw clientsError;
-            setClients(clientsData || []);
-            setSelectedClient(client.id);
-            setIsAddClientOpen(false);
-          } catch (error) {
-            console.error('Error fetching clients:', error);
-            toast({
-              title: "Error",
-              description: "Failed to refresh clients list",
-              variant: "destructive",
-            });
-          }
-        }}
-      />
     </div>
   );
 };

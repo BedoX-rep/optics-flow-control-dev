@@ -359,18 +359,27 @@ const Clients = () => {
         </div>
       </div>
 
-      <AddClientDialog
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-          setEditingClient(null);
-        }}
-        onClientAdded={(client) => {
-          fetchClients();
-          setIsOpen(false);
-          setEditingClient(null);
-        }}
-      />
+      <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingClient ? 'Edit Client' : 'Add New Client'}
+            </DialogTitle>
+          </DialogHeader>
+          <AddClientDialog
+            client={editingClient}
+            onClose={() => {
+              setIsOpen(false);
+              setEditingClient(null);
+            }}
+            onSuccess={() => {
+              setIsOpen(false);
+              setEditingClient(null);
+              fetchClients();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
