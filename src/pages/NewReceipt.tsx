@@ -225,13 +225,18 @@ const NewReceipt = () => {
 
   return (
     <div>
-      <PageTitle title="New Receipt" subtitle="Create a new prescription receipt" />
-
       <div className="grid grid-cols-1 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Client Information</CardTitle>
-          </CardHeader>
+        <Tabs defaultValue="prescription" className="mb-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="prescription">Prescription & Client Information</TabsTrigger>
+            <TabsTrigger value="items-payment">Items & Payment</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="prescription">
+            <Card>
+              <CardHeader>
+                <CardTitle>Client Information</CardTitle>
+              </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-3">
@@ -256,14 +261,6 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
-        <Tabs defaultValue="prescription" className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="prescription">Prescription</TabsTrigger>
-            <TabsTrigger value="items-payment">Items & Payment</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="prescription">
             <Card>
               <CardHeader>
                 <CardTitle>Prescription Details</CardTitle>
