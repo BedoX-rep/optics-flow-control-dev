@@ -284,19 +284,16 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3 space-y-4">
+              <div className="md:col-span-3 space-y-2">
                 <div>
-                  <Label htmlFor="client-search">Search Client</Label>
                   <Input
                     id="client-search"
                     placeholder="Search by name or phone..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="mb-2"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="client">Select Client</Label>
                   <Select value={selectedClient} onValueChange={handleClientSelect}>
                     <SelectTrigger id="client">
                       <SelectValue placeholder="Select a client" />
