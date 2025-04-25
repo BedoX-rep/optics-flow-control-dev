@@ -359,7 +359,7 @@ const Products = () => {
         minHeight: "calc(100svh - 68px)",
       }}
     >
-      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-4 w-full">
+      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-6 w-full">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Button
             className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
@@ -377,7 +377,7 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-2" style={{ minHeight: 0 }}>
+      <div className="flex items-center gap-2 mb-4" style={{ minHeight: 0 }}>
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input
