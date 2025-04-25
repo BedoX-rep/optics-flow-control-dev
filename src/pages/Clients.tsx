@@ -361,6 +361,7 @@ const Clients = () => {
 
       <AddClientDialog
         isOpen={isOpen}
+        client={editingClient}
         onClose={() => {
           setIsOpen(false);
           setEditingClient(null);
