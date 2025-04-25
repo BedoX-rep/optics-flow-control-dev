@@ -25,7 +25,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
-  gender: z.enum(["Mr", "Mme", "Enf"])
+  gender: z.enum(["Mr", "Mme", "Enf"]),
+  Add: z.number().optional()
 })
 
 interface AddClientDialogProps {
@@ -60,6 +61,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         name: values.name,
         phone: values.phone,
         gender: values.gender,
+        Add: values.Add,
         right_eye_sph: values.right_eye_sph,
         right_eye_cyl: values.right_eye_cyl,
         right_eye_axe: values.right_eye_axe,
@@ -126,6 +128,26 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input {...field} type="tel" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="Add"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : Number(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -38,6 +38,7 @@ interface Product {
 interface Client {
   id: string;
   name: string;
+  Add?: string; // Added Add field to Client interface
 }
 
 interface ReceiptItem {
@@ -255,7 +256,7 @@ const NewReceipt = () => {
                   <SelectContent>
                     {clients.map(client => (
                       <SelectItem key={client.id} value={client.id}>
-                        {client.name}
+                        {client.name} {client.Add ? `(Add: ${client.Add})` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
