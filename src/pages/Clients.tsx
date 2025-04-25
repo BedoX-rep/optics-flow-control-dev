@@ -358,12 +358,8 @@ const Clients = () => {
             <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
               <TableHead className="text-black text-xs font-semibold">Client Name</TableHead>
               <TableHead className="text-black text-xs font-semibold">Phone Number</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Right Eye AXE</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye SPH</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye CYL</TableHead>
-              <TableHead className="text-black text-xs font-semibold">Left Eye AXE</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Right Eye Prescription</TableHead>
+              <TableHead className="text-black text-xs font-semibold">Left Eye Prescription</TableHead>
               <TableHead className="text-black text-xs font-semibold">Add</TableHead>
               <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
               <TableHead className="text-right text-black text-xs font-semibold">Actions</TableHead>
@@ -386,12 +382,16 @@ const Clients = () => {
                     </div>
                   </TableCell>
                   <TableCell className="py-3">{client.phone}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3">{client.right_eye_axe || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_sph || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_cyl || '-'}</TableCell>
-                  <TableCell className="py-3">{client.left_eye_axe || '-'}</TableCell>
+                  <TableCell className="py-3">
+                    {client.right_eye_sph ? 
+                      `${client.right_eye_sph} (${client.right_eye_cyl || 0} a ${client.right_eye_axe || 0})` 
+                      : '-'}
+                  </TableCell>
+                  <TableCell className="py-3">
+                    {client.left_eye_sph ? 
+                      `${client.left_eye_sph} (${client.left_eye_cyl || 0} a ${client.left_eye_axe || 0})` 
+                      : '-'}
+                  </TableCell>
                   <TableCell className="py-3">{client.Add || '-'}</TableCell>
                   <TableCell className="py-3">{client.notes || '-'}</TableCell>
                   <TableCell className="py-3 text-right">
