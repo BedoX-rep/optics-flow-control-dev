@@ -530,9 +530,27 @@ const NewReceipt = () => {
       <AddClientDialog
         isOpen={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
-        onClientAdded={(client) => {
-          setSelectedClient(client.id);
-          setIsAddClientOpen(false);
+        onClientAdded={async (client) => {
+          if (!user) return;
+          try {
+            const { data: clientsData, error: clientsError } = await supabase
+              .from('clients')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('name', { ascending: true });
+
+            if (clientsError) throw clientsError;
+            setClients(clientsData || []);
+            setSelectedClient(client.id);
+            setIsAddClientOpen(false);
+          } catch (error) {
+            console.error('Error fetching clients:', error);
+            toast({
+              title: "Error",
+              description: "Failed to refresh clients list",
+              variant: "destructive",
+            });
+          }
         }}
       />
     </div>
