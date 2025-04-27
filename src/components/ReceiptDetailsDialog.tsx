@@ -86,14 +86,6 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 </span>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Balance</p>
-                <p className="text-sm font-medium">{receipt.balance.toFixed(2)} DH</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Advance Payment</p>
-                <p className="text-sm font-medium">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-500 mb-1">Payment Status</p>
                 <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                   receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
