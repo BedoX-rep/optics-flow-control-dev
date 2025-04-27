@@ -46,11 +46,17 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 <div>
                   <h3 className="font-medium mb-1 text-gray-900">Payment Details</h3>
                   <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || '0.00'} DH</span></p>
-                  <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || '0.00'} DH</span></p>
-                  {receipt.discount_amount && (
+                  {receipt.tax > 0 && (
+                    <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || '0.00'} DH</span></p>
+                  )}
+                  {receipt.discount_amount > 0 && (
                     <p className="text-sm text-gray-600">Discount: <span className="font-medium">{receipt.discount_amount.toFixed(2)} DH</span></p>
                   )}
                   <p className="text-sm text-gray-800 font-medium mt-1.5">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
+                  <p className="text-sm text-gray-600 mt-2">Cost TTC: <span className="font-medium">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</span></p>
+                  <p className="text-sm text-gray-600">Profit: <span className="font-medium">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</span></p>
+                  <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</span></p>
+                  <p className="text-sm text-gray-600">Balance: <span className="font-medium">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</span></p>
                 </div>
               </div>
             </div>

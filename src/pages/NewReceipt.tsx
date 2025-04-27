@@ -682,15 +682,19 @@ const NewReceipt = () => {
                   <span>{subtotal.toFixed(2)} DH</span>
                 </div>
 
-                <div className="flex justify-between py-2 border-b">
-                  <span>Discount ({discount}% + {numericDiscount} DH):</span>
-                  <span>-{totalDiscount.toFixed(2)} DH</span>
-                </div>
+                {(discount > 0 || numericDiscount > 0) && (
+                  <div className="flex justify-between py-2 border-b">
+                    <span>Discount ({discount}% + {numericDiscount} DH):</span>
+                    <span>-{totalDiscount.toFixed(2)} DH</span>
+                  </div>
+                )}
 
-                <div className="flex justify-between py-2 border-b">
-                  <span>Tax:</span>
-                  <span>{taxAmount.toFixed(2)} DH</span>
-                </div>
+                {tax > 0 && (
+                  <div className="flex justify-between py-2 border-b">
+                    <span>Tax:</span>
+                    <span>{taxAmount.toFixed(2)} DH</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between py-2 border-b text-lg font-semibold">
                   <span>Total:</span>
@@ -714,16 +718,7 @@ const NewReceipt = () => {
                   <span>Balance:</span>
                   <span>{balance.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span>Payment Status:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${
-                    paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
-                    paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {paymentStatus}
-                  </span>
-                </div>
+                
               </div>
             </div>
           </CardContent>
