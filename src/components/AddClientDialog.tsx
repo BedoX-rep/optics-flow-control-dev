@@ -167,17 +167,15 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value;
-                              if (value === '' || value === '-') {
+                              if (value === '') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              const numValue = parseFloat(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
+                              if (/^-?\d*\.?\d*$/.test(value)) {
+                                field.onChange(value);
                               }
                             }}
                             className="h-8"
@@ -195,17 +193,15 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value;
-                              if (value === '' || value === '-') {
+                              if (value === '') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              const numValue = parseFloat(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
+                              if (/^-?\d*\.?\d*$/.test(value)) {
+                                field.onChange(value);
                               }
                             }}
                             className="h-8"
@@ -250,17 +246,15 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value;
-                              if (value === '' || value === '-') {
+                              if (value === '') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              const numValue = parseFloat(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
+                              if (/^-?\d*\.?\d*$/.test(value)) {
+                                field.onChange(value);
                               }
                             }}
                             className="h-8"
@@ -278,17 +272,15 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value;
-                              if (value === '' || value === '-') {
+                              if (value === '') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              const numValue = parseFloat(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
+                              if (/^-?\d*\.?\d*$/.test(value)) {
+                                field.onChange(value);
                               }
                             }}
                             className="h-8"
