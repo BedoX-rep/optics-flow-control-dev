@@ -357,6 +357,8 @@ const NewReceipt = () => {
                     <Label htmlFor="rightSph">SPH</Label>
                     <Input 
                       id="rightSph"
+                      type="text"
+                      inputMode="decimal"
                       value={rightEye.sph}
                       onChange={(e) => setRightEye({ ...rightEye, sph: e.target.value })}
                     />
@@ -365,6 +367,8 @@ const NewReceipt = () => {
                     <Label htmlFor="rightCyl">CYL</Label>
                     <Input 
                       id="rightCyl"
+                      type="text"
+                      inputMode="decimal"
                       value={rightEye.cyl}
                       onChange={(e) => setRightEye({ ...rightEye, cyl: e.target.value })}
                     />
@@ -373,6 +377,8 @@ const NewReceipt = () => {
                     <Label htmlFor="rightAxe">AXE</Label>
                     <Input 
                       id="rightAxe"
+                      type="text"
+                      inputMode="numeric"
                       value={rightEye.axe}
                       onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
                     />
