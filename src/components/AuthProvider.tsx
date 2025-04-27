@@ -78,22 +78,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // First set up auth state listener to catch changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        
-        // Clear subscription data on sign out
+      async (event, newSession) => {
         if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setSubscription(null);
           setIsLoading(false);
-        } 
-        // Fetch subscription on sign in or token refresh
-        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase auth
-          setTimeout(() => {
-            fetchSubscription(newSession.user!.id);
-            setIsLoading(false);
-          }, 0);
+          return;
+        }
+
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
+          setSession(newSession);
+          setUser(newSession.user);
+          
+          // Fetch subscription before completing the auth state change
+          await fetchSubscription(newSession.user.id);
+          
+          // Handle redirect based on subscription status
+          const currentPath = window.location.pathname;
+          const hasValidSub = subscription?.subscription_status?.toLowerCase() === 'active';
+          
+          if (hasValidSub && currentPath === '/subscriptions') {
+            window.history.replaceState(null, '', '/');
+          } else if (!hasValidSub && currentPath !== '/subscriptions' && currentPath !== '/auth') {
+            window.history.replaceState(null, '', '/subscriptions');
+          }
+          
+          setIsLoading(false);
         }
       }
     );
