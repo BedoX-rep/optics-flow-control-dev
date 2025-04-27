@@ -264,13 +264,13 @@ const Clients = () => {
                       </div>
                     </TableCell>
                     <TableCell className="py-3 text-sm">
-                      {client.right_eye_sph ? 
-                        <span className="whitespace-nowrap">{client.right_eye_sph} ({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})</span>
+                      {(client.right_eye_sph !== null && client.right_eye_sph !== undefined) ? 
+                        <span className="whitespace-nowrap">{client.right_eye_sph}{(client.right_eye_cyl || client.right_eye_axe) ? ` (${client.right_eye_cyl || 0} a ${client.right_eye_axe || 0})` : ''}</span>
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3 text-sm">
-                      {client.left_eye_sph ? 
-                        <span className="whitespace-nowrap">{client.left_eye_sph} ({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})</span>
+                      {(client.left_eye_sph !== null && client.left_eye_sph !== undefined) ? 
+                        <span className="whitespace-nowrap">{client.left_eye_sph}{(client.left_eye_cyl || client.left_eye_axe) ? ` (${client.left_eye_cyl || 0} a ${client.left_eye_axe || 0})` : ''}</span>
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">{client.Add || '-'}</TableCell>
