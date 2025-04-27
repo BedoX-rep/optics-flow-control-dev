@@ -204,10 +204,45 @@ const NewReceipt = () => {
     }
   };
 
+  const updateClientPrescription = async () => {
+    if (!selectedClient || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({
+          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+          Add: add ? parseFloat(add) : null,
+          last_prescription_update: new Date().toISOString()
+        })
+        .eq('id', selectedClient);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating client prescription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update client prescription",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleClientSelect = (clientId: string) => {
     setSelectedClient(clientId);
     fetchClientPrescription(clientId);
   };
+
+  useEffect(() => {
+    if (selectedClient) {
+      updateClientPrescription();
+    }
+  }, [rightEye, leftEye, add]);
 
   const updatePaymentStatus = (newBalance: number) => {
     if (newBalance <= 0) {

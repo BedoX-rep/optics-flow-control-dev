@@ -204,6 +204,7 @@ const Clients = () => {
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Right Eye</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Left Eye</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Add</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[120px]">Last Updated</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Assurance</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
                 <TableHead className="text-right text-black text-xs font-semibold w-[80px]">Actions</TableHead>
@@ -275,6 +276,11 @@ const Clients = () => {
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">{client.Add || '-'}</TableCell>
+                    <TableCell className="py-3">
+                      {client.last_prescription_update 
+                        ? new Date(client.last_prescription_update).toLocaleDateString()
+                        : '-'}
+                    </TableCell>
                     <TableCell className="py-3">{client.assurance || '-'}</TableCell>
                     <TableCell className="py-3">
                       {editingCell?.id === client.id && editingCell.field === "notes" ? (
