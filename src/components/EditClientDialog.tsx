@@ -200,11 +200,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
-                            step="0.25"
-                            min="-20"
-                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -223,11 +221,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
-                            step="0.25"
-                            min="-20"
-                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -246,7 +242,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Axe</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -272,11 +269,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
-                            step="0.25"
-                            min="-20"
-                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -295,11 +290,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
-                            step="0.25"
-                            min="-20"
-                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -318,7 +311,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Axe</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
