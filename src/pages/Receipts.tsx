@@ -207,7 +207,9 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Client</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Phone</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Total</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Advance Payment</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Balance</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
@@ -220,7 +222,18 @@ const Receipts = () => {
                   <TableCell className="py-3">{receipt.client_name}</TableCell>
                   <TableCell className="py-3">{receipt.client_phone}</TableCell>
                   <TableCell className="py-3 font-medium">{receipt.total.toFixed(2)} DH</TableCell>
+                  <TableCell className="py-3">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</TableCell>
                   <TableCell className="py-3">{receipt.balance.toFixed(2)} DH</TableCell>
+                  <TableCell className="py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      receipt.balance === 0 ? 'bg-green-100 text-green-800' :
+                      receipt.advance_payment > 0 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {receipt.balance === 0 ? 'Paid' : 
+                       receipt.advance_payment > 0 ? 'Partially Paid' : 'Unpaid'}
+                    </span>
+                  </TableCell>
                   <TableCell className="py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       receipt.delivery_status === 'Completed' 
