@@ -79,6 +79,32 @@ const Receipts = () => {
     }
   };
 
+  const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready'];
+
+  const handleMontageStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ montage_status: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      fetchReceipts();
+      toast({
+        title: "Receipt Updated",
+        description: `Montage status has been updated to ${newStatus}.`,
+      });
+    } catch (error) {
+      console.error('Error updating montage status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update montage status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleMarkAsDelivered = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'Completed' ? 'Undelivered' : 'Completed';
@@ -302,13 +328,47 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        receipt.montage_status === 'Completed' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {receipt.montage_status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+                            const prevIndex = (currentIndex - 1 + MONTAGE_STATUSES.length) % MONTAGE_STATUSES.length;
+                            handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[prevIndex]);
+                          }}
+                        >
+                          ←
+                        </Button>
+                        <Select
+                          value={receipt.montage_status}
+                          onValueChange={(value) => handleMontageStatusChange(receipt.id, value)}
+                        >
+                          <SelectTrigger className="h-7 w-[100px]">
+                            <SelectValue>{receipt.montage_status}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MONTAGE_STATUSES.map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {status}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+                            const nextIndex = (currentIndex + 1) % MONTAGE_STATUSES.length;
+                            handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[nextIndex]);
+                          }}
+                        >
+                          →
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="py-3 text-right">
                       <div className="flex justify-end gap-1">
