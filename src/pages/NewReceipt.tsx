@@ -180,17 +180,16 @@ const NewReceipt = () => {
 
       if (clientData) {
         setRightEye({
-          sph: clientData.right_eye_sph?.toString() || '',
-          cyl: clientData.right_eye_cyl?.toString() || '',
-          axe: clientData.right_eye_axe?.toString() || ''
-        });
-        setLeftEye({
-          sph: clientData.left_eye_sph?.toString() || '',
-          cyl: clientData.left_eye_cyl?.toString() || '',
-          axe: clientData.left_eye_axe?.toString() || ''
-        });
-        const addValue = clientData.Add || 0;
-        setAdd(addValue.toString());
+            sph: clientData.right_eye_sph !== null ? clientData.right_eye_sph.toString() : '',
+            cyl: clientData.right_eye_cyl !== null ? clientData.right_eye_cyl.toString() : '',
+            axe: clientData.right_eye_axe !== null ? clientData.right_eye_axe.toString() : ''
+          });
+          setLeftEye({
+            sph: clientData.left_eye_sph !== null ? clientData.left_eye_sph.toString() : '',
+            cyl: clientData.left_eye_cyl !== null ? clientData.left_eye_cyl.toString() : '',
+            axe: clientData.left_eye_axe !== null ? clientData.left_eye_axe.toString() : ''
+          });
+          setAdd(clientData.Add !== null ? clientData.Add.toString() : '');
       }
     } catch (error) {
       console.error('Error fetching client prescription:', error);
