@@ -33,6 +33,7 @@ const formSchema = z.object({
   left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_axe: z.number().optional(),
+  Add: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   notes: z.string().nullable().optional()
 })
 
@@ -353,6 +354,33 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                 </div>
               </div>
             </div>
+            <FormField
+              control={form.control}
+              name="Add"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="text"
+                      {...field} 
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          field.onChange(undefined);
+                          return;
+                        }
+                        if (/^-?\d*\.?\d*$/.test(value)) {
+                          field.onChange(value);
+                        }
+                      }}
+                      className="h-8"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="notes"

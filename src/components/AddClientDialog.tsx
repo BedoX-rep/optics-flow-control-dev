@@ -32,6 +32,7 @@ const formSchema = z.object({
   left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_axe: z.number().optional(),
+  Add: z.string().optional(), // Added Add field to schema
 })
 
 interface AddClientDialogProps {
@@ -49,6 +50,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       name: "",
       phone: "",
       gender: undefined,
+      Add: "", // Added default value for Add field
     },
   })
 
@@ -65,7 +67,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         right_eye_axe: values.right_eye_axe,
         left_eye_sph: values.left_eye_sph,
         left_eye_cyl: values.left_eye_cyl,
-        left_eye_axe: values.left_eye_axe
+        left_eye_axe: values.left_eye_axe,
+        Add: values.Add, // Included Add field in clientData
       }
 
       const { data, error } = await supabase
@@ -313,6 +316,34 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </div>
               </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="Add"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="text"
+                      {...field} 
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          field.onChange(undefined);
+                          return;
+                        }
+                        if (/^-?\d*\.?\d*$/.test(value)) {
+                          field.onChange(value);
+                        }
+                      }}
+                      className="h-8"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
