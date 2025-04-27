@@ -279,50 +279,42 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       {(client.right_eye_sph !== null && client.right_eye_sph !== undefined) ? 
-                        <div className="flex items-center gap-1.5">
-                          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-medium whitespace-nowrap">
+                        <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
+                          <span className="whitespace-nowrap">
                             {client.right_eye_sph}
+                            {(client.right_eye_cyl || client.right_eye_axe) && 
+                              <span className="text-blue-600/80">
+                                {' '}({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})
+                              </span>
+                            }
                           </span>
-                          {(client.right_eye_cyl || client.right_eye_axe) && 
-                            <span className="text-neutral-500 text-sm">
-                              ({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})
-                            </span>
-                          }
                         </div>
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">
                       {(client.left_eye_sph !== null && client.left_eye_sph !== undefined) ? 
-                        <div className="flex items-center gap-1.5">
-                          <span className="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-sm font-medium whitespace-nowrap">
+                        <div className="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
+                          <span className="whitespace-nowrap">
                             {client.left_eye_sph}
+                            {(client.left_eye_cyl || client.left_eye_axe) && 
+                              <span className="text-purple-600/80">
+                                {' '}({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})
+                              </span>
+                            }
                           </span>
-                          {(client.left_eye_cyl || client.left_eye_axe) && 
-                            <span className="text-neutral-500 text-sm">
-                              ({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})
-                            </span>
-                          }
                         </div>
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">
                       {client.Add ? 
-                        <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-sm font-medium">
+                        <div className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
                           {client.Add}
-                        </span>
+                        </div>
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className="text-neutral-600 text-xs">
-                        {client.last_prescription_update 
-                          ? new Date(client.last_prescription_update).toLocaleString(undefined, {
-                              year: 'numeric',
-                              month: 'numeric',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          : '-'}
+                      <span className={`${client.assurance ? "border rounded-full py-1 px-2.5 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"}`}>
+                        {client.assurance || '-'}
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
@@ -339,8 +331,16 @@ const Clients = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className={`${client.assurance ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"}`}>
-                        {client.assurance || '-'}
+                      <span className="text-neutral-600 text-xs">
+                        {client.last_prescription_update 
+                          ? new Date(client.last_prescription_update).toLocaleString(undefined, {
+                              year: 'numeric',
+                              month: 'numeric',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : '-'}
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
