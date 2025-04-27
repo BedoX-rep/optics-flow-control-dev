@@ -52,11 +52,14 @@ const Receipts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleMarkAsPaid = async (id: string) => {
+  const handleMarkAsPaid = async (id: string, total: number) => {
     try {
       const { error } = await supabase
         .from('receipts')
-        .update({ balance: 0 })
+        .update({ 
+          balance: 0,
+          advance_payment: total 
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -76,11 +79,12 @@ const Receipts = () => {
     }
   };
 
-  const handleMarkAsDelivered = async (id: string) => {
+  const handleMarkAsDelivered = async (id: string, currentStatus: string) => {
     try {
+      const newStatus = currentStatus === 'Completed' ? 'Undelivered' : 'Completed';
       const { error } = await supabase
         .from('receipts')
-        .update({ delivery_status: 'Completed' })
+        .update({ delivery_status: newStatus })
         .eq('id', id);
 
       if (error) throw error;
@@ -88,7 +92,7 @@ const Receipts = () => {
       fetchReceipts();
       toast({
         title: "Receipt Updated",
-        description: "Receipt has been marked as delivered.",
+        description: `Receipt has been marked as ${newStatus.toLowerCase()}.`,
       });
     } catch (error) {
       console.error('Error updating receipt:', error);
@@ -311,20 +315,19 @@ const Receipts = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => handleMarkAsPaid(receipt.id)}
+                          onClick={() => handleMarkAsPaid(receipt.id, receipt.total)}
                           className="hover:bg-green-100"
                           disabled={receipt.balance === 0}
                           title="Mark as Paid"
                         >
-                          <span className="text-green-600">₪</span>
+                          <span className="text-green-600">✓</span>
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => handleMarkAsDelivered(receipt.id)}
+                          onClick={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
                           className="hover:bg-blue-100"
-                          disabled={receipt.delivery_status === 'Completed'}
-                          title="Mark as Delivered"
+                          title={`${receipt.delivery_status === 'Completed' ? 'Mark as Undelivered' : 'Mark as Delivered'}`}
                         >
                           <span className="text-blue-600">📦</span>
                         </Button>
