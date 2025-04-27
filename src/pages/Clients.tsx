@@ -154,36 +154,38 @@ const Clients = () => {
       transition: "all 0.2s ease",
       minHeight: "calc(100svh - 68px)",
     }}>
-      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-6 w-full">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Button
-            className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
-            onClick={() => setIsOpen(true)}
-          >
-            <span className="mr-2 flex items-center"><Plus size={18} /></span>
-            Add Client
-          </Button>
-          <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
-            <div className="flex items-baseline gap-1">
-              <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
-              <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                This Month: {clients.filter(client => {
-                  const clientDate = new Date(client.created_at || '');
-                  const now = new Date();
-                  return clientDate.getMonth() === now.getMonth() && 
-                         clientDate.getFullYear() === now.getFullYear();
-                }).length}
-              </span>
-              <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                Favorites: {clients.filter(client => client.favorite).length}
-              </span>
+      <div className="flex flex-col gap-6 mb-6 w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
+              onClick={() => setIsOpen(true)}
+            >
+              <span className="mr-2 flex items-center"><Plus size={18} /></span>
+              Add Client
+            </Button>
+            <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+                <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  This Month: {clients.filter(client => {
+                    const clientDate = new Date(client.created_at || '');
+                    const now = new Date();
+                    return clientDate.getMonth() === now.getMonth() && 
+                           clientDate.getFullYear() === now.getFullYear();
+                  }).length}
+                </span>
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  Favorites: {clients.filter(client => client.favorite).length}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-        <div className="relative flex-1">
+        <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input
             type="text"
@@ -229,7 +231,7 @@ const Clients = () => {
                   <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
-                        <ClientAvatar gender={client.gender} name={client.name} />
+                        <ClientAvatar gender={client.gender} name={client.name} className="w-11 h-11" />
                         <div className="flex flex-col gap-1">
                           {editingCell?.id === client.id && editingCell.field === "name" ? (
                             <input
@@ -243,8 +245,10 @@ const Clients = () => {
                             />
                           ) : (
                             <span
-                              className="font-medium text-black hover:underline cursor-pointer"
+                              className="font-semibold text-black hover:underline cursor-pointer"
                               onClick={() => startInlineEdit(client, "name")}
+                              tabIndex={0}
+                              title="Edit"
                             >{client.name}</span>
                           )}
                           {editingCell?.id === client.id && editingCell.field === "phone" ? (
@@ -261,6 +265,8 @@ const Clients = () => {
                             <span
                               className="text-sm text-gray-500 hover:underline cursor-pointer"
                               onClick={() => startInlineEdit(client, "phone")}
+                              tabIndex={0}
+                              title="Edit"
                             >{client.phone}</span>
                           )}
                         </div>
