@@ -408,7 +408,7 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">
+                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-teal-900 border-teal-800 text-gray-200">
                         {(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH
                       </span>
                     </TableCell>
