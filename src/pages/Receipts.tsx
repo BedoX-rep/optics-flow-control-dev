@@ -52,6 +52,78 @@ const Receipts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const handleMarkAsPaid = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ balance: 0 })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      fetchReceipts();
+      toast({
+        title: "Receipt Updated",
+        description: "Receipt has been marked as paid.",
+      });
+    } catch (error) {
+      console.error('Error updating receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update receipt. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMarkAsDelivered = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ delivery_status: 'Completed' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      fetchReceipts();
+      toast({
+        title: "Receipt Updated",
+        description: "Receipt has been marked as delivered.",
+      });
+    } catch (error) {
+      console.error('Error updating receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update receipt. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ is_deleted: true })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setReceipts(receipts.filter(receipt => receipt.id !== id));
+      toast({
+        title: "Receipt Deleted",
+        description: "Receipt has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete receipt. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchReceipts = async () => {
     if (!user) return;
 
@@ -235,14 +307,45 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3 text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => setSelectedReceipt(receipt)}
-                        className="hover:bg-black/10"
-                      >
-                        <Eye className="h-4 w-4 text-black" />
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleMarkAsPaid(receipt.id)}
+                          className="hover:bg-green-100"
+                          disabled={receipt.balance === 0}
+                          title="Mark as Paid"
+                        >
+                          <span className="text-green-600">₪</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleMarkAsDelivered(receipt.id)}
+                          className="hover:bg-blue-100"
+                          disabled={receipt.delivery_status === 'Completed'}
+                          title="Mark as Delivered"
+                        >
+                          <span className="text-blue-600">📦</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDelete(receipt.id)}
+                          className="hover:bg-red-100"
+                          title="Delete Receipt"
+                        >
+                          <span className="text-red-600">🗑️</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setSelectedReceipt(receipt)}
+                          className="hover:bg-black/10"
+                        >
+                          <Eye className="h-4 w-4 text-black" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
