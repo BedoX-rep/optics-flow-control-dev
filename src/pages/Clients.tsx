@@ -41,6 +41,8 @@ interface Client {
   favorite?: boolean;
   created_at?: string;
   is_deleted?: boolean;
+  last_prescription_update?: string;
+  assurance?: string;
 }
 
 const Clients = () => {
@@ -279,11 +281,11 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       {(client.right_eye_sph !== null && client.right_eye_sph !== undefined) ? 
-                        <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
+                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
                           <span className="whitespace-nowrap">
                             {client.right_eye_sph}
                             {(client.right_eye_cyl || client.right_eye_axe) && 
-                              <span className="text-blue-600/80">
+                              <span className="text-[#1e7575] text-sm">
                                 {' '}({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})
                               </span>
                             }
@@ -293,11 +295,11 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       {(client.left_eye_sph !== null && client.left_eye_sph !== undefined) ? 
-                        <div className="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
+                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
                           <span className="whitespace-nowrap">
                             {client.left_eye_sph}
                             {(client.left_eye_cyl || client.left_eye_axe) && 
-                              <span className="text-purple-600/80">
+                              <span className="text-[#1e7575] text-sm">
                                 {' '}({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})
                               </span>
                             }
@@ -307,7 +309,7 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       {client.Add ? 
-                        <div className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-md text-sm font-medium inline-block">
+                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
                           {client.Add}
                         </div>
                         : '-'}
