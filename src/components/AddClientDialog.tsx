@@ -166,30 +166,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
-                              let value = e.target.value;
-                              // Allow empty input, single minus sign, or decimal point
-                              if (value === '' || value === '-' || value === '.') {
+                              const value = e.target.value;
+                              if (value === '' || value === '-') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              // Convert to number if valid
                               const numValue = parseFloat(value);
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
-                              }
-                            }} 
-                            onKeyDown={(e) => {
-                              // Allow negative sign only at start
-                              if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
-                                e.preventDefault();
-                              }
-                              // Allow only one decimal point
-                              if (e.key === '.' && e.currentTarget.value.includes('.')) {
-                                e.preventDefault();
                               }
                             }}
                             className="h-8"
@@ -206,30 +194,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
-                              let value = e.target.value;
-                              // Allow empty input, single minus sign, or decimal point
-                              if (value === '' || value === '-' || value === '.') {
+                              const value = e.target.value;
+                              if (value === '' || value === '-') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              // Convert to number if valid
                               const numValue = parseFloat(value);
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
-                              }
-                            }} 
-                            onKeyDown={(e) => {
-                              // Allow negative sign only at start
-                              if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
-                                e.preventDefault();
-                              }
-                              // Allow only one decimal point
-                              if (e.key === '.' && e.currentTarget.value.includes('.')) {
-                                e.preventDefault();
                               }
                             }}
                             className="h-8"
@@ -273,30 +249,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
-                              let value = e.target.value;
-                              // Allow empty input, single minus sign, or decimal point
-                              if (value === '' || value === '-' || value === '.') {
+                              const value = e.target.value;
+                              if (value === '' || value === '-') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              // Convert to number if valid
                               const numValue = parseFloat(value);
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
-                              }
-                            }} 
-                            onKeyDown={(e) => {
-                              // Allow negative sign only at start
-                              if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
-                                e.preventDefault();
-                              }
-                              // Allow only one decimal point
-                              if (e.key === '.' && e.currentTarget.value.includes('.')) {
-                                e.preventDefault();
                               }
                             }}
                             className="h-8"
@@ -313,30 +277,18 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
-                              let value = e.target.value;
-                              // Allow empty input, single minus sign, or decimal point
-                              if (value === '' || value === '-' || value === '.') {
+                              const value = e.target.value;
+                              if (value === '' || value === '-') {
                                 field.onChange(undefined);
                                 return;
                               }
-                              // Convert to number if valid
                               const numValue = parseFloat(value);
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
-                              }
-                            }} 
-                            onKeyDown={(e) => {
-                              // Allow negative sign only at start
-                              if (e.key === '-' && e.currentTarget.selectionStart !== 0) {
-                                e.preventDefault();
-                              }
-                              // Allow only one decimal point
-                              if (e.key === '.' && e.currentTarget.value.includes('.')) {
-                                e.preventDefault();
                               }
                             }}
                             className="h-8"
