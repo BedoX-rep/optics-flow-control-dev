@@ -154,7 +154,7 @@ const Clients = () => {
       transition: "all 0.2s ease",
       minHeight: "calc(100svh - 68px)",
     }}>
-      <div className="flex flex-col gap-6 mb-6 w-full">
+      <div className="flex flex-col gap-4 mb-4 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -284,28 +284,36 @@ const Clients = () => {
                     </TableCell>
                     <TableCell className="py-3">{client.Add || '-'}</TableCell>
                     <TableCell className="py-3">
-                      {client.last_prescription_update 
-                        ? new Date(client.last_prescription_update).toLocaleString(undefined, {
-                            year: 'numeric',
-                            month: 'numeric',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        : '-'}
+                      <span className="text-neutral-600 text-xs">
+                        {client.last_prescription_update 
+                          ? new Date(client.last_prescription_update).toLocaleString(undefined, {
+                              year: 'numeric',
+                              month: 'numeric',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : '-'}
+                      </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      {client.created_at 
-                        ? new Date(client.created_at).toLocaleString(undefined, {
-                            year: 'numeric',
-                            month: 'numeric',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        : '-'}
+                      <span className="text-neutral-600 text-xs">
+                        {client.created_at 
+                          ? new Date(client.created_at).toLocaleString(undefined, {
+                              year: 'numeric',
+                              month: 'numeric',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : '-'}
+                      </span>
                     </TableCell>
-                    <TableCell className="py-3">{client.assurance || '-'}</TableCell>
+                    <TableCell className="py-3">
+                      <span className={`${client.assurance ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"}`}>
+                        {client.assurance || '-'}
+                      </span>
+                    </TableCell>
                     <TableCell className="py-3">
                       {editingCell?.id === client.id && editingCell.field === "notes" ? (
                         <input
@@ -319,10 +327,10 @@ const Clients = () => {
                         />
                       ) : (
                         <span
-                          className="hover:underline cursor-pointer"
+                          className="hover:underline cursor-pointer text-neutral-500"
                           onClick={() => startInlineEdit(client, "notes")}
                         >
-                          {client.notes || '-'}
+                          {client.notes || 'Écrivez ici vos observations ou rappels !'}
                         </span>
                       )}
                     </TableCell>
