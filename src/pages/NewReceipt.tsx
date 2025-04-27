@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -67,6 +66,10 @@ const NewReceipt = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [advancePayment, setAdvancePayment] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState('Unpaid');
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,22 +150,22 @@ const NewReceipt = () => {
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalCost = items.reduce((sum, item) => sum + (item.cost * item.quantity), 0);
-  
+
   // Calculate percentage-based discount
   const discountAmount = (subtotal * discount) / 100;
-  
+
   // Calculate numeric discount (direct amount)
   const totalDiscount = discountAmount + numericDiscount;
-  
+
   // Calculate purchasing amount (subtotal - discount)
   const purchasingAmount = subtotal - totalDiscount;
-  
+
   // Calculate tax based on amount above purchasing amount
   const taxAmount = tax > purchasingAmount ? (tax - purchasingAmount) * taxIndicator : 0;
-  
+
   // Calculate final total
   const total = purchasingAmount + taxAmount;
-  
+
   // Calculate profit
   const profit = total - totalCost;
 
@@ -205,6 +208,17 @@ const NewReceipt = () => {
     setSelectedClient(clientId);
     fetchClientPrescription(clientId);
   };
+
+  const updatePaymentStatus = (newBalance: number) => {
+    if (newBalance <= 0) {
+      setPaymentStatus('Paid');
+    } else if (newBalance < total) {
+      setPaymentStatus('Partially Paid');
+    } else {
+      setPaymentStatus('Unpaid');
+    }
+  };
+
 
   const handleSaveReceipt = async () => {
     if (!user) {
@@ -255,7 +269,9 @@ const NewReceipt = () => {
           discount_amount: totalDiscount,
           discount_percentage: discount,
           total,
-          balance: total,
+          balance,
+          advance_payment: advancePayment, // Added advance_payment
+          payment_status: paymentStatus, // Added payment_status
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered'
         })
@@ -297,10 +313,17 @@ const NewReceipt = () => {
     }
   };
 
+  useEffect(() => {
+    const newBalance = total - advancePayment;
+    setBalance(newBalance);
+    updatePaymentStatus(newBalance);
+  }, [total, advancePayment]);
+
+
   return (
     <div>
       <PageTitle title="New Receipt" subtitle="Create a new receipt for a client" />
-      
+
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
@@ -440,7 +463,7 @@ const NewReceipt = () => {
                   <Plus className="h-4 w-4 mr-1" /> Add Custom Item
                 </Button>
               </div>
-              
+
               {items.map((item) => (
                 <div key={item.id} className="flex items-end gap-4 p-4 border rounded-md">
                   {item.customName !== undefined ? (
@@ -495,7 +518,7 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
                     />
                   </div>
-                  
+
                   {item.customName !== undefined && (
                     <div className="w-32">
                       <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
@@ -594,6 +617,19 @@ const NewReceipt = () => {
                     onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="advancePayment">Advance Payment (DH)</Label>
+                  <Input
+                    id="advancePayment"
+                    type="number"
+                    min="0"
+                    value={advancePayment}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      setAdvancePayment(value);
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
@@ -618,15 +654,33 @@ const NewReceipt = () => {
                   <span>Total:</span>
                   <span>{total.toFixed(2)} DH</span>
                 </div>
-                
+
                 <div className="flex justify-between py-2 border-b text-red-500">
                   <span>Cost:</span>
                   <span>{totalCost.toFixed(2)} DH</span>
                 </div>
-                
+
                 <div className="flex justify-between py-2 font-bold text-green-600">
                   <span>Profit:</span>
                   <span>{profit.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between py-2 border-b">
+                  <span>Advance Payment:</span>
+                  <span>{advancePayment.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between py-2 border-b text-lg font-semibold">
+                  <span>Balance:</span>
+                  <span>{balance.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span>Payment Status:</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${
+                    paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                    paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {paymentStatus}
+                  </span>
                 </div>
               </div>
             </div>
