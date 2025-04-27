@@ -200,12 +200,14 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            pattern="-?\d*\.?\d*"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                              field.onChange(value);
+                              if (!isNaN(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -222,12 +224,14 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            pattern="-?\d*\.?\d*"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                              field.onChange(value);
+                              if (!isNaN(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -272,12 +276,14 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            pattern="-?\d*\.?\d*"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                              field.onChange(value);
+                              if (!isNaN(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -294,12 +300,14 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            pattern="-?\d*\.?\d*"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                              field.onChange(value);
+                              if (!isNaN(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
