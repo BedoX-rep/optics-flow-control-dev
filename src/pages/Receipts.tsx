@@ -407,7 +407,11 @@ const Receipts = () => {
                         ) : `${receipt.advance_payment?.toFixed(2) || '0.00'} DH`}
                       </span>
                     </TableCell>
-                    <TableCell className="py-3 text-right">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</TableCell>
+                    <TableCell className="py-3">
+                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">
+                        {(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH
+                      </span>
+                    </TableCell>
                     <TableCell className="py-3">
                       <span
                         className="font-semibold text-black hover:underline cursor-pointer"
@@ -427,7 +431,11 @@ const Receipts = () => {
                         ) : `${receipt.cost_ttc?.toFixed(2) || '0.00'} DH`}
                       </span>
                     </TableCell>
-                    <TableCell className="py-3 text-right">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</TableCell>
+                    <TableCell className="py-3">
+                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">
+                        {(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH
+                      </span>
+                    </TableCell>
                     <TableCell className="py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         receipt.balance === 0 ? 'bg-green-100 text-green-800' :
@@ -549,7 +557,6 @@ const Receipts = () => {
                         </Button>
                       </div>
                     </TableCell>
-                     {/* Added Total cell to the end */}
                   </TableRow>
                 ))
               )}
