@@ -33,6 +33,7 @@ const formSchema = z.object({
   left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_axe: z.number().optional(),
   Add: z.string().optional(), // Added Add field to schema
+  assurance: z.string().optional(), // Added Assurance field to schema
 })
 
 interface AddClientDialogProps {
@@ -51,6 +52,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       phone: "",
       gender: undefined,
       Add: "", // Added default value for Add field
+      assurance: "", // Added default value for Assurance field
     },
   })
 
@@ -69,6 +71,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         left_eye_cyl: values.left_eye_cyl,
         left_eye_axe: values.left_eye_axe,
         Add: values.Add, // Included Add field in clientData
+        assurance: values.assurance, // Included Assurance field in clientData
       }
 
       const { data, error } = await supabase
@@ -339,6 +342,20 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                       }}
                       className="h-8"
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="assurance"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assurance</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="text" className="h-8" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

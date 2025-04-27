@@ -34,6 +34,7 @@ const formSchema = z.object({
   left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_axe: z.number().optional(),
   Add: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
+  assurance: z.string().optional(),
   notes: z.string().nullable().optional()
 })
 
@@ -376,6 +377,19 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                       }}
                       className="h-8"
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="assurance"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assurance</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="text" className="h-8" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
