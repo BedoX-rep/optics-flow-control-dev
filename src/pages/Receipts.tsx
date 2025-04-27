@@ -49,6 +49,52 @@ const Receipts = () => {
   const [dateFilter, setDateFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
+  const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
+  const [cellEditValue, setCellEditValue] = useState<string>('');
+
+  const startInlineEdit = (receipt: Receipt, field: string) => {
+    setEditingCell({ id: receipt.id, field });
+    setCellEditValue(String(receipt[field as keyof Receipt] || ''));
+  };
+
+  const endInlineEdit = async (receipt: Receipt) => {
+    if (!editingCell) return;
+    
+    try {
+      const value = cellEditValue.trim();
+      if (value === String(receipt[editingCell.field as keyof Receipt])) {
+        setEditingCell(null);
+        return;
+      }
+
+      const updates: any = {
+        [editingCell.field]: editingCell.field.includes('phone') ? value : 
+                           isNaN(Number(value)) ? value : Number(value)
+      };
+
+      const { error } = await supabase
+        .from('receipts')
+        .update(updates)
+        .eq('id', receipt.id);
+
+      if (error) throw error;
+
+      fetchReceipts();
+      toast({
+        title: "Success",
+        description: "Receipt updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating receipt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update receipt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEditingCell(null);
+    }
+  };
   const { user } = useAuth();
   const { toast } = useToast();
 
