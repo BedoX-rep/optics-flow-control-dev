@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -60,7 +59,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
   const { toast } = useToast()
   const { user } = useAuth()
   const [gender, setGender] = useState<"Mr" | "Mme" | "Enf">(client?.gender || "Mr");
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -203,6 +202,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -223,6 +225,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -269,6 +274,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -289,6 +297,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);

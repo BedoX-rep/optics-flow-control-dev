@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -169,6 +168,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -189,6 +191,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -235,6 +240,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
@@ -255,6 +263,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           <Input 
                             type="number" 
                             {...field} 
+                            step="0.25"
+                            min="-20"
+                            max="20"
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
                               field.onChange(value);
