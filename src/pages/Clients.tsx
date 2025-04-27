@@ -263,26 +263,55 @@ const Clients = () => {
                             />
                           ) : (
                             <span
-                              className="text-sm text-gray-500 hover:underline cursor-pointer"
+                              className="text-sm text-gray-500 hover:underline cursor-pointer flex items-center gap-1.5"
                               onClick={() => startInlineEdit(client, "phone")}
                               tabIndex={0}
                               title="Edit"
-                            >{client.phone}</span>
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                              </svg>
+                              {client.phone}
+                            </span>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 text-sm">
+                    <TableCell className="py-3">
                       {(client.right_eye_sph !== null && client.right_eye_sph !== undefined) ? 
-                        <span className="whitespace-nowrap">{client.right_eye_sph}{(client.right_eye_cyl || client.right_eye_axe) ? ` (${client.right_eye_cyl || 0} a ${client.right_eye_axe || 0})` : ''}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-medium whitespace-nowrap">
+                            {client.right_eye_sph}
+                          </span>
+                          {(client.right_eye_cyl || client.right_eye_axe) && 
+                            <span className="text-neutral-500 text-sm">
+                              ({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})
+                            </span>
+                          }
+                        </div>
                         : '-'}
                     </TableCell>
-                    <TableCell className="py-3 text-sm">
+                    <TableCell className="py-3">
                       {(client.left_eye_sph !== null && client.left_eye_sph !== undefined) ? 
-                        <span className="whitespace-nowrap">{client.left_eye_sph}{(client.left_eye_cyl || client.left_eye_axe) ? ` (${client.left_eye_cyl || 0} a ${client.left_eye_axe || 0})` : ''}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-sm font-medium whitespace-nowrap">
+                            {client.left_eye_sph}
+                          </span>
+                          {(client.left_eye_cyl || client.left_eye_axe) && 
+                            <span className="text-neutral-500 text-sm">
+                              ({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})
+                            </span>
+                          }
+                        </div>
                         : '-'}
                     </TableCell>
-                    <TableCell className="py-3">{client.Add || '-'}</TableCell>
+                    <TableCell className="py-3">
+                      {client.Add ? 
+                        <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-sm font-medium">
+                          {client.Add}
+                        </span>
+                        : '-'}
+                    </TableCell>
                     <TableCell className="py-3">
                       <span className="text-neutral-600 text-xs">
                         {client.last_prescription_update 
