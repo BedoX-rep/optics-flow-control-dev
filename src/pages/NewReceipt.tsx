@@ -521,20 +521,6 @@ const NewReceipt = () => {
                     />
                   </div>
 
-                  {item.customName !== undefined && (
-                    <div className="w-32">
-                      <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
-                      <Input
-                        id={`cost-${item.id}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.cost}
-                        onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-                  )}
-
                   <div className="w-32">
                     <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
                     <Input
