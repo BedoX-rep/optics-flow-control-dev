@@ -18,13 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Phone, FileText, Eye, Plus, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ReceiptDetailsDialog from '@/components/ReceiptDetailsDialog';
-import { Card, CardContent } from '@/components/ui/card';
 
 interface Receipt {
   id: string;
@@ -36,6 +36,10 @@ interface Receipt {
   delivery_status: string;
   montage_status: string;
   balance: number;
+  advance_payment?: number;
+  cost?: number;
+  cost_ttc?: number;
+  profit?: number;
 }
 
 const Receipts = () => {
@@ -91,12 +95,6 @@ const Receipts = () => {
     if (user) {
       fetchReceipts();
     }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchReceipts();
-    }
   }, [dateFilter]);
 
   const handleDeleteReceipt = async (id: string) => {
@@ -131,28 +129,33 @@ const Receipts = () => {
      new Date(receipt.created_at).toLocaleDateString() === dateFilter)
   );
 
-  const pageActions = (
-    <Link to="/new-receipt">
-      <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
-        <Plus className="h-4 w-4 mr-2" />
-        New Receipt
-      </Button>
-    </Link>
-  );
-
   return (
-    <div>
+    <div className="flex flex-col h-[calc(100svh-68px)]" style={{
+      width: "100%",
+      paddingLeft: "1rem",
+      paddingRight: "1rem",
+      paddingTop: "1.5rem",
+      transition: "all 0.2s ease",
+      minHeight: "calc(100svh - 68px)",
+    }}>
       <PageTitle 
         title="Receipts" 
-        subtitle="View and manage prescription receipts" 
-        actions={pageActions}
+        subtitle="View and manage prescription receipts"
+        actions={
+          <Link to="/new-receipt">
+            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
+              <Plus className="h-4 w-4 mr-2" />
+              New Receipt
+            </Button>
+          </Link>
+        }
       />
       
       <Card className="mb-6 card-shadow border border-gray-100">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 min-w-[240px]">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <Input 
                 type="text" 
                 placeholder="Search by client or phone..." 
@@ -180,37 +183,20 @@ const Receipts = () => {
           </div>
         </CardContent>
       </Card>
-      
-      {isLoading ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
-          <div className="h-4 bg-gray-100 rounded w-1/2 mx-auto"></div>
-        </div>
-      ) : filteredReceipts.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-xl font-medium text-gray-800 mb-2">No receipts found</h3>
-          <p className="text-gray-500 mb-6">Create your first receipt to get started.</p>
-          <Link to="/new-receipt">
-            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Receipt
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="w-full bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
+
+      <div className="flex-grow min-h-0 flex flex-col">
+        <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
           <Table className="min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
                 <TableHead className="text-black text-xs font-semibold">Date</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Client</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Phone</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Total</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Cost TTC</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Profit</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Advance Payment</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Balance</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Cost TTC</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Profit</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Balance</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
@@ -218,60 +204,76 @@ const Receipts = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredReceipts.map((receipt) => (
-                <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
-                  <TableCell className="py-3 font-medium">{new Date(receipt.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="py-3">{receipt.client_name}</TableCell>
-                  <TableCell className="py-3">{receipt.client_phone}</TableCell>
-                  <TableCell className="py-3 font-medium">{receipt.total.toFixed(2)} DH</TableCell>
-                  <TableCell className="py-3">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</TableCell>
-                  <TableCell className="py-3">{receipt.profit?.toFixed(2) || '0.00'} DH</TableCell>
-                  <TableCell className="py-3">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</TableCell>
-                  <TableCell className="py-3">{receipt.balance.toFixed(2)} DH</TableCell>
-                  <TableCell className="py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.balance === 0 ? 'bg-green-100 text-green-800' :
-                      receipt.advance_payment > 0 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {receipt.balance === 0 ? 'Paid' : 
-                       receipt.advance_payment > 0 ? 'Partially Paid' : 'Unpaid'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.delivery_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {receipt.delivery_status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.montage_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {receipt.montage_status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-3 text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setSelectedReceipt(receipt)}
-                      className="hover:bg-black/10"
-                    >
-                      <Eye className="h-4 w-4 text-black" />
-                    </Button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
+                    <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredReceipts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
+                    No receipts found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredReceipts.map((receipt) => (
+                  <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group">
+                    <TableCell className="py-3 font-medium">
+                      {new Date(receipt.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="py-3">{receipt.client_name}</TableCell>
+                    <TableCell className="py-3">{receipt.client_phone}</TableCell>
+                    <TableCell className="py-3 text-right font-medium">{receipt.total.toFixed(2)} DH</TableCell>
+                    <TableCell className="py-3 text-right">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</TableCell>
+                    <TableCell className="py-3 text-right">{receipt.profit?.toFixed(2) || '0.00'} DH</TableCell>
+                    <TableCell className="py-3 text-right">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</TableCell>
+                    <TableCell className="py-3 text-right">{receipt.balance.toFixed(2)} DH</TableCell>
+                    <TableCell className="py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        receipt.balance === 0 ? 'bg-green-100 text-green-800' :
+                        receipt.advance_payment > 0 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {receipt.balance === 0 ? 'Paid' : 
+                         receipt.advance_payment > 0 ? 'Partially Paid' : 'Unpaid'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        receipt.delivery_status === 'Completed' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {receipt.delivery_status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        receipt.montage_status === 'Completed' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {receipt.montage_status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3 text-right">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => setSelectedReceipt(receipt)}
+                        className="hover:bg-black/10"
+                      >
+                        <Eye className="h-4 w-4 text-black" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
-      )}
+      </div>
 
       <ReceiptDetailsDialog
         isOpen={!!selectedReceipt}
