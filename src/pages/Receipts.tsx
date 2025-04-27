@@ -207,6 +207,8 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Client</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Phone</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Total</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Cost TTC</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Profit</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Advance Payment</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Balance</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
@@ -222,6 +224,8 @@ const Receipts = () => {
                   <TableCell className="py-3">{receipt.client_name}</TableCell>
                   <TableCell className="py-3">{receipt.client_phone}</TableCell>
                   <TableCell className="py-3 font-medium">{receipt.total.toFixed(2)} DH</TableCell>
+                  <TableCell className="py-3">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</TableCell>
+                  <TableCell className="py-3">{receipt.profit?.toFixed(2) || '0.00'} DH</TableCell>
                   <TableCell className="py-3">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</TableCell>
                   <TableCell className="py-3">{receipt.balance.toFixed(2)} DH</TableCell>
                   <TableCell className="py-3">

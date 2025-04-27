@@ -266,6 +266,8 @@ const NewReceipt = () => {
           subtotal,
           tax: taxAmount,
           cost: totalCost,
+          cost_ttc: totalCost,
+          profit: profit,
           discount_amount: totalDiscount,
           discount_percentage: discount,
           total,
@@ -534,9 +536,28 @@ const NewReceipt = () => {
                   )}
 
                   <div className="w-32">
+                    <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+                    <Input
+                      id={`cost-${item.id}`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.cost}
+                      onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+
+                  <div className="w-32">
                     <Label>Total</Label>
                     <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
                       {(item.price * item.quantity).toFixed(2)} DH
+                    </div>
+                  </div>
+
+                  <div className="w-32">
+                    <Label>Profit</Label>
+                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                      {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
                     </div>
                   </div>
 
