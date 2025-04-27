@@ -332,25 +332,43 @@ const Receipts = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="h-7 w-7 rounded-full hover:bg-gray-100 transition-colors"
                           onClick={() => {
                             const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
                             const prevIndex = (currentIndex - 1 + MONTAGE_STATUSES.length) % MONTAGE_STATUSES.length;
                             handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[prevIndex]);
                           }}
                         >
-                          ←
+                          <span className="text-gray-600">⟵</span>
                         </Button>
                         <Select
                           value={receipt.montage_status}
                           onValueChange={(value) => handleMontageStatusChange(receipt.id, value)}
                         >
-                          <SelectTrigger className="h-7 w-[100px]">
+                          <SelectTrigger className={`h-7 w-[120px] text-xs font-medium ${
+                            receipt.montage_status === 'UnOrdered' ? 'bg-red-50 text-red-700 border-red-200' :
+                            receipt.montage_status === 'Ordered' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            receipt.montage_status === 'InStore' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                            receipt.montage_status === 'InCutting' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            receipt.montage_status === 'Ready' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            ''
+                          }`}>
                             <SelectValue>{receipt.montage_status}</SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {MONTAGE_STATUSES.map((status) => (
-                              <SelectItem key={status} value={status}>
+                              <SelectItem 
+                                key={status} 
+                                value={status}
+                                className={`text-xs ${
+                                  status === 'UnOrdered' ? 'text-red-700' :
+                                  status === 'Ordered' ? 'text-blue-700' :
+                                  status === 'InStore' ? 'text-purple-700' :
+                                  status === 'InCutting' ? 'text-amber-700' :
+                                  status === 'Ready' ? 'text-emerald-700' :
+                                  ''
+                                }`}
+                              >
                                 {status}
                               </SelectItem>
                             ))}
@@ -359,14 +377,14 @@ const Receipts = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="h-7 w-7 rounded-full hover:bg-gray-100 transition-colors"
                           onClick={() => {
                             const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
                             const nextIndex = (currentIndex + 1) % MONTAGE_STATUSES.length;
                             handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[nextIndex]);
                           }}
                         >
-                          →
+                          <span className="text-gray-600">⟶</span>
                         </Button>
                       </div>
                     </TableCell>
