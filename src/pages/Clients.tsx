@@ -208,9 +208,9 @@ const Clients = () => {
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Right Eye</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Left Eye</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Add</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Last Updated</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Assurance</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[120px]">Created At</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[120px]">Last Updated</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
                 <TableHead className="text-right text-black text-xs font-semibold w-[80px]">Actions</TableHead>
               </TableRow>
