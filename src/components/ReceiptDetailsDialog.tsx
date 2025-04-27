@@ -94,10 +94,7 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
                     <p className="text-gray-500">SPH</p>
-                    <p className="font-medium">
-                      {receipt.right_eye_sph === 0 ? '0' : (receipt.right_eye_sph || 'N/A')}
-                      {receipt.right_eye_cyl && receipt.right_eye_axe ? ` (${receipt.right_eye_cyl} à ${receipt.right_eye_axe})` : ''}
-                    </p>
+                    <p className="font-medium">{receipt.right_eye_sph || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">CYL</p>
@@ -114,10 +111,7 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
                     <p className="text-gray-500">SPH</p>
-                    <p className="font-medium">
-                      {receipt.left_eye_sph === 0 ? '0' : (receipt.left_eye_sph || 'N/A')}
-                      {receipt.left_eye_cyl && receipt.left_eye_axe ? ` (${receipt.left_eye_cyl} à ${receipt.left_eye_axe})` : ''}
-                    </p>
+                    <p className="font-medium">{receipt.left_eye_sph || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">CYL</p>
