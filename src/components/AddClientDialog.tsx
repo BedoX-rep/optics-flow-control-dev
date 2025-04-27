@@ -26,11 +26,11 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
   gender: z.enum(["Mr", "Mme", "Enf"]),
-  right_eye_sph: z.number().optional(),
-  right_eye_cyl: z.number().optional(),
+  right_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
+  right_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   right_eye_axe: z.number().optional(),
-  left_eye_sph: z.number().optional(),
-  left_eye_cyl: z.number().optional(),
+  left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
+  left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_axe: z.number().optional(),
 })
 
