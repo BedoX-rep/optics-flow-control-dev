@@ -205,6 +205,7 @@ const Clients = () => {
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Left Eye</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-14">Add</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Last Updated</TableHead>
+                <TableHead className="text-black text-xs font-semibold w-[120px]">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-[120px]">Assurance</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
                 <TableHead className="text-right text-black text-xs font-semibold w-[80px]">Actions</TableHead>
@@ -278,7 +279,24 @@ const Clients = () => {
                     <TableCell className="py-3">{client.Add || '-'}</TableCell>
                     <TableCell className="py-3">
                       {client.last_prescription_update 
-                        ? new Date(client.last_prescription_update).toLocaleDateString()
+                        ? new Date(client.last_prescription_update).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : '-'}
+                    </TableCell>
+                    <TableCell className="py-3">
+                      {client.created_at 
+                        ? new Date(client.created_at).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                         : '-'}
                     </TableCell>
                     <TableCell className="py-3">{client.assurance || '-'}</TableCell>
