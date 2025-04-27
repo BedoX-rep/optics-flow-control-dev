@@ -166,8 +166,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -187,8 +187,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -208,10 +208,11 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Axe</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
                               field.onChange(value);
                             }} 
                             className="h-8"
@@ -234,8 +235,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -255,8 +256,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -276,10 +277,11 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         <FormLabel className="text-xs">Axe</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
+                            inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
                               field.onChange(value);
                             }} 
                             className="h-8"

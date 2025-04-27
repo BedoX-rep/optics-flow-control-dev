@@ -200,8 +200,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -221,8 +221,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -243,10 +243,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
+                            inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
                               field.onChange(value);
                             }} 
                             className="h-8"
@@ -269,8 +269,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -290,8 +290,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number"
-                            step="0.25"
+                            type="text"
+                            inputMode="decimal"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -312,10 +312,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            inputMode="decimal"
+                            inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
                               field.onChange(value);
                             }} 
                             className="h-8"
