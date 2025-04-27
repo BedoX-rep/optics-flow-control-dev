@@ -285,7 +285,7 @@ const Clients = () => {
                           <span className="whitespace-nowrap">
                             {client.right_eye_sph}
                             {(client.right_eye_cyl || client.right_eye_axe) && 
-                              <span className="text-[#1e7575] text-sm">
+                              <span className="text-[#F0F0F0] text-sm">
                                 {' '}({client.right_eye_cyl || 0} a {client.right_eye_axe || 0})
                               </span>
                             }
@@ -299,7 +299,7 @@ const Clients = () => {
                           <span className="whitespace-nowrap">
                             {client.left_eye_sph}
                             {(client.left_eye_cyl || client.left_eye_axe) && 
-                              <span className="text-[#1e7575] text-sm">
+                              <span className="text-[#F0F0F0] text-sm">
                                 {' '}({client.left_eye_cyl || 0} a {client.left_eye_axe || 0})
                               </span>
                             }
