@@ -35,6 +35,7 @@ import { sortProducts, ProductSortable } from "@/components/products/sortProduct
 
 interface Product extends ProductSortable {
   // All properties are already defined in ProductSortable
+  cost_ttc?: number;
 }
 
 const DEFAULT_FILTERS = {
@@ -55,7 +56,7 @@ const Products = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [isLoading, setIsLoading] = useState(false);
-  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0 });
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
   const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
   const [pageReady, setPageReady] = useState(false);
@@ -158,7 +159,8 @@ const Products = () => {
       company: editing.company ?? undefined,
       image: editing.image ?? undefined,
       created_at: editing.created_at ?? undefined,
-    } : { name: '', price: 0 });
+      cost_ttc: editing.cost_ttc ?? 0,
+    } : { name: '', price: 0, cost_ttc: 0 });
     setIsOpen(true);
   };
 
@@ -185,7 +187,7 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0 });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0 });
       fetchProducts();
     } catch (error) {
       console.error('Error saving product:', error);
@@ -241,7 +243,7 @@ const Products = () => {
     if (!editingCell || !user) return;
     let val: string | number | null = cellEditValue;
 
-    if (editingCell.field === "price") {
+    if (editingCell.field === "price" || editingCell.field === "cost_ttc") {
       val = Number(cellEditValue);
     } else if (cellEditValue === "none_selected" || cellEditValue === "") {
       val = null;
@@ -407,19 +409,20 @@ const Products = () => {
                 <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
                 <TableHead className="text-black text-xs font-semibold w-28">Created At</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right w-20">Cost TTC</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right w-[84px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
                     No products found.
                   </TableCell>
                 </TableRow>
@@ -613,6 +616,28 @@ const Products = () => {
                       <span className="text-neutral-600 text-xs">
                         {product.created_at ? new Date(product.created_at).toLocaleString() : '-'}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingCell?.id === product.id && editingCell.field === "cost_ttc" ? (
+                        <input
+                          type="number"
+                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
+                          min={0}
+                          value={cellEditValue}
+                          onChange={e => setCellEditValue(e.target.value)}
+                          onBlur={() => endInlineEdit(product)}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          className="font-semibold text-black hover:underline cursor-pointer"
+                          tabIndex={0}
+                          title="Edit"
+                          onClick={() => startInlineEdit(product, "cost_ttc")}
+                        >
+                          {Number(product.cost_ttc || 0).toFixed(2)} DH
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">

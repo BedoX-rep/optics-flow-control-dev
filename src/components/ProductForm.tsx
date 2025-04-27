@@ -42,6 +42,7 @@ const COMPANY_OPTIONS = [
 export interface ProductFormValues {
   name: string;
   price: number;
+  cost_ttc?: number;
   stock?: number;
   category?: string;
   index?: string;
@@ -214,6 +215,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
           min={0}
           required
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-3">
+        <Label htmlFor="cost_ttc">Cost TTC</Label>
+        <Input
+          id="cost_ttc"
+          type="number"
+          className="col-span-3"
+          value={form.cost_ttc ?? 0}
+          onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
+          min={0}
         />
       </div>
       <div className="grid grid-cols-4 items-center gap-3">
