@@ -313,6 +313,7 @@ const Receipts = () => {
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
                 <TableHead className="text-black text-xs font-semibold">Client Info</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Balance</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Cost TTC</TableHead>
@@ -368,12 +369,36 @@ const Receipts = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 text-right">
-                      <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "advance_payment")}>
+                    <TableCell className="py-3">
+                      <span
+                        className="font-semibold text-black hover:underline cursor-pointer"
+                        tabIndex={0}
+                        title="Edit"
+                        onClick={() => startInlineEdit(receipt, "total")}
+                      >
+                        {editingCell?.id === receipt.id && editingCell.field === "total" ? (
+                          <input
+                            type="number"
+                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
+                            value={cellEditValue}
+                            onChange={e => setCellEditValue(e.target.value)}
+                            onBlur={() => endInlineEdit(receipt)}
+                            autoFocus
+                          />
+                        ) : `${receipt.total.toFixed(2)} DH`}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <span
+                        className="font-semibold text-black hover:underline cursor-pointer"
+                        tabIndex={0}
+                        title="Edit"
+                        onClick={() => startInlineEdit(receipt, "advance_payment")}
+                      >
                         {editingCell?.id === receipt.id && editingCell.field === "advance_payment" ? (
                           <input
                             type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black text-right"
+                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
                             value={cellEditValue}
                             onChange={e => setCellEditValue(e.target.value)}
                             onBlur={() => endInlineEdit(receipt)}
@@ -383,7 +408,7 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3 text-right">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</TableCell>
-                    <TableCell className="py-3 text-right">
+                    <TableCell className="py-3">
                       <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "cost_ttc")}>
                         {editingCell?.id === receipt.id && editingCell.field === "cost_ttc" ? (
                           <input
@@ -532,20 +557,7 @@ const Receipts = () => {
                         </Button>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 text-right">
-                      <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "total")}>
-                        {editingCell?.id === receipt.id && editingCell.field === "total" ? (
-                          <input
-                            type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black text-right"
-                            value={cellEditValue}
-                            onChange={e => setCellEditValue(e.target.value)}
-                            onBlur={() => endInlineEdit(receipt)}
-                            autoFocus
-                          />
-                        ) : `${receipt.total.toFixed(2)} DH`}
-                      </span>
-                    </TableCell> {/* Added Total cell to the end */}
+                     {/* Added Total cell to the end */}
                   </TableRow>
                 ))
               )}
