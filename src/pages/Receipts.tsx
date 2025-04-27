@@ -11,13 +11,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Search, Filter, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import PageTitle from '@/components/PageTitle';
@@ -25,6 +18,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ReceiptDetailsDialog from '@/components/ReceiptDetailsDialog';
+import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Receipt {
   id: string;
@@ -97,31 +98,6 @@ const Receipts = () => {
     }
   }, [dateFilter]);
 
-  const handleDeleteReceipt = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('receipts')
-        .update({ is_deleted: true })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setReceipts(receipts.filter(receipt => receipt.id !== id));
-      
-      toast({
-        title: "Receipt Deleted",
-        description: "The receipt has been successfully deleted.",
-      });
-    } catch (error) {
-      console.error('Error deleting receipt:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete receipt. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const filteredReceipts = receipts.filter(receipt => 
     (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
      receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase())) &&
@@ -138,18 +114,19 @@ const Receipts = () => {
       transition: "all 0.2s ease",
       minHeight: "calc(100svh - 68px)",
     }}>
-      <PageTitle 
-        title="Receipts" 
-        subtitle="View and manage prescription receipts"
-        actions={
+      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-6 w-full">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <Link to="/new-receipt">
             <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               New Receipt
             </Button>
           </Link>
-        }
-      />
+          <span>
+            <ReceiptStatsSummary receipts={receipts} />
+          </span>
+        </div>
+      </div>
       
       <Card className="mb-6 card-shadow border border-gray-100">
         <CardContent className="p-4">
@@ -158,7 +135,7 @@ const Receipts = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <Input 
                 type="text" 
-                placeholder="Search by client or phone..." 
+                placeholder="Search receipts..." 
                 className="pl-9 pr-4 py-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
