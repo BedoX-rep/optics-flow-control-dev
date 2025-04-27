@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -59,7 +58,7 @@ const Receipts = () => {
 
   const endInlineEdit = async (receipt: Receipt) => {
     if (!editingCell) return;
-    
+
     try {
       const value = cellEditValue.trim();
       if (value === String(receipt[editingCell.field as keyof Receipt])) {
@@ -205,7 +204,7 @@ const Receipts = () => {
 
     try {
       setIsLoading(true);
-      
+
       const { data: receiptsData, error: receiptsError } = await supabase
         .from('receipts')
         .select(`
@@ -224,7 +223,8 @@ const Receipts = () => {
       const formattedReceipts = receiptsData.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || 'No Client',
-        client_phone: receipt.clients?.phone || 'N/A'
+        client_phone: receipt.clients?.phone || 'N/A',
+        balance: receipt.total - (receipt.advance_payment || 0) // Calculate balance
       }));
 
       setReceipts(formattedReceipts);
@@ -248,9 +248,7 @@ const Receipts = () => {
 
   const filteredReceipts = receipts.filter(receipt => 
     (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (dateFilter === 'all' || 
-     new Date(receipt.created_at).toLocaleDateString() === dateFilter)
+     receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase())) 
   );
 
   return (
@@ -275,7 +273,7 @@ const Receipts = () => {
           </span>
         </div>
       </div>
-      
+
       <Card className="mb-6 card-shadow border border-gray-100">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
@@ -289,7 +287,7 @@ const Receipts = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-gray-500" />
               <Select value={dateFilter} onValueChange={setDateFilter}>
@@ -317,26 +315,25 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Client Info</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Balance</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Cost TTC</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Profit</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Date</TableHead>
+                <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead> {/* Moved Total column */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredReceipts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
                     No receipts found
                   </TableCell>
                 </TableRow>
@@ -385,21 +382,7 @@ const Receipts = () => {
                         ) : `${receipt.advance_payment?.toFixed(2) || '0.00'} DH`}
                       </span>
                     </TableCell>
-                    <TableCell className="py-3 text-right">{receipt.balance.toFixed(2)} DH</TableCell>
-                    <TableCell className="py-3 text-right">
-                      <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "total")}>
-                        {editingCell?.id === receipt.id && editingCell.field === "total" ? (
-                          <input
-                            type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black text-right"
-                            value={cellEditValue}
-                            onChange={e => setCellEditValue(e.target.value)}
-                            onBlur={() => endInlineEdit(receipt)}
-                            autoFocus
-                          />
-                        ) : `${receipt.total.toFixed(2)} DH`}
-                      </span>
-                    </TableCell>
+                    <TableCell className="py-3 text-right">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</TableCell>
                     <TableCell className="py-3 text-right">
                       <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "cost_ttc")}>
                         {editingCell?.id === receipt.id && editingCell.field === "cost_ttc" ? (
@@ -549,6 +532,20 @@ const Receipts = () => {
                         </Button>
                       </div>
                     </TableCell>
+                    <TableCell className="py-3 text-right">
+                      <span className="hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "total")}>
+                        {editingCell?.id === receipt.id && editingCell.field === "total" ? (
+                          <input
+                            type="number"
+                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black text-right"
+                            value={cellEditValue}
+                            onChange={e => setCellEditValue(e.target.value)}
+                            onBlur={() => endInlineEdit(receipt)}
+                            autoFocus
+                          />
+                        ) : `${receipt.total.toFixed(2)} DH`}
+                      </span>
+                    </TableCell> {/* Added Total cell to the end */}
                   </TableRow>
                 ))
               )}
