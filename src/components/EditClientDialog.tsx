@@ -200,8 +200,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="text"
-                            inputMode="decimal"
+                            type="number"
+                            step="0.25"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -221,8 +221,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="text"
-                            inputMode="decimal"
+                            type="number"
+                            step="0.25"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -269,8 +269,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Sph</FormLabel>
                         <FormControl>
                           <Input 
-                            type="text"
-                            inputMode="decimal"
+                            type="number"
+                            step="0.25"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
@@ -290,8 +290,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormLabel className="text-xs">Cyl</FormLabel>
                         <FormControl>
                           <Input 
-                            type="text"
-                            inputMode="decimal"
+                            type="number"
+                            step="0.25"
                             {...field} 
                             onChange={(e) => {
                               const value = e.target.value === '' ? undefined : Number(e.target.value);
