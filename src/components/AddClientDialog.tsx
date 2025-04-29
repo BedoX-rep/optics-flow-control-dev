@@ -64,13 +64,13 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         name: values.name,
         phone: values.phone,
         gender: values.gender,
-        right_eye_sph: values.right_eye_sph ? parseFloat(values.right_eye_sph) : null,
-        right_eye_cyl: values.right_eye_cyl ? parseFloat(values.right_eye_cyl) : null,
-        right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe) : null,
-        left_eye_sph: values.left_eye_sph ? parseFloat(values.left_eye_sph) : null,
-        left_eye_cyl: values.left_eye_cyl ? parseFloat(values.left_eye_cyl) : null,
-        left_eye_axe: values.left_eye_axe ? parseInt(values.left_eye_axe) : null,
-        Add: values.Add ? parseFloat(values.Add) : null,
+        right_eye_sph: values.right_eye_sph ? parseFloat(values.right_eye_sph) : 0,
+        right_eye_cyl: values.right_eye_cyl ? parseFloat(values.right_eye_cyl) : 0,
+        right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe) : 0,
+        left_eye_sph: values.left_eye_sph ? parseFloat(values.left_eye_sph) : 0,
+        left_eye_cyl: values.left_eye_cyl ? parseFloat(values.left_eye_cyl) : 0,
+        left_eye_axe: values.left_eye_axe ? parseInt(values.left_eye_axe) : 0,
+        Add: values.Add ? parseFloat(values.Add) : 0,
         assurance: values.assurance || null
       }
 
