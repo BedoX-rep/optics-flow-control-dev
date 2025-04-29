@@ -150,10 +150,6 @@ const Subscriptions = () => {
   };
   
   const renderSubscriptionPlans = () => {
-    if (currentSubscription?.subscription_status === 'Active' && 
-        currentSubscription?.subscription_type !== 'Trial') {
-      return null;
-    }
     
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
