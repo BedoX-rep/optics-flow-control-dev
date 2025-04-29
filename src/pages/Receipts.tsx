@@ -407,7 +407,13 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium" style={{ backgroundColor: '#1e7575', borderColor: '#1a6868', color: '#f3f4f6' }}>
+                      <span 
+                        className={`border rounded-full py-1 px-3 text-sm font-medium ${
+                          receipt.balance > 0 
+                            ? 'bg-red-100 border-red-200 text-red-700' 
+                            : 'bg-green-50 border-green-100 text-green-700'
+                        }`}
+                      >
                         {(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH
                       </span>
                     </TableCell>
