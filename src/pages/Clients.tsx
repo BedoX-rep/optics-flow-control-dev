@@ -156,11 +156,10 @@ const Clients = () => {
       transition: "all 0.2s ease",
       minHeight: "calc(100svh - 68px)",
     }}>
-      <>
-        <div className="flex flex-col gap-4 mb-4 w-full">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
+      <div className="flex flex-col gap-4 mb-4 w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
               <Button
                 className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
                 onClick={() => setIsOpen(true)}
@@ -168,34 +167,13 @@ const Clients = () => {
                 <span className="mr-2 flex items-center"><Plus size={18} /></span>
                 Add Client
               </Button>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 10C2.77614 10 3 10.2239 3 10.5V12C3 12.5539 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2239 12.2239 10 12.5 10C12.7761 10 13 10.2239 13 10.5V12C13 13.1041 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2239 2.22386 10 2.5 10Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-                    </svg>
-                    Import
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Import Clients</DialogTitle>
-                    <DialogDescription>
-                      Upload a CSV file containing client information. Please ensure your file follows these requirements:
-                      <ul className="mt-2 list-disc list-inside space-y-1">
-                        <li>File must be in CSV format</li>
-                        <li>Required columns: "Name" and "Phone"</li>
-                        <li>Maximum 50 rows per import</li>
-                      </ul>
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="file"
-                      id="fileInput"
-                      accept=".csv"
-                      className="hidden"
-                      onChange={async (e) => {
+              <div className="relative">
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept=".csv,.xlsx,.xls"
+                  className="hidden"
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file || !user) return;
 
@@ -258,18 +236,21 @@ const Clients = () => {
                       });
                     }
                     e.target.value = '';
-                    }}
-                  />
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => document.getElementById('fileInput')?.click()}
-                  >
-                    Choose File
-                  </Button>
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => document.getElementById('fileInput')?.click()}
+                >
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 10C2.77614 10 3 10.2239 3 10.5V12C3 12.5539 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2239 12.2239 10 12.5 10C12.7761 10 13 10.2239 13 10.5V12C13 13.1041 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2239 2.22386 10 2.5 10Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                  </svg>
+                  Import
+                </Button>
+                <div className="absolute top-full left-0 mt-1 text-xs text-gray-500 w-48">
+                  CSV columns must be "Name" and "Phone". Max 50 rows per import.
                 </div>
-              </DialogContent>
-            </Dialog>
               </div>
             </div>
             <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
@@ -563,7 +544,6 @@ const Clients = () => {
           }}
         />
       )}
-      </>
     </div>
   );
 };
