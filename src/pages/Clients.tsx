@@ -166,28 +166,48 @@ const Clients = () => {
               <span className="mr-2 flex items-center"><Plus size={18} /></span>
               Add Client
             </Button>
-
-            <div className="flex flex-col items-start gap-0.5">
-              <div className="flex items-baseline gap-1">
-                <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
-                <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+            <div className="flex items-center gap-4"> {/* Added parent div */}
+              <div className="flex flex-col items-start gap-0.5">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+                  <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                    This Month: {clients.filter(client => {
+                      const clientDate = new Date(client.created_at || '');
+                      const now = new Date();
+                      return clientDate.getMonth() === now.getMonth() && 
+                             clientDate.getFullYear() === now.getFullYear();
+                    }).length}
+                  </span>
+                  <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                    Favorites: {clients.filter(client => client.favorite).length}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1">
-                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                  This Month: {clients.filter(client => {
-                    const clientDate = new Date(client.created_at || '');
-                    const now = new Date();
-                    return clientDate.getMonth() === now.getMonth() && 
-                           clientDate.getFullYear() === now.getFullYear();
-                  }).length}
-                </span>
-                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                  Favorites: {clients.filter(client => client.favorite).length}
-                </span>
+              <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+                  <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                    This Month: {clients.filter(client => {
+                      const clientDate = new Date(client.created_at || '');
+                      const now = new Date();
+                      return clientDate.getMonth() === now.getMonth() && 
+                             clientDate.getFullYear() === now.getFullYear();
+                    }).length}
+                  </span>
+                  <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                    Favorites: {clients.filter(client => client.favorite).length}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-            
+
           <div className="flex items-center gap-3">
               <Dialog>
                 <DialogTrigger asChild>
@@ -239,7 +259,7 @@ const Clients = () => {
 
                         const rows = csv.split('\n').map(row => row.split(','));
                         const headers = rows[0].map(h => h.trim());
-                        
+
                         if (!headers.includes('Name')) {
                           toast({
                             title: "Error",
@@ -257,7 +277,7 @@ const Clients = () => {
                         const leftEyeSphIndex = headers.indexOf('left_eye_sph');
                         const leftEyeCylIndex = headers.indexOf('left_eye_cyl');
                         const leftEyeAxeIndex = headers.indexOf('left_eye_axe');
-                        
+
                         const clients = rows.slice(1, 51).map(row => ({
                           user_id: user.id,
                           name: row[nameIndex]?.trim() || '',
@@ -289,7 +309,7 @@ const Clients = () => {
                           title: "Success",
                           description: `${clients.length} clients imported successfully`,
                         });
-                        
+
                         fetchClients();
                       };
                       reader.readAsText(file);
@@ -319,7 +339,7 @@ const Clients = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+            <div className="flex flex-col items-start gap-0.5">
               <div className="flex items-baseline gap-1">
                 <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
                 <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
