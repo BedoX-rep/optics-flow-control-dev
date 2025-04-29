@@ -158,7 +158,26 @@ const Clients = () => {
     }}>
       <div className="flex flex-col gap-4 mb-4 w-full">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+                <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  This Month: {clients.filter(client => {
+                    const clientDate = new Date(client.created_at || '');
+                    const now = new Date();
+                    return clientDate.getMonth() === now.getMonth() && 
+                           clientDate.getFullYear() === now.getFullYear();
+                  }).length}
+                </span>
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  Favorites: {clients.filter(client => client.favorite).length}
+                </span>
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button
                 className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
