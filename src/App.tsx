@@ -50,11 +50,12 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
   
-  const subStatus = subscription?.subscription_status.toLowerCase();
-  
-  // Only redirect non-active subscriptions to subscription page
-  if (requiresActiveSubscription && (!subscription || subStatus !== 'active')) {
-    return <Navigate to="/subscriptions" replace />;
+  if (requiresActiveSubscription) {
+    // Check if subscription exists and is active, using lowercase for consistent comparison
+    const subStatus = subscription?.subscription_status.toLowerCase();
+    if (!subscription || (subStatus !== 'active' && location.pathname !== '/subscriptions')) {
+      return <Navigate to="/subscriptions" replace />;
+    }
   }
   
   return <>{children}</>;
