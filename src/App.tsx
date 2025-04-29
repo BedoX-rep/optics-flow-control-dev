@@ -51,15 +51,9 @@ const ProtectedRoute = ({
   }
   
   if (requiresActiveSubscription) {
-    // Only check subscription status if the route requires an active subscription
+    // Check if subscription exists and is active, using lowercase for consistent comparison
     const subStatus = subscription?.subscription_status.toLowerCase();
-    const isSubActive = subStatus === 'active';
-    const isSubsPage = location.pathname === '/subscriptions';
-    
-    // Redirect to subscriptions page only if:
-    // 1. No subscription exists, or
-    // 2. Subscription is not active AND user is not already on subscriptions page
-    if (!subscription || (!isSubActive && !isSubsPage)) {
+    if (!subscription || subStatus !== 'active') {
       return <Navigate to="/subscriptions" replace />;
     }
   }
