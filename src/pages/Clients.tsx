@@ -248,9 +248,6 @@ const Clients = () => {
                   </svg>
                   Import
                 </Button>
-                <div className="absolute top-full left-0 mt-1 text-xs text-gray-500 w-48">
-                  CSV columns must be "Name" and "Phone". Max 50 rows per import.
-                </div>
               </div>
             </div>
             <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
