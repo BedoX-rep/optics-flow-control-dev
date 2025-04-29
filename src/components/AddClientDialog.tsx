@@ -90,6 +90,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       onClientAdded({
         id: data.id,
         name: data.name,
+        phone: data.phone,
+        gender: data.gender
       })
       onClose()
       form.reset()

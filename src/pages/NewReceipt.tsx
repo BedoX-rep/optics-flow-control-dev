@@ -754,8 +754,10 @@ const NewReceipt = () => {
                 .order('name', { ascending: true });
 
               if (clientsError) throw clientsError;
-              setClients(clientsData || []);
+              const updatedClients = clientsData || [];
+              setClients(updatedClients);
               setSelectedClient(client.id);
+              setSearchTerm(client.name);
               setIsAddClientOpen(false);
             } catch (error) {
               console.error('Error fetching clients:', error);
