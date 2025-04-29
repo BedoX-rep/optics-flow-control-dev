@@ -156,10 +156,11 @@ const Clients = () => {
       transition: "all 0.2s ease",
       minHeight: "calc(100svh - 68px)",
     }}>
-      <div className="flex flex-col gap-4 mb-4 w-full">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
+      <>
+        <div className="flex flex-col gap-4 mb-4 w-full">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
               <Button
                 className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
                 onClick={() => setIsOpen(true)}
@@ -562,6 +563,7 @@ const Clients = () => {
           }}
         />
       )}
+      </>
     </div>
   );
 };
