@@ -26,14 +26,14 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
   gender: z.enum(["Mr", "Mme", "Enf"]),
-  right_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_axe: z.number().optional(),
-  left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_axe: z.number().optional(),
-  Add: z.string().optional(), // Added Add field to schema
-  assurance: z.string().optional(), // Added Assurance field to schema
+  right_eye_sph: z.string().optional(),
+  right_eye_cyl: z.string().optional(),
+  right_eye_axe: z.string().optional(),
+  left_eye_sph: z.string().optional(),
+  left_eye_cyl: z.string().optional(),
+  left_eye_axe: z.string().optional(),
+  Add: z.string().optional(),
+  assurance: z.string().optional()
 })
 
 interface AddClientDialogProps {
@@ -61,17 +61,17 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       // Fix the clientData by ensuring name is included and not optional
       const clientData = {
         user_id: user?.id,
-        name: values.name, // Explicitly include name to satisfy TypeScript
+        name: values.name,
         phone: values.phone,
         gender: values.gender,
-        right_eye_sph: values.right_eye_sph,
-        right_eye_cyl: values.right_eye_cyl,
-        right_eye_axe: values.right_eye_axe,
-        left_eye_sph: values.left_eye_sph,
-        left_eye_cyl: values.left_eye_cyl,
-        left_eye_axe: values.left_eye_axe,
-        Add: values.Add, // Included Add field in clientData
-        assurance: values.assurance, // Included Assurance field in clientData
+        right_eye_sph: values.right_eye_sph ? parseFloat(values.right_eye_sph) : null,
+        right_eye_cyl: values.right_eye_cyl ? parseFloat(values.right_eye_cyl) : null,
+        right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe) : null,
+        left_eye_sph: values.left_eye_sph ? parseFloat(values.left_eye_sph) : null,
+        left_eye_cyl: values.left_eye_cyl ? parseFloat(values.left_eye_cyl) : null,
+        left_eye_axe: values.left_eye_axe ? parseInt(values.left_eye_axe) : null,
+        Add: values.Add ? parseFloat(values.Add) : null,
+        assurance: values.assurance || null
       }
 
       const { data, error } = await supabase
