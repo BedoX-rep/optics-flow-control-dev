@@ -167,42 +167,57 @@ const Clients = () => {
                 <span className="mr-2 flex items-center"><Plus size={18} /></span>
                 Add Client
               </Button>
-              <div className="relative">
-                <input
-                  type="file"
-                  id="fileInput"
-                  accept=".csv,.xlsx,.xls"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file || !user) return;
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !user) return;
 
-                    try {
-                      const reader = new FileReader();
-                      reader.onload = async (event) => {
-                        const csv = event.target?.result;
-                        if (typeof csv !== 'string') return;
+                      try {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                          const csv = event.target?.result;
+                          if (typeof csv !== 'string') return;
 
-                        const rows = csv.split('\n').map(row => row.split(','));
-                        const headers = rows[0].map(h => h.trim());
-                        
-                        if (!headers.includes('Name') || !headers.includes('Phone')) {
-                          toast({
-                            title: "Error",
-                            description: "File must contain 'Name' and 'Phone' columns",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
+                          const rows = csv.split('\n').map(row => row.split(','));
+                          const headers = rows[0].map(h => h.trim());
+                          
+                          if (!headers.includes('Name') || !headers.includes('Phone')) {
+                            toast({
+                              title: "Error",
+                              description: "File must contain 'Name' and 'Phone' columns",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
 
-                        const nameIndex = headers.indexOf('Name');
-                        const phoneIndex = headers.indexOf('Phone');
-                        
-                        const clients = rows.slice(1, 51).map(row => ({
-                          user_id: user.id,
-                          name: row[nameIndex]?.trim() || '',
-                          phone: row[phoneIndex]?.trim() || '',
-                        })).filter(client => client.name && client.phone);
+                          const nameIndex = headers.indexOf('Name');
+                          const phoneIndex = headers.indexOf('Phone');
+                          const sphRightIndex = headers.indexOf('SPH_Right');
+                          const cylRightIndex = headers.indexOf('CYL_Right');
+                          const axeRightIndex = headers.indexOf('AXE_Right');
+                          const sphLeftIndex = headers.indexOf('SPH_Left');
+                          const cylLeftIndex = headers.indexOf('CYL_Left');
+                          const axeLeftIndex = headers.indexOf('AXE_Left');
+                          const addIndex = headers.indexOf('Add');
+                          
+                          const clients = rows.slice(1, 51).map(row => ({
+                            user_id: user.id,
+                            name: row[nameIndex]?.trim() || '',
+                            phone: row[phoneIndex]?.trim() || '',
+                            right_eye_sph: sphRightIndex !== -1 ? parseFloat(row[sphRightIndex]) || 0 : 0,
+                            right_eye_cyl: cylRightIndex !== -1 ? parseFloat(row[cylRightIndex]) || 0 : 0,
+                            right_eye_axe: axeRightIndex !== -1 ? parseInt(row[axeRightIndex]) || 0 : 0,
+                            left_eye_sph: sphLeftIndex !== -1 ? parseFloat(row[sphLeftIndex]) || 0 : 0,
+                            left_eye_cyl: cylLeftIndex !== -1 ? parseFloat(row[cylLeftIndex]) || 0 : 0,
+                            left_eye_axe: axeLeftIndex !== -1 ? parseInt(row[axeLeftIndex]) || 0 : 0,
+                            Add: addIndex !== -1 ? parseFloat(row[addIndex]) || 0 : 0,
+                          })).filter(client => client.name && client.phone);
 
                         if (clients.length === 0) {
                           toast({
@@ -238,16 +253,53 @@ const Clients = () => {
                     e.target.value = '';
                   }}
                 />
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                >
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 10C2.77614 10 3 10.2239 3 10.5V12C3 12.5539 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2239 12.2239 10 12.5 10C12.7761 10 13 10.2239 13 10.5V12C13 13.1041 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2239 2.22386 10 2.5 10Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-                  </svg>
-                  Import
-                </Button>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={() => document.getElementById('fileInput')?.click()}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 10C2.77614 10 3 10.2239 3 10.5V12C3 12.5539 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2239 12.2239 10 12.5 10C12.7761 10 13 10.2239 13 10.5V12C13 13.1041 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2239 2.22386 10 2.5 10Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                    </svg>
+                    Import
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7.5 1.75a.75.75 0 01.75.75v4.25h4.25a.75.75 0 110 1.5H8.25v4.25a.75.75 0 11-1.5 0V8.25H2.5a.75.75 0 110-1.5h4.25V2.5a.75.75 0 01.75-.75z" fill="currentColor"/>
+                        </svg>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>How to Import Clients</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <p className="text-sm text-muted-foreground">
+                          Create a CSV file with the following columns:
+                        </p>
+                        <div className="rounded-md bg-neutral-50 p-4">
+                          <ul className="list-disc pl-4 text-sm space-y-2">
+                            <li>Name (required)</li>
+                            <li>Phone (required)</li>
+                            <li>SPH_Right</li>
+                            <li>CYL_Right</li>
+                            <li>AXE_Right</li>
+                            <li>SPH_Left</li>
+                            <li>CYL_Left</li>
+                            <li>AXE_Left</li>
+                            <li>Add</li>
+                          </ul>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Note: The optical prescription columns (SPH, CYL, AXE, Add) are optional. If not provided, they will default to 0.
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
