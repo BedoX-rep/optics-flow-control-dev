@@ -50,9 +50,12 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
   
-  // Only check for user authentication, not subscription status
-  if (!user) {
-    return <Navigate to="/auth" replace />;
+  if (requiresActiveSubscription) {
+    // Check if subscription exists and is active, using lowercase for consistent comparison
+    const subStatus = subscription?.subscription_status.toLowerCase();
+    if (!subscription || subStatus !== 'active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
   }
   
   return <>{children}</>;
