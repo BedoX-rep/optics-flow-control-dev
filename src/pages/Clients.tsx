@@ -197,11 +197,25 @@ const Clients = () => {
 
                         const nameIndex = headers.indexOf('Name');
                         const phoneIndex = headers.indexOf('Phone');
+                        const rightSphIndex = headers.indexOf('Right_Eye_SPH');
+                        const rightCylIndex = headers.indexOf('Right_Eye_CYL');
+                        const rightAxeIndex = headers.indexOf('Right_Eye_AXE');
+                        const leftSphIndex = headers.indexOf('Left_Eye_SPH');
+                        const leftCylIndex = headers.indexOf('Left_Eye_CYL');
+                        const leftAxeIndex = headers.indexOf('Left_Eye_AXE');
+                        const addIndex = headers.indexOf('Add');
                         
                         const clients = rows.slice(1, 51).map(row => ({
                           user_id: user.id,
                           name: row[nameIndex]?.trim() || '',
                           phone: row[phoneIndex]?.trim() || '',
+                          right_eye_sph: rightSphIndex !== -1 ? parseFloat(row[rightSphIndex]) || null : null,
+                          right_eye_cyl: rightCylIndex !== -1 ? parseFloat(row[rightCylIndex]) || null : null,
+                          right_eye_axe: rightAxeIndex !== -1 ? parseInt(row[rightAxeIndex]) || null : null,
+                          left_eye_sph: leftSphIndex !== -1 ? parseFloat(row[leftSphIndex]) || null : null,
+                          left_eye_cyl: leftCylIndex !== -1 ? parseFloat(row[leftCylIndex]) || null : null,
+                          left_eye_axe: leftAxeIndex !== -1 ? parseInt(row[leftAxeIndex]) || null : null,
+                          Add: addIndex !== -1 ? parseFloat(row[addIndex]) || null : null,
                         })).filter(client => client.name && client.phone);
 
                         if (clients.length === 0) {
@@ -248,6 +262,51 @@ const Clients = () => {
                   </svg>
                   Import
                 </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="ml-2">
+                      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                        <path d="M7.5 1C3.91015 1 1 3.91015 1 7.5C1 11.0899 3.91015 14 7.5 14C11.0899 14 14 11.0899 14 7.5C14 3.91015 11.0899 1 7.5 1ZM7.5 2C10.5376 2 13 4.46243 13 7.5C13 10.5376 10.5376 13 7.5 13C4.46243 13 2 10.5376 2 7.5C2 4.46243 4.46243 2 7.5 2ZM7.5 4.625C7.15482 4.625 6.875 4.90482 6.875 5.25C6.875 5.59518 7.15482 5.875 7.5 5.875C7.84518 5.875 8.125 5.59518 8.125 5.25C8.125 4.90482 7.84518 4.625 7.5 4.625ZM6.875 7C6.875 6.65482 7.15482 6.375 7.5 6.375C7.84518 6.375 8.125 6.65482 8.125 7V10C8.125 10.3452 7.84518 10.625 7.5 10.625C7.15482 10.625 6.875 10.3452 6.875 10V7Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
+                      </svg>
+                      Import Guide
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>How to Import Clients</DialogTitle>
+                      <DialogDescription>
+                        <div className="mt-4 space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">CSV Format Requirements:</h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                              <li>File must be in CSV format</li>
+                              <li>Maximum 50 rows per import</li>
+                              <li>Required columns:</li>
+                              <ul className="list-disc pl-5 space-y-1">
+                                <li>Name</li>
+                                <li>Phone</li>
+                                <li>Right_Eye_SPH (optional)</li>
+                                <li>Right_Eye_CYL (optional)</li>
+                                <li>Right_Eye_AXE (optional)</li>
+                                <li>Left_Eye_SPH (optional)</li>
+                                <li>Left_Eye_CYL (optional)</li>
+                                <li>Left_Eye_AXE (optional)</li>
+                                <li>Add (optional)</li>
+                              </ul>
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Example Row:</h4>
+                            <code className="bg-slate-100 p-2 rounded block">
+                              Name,Phone,Right_Eye_SPH,Right_Eye_CYL,Right_Eye_AXE,Left_Eye_SPH,Left_Eye_CYL,Left_Eye_AXE,Add
+                              John Doe,+1234567890,2.00,-0.50,180,2.25,-0.75,175,2.50
+                            </code>
+                          </div>
+                        </div>
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
