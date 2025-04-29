@@ -12,62 +12,56 @@ export type Database = {
       clients: {
         Row: {
           Add: number | null
-          assurance: string | null
           created_at: string | null
           favorite: boolean
           gender: string | null
           id: string
           is_deleted: boolean | null
-          last_prescription_update: string | null
-          left_eye_axe: number
-          left_eye_cyl: number
-          left_eye_sph: number
+          left_eye_axe: number | null
+          left_eye_cyl: number | null
+          left_eye_sph: number | null
           name: string
           notes: string | null
           phone: string
-          right_eye_axe: number
-          right_eye_cyl: number
-          right_eye_sph: number
+          right_eye_axe: number | null
+          right_eye_cyl: number | null
+          right_eye_sph: number | null
           user_id: string
         }
         Insert: {
           Add?: number | null
-          assurance?: string | null
           created_at?: string | null
           favorite?: boolean
           gender?: string | null
           id?: string
           is_deleted?: boolean | null
-          last_prescription_update?: string | null
-          left_eye_axe?: number
-          left_eye_cyl?: number
-          left_eye_sph?: number
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name: string
           notes?: string | null
           phone: string
-          right_eye_axe?: number
-          right_eye_cyl?: number
-          right_eye_sph?: number
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id: string
         }
         Update: {
           Add?: number | null
-          assurance?: string | null
           created_at?: string | null
           favorite?: boolean
           gender?: string | null
           id?: string
           is_deleted?: boolean | null
-          last_prescription_update?: string | null
-          left_eye_axe?: number
-          left_eye_cyl?: number
-          left_eye_sph?: number
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name?: string
           notes?: string | null
           phone?: string
-          right_eye_axe?: number
-          right_eye_cyl?: number
-          right_eye_sph?: number
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id?: string
         }
         Relationships: []
@@ -76,7 +70,7 @@ export type Database = {
         Row: {
           category: string | null
           company: string | null
-          cost_ttc: number
+          Cost: number
           created_at: string | null
           id: string
           image: string | null
@@ -92,7 +86,7 @@ export type Database = {
         Insert: {
           category?: string | null
           company?: string | null
-          cost_ttc?: number
+          Cost?: number
           created_at?: string | null
           id?: string
           image?: string | null
@@ -108,7 +102,7 @@ export type Database = {
         Update: {
           category?: string | null
           company?: string | null
-          cost_ttc?: number
+          Cost?: number
           created_at?: string | null
           id?: string
           image?: string | null
@@ -181,7 +175,6 @@ export type Database = {
           balance: number
           client_id: string | null
           cost: number | null
-          cost_ttc: number | null
           created_at: string | null
           delivery_status: string
           discount_amount: number | null
@@ -192,8 +185,6 @@ export type Database = {
           left_eye_cyl: number | null
           left_eye_sph: number | null
           montage_status: string
-          payment_status: string | null
-          profit: number | null
           right_eye_axe: number | null
           right_eye_cyl: number | null
           right_eye_sph: number | null
@@ -208,7 +199,6 @@ export type Database = {
           balance?: number
           client_id?: string | null
           cost?: number | null
-          cost_ttc?: number | null
           created_at?: string | null
           delivery_status?: string
           discount_amount?: number | null
@@ -219,8 +209,6 @@ export type Database = {
           left_eye_cyl?: number | null
           left_eye_sph?: number | null
           montage_status?: string
-          payment_status?: string | null
-          profit?: number | null
           right_eye_axe?: number | null
           right_eye_cyl?: number | null
           right_eye_sph?: number | null
@@ -235,7 +223,6 @@ export type Database = {
           balance?: number
           client_id?: string | null
           cost?: number | null
-          cost_ttc?: number | null
           created_at?: string | null
           delivery_status?: string
           discount_amount?: number | null
@@ -246,8 +233,6 @@ export type Database = {
           left_eye_cyl?: number | null
           left_eye_sph?: number | null
           montage_status?: string
-          payment_status?: string | null
-          profit?: number | null
           right_eye_axe?: number | null
           right_eye_cyl?: number | null
           right_eye_sph?: number | null
