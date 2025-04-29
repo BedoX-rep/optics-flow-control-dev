@@ -271,7 +271,7 @@ const Clients = () => {
                       Import Guide
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>How to Import Clients</DialogTitle>
                       <DialogDescription>
@@ -297,8 +297,8 @@ const Clients = () => {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-2">Example Row:</h4>
-                            <code className="bg-slate-100 p-2 rounded block">
-                              Name,Phone,Right_Eye_SPH,Right_Eye_CYL,Right_Eye_AXE,Left_Eye_SPH,Left_Eye_CYL,Left_Eye_AXE,Add
+                            <code className="bg-slate-100 p-2 rounded block text-sm">
+                              Name,Phone,Right_Eye_SPH,Right_Eye_CYL,Right_Eye_AXE,Left_Eye_SPH,Left_Eye_CYL,Left_Eye_AXE,Add<br/>
                               John Doe,+1234567890,2.00,-0.50,180,2.25,-0.75,175,2.50
                             </code>
                           </div>
