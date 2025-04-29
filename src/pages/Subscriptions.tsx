@@ -150,11 +150,6 @@ const Subscriptions = () => {
   };
   
   const renderSubscriptionPlans = () => {
-    if (currentSubscription?.subscription_status === 'Active' && 
-        currentSubscription?.subscription_type !== 'Trial') {
-      return null;
-    }
-    
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         <Card className="border-2 hover:border-optics-500 transition-all">
@@ -170,12 +165,22 @@ const Subscriptions = () => {
             </ul>
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
-            <Button 
-              onClick={() => updateSubscription('Monthly', true)}
-              className="bg-optics-600 hover:bg-optics-700 w-full"
-            >
-              Subscribe Now
-            </Button>
+            {currentSubscription?.subscription_type === 'Monthly' && 
+             currentSubscription?.subscription_status === 'Active' ? (
+              <Button 
+                disabled
+                className="bg-gray-400 w-full"
+              >
+                Current Plan
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => updateSubscription('Monthly', true)}
+                className="bg-optics-600 hover:bg-optics-700 w-full"
+              >
+                Subscribe Now
+              </Button>
+            )}
           </CardFooter>
         </Card>
         
@@ -194,12 +199,22 @@ const Subscriptions = () => {
             </ul>
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
-            <Button 
-              onClick={() => updateSubscription('Quarterly', true)}
-              className="bg-optics-600 hover:bg-optics-700 w-full"
-            >
-              Subscribe Now
-            </Button>
+            {currentSubscription?.subscription_type === 'Quarterly' && 
+             currentSubscription?.subscription_status === 'Active' ? (
+              <Button 
+                disabled
+                className="bg-gray-400 w-full"
+              >
+                Current Plan
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => updateSubscription('Quarterly', true)}
+                className="bg-optics-600 hover:bg-optics-700 w-full"
+              >
+                Subscribe Now
+              </Button>
+            )}
           </CardFooter>
         </Card>
         
@@ -218,12 +233,22 @@ const Subscriptions = () => {
             </ul>
           </CardContent>
           <CardFooter className="flex justify-center pb-6">
-            <Button 
-              onClick={() => updateSubscription('Lifetime', false)}
-              className="bg-optics-600 hover:bg-optics-700 w-full"
-            >
-              Buy Lifetime
-            </Button>
+            {currentSubscription?.subscription_type === 'Lifetime' && 
+             currentSubscription?.subscription_status === 'Active' ? (
+              <Button 
+                disabled
+                className="bg-gray-400 w-full"
+              >
+                Current Plan
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => updateSubscription('Lifetime', false)}
+                className="bg-optics-600 hover:bg-optics-700 w-full"
+              >
+                Buy Lifetime
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>
