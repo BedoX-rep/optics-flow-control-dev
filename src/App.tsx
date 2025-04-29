@@ -35,6 +35,19 @@ const ProtectedRoute = ({
 }) => {
   const { user, subscription, isLoading } = useAuth();
   
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Only check subscription after loading is complete and if route requires active subscription
+  if (!isLoading && requiresActiveSubscription && subscription) {
+    const subStatus = subscription.subscription_status.toLowerCase();
+    if (subStatus !== 'active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
+  }
+  
+  // Show loading state while subscription data is being fetched
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
@@ -44,17 +57,6 @@ const ProtectedRoute = ({
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  if (requiresActiveSubscription) {
-    const subStatus = subscription?.subscription_status.toLowerCase();
-    if (!subscription || subStatus !== 'active') {
-      return <Navigate to="/subscriptions" replace />;
-    }
   }
   
   return <>{children}</>;
