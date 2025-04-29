@@ -35,6 +35,18 @@ const ProtectedRoute = ({
 }) => {
   const { user, subscription, isLoading } = useAuth();
   
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (requiresActiveSubscription && !isLoading) {
+    // Only check subscription status after loading is complete
+    const subStatus = subscription?.subscription_status.toLowerCase();
+    if (!subscription || subStatus !== 'active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
+  }
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
@@ -44,18 +56,6 @@ const ProtectedRoute = ({
         </div>
       </div>
     );
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  if (requiresActiveSubscription) {
-    // Check if subscription exists and is active, using lowercase for consistent comparison
-    const subStatus = subscription?.subscription_status.toLowerCase();
-    if (!subscription || subStatus !== 'active') {
-      return <Navigate to="/subscriptions" replace />;
-    }
   }
   
   return <>{children}</>;
