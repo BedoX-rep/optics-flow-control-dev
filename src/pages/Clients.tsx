@@ -158,7 +158,7 @@ const Clients = () => {
     }}>
       <div className="flex flex-col gap-4 mb-4 w-full">
         <div className="flex items-center justify-between">
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-4">
             <Button
               className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
               onClick={() => setIsOpen(true)}
@@ -166,8 +166,29 @@ const Clients = () => {
               <span className="mr-2 flex items-center"><Plus size={18} /></span>
               Add Client
             </Button>
+
+            <div className="flex flex-col items-start gap-0.5">
+              <div className="flex items-baseline gap-1">
+                <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
+                <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  This Month: {clients.filter(client => {
+                    const clientDate = new Date(client.created_at || '');
+                    const now = new Date();
+                    return clientDate.getMonth() === now.getMonth() && 
+                           clientDate.getFullYear() === now.getFullYear();
+                  }).length}
+                </span>
+                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
+                  Favorites: {clients.filter(client => client.favorite).length}
+                </span>
+              </div>
+            </div>
+          </div>
             
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
@@ -184,11 +205,11 @@ const Clients = () => {
                   <div className="space-y-4 pt-4">
                     <p>Create a CSV file with the following columns:</p>
                     <code className="block bg-gray-100 p-3 rounded text-sm">
-                      Name,Phone,right_eye_sph,left_eye_sph
+                      Name,Phone,right_eye_sph,right_eye_cyl,right_eye_axe,left_eye_sph,left_eye_cyl,left_eye_axe
                     </code>
                     <p>Example row:</p>
                     <code className="block bg-gray-100 p-3 rounded text-sm">
-                      John Doe,+1234567890,-1.25,+2.00
+                      John Doe,+1234567890,-1.25,-0.50,180,+2.00,-0.75,90
                     </code>
                     <ul className="list-disc list-inside space-y-2">
                       <li>Name: Required</li>
@@ -231,14 +252,22 @@ const Clients = () => {
                         const nameIndex = headers.indexOf('Name');
                         const phoneIndex = headers.indexOf('Phone');
                         const rightEyeSphIndex = headers.indexOf('right_eye_sph');
+                        const rightEyeCylIndex = headers.indexOf('right_eye_cyl');
+                        const rightEyeAxeIndex = headers.indexOf('right_eye_axe');
                         const leftEyeSphIndex = headers.indexOf('left_eye_sph');
+                        const leftEyeCylIndex = headers.indexOf('left_eye_cyl');
+                        const leftEyeAxeIndex = headers.indexOf('left_eye_axe');
                         
                         const clients = rows.slice(1, 51).map(row => ({
                           user_id: user.id,
                           name: row[nameIndex]?.trim() || '',
                           phone: phoneIndex !== -1 ? row[phoneIndex]?.trim() : '',
                           right_eye_sph: rightEyeSphIndex !== -1 ? parseFloat(row[rightEyeSphIndex]) || 0 : 0,
+                          right_eye_cyl: rightEyeCylIndex !== -1 ? parseFloat(row[rightEyeCylIndex]) || 0 : 0,
+                          right_eye_axe: rightEyeAxeIndex !== -1 ? parseFloat(row[rightEyeAxeIndex]) || 0 : 0,
                           left_eye_sph: leftEyeSphIndex !== -1 ? parseFloat(row[leftEyeSphIndex]) || 0 : 0,
+                          left_eye_cyl: leftEyeCylIndex !== -1 ? parseFloat(row[leftEyeCylIndex]) || 0 : 0,
+                          left_eye_axe: leftEyeAxeIndex !== -1 ? parseFloat(row[leftEyeAxeIndex]) || 0 : 0,
                         })).filter(client => client.name);
 
                         if (clients.length === 0) {
