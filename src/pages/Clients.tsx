@@ -158,15 +158,48 @@ const Clients = () => {
     }}>
       <div className="flex flex-col gap-4 mb-4 w-full">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              <Button
-                className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
-                onClick={() => setIsOpen(true)}
-              >
-                <span className="mr-2 flex items-center"><Plus size={18} /></span>
-                Add Client
-              </Button>
+          <div className="flex items-center justify-between w-full">
+            <Button
+              className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
+              onClick={() => setIsOpen(true)}
+            >
+              <span className="mr-2 flex items-center"><Plus size={18} /></span>
+              Add Client
+            </Button>
+            
+            <div className="flex items-center gap-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4.5 6.5L7.5 3.5M7.5 3.5L10.5 6.5M7.5 3.5V11.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    How to Import
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>How to Import Clients</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <p>Create a CSV file with the following columns:</p>
+                    <code className="block bg-gray-100 p-3 rounded text-sm">
+                      Name,Phone,right_eye_sph,left_eye_sph
+                    </code>
+                    <p>Example row:</p>
+                    <code className="block bg-gray-100 p-3 rounded text-sm">
+                      John Doe,+1234567890,-1.25,+2.00
+                    </code>
+                    <ul className="list-disc list-inside space-y-2">
+                      <li>Name: Required</li>
+                      <li>Phone: Optional</li>
+                      <li>right_eye_sph: Optional, decimal number (e.g., -1.25, +2.00)</li>
+                      <li>left_eye_sph: Optional, decimal number (e.g., -1.25, +2.00)</li>
+                    </ul>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               <div className="relative">
                 <input
                   type="file"
@@ -186,10 +219,10 @@ const Clients = () => {
                         const rows = csv.split('\n').map(row => row.split(','));
                         const headers = rows[0].map(h => h.trim());
                         
-                        if (!headers.includes('Name') || !headers.includes('Phone')) {
+                        if (!headers.includes('Name')) {
                           toast({
                             title: "Error",
-                            description: "File must contain 'Name' and 'Phone' columns",
+                            description: "File must contain 'Name' column",
                             variant: "destructive",
                           });
                           return;
@@ -197,12 +230,16 @@ const Clients = () => {
 
                         const nameIndex = headers.indexOf('Name');
                         const phoneIndex = headers.indexOf('Phone');
+                        const rightEyeSphIndex = headers.indexOf('right_eye_sph');
+                        const leftEyeSphIndex = headers.indexOf('left_eye_sph');
                         
                         const clients = rows.slice(1, 51).map(row => ({
                           user_id: user.id,
                           name: row[nameIndex]?.trim() || '',
-                          phone: row[phoneIndex]?.trim() || '',
-                        })).filter(client => client.name && client.phone);
+                          phone: phoneIndex !== -1 ? row[phoneIndex]?.trim() : '',
+                          right_eye_sph: rightEyeSphIndex !== -1 ? parseFloat(row[rightEyeSphIndex]) || 0 : 0,
+                          left_eye_sph: leftEyeSphIndex !== -1 ? parseFloat(row[leftEyeSphIndex]) || 0 : 0,
+                        })).filter(client => client.name);
 
                         if (clients.length === 0) {
                           toast({
