@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -39,7 +40,7 @@ const formSchema = z.object({
 interface AddClientDialogProps {
   isOpen: boolean
   onClose: () => void
-  onClientAdded: (client: { id: string; name: string }) => void
+  onClientAdded: (client: { id: string; name: string; phone?: string; gender?: "Mr" | "Mme" | "Enf" }) => void
 }
 
 const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {

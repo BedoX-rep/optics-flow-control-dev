@@ -1,4 +1,3 @@
-
 import { CATEGORY_OPTIONS } from "./CategoryCellEditor";
 import { INDEX_OPTIONS } from "./IndexCellEditor";
 import { TREATMENT_OPTIONS } from "./TreatmentCellEditor";
@@ -7,14 +6,15 @@ import { COMPANY_OPTIONS } from "./CompanyCellEditor";
 export interface ProductSortable {
   id: string;
   name: string;
-  price: number;
-  stock?: number | null;
   category?: string | null;
-  index?: string | null;
-  treatment?: string | null;
   company?: string | null;
+  treatment?: string | null;
+  index?: string | null;
+  price: number;
+  stock?: number;
   image?: string | null;
-  created_at?: string | null;
+  cost_ttc?: number;
+  created_at?: string;
 }
 
 function idxOrLast(arr: string[], v?: string | null) {
