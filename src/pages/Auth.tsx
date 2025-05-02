@@ -85,10 +85,10 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName || !storeName) {
+    if (!email || !password || !confirmPassword || !displayName || !storeName || storeName.trim() === '') {
       toast({
         title: "Error",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields including store name.",
         variant: "destructive",
       });
       return;
@@ -124,10 +124,10 @@ const Auth = () => {
             .insert([
               {
                 user_id: user.id,
-                email: email,
-                display_name: displayName,
-                store_name: storeName,
-                referred_by: referralCode || null,
+                email: email.toLowerCase(),
+                display_name: displayName.trim(),
+                store_name: storeName.trim(),
+                referred_by: referralCode?.trim().toUpperCase() || null,
                 subscription_status: 'inActive',
                 subscription_type: 'Trial',
                 trial_used: false,
@@ -135,7 +135,8 @@ const Auth = () => {
                 is_recurring: false,
                 price: 0,
                 start_date: new Date().toISOString(),
-                end_date: null
+                end_date: null,
+                created_at: new Date().toISOString()
               }
             ]);
 
