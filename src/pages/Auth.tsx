@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -26,20 +27,30 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate('/');
       }
     };
-
     checkSession();
   }, [navigate]);
+
+  const generateReferralCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +92,10 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !displayName || !storeName) {
       toast({
         title: "Error",
-        description: "Please fill in all fields.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -101,17 +112,45 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const newReferralCode = generateReferralCode();
+      
+      const { data: { user }, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            display_name: email.split('@')[0],
+            display_name: displayName,
+            store_name: storeName,
           },
         },
       });
 
       if (error) throw error;
+
+      if (user) {
+        // Create referral record
+        await supabase.from('referrals').insert({
+          referrer_id: user.id,
+          referral_code: newReferralCode,
+        });
+
+        // If referral code was provided, create referral relationship
+        if (referralCode) {
+          const { data: referrer } = await supabase
+            .from('referrals')
+            .select('referrer_id')
+            .eq('referral_code', referralCode)
+            .single();
+
+          if (referrer) {
+            await supabase.from('referrals').insert({
+              referrer_id: referrer.referrer_id,
+              referred_id: user.id,
+              referral_code: referralCode,
+            });
+          }
+        }
+      }
 
       toast({
         title: "Success",
@@ -165,9 +204,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                  </div>
+                  <Label htmlFor="password">Password</Label>
                   <Input 
                     id="password" 
                     type="password" 
@@ -191,6 +228,28 @@ const Auth = () => {
           <TabsContent value="signup">
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="display-name">Display Name</Label>
+                  <Input 
+                    id="display-name" 
+                    type="text" 
+                    placeholder="John Doe" 
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="store-name">Store Name</Label>
+                  <Input 
+                    id="store-name" 
+                    type="text" 
+                    placeholder="My Optical Store" 
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email-signup">Email</Label>
                   <Input 
@@ -220,6 +279,16 @@ const Auth = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referral-code">Referral Code (Optional)</Label>
+                  <Input 
+                    id="referral-code" 
+                    type="text" 
+                    placeholder="Enter referral code" 
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                   />
                 </div>
               </CardContent>
