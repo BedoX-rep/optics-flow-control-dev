@@ -676,124 +676,156 @@ const NewReceipt = () => {
         </Card>
 
         <Card>
-          <CardHeader className="cursor-pointer" onClick={() => setPaymentOpen(!paymentOpen)}>
-            <div className="flex justify-between items-center">
-              <CardTitle>Payment Details</CardTitle>
-              <ChevronDown className={`h-4 w-4 transition-transform ${paymentOpen ? 'transform rotate-180' : ''}`} />
-            </div>
-          </CardHeader>
-          <CardContent className={`${paymentOpen ? '' : 'hidden'} p-2`}>
-            <div className="grid grid-cols-2 gap-3 w-3/5 mx-auto"> {/* Added w-3/5 and mx-auto for 60% width and centering */}
-              <div className="space-y-4">
-                <h3 className="font-medium text-lg">Summary</h3>
-
-                <div className="flex justify-between py-2 border-b">
-                  <span>Subtotal:</span>
-                  <span>{subtotal.toFixed(2)} DH</span>
-                </div>
-
-                {(discount > 0 || numericDiscount > 0) && (
-                  <div className="flex justify-between py-2 border-b">
-                    <span>Discount ({discount}% + {numericDiscount} DH):</span>
-                    <span>-{totalDiscount.toFixed(2)} DH</span>
+          <CardContent className="p-4">
+            <div className="flex gap-8">
+              <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
+                <h3 className="font-semibold text-xl text-gray-900">Order Summary</h3> {/* Added w-3/5 and mx-auto for 60% width and centering */}
+              <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
-                )}
 
-                {tax > 0 && (
-                  <div className="flex justify-between py-2 border-b">
-                    <span>Tax:</span>
-                    <span>{taxAmount.toFixed(2)} DH</span>
+                  {(discount > 0 || numericDiscount > 0) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
+                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
+                    </div>
+                  )}
+
+                  {tax > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tax</span>
+                      <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total</span>
+                      <span className="font-semibold text-lg">{total.toFixed(2)} DH</span>
+                    </div>
                   </div>
-                )}
 
-                <div className="flex justify-between py-2 border-b text-lg font-semibold">
-                  <span>Total:</span>
-                  <span>{total.toFixed(2)} DH</span>
-                </div>
+                  <div className="py-3 space-y-2 border-t border-b">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Cost</span>
+                      <span className="font-medium text-red-600">{totalCost.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-900">Profit</span>
+                      <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
+                    </div>
+                  </div>
 
-                <div className="flex justify-between py-2 border-b text-red-500">
-                  <span>Cost:</span>
-                  <span>{totalCost.toFixed(2)} DH</span>
-                </div>
-
-                <div className="flex justify-between py-2 font-bold text-green-600">
-                  <span>Profit:</span>
-                  <span>{profit.toFixed(2)} DH</span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b">
-                  <span>Advance Payment:</span>
-                  <span>{advancePayment.toFixed(2)} DH</span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b text-lg font-semibold">
-                  <span>Balance:</span>
-                  <span>{balance.toFixed(2)} DH</span>
+                  <div className="pt-2 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Advance Payment</span>
+                      <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Balance Due</span>
+                      <span className="font-semibold text-lg">{balance.toFixed(2)} DH</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div>
-                  <Label htmlFor="tax">Tax Base Amount (DH)</Label>
-                  <Input
-                    id="tax"
-                    type="number"
-                    min="0"
-                    value={tax}
-                    onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                    placeholder="Amount above which tax applies"
-                  />
-                </div>
+              <div className="flex-1 p-6 space-y-4 border rounded-lg">
+                <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="discount">Percentage Discount</Label>
+                      <div className="relative">
+                        <Input
+                          id="discount"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={discount}
+                          onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="numericDiscount">Fixed Discount</Label>
+                      <div className="relative">
+                        <Input
+                          id="numericDiscount"
+                          type="number"
+                          min="0"
+                          value={numericDiscount}
+                          onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
+                          className="pr-12"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div>
-                  <Label htmlFor="taxIndicator">Tax Rate</Label>
-                  <Input
-                    id="taxIndicator"
-                    type="number"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={taxIndicator}
-                    onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
-                    placeholder="Tax rate (e.g. 0.4 for 40%)"
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="tax">Tax Base Amount</Label>
+                      <div className="relative">
+                        <Input
+                          id="tax"
+                          type="number"
+                          min="0"
+                          value={tax}
+                          onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                          className="pr-12"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="taxIndicator">Tax Rate</Label>
+                      <div className="relative">
+                        <Input
+                          id="taxIndicator"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={taxIndicator}
+                          onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">×</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div>
-                  <Label htmlFor="discount">Discount (%)</Label>
-                  <Input
-                    id="discount"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={discount}
-                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                  />
-                </div>
+                  <div className="pt-4 border-t">
+                    <Label htmlFor="advancePayment">Advance Payment</Label>
+                    <div className="relative">
+                      <Input
+                        id="advancePayment"
+                        type="number"
+                        min="0"
+                        value={advancePayment}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
+                          setAdvancePayment(value);
+                        }}
+                        className="pr-12"
+                      />
+                      <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                    </div>
+                  </div>
 
-                <div>
-                  <Label htmlFor="numericDiscount">Discount Amount (DH)</Label>
-                  <Input
-                    id="numericDiscount"
-                    type="number"
-                    min="0"
-                    value={numericDiscount}
-                    onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="advancePayment">Advance Payment (DH)</Label>
-                  <Input
-                    id="advancePayment"
-                    type="number"
-                    min="0"
-                    value={advancePayment}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      setAdvancePayment(value);
-                    }}
-                  />
+                  <div className="pt-4">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                      paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {paymentStatus}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
