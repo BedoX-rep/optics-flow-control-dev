@@ -46,6 +46,8 @@ const Receipts = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+  const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
@@ -257,10 +259,23 @@ const Receipts = () => {
     }
   }, [dateFilter]);
 
-  const filteredReceipts = receipts.filter(receipt => 
-    (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase())) 
-  );
+  const filteredReceipts = receipts.filter(receipt => {
+    const matchesSearch = 
+      (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesPayment = 
+      paymentFilter === 'all' ? true :
+      paymentFilter === 'paid' ? receipt.balance === 0 :
+      paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
+      receipt.balance === receipt.total;
+
+    const matchesDelivery = 
+      deliveryFilter === 'all' ? true :
+      receipt.delivery_status === deliveryFilter;
+
+    return matchesSearch && matchesPayment && matchesDelivery;
+  });
 
   return (
     <div className="flex flex-col h-[calc(100svh-68px)]" style={{
@@ -299,18 +314,41 @@ const Receipts = () => {
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-[180px] border-gray-200 h-9">
-                  <SelectValue placeholder="Filter by date" />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-gray-500" />
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="w-[180px] border-gray-200 h-9">
+                    <SelectValue placeholder="Filter by date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Dates</SelectItem>
+                    {Array.from(new Set(receipts.map(r => new Date(r.created_at).toLocaleDateString())))
+                      .map(date => (
+                        <SelectItem key={date} value={date}>{date}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Select defaultValue="all" onValueChange={(value) => setPaymentFilter(value)}>
+                <SelectTrigger className="w-[150px] border-gray-200 h-9">
+                  <SelectValue placeholder="Payment Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Dates</SelectItem>
-                  {Array.from(new Set(receipts.map(r => new Date(r.created_at).toLocaleDateString())))
-                    .map(date => (
-                      <SelectItem key={date} value={date}>{date}</SelectItem>
-                    ))}
+                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="partial">Partially Paid</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="all" onValueChange={(value) => setDeliveryFilter(value)}>
+                <SelectTrigger className="w-[150px] border-gray-200 h-9">
+                  <SelectValue placeholder="Delivery Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Deliveries</SelectItem>
+                  <SelectItem value="Completed">Delivered</SelectItem>
+                  <SelectItem value="Undelivered">Undelivered</SelectItem>
                 </SelectContent>
               </Select>
             </div>
