@@ -124,12 +124,15 @@ const Auth = () => {
             .insert([
               {
                 user_id: user.id,
+                email: email,
                 display_name: displayName,
                 store_name: storeName,
                 referred_by: referralCode || null,
                 referral_code: null, // Let the trigger generate this
-                subscription_status: 'inactive',
+                subscription_status: 'inActive',
                 trial_used: false,
+                is_admin: false,
+                is_recurring: false
               }
             ]);
 
