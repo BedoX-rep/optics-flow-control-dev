@@ -55,7 +55,7 @@ const NewReceipt = () => {
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
   const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
   const [add, setAdd] = useState('');
-  const [prescriptionOpen, setPrescriptionOpen] = useState(true);
+  const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(true);
   const [discount, setDiscount] = useState(0);
   const [numericDiscount, setNumericDiscount] = useState(0);
@@ -406,15 +406,13 @@ const NewReceipt = () => {
 
   return (
     <div>
-      <PageTitle title="New Receipt" /> {/* Removed subtitle */}
-
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Client Information</CardTitle>
           </CardHeader>
-          <CardContent className="p-3">
-            <div className="grid grid-cols-3 gap-3">
+          <CardContent className="p-2">
+            <div className="grid grid-cols-3 gap-2">
               <div className="md:col-span-2 space-y-2">
                 <div>
                   <Input
@@ -537,8 +535,8 @@ const NewReceipt = () => {
           <CardHeader>
             <CardTitle>Receipt Items</CardTitle>
           </CardHeader>
-          <CardContent className="p-3">
-            <div className="space-y-4">
+          <CardContent className="p-2">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
@@ -686,8 +684,8 @@ const NewReceipt = () => {
               <ChevronDown className={`h-4 w-4 transition-transform ${paymentOpen ? 'transform rotate-180' : ''}`} />
             </div>
           </CardHeader>
-          <CardContent className={`${paymentOpen ? '' : 'hidden'} p-3`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className={`${paymentOpen ? '' : 'hidden'} p-2`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="tax">Tax Base Amount (DH)</Label>
