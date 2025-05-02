@@ -1,0 +1,81 @@
+Based on your codebase, I'll outline a plan to implement these changes without breaking your existing functionality. Here's the implementation plan:
+
+Database Changes Required:
+Add columns to the subscriptions table:
+display_name (already exists)
+store_name (new)
+referral_code (new)
+referred_by (new)
+Component Changes:
+Update Auth.tsx to include new fields
+Create a new ReferralButton component
+Add ReferralButton to MainNav.tsx
+Update AuthProvider.tsx to handle new fields
+Implementation Steps:
+A. Database Modifications:
+
+-- Add new columns to subscriptions table
+ALTER TABLE public.subscriptions 
+ADD COLUMN IF NOT EXISTS store_name TEXT,
+ADD COLUMN IF NOT EXISTS referral_code CHAR(4),
+ADD COLUMN IF NOT EXISTS referred_by CHAR(4),
+ADD CONSTRAINT unique_referral_code UNIQUE (referral_code);
+-- Create function to generate unique referral code
+CREATE OR REPLACE FUNCTION generate_unique_referral_code()
+RETURNS CHAR(4) AS $$
+DECLARE
+    chars TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    result CHAR(4);
+    done BOOLEAN;
+BEGIN
+    done := FALSE;
+    WHILE NOT done LOOP
+        result := '';
+        FOR i IN 1..4 LOOP
+            result := result || substr(chars, floor(random() * length(chars) + 1)::integer, 1);
+        END LOOP;
+        
+        done := NOT EXISTS (
+            SELECT 1 
+            FROM public.subscriptions 
+            WHERE referral_code = result
+        );
+    END LOOP;
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+-- Create trigger to automatically generate referral code
+CREATE OR REPLACE FUNCTION set_referral_code()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.referral_code IS NULL THEN
+        NEW.referral_code := generate_unique_referral_code();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_set_referral_code
+BEFORE INSERT ON public.subscriptions
+FOR EACH ROW
+EXECUTE FUNCTION set_referral_code();
+Key Integration Points:
+
+Auth Flow:
+Update sign-up form to include store_name field
+Add optional referral code input
+Generate unique referral code on signup
+Store referral information in subscriptions table
+UI/UX:
+Add store name field below display name in signup form
+Add referral code input field with validation
+Create referral button component with popup/dialog showing user's referral code
+Add copy-to-clipboard functionality for referral code
+Data Flow:
+Extend supabase.auth.signUp to include additional metadata
+Update subscription creation process to include new fields
+Add referral code validation before signup
+Track referral relationships in the database
+This implementation maintains your existing authentication flow while adding the new features. The changes are modular and won't affect existing functionality.
+
+Would you like me to proceed with providing the specific code changes for any of these components?
+
