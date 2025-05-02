@@ -424,23 +424,23 @@ const NewReceipt = () => {
               </div>
               <div className="flex-1">
                 <Select value={selectedClient} onValueChange={handleClientSelect}>
-                    <SelectTrigger id="client">
-                      <SelectValue placeholder="Select a client" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredClients.map(client => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <SelectTrigger id="client">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <Label>&nbsp;</Label>
                 <Button className="w-full" onClick={() => setIsAddClientOpen(true)}>Add New Client</Button>
               </div>
+            </div>
+          </CardContent>
             </div>
           </CardContent>
         </Card>
