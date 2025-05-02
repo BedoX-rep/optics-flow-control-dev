@@ -51,7 +51,7 @@ const Receipts = () => {
     const receiptDate = new Date(receipt.created_at);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const receiptDay = new Date(receiptDate);
     receiptDay.setHours(0, 0, 0, 0);
 
@@ -290,7 +290,7 @@ const Receipts = () => {
     const matchesSearch = 
       (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
        receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesPayment = 
       paymentFilter === 'all' ? true :
       paymentFilter === 'paid' ? receipt.balance === 0 :
@@ -390,6 +390,7 @@ const Receipts = () => {
           <Table className="min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
+                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Client Info</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
@@ -405,19 +406,29 @@ const Receipts = () => {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredReceipts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
                     No receipts found
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group">
+                    <TableCell className="font-mono text-sm py-3">
+                      {new Date(receipt.created_at).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </TableCell>
                     <TableCell className="py-3">
                       <div className="flex flex-col">
                         <span className="font-medium hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_name")}>
