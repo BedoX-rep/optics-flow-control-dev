@@ -30,6 +30,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -37,25 +45,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   
-  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  const REFRESH_INTERVAL = 5 * 60 * 1000;
 
   const fetchSubscription = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used')
+        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used, store_name, referral_code, referred_by, display_name')
         .eq('user_id', userId)
         .single();
       
       if (error) throw error;
       
       if (data) {
-        // Ensure we're using the actual data with its original case
-        const formattedSubscription: UserSubscription = {
-          ...data,
-          subscription_status: data.subscription_status as SubscriptionStatus
-        };
-        setSubscription(formattedSubscription);
+        setSubscription(data as UserSubscription);
       }
       
       setLastRefreshTime(Date.now());
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshSubscription = async (force: boolean = false) => {
     const now = Date.now();
     if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
-      return; // Skip if recently refreshed
+      return;
     }
     
     if (!user) return;
@@ -80,29 +83,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // First set up auth state listener to catch changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
+      async (event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
-        // Clear subscription data on sign out
         if (event === 'SIGNED_OUT') {
           setSubscription(null);
           setIsLoading(false);
         } 
-        // Fetch subscription on sign in or token refresh
         else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase auth
-          setTimeout(() => {
-            fetchSubscription(newSession.user!.id);
-            setIsLoading(false);
-          }, 0);
+          await fetchSubscription(newSession.user.id);
+          setIsLoading(false);
         }
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -133,10 +129,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export { useAuth };
