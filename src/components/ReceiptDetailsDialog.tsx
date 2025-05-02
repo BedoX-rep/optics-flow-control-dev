@@ -161,10 +161,10 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                     <TableRow key={item.id}>
                       <TableCell>{item.product?.name || item.custom_item_name}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
-                      <TableCell className="text-right">{Number(item.price).toFixed(2)} DH</TableCell>
-                      <TableCell className="text-right">{Number(item.cost).toFixed(2)} DH</TableCell>
-                      <TableCell className="text-right">{(Number(item.price) * item.quantity).toFixed(2)} DH</TableCell>
-                      <TableCell className="text-right">{((Number(item.price) * item.quantity) - (Number(item.cost) * item.quantity)).toFixed(2)} DH</TableCell>
+                      <TableCell className="text-right">{item.price?.toFixed(2)} DH</TableCell>
+                      <TableCell className="text-right">{item.cost?.toFixed(2)} DH</TableCell>
+                      <TableCell className="text-right">{(item.price * item.quantity).toFixed(2)} DH</TableCell>
+                      <TableCell className="text-right">{((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
