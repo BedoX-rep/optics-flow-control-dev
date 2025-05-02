@@ -127,6 +127,7 @@ const Auth = () => {
                 display_name: displayName,
                 store_name: storeName,
                 referred_by: referralCode || null,
+                referral_code: null, // Let the trigger generate this
                 subscription_status: 'inactive',
                 trial_used: false,
               }

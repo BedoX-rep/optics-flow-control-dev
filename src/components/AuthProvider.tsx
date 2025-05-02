@@ -15,7 +15,7 @@ interface UserSubscription {
   trial_used: boolean;
   store_name: string;
   display_name: string;
-  referral_code: string;
+  referral_code: string | null;
   referred_by: string | null;
 }
 
