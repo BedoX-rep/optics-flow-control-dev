@@ -13,6 +13,10 @@ interface UserSubscription {
   end_date: string | null;
   is_recurring: boolean;
   trial_used: boolean;
+  store_name?: string;
+  display_name?: string;
+  referral_code?: string;
+  referred_by?: string;
 }
 
 interface AuthContextType {
@@ -39,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used')
+        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used, store_name, display_name, referral_code, referred_by')
         .eq('user_id', userId)
         .single();
       

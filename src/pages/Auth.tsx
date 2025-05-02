@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -26,6 +27,9 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
@@ -84,7 +88,7 @@ const Auth = () => {
     if (!email || !password || !confirmPassword) {
       toast({
         title: "Error",
-        description: "Please fill in all fields.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -101,13 +105,23 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
+      
+      // Create user metadata with display name and store name
+      const userData = {
+        display_name: displayName || email.split('@')[0],
+        store_name: storeName || 'Optique'
+      };
+      
+      // Add referral code to metadata if provided
+      if (referralCode) {
+        userData['referred_by'] = referralCode;
+      }
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            display_name: email.split('@')[0],
-          },
+          data: userData,
         },
       });
 
@@ -192,7 +206,7 @@ const Auth = () => {
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
+                  <Label htmlFor="email-signup">Email*</Label>
                   <Input 
                     id="email-signup" 
                     type="email" 
@@ -203,7 +217,40 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
+                  <Label htmlFor="display-name">Display Name</Label>
+                  <Input 
+                    id="display-name" 
+                    type="text" 
+                    placeholder="John Doe" 
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">If left blank, will use part of your email</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="store-name">Store Name</Label>
+                  <Input 
+                    id="store-name" 
+                    type="text" 
+                    placeholder="My Optical Store" 
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">If left blank, will use 'Optique'</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referral-code">Referral Code (optional)</Label>
+                  <Input 
+                    id="referral-code" 
+                    type="text" 
+                    placeholder="ABCD" 
+                    maxLength={4}
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-signup">Password*</Label>
                   <Input 
                     id="password-signup" 
                     type="password" 
@@ -213,7 +260,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">Confirm Password*</Label>
                   <Input 
                     id="confirm-password" 
                     type="password" 
