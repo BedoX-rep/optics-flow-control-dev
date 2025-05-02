@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDistanceToNow, format } from 'date-fns';
+
 
 interface Receipt {
   id: string;
@@ -51,7 +53,7 @@ const Receipts = () => {
     const receiptDate = new Date(receipt.created_at);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const receiptDay = new Date(receiptDate);
     receiptDay.setHours(0, 0, 0, 0);
 
@@ -290,7 +292,7 @@ const Receipts = () => {
     const matchesSearch = 
       (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
        receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesPayment = 
       paymentFilter === 'all' ? true :
       paymentFilter === 'paid' ? receipt.balance === 0 :
@@ -305,6 +307,18 @@ const Receipts = () => {
 
     return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
   });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return formatDistanceToNow(date, { addSuffix: true });
+    } else {
+      return format(date, 'yy/MM/dd HH:mm');
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100svh-68px)]" style={{
@@ -399,19 +413,20 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredReceipts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
                     No receipts found
                   </TableCell>
                 </TableRow>
@@ -598,6 +613,9 @@ const Receipts = () => {
                           <span className="text-gray-600">⟶</span>
                         </Button>
                       </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      {formatDate(receipt.created_at)}
                     </TableCell>
                     <TableCell className="py-3 text-right">
                       <div className="flex justify-end gap-1">
