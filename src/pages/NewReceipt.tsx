@@ -71,6 +71,7 @@ const NewReceipt = () => {
   const [advancePayment, setAdvancePayment] = useState(0);
   const [balance, setBalance] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
+  const [autoMontage, setAutoMontage] = useState(true);
 
 
   useEffect(() => {
@@ -159,20 +160,23 @@ const NewReceipt = () => {
             } : item;
 
             // Check if we need to add montage costs
-            if (product?.name.toLowerCase().includes('single vision') ||
-                product?.name.toLowerCase().includes('progressive') ||
-                product?.name.toLowerCase().includes('sunglasses')) {
+            if (autoMontage && product && (
+                product.name.toLowerCase().includes('single vision') ||
+                product.name.toLowerCase().includes('progressive') ||
+                product.name.toLowerCase().includes('sunglasses')
+              )) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
-                setTimeout(() => {
-                  setItems(prev => [...prev, {
+                return [
+                  ...updatedItems,
+                  {
                     id: `montage-${Date.now()}`,
                     customName: 'Montage costs',
                     quantity: 1,
                     price: 0,
                     cost: 20
-                  }]);
-                }, 0);
+                  }
+                ];
               }
             }
             return selectedProduct;
@@ -530,13 +534,25 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-end space-x-2">
-                <Button onClick={() => addItem('product')} variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-1" /> Add Product
-                </Button>
-                <Button onClick={() => addItem('custom')} variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-1" /> Add Custom Item
-                </Button>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="autoMontage"
+                    checked={autoMontage}
+                    onChange={(e) => setAutoMontage(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="autoMontage">Auto-add Montage costs</Label>
+                </div>
+                <div className="flex space-x-2">
+                  <Button onClick={() => addItem('product')} variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-1" /> Add Product
+                  </Button>
+                  <Button onClick={() => addItem('custom')} variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-1" /> Add Custom Item
+                  </Button>
+                </div>
               </div>
 
               {items.map((item) => (
