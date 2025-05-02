@@ -121,24 +121,22 @@ const Auth = () => {
         try {
           const { error: subscriptionError } = await supabase
             .from('subscriptions')
-            .insert([
-              {
-                user_id: user.id,
-                email: email.toLowerCase(),
-                display_name: displayName.trim(),
-                store_name: storeName.trim(),
-                referred_by: referralCode?.trim().toUpperCase() || null,
-                subscription_status: 'inActive',
-                subscription_type: 'Trial',
-                trial_used: false,
-                is_admin: false,
-                is_recurring: false,
-                price: 0,
-                start_date: new Date().toISOString(),
-                end_date: null,
-                created_at: new Date().toISOString()
-              }
-            ]);
+            .insert({
+              user_id: user.id,
+              email: email.toLowerCase(),
+              display_name: displayName.trim(),
+              store_name: storeName.trim(),
+              referred_by: referralCode?.trim().toUpperCase() || null,
+              subscription_status: 'inActive',
+              subscription_type: 'Trial',
+              trial_used: false,
+              is_admin: false,
+              is_recurring: false,
+              price: 0,
+              start_date: new Date().toISOString(),
+              end_date: null
+            })
+            .select();
 
           if (subscriptionError) {
             console.error('Subscription creation error:', subscriptionError);
