@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import MainNav from './MainNav';
+import { MainNav } from './MainNav';
 import { useAuth } from './AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import ReferralCodeDialog from './ReferralCodeDialog';

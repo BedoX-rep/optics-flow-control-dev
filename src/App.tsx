@@ -69,20 +69,39 @@ const AppRoutes = () => (
     
     <Route path="/" element={
       <ProtectedRoute>
-        <Layout />
+        <Layout><Dashboard /></Layout>
       </ProtectedRoute>
-    }>
-      <Route index element={<Dashboard />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/clients" element={<Clients />} />
-      <Route path="/receipts" element={<Receipts />} />
-      <Route path="/new-receipt" element={<NewReceipt />} />
-      <Route path="/subscriptions" element={
-        <ProtectedRoute requiresActiveSubscription={false}>
-          <Subscriptions />
-        </ProtectedRoute>
-      } />
-    </Route>
+    } />
+    
+    <Route path="/products" element={
+      <ProtectedRoute>
+        <Layout><Products /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/clients" element={
+      <ProtectedRoute>
+        <Layout><Clients /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/receipts" element={
+      <ProtectedRoute>
+        <Layout><Receipts /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/new-receipt" element={
+      <ProtectedRoute>
+        <Layout><NewReceipt /></Layout>
+      </ProtectedRoute>
+    } />
+    
+    <Route path="/subscriptions" element={
+      <ProtectedRoute requiresActiveSubscription={false}>
+        <Layout><Subscriptions /></Layout>
+      </ProtectedRoute>
+    } />
     
     <Route path="*" element={<NotFound />} />
   </Routes>
