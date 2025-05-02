@@ -46,7 +46,7 @@ const Receipts = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
-  const [paymentFilters, setPaymentFilters] = useState(['all']); // Changed to handle multiple selections
+  const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
@@ -257,20 +257,18 @@ const Receipts = () => {
     if (user) {
       fetchReceipts();
     }
-  }, [dateFilter, paymentFilters]); // Added paymentFilters to the dependency array
+  }, [dateFilter]);
 
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch = 
       (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
        receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    const matchesPayment = paymentFilters.includes('all') || paymentFilters.some(filter => {
-      if (filter === 'paid') return receipt.balance === 0;
-      if (filter === 'partial') return receipt.balance > 0 && receipt.advance_payment > 0;
-      if (filter === 'unpaid') return receipt.balance === receipt.total;
-      return false;
-    });
-
+    
+    const matchesPayment = 
+      paymentFilter === 'all' ? true :
+      paymentFilter === 'paid' ? receipt.balance === 0 :
+      paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
+      receipt.balance === receipt.total;
 
     const matchesDelivery = 
       deliveryFilter === 'all' ? true :
@@ -325,19 +323,15 @@ const Receipts = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Dates</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
+                    {Array.from(new Set(receipts.map(r => new Date(r.created_at).toLocaleDateString())))
+                      .map(date => (
+                        <SelectItem key={date} value={date}>{date}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Select 
-                defaultValue={['all']}
-                onValueChange={(value) => setPaymentFilters(Array.isArray(value) ? value : [value])}
-                multiple
-              >
-                <SelectTrigger className="w-[180px] border-gray-200 h-9">
+              <Select defaultValue="all" onValueChange={(value) => setPaymentFilter(value)}>
+                <SelectTrigger className="w-[150px] border-gray-200 h-9">
                   <SelectValue placeholder="Payment Status" />
                 </SelectTrigger>
                 <SelectContent>
