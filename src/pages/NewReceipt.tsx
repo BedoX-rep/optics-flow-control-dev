@@ -366,7 +366,9 @@ const NewReceipt = () => {
         product_id: item.productId || null,
         custom_item_name: item.customName || null,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        cost: item.cost,
+        profit: (item.price - item.cost) * item.quantity
       }));
 
       const { error: itemsError } = await supabase
