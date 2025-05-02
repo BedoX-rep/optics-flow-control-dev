@@ -217,6 +217,8 @@ const Receipts = () => {
             id,
             quantity,
             price,
+            cost,
+            profit,
             custom_item_name,
             product:product_id (
               name
