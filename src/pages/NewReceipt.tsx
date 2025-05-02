@@ -63,7 +63,9 @@ const NewReceipt = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [productSearchTerm, setProductSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [advancePayment, setAdvancePayment] = useState(0);
@@ -87,6 +89,12 @@ const NewReceipt = () => {
 
         if (productsError) throw productsError;
         setProducts(productsData || []);
+        setFilteredProducts(productsData || []);
+        
+        // Add default item if no items exist
+        if (items.length === 0) {
+          addItem('product');
+        }
 
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
@@ -117,6 +125,13 @@ const NewReceipt = () => {
     );
     setFilteredClients(filtered);
   }, [searchTerm, clients]);
+
+  useEffect(() => {
+    const filtered = products.filter(product =>
+      product.name.toLowerCase().includes(productSearchTerm.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [productSearchTerm, products]);
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
@@ -519,14 +534,8 @@ const NewReceipt = () => {
                         <Input
                           type="text"
                           placeholder="Search products..."
-                          onChange={(e) => {
-                            const value = e.target.value.toLowerCase();
-                            setProducts(
-                              value 
-                                ? products.filter(p => p.name.toLowerCase().includes(value))
-                                : products
-                            );
-                          }}
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
                           className="mb-2"
                         />
                         <Select 
@@ -537,7 +546,7 @@ const NewReceipt = () => {
                             <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                           <SelectContent>
-                            {products.map(product => (
+                            {filteredProducts.map(product => (
                               <SelectItem key={product.id} value={product.id}>
                                 {product.name} - {product.price.toFixed(2)} DH
                               </SelectItem>
