@@ -212,6 +212,15 @@ const Receipts = () => {
           clients (
             name,
             phone
+          ),
+          receipt_items (
+            id,
+            quantity,
+            price,
+            custom_item_name,
+            product:product_id (
+              name
+            )
           )
         `)
         .eq('user_id', user.id)
