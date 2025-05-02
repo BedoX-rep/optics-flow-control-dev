@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(8, "Phone must be at least 8 characters"),
+  phone: z.string().min(8, "Phone must be at least 8 characters").optional(),
   gender: z.enum(["Mr", "Mme", "Enf"]).optional(),
   right_eye_sph: z.string().optional(),
   right_eye_cyl: z.string().optional(),
