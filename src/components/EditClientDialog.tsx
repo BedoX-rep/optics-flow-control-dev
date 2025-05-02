@@ -29,10 +29,10 @@ const formSchema = z.object({
   gender: z.enum(["Mr", "Mme", "Enf"]),
   right_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   right_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_axe: z.string().transform((val) => val === '' ? parseInt(val, 10) : undefined).optional(),
+  right_eye_axe: z.number().optional(),
   left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_axe: z.string().transform((val) => val === '' ? parseInt(val, 10) : undefined).optional(),
+  left_eye_axe: z.number().optional(),
   Add: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
   assurance: z.string().optional(),
   notes: z.string().nullable().optional()
@@ -70,10 +70,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       gender: client?.gender,
       right_eye_sph: client?.right_eye_sph?.toString() || "",
       right_eye_cyl: client?.right_eye_cyl?.toString() || "",
-      right_eye_axe: client?.right_eye_axe?.toString() || "",
+      right_eye_axe: client?.right_eye_axe,
       left_eye_sph: client?.left_eye_sph?.toString() || "",
       left_eye_cyl: client?.left_eye_cyl?.toString() || "",
-      left_eye_axe: client?.left_eye_axe?.toString() || "",
+      left_eye_axe: client?.left_eye_axe,
       notes: client?.notes || ""
     },
   })
@@ -86,10 +86,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         gender: client.gender,
         right_eye_sph: client.right_eye_sph?.toString() || "",
         right_eye_cyl: client.right_eye_cyl?.toString() || "",
-        right_eye_axe: client.right_eye_axe?.toString() || "",
+        right_eye_axe: client.right_eye_axe,
         left_eye_sph: client.left_eye_sph?.toString() || "",
         left_eye_cyl: client.left_eye_cyl?.toString() || "",
-        left_eye_axe: client.left_eye_axe?.toString() || "",
+        left_eye_axe: client.left_eye_axe,
         notes: client.notes || ""
       });
       setGender(client.gender);

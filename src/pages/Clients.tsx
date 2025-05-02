@@ -46,22 +46,6 @@ interface Client {
   assurance?: string;
 }
 
-interface ClientAvatarProps {
-  name: string;
-  gender: "Mr" | "Mme" | "Enf";
-  className?: string; // Add className as an optional prop
-}
-
-const ClientAvatar: React.FC<ClientAvatarProps> = ({ name, gender, className }) => {
-  return (
-    <div className={`flex items-center justify-center w-11 h-11 rounded-full bg-[#f6f6f7] ${className}`}>
-      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#1e7575]">
-        <span className="text-[#F0F0F0] text-2xl font-bold">{name.charAt(0).toUpperCase()}</span>
-      </div>
-    </div>
-  );
-}
-
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');

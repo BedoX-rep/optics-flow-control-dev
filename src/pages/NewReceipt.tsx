@@ -27,7 +27,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  cost_ttc: number; // Replace Cost with cost_ttc to match the database
+  Cost: number;
   category: string;
 }
 
@@ -74,40 +74,52 @@ const NewReceipt = () => {
   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
   const [autoMontage, setAutoMontage] = useState(true);
 
-  const fetchProducts = async () => {
-    try {
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false });
-
-      if (productsError) throw productsError;
-      setProducts(productsData || []);
-      setFilteredProducts(productsData || []);
-
-      // Add default item if no items exist
-      if (items.length === 0) {
-        addItem('product');
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load data. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
-    fetchProducts();
+    const fetchData = async () => {
+      try {
+        if (!user) {
+          navigate('/auth');
+          return;
+        }
+
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false });
+
+        if (productsError) throw productsError;
+        setProducts(productsData || []);
+        setFilteredProducts(productsData || []);
+
+        // Add default item if no items exist
+        if (items.length === 0) {
+          addItem('product');
+        }
+
+        const { data: clientsData, error: clientsError } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_deleted', false)
+          .order('name', { ascending: true });
+
+        if (clientsError) throw clientsError;
+        setClients(clientsData || []);
+        setFilteredClients(clientsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load data. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchData();
   }, [navigate, toast, user]);
 
   useEffect(() => {
@@ -147,7 +159,7 @@ const NewReceipt = () => {
               ...item,
               [field]: value.toString(),
               price: product.price || 0,
-              cost: product.cost_ttc || 0 // Update to use cost_ttc instead of Cost
+              cost: product.cost_ttc || 0
             } : item;
 
             // Check if we need to add montage costs
