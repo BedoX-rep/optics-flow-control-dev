@@ -28,9 +28,6 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const [displayName, setDisplayName] = useState('');
-  const [storeName, setStoreName] = useState('');
-  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -82,9 +79,11 @@ const Auth = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const [displayName, setDisplayName] = useState('');
+
+const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName || !storeName) {
+    if (!email || !password || !confirmPassword || !displayName) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -110,8 +109,6 @@ const Auth = () => {
         options: {
           data: {
             display_name: displayName,
-            store_name: storeName,
-            referred_by: referralCode || null,
           },
         },
       });
@@ -205,28 +202,6 @@ const Auth = () => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="store-name">Store Name</Label>
-                  <Input 
-                    id="store-name" 
-                    type="text" 
-                    placeholder="Your store name" 
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="referral-code">Referral Code (Optional)</Label>
-                  <Input 
-                    id="referral-code" 
-                    type="text" 
-                    placeholder="Enter referral code" 
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    maxLength={4}
                   />
                 </div>
                 <div className="space-y-2">
