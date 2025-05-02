@@ -759,13 +759,14 @@ const NewReceipt = () => {
                       <div className="relative">
                         <Input
                           id="numericDiscount"
-                          type="number"
-                          step="0.01"
-                          min="0"
+                          type="text"
+                          inputMode="decimal"
                           value={numericDiscount}
                           onChange={(e) => {
-                            const value = e.target.value;
-                            setNumericDiscount(value === '' ? 0 : parseFloat(value));
+                            const value = e.target.value.replace(',', '.');
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              setNumericDiscount(value === '' ? 0 : parseFloat(value));
+                            }
                           }}
                           className="pr-12"
                         />
