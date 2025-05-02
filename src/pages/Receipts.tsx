@@ -311,10 +311,13 @@ const Receipts = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    const diffInMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
+    const diffInHours = diffInMinutes / 60;
 
-    if (diffInHours < 24) {
-      return formatDistanceToNow(date, { addSuffix: true });
+    if (diffInMinutes < 60) {
+      return `${Math.floor(diffInMinutes)} minutes ago`;
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)} hours ago`;
     } else {
       return format(date, 'yy/MM/dd HH:mm');
     }
