@@ -534,9 +534,9 @@ const NewReceipt = () => {
             <CardTitle>Receipt Items</CardTitle>
           </CardHeader>
           <CardContent className="p-2">
-            <div className="space-y-1">
-              <div className="flex justify-between items-center mb-1">
-                <div className="flex items-center gap-2">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="autoMontage"
@@ -546,7 +546,7 @@ const NewReceipt = () => {
                   />
                   <Label htmlFor="autoMontage">Auto-add Montage costs</Label>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex space-x-2">
                   <Button onClick={() => addItem('product')} variant="outline" size="sm">
                     <Plus className="h-4 w-4 mr-1" /> Add Product
                   </Button>
@@ -683,8 +683,8 @@ const NewReceipt = () => {
             </div>
           </CardHeader>
           <CardContent className={`${paymentOpen ? '' : 'hidden'} p-2`}>
-            <div className="flex justify-between gap-3">
-              <div className="space-y-2 flex-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
                 <div>
                   <Label htmlFor="tax">Tax Base Amount (DH)</Label>
                   <Input
