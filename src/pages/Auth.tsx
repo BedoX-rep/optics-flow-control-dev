@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -27,19 +26,18 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [storeName, setStoreName] = useState('');
-  const [referralCode, setReferralCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
   useEffect(() => {
+    // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate('/');
       }
     };
+
     checkSession();
   }, [navigate]);
 
@@ -56,22 +54,19 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      if (data.user) {
-        toast({
-          title: "Success",
-          description: "Logged in successfully.",
-        });
-        navigate('/');
-      } else {
-        throw new Error("No user data received");
-      }
+      toast({
+        title: "Success",
+        description: "Logged in successfully.",
+      });
+
+      navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -84,21 +79,12 @@ const Auth = () => {
     }
   };
 
-  const generateReferralCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 4; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName || !storeName) {
+    if (!email || !password || !confirmPassword) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all fields.",
         variant: "destructive",
       });
       return;
@@ -115,51 +101,21 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      const newReferralCode = generateReferralCode();
-      
-      const { data: { user }, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            display_name: displayName,
-            store_name: storeName,
+            display_name: email.split('@')[0],
           },
         },
       });
 
       if (error) throw error;
 
-      if (user) {
-        // Create referral record for the new user
-        const { error: referralError } = await supabase.from('referrals').insert({
-          referrer_id: user.id,
-          referral_code: newReferralCode,
-        });
-
-        if (referralError) throw referralError;
-
-        // If referral code was provided, create referral relationship
-        if (referralCode) {
-          const { data: referrer } = await supabase
-            .from('referrals')
-            .select('referrer_id')
-            .eq('referral_code', referralCode)
-            .single();
-
-          if (referrer) {
-            await supabase.from('referral_relationships').insert({
-              referrer_id: referrer.referrer_id,
-              referred_id: user.id,
-              referral_code: referralCode,
-            });
-          }
-        }
-      }
-
       toast({
         title: "Success",
-        description: "Account created successfully. Please check your email to verify your account.",
+        description: "Account created successfully. You may need to verify your email before logging in.",
       });
 
       setActiveTab('login');
@@ -209,7 +165,9 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                  </div>
                   <Input 
                     id="password" 
                     type="password" 
@@ -222,7 +180,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full bg-primary text-white hover:bg-primary/80"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
@@ -234,29 +192,7 @@ const Auth = () => {
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="display-name">Display Name*</Label>
-                  <Input 
-                    id="display-name" 
-                    type="text" 
-                    placeholder="John Doe" 
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="store-name">Store Name*</Label>
-                  <Input 
-                    id="store-name" 
-                    type="text" 
-                    placeholder="My Optical Store" 
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email*</Label>
+                  <Label htmlFor="email-signup">Email</Label>
                   <Input 
                     id="email-signup" 
                     type="email" 
@@ -267,7 +203,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password*</Label>
+                  <Label htmlFor="password-signup">Password</Label>
                   <Input 
                     id="password-signup" 
                     type="password" 
@@ -277,7 +213,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password*</Label>
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input 
                     id="confirm-password" 
                     type="password" 
@@ -286,21 +222,11 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="referral-code">Referral Code (Optional)</Label>
-                  <Input 
-                    id="referral-code" 
-                    type="text" 
-                    placeholder="Enter referral code" 
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                  />
-                </div>
               </CardContent>
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full bg-optics-600 hover:bg-optics-700"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}

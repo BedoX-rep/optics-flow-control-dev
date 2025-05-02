@@ -48,22 +48,6 @@ const MainNav = () => {
           {collapsed && (
             <h2 className="text-xl font-bold text-white">L</h2>
           )}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="ml-2">
-                <Gift className="h-5 w-5 text-white/70 hover:text-white" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Your Referral Code</DialogTitle>
-              </DialogHeader>
-              <div className="p-4 text-center">
-                <p className="text-2xl font-bold">{referralCode}</p>
-                <p className="text-sm text-gray-500 mt-2">Share this code with others to invite them to Lensly</p>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
         <button 
           onClick={toggleSidebar}
