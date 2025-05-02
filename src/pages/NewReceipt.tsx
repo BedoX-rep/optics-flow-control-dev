@@ -197,13 +197,15 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   // Calculate percentage-based discount
-  const discountAmount = (subtotal * discount) / 100;
+  // Calculate percentage discount first
+  const percentageDiscountAmount = (subtotal * discount) / 100;
+  const afterPercentageDiscount = subtotal - percentageDiscountAmount;
 
-  // Calculate numeric discount (direct amount)
-  const totalDiscount = discountAmount + numericDiscount;
+  // Apply fixed discount after percentage discount
+  const totalDiscount = percentageDiscountAmount + numericDiscount;
 
-  // Calculate purchasing amount (subtotal - discount)
-  const purchasingAmount = subtotal - totalDiscount;
+  // Calculate purchasing amount
+  const purchasingAmount = afterPercentageDiscount - numericDiscount;
 
   // Calculate tax based on amount above purchasing amount
   const taxAmount = tax > purchasingAmount ? (tax - purchasingAmount) * taxIndicator : 0;
@@ -703,7 +705,7 @@ const NewReceipt = () => {
                   <div className="pt-3 border-t">
                     <div className="flex justify-between">
                       <span className="font-medium">Total</span>
-                      <span className="font-semibold text-lg">{total.toFixed(2)} DH</span>
+                      <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
                     </div>
                   </div>
 
@@ -757,6 +759,7 @@ const NewReceipt = () => {
                           id="numericDiscount"
                           type="number"
                           min="0"
+                          step="0.01"
                           value={numericDiscount}
                           onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
                           className="pr-12"
