@@ -28,9 +28,6 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const [displayName, setDisplayName] = useState('');
-  const [storeName, setStoreName] = useState('');
-  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -82,13 +79,12 @@ const Auth = () => {
     }
   };
 
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName || !storeName || storeName.trim() === '') {
+    if (!email || !password || !confirmPassword) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields including store name.",
+        description: "Please fill in all fields.",
         variant: "destructive",
       });
       return;
@@ -105,68 +101,24 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            display_name: displayName,
-          }
-        }
+            display_name: email.split('@')[0],
+          },
+        },
       });
 
-      if (signUpError) throw signUpError;
-
-      if (user) {
-        try {
-          const { error: subscriptionError } = await supabase
-            .from('subscriptions')
-            .insert({
-              user_id: user.id,
-              email: email.toLowerCase(),
-              display_name: displayName.trim(),
-              store_name: storeName.trim(),
-              referred_by: referralCode?.trim().toUpperCase() || null,
-              subscription_status: 'inActive',
-              subscription_type: 'Trial',
-              trial_used: false,
-              is_admin: false,
-              is_recurring: false,
-              price: 0,
-              start_date: new Date().toISOString(),
-              end_date: null
-            })
-            .select();
-
-          if (subscriptionError) {
-            console.error('Subscription creation error:', subscriptionError);
-            toast({
-              title: "Error",
-              description: "Failed to create subscription. Please try again.",
-              variant: "destructive",
-            });
-            // Clean up the created auth user since subscription failed
-            await supabase.auth.signOut();
-            return;
-          }
-        } catch (err) {
-          console.error('Error creating subscription:', err);
-          toast({
-            title: "Error",
-            description: "Failed to complete signup. Please try again.",
-            variant: "destructive",
-          });
-          await supabase.auth.signOut();
-          return;
-        }
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Account created successfully. Please check your email for verification.",
+        description: "Account created successfully. You may need to verify your email before logging in.",
       });
 
-      navigate('/');
+      setActiveTab('login');
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
@@ -228,7 +180,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-teal-700 text-white hover:bg-teal-800"
+                  className="w-full bg-primary text-white hover:bg-primary/80"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
@@ -239,28 +191,6 @@ const Auth = () => {
           <TabsContent value="signup">
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input 
-                    id="displayName" 
-                    type="text" 
-                    placeholder="Your name" 
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="storeName">Store Name</Label>
-                  <Input 
-                    id="storeName" 
-                    type="text" 
-                    placeholder="Your Store Name" 
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                    required
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email-signup">Email</Label>
                   <Input 
@@ -292,22 +222,11 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="referralCode">Referral Code (Optional)</Label>
-                  <Input 
-                    id="referralCode" 
-                    type="text" 
-                    placeholder="Enter referral code" 
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    maxLength={4}
-                  />
-                </div>
               </CardContent>
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-teal-700 text-white hover:bg-teal-800"
+                  className="w-full bg-optics-600 hover:bg-optics-700"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
