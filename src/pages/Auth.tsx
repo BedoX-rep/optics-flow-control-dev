@@ -28,6 +28,9 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [displayName, setDisplayName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -79,14 +82,13 @@ const Auth = () => {
     }
   };
 
-  const [displayName, setDisplayName] = useState('');
 
-const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName) {
+    if (!email || !password || !confirmPassword || !displayName || !storeName) {
       toast({
         title: "Error",
-        description: "Please fill in all fields.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -103,24 +105,41 @@ const handleSignup = async (e: React.FormEvent) => {
 
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             display_name: displayName,
-          },
-        },
+          }
+        }
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      if (user) {
+        const { error: subscriptionError } = await supabase
+          .from('subscriptions')
+          .insert([
+            {
+              user_id: user.id,
+              display_name: displayName,
+              store_name: storeName,
+              referred_by: referralCode || null,
+              subscription_status: 'inactive',
+              trial_used: false,
+            }
+          ]);
+
+        if (subscriptionError) throw subscriptionError;
+      }
 
       toast({
         title: "Success",
-        description: "Account created successfully. You may need to verify your email before logging in.",
+        description: "Account created successfully. Please check your email for verification.",
       });
 
-      setActiveTab('login');
+      navigate('/');
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
@@ -194,13 +213,24 @@ const handleSignup = async (e: React.FormEvent) => {
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="display-name">Display Name</Label>
+                  <Label htmlFor="displayName">Display Name</Label>
                   <Input 
-                    id="display-name" 
+                    id="displayName" 
                     type="text" 
                     placeholder="Your name" 
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="storeName">Store Name</Label>
+                  <Input 
+                    id="storeName" 
+                    type="text" 
+                    placeholder="Your Store Name" 
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
                     required
                   />
                 </div>
@@ -233,6 +263,17 @@ const handleSignup = async (e: React.FormEvent) => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+                  <Input 
+                    id="referralCode" 
+                    type="text" 
+                    placeholder="Enter referral code" 
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    maxLength={4}
                   />
                 </div>
               </CardContent>
