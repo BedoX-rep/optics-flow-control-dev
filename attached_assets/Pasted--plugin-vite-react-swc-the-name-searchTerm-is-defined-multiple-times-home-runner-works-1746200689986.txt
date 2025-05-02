@@ -1,0 +1,47 @@
+[plugin:vite:react-swc] × the name `searchTerm` is defined multiple times
+    ╭─[/home/runner/workspace/src/pages/NewReceipt.tsx:66:1]
+ 63 │   const [products, setProducts] = useState<Product[]>([]);
+ 64 │   const [clients, setClients] = useState<Client[]>([]);
+ 65 │   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+ 66 │   const [searchTerm, setSearchTerm] = useState('');
+    ·          ─────┬────
+    ·               ╰── previous definition of `searchTerm` here
+ 67 │   const [isLoading, setIsLoading] = useState(false);
+ 68 │   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+ 69 │   const [advancePayment, setAdvancePayment] = useState(0);
+ 70 │   const [balance, setBalance] = useState(0);
+ 71 │   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
+ 72 │   const [searchTerm, setSearchTerm] = useState('');
+    ·          ─────┬────
+    ·               ╰── `searchTerm` redefined here
+ 73 │ 
+ 74 │ 
+ 75 │   useEffect(() => {
+    ╰────
+  × the name `setSearchTerm` is defined multiple times
+    ╭─[/home/runner/workspace/src/pages/NewReceipt.tsx:66:1]
+ 63 │   const [products, setProducts] = useState<Product[]>([]);
+ 64 │   const [clients, setClients] = useState<Client[]>([]);
+ 65 │   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+ 66 │   const [searchTerm, setSearchTerm] = useState('');
+    ·                      ──────┬──────
+    ·                            ╰── previous definition of `setSearchTerm` here
+ 67 │   const [isLoading, setIsLoading] = useState(false);
+ 68 │   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+ 69 │   const [advancePayment, setAdvancePayment] = useState(0);
+ 70 │   const [balance, setBalance] = useState(0);
+ 71 │   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
+ 72 │   const [searchTerm, setSearchTerm] = useState('');
+    ·                      ──────┬──────
+    ·                            ╰── `setSearchTerm` redefined here
+ 73 │ 
+ 74 │ 
+ 75 │   useEffect(() => {
+    ╰────
+/home/runner/workspace/src/pages/NewReceipt.tsx:66:1
+572|  
+573|                    <div className="w-32">
+574|                      <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+   |                                               ^
+575|                      <Input
+576|                        id={`cost-${item.id}`}
