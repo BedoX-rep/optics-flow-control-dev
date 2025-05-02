@@ -743,8 +743,12 @@ const NewReceipt = () => {
                           type="number"
                           min="0"
                           max="100"
+                          step="0.01"
                           value={discount}
-                          onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setDiscount(value === '' ? 0 : parseFloat(value));
+                          }}
                           className="pr-8"
                         />
                         <span className="absolute right-3 top-2.5 text-gray-500">%</span>
