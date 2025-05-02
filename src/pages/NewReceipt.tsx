@@ -757,11 +757,17 @@ const NewReceipt = () => {
                       <div className="relative">
                         <Input
                           id="numericDiscount"
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9]*[.,]?[0-9]*"
                           min="0"
-                          step="0.01"
                           value={numericDiscount}
-                          onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(',', '.');
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              setNumericDiscount(parseFloat(value) || 0);
+                            }
+                          }}
                           className="pr-12"
                         />
                         <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
