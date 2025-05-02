@@ -530,10 +530,10 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
           <Card>
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle>Receipt Items</CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
+          <CardContent className="p-2 pt-0">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
