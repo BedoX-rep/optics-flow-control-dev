@@ -118,20 +118,41 @@ const Auth = () => {
       if (signUpError) throw signUpError;
 
       if (user) {
-        const { error: subscriptionError } = await supabase
-          .from('subscriptions')
-          .insert([
-            {
-              user_id: user.id,
-              display_name: displayName,
-              store_name: storeName,
-              referred_by: referralCode || null,
-              subscription_status: 'inactive',
-              trial_used: false,
-            }
-          ]);
+        try {
+          const { error: subscriptionError } = await supabase
+            .from('subscriptions')
+            .insert([
+              {
+                user_id: user.id,
+                display_name: displayName,
+                store_name: storeName,
+                referred_by: referralCode || null,
+                subscription_status: 'inactive',
+                trial_used: false,
+              }
+            ]);
 
-        if (subscriptionError) throw subscriptionError;
+          if (subscriptionError) {
+            console.error('Subscription creation error:', subscriptionError);
+            toast({
+              title: "Error",
+              description: "Failed to create subscription. Please try again.",
+              variant: "destructive",
+            });
+            // Clean up the created auth user since subscription failed
+            await supabase.auth.signOut();
+            return;
+          }
+        } catch (err) {
+          console.error('Error creating subscription:', err);
+          toast({
+            title: "Error",
+            description: "Failed to complete signup. Please try again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
       }
 
       toast({
