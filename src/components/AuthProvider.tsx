@@ -39,24 +39,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used')
+        .select('*')
         .eq('user_id', userId)
         .single();
       
-      if (error) throw error;
-      
-      if (data) {
-        // Ensure we're using the actual data with its original case
-        const formattedSubscription: UserSubscription = {
-          ...data,
-          subscription_status: data.subscription_status as SubscriptionStatus
-        };
-        setSubscription(formattedSubscription);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No subscription found, create a trial subscription
+          const { data: newSubscription, error: createError } = await supabase
+            .from('subscriptions')
+            .insert({
+              user_id: userId,
+              subscription_status: 'Trial',
+              subscription_type: 'Trial',
+              trial_used: false,
+              display_name: user?.user_metadata?.display_name || '',
+              email: user?.email || '',
+            })
+            .select()
+            .single();
+            
+          if (createError) throw createError;
+          setSubscription(newSubscription);
+        } else {
+          throw error;
+        }
+      } else if (data) {
+        setSubscription(data);
       }
       
       setLastRefreshTime(Date.now());
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error('Error handling subscription:', error);
       setSubscription(null);
     }
   };
