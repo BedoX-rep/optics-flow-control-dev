@@ -46,6 +46,33 @@ const Receipts = () => {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+
+  const isReceiptInDateRange = (receipt: Receipt) => {
+    const receiptDate = new Date(receipt.created_at);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const receiptDay = new Date(receiptDate);
+    receiptDay.setHours(0, 0, 0, 0);
+
+    switch (dateFilter) {
+      case 'today':
+        return receiptDay.getTime() === today.getTime();
+      case 'week': {
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        return receiptDate >= weekStart;
+      }
+      case 'month': {
+        return receiptDate.getMonth() === today.getMonth() && 
+               receiptDate.getFullYear() === today.getFullYear();
+      }
+      case 'year':
+        return receiptDate.getFullYear() === today.getFullYear();
+      default:
+        return true;
+    }
+  };
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -274,7 +301,9 @@ const Receipts = () => {
       deliveryFilter === 'all' ? true :
       receipt.delivery_status === deliveryFilter;
 
-    return matchesSearch && matchesPayment && matchesDelivery;
+    const matchesDate = isReceiptInDateRange(receipt);
+
+    return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
   });
 
   return (
@@ -322,11 +351,11 @@ const Receipts = () => {
                     <SelectValue placeholder="Filter by date" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Dates</SelectItem>
-                    {Array.from(new Set(receipts.map(r => new Date(r.created_at).toLocaleDateString())))
-                      .map(date => (
-                        <SelectItem key={date} value={date}>{date}</SelectItem>
-                      ))}
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="year">This Year</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
