@@ -168,16 +168,13 @@ const NewReceipt = () => {
               )) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
-                return [
-                  ...updatedItems,
-                  {
-                    id: `montage-${Date.now()}`,
-                    customName: 'Montage costs',
-                    quantity: 1,
-                    price: 0,
-                    cost: 20
-                  }
-                ];
+                setItems(prev => [...prev, {
+                  id: `montage-${Date.now()}`,
+                  customName: 'Montage costs',
+                  quantity: 1,
+                  price: 0,
+                  cost: 20
+                }]);
               }
             }
             return selectedProduct;
