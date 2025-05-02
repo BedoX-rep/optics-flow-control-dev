@@ -51,7 +51,7 @@ const Receipts = () => {
     const receiptDate = new Date(receipt.created_at);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
+    
     const receiptDay = new Date(receiptDate);
     receiptDay.setHours(0, 0, 0, 0);
 
@@ -290,7 +290,7 @@ const Receipts = () => {
     const matchesSearch = 
       (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
        receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
-
+    
     const matchesPayment = 
       paymentFilter === 'all' ? true :
       paymentFilter === 'paid' ? receipt.balance === 0 :
@@ -399,20 +399,19 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
+                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
                     <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredReceipts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
+                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
                     No receipts found
                   </TableCell>
                 </TableRow>
@@ -599,27 +598,6 @@ const Receipts = () => {
                           <span className="text-gray-600">⟶</span>
                         </Button>
                       </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {(() => {
-                        const createdDate = new Date(receipt.created_at);
-                        const now = new Date();
-                        const diff = now.getTime() - createdDate.getTime();
-                        const hours = Math.floor(diff / (1000 * 60 * 60));
-                        
-                        if (hours < 24) {
-                          return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-                        } else {
-                          return createdDate.toLocaleString('en-US', {
-                            year: '2-digit',
-                            month: 'short',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false
-                          });
-                        }
-                      })()}
                     </TableCell>
                     <TableCell className="py-3 text-right">
                       <div className="flex justify-end gap-1">
