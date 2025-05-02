@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
-import Button from '@/components/ui/Button'; // Assumed import
-import { toast } from '@/components/ui/Toast'; // Assumed import
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/toast';
 
 
 const navigation = [
