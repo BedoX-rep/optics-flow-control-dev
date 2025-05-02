@@ -322,3 +322,17 @@ SELECT cron.schedule(
   '* * * * *',
   $$ SELECT check_and_renew_subscriptions(); $$
 );
+-- Add columns to auth.users
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS display_name TEXT;
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS store_name TEXT;
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS referral_code CHAR(4);
+
+-- Create referrals table
+CREATE TABLE IF NOT EXISTS public.referrals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    referrer_id UUID REFERENCES auth.users(id),
+    referred_id UUID REFERENCES auth.users(id),
+    referral_code CHAR(4) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(referral_code)
+);
