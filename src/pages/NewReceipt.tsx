@@ -515,21 +515,38 @@ const NewReceipt = () => {
                   ) : (
                     <div className="flex-1">
                       <Label htmlFor={`product-${item.id}`}>Product</Label>
-                      <Select 
-                        value={item.productId} 
-                        onValueChange={(value) => updateItem(item.id, 'productId', value)}
-                      >
-                        <SelectTrigger id={`product-${item.id}`}>
-                          <SelectValue placeholder="Select a product" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {products.map(product => (
-                            <SelectItem key={product.id} value={product.id}>
-                              {product.name} - {product.price.toFixed(2)} DH
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        <Input
+                          type="text"
+                          placeholder="Search products..."
+                          onChange={(e) => {
+                            const searchTerm = e.target.value.toLowerCase();
+                            const filtered = products.filter(product =>
+                              product.name.toLowerCase().includes(searchTerm)
+                            );
+                            setProducts(filtered);
+                            if (!searchTerm) {
+                              fetchData(); // This will reset the products list
+                            }
+                          }}
+                          className="mb-2"
+                        />
+                        <Select 
+                          value={item.productId} 
+                          onValueChange={(value) => updateItem(item.id, 'productId', value)}
+                        >
+                          <SelectTrigger id={`product-${item.id}`}>
+                            <SelectValue placeholder="Select a product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map(product => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name} - {product.price.toFixed(2)} DH
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
 
