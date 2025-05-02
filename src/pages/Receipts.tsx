@@ -155,7 +155,7 @@ const Receipts = () => {
     }
   };
 
-  const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Ready & Paid Costs'];
+  const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
 
   const handleMontageStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -580,7 +580,7 @@ const Receipts = () => {
                             receipt.montage_status === 'InStore' ? 'bg-orange-50 text-orange-700 border-orange-200' :
                             receipt.montage_status === 'InCutting' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                             receipt.montage_status === 'Ready' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            receipt.montage_status === 'Ready & Paid Costs' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            receipt.montage_status === 'Paid costs' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                             ''
                           }`}>
                             <SelectValue>{receipt.montage_status}</SelectValue>
