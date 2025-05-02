@@ -683,7 +683,55 @@ const NewReceipt = () => {
             </div>
           </CardHeader>
           <CardContent className={`${paymentOpen ? '' : 'hidden'} p-2`}>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 w-3/5 mx-auto"> {/* Added w-3/5 and mx-auto for 60% width and centering */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg">Summary</h3>
+
+                <div className="flex justify-between py-2 border-b">
+                  <span>Subtotal:</span>
+                  <span>{subtotal.toFixed(2)} DH</span>
+                </div>
+
+                {(discount > 0 || numericDiscount > 0) && (
+                  <div className="flex justify-between py-2 border-b">
+                    <span>Discount ({discount}% + {numericDiscount} DH):</span>
+                    <span>-{totalDiscount.toFixed(2)} DH</span>
+                  </div>
+                )}
+
+                {tax > 0 && (
+                  <div className="flex justify-between py-2 border-b">
+                    <span>Tax:</span>
+                    <span>{taxAmount.toFixed(2)} DH</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between py-2 border-b text-lg font-semibold">
+                  <span>Total:</span>
+                  <span>{total.toFixed(2)} DH</span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b text-red-500">
+                  <span>Cost:</span>
+                  <span>{totalCost.toFixed(2)} DH</span>
+                </div>
+
+                <div className="flex justify-between py-2 font-bold text-green-600">
+                  <span>Profit:</span>
+                  <span>{profit.toFixed(2)} DH</span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b">
+                  <span>Advance Payment:</span>
+                  <span>{advancePayment.toFixed(2)} DH</span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b text-lg font-semibold">
+                  <span>Balance:</span>
+                  <span>{balance.toFixed(2)} DH</span>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <div>
                   <Label htmlFor="tax">Tax Base Amount (DH)</Label>
@@ -733,6 +781,7 @@ const NewReceipt = () => {
                     onChange={(e) => setNumericDiscount(parseFloat(e.target.value) || 0)}
                   />
                 </div>
+
                 <div>
                   <Label htmlFor="advancePayment">Advance Payment (DH)</Label>
                   <Input
@@ -746,53 +795,6 @@ const NewReceipt = () => {
                     }}
                   />
                 </div>
-              </div>
-
-              <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-medium text-lg">Summary</h3>
-
-                <div className="flex justify-between py-2 border-b">
-                  <span>Subtotal:</span>
-                  <span>{subtotal.toFixed(2)} DH</span>
-                </div>
-
-                {(discount > 0 || numericDiscount > 0) && (
-                  <div className="flex justify-between py-2 border-b">
-                    <span>Discount ({discount}% + {numericDiscount} DH):</span>
-                    <span>-{totalDiscount.toFixed(2)} DH</span>
-                  </div>
-                )}
-
-                {tax > 0 && (
-                  <div className="flex justify-between py-2 border-b">
-                    <span>Tax:</span>
-                    <span>{taxAmount.toFixed(2)} DH</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between py-2 border-b text-lg font-semibold">
-                  <span>Total:</span>
-                  <span>{total.toFixed(2)} DH</span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b text-red-500">
-                  <span>Cost:</span>
-                  <span>{totalCost.toFixed(2)} DH</span>
-                </div>
-
-                <div className="flex justify-between py-2 font-bold text-green-600">
-                  <span>Profit:</span>
-                  <span>{profit.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span>Advance Payment:</span>
-                  <span>{advancePayment.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between py-2 border-b text-lg font-semibold">
-                  <span>Balance:</span>
-                  <span>{balance.toFixed(2)} DH</span>
-                </div>
-
               </div>
             </div>
           </CardContent>
