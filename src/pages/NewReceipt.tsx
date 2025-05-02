@@ -441,8 +441,6 @@ const NewReceipt = () => {
               </div>
             </div>
           </CardContent>
-            </div>
-          </CardContent>
         </Card>
 
         <Card>
