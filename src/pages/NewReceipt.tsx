@@ -168,18 +168,19 @@ const NewReceipt = () => {
               )) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
-                const newItems = [...updatedItems];
-                newItems.push({
-                  id: `montage-${Date.now()}`,
-                  customName: 'Montage costs',
-                  quantity: 1,
-                  price: 0,
-                  cost: 20
-                });
-                setItems(newItems);
+                // Add montage costs in the next tick to avoid state update conflicts
+                setTimeout(() => {
+                  setItems(prev => [...prev, {
+                    id: `montage-${Date.now()}`,
+                    customName: 'Montage costs',
+                    quantity: 1,
+                    price: 0,
+                    cost: 20
+                  }]);
+                }, 0);
               }
             }
-            return updatedItems;
+            return selectedProduct;
           }
           return { ...item, [field]: value };
         }
