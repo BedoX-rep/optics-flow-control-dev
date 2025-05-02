@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,8 +116,8 @@ const Auth = () => {
     try {
       setIsLoading(true);
       const newReferralCode = generateReferralCode();
-
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      
+      const { data: { user }, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -127,26 +128,16 @@ const Auth = () => {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
 
       if (user) {
-        // Create subscription record for the new user
-        const { error: subscriptionError } = await supabase
-          .from('subscriptions')
-          .insert({
-            user_id: user.id,
-            display_name: displayName,
-            store_name: storeName,
-            email: email,
-            subscription_status: 'Trial',
-            subscription_type: 'Trial',
-            trial_used: false
-          });
+        // Create referral record for the new user
+        const { error: referralError } = await supabase.from('referrals').insert({
+          referrer_id: user.id,
+          referral_code: newReferralCode,
+        });
 
-        if (subscriptionError) {
-          console.error('Subscription creation error:', subscriptionError);
-          throw subscriptionError;
-        }
+        if (referralError) throw referralError;
 
         // If referral code was provided, create referral relationship
         if (referralCode) {
@@ -164,14 +155,14 @@ const Auth = () => {
             });
           }
         }
-        toast({
-          title: "Success",
-          description: "Please check your email to verify your account.",
-        });
-
-        setActiveTab('login');
       }
 
+      toast({
+        title: "Success",
+        description: "Account created successfully. Please check your email to verify your account.",
+      });
+
+      setActiveTab('login');
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
