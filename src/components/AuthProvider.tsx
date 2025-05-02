@@ -7,6 +7,9 @@ type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'e
                          'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
 interface UserSubscription {
+  id: string;
+  user_id: string;
+  email: string;
   subscription_status: SubscriptionStatus;
   subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
   start_date: string | null;
@@ -17,6 +20,9 @@ interface UserSubscription {
   display_name: string;
   referral_code: string | null;
   referred_by: string | null;
+  is_admin: boolean;
+  price: number | null;
+  created_at: string | null;
 }
 
 interface AuthContextType {

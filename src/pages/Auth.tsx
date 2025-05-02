@@ -128,11 +128,14 @@ const Auth = () => {
                 display_name: displayName,
                 store_name: storeName,
                 referred_by: referralCode || null,
-                referral_code: null, // Let the trigger generate this
                 subscription_status: 'inActive',
+                subscription_type: 'Trial',
                 trial_used: false,
                 is_admin: false,
-                is_recurring: false
+                is_recurring: false,
+                price: 0,
+                start_date: new Date().toISOString(),
+                end_date: null
               }
             ]);
 
