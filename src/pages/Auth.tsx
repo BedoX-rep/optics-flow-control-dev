@@ -79,9 +79,11 @@ const Auth = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const [displayName, setDisplayName] = useState('');
+
+const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !displayName) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -106,7 +108,7 @@ const Auth = () => {
         password,
         options: {
           data: {
-            display_name: email.split('@')[0],
+            display_name: displayName,
           },
         },
       });
@@ -180,7 +182,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary text-white hover:bg-primary/80"
+                  className="w-full bg-teal-700 text-white hover:bg-teal-800"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
@@ -191,6 +193,17 @@ const Auth = () => {
           <TabsContent value="signup">
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="display-name">Display Name</Label>
+                  <Input 
+                    id="display-name" 
+                    type="text" 
+                    placeholder="Your name" 
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email-signup">Email</Label>
                   <Input 
@@ -226,7 +239,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-optics-600 hover:bg-optics-700"
+                  className="w-full bg-teal-700 text-white hover:bg-teal-800"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
