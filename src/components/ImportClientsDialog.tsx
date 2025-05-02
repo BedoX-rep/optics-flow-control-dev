@@ -51,8 +51,8 @@ export function ImportClientsDialog({ isOpen, onClose, onImportComplete }: Impor
 
           const clientsToInsert = rows.map(row => ({
             name: row.name,
-            phone: row.phone,
-            gender: row.gender,
+            phone: row.phone || null,
+            gender: (row.gender as "Mr" | "Mme" | "Enf" | undefined) || null,
             right_eye_sph: row.right_eye_sph ? parseFloat(row.right_eye_sph) : null,
             right_eye_cyl: row.right_eye_cyl ? parseFloat(row.right_eye_cyl) : null,
             right_eye_axe: row.right_eye_axe ? parseInt(row.right_eye_axe) : null,
