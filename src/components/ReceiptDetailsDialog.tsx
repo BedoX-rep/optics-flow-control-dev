@@ -57,8 +57,8 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                       <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || '0.00'} DH</span></p>
                       {receipt.tax > 0 && (
                         <>
-                          <p className="text-sm text-gray-600">Tax Base Amount: <span className="font-medium">{receipt.tax?.toFixed(2) || '0.00'} DH</span></p>
-                          <p className="text-sm text-gray-600">Tax: <span className="font-medium">{((receipt.tax - (receipt.total - receipt.tax_amount)) * 0.4)?.toFixed(2) || '0.00'} DH</span></p>
+                          <p className="text-sm text-gray-600">Tax Base Amount: <span className="font-medium">{receipt.tax_base?.toFixed(2) || '0.00'} DH</span></p>
+                          <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || '0.00'} DH</span></p>
                         </>
                       )}
                       {receipt.discount_amount > 0 && (

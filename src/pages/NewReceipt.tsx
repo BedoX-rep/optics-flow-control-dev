@@ -344,6 +344,7 @@ const NewReceipt = () => {
           left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
           add: add ? parseFloat(add) : null,
           subtotal,
+          tax_base: tax > subtotal ? tax : subtotal,
           tax: taxAmount,
           cost: totalCost,
           cost_ttc: totalCost,
@@ -352,8 +353,8 @@ const NewReceipt = () => {
           discount_percentage: discount,
           total,
           balance,
-          advance_payment: advancePayment, // Added advance_payment
-          payment_status: paymentStatus, // Added payment_status
+          advance_payment: advancePayment,
+          payment_status: paymentStatus,
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered'
         })
