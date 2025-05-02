@@ -28,6 +28,7 @@ interface Product {
   name: string;
   price: number;
   Cost: number;
+  category: string;
 }
 
 interface Client {
@@ -161,9 +162,9 @@ const NewReceipt = () => {
 
             // Check if we need to add montage costs
             if (autoMontage && product && (
-                product.name.toLowerCase().includes('single vision') ||
-                product.name.toLowerCase().includes('progressive') ||
-                product.name.toLowerCase().includes('sunglasses')
+                product.category === 'Single Vision Lenses' ||
+                product.category === 'Progressive Lenses' ||
+                product.category === 'Sunglasses'
               )) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
