@@ -14,8 +14,8 @@ interface ImportClientsDialogProps {
 
 interface CSVRow {
   name: string;
-  phone: string;
-  gender: "Mr" | "Mme" | "Enf";
+  phone?: string;
+  gender?: "Mr" | "Mme" | "Enf";
   right_eye_sph?: string;
   right_eye_cyl?: string;
   right_eye_axe?: string;
@@ -111,10 +111,10 @@ export function ImportClientsDialog({ isOpen, onClose, onImportComplete }: Impor
         <div className="space-y-4">
           <p className="text-sm text-neutral-500">
             Upload a CSV file with the following columns:<br/>
-            name*, phone*, gender* (Mr/Mme/Enf), right_eye_sph, right_eye_cyl, right_eye_axe,<br/>
+            name*, phone, gender (Mr/Mme/Enf), right_eye_sph, right_eye_cyl, right_eye_axe,<br/>
             left_eye_sph, left_eye_cyl, left_eye_axe, Add, notes<br/>
             <br/>
-            * Required fields
+            * Required field
           </p>
           <div className="flex gap-4">
             <input
