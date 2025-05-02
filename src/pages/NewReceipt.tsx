@@ -197,21 +197,19 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   // Calculate percentage-based discount
-  // Calculate percentage discount first
-  const percentageDiscountAmount = (subtotal * discount) / 100;
-  const afterPercentageDiscount = subtotal - percentageDiscountAmount;
+  // Calculate tax first
+  const taxAmount = tax > subtotal ? (tax - subtotal) * taxIndicator : 0;
+  const afterTax = subtotal + taxAmount;
 
-  // Apply fixed discount after percentage discount
+  // Calculate percentage discount
+  const percentageDiscountAmount = (afterTax * discount) / 100;
+  const afterPercentageDiscount = afterTax - percentageDiscountAmount;
+
+  // Apply fixed discount
   const totalDiscount = percentageDiscountAmount + numericDiscount;
-
-  // Calculate purchasing amount
-  const purchasingAmount = afterPercentageDiscount - numericDiscount;
-
-  // Calculate tax based on amount above purchasing amount
-  const taxAmount = tax > purchasingAmount ? (tax - purchasingAmount) * taxIndicator : 0;
-
+  
   // Calculate final total
-  const total = purchasingAmount + taxAmount;
+  const total = afterPercentageDiscount - numericDiscount;
 
   // Calculate profit
   const profit = total - totalCost;
@@ -757,16 +755,13 @@ const NewReceipt = () => {
                       <div className="relative">
                         <Input
                           id="numericDiscount"
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9]*[.,]?[0-9]*"
+                          type="number"
+                          step="0.01"
                           min="0"
                           value={numericDiscount}
                           onChange={(e) => {
-                            const value = e.target.value.replace(',', '.');
-                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                              setNumericDiscount(parseFloat(value) || 0);
-                            }
+                            const value = e.target.value;
+                            setNumericDiscount(value === '' ? 0 : parseFloat(value));
                           }}
                           className="pr-12"
                         />
