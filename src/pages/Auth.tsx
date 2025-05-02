@@ -80,10 +80,12 @@ const Auth = () => {
   };
 
   const [displayName, setDisplayName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
 
 const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !displayName) {
+    if (!email || !password || !confirmPassword || !displayName || !storeName) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -109,6 +111,8 @@ const handleSignup = async (e: React.FormEvent) => {
         options: {
           data: {
             display_name: displayName,
+            store_name: storeName,
+            referred_by: referralCode || null,
           },
         },
       });
@@ -202,6 +206,28 @@ const handleSignup = async (e: React.FormEvent) => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="store-name">Store Name</Label>
+                  <Input 
+                    id="store-name" 
+                    type="text" 
+                    placeholder="Your store name" 
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referral-code">Referral Code (Optional)</Label>
+                  <Input 
+                    id="referral-code" 
+                    type="text" 
+                    placeholder="Enter referral code" 
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    maxLength={4}
                   />
                 </div>
                 <div className="space-y-2">

@@ -13,6 +13,9 @@ interface UserSubscription {
   end_date: string | null;
   is_recurring: boolean;
   trial_used: boolean;
+  store_name: string;
+  referral_code: string;
+  referred_by: string | null;
 }
 
 interface AuthContextType {

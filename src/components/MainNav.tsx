@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -14,6 +13,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
+import Button from '@/components/ui/Button'; // Assumed import
+import { toast } from '@/components/ui/Toast'; // Assumed import
+
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -26,7 +28,7 @@ const navigation = [
 
 const MainNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, subscription } = useAuth(); // Assuming subscription is available in useAuth
   const [collapsed, setCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -56,7 +58,7 @@ const MainNav = () => {
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
-      
+
       <nav className="p-3 space-y-1 mt-2">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href;
@@ -82,7 +84,7 @@ const MainNav = () => {
           );
         })}
       </nav>
-      
+
       {!collapsed && (
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-teal-600/20">
           <div className="flex items-center space-x-3">
@@ -97,10 +99,29 @@ const MainNav = () => {
               </p>
               <p className="text-xs text-white/60">Active Subscription</p>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative mr-2"
+              onClick={() => {
+                if (subscription?.referral_code) {
+                  navigator.clipboard.writeText(subscription.referral_code);
+                  toast({
+                    title: "Copied!",
+                    description: `Your referral code ${subscription.referral_code} has been copied to clipboard`,
+                  });
+                }
+              }}
+            >
+              <Users className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       )}
-      
+
       {collapsed && (
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-teal-600/20 flex justify-center">
           <Avatar className="h-9 w-9 border-2 border-white/20">
@@ -115,4 +136,3 @@ const MainNav = () => {
 };
 
 export default MainNav;
-
