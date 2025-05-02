@@ -686,17 +686,17 @@ const NewReceipt = () => {
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
 
-                  {(discount > 0 || numericDiscount > 0) && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
-                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
-                    </div>
-                  )}
-
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax</span>
                       <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
+                    </div>
+                  )}
+
+                  {(discount > 0 || numericDiscount > 0) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
+                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
                     </div>
                   )}
 
