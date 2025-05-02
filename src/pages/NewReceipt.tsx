@@ -93,7 +93,7 @@ const NewReceipt = () => {
         if (productsError) throw productsError;
         setProducts(productsData || []);
         setFilteredProducts(productsData || []);
-        
+
         // Add default item if no items exist
         if (items.length === 0) {
           addItem('product');
@@ -406,16 +406,16 @@ const NewReceipt = () => {
 
   return (
     <div>
-      <PageTitle title="New Receipt" subtitle="Create a new receipt for a client" />
+      <PageTitle title="New Receipt" /> {/* Removed subtitle */}
 
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Client Information</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3 space-y-2">
+          <CardContent className="p-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="md:col-span-2 space-y-2">
                 <div>
                   <Input
                     id="client-search"
@@ -454,7 +454,7 @@ const NewReceipt = () => {
               <ChevronDown className={`h-4 w-4 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
             </div>
           </CardHeader>
-          <CardContent className={`${prescriptionOpen ? '' : 'hidden'}`}>
+          <CardContent className={`${prescriptionOpen ? '' : 'hidden'} p-3`}>
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-3">Right Eye</h3>
@@ -537,7 +537,7 @@ const NewReceipt = () => {
           <CardHeader>
             <CardTitle>Receipt Items</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
@@ -686,7 +686,7 @@ const NewReceipt = () => {
               <ChevronDown className={`h-4 w-4 transition-transform ${paymentOpen ? 'transform rotate-180' : ''}`} />
             </div>
           </CardHeader>
-          <CardContent className={`${paymentOpen ? '' : 'hidden'}`}>
+          <CardContent className={`${paymentOpen ? '' : 'hidden'} p-3`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
@@ -796,7 +796,7 @@ const NewReceipt = () => {
                   <span>Balance:</span>
                   <span>{balance.toFixed(2)} DH</span>
                 </div>
-                
+
               </div>
             </div>
           </CardContent>
