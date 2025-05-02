@@ -110,6 +110,12 @@ const MainNav = () => {
                     title: "Copied!",
                     description: `Your referral code ${subscription.referral_code} has been copied to clipboard`,
                   });
+                } else {
+                  toast({
+                    title: "No referral code",
+                    description: "Your referral code is not available",
+                    variant: "destructive"
+                  });
                 }
               }}
             >

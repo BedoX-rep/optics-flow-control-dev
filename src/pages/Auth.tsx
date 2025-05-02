@@ -28,6 +28,9 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [displayName, setDisplayName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -79,11 +82,7 @@ const Auth = () => {
     }
   };
 
-  const [displayName, setDisplayName] = useState('');
-  const [storeName, setStoreName] = useState('');
-  const [referralCode, setReferralCode] = useState('');
-
-const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !confirmPassword || !displayName || !storeName) {
       toast({

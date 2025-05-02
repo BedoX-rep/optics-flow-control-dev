@@ -16,6 +16,7 @@ interface UserSubscription {
   store_name: string;
   referral_code: string;
   referred_by: string | null;
+  display_name: string;
 }
 
 interface AuthContextType {
