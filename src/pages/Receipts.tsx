@@ -390,7 +390,6 @@ const Receipts = () => {
           <Table className="min-w-[980px] w-full">
             <TableHeader>
               <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Client Info</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
@@ -400,6 +399,7 @@ const Receipts = () => {
                 <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
                 <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
+                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
                 <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -419,16 +419,6 @@ const Receipts = () => {
               ) : (
                 filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group">
-                    <TableCell className="font-mono text-sm py-3">
-                      {new Date(receipt.created_at).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                      })}
-                    </TableCell>
                     <TableCell className="py-3">
                       <div className="flex flex-col">
                         <span className="font-medium hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_name")}>
@@ -609,6 +599,27 @@ const Receipts = () => {
                           <span className="text-gray-600">⟶</span>
                         </Button>
                       </div>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      {(() => {
+                        const createdDate = new Date(receipt.created_at);
+                        const now = new Date();
+                        const diff = now.getTime() - createdDate.getTime();
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        
+                        if (hours < 24) {
+                          return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                        } else {
+                          return createdDate.toLocaleString('en-US', {
+                            year: '2-digit',
+                            month: 'short',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                          });
+                        }
+                      })()}
                     </TableCell>
                     <TableCell className="py-3 text-right">
                       <div className="flex justify-end gap-1">
