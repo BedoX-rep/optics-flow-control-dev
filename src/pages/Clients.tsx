@@ -17,7 +17,8 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Search, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Users, Upload } from 'lucide-react';
+import { ImportClientsDialog } from '@/components/ImportClientsDialog';
 import { ClientAvatar } from '@/components/ClientAvatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -49,6 +50,7 @@ const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Client } | null>(null);
   const [cellEditValue, setCellEditValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -159,13 +161,23 @@ const Clients = () => {
       <div className="flex flex-col gap-4 mb-4 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
-              onClick={() => setIsOpen(true)}
-            >
-              <span className="mr-2 flex items-center"><Plus size={18} /></span>
-              Add Client
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
+                onClick={() => setIsOpen(true)}
+              >
+                <span className="mr-2 flex items-center"><Plus size={18} /></span>
+                Add Client
+              </Button>
+              <Button
+                variant="outline"
+                className="!px-5 !py-2.5 rounded-full font-semibold flex items-center"
+                onClick={() => setIsImportOpen(true)}
+              >
+                <span className="mr-2 flex items-center"><Upload size={18} /></span>
+                Import CSV
+              </Button>
+            </div>
             <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
               <div className="flex items-baseline gap-1">
                 <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
@@ -457,6 +469,12 @@ const Clients = () => {
           }}
         />
       )}
+
+      <ImportClientsDialog
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImportComplete={fetchClients}
+      />
     </div>
   );
 };
