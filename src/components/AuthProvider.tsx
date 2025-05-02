@@ -1,98 +1,138 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, AuthError, User } from '@supabase/supabase-js';
 
-interface SignUpOptions {
-  email: string;
-  password: string;
-  options?: {
-    data?: {
-      display_name?: string;
-      store_name?: string;
-      referred_by?: string | null;
-    }
-  }
-}
+type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
+                         'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
-interface SignInOptions {
-  email: string;
-  password: string;
+interface UserSubscription {
+  subscription_status: SubscriptionStatus;
+  subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
+  start_date: string | null;
+  end_date: string | null;
+  is_recurring: boolean;
+  trial_used: boolean;
 }
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  signUp: (options: SignUpOptions) => Promise<{ error: AuthError | null }>;
-  signIn: (options: SignInOptions) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<{ error: AuthError | null }>;
+  subscription: UserSubscription | null;
+  isLoading: boolean;
+  signOut: () => Promise<void>;
+  refreshSubscription: (force?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  
+  const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+  const fetchSubscription = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Ensure we're using the actual data with its original case
+        const formattedSubscription: UserSubscription = {
+          ...data,
+          subscription_status: data.subscription_status as SubscriptionStatus
+        };
+        setSubscription(formattedSubscription);
+      }
+      
+      setLastRefreshTime(Date.now());
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+      setSubscription(null);
+    }
+  };
+
+  const refreshSubscription = async (force: boolean = false) => {
+    const now = Date.now();
+    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently refreshed
+    }
+    
+    if (!user) return;
+    await fetchSubscription(user.id);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    // First set up auth state listener to catch changes
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Clear subscription data on sign out
+        if (event === 'SIGNED_OUT') {
+          setSubscription(null);
+          setIsLoading(false);
+        } 
+        // Fetch subscription on sign in or token refresh
+        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
+          // Use setTimeout to avoid potential deadlock with Supabase auth
+          setTimeout(() => {
+            fetchSubscription(newSession.user!.id);
+            setIsLoading(false);
+          }, 0);
+        }
       }
     );
 
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        fetchSubscription(currentSession.user.id);
+      }
+      
+      setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      authSubscription.unsubscribe();
+    };
   }, []);
 
-  const signUp = async ({ email, password, options }: SignUpOptions) => {
-    return await supabase.auth.signUp({
-      email,
-      password,
-      options: options
-    });
-  };
-
-  const signIn = async ({ email, password }: SignInOptions) => {
-    return await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-  };
-
-  const signOut = async () => {
-    return await supabase.auth.signOut();
-  };
-
-  const value = {
-    session,
-    user,
-    signUp,
-    signIn,
-    signOut,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      subscription, 
+      isLoading, 
+      signOut,
+      refreshSubscription
+    }}>
+      {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}

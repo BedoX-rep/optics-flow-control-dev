@@ -1,48 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { MainNav } from './MainNav';
+import React from 'react';
+import MainNav from './MainNav';
+import { Button } from '@/components/ui/button';
+import { Bell, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from './AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
-import ReferralCodeDialog from './ReferralCodeDialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
 
-export default function Layout() {
-  const { session } = useAuth();
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+interface LayoutProps {
+  children: React.ReactNode;
+}
 
-  useEffect(() => {
-    if (session?.user) {
-      const fetchReferralCode = async () => {
-        const { data, error } = await supabase
-          .from('subscriptions')
-          .select('referral_code')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (data && !error) {
-          setReferralCode(data.referral_code);
-        } else if (error) {
-          console.error('Error fetching referral code:', error);
-        }
-      };
-
-      fetchReferralCode();
-    }
-  }, [session]);
-
+const Layout = ({ children }: LayoutProps) => {
+  const { signOut, user } = useAuth();
+  const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
+  
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-background">
-        <div className="container flex h-16 items-center justify-between">
-          <MainNav />
-          <div className="flex items-center space-x-2">
-            {session && referralCode && <ReferralCodeDialog referralCode={referralCode} />}
+    <div className="flex min-h-screen bg-[#F7FAFC]">
+      <MainNav />
+      <div className="flex-1 flex flex-col">
+        <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-medium text-gray-800">
+              Welcome back, {user?.email?.split('@')[0] || 'User'}
+            </h2>
+            <p className="text-sm text-gray-500">{currentDate}</p>
           </div>
-        </div>
-      </header>
-      <main className="flex-1">
-        <Outlet />
-      </main>
+          <div className="flex items-center space-x-3">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <span>Account</span>
+                  <ChevronDown size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full animate-fade-in">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
-}
+};
+
+export default Layout;
+
