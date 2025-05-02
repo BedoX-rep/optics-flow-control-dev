@@ -87,6 +87,7 @@ const NewReceipt = () => {
           .from('products')
           .select('*')
           .eq('user_id', user.id)
+          .eq('is_deleted', false)
           .order('created_at', { ascending: false });
 
         if (productsError) throw productsError;
@@ -102,6 +103,7 @@ const NewReceipt = () => {
           .from('clients')
           .select('*')
           .eq('user_id', user.id)
+          .eq('is_deleted', false)
           .order('name', { ascending: true });
 
         if (clientsError) throw clientsError;
