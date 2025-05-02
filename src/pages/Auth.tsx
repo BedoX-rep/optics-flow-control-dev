@@ -43,15 +43,6 @@ const Auth = () => {
     checkSession();
   }, [navigate]);
 
-  const generateReferralCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 4; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -88,6 +79,15 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const generateReferralCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -128,11 +128,13 @@ const Auth = () => {
       if (error) throw error;
 
       if (user) {
-        // Create referral record
-        await supabase.from('referrals').insert({
+        // Create referral record for the new user
+        const { error: referralError } = await supabase.from('referrals').insert({
           referrer_id: user.id,
           referral_code: newReferralCode,
         });
+
+        if (referralError) throw referralError;
 
         // If referral code was provided, create referral relationship
         if (referralCode) {
@@ -143,7 +145,7 @@ const Auth = () => {
             .single();
 
           if (referrer) {
-            await supabase.from('referrals').insert({
+            await supabase.from('referral_relationships').insert({
               referrer_id: referrer.referrer_id,
               referred_id: user.id,
               referral_code: referralCode,
@@ -154,7 +156,7 @@ const Auth = () => {
 
       toast({
         title: "Success",
-        description: "Account created successfully. You may need to verify your email before logging in.",
+        description: "Account created successfully. Please check your email to verify your account.",
       });
 
       setActiveTab('login');
@@ -217,7 +219,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary text-white hover:bg-primary/80"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
@@ -229,7 +231,7 @@ const Auth = () => {
             <form onSubmit={handleSignup}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="display-name">Display Name</Label>
+                  <Label htmlFor="display-name">Display Name*</Label>
                   <Input 
                     id="display-name" 
                     type="text" 
@@ -240,7 +242,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="store-name">Store Name</Label>
+                  <Label htmlFor="store-name">Store Name*</Label>
                   <Input 
                     id="store-name" 
                     type="text" 
@@ -251,7 +253,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
+                  <Label htmlFor="email-signup">Email*</Label>
                   <Input 
                     id="email-signup" 
                     type="email" 
@@ -262,7 +264,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
+                  <Label htmlFor="password-signup">Password*</Label>
                   <Input 
                     id="password-signup" 
                     type="password" 
@@ -272,7 +274,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">Confirm Password*</Label>
                   <Input 
                     id="confirm-password" 
                     type="password" 
@@ -295,7 +297,7 @@ const Auth = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full bg-optics-600 hover:bg-optics-700"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating Account..." : "Create Account"}
