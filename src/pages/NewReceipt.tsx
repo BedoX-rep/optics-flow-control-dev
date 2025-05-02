@@ -525,9 +525,10 @@ const NewReceipt = () => {
                               product.name.toLowerCase().includes(searchTerm)
                             );
                             setProducts(filtered);
-                            if (!searchTerm) {
-                              fetchData(); // This will reset the products list
-                            }
+                          }}
+                          onFocus={(e) => {
+                            // Restore original products list when focusing the input
+                            fetchData();
                           }}
                           className="mb-2"
                         />
