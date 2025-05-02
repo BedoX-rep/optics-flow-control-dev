@@ -69,7 +69,6 @@ const NewReceipt = () => {
   const [advancePayment, setAdvancePayment] = useState(0);
   const [balance, setBalance] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
-  const [searchTerm, setSearchTerm] = useState('');
 
 
   useEffect(() => {
@@ -520,7 +519,14 @@ const NewReceipt = () => {
                         <Input
                           type="text"
                           placeholder="Search products..."
-                          onChange={(e) => setSearchTerm(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value.toLowerCase();
+                            setProducts(
+                              value 
+                                ? products.filter(p => p.name.toLowerCase().includes(value))
+                                : products
+                            );
+                          }}
                           className="mb-2"
                         />
                         <Select 
@@ -531,12 +537,7 @@ const NewReceipt = () => {
                             <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                           <SelectContent>
-                            {products
-                              .filter(product => 
-                                !searchTerm || 
-                                product.name.toLowerCase().includes(searchTerm.toLowerCase())
-                              )
-                              .map(product => (
+                            {products.map(product => (
                               <SelectItem key={product.id} value={product.id}>
                                 {product.name} - {product.price.toFixed(2)} DH
                               </SelectItem>
