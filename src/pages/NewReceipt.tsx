@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -146,21 +146,44 @@ const NewReceipt = () => {
   };
 
   const updateItem = (id: string, field: string, value: string | number) => {
-    setItems(items.map(item => {
-      if (item.id === id) {
-        if (field === 'productId') {
-          const product = products.find(p => p.id === value);
-          return { 
-            ...item, 
-            [field]: value.toString(),
-            price: product ? product.price : 0,
-            cost: product ? product.Cost : 0
-          };
+    setItems(items => {
+      const updatedItems = items.map(item => {
+        if (item.id === id) {
+          if (field === 'productId') {
+            const product = products.find(p => p.id === value);
+            const selectedProduct = product ? {
+              ...item,
+              [field]: value.toString(),
+              price: product.price,
+              cost: product.Cost
+            } : item;
+
+            // Check if we need to add montage costs
+            if (product?.name.toLowerCase().includes('single vision') ||
+                product?.name.toLowerCase().includes('progressive') ||
+                product?.name.toLowerCase().includes('sunglasses')) {
+              const hasMontage = items.some(i => i.customName === 'Montage costs');
+              if (!hasMontage) {
+                setTimeout(() => {
+                  setItems(prev => [...prev, {
+                    id: `montage-${Date.now()}`,
+                    customName: 'Montage costs',
+                    quantity: 1,
+                    price: 0,
+                    cost: 20
+                  }]);
+                }, 0);
+              }
+            }
+            return selectedProduct;
+          }
+          return { ...item, [field]: value };
         }
-        return { ...item, [field]: value };
-      }
-      return item;
-    }));
+        return item;
+      });
+
+      return updatedItems;
+    });
   };
 
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -606,13 +629,23 @@ const NewReceipt = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => removeItem(item.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  {item.customName === 'Montage costs' ? (
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
 
