@@ -156,8 +156,8 @@ const NewReceipt = () => {
             const selectedProduct = product ? {
               ...item,
               [field]: value.toString(),
-              price: product.price,
-              cost: product.Cost
+              price: product.price || 0,
+              cost: product.cost_ttc || 0
             } : item;
 
             // Check if we need to add montage costs
@@ -191,8 +191,8 @@ const NewReceipt = () => {
     });
   };
 
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const totalCost = items.reduce((sum, item) => sum + (item.cost * item.quantity), 0);
+  const subtotal = items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+  const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   // Calculate percentage-based discount
   const discountAmount = (subtotal * discount) / 100;
