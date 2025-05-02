@@ -412,18 +412,18 @@ const NewReceipt = () => {
             <CardTitle>Client Information</CardTitle>
           </CardHeader>
           <CardContent className="p-2">
-            <div className="grid grid-cols-3 gap-2">
-              <div className="md:col-span-2 space-y-2">
-                <div>
-                  <Input
-                    id="client-search"
-                    placeholder="Search by name or phone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Select value={selectedClient} onValueChange={handleClientSelect}>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  id="client-search"
+                  placeholder="Search by name or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+              <div className="flex-1">
+                <Select value={selectedClient} onValueChange={handleClientSelect}>
                     <SelectTrigger id="client">
                       <SelectValue placeholder="Select a client" />
                     </SelectTrigger>
@@ -559,7 +559,7 @@ const NewReceipt = () => {
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="flex items-end gap-4 p-4 border rounded-md">
+                <div key={item.id} className="flex items-center gap-2 p-2 border rounded-md">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
@@ -685,8 +685,8 @@ const NewReceipt = () => {
             </div>
           </CardHeader>
           <CardContent className={`${paymentOpen ? '' : 'hidden'} p-2`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
                 <div>
                   <Label htmlFor="tax">Tax Base Amount (DH)</Label>
                   <Input
