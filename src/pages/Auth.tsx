@@ -37,7 +37,7 @@ const Auth = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/dashboard'); // Updated redirect
+        navigate('/dashboard');
       }
     };
 
@@ -69,7 +69,7 @@ const Auth = () => {
         description: "Logged in successfully.",
       });
 
-      navigate('/dashboard'); // Updated redirect
+      navigate('/dashboard'); 
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
