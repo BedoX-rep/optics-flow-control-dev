@@ -213,18 +213,52 @@ const NewReceipt = () => {
               updatedItem.price = product.price * (1 + markup / 100);
             }
 
-            // Add montage costs if auto-montage is enabled
+            // Add or update montage costs if auto-montage is enabled
             if (autoMontage) {
-              const montageExists = items.some(i => i.customName === 'Montage costs');
-              if (!montageExists) {
-                const montageCost = product.category === 'Progressive Lenses' ? 30 : 20;
-                setItems(prevItems => [...prevItems, {
-                  id: `montage-${Date.now()}`,
-                  customName: 'Montage costs',
-                  quantity: 1,
-                  price: montageCost,
-                  cost: montageCost,
-                }]);
+              const countSingleVision = items.reduce((count, item) => {
+                const prod = products.find(p => p.id === item.productId);
+                return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+              }, 0);
+
+              const countProgressive = items.reduce((count, item) => {
+                const prod = products.find(p => p.id === item.productId);
+                return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+              }, 0);
+
+              const totalLensQuantity = countSingleVision + countProgressive;
+              const wholePairs = Math.floor(totalLensQuantity / 2);
+              const hasExtraLens = totalLensQuantity % 2 === 1;
+
+              const montageItem = items.find(i => i.customName === 'Montage costs');
+              const baseCostSV = 20;
+              const baseCostPG = 40;
+
+              let totalMontageCost = 0;
+              if (wholePairs > 0) {
+                totalMontageCost += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
+              }
+              if (hasExtraLens) {
+                totalMontageCost += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
+              }
+
+              if (totalLensQuantity > 0) {
+                if (montageItem) {
+                  setItems(prevItems => prevItems.map(item =>
+                    item.id === montageItem.id
+                      ? { ...item, price: totalMontageCost, cost: totalMontageCost }
+                      : item
+                  ));
+                } else {
+                  setItems(prevItems => [...prevItems, {
+                    id: `montage-${Date.now()}`,
+                    customName: 'Montage costs',
+                    quantity: 1,
+                    price: totalMontageCost,
+                    cost: totalMontageCost,
+                  }]);
+                }
+              } else if (montageItem) {
+                setItems(prevItems => prevItems.filter(item => item.id !== montageItem.id));
               }
             }
           }
