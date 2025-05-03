@@ -74,7 +74,7 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
+      <div className="w-full h-screen bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
         <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -146,7 +146,7 @@ const IndexPage = () => {
             lenses within seconds. The best eye care management software get 
             your exact data-backed prescription within seconds
           </p>
-          <div className="relative z-10 mb-32">
+          <div className="relative z-10">
             <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
