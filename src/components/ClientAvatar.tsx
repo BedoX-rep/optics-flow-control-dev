@@ -5,9 +5,10 @@ import { User2, Baby, User } from "lucide-react"
 interface ClientAvatarProps {
   gender: "Mr" | "Mme" | "Enf"
   name: string
+  className?: string
 }
 
-export const ClientAvatar = ({ gender, name }: ClientAvatarProps) => {
+export const ClientAvatar = ({ gender, name, className }: ClientAvatarProps) => {
   const getIcon = () => {
     switch (gender) {
       case "Mr":
@@ -20,7 +21,7 @@ export const ClientAvatar = ({ gender, name }: ClientAvatarProps) => {
   }
 
   return (
-    <Avatar>
+    <Avatar className={className}>
       <AvatarFallback className="bg-primary/10">
         {getIcon()}
       </AvatarFallback>

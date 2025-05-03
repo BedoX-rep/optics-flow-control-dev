@@ -28,7 +28,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  Cost: number;
+  cost_ttc: number; // Changed from Cost to cost_ttc
   category: string;
 }
 
@@ -130,8 +130,14 @@ const NewReceipt = () => {
         if (productsResult.error) throw productsResult.error;
         if (clientsResult.error) throw clientsResult.error;
 
-        setProducts(productsResult.data || []);
-        setFilteredProducts(productsResult.data || []);
+        // Map database products to match our interface
+        const mappedProducts = (productsResult.data || []).map(product => ({
+          ...product,
+          Cost: product.cost_ttc || 0 // Map cost_ttc to Cost for backward compatibility
+        }));
+
+        setProducts(mappedProducts);
+        setFilteredProducts(mappedProducts);
         setClients(clientsResult.data || []);
         setFilteredClients(clientsResult.data || []);
 
