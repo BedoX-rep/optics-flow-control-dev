@@ -118,14 +118,18 @@ const IndexPage = () => {
             </NavigationMenu>
             <div className="flex items-center space-x-4">
               {!user ? (
-                <Button className="bg-white text-primary hover:bg-white/90" onClick={() => window.location.href = '/auth'}>
-                  Sign In / Register
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button asChild className="bg-white text-primary hover:bg-white/90">
+                  <Link to="/auth">
+                    Sign In / Register
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               ) : (
-                <Button className="bg-white text-primary hover:bg-white/90" onClick={() => window.location.href = '/dashboard'}>
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Button asChild className="bg-white text-primary hover:bg-white/90">
+                  <Link to="/dashboard">
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               )}
             </div>
