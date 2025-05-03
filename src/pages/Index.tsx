@@ -73,7 +73,7 @@ const IndexPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="w-full bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white min-h-screen relative overflow-hidden">
+      <div className="w-full bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white">
         <header className="container mx-auto py-6 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -135,18 +135,35 @@ const IndexPage = () => {
           </div>
         </header>
 
-        <section className="container mx-auto px-6 lg:px-10 mt-24 mb-48 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight">
-            Optical Software For All Your Eye Care Needs
-          </h1>
-          <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Effortlessly manage all your client needs and prepare prescription 
-            lenses within seconds. The best eye care management software to
-            get your exact data-backed prescription within seconds.
-          </p>
-          <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
-            START A FREE 7-DAY TRIAL
-          </Button>
+        <section className="container mx-auto py-32 px-6 lg:px-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+            <div className="lg:w-1/2 text-left">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                Optical Software For All Your Eye Care Needs
+              </h1>
+              <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-2xl leading-relaxed">
+                Effortlessly manage all your client needs and prepare prescription 
+                lenses within seconds. The best eye care management software to
+                get your exact data-backed prescription within seconds.
+              </p>
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
+                START A FREE 7-DAY TRIAL
+                <ArrowRight className="ml-2 h-6 w-6" />
+              </Button>
+            </div>
+
+            <div className="lg:w-1/2 relative">
+              <div className="rounded-xl overflow-hidden shadow-2xl">
+                <img 
+                  src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
+                  alt="Lensly software interface" 
+                  className="w-full h-auto rounded-xl"
+                />
+              </div>
+              <div className="absolute -z-10 -bottom-6 -right-6 w-64 h-64 bg-primary/10 rounded-full"></div>
+              <div className="absolute -z-10 -top-6 -left-6 w-48 h-48 bg-primary/10 rounded-full"></div>
+            </div>
+          </div>
         </section>
 
         <div className="relative">
@@ -156,48 +173,7 @@ const IndexPage = () => {
         </div>
       </div>
 
-      <div className="relative bg-white">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2">
-          <div className="bg-[#00B8D9] rounded-full p-4 w-16 h-16 flex items-center justify-center text-white">
-            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-6 lg:px-10 py-24">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
-              <p className="text-gray-600 mb-8">
-                Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
-                while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find
-                the perfect lenses for every client.
-              </p>
-              
-              <div className="space-y-4">
-                <h3 className="text-gray-900 font-medium">This optical software offers:</h3>
-                {features.map((feature) => (
-                  <div key={feature.title} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span className="text-gray-600">{feature.description}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="rounded-xl overflow-hidden shadow-xl">
-                <img 
-                  src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
-                  alt="Lensly software interface" 
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Effortless, Fast, Simple Section - Following layout from the image */}
       <section className="py-24 px-6 lg:px-10 bg-white">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
