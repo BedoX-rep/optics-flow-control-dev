@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 
 export interface MarkupRange {
   min: number;
@@ -31,9 +32,9 @@ interface MarkupSettingsDialogProps {
 
 export const defaultMarkupSettings: MarkupSettings = {
   sph: [
-    { min: 0, max: 4, markup: 0 },
-    { min: 4, max: 8, markup: 15 },
-    { min: 8, max: Infinity, markup: 30 },
+    { min: 0, max: 2, markup: 0 },
+    { min: 2, max: 4, markup: 15 },
+    { min: 4, max: Infinity, markup: 30 },
   ],
   cyl: [
     { min: 0, max: 2, markup: 0 },
@@ -50,7 +51,31 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
 }) => {
   const [localSettings, setLocalSettings] = useState<MarkupSettings>(settings);
 
+  const validateRanges = (ranges: MarkupRange[]) => {
+    // Sort ranges by min value
+    const sortedRanges = [...ranges].sort((a, b) => a.min - b.min);
+    
+    // Check for gaps and overlaps
+    for (let i = 0; i < sortedRanges.length - 1; i++) {
+      if (sortedRanges[i].max !== sortedRanges[i + 1].min) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const handleSave = () => {
+    // Validate both SPH and CYL ranges
+    if (!validateRanges(localSettings.sph) || !validateRanges(localSettings.cyl)) {
+      toast({
+        title: "Invalid Ranges",
+        description: "Ranges must be continuous without gaps or overlaps",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     onSave(localSettings);
     onClose();
   };
@@ -72,11 +97,11 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-4">
-            <h3 className="font-medium">SPH Ranges</h3>
+            <h3 className="font-medium">SPH Ranges (±)</h3>
             {localSettings.sph.map((range, index) => (
               <div key={`sph-${index}`} className="grid grid-cols-3 gap-2">
                 <div>
-                  <Label>Min (±)</Label>
+                  <Label>Min</Label>
                   <Input
                     type="number"
                     value={range.min}
@@ -84,7 +109,7 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
                   />
                 </div>
                 <div>
-                  <Label>Max (±)</Label>
+                  <Label>Max</Label>
                   <Input
                     type="number"
                     value={range.max === Infinity ? 999 : range.max}
@@ -103,11 +128,11 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
             ))}
           </div>
           <div className="space-y-4">
-            <h3 className="font-medium">CYL Ranges</h3>
+            <h3 className="font-medium">CYL Ranges (±)</h3>
             {localSettings.cyl.map((range, index) => (
               <div key={`cyl-${index}`} className="grid grid-cols-3 gap-2">
                 <div>
-                  <Label>Min (±)</Label>
+                  <Label>Min</Label>
                   <Input
                     type="number"
                     value={range.min}
@@ -115,7 +140,7 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
                   />
                 </div>
                 <div>
-                  <Label>Max (±)</Label>
+                  <Label>Max</Label>
                   <Input
                     type="number"
                     value={range.max === Infinity ? 999 : range.max}
