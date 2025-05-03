@@ -437,7 +437,10 @@ const NewReceipt = () => {
                   <SelectContent>
                     {filteredClients.map(client => (
                       <SelectItem key={client.id} value={client.id}>
-                        {client.name}
+                        <div className="flex justify-between items-center w-full">
+                          <span>{client.name}</span>
+                          <span className="text-sm text-muted-foreground">{client.phone}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
