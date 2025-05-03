@@ -86,12 +86,12 @@ const NewReceipt = () => {
   });
   const [isMarkupSettingsOpen, setIsMarkupSettingsOpen] = useState(false);
   const [markupSettings, setMarkupSettings] = useState({
-    sphRanges: [
+    sph: [
       { min: 0, max: 4, markup: 0 },
       { min: 4, max: 8, markup: 15 },
       { min: 8, max: Infinity, markup: 30 },
     ],
-    cylRanges: [
+    cyl: [
       { min: 0, max: 2, markup: 0 },
       { min: 2, max: 4, markup: 15 },
       { min: 4, max: Infinity, markup: 30 },
@@ -230,8 +230,8 @@ const NewReceipt = () => {
   };
 
   const calculateMarkup = (sph: number, cyl: number): number => {
-    const sphMarkup = getMarkup(sph, markupSettings.sphRanges);
-    const cylMarkup = getMarkup(cyl, markupSettings.cylRanges);
+    const sphMarkup = getMarkup(sph, markupSettings.sph);
+    const cylMarkup = getMarkup(cyl, markupSettings.cyl);
     return Math.max(sphMarkup, cylMarkup);
   };
 
