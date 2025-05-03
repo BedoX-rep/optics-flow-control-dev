@@ -30,15 +30,21 @@ const queryClient = new QueryClient({
 // Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
-  requiresActiveSubscription = true 
+  requiresActiveSubscription = true,
+  requiresAuth = true
 }: { 
   children: React.ReactNode;
   requiresActiveSubscription?: boolean;
+  requiresAuth?: boolean;
 }) => {
   const { user, subscription, isLoading } = useAuth();
   
-  if (!user) {
+  if (requiresAuth && !user) {
     return <Navigate to="/auth" replace />;
+  }
+  
+  if (!requiresAuth && user) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Only check subscription after loading is complete and if route requires active subscription
@@ -68,7 +74,11 @@ const ProtectedRoute = ({
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
-    <Route path="/auth" element={<Auth />} />
+    <Route path="/auth" element={
+      <ProtectedRoute requiresAuth={false}>
+        <Auth />
+      </ProtectedRoute>
+    } />
     <Route path="/pricing" element={<Pricing />} />
     
     <Route path="/dashboard" element={
