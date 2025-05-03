@@ -171,11 +171,7 @@ const IndexPage = () => {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
               <div className="inline-block bg-primary/10 text-primary rounded-full p-3 mb-6">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <img src="/lovable-uploads/3f116841-38fb-4c30-9c49-e56e0ea362dc.png" alt="Icon" className="w-6 h-6" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-6 text-sm">
