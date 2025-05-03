@@ -134,11 +134,6 @@ const NewReceipt = () => {
         setClients(clientsResult.data || []);
         setFilteredClients(clientsResult.data || []);
 
-        // Initialize with first item after data is loaded
-        if (items.length === 0) {
-          setItems([{ id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
-        }
-
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
           .select('*')
