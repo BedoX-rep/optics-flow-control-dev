@@ -156,7 +156,7 @@ const IndexPage = () => {
 
         {/* Clean diagonal cut that runs through the button */}
         <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
+          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-24"></div>
         </div>
       </div>
 
@@ -172,32 +172,42 @@ const IndexPage = () => {
                   <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
+              <h2 className="text-3xl font-bold mb-6 text-teal-600">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-8">
                 Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
-                while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find
+                while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find 
                 the perfect lenses for every client.
               </p>
 
+              <p className="text-gray-600 mb-8">This optical software offers:</p>
+
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Quick and easy operation</span>
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Client Management - Track client histories, appointments, and prescriptions in one place</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">An intelligent search engine</span>
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Inventory Control - Manage your frames, lenses, and other products with real-time stock updates</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Access to a vast database of lenses</span>
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Customized search results</span>
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Statistics - Comprehensive analytics and reporting on your business performance</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Access Control - Manage user permissions and control access to sensitive data</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
                   <span className="text-gray-700">And so much more!</span>
                 </li>
               </ul>
