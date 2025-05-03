@@ -170,7 +170,7 @@ const IndexPage = () => {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block bg-primary/10 text-primary rounded-full p-3 mb-6">
+              <div className="inline-block bg-[#00D1FF]/10 text-[#00D1FF] rounded-full p-3 mb-6">
                 <img src="/lovable-uploads/3f116841-38fb-4c30-9c49-e56e0ea362dc.png" alt="Icon" className="w-6 h-6" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
