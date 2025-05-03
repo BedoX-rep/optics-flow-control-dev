@@ -598,7 +598,10 @@ const NewReceipt = () => {
                           <SelectContent>
                             {filteredProducts.map(product => (
                               <SelectItem key={product.id} value={product.id}>
-                                {product.name} - {product.price.toFixed(2)} DH
+                                <div className="flex justify-between items-center w-full gap-4">
+                                  <span className="font-medium">{product.name}</span>
+                                  <span className="text-sm text-muted-foreground/75 tabular-nums">{product.price.toFixed(2)} DH</span>
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
