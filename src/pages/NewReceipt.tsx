@@ -72,8 +72,15 @@ const NewReceipt = () => {
   const [advancePayment, setAdvancePayment] = useState(0);
   const [balance, setBalance] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState('Unpaid');
-  const [autoMontage, setAutoMontage] = useState(true);
+  const [autoMontage, setAutoMontage] = useState(() => {
+    const saved = localStorage.getItem('autoMontage');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
+
+  useEffect(() => {
+    localStorage.setItem('autoMontage', JSON.stringify(autoMontage));
+  }, [autoMontage]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,21 +172,18 @@ const NewReceipt = () => {
             } : item;
 
             // Check if we need to add montage costs
-            if (autoMontage && product && (
-                product.category === 'Single Vision Lenses' ||
-                product.category === 'Progressive Lenses' ||
-                product.category === 'Sunglasses'
-              )) {
+            if (autoMontage && product) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
                 // Add montage costs in the next tick to avoid state update conflicts
                 setTimeout(() => {
+                  const montageCost = product.category === 'Progressive Lenses' ? 30 : 20;
                   setItems(prev => [...prev, {
                     id: `montage-${Date.now()}`,
                     customName: 'Montage costs',
                     quantity: 1,
                     price: 0,
-                    cost: 20
+                    cost: montageCost
                   }]);
                 }, 0);
               }
@@ -209,7 +213,7 @@ const NewReceipt = () => {
 
   // Apply fixed discount
   const totalDiscount = percentageDiscountAmount + numericDiscount;
-  
+
   // Calculate final total
   const total = afterPercentageDiscount - numericDiscount;
 
