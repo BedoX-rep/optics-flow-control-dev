@@ -467,10 +467,9 @@ const NewReceipt = () => {
         quantity: item.quantity || 1,
         price: item.price || 0,
         cost: item.cost || 0,
-        total: (item.price || 0) * (item.quantity || 1),
         profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
-        linkedEye: item.linkedEye || null,
-        appliedMarkup: item.appliedMarkup || 0
+        linked_eye: item.linkedEye || null,
+        applied_markup: item.appliedMarkup || 0
       }));
 
       const { error: itemsError } = await supabase
