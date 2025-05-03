@@ -212,6 +212,21 @@ const NewReceipt = () => {
               updatedItem.appliedMarkup = markup;
               updatedItem.price = product.price * (1 + markup / 100);
             }
+
+            // Add montage costs if auto-montage is enabled
+            if (autoMontage) {
+              const montageExists = items.some(i => i.customName === 'Montage costs');
+              if (!montageExists) {
+                const montageCost = product.category === 'Progressive Lenses' ? 30 : 20;
+                setItems(prevItems => [...prevItems, {
+                  id: `montage-${Date.now()}`,
+                  customName: 'Montage costs',
+                  quantity: 1,
+                  price: montageCost,
+                  cost: montageCost,
+                }]);
+              }
+            }
           }
 
           return updatedItem;
