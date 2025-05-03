@@ -75,7 +75,7 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white">
+      <div className="w-full bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white">
         <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -137,68 +137,41 @@ const IndexPage = () => {
           </div>
         </header>
 
-        {/* Hero Section with Diagonal Split */}
-        <div className="relative">
-          <div className="container mx-auto px-6 lg:px-10">
-            <div className="grid md:grid-cols-2 gap-12 items-center py-16">
-              <div className="text-left z-10">
-                <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                  Optical Software For All Your Eye Care Needs
-                </h1>
-                <p className="text-lg mb-8 text-white/90">
-                  Effortlessly manage all your client needs and prepare prescription 
-                  lenses within seconds.
-                </p>
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-8 py-6">
-                  START A FREE TRIAL
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-              <div className="relative h-[400px] hidden md:block">
-                <img 
-                  src="/lovable-uploads/3f116841-38fb-4c30-9c49-e56e0ea362dc.png"
-                  alt="Dashboard Preview"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 max-w-none w-[120%] rounded-lg shadow-2xl"
-                />
-              </div>
-            </div>
+        {/* Hero Section - Part of the gradient background */}
+        <section className="container mx-auto py-24 px-6 lg:px-10 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            Optical Software For All Your Eye Care Needs
+          </h1>
+          <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed">
+            Effortlessly manage all your client needs and prepare prescription 
+            lenses within seconds. The best eye care management software get 
+            your exact data-backed prescription within seconds.
+          </p>
+          <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
+            START A FREE 7-DAY TRIAL
+            <ArrowRight className="ml-2 h-6 w-6" />
+          </Button>
+          
+          <div className="mt-24 relative">
+            <svg className="absolute bottom-0 left-0 right-0 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+              <path fill="currentColor" d="M0,96L80,106.7C160,117,320,139,480,138.7C640,139,800,117,960,106.7C1120,96,1280,96,1360,96L1440,96L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"></path>
+            </svg>
           </div>
-          {/* Diagonal split effect */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-white transform -skew-y-3 origin-bottom-right"></div>
-        </div>
+        </section>
       </div>
 
-      {/* Features Section with Side-by-Side Layout */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-6 lg:px-10">
+      {/* Effortless, Fast, Simple Section - Following layout from the image */}
+      <section className="py-24 px-6 lg:px-10 bg-white">
+        <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-600 rounded-full px-4 py-2 mb-6">
-                <CheckCircle className="h-5 w-5" />
-                <span className="text-sm font-medium">Effortless, Fast, And Simple!</span>
+            <div className="order-2 md:order-1">
+              <div className="inline-block bg-primary/10 text-primary rounded-full p-3 mb-6">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
-                while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find
-                the perfect lenses for every client.
-              </p>
-              <Button variant="outline" size="lg" className="gap-2">
-                Learn more
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="relative">
-              <img 
-                src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png"
-                alt="Application Interface"
-                className="rounded-lg shadow-xl"
-              />
-              <div className="absolute -z-10 -bottom-6 -right-6 w-64 h-64 bg-blue-50 rounded-full"></div>
-              <div className="absolute -z-10 -top-6 -left-6 w-48 h-48 bg-blue-50 rounded-full"></div>
-            </div>
-          </div>
-        </div>
-      </section>
               <h2 className="text-4xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-8 text-lg">
                 Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
