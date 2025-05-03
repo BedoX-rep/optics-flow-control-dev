@@ -192,14 +192,18 @@ const NewReceipt = () => {
               cost: product.Cost || 0
             } : item;
 
-            if (selectedProduct.linkedEye && product?.category?.includes('Lenses')) {
-              const { sph, cyl } = getEyeValues(selectedProduct.linkedEye);
-              const markup = calculateMarkup(sph, cyl);
-              selectedProduct = {
-                ...selectedProduct,
-                appliedMarkup: markup,
-                price: (selectedProduct.price * (1 + markup / 100))
-              };
+            if (product?.category === 'Single Vision Lenses' || product?.category === 'Progressive Lenses') {
+              if (selectedProduct.linkedEye) {
+                const { sph, cyl } = getEyeValues(selectedProduct.linkedEye);
+                if (sph !== null || cyl !== null) {
+                  const markup = calculateMarkup(sph, cyl);
+                  selectedProduct = {
+                    ...selectedProduct,
+                    appliedMarkup: markup,
+                    price: (selectedProduct.price * (1 + markup / 100))
+                  };
+                }
+              }
             }
             return selectedProduct;
           }
@@ -212,26 +216,26 @@ const NewReceipt = () => {
     });
   };
 
-  const getEyeValues = (eye: 'RE' | 'LE'): { sph: number; cyl: number } => {
+  const getEyeValues = (eye: 'RE' | 'LE'): { sph: number | null; cyl: number | null } => {
     const client = clients.find(c => c.id === selectedClient);
-    if (!client) return { sph: 0, cyl: 0 };
+    if (!client) return { sph: null, cyl: null };
 
     if (eye === 'RE') {
       return {
-        sph: client.right_eye_sph || 0,
-        cyl: client.right_eye_cyl || 0,
+        sph: typeof client.right_eye_sph === 'number' ? client.right_eye_sph : null,
+        cyl: typeof client.right_eye_cyl === 'number' ? client.right_eye_cyl : null,
       };
     } else {
       return {
-        sph: client.left_eye_sph || 0,
-        cyl: client.left_eye_cyl || 0,
+        sph: typeof client.left_eye_sph === 'number' ? client.left_eye_sph : null,
+        cyl: typeof client.left_eye_cyl === 'number' ? client.left_eye_cyl : null,
       };
     }
   };
 
-  const calculateMarkup = (sph: number, cyl: number): number => {
-    const sphMarkup = getMarkup(sph, markupSettings.sph);
-    const cylMarkup = getMarkup(cyl, markupSettings.cyl);
+  const calculateMarkup = (sph: number | null, cyl: number | null): number => {
+    const sphMarkup = sph !== null ? getMarkup(sph, markupSettings.sph) : 0;
+    const cylMarkup = cyl !== null ? getMarkup(cyl, markupSettings.cyl) : 0;
     return Math.max(sphMarkup, cylMarkup);
   };
 
