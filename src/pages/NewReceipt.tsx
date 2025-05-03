@@ -437,9 +437,9 @@ const NewReceipt = () => {
                   <SelectContent>
                     {filteredClients.map(client => (
                       <SelectItem key={client.id} value={client.id}>
-                        <div className="flex justify-between items-center w-full">
-                          <span>{client.name}</span>
-                          <span className="text-sm text-muted-foreground">{client.phone}</span>
+                        <div className="flex justify-between items-center w-full gap-4">
+                          <span className="font-medium">{client.name}</span>
+                          <span className="text-sm text-muted-foreground/75 tabular-nums">{client.phone}</span>
                         </div>
                       </SelectItem>
                     ))}
