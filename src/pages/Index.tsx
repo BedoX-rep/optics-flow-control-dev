@@ -75,7 +75,7 @@ const IndexPage = () => {
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
       <div className="w-full bg-gradient-to-r from-[#4459F2] to-[#22CDEE] text-white relative">
-        <header className="container mx-auto py-5 px-6">
+        <header className="container mx-auto py-4 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold">Lensly</h1>
@@ -97,15 +97,15 @@ const IndexPage = () => {
         </header>
 
         {/* Hero Section */}
-        <section className="container mx-auto py-20 px-6 text-center relative">
-          <h1 className="text-4xl md:text-[52px] font-bold mb-6 leading-tight max-w-2xl mx-auto">
+        <section className="container mx-auto py-12 px-6 text-center relative">
+          <h1 className="text-4xl md:text-[52px] font-bold mb-4 leading-tight max-w-2xl mx-auto">
             Optical Software For ALL<br/>Your Eye Care Needs
           </h1>
-          <p className="text-base md:text-lg mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg mb-8 text-white/90 max-w-2xl mx-auto leading-relaxed">
             Effortlessly manage all your client needs and prepare prescription lenses within seconds. 
             The best eye care management software get your exact data-backed prescription within seconds
           </p>
-          <div className="relative z-10 mb-24">
+          <div className="relative z-10 mb-16">
             <Button size="lg" className="bg-[#FF49B6] text-white hover:bg-[#FF49B6]/90 px-8 py-6 text-lg font-semibold tracking-wide">
               START A FREE TRIAL
             </Button>
@@ -113,13 +113,13 @@ const IndexPage = () => {
         </section>
 
         {/* Diagonal cut */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
+          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
         </div>
       </div>
 
       {/* Effortless, Fast, Simple Section with app interface */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-12 px-6 bg-white -mt-20">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
