@@ -74,7 +74,7 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full h-screen bg-gradient-to-r from-[#FF3B9A] to-[#00D1FF] text-white relative">
+      <div className="w-full h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white relative">
         <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -118,12 +118,12 @@ const IndexPage = () => {
             </NavigationMenu>
             <div className="flex items-center space-x-4">
               {user ? (
-                <Link to="/dashboard">
-                  <Button className="bg-white text-primary hover:bg-white/90">
+                <Button asChild className="bg-white text-primary hover:bg-white/90">
+                  <Link to="/dashboard">
                     Go to Dashboard
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               ) : (
                 <Link to="/auth">
                   <Button className="bg-white text-primary hover:bg-white/90">
@@ -170,8 +170,8 @@ const IndexPage = () => {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block bg-[#00D1FF]/10 text-[#00D1FF] rounded-full p-3 mb-6">
-                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-6 h-6" />
+              <div className="inline-block mb-6">
+                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-24 h-24" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-6 text-sm">
