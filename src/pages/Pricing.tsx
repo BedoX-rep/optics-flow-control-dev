@@ -9,20 +9,19 @@ const PricingPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation */}
-      <header className="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 py-4 px-6 lg:px-10 fixed top-0 z-50">
+      <header className="w-full bg-gradient-to-r from-blue-600 to-cyan-400 py-4 px-6 lg:px-10">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-primary">Lensly</Link>
+            <Link to="/" className="text-xl font-bold text-white">Lensly</Link>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/#features" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Features</Link>
-            <Link to="/pricing" className="text-sm font-medium text-primary border-b-2 border-primary pb-1">Pricing</Link>
-            <Link to="/#about" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">About Us</Link>
-            <Link to="/#contact" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Contact</Link>
+            <Link to="/#features" className="text-sm font-medium text-white hover:text-white/80 transition-colors">Features</Link>
+            <Link to="/pricing" className="text-sm font-medium text-white hover:text-white/80 transition-colors border-b-2 border-white pb-1">Pricing</Link>
+            <Link to="/#contact" className="text-sm font-medium text-white hover:text-white/80 transition-colors">Contact</Link>
           </nav>
           <div className="flex items-center space-x-4">
             <Link to="/auth">
-              <Button>
+              <Button className="bg-white text-primary hover:bg-white/90">
                 Sign In / Register
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -32,8 +31,7 @@ const PricingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative w-full bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 pt-32 pb-16 px-6 lg:px-10 mt-16">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI3NjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cmVjdCBmaWxsPSIjMDBDOUZGIiB3aWR0aD0iMTQ0MCIgaGVpZ2h0PSI3NjAiLz48Y2lyY2xlIGZpbGwtb3BhY2l0eT0iLjEiIGZpbGw9IiNGRkYiIGN4PSI3MjAiIGN5PSIxMDAiIHI9IjMwMCIvPjxjaXJjbGUgZmlsbC1vcGFjaXR5PSIuMTUiIGZpbGw9IiNGRkYiIGN4PSI4MDAiIGN5PSIxMDAiIHI9IjQwMCIvPjwvZz48L3N2Zz4=')]"></div>
+      <section className="relative w-full bg-gradient-to-r from-blue-600 to-cyan-400 pt-16 pb-16 px-6 lg:px-10">
         <div className="container mx-auto text-center relative z-10">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-white">
@@ -94,7 +92,9 @@ const PricingPage = () => {
                 </ul>
               </CardContent>
               <CardFooter className="pt-6 flex justify-center">
-                <Button className="w-full">Get Started</Button>
+                <Link to="/auth">
+                  <Button className="w-full">Get Started</Button>
+                </Link>
               </CardFooter>
             </Card>
 
@@ -140,7 +140,9 @@ const PricingPage = () => {
                 </ul>
               </CardContent>
               <CardFooter className="pt-6 flex justify-center">
-                <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+                <Link to="/auth">
+                  <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+                </Link>
               </CardFooter>
             </Card>
 
@@ -236,9 +238,12 @@ const PricingPage = () => {
           <p className="mb-8 max-w-xl mx-auto">Start your 7-day free trial today and see how Lensly can help you manage your optical business more efficiently.</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90">
-              START FREE TRIAL
-            </Button>
+            <Link to="/auth">
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg py-6 px-8">
+                START FREE TRIAL
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
               CONTACT SALES
             </Button>
@@ -255,19 +260,19 @@ const PricingPage = () => {
               <p className="text-sm">The comprehensive management solution designed specifically for opticians in Morocco and across Africa.</p>
             </div>
             <div>
-              <h4 className="text-white text-base font-medium mb-4">GLASSON</h4>
+              <h4 className="text-white text-base font-medium mb-4">PAGES</h4>
               <ul className="space-y-2">
                 <li><Link to="/" className="text-sm hover:text-white transition-colors">Home</Link></li>
-                <li><Link to="/#features" className="text-sm hover:text-white transition-colors">Live Preview</Link></li>
                 <li><Link to="/#features" className="text-sm hover:text-white transition-colors">Features</Link></li>
-                <li><Link to="/" className="text-sm hover:text-white transition-colors">Screenshots</Link></li>
+                <li><Link to="/pricing" className="text-sm hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link to="/#contact" className="text-sm hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white text-base font-medium mb-4">COMPANY</h4>
               <ul className="space-y-2">
-                <li><Link to="/#about" className="text-sm hover:text-white transition-colors">Careers</Link></li>
-                <li><Link to="/#about" className="text-sm hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link to="/" className="text-sm hover:text-white transition-colors">Careers</Link></li>
+                <li><Link to="/" className="text-sm hover:text-white transition-colors">Documentation</Link></li>
                 <li><Link to="/#contact" className="text-sm hover:text-white transition-colors">Communication</Link></li>
                 <li><Link to="/pricing" className="text-sm hover:text-white transition-colors">Pricing List</Link></li>
                 <li><Link to="/" className="text-sm hover:text-white transition-colors">Blog</Link></li>
@@ -275,7 +280,7 @@ const PricingPage = () => {
             </div>
             <div>
               <h4 className="text-white text-base font-medium mb-4">Contact</h4>
-              <p className="text-sm mb-4">info@glasson.app</p>
+              <p className="text-sm mb-4">info@lensly.app</p>
               <p className="text-sm mb-4">+212 634 85 98 303</p>
               <div className="flex space-x-3">
                 <a href="#" className="text-white bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">t</a>
