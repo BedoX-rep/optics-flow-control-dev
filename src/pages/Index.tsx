@@ -119,15 +119,13 @@ const IndexPage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <div className="flex items-center space-x-4">
-              <Button
+              <button
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                className="bg-white hover:bg-white/90 text-primary"
+                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors"
               >
-                <span className="flex items-center">
-                  {user ? "Go to Dashboard" : "Sign In / Register"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </span>
-              </Button>
+                {user ? "Go to Dashboard" : "Sign In / Register"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
             </div>
           </div>
         </header>
@@ -143,13 +141,13 @@ const IndexPage = () => {
             your exact data-backed prescription within seconds
           </p>
           <div className="relative z-[1]">
-            <div 
+            <button 
               onClick={() => navigate("/auth")}
-              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors"
             >
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
-            </div>
+            </button>
           </div>
         </section>
 
@@ -281,10 +279,10 @@ const IndexPage = () => {
             <div>
               <h4 className="text-white text-base font-medium mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                <li><Link to="/" className="text-sm hover:text-white transition-colors">Features</Link></li>
-                <li><Link to="/pricing" className="text-sm hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link to="/auth" className="text-sm hover:text-white transition-colors">Sign In</Link></li>
-                <li><Link to="/auth" className="text-sm hover:text-white transition-colors">Register</Link></li>
+                <li><button onClick={() => navigate("/")} className="text-sm text-gray-300 hover:text-white transition-colors">Features</button></li>
+                <li><button onClick={() => navigate("/pricing")} className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</button></li>
+                <li><button onClick={() => navigate("/auth")} className="text-sm text-gray-300 hover:text-white transition-colors">Sign In</button></li>
+                <li><button onClick={() => navigate("/auth")} className="text-sm text-gray-300 hover:text-white transition-colors">Register</button></li>
               </ul>
             </div>
             <div>
