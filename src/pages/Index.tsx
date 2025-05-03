@@ -118,16 +118,13 @@ const IndexPage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline"
-                className="bg-white hover:bg-white/90"
+              <button 
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors"
               >
-                <span className="text-primary">
-                  {user ? "Go to Dashboard" : "Sign In / Register"}
-                </span>
-                <ArrowRight className="ml-2 h-4 w-4 text-primary" />
-              </Button>
+                {user ? "Go to Dashboard" : "Sign In / Register"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
             </div>
           </div>
         </header>
@@ -143,14 +140,13 @@ const IndexPage = () => {
             your exact data-backed prescription within seconds
           </p>
           <div className="relative z-[1]">
-            <Button 
-              size="lg" 
-              className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base"
+            <button 
               onClick={() => navigate("/auth")}
+              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors"
             >
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </section>
 
@@ -261,14 +257,13 @@ const IndexPage = () => {
           <p className="text-xl mb-10 max-w-2xl mx-auto text-white/90">
             Join hundreds of opticians across Morocco and Africa who are streamlining their practice with our comprehensive management system.
           </p>
-          <Button 
-            size="lg" 
-            className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg"
+          <button
             onClick={() => navigate("/auth")}
+            className="inline-flex items-center px-8 py-6 text-lg bg-white hover:bg-white/90 text-primary rounded-md font-medium transition-colors"
           >
             Start Free Trial Today
             <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          </button>
         </div>
       </section>
 
