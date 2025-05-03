@@ -195,12 +195,13 @@ const NewReceipt = () => {
             if (product?.category === 'Single Vision Lenses' || product?.category === 'Progressive Lenses') {
               if (selectedProduct.linkedEye) {
                 const { sph, cyl } = getEyeValues(selectedProduct.linkedEye);
-                if (sph !== null || cyl !== null) {
-                  const markup = calculateMarkup(sph, cyl);
+                const markup = calculateMarkup(sph, cyl);
+                if (markup > 0) {
+                  const basePrice = product.price || 0;
                   selectedProduct = {
                     ...selectedProduct,
                     appliedMarkup: markup,
-                    price: (selectedProduct.price * (1 + markup / 100))
+                    price: basePrice * (1 + markup / 100)
                   };
                 }
               }
@@ -240,12 +241,14 @@ const NewReceipt = () => {
   };
 
   const getMarkup = (value: number, ranges: { min: number; max: number; markup: number }[]): number => {
+    if (value === null || isNaN(value)) return 0;
+    const absValue = Math.abs(value);
     for (const range of ranges) {
-      if (value >= range.min && value < range.max) {
+      if (absValue >= range.min && absValue < range.max) {
         return range.markup;
       }
     }
-    return 0; // Default markup if value is outside defined ranges
+    return 0;
   };
 
 
