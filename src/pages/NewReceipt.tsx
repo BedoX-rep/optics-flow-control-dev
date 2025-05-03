@@ -214,18 +214,21 @@ const NewReceipt = () => {
             }
 
             // Add or update montage costs if auto-montage is enabled
-            if (autoMontage) {
+            if (autoMontage && (product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses')) {
+              // Count existing items including current selection
               let countSingleVision = items.reduce((count, item) => {
+                if (item.id === id) return count; // Skip current item as we'll add it separately
                 const prod = products.find(p => p.id === item.productId);
                 return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
               }, 0);
 
               let countProgressive = items.reduce((count, item) => {
+                if (item.id === id) return count; // Skip current item as we'll add it separately
                 const prod = products.find(p => p.id === item.productId);
                 return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
               }, 0);
 
-              // Add current product to counts if it's a lens
+              // Add current product to counts
               if (product.category === 'Single Vision Lenses') {
                 countSingleVision += 1;
               } else if (product.category === 'Progressive Lenses') {
