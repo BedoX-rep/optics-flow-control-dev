@@ -17,7 +17,6 @@ import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,7 +26,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
   requiresActiveSubscription = true 
@@ -37,19 +35,6 @@ const ProtectedRoute = ({
 }) => {
   const { user, subscription, isLoading } = useAuth();
   
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Only check subscription after loading is complete and if route requires active subscription
-  if (!isLoading && requiresActiveSubscription && subscription) {
-    const subStatus = subscription.subscription_status.toLowerCase();
-    if (subStatus !== 'active') {
-      return <Navigate to="/subscriptions" replace />;
-    }
-  }
-  
-  // Show loading state while subscription data is being fetched
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
@@ -60,58 +45,71 @@ const ProtectedRoute = ({
       </div>
     );
   }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (requiresActiveSubscription && subscription) {
+    const subStatus = subscription.subscription_status.toLowerCase();
+    if (subStatus !== 'active') {
+      return <Navigate to="/subscriptions" replace />;
+    }
+  }
   
   return <>{children}</>;
 };
 
-// App Routes
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Index />} />
-    <Route path="/auth" element={<Auth />} />
-    <Route path="/pricing" element={<Pricing />} />
-    
-    <Route path="/dashboard" element={
-      <ProtectedRoute>
-        <Layout><Dashboard /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="/products" element={
-      <ProtectedRoute>
-        <Layout><Products /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="/clients" element={
-      <ProtectedRoute>
-        <Layout><Clients /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="/receipts" element={
-      <ProtectedRoute>
-        <Layout><Receipts /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="/new-receipt" element={
-      <ProtectedRoute>
-        <Layout><NewReceipt /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="/subscriptions" element={
-      <ProtectedRoute requiresActiveSubscription={false}>
-        <Layout><Subscriptions /></Layout>
-      </ProtectedRoute>
-    } />
-    
-    <Route path="*" element={<NotFound />} />
-  </Routes>
-);
+const AppRoutes = () => {
+  const { user } = useAuth();
+  
+  return (
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Index />} />
+      <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
+      <Route path="/pricing" element={<Pricing />} />
+      
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Layout><Dashboard /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/products" element={
+        <ProtectedRoute>
+          <Layout><Products /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/clients" element={
+        <ProtectedRoute>
+          <Layout><Clients /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/receipts" element={
+        <ProtectedRoute>
+          <Layout><Receipts /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/new-receipt" element={
+        <ProtectedRoute>
+          <Layout><NewReceipt /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/subscriptions" element={
+        <ProtectedRoute requiresActiveSubscription={false}>
+          <Layout><Subscriptions /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
-// Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
