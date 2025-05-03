@@ -31,8 +31,8 @@ const ContactMenu = () => {
       <NavigationMenuContent>
         <ul className="grid w-[400px] gap-3 p-4">
           {contactMethods.map((item) => (
-            <li key={item.method} className="flex items-center p-2">
-              <item.icon className="h-5 w-5 mr-2" />
+            <li key={item.method} className="flex items-center p-2 hover:bg-accent rounded-md transition-colors">
+              <item.icon className="h-5 w-5 mr-2 text-primary" />
               <div>
                 <p className="text-sm font-medium">{item.method}</p>
                 <p className="text-sm text-muted-foreground">{item.detail}</p>

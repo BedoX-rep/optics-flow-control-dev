@@ -8,7 +8,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import PageTitle from '@/components/PageTitle';
 
 interface PricingPlan {
   name: string;
@@ -26,56 +25,64 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
   {
-    name: "Basic",
-    price: "20",
-    billingCycle: "/month",
-    description: "Essential features for small optical businesses",
-    features: [
-      { 
-        name: "Client Management", 
-        detail: "Store and manage up to 100 client records with basic information" 
-      },
-      { 
-        name: "Basic Inventory Tracking", 
-        detail: "Track up to 200 products in your inventory" 
-      },
-      { 
-        name: "Simple Receipts", 
-        detail: "Generate basic receipts for your clients" 
-      },
-      { 
-        name: "1 User Account", 
-        detail: "Single user access to the system" 
-      }
-    ],
-    buttonText: "Start Free Trial",
-    buttonVariant: "outline"
-  },
-  {
-    name: "Professional",
-    price: "49",
-    billingCycle: "/month",
-    description: "Complete solution for growing businesses",
+    name: "Monthly",
+    price: "29",
+    billingCycle: "per month",
+    description: "Pay as you go subscription",
     features: [
       { 
         name: "Unlimited Client Records", 
         detail: "Store and manage unlimited client records with comprehensive information" 
       },
       { 
-        name: "Advanced Inventory Management", 
+        name: "Unlimited Products", 
         detail: "Track unlimited products with categories and detailed attributes" 
       },
       { 
-        name: "Comprehensive Receipting",
-        detail: "Generate detailed receipts with customization options" 
+        name: "Unlimited Receipts", 
+        detail: "Generate and manage unlimited receipts for your business" 
       },
       { 
-        name: "Prescription Management", 
-        detail: "Store and track client prescriptions with history" 
+        name: "Core Features", 
+        detail: "Access to all core features including client management, inventory, and billing" 
       },
       { 
-        name: "5 User Accounts", 
-        detail: "Multiple user access with role management" 
+        name: "Regular Updates", 
+        detail: "Receive regular software updates with new features and improvements" 
+      },
+      { 
+        name: "Email Support", 
+        detail: "Get support through our email channel with 24-hour response time" 
+      }
+    ],
+    buttonText: "Start Free Trial",
+    buttonVariant: "outline"
+  },
+  {
+    name: "Quarterly",
+    price: "79",
+    billingCycle: "per quarter",
+    description: "Save with quarterly billing",
+    features: [
+      { 
+        name: "Everything in Monthly", 
+        detail: "All features included in the Monthly plan" 
+      },
+      { 
+        name: "Priority Support", 
+        detail: "Get faster support response with priority service" 
+      },
+      { 
+        name: "Data Export", 
+        detail: "Export your data in various formats for backup or analysis" 
+      },
+      { 
+        name: "Advanced Analytics", 
+        detail: "Access detailed analytics and reporting features" 
+      },
+      { 
+        name: "Customized Branding", 
+        detail: "Add your brand logo and colors to receipts and documents" 
       }
     ],
     buttonText: "Start Free Trial",
@@ -83,62 +90,62 @@ const pricingPlans: PricingPlan[] = [
     popular: true
   },
   {
-    name: "Enterprise",
-    price: "99",
-    billingCycle: "/month",
-    description: "Advanced features for large businesses",
+    name: "Lifetime",
+    price: "299",
+    billingCycle: "one-time payment",
+    description: "One-time purchase, lifetime access",
     features: [
       { 
-        name: "Everything in Professional", 
-        detail: "All features included in the Professional plan" 
+        name: "Everything in Quarterly", 
+        detail: "All features included in the Quarterly plan" 
+      },
+      { 
+        name: "Lifetime Updates", 
+        detail: "Get all future updates without additional charges" 
+      },
+      { 
+        name: "Premium Support", 
+        detail: "Access to premium support with faster response times" 
+      },
+      { 
+        name: "Offline Access", 
+        detail: "Work without internet connection with offline mode" 
       },
       { 
         name: "Multi-location Support", 
         detail: "Manage multiple store locations from a single account" 
-      },
-      { 
-        name: "Advanced Analytics", 
-        detail: "Comprehensive business reporting and insights" 
-      },
-      { 
-        name: "Priority Support", 
-        detail: "Dedicated support channel with priority response" 
-      },
-      { 
-        name: "Unlimited User Accounts", 
-        detail: "No limit on user accounts with advanced role management" 
       }
     ],
-    buttonText: "Contact Sales",
+    buttonText: "Purchase Now",
     buttonVariant: "outline"
   }
 ];
 
-const Pricing = () => {
-  const renderPricingFeature = (feature: { name: string; detail?: string }) => (
-    <HoverCard>
-      <HoverCardTrigger asChild>
-        <li className="flex items-center mb-2 cursor-help">
-          <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-          <span>{feature.name}</span>
-        </li>
-      </HoverCardTrigger>
-      {feature.detail && (
-        <HoverCardContent className="w-80">
-          <div className="space-y-2">
-            <p className="text-sm text-gray-700">{feature.detail}</p>
-          </div>
-        </HoverCardContent>
-      )}
-    </HoverCard>
-  );
+const renderPricingFeature = (feature: { name: string; detail?: string }) => (
+  <HoverCard>
+    <HoverCardTrigger asChild>
+      <li className="flex items-center mb-2 cursor-help">
+        <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+        <span>{feature.name}</span>
+      </li>
+    </HoverCardTrigger>
+    {feature.detail && (
+      <HoverCardContent className="w-80">
+        <div className="space-y-2">
+          <p className="text-sm text-gray-700">{feature.detail}</p>
+        </div>
+      </HoverCardContent>
+    )}
+  </HoverCard>
+);
 
+const Pricing = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] py-16 px-6">
         <div className="container mx-auto text-center">
-          <PageTitle title="Pricing Plans" className="text-white mb-4" />
+          <h1 className="text-4xl font-bold text-white mb-4">Pricing Plans</h1>
           <p className="text-white/90 text-xl max-w-3xl mx-auto">
             Choose the perfect plan for your optical business needs
           </p>
@@ -207,13 +214,13 @@ const Pricing = () => {
           <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
             <h3 className="font-semibold text-lg mb-2">Is there a setup fee?</h3>
             <p className="text-gray-600">
-              No, there are no setup fees for any of our plans. You only pay the monthly subscription fee.
+              No, there are no setup fees for any of our plans. You only pay the subscription fee.
             </p>
           </div>
           <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-semibold text-lg mb-2">Do you offer discounts for annual billing?</h3>
+            <h3 className="font-semibold text-lg mb-2">What payment methods do you accept?</h3>
             <p className="text-gray-600">
-              Yes, you can save 15% by choosing annual billing on any plan. Contact our sales team for more information.
+              We accept all major credit cards, PayPal, and bank transfers for our subscription plans.
             </p>
           </div>
           <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
