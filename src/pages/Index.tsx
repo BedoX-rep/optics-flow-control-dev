@@ -125,12 +125,12 @@ const IndexPage = () => {
                   </Link>
                 </Button>
               ) : (
-                <Link to="/auth">
-                  <Button className="bg-white text-primary hover:bg-white/90">
+                <Button asChild className="bg-white text-primary hover:bg-white/90">
+                  <Link to="/auth">
                     Sign In / Register
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               )}
             </div>
           </div>
@@ -166,7 +166,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless, Fast, Simple Section with twisted image */}
-      <section className="pt-0 -mt-48 px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-0 -mt-52 px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
