@@ -3,11 +3,9 @@ import React from 'react';
 import { Mail, Phone } from 'lucide-react';
 import {
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuTrigger,
   NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
-import { cn } from '@/lib/utils';
 
 const contactMethods = [
   {

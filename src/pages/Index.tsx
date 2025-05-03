@@ -277,10 +277,10 @@ const IndexPage = () => {
             <div>
               <h4 className="text-white text-base font-medium mb-4">Quick Links</h4>
               <ul className="space-y-2">
-                <li><button onClick={() => navigate("/")} className="text-sm text-gray-300 hover:text-white transition-colors">Features</button></li>
-                <li><button onClick={() => navigate("/pricing")} className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</button></li>
-                <li><button onClick={() => navigate("/auth")} className="text-sm text-gray-300 hover:text-white transition-colors">Sign In</button></li>
-                <li><button onClick={() => navigate("/auth")} className="text-sm text-gray-300 hover:text-white transition-colors">Register</button></li>
+                <li><button onClick={() => navigate("/")} className="w-full text-left text-sm text-gray-300 hover:text-white transition-colors">Features</button></li>
+                <li><button onClick={() => navigate("/pricing")} className="w-full text-left text-sm text-gray-300 hover:text-white transition-colors">Pricing</button></li>
+                <li><button onClick={() => navigate("/auth")} className="w-full text-left text-sm text-gray-300 hover:text-white transition-colors">Sign In</button></li>
+                <li><button onClick={() => navigate("/auth")} className="w-full text-left text-sm text-gray-300 hover:text-white transition-colors">Register</button></li>
               </ul>
             </div>
             <div>
