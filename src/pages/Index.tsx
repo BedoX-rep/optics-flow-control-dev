@@ -159,7 +159,7 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 85%, 100% 65%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 80%, 100% 45%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
@@ -217,7 +217,7 @@ const IndexPage = () => {
                 </li>
               </ul>
 
-              <Button className="text-base px-5 py-5">
+              <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
                 Learn more
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
