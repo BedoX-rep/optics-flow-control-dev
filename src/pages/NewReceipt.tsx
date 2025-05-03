@@ -172,7 +172,7 @@ const NewReceipt = () => {
             } : item;
 
             // Check if we need to add montage costs
-            if (autoMontage && product) {
+            if (autoMontage && product && (product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses')) {
               const hasMontage = items.some(i => i.customName === 'Montage costs');
               if (!hasMontage) {
                 // Add montage costs in the next tick to avoid state update conflicts
