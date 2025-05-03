@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -76,7 +75,7 @@ const IndexPage = () => {
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
       <div className="w-full bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
-        <header className="container mx-auto py-6 px-6 lg:px-10">
+        <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <h1 className="text-xl font-bold">Lensly</h1>
@@ -138,28 +137,28 @@ const IndexPage = () => {
         </header>
 
         {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-32 px-6 lg:px-10 text-center relative">
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight max-w-4xl mx-auto">
+        <section className="container mx-auto py-20 px-6 lg:px-10 text-center relative">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight max-w-3xl mx-auto">
             Optical Software For All Your Eye Care Needs
           </h1>
-          <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
             Effortlessly manage all your client needs and prepare prescription 
             lenses within seconds. The best eye care management software get 
             your exact data-backed prescription within seconds
           </p>
-          <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-10 py-7 text-xl font-medium">
+          <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-8 py-6 text-lg z-10 relative">
             START A FREE TRIAL
-            <ArrowRight className="ml-2 h-6 w-6" />
+            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </section>
-        
-        {/* Diagonal cut */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
+
+        {/* Clean diagonal cut that runs through the button */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
+          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
         </div>
       </div>
 
-      {/* Effortless, Fast, Simple Section - Following layout from the image */}
+      {/* Effortless, Fast, Simple Section with twisted image */}
       <section className="py-24 px-6 lg:px-10 bg-white">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -171,51 +170,48 @@ const IndexPage = () => {
                   <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h2 className="text-4xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
-              <p className="text-gray-600 mb-8 text-lg">
+              <h2 className="text-3xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
+              <p className="text-gray-600 mb-8">
                 Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
                 while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find
                 the perfect lenses for every client.
               </p>
-              
-              <p className="text-gray-700 font-medium mb-4 text-lg">This optical software offers:</p>
-              <ul className="space-y-4">
-                {features.map((feature, index) => (
-                  <HoverCard key={index} openDelay={100} closeDelay={100}>
-                    <HoverCardTrigger asChild>
-                      <li className="flex items-start cursor-help">
-                        <CheckCircle className="h-5 w-5 text-primary mt-1 mr-3 flex-shrink-0" />
-                        <span className="text-gray-700">{feature.title} - {feature.description}</span>
-                      </li>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="flex flex-col gap-2">
-                        <h4 className="font-medium">{feature.title}</h4>
-                        <p className="text-sm text-gray-600">{feature.detail}</p>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ))}
+
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Quick and easy operation</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">An intelligent search engine</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Access to a vast database of lenses</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Customized search results</span>
+                </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">And so much more!</span>
                 </li>
               </ul>
-              
-              <div className="mt-10">
-                <Button className="gap-2 text-lg px-6 py-6">
-                  Learn more
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </div>
+
+              <Button className="text-base px-5 py-5">
+                Learn more
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            
+
             <div className="relative order-1 md:order-2">
-              <div className="rounded-xl overflow-hidden shadow-2xl">
+              <div className="rounded-xl overflow-hidden shadow-2xl transform -rotate-6">
                 <img 
                   src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
                   alt="Lensly software interface" 
-                  className="w-full h-auto rounded-xl"
+                  className="w-full h-auto"
                 />
               </div>
               <div className="absolute -z-10 -bottom-6 -right-6 w-64 h-64 bg-primary/10 rounded-full"></div>
