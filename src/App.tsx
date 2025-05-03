@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +13,6 @@ import Subscriptions from "./pages/Subscriptions";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
-import Pricing from "./pages/Pricing";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 
 // Create a client
@@ -69,7 +67,6 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
-    <Route path="/pricing" element={<Pricing />} />
     
     <Route path="/dashboard" element={
       <ProtectedRoute>
