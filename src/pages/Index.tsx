@@ -156,16 +156,12 @@ const IndexPage = () => {
 
         {/* Diagonal cut for hero section */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute bottom-0 left-0 right-0 h-[70%] overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-white"
-              style={{
-                transform: 'skewY(-32deg)',
-                transformOrigin: '100% 0',
-                top: '35%'
-              }}
-            />
-          </div>
+          <div 
+            className="absolute inset-0 bg-white"
+            style={{
+              clipPath: 'polygon(0% 80%, 100% 45%, 100% 100%, 0% 100%)'
+            }}
+          />
         </div>
       </div>
 
