@@ -118,23 +118,13 @@ const IndexPage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <div className="flex items-center space-x-4">
-              {!user ? (
-                <Button 
-                  className="bg-white text-primary hover:bg-white/90"
-                  onClick={() => navigate("/auth")}
-                >
-                  Sign In / Register
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button 
-                  className="bg-white text-primary hover:bg-white/90"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
+              <Button 
+                className="bg-white text-primary hover:bg-white/90"
+                onClick={() => navigate(!user ? "/auth" : "/dashboard")}
+              >
+                {!user ? "Sign In / Register" : "Go to Dashboard"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </header>
