@@ -177,49 +177,49 @@ const IndexPage = () => {
                   <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold mb-6 text-teal-600">Effortless, Fast, And Simple!</h2>
-              <p className="text-gray-600 mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
+              <p className="text-gray-600 mb-6 text-sm">
                 Running an optical salon is a complex task. You need optical software that simplifies your daily operations 
                 while enhancing your services — both in quality and quantity. Lensly is incredibly intuitive, helping you find 
                 the perfect lenses for every client.
               </p>
 
-              <p className="text-gray-600 mb-8">This optical software offers:</p>
+              <p className="text-gray-600 mb-6 text-sm">This optical software offers:</p>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Client Management - Track client histories, appointments, and prescriptions in one place</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Client Management - Track client histories, appointments, and prescriptions in one place</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Inventory Control - Manage your frames, lenses, and other products with real-time stock updates</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Inventory Control - Manage your frames, lenses, and other products with real-time stock updates</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Statistics - Comprehensive analytics and reporting on your business performance</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Statistics - Comprehensive analytics and reporting on your business performance</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Access Control - Manage user permissions and control access to sensitive data</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">Access Control - Manage user permissions and control access to sensitive data</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-teal-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">And so much more!</span>
+                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-sm">And so much more!</span>
                 </li>
               </ul>
 
-              <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
+              <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-4 text-sm">
+                <img src="/lovable-uploads/3f116841-38fb-4c30-9c49-e56e0ea362dc.png" alt="Icon" className="w-4 h-4 mr-2" />
                 Learn more
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
 
