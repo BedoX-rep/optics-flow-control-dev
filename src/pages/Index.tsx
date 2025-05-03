@@ -75,8 +75,8 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white">
-        <header className="container mx-auto py-4 px-6 lg:px-10">
+      <div className="w-full bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
+        <header className="container mx-auto py-6 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <h1 className="text-xl font-bold">Lensly</h1>
@@ -138,26 +138,25 @@ const IndexPage = () => {
         </header>
 
         {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-24 px-6 lg:px-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        <section className="container mx-auto py-32 px-6 lg:px-10 text-center relative">
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight max-w-4xl mx-auto">
             Optical Software For All Your Eye Care Needs
           </h1>
           <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed">
             Effortlessly manage all your client needs and prepare prescription 
             lenses within seconds. The best eye care management software get 
-            your exact data-backed prescription within seconds.
+            your exact data-backed prescription within seconds
           </p>
-          <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
-            START A FREE 7-DAY TRIAL
+          <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-10 py-7 text-xl font-medium">
+            START A FREE TRIAL
             <ArrowRight className="ml-2 h-6 w-6" />
           </Button>
-          
-          <div className="mt-24 relative">
-            <svg className="absolute bottom-0 left-0 right-0 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
-              <path fill="currentColor" d="M0,96L80,106.7C160,117,320,139,480,138.7C640,139,800,117,960,106.7C1120,96,1280,96,1360,96L1440,96L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"></path>
-            </svg>
-          </div>
         </section>
+        
+        {/* Diagonal cut */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
+        </div>
       </div>
 
       {/* Effortless, Fast, Simple Section - Following layout from the image */}
