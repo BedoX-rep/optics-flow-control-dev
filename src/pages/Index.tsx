@@ -106,14 +106,12 @@ const IndexPage = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/pricing"
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
-                    >
-                      Pricing
-                    </Link>
-                  </NavigationMenuLink>
+                  <button
+                    onClick={() => navigate("/pricing")}
+                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
+                  >
+                    Pricing
+                  </button>
                 </NavigationMenuItem>
                 <ContactMenu />
               </NavigationMenuList>
