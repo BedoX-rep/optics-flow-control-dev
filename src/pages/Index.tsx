@@ -155,8 +155,8 @@ const IndexPage = () => {
         </section>
 
         {/* Diagonal cut aligned with button at 32 degrees */}
-        <div className="absolute bottom-0 left-0 right-0 h-[600px] overflow-hidden">
-          <div className="bg-white transform -skew-y-[32deg] origin-top-right h-full translate-y-[420px]"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[800px] overflow-hidden">
+          <div className="bg-white transform -skew-y-[32deg] origin-top-right h-full translate-y-[500px]"></div>
         </div>
       </div>
 
