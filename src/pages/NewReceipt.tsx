@@ -180,40 +180,37 @@ const NewReceipt = () => {
   };
 
   const updateItem = (id: string, field: string, value: string | number) => {
-    setItems(items => {
-      const updatedItems = items.map(item => {
-        if (item.id === id) {
-          if (field === 'productId') {
-            const product = products.find(p => p.id === value);
-            let selectedProduct = product ? {
-              ...item,
-              [field]: value.toString(),
-              price: product.price || 0,
-              cost: product.Cost || 0
-            } : item;
+    setItems(prevItems => {
+      return prevItems.map(item => {
+        if (item.id !== id) return item;
 
-            if (product?.category === 'Single Vision Lenses' || product?.category === 'Progressive Lenses') {
-              if (selectedProduct.linkedEye) {
-                const { sph, cyl } = getEyeValues(selectedProduct.linkedEye);
-                const markup = calculateMarkup(sph, cyl);
-                if (markup > 0) {
-                  const basePrice = product.price || 0;
-                  selectedProduct = {
-                    ...selectedProduct,
-                    appliedMarkup: markup,
-                    price: basePrice * (1 + markup / 100)
-                  };
-                }
-              }
+        if (field === 'productId') {
+          const product = products.find(p => p.id === value);
+          if (!product) return item;
+
+          const updatedItem = {
+            ...item,
+            productId: value.toString(),
+            price: product.price || 0,
+            cost: product.Cost || 0,
+            appliedMarkup: 0
+          };
+
+          // Only calculate markup for lenses if eye is linked
+          if ((product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses') && item.linkedEye) {
+            const { sph, cyl } = getEyeValues(item.linkedEye);
+            const markup = calculateMarkup(sph, cyl);
+            if (markup > 0) {
+              updatedItem.appliedMarkup = markup;
+              updatedItem.price = product.price * (1 + markup / 100);
             }
-            return selectedProduct;
           }
-          return { ...item, [field]: value };
-        }
-        return item;
-      });
 
-      return updatedItems;
+          return updatedItem;
+        }
+
+        return { ...item, [field]: value };
+      });
     });
   };
 
