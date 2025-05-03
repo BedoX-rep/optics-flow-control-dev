@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -74,12 +73,11 @@ const IndexPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header/Navigation with Gradient Background */}
       <div className="w-full bg-gradient-to-r from-[#0B6E63] to-[#38B2AC] text-white">
-        <header className="container mx-auto py-4 px-6 lg:px-10">
+        <header className="container mx-auto py-6 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold">Lensly</h1>
+              <h1 className="text-2xl font-bold">Lensly</h1>
             </div>
             <NavigationMenu>
               <NavigationMenuList>
@@ -137,27 +135,42 @@ const IndexPage = () => {
           </div>
         </header>
 
-        {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-24 px-6 lg:px-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Optical Software For All Your Eye Care Needs
-          </h1>
-          <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-3xl mx-auto leading-relaxed">
-            Effortlessly manage all your client needs and prepare prescription 
-            lenses within seconds. The best eye care management software get 
-            your exact data-backed prescription within seconds.
-          </p>
-          <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
-            START A FREE 7-DAY TRIAL
-            <ArrowRight className="ml-2 h-6 w-6" />
-          </Button>
-          
-          <div className="mt-24 relative">
-            <svg className="absolute bottom-0 left-0 right-0 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
-              <path fill="currentColor" d="M0,96L80,106.7C160,117,320,139,480,138.7C640,139,800,117,960,106.7C1120,96,1280,96,1360,96L1440,96L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"></path>
-            </svg>
+        <section className="container mx-auto py-32 px-6 lg:px-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+            <div className="lg:w-1/2 text-left">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                Optical Software For All Your Eye Care Needs
+              </h1>
+              <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-2xl leading-relaxed">
+                Effortlessly manage all your client needs and prepare prescription 
+                lenses within seconds. The best eye care management software to
+                get your exact data-backed prescription within seconds.
+              </p>
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-7 text-xl font-medium">
+                START A FREE 7-DAY TRIAL
+                <ArrowRight className="ml-2 h-6 w-6" />
+              </Button>
+            </div>
+
+            <div className="lg:w-1/2 relative">
+              <div className="rounded-xl overflow-hidden shadow-2xl">
+                <img 
+                  src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
+                  alt="Lensly software interface" 
+                  className="w-full h-auto rounded-xl"
+                />
+              </div>
+              <div className="absolute -z-10 -bottom-6 -right-6 w-64 h-64 bg-primary/10 rounded-full"></div>
+              <div className="absolute -z-10 -top-6 -left-6 w-48 h-48 bg-primary/10 rounded-full"></div>
+            </div>
           </div>
         </section>
+
+        <div className="relative">
+          <svg className="absolute bottom-0 left-0 right-0 text-white w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path fill="currentColor" d="M0,96L80,106.7C160,117,320,139,480,138.7C640,139,800,117,960,106.7C1120,96,1280,96,1360,96L1440,96L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"></path>
+          </svg>
+        </div>
       </div>
 
       {/* Effortless, Fast, Simple Section - Following layout from the image */}
