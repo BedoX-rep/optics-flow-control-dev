@@ -106,26 +106,25 @@ const IndexPage = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link to="/pricing" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white">
+                  <Link to="/pricing">
+                    <NavigationMenuLink className={cn(
+                      "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
+                    )}>
                       Pricing
-                    </Link>
-                  </NavigationMenuLink>
+                    </NavigationMenuLink>
+                  </Link>
                 </NavigationMenuItem>
                 <ContactMenu />
               </NavigationMenuList>
             </NavigationMenu>
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                className="bg-white hover:bg-white/90"
+              <div 
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors cursor-pointer"
               >
-                <span className="text-primary flex items-center">
-                  {user ? "Go to Dashboard" : "Sign In / Register"}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </span>
-              </Button>
+                {user ? "Go to Dashboard" : "Sign In / Register"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </div>
             </div>
           </div>
         </header>
