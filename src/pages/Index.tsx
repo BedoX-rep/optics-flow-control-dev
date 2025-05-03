@@ -119,11 +119,14 @@ const IndexPage = () => {
             </NavigationMenu>
             <div className="flex items-center space-x-4">
               <Button 
-                className="bg-white text-primary hover:bg-white/90"
-                onClick={() => navigate(!user ? "/auth" : "/dashboard")}
+                variant="outline"
+                className="bg-white hover:bg-white/90"
+                onClick={() => navigate(user ? "/dashboard" : "/auth")}
               >
-                {!user ? "Sign In / Register" : "Go to Dashboard"}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <span className="text-primary">
+                  {user ? "Go to Dashboard" : "Sign In / Register"}
+                </span>
+                <ArrowRight className="ml-2 h-4 w-4 text-primary" />
               </Button>
             </div>
           </div>
