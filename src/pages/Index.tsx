@@ -118,13 +118,13 @@ const IndexPage = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <div className="flex items-center space-x-4">
-              <button 
+              <div 
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors cursor-pointer"
               >
                 {user ? "Go to Dashboard" : "Sign In / Register"}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </button>
+              </div>
             </div>
           </div>
         </header>
@@ -140,13 +140,13 @@ const IndexPage = () => {
             your exact data-backed prescription within seconds
           </p>
           <div className="relative z-[1]">
-            <button 
+            <div 
               onClick={() => navigate("/auth")}
-              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors"
+              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors cursor-pointer"
             >
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
-            </button>
+            </div>
           </div>
         </section>
 
