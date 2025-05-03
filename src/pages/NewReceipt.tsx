@@ -225,6 +225,13 @@ const NewReceipt = () => {
                 return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
               }, 0);
 
+              // Add current product to counts if it's a lens
+              if (product.category === 'Single Vision Lenses') {
+                countSingleVision += 1;
+              } else if (product.category === 'Progressive Lenses') {
+                countProgressive += 1;
+              }
+
               const totalLensQuantity = countSingleVision + countProgressive;
               const wholePairs = Math.floor(totalLensQuantity / 2);
               const hasExtraLens = totalLensQuantity % 2 === 1;
