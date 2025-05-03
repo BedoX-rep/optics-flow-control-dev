@@ -155,8 +155,8 @@ const IndexPage = () => {
         </section>
 
         {/* Clean diagonal cut that runs through the button */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-24"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden">
+          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-32"></div>
         </div>
       </div>
 
