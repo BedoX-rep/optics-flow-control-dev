@@ -74,93 +74,52 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-[#4357F2] to-[#22CDEE] text-white relative">
-        <header className="container mx-auto py-4 px-6 lg:px-10">
+      <div className="w-full bg-gradient-to-r from-[#4459F2] to-[#22CDEE] text-white relative">
+        <header className="container mx-auto py-5 px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold">Lensly</h1>
+              <h1 className="text-2xl font-bold">Lensly</h1>
             </div>
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-transparent hover:bg-white/10 text-white">
-                    Features
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[600px] gap-3 p-4 md:grid-cols-2">
-                      {features.map((feature) => (
-                        <li key={feature.title}>
-                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
-                            <div className="flex items-center gap-2">
-                              {React.cloneElement(feature.icon, { className: "h-5 w-5 text-primary" })}
-                              <div className="text-sm font-medium leading-none">{feature.title}</div>
-                            </div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              {feature.description}
-                            </p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link to="/pricing">
-                    <NavigationMenuLink className={cn(
-                      "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
-                    )}>
-                      Pricing
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                <ContactMenu />
-              </NavigationMenuList>
-            </NavigationMenu>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <Link to="/dashboard">
-                  <Button className="bg-white text-primary hover:bg-white/90">
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/auth">
-                  <Button className="bg-white text-primary hover:bg-white/90">
-                    Sign In / Register
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              )}
+            <div className="flex items-center gap-8">
+              <nav className="hidden md:flex items-center gap-8">
+                <Link to="/features" className="text-white/90 hover:text-white">Features</Link>
+                <Link to="/pricing" className="text-white/90 hover:text-white">Pricing</Link>
+                <Link to="/contact" className="text-white/90 hover:text-white">Contact</Link>
+              </nav>
+              <Link to="/dashboard">
+                <Button className="bg-white text-primary hover:bg-white/90 font-medium">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </header>
 
-        {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-24 px-6 lg:px-10 text-center relative">
-          <h1 className="text-4xl md:text-[56px] font-bold mb-6 leading-tight max-w-3xl mx-auto">
-            Optical Software For ALL Your Eye Care Needs
+        {/* Hero Section */}
+        <section className="container mx-auto py-20 px-6 text-center relative">
+          <h1 className="text-4xl md:text-[52px] font-bold mb-6 leading-tight max-w-2xl mx-auto">
+            Optical Software For ALL<br/>Your Eye Care Needs
           </h1>
           <p className="text-base md:text-lg mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Effortlessly manage all your client needs and prepare prescription 
-            lenses within seconds. The best eye care management software get 
-            your exact data-backed prescription within seconds
+            Effortlessly manage all your client needs and prepare prescription lenses within seconds. 
+            The best eye care management software get your exact data-backed prescription within seconds
           </p>
-          <div className="relative z-10 mb-32">
-            <Button size="lg" className="bg-[#FF49B6] text-white hover:bg-[#FF49B6]/90 px-8 py-6 text-lg font-medium tracking-wide">
+          <div className="relative z-10 mb-24">
+            <Button size="lg" className="bg-[#FF49B6] text-white hover:bg-[#FF49B6]/90 px-8 py-6 text-lg font-semibold tracking-wide">
               START A FREE TRIAL
             </Button>
           </div>
         </section>
 
-        {/* Clean diagonal cut that runs through the button */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
-          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
+        {/* Diagonal cut */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
         </div>
       </div>
 
       {/* Effortless, Fast, Simple Section with app interface */}
-      <section className="py-32 px-6 lg:px-10 bg-white">
+      <section className="py-20 px-6 bg-white">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
