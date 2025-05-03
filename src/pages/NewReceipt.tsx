@@ -362,11 +362,11 @@ const NewReceipt = () => {
     fetchClientPrescription(clientId);
   };
 
-  useEffect(() => {
-    if (selectedClient) {
-      updateClientPrescription();
-    }
-  }, [rightEye, leftEye, add]);
+  // useEffect(() => { //Removed this useEffect as per the user request
+  //   if (selectedClient) {
+  //     updateClientPrescription();
+  //   }
+  // }, [rightEye, leftEye, add]);
 
   const updatePaymentStatus = (newBalance: number) => {
     if (newBalance <= 0) {
@@ -441,6 +441,25 @@ const NewReceipt = () => {
         .single();
 
       if (receiptError) throw receiptError;
+
+      // Update client prescription after receipt is saved
+      if (selectedClient) {
+        const { error: prescriptionError } = await supabase
+          .from('clients')
+          .update({
+            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+            Add: add ? parseFloat(add) : null,
+            last_prescription_update: new Date().toISOString()
+          })
+          .eq('id', selectedClient);
+
+        if (prescriptionError) throw prescriptionError;
+      }
 
       const receiptItems = items.map(item => ({
         user_id: user.id,
@@ -840,8 +859,7 @@ const NewReceipt = () => {
                     </div>
                   </div>
 
-                  <div className="pt-2 space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="pt-2 space-y-2"><div className="flex justify-between text-sm">
                       <span className="text-gray-600">Advance Payment</span>
                       <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
                     </div>
@@ -1052,10 +1070,10 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
   };
 
   const addRange = (type: 'sph' | 'cyl') => {
-    const newRange = type === 'sph' ? 
-      { min: 0, max: 4, markup: 0 } : 
+    const newRange = type === 'sph' ?
+      { min: 0, max: 4, markup: 0 } :
       { min: 0, max: 2, markup: 0 };
-    
+
     setLocalSettings(prev => ({
       ...prev,
       [type]: [...prev[type], newRange]
@@ -1070,24 +1088,24 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
           <h3>SPH Ranges</h3>
           {localSettings.sph.map((range, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
-              <Input 
-                type="number" 
-                value={range.min} 
-                onChange={(e) => updateRange('sph', index, 'min', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.min}
+                onChange={(e) => updateRange('sph', index, 'min', parseFloat(e.target.value))}
               />
-              <Input 
-                type="number" 
-                value={range.max === Infinity ? 999 : range.max} 
-                onChange={(e) => updateRange('sph', index, 'max', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.max === Infinity ? 999 : range.max}
+                onChange={(e) => updateRange('sph', index, 'max', parseFloat(e.target.value))}
               />
-              <Input 
-                type="number" 
-                value={range.markup} 
-                onChange={(e) => updateRange('sph', index, 'markup', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.markup}
+                onChange={(e) => updateRange('sph', index, 'markup', parseFloat(e.target.value))}
               />
-              <Button 
-                onClick={() => removeRange('sph', index)} 
-                variant="ghost" 
+              <Button
+                onClick={() => removeRange('sph', index)}
+                variant="ghost"
                 size="icon"
               >
                 <X className="h-4 w-4" />
@@ -1095,28 +1113,28 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
             </div>
           ))}
           <Button onClick={() => addRange('sph')} variant="outline">Add SPH Range</Button>
-          
+
           <h3>CYL Ranges</h3>
           {localSettings.cyl.map((range, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
-              <Input 
-                type="number" 
-                value={range.min} 
-                onChange={(e) => updateRange('cyl', index, 'min', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.min}
+                onChange={(e) => updateRange('cyl', index, 'min', parseFloat(e.target.value))}
               />
-              <Input 
-                type="number" 
-                value={range.max === Infinity ? 999 : range.max} 
-                onChange={(e) => updateRange('cyl', index, 'max', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.max === Infinity ? 999 : range.max}
+                onChange={(e) => updateRange('cyl', index, 'max', parseFloat(e.target.value))}
               />
-              <Input 
-                type="number" 
-                value={range.markup} 
-                onChange={(e) => updateRange('cyl', index, 'markup', parseFloat(e.target.value))} 
+              <Input
+                type="number"
+                value={range.markup}
+                onChange={(e) => updateRange('cyl', index, 'markup', parseFloat(e.target.value))}
               />
-              <Button 
-                onClick={() => removeRange('cyl', index)} 
-                variant="ghost" 
+              <Button
+                onClick={() => removeRange('cyl', index)}
+                variant="ghost"
                 size="icon"
               >
                 <X className="h-4 w-4" />
