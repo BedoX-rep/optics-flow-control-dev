@@ -74,57 +74,101 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-[#4459F2] to-[#22CDEE] text-white relative">
-        <header className="container mx-auto py-4 px-6">
+      <div className="w-full bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
+        <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold">Lensly</h1>
+              <h1 className="text-xl font-bold">Lensly</h1>
             </div>
-            <div className="flex items-center gap-8">
-              <nav className="hidden md:flex items-center gap-8">
-                <Link to="/features" className="text-white/90 hover:text-white">Features</Link>
-                <Link to="/pricing" className="text-white/90 hover:text-white">Pricing</Link>
-                <Link to="/contact" className="text-white/90 hover:text-white">Contact</Link>
-              </nav>
-              <Link to="/dashboard">
-                <Button className="bg-white text-primary hover:bg-white/90 font-medium">
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent hover:bg-white/10 text-white">
+                    Features
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[600px] gap-3 p-4 md:grid-cols-2">
+                      {features.map((feature) => (
+                        <li key={feature.title}>
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+                            <div className="flex items-center gap-2">
+                              {React.cloneElement(feature.icon, { className: "h-5 w-5 text-primary" })}
+                              <div className="text-sm font-medium leading-none">{feature.title}</div>
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              {feature.description}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/pricing">
+                    <NavigationMenuLink className={cn(
+                      "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
+                    )}>
+                      Pricing
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <ContactMenu />
+              </NavigationMenuList>
+            </NavigationMenu>
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <Link to="/dashboard">
+                  <Button className="bg-white text-primary hover:bg-white/90">
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/auth">
+                  <Button className="bg-white text-primary hover:bg-white/90">
+                    Sign In / Register
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Hero Section */}
-        <section className="container mx-auto py-12 px-6 text-center relative">
-          <h1 className="text-4xl md:text-[52px] font-bold mb-4 leading-tight max-w-2xl mx-auto">
-            Optical Software For ALL<br/>Your Eye Care Needs
+        {/* Hero Section - Part of the gradient background */}
+        <section className="container mx-auto py-20 px-6 lg:px-10 text-center relative">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight max-w-3xl mx-auto">
+            Optical Software For All Your Eye Care Needs
           </h1>
-          <p className="text-base md:text-lg mb-8 text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Effortlessly manage all your client needs and prepare prescription lenses within seconds. 
-            The best eye care management software get your exact data-backed prescription within seconds
+          <p className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
+            Effortlessly manage all your client needs and prepare prescription 
+            lenses within seconds. The best eye care management software get 
+            your exact data-backed prescription within seconds
           </p>
-          <div className="relative z-10 mb-16">
-            <Button size="lg" className="bg-[#FF49B6] text-white hover:bg-[#FF49B6]/90 px-8 py-6 text-lg font-semibold tracking-wide">
-              START A FREE TRIAL
-            </Button>
-          </div>
+          <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-8 py-6 text-lg z-10 relative">
+            START A FREE TRIAL
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </section>
 
-        {/* Diagonal cut */}
+        {/* Clean diagonal cut that runs through the button */}
         <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
           <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
         </div>
       </div>
 
-      {/* Effortless, Fast, Simple Section with app interface */}
-      <section className="py-12 px-6 bg-white -mt-20">
+      {/* Effortless, Fast, Simple Section with twisted image */}
+      <section className="py-24 px-6 lg:px-10 bg-white">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00E5FF] text-white rounded-xl mb-6">
-                <span className="text-2xl font-bold">A</span>
+              <div className="inline-block bg-primary/10 text-primary rounded-full p-3 mb-6">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
               <h2 className="text-3xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-8">
@@ -133,29 +177,28 @@ const IndexPage = () => {
                 the perfect lenses for every client.
               </p>
 
-              <div className="space-y-3 mb-8">
-                <p className="text-gray-700">This optical software offers:</p>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">Quick and easy operation</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">An intelligent search engine</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">Access to a vast database of lenses</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">Customized search results</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
                   <span className="text-gray-700">And so much more!</span>
-                </div>
-              </div>
+                </li>
+              </ul>
 
               <Button className="text-base px-5 py-5">
                 Learn more
