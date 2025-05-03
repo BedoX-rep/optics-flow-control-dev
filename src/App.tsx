@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,7 +35,7 @@ const ProtectedRoute = ({
   requiresActiveSubscription?: boolean;
 }) => {
   const { user, subscription, isLoading } = useAuth();
-  
+
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
@@ -48,7 +47,7 @@ const ProtectedRoute = ({
       return <Navigate to="/subscriptions" replace />;
     }
   }
-  
+
   // Show loading state while subscription data is being fetched
   if (isLoading) {
     return (
@@ -60,7 +59,7 @@ const ProtectedRoute = ({
       </div>
     );
   }
-  
+
   return <>{children}</>;
 };
 
@@ -70,43 +69,43 @@ const AppRoutes = () => (
     <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/pricing" element={<Pricing />} />
-    
+
     <Route path="/dashboard" element={
       <ProtectedRoute>
         <Layout><Dashboard /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="/products" element={
       <ProtectedRoute>
         <Layout><Products /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="/clients" element={
       <ProtectedRoute>
         <Layout><Clients /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="/receipts" element={
       <ProtectedRoute>
         <Layout><Receipts /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="/new-receipt" element={
       <ProtectedRoute>
         <Layout><NewReceipt /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="/subscriptions" element={
       <ProtectedRoute requiresActiveSubscription={false}>
         <Layout><Subscriptions /></Layout>
       </ProtectedRoute>
     } />
-    
+
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
