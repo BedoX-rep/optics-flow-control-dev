@@ -215,12 +215,12 @@ const NewReceipt = () => {
 
             // Add or update montage costs if auto-montage is enabled
             if (autoMontage) {
-              const countSingleVision = items.reduce((count, item) => {
+              let countSingleVision = items.reduce((count, item) => {
                 const prod = products.find(p => p.id === item.productId);
                 return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
               }, 0);
 
-              const countProgressive = items.reduce((count, item) => {
+              let countProgressive = items.reduce((count, item) => {
                 const prod = products.find(p => p.id === item.productId);
                 return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
               }, 0);
