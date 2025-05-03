@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,7 +33,7 @@ const ProtectedRoute = ({
   requiresActiveSubscription?: boolean;
 }) => {
   const { user, subscription, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
@@ -56,55 +55,55 @@ const ProtectedRoute = ({
       return <Navigate to="/subscriptions" replace />;
     }
   }
-  
+
   return <>{children}</>;
 };
 
 const AppRoutes = () => {
   const { user } = useAuth();
-  
+
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Index />} />
       <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
       <Route path="/pricing" element={<Pricing />} />
-      
+
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout><Dashboard /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="/products" element={
         <ProtectedRoute>
           <Layout><Products /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="/clients" element={
         <ProtectedRoute>
           <Layout><Clients /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="/receipts" element={
         <ProtectedRoute>
           <Layout><Receipts /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="/new-receipt" element={
         <ProtectedRoute>
           <Layout><NewReceipt /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="/subscriptions" element={
         <ProtectedRoute requiresActiveSubscription={false}>
           <Layout><Subscriptions /></Layout>
         </ProtectedRoute>
       } />
-      
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
