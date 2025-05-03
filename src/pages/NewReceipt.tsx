@@ -132,8 +132,7 @@ const NewReceipt = () => {
 
         // Map database products to match our interface
         const mappedProducts = (productsResult.data || []).map(product => ({
-          ...product,
-          Cost: product.cost_ttc || 0 // Map cost_ttc to Cost for backward compatibility
+          ...product
         }));
 
         setProducts(mappedProducts);
@@ -206,7 +205,7 @@ const NewReceipt = () => {
             ...item,
             productId: value.toString(),
             price: product.price || 0,
-            cost: product.Cost || 0,
+            cost: product.cost_ttc || 0, // Use cost_ttc instead of Cost
             appliedMarkup: 0
           };
 

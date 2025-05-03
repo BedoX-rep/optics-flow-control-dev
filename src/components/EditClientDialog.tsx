@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -90,17 +91,17 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         name: client.name,
         phone: client.phone,
         gender: client.gender,
-        right_eye_sph: client.right_eye_sph?.toString() || "",
-        right_eye_cyl: client.right_eye_cyl?.toString() || "",
+        right_eye_sph: client.right_eye_sph !== undefined ? client.right_eye_sph.toString() : "",
+        right_eye_cyl: client.right_eye_cyl !== undefined ? client.right_eye_cyl.toString() : "",
         right_eye_axe: client.right_eye_axe,
-        left_eye_sph: client.left_eye_sph?.toString() || "",
-        left_eye_cyl: client.left_eye_cyl?.toString() || "",
+        left_eye_sph: client.left_eye_sph !== undefined ? client.left_eye_sph.toString() : "",
+        left_eye_cyl: client.left_eye_cyl !== undefined ? client.left_eye_cyl.toString() : "",
         left_eye_axe: client.left_eye_axe,
         notes: client.notes || ""
       });
       setGender(client.gender);
     }
-  }, [client]);
+  }, [client, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {

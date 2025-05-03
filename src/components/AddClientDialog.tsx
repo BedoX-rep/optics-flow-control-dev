@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -62,7 +63,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         user_id: user?.id,
         name: values.name,
         phone: values.phone,
-        gender: values.gender,
+        gender: values.gender as "Mr" | "Mme" | "Enf" | undefined,
         right_eye_sph: values.right_eye_sph ? parseFloat(values.right_eye_sph) : 0,
         right_eye_cyl: values.right_eye_cyl ? parseFloat(values.right_eye_cyl) : 0,
         right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe) : 0,
@@ -90,7 +91,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         id: data.id,
         name: data.name,
         phone: data.phone,
-        gender: data.gender
+        gender: data.gender as "Mr" | "Mme" | "Enf"
       })
       onClose()
       form.reset()
