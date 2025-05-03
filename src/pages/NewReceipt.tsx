@@ -238,18 +238,15 @@ const NewReceipt = () => {
   };
 
   const getEyeValues = (eye: 'RE' | 'LE'): { sph: number | null; cyl: number | null } => {
-    const client = clients.find(c => c.id === selectedClient);
-    if (!client) return { sph: null, cyl: null };
-
     if (eye === 'RE') {
       return {
-        sph: typeof client.right_eye_sph === 'number' ? client.right_eye_sph : null,
-        cyl: typeof client.right_eye_cyl === 'number' ? client.right_eye_cyl : null,
+        sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+        cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
       };
     } else {
       return {
-        sph: typeof client.left_eye_sph === 'number' ? client.left_eye_sph : null,
-        cyl: typeof client.left_eye_cyl === 'number' ? client.left_eye_cyl : null,
+        sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+        cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
       };
     }
   };
