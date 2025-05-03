@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/AuthProvider';
 import { 
@@ -14,13 +14,20 @@ import {
   Database
 } from 'lucide-react';
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import ContactMenu from '@/components/ContactMenu';
+import { cn } from '@/lib/utils';
 
 const IndexPage = () => {
   const { user } = useAuth();
@@ -72,44 +79,43 @@ const IndexPage = () => {
         <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <button onClick={() => navigate("/")} className="text-xl font-bold">
-                Lensly
-              </button>
+              <h1 className="text-xl font-bold">Lensly</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative group">
-                <button className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white">
-                  Features
-                </button>
-                <div className="absolute hidden group-hover:block left-0 top-full mt-2 w-[600px] bg-white rounded-md shadow-lg p-4">
-                  <ul className="grid gap-3 md:grid-cols-2">
-                    {features.map((feature) => (
-                      <li key={feature.title}>
-                        <button 
-                          onClick={() => {}}
-                          className="block w-full select-none space-y-1 rounded-md p-3 leading-none outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-left"
-                        >
-                          <div className="flex items-center gap-2">
-                            {React.cloneElement(feature.icon, { className: "h-5 w-5 text-primary" })}
-                            <div className="text-sm font-medium leading-none">{feature.title}</div>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent hover:bg-white/10 text-white">
+                    Features
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[600px] gap-3 p-4 md:grid-cols-2">
+                      {features.map((feature) => (
+                        <li key={feature.title}>
+                          <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+                            <div className="flex items-center gap-2">
+                              {React.cloneElement(feature.icon, { className: "h-5 w-5 text-primary" })}
+                              <div className="text-sm font-medium leading-none">{feature.title}</div>
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              {feature.description}
+                            </p>
                           </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            {feature.description}
-                          </p>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate("/pricing")}
-                className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
-              >
-                Pricing
-              </button>
-              <ContactMenu />
-            </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <button
+                    onClick={() => navigate("/pricing")}
+                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
+                  >
+                    Pricing
+                  </button>
+                </NavigationMenuItem>
+                <ContactMenu />
+              </NavigationMenuList>
+            </NavigationMenu>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}

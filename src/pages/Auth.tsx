@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -37,7 +38,7 @@ const Auth = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/dashboard');
+        navigate('/');
       }
     };
 
@@ -69,7 +70,7 @@ const Auth = () => {
         description: "Logged in successfully.",
       });
 
-      navigate('/dashboard'); 
+      navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -104,18 +105,18 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-
+      
       // Create user metadata with display name and store name
       const userData = {
         display_name: displayName || email.split('@')[0],
         store_name: storeName || 'Optique'
       };
-
+      
       // Add referral code to metadata if provided
       if (referralCode) {
         userData['referred_by'] = referralCode;
       }
-
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
