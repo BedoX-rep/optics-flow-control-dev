@@ -111,20 +111,32 @@ const NewReceipt = () => {
           return;
         }
 
-        const { data: productsData, error: productsError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('is_deleted', false)
-          .order('created_at', { ascending: false });
+        const [productsResult, clientsResult] = await Promise.all([
+          supabase
+            .from('products')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('clients')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('is_deleted', false)
+            .order('name', { ascending: true })
+        ]);
 
-        if (productsError) throw productsError;
-        setProducts(productsData || []);
-        setFilteredProducts(productsData || []);
+        if (productsResult.error) throw productsResult.error;
+        if (clientsResult.error) throw clientsResult.error;
 
-        // Add default item if no items exist
+        setProducts(productsResult.data || []);
+        setFilteredProducts(productsResult.data || []);
+        setClients(clientsResult.data || []);
+        setFilteredClients(clientsResult.data || []);
+
+        // Initialize with first item after data is loaded
         if (items.length === 0) {
-          addItem('product');
+          setItems([{ id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
         }
 
         const { data: clientsData, error: clientsError } = await supabase
