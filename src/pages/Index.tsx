@@ -140,7 +140,11 @@ const IndexPage = () => {
             your exact data-backed prescription within seconds
           </p>
           <div className="relative z-[1]">
-            <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
+            <Button 
+              size="lg" 
+              className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base"
+              onClick={() => navigate("/auth")}
+            >
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -254,12 +258,14 @@ const IndexPage = () => {
           <p className="text-xl mb-10 max-w-2xl mx-auto text-white/90">
             Join hundreds of opticians across Morocco and Africa who are streamlining their practice with our comprehensive management system.
           </p>
-          <Link to="/auth">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg">
-              Start Free Trial Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg"
+            onClick={() => navigate("/auth")}
+          >
+            Start Free Trial Today
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
       </section>
 
