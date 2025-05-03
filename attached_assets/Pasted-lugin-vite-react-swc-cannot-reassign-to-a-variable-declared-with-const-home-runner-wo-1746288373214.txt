@@ -1,0 +1,56 @@
+lugin:vite:react-swc] × cannot reassign to a variable declared with `const`
+     ╭─[/home/runner/workspace/src/pages/NewReceipt.tsx:218:1]
+ 215 │ 
+ 216 │             // Add or update montage costs if auto-montage is enabled
+ 217 │             if (autoMontage) {
+ 218 │               const countSingleVision = items.reduce((count, item) => {
+     ·                     ────────┬────────
+     ·                             ╰── const variable was declared here
+ 219 │                 const prod = products.find(p => p.id === item.productId);
+ 220 │                 return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+ 221 │               }, 0);
+ 222 │ 
+ 223 │               const countProgressive = items.reduce((count, item) => {
+ 224 │                 const prod = products.find(p => p.id === item.productId);
+ 225 │                 return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+ 226 │               }, 0);
+ 227 │ 
+ 228 │               // Add current product to counts if it's a lens
+ 229 │               if (product.category === 'Single Vision Lenses') {
+ 230 │                 countSingleVision += 1;
+     ·                 ────────┬────────
+     ·                         ╰── cannot reassign
+ 231 │               } else if (product.category === 'Progressive Lenses') {
+ 232 │                 countProgressive += 1;
+ 233 │               }
+     ╰────
+  × cannot reassign to a variable declared with `const`
+     ╭─[/home/runner/workspace/src/pages/NewReceipt.tsx:223:1]
+ 220 │                 return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+ 221 │               }, 0);
+ 222 │ 
+ 223 │               const countProgressive = items.reduce((count, item) => {
+     ·                     ────────┬───────
+     ·                             ╰── const variable was declared here
+ 224 │                 const prod = products.find(p => p.id === item.productId);
+ 225 │                 return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+ 226 │               }, 0);
+ 227 │ 
+ 228 │               // Add current product to counts if it's a lens
+ 229 │               if (product.category === 'Single Vision Lenses') {
+ 230 │                 countSingleVision += 1;
+ 231 │               } else if (product.category === 'Progressive Lenses') {
+ 232 │                 countProgressive += 1;
+     ·                 ────────┬───────
+     ·                         ╰── cannot reassign
+ 233 │               }
+ 234 │ 
+ 235 │               const totalLensQuantity = countSingleVision + countProgressive;
+     ╰────
+/home/runner/workspace/src/pages/NewReceipt.tsx:218:1
+902|                    </div>
+903|  
+904|                    <div data-lov-id="src/pages/NewReceipt.tsx:904:18" data-lov-name="div"  data-component-path="src/pages/NewReceipt.tsx" data-component-line="904" data-component-file="NewReceipt.tsx" data-component-name="div" data-component-content="%7B%22className%22%3A%22pt-2%20space-y-2%22%7D" className="pt-2 space-y-2"><div data-lov-id="src/pages/NewReceipt.tsx:904:50" data-lov-name="div"  data-component-path="src/pages/NewReceipt.tsx" data-component-line="904" data-component-file="NewReceipt.tsx" data-component-name="div" data-component-content="%7B%22className%22%3A%22flex%20justify-between%20text-sm%22%7D" className="flex justify-between text-sm">
+   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+905|                        <span data-lov-id="src/pages/NewReceipt.tsx:905:22" data-lov-name="span"  data-component-path="src/pages/NewReceipt.tsx" data-component-line="905" data-component-file="NewReceipt.tsx" data-component-name="span" data-component-content="%7B%22text%22%3A%22Advance%20Payment%22%2C%22className%22%3A%22text-gray-600%22%7D" className="text-gray-600">Advance Payment</span>
+906|                        <span data-lov-id="src/pages/NewReceipt.tsx:906:22" data-lov-name="span"  data-component-path="src/pages/NewRece
