@@ -458,24 +458,29 @@ const NewReceipt = () => {
         if (prescriptionError) throw prescriptionError;
       }
 
+      // Insert receipt items with current prices and totals
       const receiptItems = items.map(item => ({
         user_id: user.id,
         receipt_id: receipt.id,
         product_id: item.productId || null,
         custom_item_name: item.customName || null,
-        quantity: item.quantity,
-        price: item.price,
-        cost: item.cost,
-        profit: (item.price - item.cost) * item.quantity,
-        linkedEye: item.linkedEye,
-        appliedMarkup: item.appliedMarkup
+        quantity: item.quantity || 1,
+        price: item.price || 0,
+        cost: item.cost || 0,
+        total: (item.price || 0) * (item.quantity || 1),
+        profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+        linkedEye: item.linkedEye || null,
+        appliedMarkup: item.appliedMarkup || 0
       }));
 
       const { error: itemsError } = await supabase
         .from('receipt_items')
         .insert(receiptItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Error saving receipt items:', itemsError);
+        throw itemsError;
+      }
 
       toast({
         title: "Success",
