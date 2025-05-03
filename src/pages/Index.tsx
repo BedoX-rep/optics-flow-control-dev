@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/AuthProvider';
 import { 
@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 
 const IndexPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const features = [
     {
@@ -118,18 +119,20 @@ const IndexPage = () => {
             </NavigationMenu>
             <div className="flex items-center space-x-4">
               {!user ? (
-                <Button asChild className="bg-white text-primary hover:bg-white/90">
-                  <Link to="/auth">
-                    Sign In / Register
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button 
+                  className="bg-white text-primary hover:bg-white/90"
+                  onClick={() => navigate("/auth")}
+                >
+                  Sign In / Register
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button asChild className="bg-white text-primary hover:bg-white/90">
-                  <Link to="/dashboard">
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button 
+                  className="bg-white text-primary hover:bg-white/90"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               )}
             </div>
