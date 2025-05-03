@@ -146,7 +146,7 @@ const IndexPage = () => {
             lenses within seconds. The best eye care management software get 
             your exact data-backed prescription within seconds
           </p>
-          <div className="relative z-10 mb-32">
+          <div className="relative z-10 mb-16">
             <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -154,9 +154,9 @@ const IndexPage = () => {
           </div>
         </section>
 
-        {/* Clean diagonal cut that runs through the button */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden">
-          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-32"></div>
+        {/* Clean diagonal cut with 32 degree angle */}
+        <div className="absolute bottom-0 left-0 right-0 h-96 overflow-hidden">
+          <div className="bg-white transform -skew-y-[32deg] origin-top-left h-full translate-y-48"></div>
         </div>
       </div>
 
