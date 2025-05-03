@@ -125,11 +125,13 @@ export type Database = {
       }
       receipt_items: {
         Row: {
+          applied_markup: number | null
           cost: number
           created_at: string | null
           custom_item_name: string | null
           id: string
           is_deleted: boolean | null
+          linked_eye: string | null
           price: number
           product_id: string | null
           profit: number
@@ -138,11 +140,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          applied_markup?: number | null
           cost?: number
           created_at?: string | null
           custom_item_name?: string | null
           id?: string
           is_deleted?: boolean | null
+          linked_eye?: string | null
           price: number
           product_id?: string | null
           profit?: number
@@ -151,11 +155,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          applied_markup?: number | null
           cost?: number
           created_at?: string | null
           custom_item_name?: string | null
           id?: string
           is_deleted?: boolean | null
+          linked_eye?: string | null
           price?: number
           product_id?: string | null
           profit?: number

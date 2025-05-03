@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import NewReceipt from "./pages/NewReceipt";
 import Subscriptions from "./pages/Subscriptions";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 
 // Create a client
@@ -65,9 +65,10 @@ const ProtectedRoute = ({
 // App Routes
 const AppRoutes = () => (
   <Routes>
+    <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
     
-    <Route path="/" element={
+    <Route path="/dashboard" element={
       <ProtectedRoute>
         <Layout><Dashboard /></Layout>
       </ProtectedRoute>
