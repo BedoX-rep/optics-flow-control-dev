@@ -137,24 +137,26 @@ const IndexPage = () => {
         </header>
 
         {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-20 px-6 lg:px-10 text-center relative">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight max-w-3xl mx-auto">
+        <section className="container mx-auto py-16 px-6 lg:px-10 text-center relative">
+          <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             Optical Software For All Your Eye Care Needs
           </h1>
-          <p className="text-lg md:text-xl mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg mb-8 text-white/90 max-w-xl mx-auto leading-relaxed">
             Effortlessly manage all your client needs and prepare prescription 
             lenses within seconds. The best eye care management software get 
             your exact data-backed prescription within seconds
           </p>
-          <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-8 py-6 text-lg z-10 relative">
-            START A FREE TRIAL
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          <div className="relative z-10 mb-32">
+            <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
+              START A FREE TRIAL
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </section>
 
         {/* Clean diagonal cut that runs through the button */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
-          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
         </div>
       </div>
 
