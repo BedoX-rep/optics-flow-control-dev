@@ -996,12 +996,36 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
   settings: any;
   onSave: (settings: any) => void;
 }) => {
-  const [sphRanges, setSphRanges] = useState(settings.sphRanges);
-  const [cylRanges, setCylRanges] = useState(settings.cylRanges);
+  const [localSettings, setLocalSettings] = useState({
+    sph: settings.sph || [],
+    cyl: settings.cyl || []
+  });
 
-  const handleSave = () => {
-    onSave({ sphRanges, cylRanges });
-    onClose();
+  const updateRange = (type: 'sph' | 'cyl', index: number, field: string, value: number) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [type]: prev[type].map((range, i) =>
+        i === index ? { ...range, [field]: value } : range
+      )
+    }));
+  };
+
+  const removeRange = (type: 'sph' | 'cyl', index: number) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }));
+  };
+
+  const addRange = (type: 'sph' | 'cyl') => {
+    const newRange = type === 'sph' ? 
+      { min: 0, max: 4, markup: 0 } : 
+      { min: 0, max: 2, markup: 0 };
+    
+    setLocalSettings(prev => ({
+      ...prev,
+      [type]: [...prev[type], newRange]
+    }));
   };
 
   return (
@@ -1010,64 +1034,68 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
         <DialogTitle>Markup Settings</DialogTitle>
         <div className="space-y-4">
           <h3>SPH Ranges</h3>
-          {sphRanges.map((range, index) => (
+          {localSettings.sph.map((range, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
-              <Input type="number" value={range.min} onChange={(e) => {
-                const newRanges = [...sphRanges];
-                newRanges[index].min = parseFloat(e.target.value);
-                setSphRanges(newRanges);
-              }} />
-              <Input type="number" value={range.max} onChange={(e) => {
-                const newRanges = [...sphRanges];
-                newRanges[index].max = parseFloat(e.target.value);
-                setSphRanges(newRanges);
-              }} />
-              <Input type="number" value={range.markup} onChange={(e) => {
-                const newRanges = [...sphRanges];
-                newRanges[index].markup = parseFloat(e.target.value);
-                setSphRanges(newRanges);
-              }} />
-              <Button onClick={() => {
-                const newRanges = [...sphRanges];
-                newRanges.splice(index, 1);
-                setSphRanges(newRanges);
-              }} variant="ghost" size="icon">
+              <Input 
+                type="number" 
+                value={range.min} 
+                onChange={(e) => updateRange('sph', index, 'min', parseFloat(e.target.value))} 
+              />
+              <Input 
+                type="number" 
+                value={range.max === Infinity ? 999 : range.max} 
+                onChange={(e) => updateRange('sph', index, 'max', parseFloat(e.target.value))} 
+              />
+              <Input 
+                type="number" 
+                value={range.markup} 
+                onChange={(e) => updateRange('sph', index, 'markup', parseFloat(e.target.value))} 
+              />
+              <Button 
+                onClick={() => removeRange('sph', index)} 
+                variant="ghost" 
+                size="icon"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           ))}
-          <Button onClick={() => setSphRanges([...sphRanges, { min: 0, max: 4, markup: 0 }])} variant="outline">Add SPH Range</Button>
+          <Button onClick={() => addRange('sph')} variant="outline">Add SPH Range</Button>
+          
           <h3>CYL Ranges</h3>
-          {cylRanges.map((range, index) => (
+          {localSettings.cyl.map((range, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
-              <Input type="number" value={range.min} onChange={(e) => {
-                const newRanges = [...cylRanges];
-                newRanges[index].min = parseFloat(e.target.value);
-                setCylRanges(newRanges);
-              }} />
-              <Input type="number" value={range.max} onChange={(e) => {
-                const newRanges = [...cylRanges];
-                newRanges[index].max = parseFloat(e.target.value);
-                setCylRanges(newRanges);
-              }} />
-              <Input type="number" value={range.markup} onChange={(e) => {
-                const newRanges = [...cylRanges];
-                newRanges[index].markup = parseFloat(e.target.value);
-                setCylRanges(newRanges);
-              }} />
-              <Button onClick={() => {
-                const newRanges = [...cylRanges];
-                newRanges.splice(index, 1);
-                setCylRanges(newRanges);
-              }} variant="ghost" size="icon">
+              <Input 
+                type="number" 
+                value={range.min} 
+                onChange={(e) => updateRange('cyl', index, 'min', parseFloat(e.target.value))} 
+              />
+              <Input 
+                type="number" 
+                value={range.max === Infinity ? 999 : range.max} 
+                onChange={(e) => updateRange('cyl', index, 'max', parseFloat(e.target.value))} 
+              />
+              <Input 
+                type="number" 
+                value={range.markup} 
+                onChange={(e) => updateRange('cyl', index, 'markup', parseFloat(e.target.value))} 
+              />
+              <Button 
+                onClick={() => removeRange('cyl', index)} 
+                variant="ghost" 
+                size="icon"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           ))}
-          <Button onClick={() => setCylRanges([...cylRanges, { min: 0, max: 2, markup: 0 }])} variant="outline">Add CYL Range</Button>
+          <Button onClick={() => addRange('cyl')} variant="outline">Add CYL Range</Button>
         </div>
         <div className="mt-4 flex justify-end">
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={() => {
+            onSave(localSettings);
+            onClose();
+          }}>Save</Button>
         </div>
       </DialogContent>
     </Dialog>
