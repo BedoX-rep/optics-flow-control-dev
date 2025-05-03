@@ -74,7 +74,7 @@ const IndexPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation with Gradient Background */}
-      <div className="w-full bg-gradient-to-r from-[#4861F0] to-[#22CDEE] text-white relative">
+      <div className="w-full bg-gradient-to-r from-[#4357F2] to-[#22CDEE] text-white relative">
         <header className="container mx-auto py-4 px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -137,40 +137,35 @@ const IndexPage = () => {
         </header>
 
         {/* Hero Section - Part of the gradient background */}
-        <section className="container mx-auto py-16 px-6 lg:px-10 text-center relative">
-          <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
-            Optical Software For All Your Eye Care Needs
+        <section className="container mx-auto py-24 px-6 lg:px-10 text-center relative">
+          <h1 className="text-4xl md:text-[56px] font-bold mb-6 leading-tight max-w-3xl mx-auto">
+            Optical Software For ALL Your Eye Care Needs
           </h1>
-          <p className="text-base md:text-lg mb-8 text-white/90 max-w-xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
             Effortlessly manage all your client needs and prepare prescription 
             lenses within seconds. The best eye care management software get 
             your exact data-backed prescription within seconds
           </p>
           <div className="relative z-10 mb-32">
-            <Button size="lg" className="bg-[#FF3B9A] text-white hover:bg-[#FF3B9A]/90 px-6 py-5 text-base">
+            <Button size="lg" className="bg-[#FF49B6] text-white hover:bg-[#FF49B6]/90 px-8 py-6 text-lg font-medium tracking-wide">
               START A FREE TRIAL
-              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </section>
 
         {/* Clean diagonal cut that runs through the button */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-          <div className="bg-white transform -skew-y-3 origin-top-right h-full translate-y-16"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-40 overflow-hidden">
+          <div className="bg-white transform -skew-y-6 origin-top-right h-full translate-y-20"></div>
         </div>
       </div>
 
-      {/* Effortless, Fast, Simple Section with twisted image */}
-      <section className="py-24 px-6 lg:px-10 bg-white">
+      {/* Effortless, Fast, Simple Section with app interface */}
+      <section className="py-32 px-6 lg:px-10 bg-white">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block bg-primary/10 text-primary rounded-full p-3 mb-6">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#00E5FF] text-white rounded-xl mb-6">
+                <span className="text-2xl font-bold">A</span>
               </div>
               <h2 className="text-3xl font-bold mb-6">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-8">
@@ -179,28 +174,29 @@ const IndexPage = () => {
                 the perfect lenses for every client.
               </p>
 
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+              <div className="space-y-3 mb-8">
+                <p className="text-gray-700">This optical software offers:</p>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
                   <span className="text-gray-700">Quick and easy operation</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
                   <span className="text-gray-700">An intelligent search engine</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
                   <span className="text-gray-700">Access to a vast database of lenses</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
                   <span className="text-gray-700">Customized search results</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
                   <span className="text-gray-700">And so much more!</span>
-                </li>
-              </ul>
+                </div>
+              </div>
 
               <Button className="text-base px-5 py-5">
                 Learn more
