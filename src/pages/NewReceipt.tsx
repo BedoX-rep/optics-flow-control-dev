@@ -204,6 +204,58 @@ const NewReceipt = () => {
             appliedMarkup: 0
           };
 
+          // Handle montage costs when a lens product is selected
+          if (autoMontage && (product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses')) {
+            setTimeout(() => {
+              setItems(prevItems => {
+                let countSingleVision = prevItems.reduce((count, item) => {
+                  const prod = products.find(p => p.id === item.productId);
+                  return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+                }, 0);
+
+                let countProgressive = prevItems.reduce((count, item) => {
+                  const prod = products.find(p => p.id === item.productId);
+                  return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+                }, 0);
+
+                const totalLensQuantity = countSingleVision + countProgressive;
+                const wholePairs = Math.floor(totalLensQuantity / 2);
+                const hasExtraLens = totalLensQuantity % 2 === 1;
+
+                const montageItem = prevItems.find(i => i.customName === 'Montage costs');
+                const baseCostSV = 20;
+                const baseCostPG = 40;
+
+                let totalMontageCost = 0;
+                if (wholePairs > 0) {
+                  totalMontageCost += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
+                }
+                if (hasExtraLens) {
+                  totalMontageCost += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
+                }
+
+                if (totalLensQuantity > 0) {
+                  if (montageItem) {
+                    return prevItems.map(item =>
+                      item.id === montageItem.id
+                        ? { ...item, price: totalMontageCost, cost: totalMontageCost }
+                        : item
+                    );
+                  } else {
+                    return [...prevItems, {
+                      id: `montage-${Date.now()}`,
+                      customName: 'Montage costs',
+                      quantity: 1,
+                      price: totalMontageCost,
+                      cost: totalMontageCost,
+                    }];
+                  }
+                }
+                return prevItems;
+              });
+            }, 0);
+          }
+
           // Only calculate markup for lenses if eye is linked
           if ((product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses') && item.linkedEye) {
             const { sph, cyl } = getEyeValues(item.linkedEye);
@@ -211,65 +263,6 @@ const NewReceipt = () => {
             if (markup > 0) {
               updatedItem.appliedMarkup = markup;
               updatedItem.price = product.price * (1 + markup / 100);
-            }
-
-            // Add or update montage costs if auto-montage is enabled
-            if (autoMontage && (product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses')) {
-              // Count existing items including current selection
-              let countSingleVision = items.reduce((count, item) => {
-                if (item.id === id) return count; // Skip current item as we'll add it separately
-                const prod = products.find(p => p.id === item.productId);
-                return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
-              }, 0);
-
-              let countProgressive = items.reduce((count, item) => {
-                if (item.id === id) return count; // Skip current item as we'll add it separately
-                const prod = products.find(p => p.id === item.productId);
-                return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
-              }, 0);
-
-              // Add current product to counts
-              if (product.category === 'Single Vision Lenses') {
-                countSingleVision += 1;
-              } else if (product.category === 'Progressive Lenses') {
-                countProgressive += 1;
-              }
-
-              const totalLensQuantity = countSingleVision + countProgressive;
-              const wholePairs = Math.floor(totalLensQuantity / 2);
-              const hasExtraLens = totalLensQuantity % 2 === 1;
-
-              const montageItem = items.find(i => i.customName === 'Montage costs');
-              const baseCostSV = 20;
-              const baseCostPG = 40;
-
-              let totalMontageCost = 0;
-              if (wholePairs > 0) {
-                totalMontageCost += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
-              }
-              if (hasExtraLens) {
-                totalMontageCost += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
-              }
-
-              if (totalLensQuantity > 0) {
-                if (montageItem) {
-                  setItems(prevItems => prevItems.map(item =>
-                    item.id === montageItem.id
-                      ? { ...item, price: totalMontageCost, cost: totalMontageCost }
-                      : item
-                  ));
-                } else {
-                  setItems(prevItems => [...prevItems, {
-                    id: `montage-${Date.now()}`,
-                    customName: 'Montage costs',
-                    quantity: 1,
-                    price: totalMontageCost,
-                    cost: totalMontageCost,
-                  }]);
-                }
-              } else if (montageItem) {
-                setItems(prevItems => prevItems.filter(item => item.id !== montageItem.id));
-              }
             }
           }
 
