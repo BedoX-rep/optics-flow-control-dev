@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ReceiptDetailsDialog from '@/components/ReceiptDetailsDialog';
+import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
 import {
   Select,
@@ -79,6 +80,7 @@ const Receipts = () => {
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
+  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
 
@@ -660,6 +662,14 @@ const Receipts = () => {
                         >
                           <Eye className="h-4 w-4 text-black" />
                         </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setEditingReceipt(receipt)}
+                          className="hover:bg-black/10"
+                        >
+                          ✏️
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -674,6 +684,13 @@ const Receipts = () => {
         isOpen={!!selectedReceipt}
         onClose={() => setSelectedReceipt(null)}
         receipt={selectedReceipt}
+      />
+
+      <ReceiptEditDialog
+        isOpen={!!editingReceipt}
+        onClose={() => setEditingReceipt(null)}
+        receipt={editingReceipt}
+        onUpdate={fetchReceipts}
       />
     </div>
   );
