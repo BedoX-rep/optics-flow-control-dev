@@ -793,30 +793,30 @@ const NewReceipt = () => {
                 <div key={item.id} className="flex items-center gap-4 p-6 bg-white border border-black/10 rounded-xl shadow-sm mb-4 hover:border-primary/30 transition-all duration-200">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
-                      <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
+                      <Label htmlFor={`custom-${item.id}`} className="text-sm text-gray-600">Custom Item Name <span className="text-blue-500">*</span></Label>
                       <Input
                         id={`custom-${item.id}`}
                         value={item.customName || ''}
                         onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                        className="h-11 text-base"
+                        className="h-11 text-base hover:border-blue-300 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   ) : (
                     <div className="flex-1">
-                      <Label htmlFor={`product-${item.id}`} className="text-sm font-medium">Product</Label>
+                      <Label htmlFor={`product-${item.id}`} className="text-sm text-gray-600">Product <span className="text-blue-500">*</span></Label>
                       <div className="space-y-3">
                         <Input
                           type="text"
                           placeholder="Search products..."
                           value={productSearchTerm}
                           onChange={(e) => setProductSearchTerm(e.target.value)}
-                          className="h-11 text-base bg-gray-50/50"
+                          className="h-11 text-base bg-gray-50/50 hover:border-blue-300 focus:border-blue-500 transition-colors"
                         />
                         <Select
                           value={item.productId}
                           onValueChange={(value) => updateItem(item.id, 'productId', value)}
                         >
-                          <SelectTrigger id={`product-${item.id}`}>
+                          <SelectTrigger id={`product-${item.id}`} className="hover:border-blue-300 focus:border-blue-500 transition-colors">
                             <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                           <SelectContent>
@@ -834,19 +834,20 @@ const NewReceipt = () => {
                     </div>
                   )}
 
-                  <div className="w-20">
-                    <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                  <div className="w-24">
+                    <Label htmlFor={`quantity-${item.id}`} className="text-sm text-gray-600">Quantity <span className="text-blue-500">*</span></Label>
                     <Input
                       id={`quantity-${item.id}`}
                       type="number"
                       min="1"
                       value={item.quantity}
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      className="hover:border-blue-300 focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div className="w-32">
-                    <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
+                    <Label htmlFor={`price-${item.id}`} className="text-sm text-gray-600">Price (DH) <span className="text-blue-500">*</span></Label>
                     <Input
                       id={`price-${item.id}`}
                       type="number"
@@ -854,11 +855,12 @@ const NewReceipt = () => {
                       step="0.01"
                       value={item.price}
                       onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                      className="hover:border-blue-300 focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div className="w-32">
-                    <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+                    <Label htmlFor={`cost-${item.id}`} className="text-sm text-gray-600">Cost (DH) <span className="text-blue-500">*</span></Label>
                     <Input
                       id={`cost-${item.id}`}
                       type="number"
@@ -866,19 +868,20 @@ const NewReceipt = () => {
                       step="0.01"
                       value={item.cost}
                       onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                      className="hover:border-blue-300 focus:border-blue-500 transition-colors"
                     />
                   </div>
 
                   <div className="w-32">
-                    <Label>Total</Label>
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                    <Label className="text-sm text-gray-500">Total (Auto)</Label>
+                    <div className="h-11 px-3 py-2 rounded-md bg-gray-50 text-sm font-medium text-gray-700 border border-gray-200 cursor-not-allowed">
                       {(item.price * item.quantity).toFixed(2)} DH
                     </div>
                   </div>
 
                   <div className="w-32">
-                    <Label>Profit</Label>
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                    <Label className="text-sm text-gray-500">Profit (Auto)</Label>
+                    <div className="h-11 px-3 py-2 rounded-md bg-gray-50 text-sm font-medium text-gray-700 border border-gray-200 cursor-not-allowed">
                       {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
                     </div>
                   </div>
