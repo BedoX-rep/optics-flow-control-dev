@@ -89,7 +89,7 @@ const IndexPage = () => {
             <div className="flex items-center">
               <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
             </div>
-            
+
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
               <NavigationMenu>
@@ -127,12 +127,12 @@ const IndexPage = () => {
                   <ContactMenu />
                 </NavigationMenuList>
               </NavigationMenu>
-              
+
               {/* Language Switcher */}
               <div className="mx-2 z-20">
                 <LanguageSwitcher />
               </div>
-              
+
               <div className="flex items-center space-x-4 relative z-10">
                 <button
                   onClick={() => navigate(user ? "/dashboard" : "/auth")}
@@ -220,7 +220,7 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 95%, 100% 45%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 95%, 100% 65%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
