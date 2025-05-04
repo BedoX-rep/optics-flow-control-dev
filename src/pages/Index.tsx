@@ -220,18 +220,18 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 95%, 100% 60%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 95%, 100% 45%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
       </div>
 
       {/* Effortless Section Content */}
-      <section className="pt-0 -mt-32 sm:-mt-40 md:-mt-60 px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-0 -mt-24 sm:-mt-32 md:-mt-45 px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-12`}>
-              <div className="inline-block mb-4">
+              <div className="hidden md:inline-block mb-4">
                 <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-16 h-16 md:w-24 md:h-24" />
               </div>
               <h2 className="text-xl md:text-2xl font-bold mb-4 text-teal-600">
