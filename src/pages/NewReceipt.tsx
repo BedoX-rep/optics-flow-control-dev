@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X, Copy } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -756,38 +757,41 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Receipt Items</CardTitle>
-            <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="ghost" size="icon">
-              Settings
-            </Button>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2 flex flex-row justify-between items-center">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <div className="flex items-center gap-2">
+                <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="ghost" size="sm" className="h-8">
+                  <Settings className="h-4 w-4 mr-1" />
+                  Markup
+                </Button>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => addItem('product')} variant="outline" size="sm" className="h-8">
+                <Plus className="h-4 w-4 mr-1" /> Product
+              </Button>
+              <Button onClick={() => addItem('custom')} variant="outline" size="sm" className="h-8">
+                <Plus className="h-4 w-4 mr-1" /> Custom
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="p-2 pt-0">
+          <CardContent className="p-4">
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="autoMontage"
-                    checked={autoMontage}
-                    onChange={(e) => setAutoMontage(e.target.checked)}
-                    className="w-4 h-4"
-                  />
-                  <Label htmlFor="autoMontage">Auto-add Montage costs</Label>
-                </div>
-                <div className="flex space-x-2">
-                  <Button onClick={() => addItem('product')} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-1" /> Add Product
-                  </Button>
-                  <Button onClick={() => addItem('custom')} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-1" /> Add Custom Item
-                  </Button>
-                </div>
+              <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-lg">
+                <Switch
+                  id="autoMontage"
+                  checked={autoMontage}
+                  onCheckedChange={(checked) => setAutoMontage(checked)}
+                />
+                <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
+                  Auto-add Montage costs
+                </Label>
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-2 p-2 border rounded-md">
+                <div key={item.id} className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
