@@ -550,22 +550,32 @@ const NewReceipt = () => {
 
 
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-4">
-        <Card>
+    <div className="min-h-screen bg-gray-50/50 py-8">
+      <div className="max-w-[1400px] mx-auto px-4 space-y-6">
+        <PageTitle 
+          title="New Receipt" 
+          subtitle="Create a new receipt for your client"
+          className="mb-8"
+        />
+        <div className="grid grid-cols-1 gap-6">
+          <Card className="shadow-sm border-0">
           <CardHeader>
             <CardTitle>Client Information</CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  id="client-search"
-                  placeholder="Search by name or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-9"
-                />
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[280px]">
+                <Label htmlFor="client-search" className="text-sm font-medium mb-2">Search Client</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="client-search"
+                    placeholder="Search by name or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 h-10 bg-white"
+                  />
+                </div>
               </div>
               <div className="flex-1">
                 <Select value={selectedClient} onValueChange={handleClientSelect}>
@@ -591,14 +601,22 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="cursor-pointer" onClick={() => setPrescriptionOpen(!prescriptionOpen)}>
+        <Card className="shadow-sm border-0">
+          <CardHeader 
+            className="cursor-pointer hover:bg-gray-50/50 transition-colors" 
+            onClick={() => setPrescriptionOpen(!prescriptionOpen)}
+          >
             <div className="flex justify-between items-center">
-              <CardTitle>Prescription Details</CardTitle>
-              <ChevronDown className={`h-4 w-4 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-blue-100 p-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
+                <CardTitle>Prescription Details</CardTitle>
+              </div>
+              <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
             </div>
           </CardHeader>
-          <CardContent className={`${prescriptionOpen ? '' : 'hidden'} p-3`}>
+          <CardContent className={`${prescriptionOpen ? '' : 'hidden'} p-6 border-t`}>
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-3">Right Eye</h3>
@@ -757,24 +775,44 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-        <div className="mb-6 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-semibold">Receipt Items</h2>
-            <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="outline" size="sm" className="h-9">
-              <Settings className="h-4 w-4 mr-2" />
-              Markup Settings
-            </Button>
+        <div className="bg-white rounded-xl shadow-sm border-0 p-6">
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-blue-100 p-2.5">
+                <FileText className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Receipt Items</h2>
+                <p className="text-sm text-gray-500 mt-1">Add and manage items in your receipt</p>
+              </div>
+              <Button 
+                onClick={() => setIsMarkupSettingsOpen(true)} 
+                variant="outline" 
+                size="sm" 
+                className="ml-2 bg-gray-50 hover:bg-gray-100"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Markup Settings
+              </Button>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => addItem('product')} 
+                size="lg" 
+                className="h-11 px-6 bg-blue-600 hover:bg-blue-700 shadow-sm"
+              >
+                <Plus className="h-5 w-5 mr-2" /> Add Product
+              </Button>
+              <Button 
+                onClick={() => addItem('custom')} 
+                variant="outline" 
+                size="lg" 
+                className="h-11 px-6 border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Plus className="h-5 w-5 mr-2" /> Add Custom Item
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <Button onClick={() => addItem('product')} size="lg" className="h-10 px-6 bg-black hover:bg-black/90">
-              <Plus className="h-5 w-5 mr-2" /> Add Product
-            </Button>
-            <Button onClick={() => addItem('custom')} variant="outline" size="lg" className="h-10 px-6">
-              <Plus className="h-5 w-5 mr-2" /> Add Custom Item
-            </Button>
-          </div>
-        </div>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6">
             <div className="space-y-2">
@@ -973,11 +1011,18 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-8">
-              <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
-                <h3 className="font-semibold text-xl text-gray-900">Order Summary</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="shadow-sm border-0">
+            <CardHeader className="border-b">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-green-100 p-2">
+                  <FileText className="h-5 w-5 text-green-600" />
+                </div>
+                <CardTitle>Order Summary</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
@@ -1028,8 +1073,16 @@ const NewReceipt = () => {
                 </div>
               </div>
 
-              <div className="flex-1 p-6 space-y-4 border rounded-lg">
-                <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
+              <Card className="shadow-sm border-0">
+                <CardHeader className="border-b">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full bg-purple-100 p-2">
+                      <FileText className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <CardTitle>Payment Options</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
                 <div className="grid gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1137,20 +1190,31 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
 
-        <div className="mt-4 flex justify-end space-x-4">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/receipts')}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSaveReceipt}
-            disabled={isLoading}
-          >
-            {isLoading ? "Saving..." : "Save Receipt"}
-          </Button>
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t py-4 px-6 mt-8">
+          <div className="max-w-[1400px] mx-auto flex justify-end space-x-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/receipts')}
+              disabled={isLoading}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveReceipt}
+              disabled={isLoading}
+              className="px-6 bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Saving...
+                </>
+              ) : (
+                "Save Receipt"
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
