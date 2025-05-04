@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -76,10 +77,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       gender: client?.gender,
       right_eye_sph: client?.right_eye_sph?.toString() || "",
       right_eye_cyl: client?.right_eye_cyl?.toString() || "",
-      right_eye_axe: client?.right_eye_axe !== undefined ? client?.right_eye_axe.toString() : undefined,
+      right_eye_axe: client?.right_eye_axe,
       left_eye_sph: client?.left_eye_sph?.toString() || "",
       left_eye_cyl: client?.left_eye_cyl?.toString() || "",
-      left_eye_axe: client?.left_eye_axe !== undefined ? client?.left_eye_axe.toString() : undefined,
+      left_eye_axe: client?.left_eye_axe,
       notes: client?.notes || ""
     },
   })
@@ -92,10 +93,10 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         gender: client.gender,
         right_eye_sph: client.right_eye_sph !== undefined ? client.right_eye_sph.toString() : "",
         right_eye_cyl: client.right_eye_cyl !== undefined ? client.right_eye_cyl.toString() : "",
-        right_eye_axe: client.right_eye_axe !== undefined ? client.right_eye_axe.toString() : undefined,
+        right_eye_axe: client.right_eye_axe,
         left_eye_sph: client.left_eye_sph !== undefined ? client.left_eye_sph.toString() : "",
         left_eye_cyl: client.left_eye_cyl !== undefined ? client.left_eye_cyl.toString() : "",
-        left_eye_axe: client.left_eye_axe !== undefined ? client.left_eye_axe.toString() : undefined,
+        left_eye_axe: client.left_eye_axe,
         notes: client.notes || ""
       });
       setGender(client.gender);
@@ -104,21 +105,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Convert string form values to appropriate number types for the database
       const clientData = {
         user_id: user?.id,
-        name: values.name,
-        phone: values.phone,
-        gender: values.gender,
-        right_eye_sph: values.right_eye_sph,
-        right_eye_cyl: values.right_eye_cyl,
-        right_eye_axe: values.right_eye_axe,
-        left_eye_sph: values.left_eye_sph,
-        left_eye_cyl: values.left_eye_cyl,
-        left_eye_axe: values.left_eye_axe,
-        Add: values.Add,
-        assurance: values.assurance,
-        notes: values.notes
+        ...values
       }
 
       const { data, error } = await supabase
@@ -278,14 +267,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                             inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
+                              field.onChange(value);
                             }} 
                             className="h-8"
                           />
@@ -366,14 +349,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                             inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
+                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
+                              field.onChange(value);
                             }} 
                             className="h-8"
                           />
@@ -450,5 +427,4 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
     </Dialog>
   )
 }
-
 export default EditClientDialog
