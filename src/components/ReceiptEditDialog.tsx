@@ -68,11 +68,26 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       setLoading(true);
 
       // Calculate products cost and cost_ttc
+      // Calculate total and costs
       const totalProductsCost = formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
-
-      // Update receipt
       const total = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      // If the total cost was manually edited, distribute the difference proportionally
+      if (formData.manualCostTtc && formData.manualCostTtc !== costTtc) {
+        const costDifference = formData.manualCostTtc - costTtc;
+        const itemsWithCost = formData.items.filter(item => item.cost > 0);
+        const totalWeight = itemsWithCost.reduce((sum, item) => sum + item.cost, 0);
+        
+        formData.items = formData.items.map(item => {
+          if (item.cost > 0) {
+            const proportion = item.cost / totalWeight;
+            const costAdjustment = costDifference * proportion;
+            return { ...item, cost: item.cost + costAdjustment };
+          }
+          return item;
+        });
+      }
       const { error: receiptError } = await supabase
         .from('receipts')
         .update({
@@ -239,8 +254,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
               <Label>Products Cost</Label>
               <Input
                 type="number"
-                value={formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0)}
-                disabled
+                value={formData.manualCostTtc || formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0)}
+                onChange={(e) => {
+                  const newCost = parseFloat(e.target.value) || 0;
+                  setFormData(prev => ({ ...prev, manualCostTtc: newCost }));
+                }}
               />
             </div>
             <div>
