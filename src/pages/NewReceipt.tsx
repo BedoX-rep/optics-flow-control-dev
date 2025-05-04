@@ -551,7 +551,7 @@ const NewReceipt = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 gap-6"> {/* Added md:grid-cols-3 for larger screens */}
         <Card>
           <CardHeader>
             <CardTitle>Client Information</CardTitle>
@@ -1133,6 +1133,30 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="col-span-3 h-fit sticky top-4">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Markup Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setIsMarkupSettingsOpen(true)} 
+              variant="outline" 
+              className="w-full"
+            >
+              Configure Markup Rules
+            </Button>
+            <div className="mt-4 space-y-2 text-sm text-gray-600">
+              <p>• SPH-based markup rules</p>
+              <p>• CYL-based markup rules</p>
+              <p>• Automatic price adjustments</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
         <div className="mt-4 flex justify-end space-x-4">
           <Button
