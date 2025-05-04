@@ -1,171 +1,122 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { useAuth } from "@/components/AuthProvider"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState, useEffect } from 'react';
+
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Client } from '@/integrations/supabase/types';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(8, "Phone must be at least 8 characters"),
-  gender: z.enum(["Mr", "Mme", "Enf"]),
-  right_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_axe: z.union([
-    z.string().transform((val) => val === '' ? undefined : parseInt(val)),
-    z.number()
-  ]).optional(),
-  left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_axe: z.union([
-    z.string().transform((val) => val === '' ? undefined : parseInt(val)),
-    z.number()
-  ]).optional(),
-  Add: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  assurance: z.string().optional(),
-  notes: z.string().nullable().optional()
-})
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  notes: z.string().optional(),
+  sph_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  sph_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  cyl_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  cyl_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  axis_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  axis_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface EditClientDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onClientUpdated: (client: { id: string; name: string }) => void
-  client: {
-    id: string;
-    name: string;
-    phone: string;
-    gender: "Mr" | "Mme" | "Enf";
-    right_eye_sph?: number;
-    right_eye_cyl?: number;
-    right_eye_axe?: number;
-    left_eye_sph?: number;
-    left_eye_cyl?: number;
-    left_eye_axe?: number;
-    notes?: string;
-  };
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  client: Client | null;
+  onSave: (data: Partial<Client>) => void;
+  isLoading?: boolean;
 }
 
-const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClientDialogProps) => {
-  const { toast } = useToast()
-  const { user } = useAuth()
-  const [gender, setGender] = useState<"Mr" | "Mme" | "Enf">(client?.gender || "Mr");
-
-  const form = useForm<z.infer<typeof formSchema>>({
+const EditClientDialog: React.FC<EditClientDialogProps> = ({
+  open,
+  onOpenChange,
+  client,
+  onSave,
+  isLoading = false,
+}) => {
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: client?.name || "",
-      phone: client?.phone || "",
-      gender: client?.gender,
-      right_eye_sph: client?.right_eye_sph?.toString() || "",
-      right_eye_cyl: client?.right_eye_cyl?.toString() || "",
-      right_eye_axe: client?.right_eye_axe !== undefined ? client?.right_eye_axe.toString() : undefined,
-      left_eye_sph: client?.left_eye_sph?.toString() || "",
-      left_eye_cyl: client?.left_eye_cyl?.toString() || "",
-      left_eye_axe: client?.left_eye_axe !== undefined ? client?.left_eye_axe.toString() : undefined,
-      notes: client?.notes || ""
+      first_name: client?.first_name || '',
+      last_name: client?.last_name || '',
+      email: client?.email || '',
+      phone: client?.phone || '',
+      address: client?.address || '',
+      city: client?.city || '',
+      notes: client?.notes || '',
+      sph_right: client?.sph_right !== undefined ? client.sph_right : undefined,
+      sph_left: client?.sph_left !== undefined ? client.sph_left : undefined,
+      cyl_right: client?.cyl_right !== undefined ? client.cyl_right : undefined,
+      cyl_left: client?.cyl_left !== undefined ? client.cyl_left : undefined,
+      axis_right: client?.axis_right !== undefined ? client.axis_right : undefined,
+      axis_left: client?.axis_left !== undefined ? client.axis_left : undefined,
     },
-  })
+  });
 
-  useEffect(() => {
-    if (client) {
-      form.reset({
-        name: client.name,
-        phone: client.phone,
-        gender: client.gender,
-        right_eye_sph: client.right_eye_sph !== undefined ? client.right_eye_sph.toString() : "",
-        right_eye_cyl: client.right_eye_cyl !== undefined ? client.right_eye_cyl.toString() : "",
-        right_eye_axe: client.right_eye_axe !== undefined ? client.right_eye_axe.toString() : undefined,
-        left_eye_sph: client.left_eye_sph !== undefined ? client.left_eye_sph.toString() : "",
-        left_eye_cyl: client.left_eye_cyl !== undefined ? client.left_eye_cyl.toString() : "",
-        left_eye_axe: client.left_eye_axe !== undefined ? client.left_eye_axe.toString() : undefined,
-        notes: client.notes || ""
-      });
-      setGender(client.gender);
-    }
-  }, [client, form]);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      // Convert string form values to appropriate number types for the database
-      const clientData = {
-        user_id: user?.id,
-        name: values.name,
-        phone: values.phone,
-        gender: values.gender,
-        right_eye_sph: values.right_eye_sph,
-        right_eye_cyl: values.right_eye_cyl,
-        right_eye_axe: values.right_eye_axe,
-        left_eye_sph: values.left_eye_sph,
-        left_eye_cyl: values.left_eye_cyl,
-        left_eye_axe: values.left_eye_axe,
-        Add: values.Add,
-        assurance: values.assurance,
-        notes: values.notes
-      }
-
-      const { data, error } = await supabase
-        .from('clients')
-        .update(clientData)
-        .eq('id', client.id)
-        .select()
-        .single()
-
-      if (error) throw error
-
-      toast({
-        title: "Success",
-        description: "Client updated successfully",
-      })
-
-      onClientUpdated({
-        id: data.id,
-        name: data.name,
-      })
-      onClose()
-      form.reset()
-    } catch (error) {
-      console.error("Error updating client:", error)
-      toast({
-        title: "Error",
-        description: "Failed to update client. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
+  const handleSubmit = (data: FormValues) => {
+    onSave({
+      ...data,
+      // Make sure to convert string values to numbers for these fields
+      sph_right: data.sph_right !== undefined ? Number(data.sph_right) : undefined,
+      sph_left: data.sph_left !== undefined ? Number(data.sph_left) : undefined,
+      cyl_right: data.cyl_right !== undefined ? Number(data.cyl_right) : undefined,
+      cyl_left: data.cyl_left !== undefined ? Number(data.cyl_left) : undefined,
+      axis_right: data.axis_right !== undefined ? Number(data.axis_right) : undefined,
+      axis_left: data.axis_left !== undefined ? Number(data.axis_left) : undefined,
+    });
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[600px] p-6">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit Client</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Basic Information */}
               <FormField
                 control={form.control}
-                name="name"
+                name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -180,275 +131,183 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input {...field} type="tel" />
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Prescription Information */}
+              <div className="col-span-1 md:col-span-2">
+                <h3 className="font-medium text-sm mb-2">Prescription Information</h3>
+              </div>
+              <FormField
+                control={form.control}
+                name="sph_right"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SPH Right</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        step="0.25"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sph_left"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>SPH Left</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        step="0.25"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cyl_right"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CYL Right</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        step="0.25"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cyl_left"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CYL Left</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        step="0.25"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="axis_right"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>AXIS Right</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="axis_left"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>AXIS Left</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Mr">Mr</SelectItem>
-                      <SelectItem value="Mme">Mme</SelectItem>
-                      <SelectItem value="Enf">Enf</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">Right Eye</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="right_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Sph</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Cyl</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Axe</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            inputMode="numeric"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }} 
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">Left Eye</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="left_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Sph</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Cyl</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Axe</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            inputMode="numeric"
-                            {...field} 
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              if (/^\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }} 
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-            <FormField
-              control={form.control}
-              name="Add"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Add</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="text"
-                      {...field} 
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          field.onChange(undefined);
-                          return;
-                        }
-                        if (/^-?\d*\.?\d*$/.test(value)) {
-                          field.onChange(value);
-                        }
-                      }}
-                      className="h-8"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="assurance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assurance</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" className="h-8" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Update Client</Button>
-            </div>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default EditClientDialog
+export default EditClientDialog;
