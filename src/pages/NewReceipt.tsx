@@ -757,59 +757,26 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-        <div className="mb-6 bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Receipt Items</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Add and manage items in your receipt</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button 
-                onClick={() => setIsMarkupSettingsOpen(true)} 
-                variant="outline" 
-                size="sm" 
-                className="h-9 bg-white border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Markup Settings
-              </Button>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => addItem('product')} 
-                  size="lg" 
-                  className="h-10 px-6 bg-black hover:bg-black/90 shadow-sm transition-all duration-200 hover:shadow-md"
-                >
-                  <Plus className="h-5 w-5 mr-2" /> Add Product
-                </Button>
-                <Button 
-                  onClick={() => addItem('custom')} 
-                  variant="outline" 
-                  size="lg" 
-                  className="h-10 px-6 bg-white border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="h-5 w-5 mr-2" /> Add Custom Item
-                </Button>
-              </div>
-            </div>
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Receipt Items</h2>
+            <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="outline" size="sm" className="h-9">
+              <Settings className="h-4 w-4 mr-2" />
+              Markup Settings
+            </Button>
           </div>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-              <div className="flex items-center mb-3 bg-white p-3 rounded-lg border border-gray-200">
-                <Switch
-                  id="autoMontage"
-                  checked={autoMontage}
-                  onCheckedChange={(checked) => setAutoMontage(checked)}
-                />
-                <Label htmlFor="autoMontage" className="ml-3 font-medium text-gray-700">
-                  Auto-add Montage costs
-                </Label>
-              </div>
-            </div>
+          <div className="flex gap-3">
+            <Button onClick={() => addItem('product')} size="lg" className="h-10 px-6 bg-black hover:bg-black/90">
+              <Plus className="h-5 w-5 mr-2" /> Add Product
+            </Button>
+            <Button onClick={() => addItem('custom')} variant="outline" size="lg" className="h-10 px-6">
+              <Plus className="h-5 w-5 mr-2" /> Add Custom Item
+            </Button>
+          </div>
+        </div>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-6">
             <div className="space-y-2">
               <div className="flex items-center mb-6 bg-black/5 p-4 rounded-xl border border-black/10">
                 <Switch
@@ -821,12 +788,9 @@ const NewReceipt = () => {
                   Auto-add Montage costs
                 </Label>
               </div>
-            </div>
-          </div>
-        </div>
 
               {items.map((item) => (
-                <div key={item.id} className="group flex flex-wrap lg:flex-nowrap items-start gap-4 p-6 bg-white hover:bg-gray-50/50 border-b border-gray-100 last:border-b-0 transition-all duration-200">
+                <div key={item.id} className="flex items-center gap-4 p-6 bg-white border border-black/10 rounded-xl shadow-sm mb-4 hover:border-primary/30 transition-all duration-200">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`} className="text-sm text-gray-600">Custom Item Name <span className="text-blue-500">*</span></Label>
@@ -834,7 +798,7 @@ const NewReceipt = () => {
                         id={`custom-${item.id}`}
                         value={item.customName || ''}
                         onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                        className="h-11 text-base bg-white border-gray-200 hover:border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all duration-200"
+                        className="h-11 text-base hover:border-blue-300 focus:border-blue-500 transition-colors"
                       />
                     </div>
                   ) : (
