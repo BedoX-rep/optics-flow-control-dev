@@ -131,7 +131,7 @@ const NewReceipt = () => {
         if (productsResult.error) throw productsResult.error;
         if (clientsResult.error) throw clientsResult.error;
 
-        
+
         const mappedProducts = (productsResult.data || []).map(product => ({
           ...product
         }));
@@ -444,14 +444,15 @@ const NewReceipt = () => {
           payment_status: paymentStatus,
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered',
-          montage_costs: montageCosts
+          montage_costs: montageCosts,
+          products_cost: totalCost // Added products_cost
         })
         .select()
         .single();
 
       if (receiptError) throw receiptError;
 
-      
+
       if (selectedClient) {
         const { error: prescriptionError } = await supabase
           .from('clients')
@@ -470,7 +471,7 @@ const NewReceipt = () => {
         if (prescriptionError) throw prescriptionError;
       }
 
-      
+
       const receiptItems = items.map(item => ({
         user_id: user.id,
         receipt_id: receipt.id,
@@ -581,7 +582,7 @@ const NewReceipt = () => {
                       value={rightEye.sph}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, sph: e.target.value });
-                        
+
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -611,7 +612,7 @@ const NewReceipt = () => {
                       value={rightEye.cyl}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, cyl: e.target.value });
-                        
+
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -655,7 +656,7 @@ const NewReceipt = () => {
                       value={leftEye.sph}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, sph: e.target.value });
-                        
+
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -683,7 +684,7 @@ const NewReceipt = () => {
                       value={leftEye.cyl}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, cyl: e.target.value });
-                        
+
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -859,7 +860,7 @@ const NewReceipt = () => {
                   </div>
 
                   <div className="flex gap-1">
-                    
+
                     <Button
                       variant="ghost"
                       size="icon"
@@ -867,14 +868,14 @@ const NewReceipt = () => {
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
-                    
+
                   </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
                       <div className="flex gap-2 items-center">
                         <Button
                           type="button"
-                          variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                          variant={item.linkedEye ==='LE' ? 'default' : 'ghost'}
                           size="icon"
                           className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
@@ -961,12 +962,20 @@ const NewReceipt = () => {
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
 
-                  {montageCosts > 0 && (
+                  <div className="pt-3 border-t space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Products Cost</span>
+                      <span className="font-medium">{totalCost.toFixed(2)} DH</span>
+                    </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Montage Costs</span>
                       <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
                     </div>
-                  )}
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-gray-800">Total Cost (TTC)</span>
+                      <span className="text-primary">{(totalCost + montageCosts).toFixed(2)} DH</span>
+                    </div>
+                  </div>
 
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
