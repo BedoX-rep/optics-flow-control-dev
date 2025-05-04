@@ -3,7 +3,6 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tables } from '@/integrations/supabase/types';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -50,9 +49,11 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
     defaultValues: {
       name: client?.name || '',
       phone: client?.phone || '',
-      email: client?.email || '',
-      address: client?.address || '',
-      city: client?.city || '',
+      // These fields don't exist in the Client type but are in our form
+      // Initialize them as empty strings since they're optional
+      email: '',
+      address: '',
+      city: '',
       notes: client?.notes || '',
       right_eye_sph: client?.right_eye_sph !== undefined ? client.right_eye_sph : undefined,
       left_eye_sph: client?.left_eye_sph !== undefined ? client.left_eye_sph : undefined,
@@ -65,8 +66,10 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
 
   const handleSubmit = (data: FormValues) => {
     onSave({
-      ...data,
-      // Make sure to convert string values to numbers for these fields
+      name: data.name,
+      phone: data.phone,
+      notes: data.notes,
+      // Only include eye prescription fields if they're defined
       right_eye_sph: data.right_eye_sph !== undefined ? Number(data.right_eye_sph) : undefined,
       left_eye_sph: data.left_eye_sph !== undefined ? Number(data.left_eye_sph) : undefined,
       right_eye_cyl: data.right_eye_cyl !== undefined ? Number(data.right_eye_cyl) : undefined,

@@ -30,26 +30,6 @@ import { Tables } from '@/integrations/supabase/types';
 // Define the Client type based on Tables type
 type Client = Tables<'clients'>;
 
-interface Client {
-  id: string;
-  name: string;
-  phone: string;
-  gender: "Mr" | "Mme" | "Enf";
-  right_eye_sph?: number;
-  right_eye_cyl?: number;
-  right_eye_axe?: number;
-  left_eye_sph?: number;
-  left_eye_cyl?: number;
-  left_eye_axe?: number;
-  Add?: number;
-  notes?: string;
-  favorite?: boolean;
-  created_at?: string;
-  is_deleted?: boolean;
-  last_prescription_update?: string;
-  assurance?: string;
-}
-
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
