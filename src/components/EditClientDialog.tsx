@@ -3,31 +3,30 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tables } from '@/integrations/supabase/types';
+import { Label } from "@/components/ui/label";
+import { Client } from '@/integrations/supabase/types';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  phone: z.string().min(1, "Phone is required"),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
   email: z.string().email().optional().or(z.literal('')),
+  phone: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   notes: z.string().optional(),
-  right_eye_sph: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
-  left_eye_sph: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
-  right_eye_cyl: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
-  left_eye_cyl: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
-  right_eye_axe: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
-  left_eye_axe: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  sph_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  sph_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  cyl_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  cyl_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  axis_right: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
+  axis_left: z.number().optional().or(z.literal('')).transform(v => v === '' ? undefined : Number(v)),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-// Use the Tables type from Supabase types
-type Client = Tables<'clients'>;
 
 interface EditClientDialogProps {
   open: boolean;
@@ -47,35 +46,32 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: client?.name || '',
+      first_name: client?.first_name || '',
+      last_name: client?.last_name || '',
+      email: client?.email || '',
       phone: client?.phone || '',
-      // These fields don't exist in the Client type but are in our form
-      // Initialize them as empty strings since they're optional
-      email: '',
-      address: '',
-      city: '',
+      address: client?.address || '',
+      city: client?.city || '',
       notes: client?.notes || '',
-      right_eye_sph: client?.right_eye_sph !== undefined ? client.right_eye_sph : undefined,
-      left_eye_sph: client?.left_eye_sph !== undefined ? client.left_eye_sph : undefined,
-      right_eye_cyl: client?.right_eye_cyl !== undefined ? client.right_eye_cyl : undefined,
-      left_eye_cyl: client?.left_eye_cyl !== undefined ? client.left_eye_cyl : undefined,
-      right_eye_axe: client?.right_eye_axe !== undefined ? client.right_eye_axe : undefined,
-      left_eye_axe: client?.left_eye_axe !== undefined ? client.left_eye_axe : undefined,
+      sph_right: client?.sph_right !== undefined ? client.sph_right : undefined,
+      sph_left: client?.sph_left !== undefined ? client.sph_left : undefined,
+      cyl_right: client?.cyl_right !== undefined ? client.cyl_right : undefined,
+      cyl_left: client?.cyl_left !== undefined ? client.cyl_left : undefined,
+      axis_right: client?.axis_right !== undefined ? client.axis_right : undefined,
+      axis_left: client?.axis_left !== undefined ? client.axis_left : undefined,
     },
   });
 
   const handleSubmit = (data: FormValues) => {
     onSave({
-      name: data.name,
-      phone: data.phone,
-      notes: data.notes,
-      // Only include eye prescription fields if they're defined
-      right_eye_sph: data.right_eye_sph !== undefined ? Number(data.right_eye_sph) : undefined,
-      left_eye_sph: data.left_eye_sph !== undefined ? Number(data.left_eye_sph) : undefined,
-      right_eye_cyl: data.right_eye_cyl !== undefined ? Number(data.right_eye_cyl) : undefined,
-      left_eye_cyl: data.left_eye_cyl !== undefined ? Number(data.left_eye_cyl) : undefined,
-      right_eye_axe: data.right_eye_axe !== undefined ? Number(data.right_eye_axe) : undefined,
-      left_eye_axe: data.left_eye_axe !== undefined ? Number(data.left_eye_axe) : undefined,
+      ...data,
+      // Make sure to convert string values to numbers for these fields
+      sph_right: data.sph_right !== undefined ? Number(data.sph_right) : undefined,
+      sph_left: data.sph_left !== undefined ? Number(data.sph_left) : undefined,
+      cyl_right: data.cyl_right !== undefined ? Number(data.cyl_right) : undefined,
+      cyl_left: data.cyl_left !== undefined ? Number(data.cyl_left) : undefined,
+      axis_right: data.axis_right !== undefined ? Number(data.axis_right) : undefined,
+      axis_left: data.axis_left !== undefined ? Number(data.axis_left) : undefined,
     });
   };
 
@@ -91,10 +87,10 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               {/* Basic Information */}
               <FormField
                 control={form.control}
-                name="name"
+                name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>First Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -104,10 +100,10 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="phone"
+                name="last_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>Last Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -121,6 +117,19 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -161,7 +170,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               </div>
               <FormField
                 control={form.control}
-                name="right_eye_sph"
+                name="sph_right"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>SPH Right</FormLabel>
@@ -180,7 +189,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="left_eye_sph"
+                name="sph_left"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>SPH Left</FormLabel>
@@ -199,7 +208,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="right_eye_cyl"
+                name="cyl_right"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CYL Right</FormLabel>
@@ -218,7 +227,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="left_eye_cyl"
+                name="cyl_left"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CYL Left</FormLabel>
@@ -237,7 +246,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="right_eye_axe"
+                name="axis_right"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>AXIS Right</FormLabel>
@@ -255,7 +264,7 @@ const EditClientDialog: React.FC<EditClientDialogProps> = ({
               />
               <FormField
                 control={form.control}
-                name="left_eye_axe"
+                name="axis_left"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>AXIS Left</FormLabel>

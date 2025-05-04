@@ -12,9 +12,8 @@ const Pricing = () => {
   const { user, subscription } = useAuth();
   
   // Check if user has a subscription and if it's the quarterly plan
-  // Fix the type comparison by using uppercase 'Quarterly'
   const isQuarterlyPlan = subscription?.subscription_status === 'active' && 
-                          subscription?.subscription_type === 'Quarterly';
+                          subscription?.subscription_type === 'quarterly';
 
   const pricingPlans = [
     {

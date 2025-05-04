@@ -25,10 +25,26 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
 import EditClientDialog from '@/components/EditClientDialog';
-import { Tables } from '@/integrations/supabase/types';
 
-// Define the Client type based on Tables type
-type Client = Tables<'clients'>;
+interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  gender: "Mr" | "Mme" | "Enf";
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  Add?: number;
+  notes?: string;
+  favorite?: boolean;
+  created_at?: string;
+  is_deleted?: boolean;
+  last_prescription_update?: string;
+  assurance?: string;
+}
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -229,11 +245,7 @@ const Clients = () => {
                   <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
-                        <ClientAvatar 
-                          gender={client.gender as "Mr" | "Mme" | "Enf" | null} 
-                          name={client.name} 
-                          className="w-11 h-11" 
-                        />
+                        <ClientAvatar gender={client.gender} name={client.name} className="w-11 h-11" />
                         <div className="flex flex-col gap-1">
                           {editingCell?.id === client.id && editingCell.field === "name" ? (
                             <input
@@ -433,15 +445,17 @@ const Clients = () => {
 
       {editingClient ? (
         <EditClientDialog
-          open={isOpen}
-          onOpenChange={setIsOpen}
-          client={editingClient}
-          onSave={(updatedClient) => {
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+            setEditingClient(null);
+          }}
+          onClientUpdated={() => {
             fetchClients();
             setIsOpen(false);
             setEditingClient(null);
           }}
-          isLoading={isLoading}
+          client={editingClient}
         />
       ) : (
         <AddClientDialog
