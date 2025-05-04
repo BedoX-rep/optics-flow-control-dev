@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useLanguage } from './LanguageProvider';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +17,6 @@ const LanguageSwitcher: React.FC = () => {
     { code: 'ar', name: 'العربية', flag: '🇲🇦' }
   ];
 
-  // Find current language data
   const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
   
   return (
@@ -28,14 +26,14 @@ const LanguageSwitcher: React.FC = () => {
           <span className="text-base">{currentLanguage.flag}</span>
           <span>{currentLanguage.code === 'en' ? 'English' : currentLanguage.name}</span>
           <span className="text-xs">▼</span>
-        </Button>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[130px] mt-1">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code as 'en' | 'fr' | 'ar')}
-            className={`flex items-center gap-2 cursor-pointer ${language === lang.code ? "bg-muted" : ""}`}
+            className="flex items-center gap-2 cursor-pointer"
           >
             <span className="text-lg leading-none">{lang.flag}</span>
             <span className="text-sm">{lang.name}</span>
