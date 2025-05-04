@@ -36,6 +36,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
     left_eye_axe: '',
     add: '',
     montage_costs: 0,
+    products_cost: 0,
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
@@ -67,6 +68,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
     try {
       setLoading(true);
 
+      // Calculate new total and costs from items
+      const newTotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const newProductsCost = formData.items.reduce((sum, item) => sum + (item.cost * item.quantity), 0);
+      const newCostTTC = newProductsCost + formData.montage_costs;
+
       // Update receipt
       const { error: receiptError } = await supabase
         .from('receipts')
@@ -79,6 +85,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
           left_eye_axe: formData.left_eye_axe || null,
           add: formData.add || null,
           montage_costs: formData.montage_costs,
+          products_cost: newProductsCost,
+          cost_ttc: newCostTTC,
+          total: newTotal,
           advance_payment: formData.advance_payment,
           delivery_status: formData.delivery_status,
           montage_status: formData.montage_status

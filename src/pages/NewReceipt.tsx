@@ -444,7 +444,9 @@ const NewReceipt = () => {
           payment_status: paymentStatus,
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered',
-          montage_costs: montageCosts
+          montage_costs: montageCosts,
+          products_cost: totalCost,
+          cost_ttc: totalCost + montageCosts
         })
         .select()
         .single();
