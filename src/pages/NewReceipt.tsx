@@ -609,7 +609,27 @@ const NewReceipt = () => {
                       type="text"
                       inputMode="decimal"
                       value={rightEye.sph}
-                      onChange={(e) => setRightEye({ ...rightEye, sph: e.target.value })}
+                      onChange={(e) => {
+                        setRightEye({ ...rightEye, sph: e.target.value });
+                        // Update items linked to right eye
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'RE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                e.target.value ? parseFloat(e.target.value) : null,
+                                rightEye.cyl ? parseFloat(rightEye.cyl) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
                     />
                   </div>
                   <div>
@@ -619,7 +639,27 @@ const NewReceipt = () => {
                       type="text"
                       inputMode="decimal"
                       value={rightEye.cyl}
-                      onChange={(e) => setRightEye({ ...rightEye, cyl: e.target.value })}
+                      onChange={(e) => {
+                        setRightEye({ ...rightEye, cyl: e.target.value });
+                        // Update items linked to right eye
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'RE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                rightEye.sph ? parseFloat(rightEye.sph) : null,
+                                e.target.value ? parseFloat(e.target.value) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
                     />
                   </div>
                   <div>
@@ -643,7 +683,27 @@ const NewReceipt = () => {
                     <Input
                       id="leftSph"
                       value={leftEye.sph}
-                      onChange={(e) => setLeftEye({ ...leftEye, sph: e.target.value })}
+                      onChange={(e) => {
+                        setLeftEye({ ...leftEye, sph: e.target.value });
+                        // Update items linked to left eye
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'LE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                e.target.value ? parseFloat(e.target.value) : null,
+                                leftEye.cyl ? parseFloat(leftEye.cyl) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
                     />
                   </div>
                   <div>
@@ -651,7 +711,27 @@ const NewReceipt = () => {
                     <Input
                       id="leftCyl"
                       value={leftEye.cyl}
-                      onChange={(e) => setLeftEye({ ...leftEye, cyl: e.target.value })}
+                      onChange={(e) => {
+                        setLeftEye({ ...leftEye, cyl: e.target.value });
+                        // Update items linked to left eye
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'LE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                leftEye.sph ? parseFloat(leftEye.sph) : null,
+                                e.target.value ? parseFloat(e.target.value) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
                     />
                   </div>
                   <div>
