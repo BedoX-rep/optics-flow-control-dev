@@ -805,14 +805,7 @@ const NewReceipt = () => {
                   ) : (
                     <div className="flex-1">
                       <Label htmlFor={`product-${item.id}`}>Product</Label>
-                      <div className="space-y-2">
-                        <Input
-                          type="text"
-                          placeholder="Search products..."
-                          value={productSearchTerm}
-                          onChange={(e) => setProductSearchTerm(e.target.value)}
-                          className="mb-2"
-                        />
+                      <div className="flex gap-2">
                         <Select
                           value={item.productId}
                           onValueChange={(value) => updateItem(item.id, 'productId', value)}
@@ -831,6 +824,13 @@ const NewReceipt = () => {
                             ))}
                           </SelectContent>
                         </Select>
+                        <Input
+                          type="text"
+                          placeholder="Search products..."
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          className="w-48"
+                        />
                       </div>
                     </div>
                   )}
@@ -930,28 +930,44 @@ const NewReceipt = () => {
                   </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
-                      <Select
-                        value={item.linkedEye || ""}
-                        onValueChange={(value: 'RE' | 'LE') => {
-                          const updatedItem = { ...item, linkedEye: value };
-                          const product = products.find(p => p.id === item.productId);
-                          if (product) {
-                            const { sph, cyl } = getEyeValues(value);
-                            const markup = calculateMarkup(sph, cyl);
-                            updatedItem.appliedMarkup = markup;
-                            updatedItem.price = product.price * (1 + markup / 100);
-                          }
-                          setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                        }}
-                      >
-                        <SelectTrigger className="w-24">
-                          <SelectValue placeholder="Eye" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="RE">RE</SelectItem>
-                          <SelectItem value="LE">LE</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex rounded-md overflow-hidden border">
+                        <Button
+                          type="button"
+                          variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                          className={`px-3 py-1 h-8 rounded-none ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          onClick={() => {
+                            const updatedItem = { ...item, linkedEye: 'RE' };
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const { sph, cyl } = getEyeValues('RE');
+                              const markup = calculateMarkup(sph, cyl);
+                              updatedItem.appliedMarkup = markup;
+                              updatedItem.price = product.price * (1 + markup / 100);
+                            }
+                            setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                          }}
+                        >
+                          Right Eye
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                          className={`px-3 py-1 h-8 rounded-none ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          onClick={() => {
+                            const updatedItem = { ...item, linkedEye: 'LE' };
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const { sph, cyl } = getEyeValues('LE');
+                              const markup = calculateMarkup(sph, cyl);
+                              updatedItem.appliedMarkup = markup;
+                              updatedItem.price = product.price * (1 + markup / 100);
+                            }
+                            setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                          }}
+                        >
+                          Left Eye
+                        </Button>
+                      </div>
                       {item.appliedMarkup > 0 && (
                         <span className="text-sm text-muted-foreground">
                           (+{item.appliedMarkup}% markup)
