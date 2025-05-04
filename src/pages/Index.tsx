@@ -197,7 +197,7 @@ const IndexPage = () => {
         </header>
 
         {/* Combined Hero and Effortless Section */}
-        <section className="container mx-auto pt-8 pb-20 md:py-16 px-4 md:px-6 lg:px-10 text-center relative">
+          <section className="container mx-auto pt-8 pb-[65px] md:py-16 px-4 md:px-6 lg:px-10 text-center relative">
           <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             {t('heroTitle')}
           </h1>
@@ -227,7 +227,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless Section Content */}
-      <section className="pt-0 -mt-24 sm:-mt-32 md:-mt-[50px] px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
+            <section className="pt-0 -mt-[160px] px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-12`}>
