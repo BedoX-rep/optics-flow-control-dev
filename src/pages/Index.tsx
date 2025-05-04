@@ -154,7 +154,7 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 85%, 100% 65%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 80%, 100% 60%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
