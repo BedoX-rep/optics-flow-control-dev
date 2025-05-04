@@ -25,6 +25,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
 import EditClientDialog from '@/components/EditClientDialog';
+import { Tables } from '@/integrations/supabase/types';
+
+// Define the Client type based on Tables type
+type Client = Tables<'clients'>;
 
 interface Client {
   id: string;
@@ -445,17 +449,15 @@ const Clients = () => {
 
       {editingClient ? (
         <EditClientDialog
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-            setEditingClient(null);
-          }}
-          onClientUpdated={() => {
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          client={editingClient}
+          onSave={(updatedClient) => {
             fetchClients();
             setIsOpen(false);
             setEditingClient(null);
           }}
-          client={editingClient}
+          isLoading={isLoading}
         />
       ) : (
         <AddClientDialog

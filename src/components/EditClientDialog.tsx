@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Client } from '@/integrations/supabase/types';
+import { Tables } from '@/integrations/supabase/types';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,6 +27,9 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+// Use the Tables type from Supabase types instead of Client
+type Client = Tables<'clients'>;
 
 interface EditClientDialogProps {
   open: boolean;
