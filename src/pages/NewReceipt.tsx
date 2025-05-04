@@ -757,41 +757,40 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold">Receipt Items</h2>
+            <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="outline" size="sm" className="h-9">
+              <Settings className="h-4 w-4 mr-2" />
+              Markup Settings
+            </Button>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => addItem('product')} size="lg" className="h-10 px-6 bg-black hover:bg-black/90">
+              <Plus className="h-5 w-5 mr-2" /> Add Product
+            </Button>
+            <Button onClick={() => addItem('custom')} variant="outline" size="lg" className="h-10 px-6">
+              <Plus className="h-5 w-5 mr-2" /> Add Custom Item
+            </Button>
+          </div>
+        </div>
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 flex flex-row justify-between items-center">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="ghost" size="sm" className="h-8">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Markup
-                </Button>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => addItem('product')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Product
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Custom
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="space-y-2">
-              <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-lg">
+              <div className="flex items-center mb-6 bg-black/5 p-4 rounded-xl border border-black/10">
                 <Switch
                   id="autoMontage"
                   checked={autoMontage}
                   onCheckedChange={(checked) => setAutoMontage(checked)}
                 />
-                <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
+                <Label htmlFor="autoMontage" className="ml-3 font-medium">
                   Auto-add Montage costs
                 </Label>
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
+                <div key={item.id} className="flex items-center gap-4 p-6 bg-white border border-black/10 rounded-xl shadow-sm mb-4 hover:border-primary/30 transition-all duration-200">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
@@ -799,18 +798,19 @@ const NewReceipt = () => {
                         id={`custom-${item.id}`}
                         value={item.customName || ''}
                         onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                        className="h-11 text-base"
                       />
                     </div>
                   ) : (
                     <div className="flex-1">
-                      <Label htmlFor={`product-${item.id}`}>Product</Label>
-                      <div className="space-y-2">
+                      <Label htmlFor={`product-${item.id}`} className="text-sm font-medium">Product</Label>
+                      <div className="space-y-3">
                         <Input
                           type="text"
                           placeholder="Search products..."
                           value={productSearchTerm}
                           onChange={(e) => setProductSearchTerm(e.target.value)}
-                          className="mb-2"
+                          className="h-11 text-base bg-gray-50/50"
                         />
                         <Select
                           value={item.productId}
