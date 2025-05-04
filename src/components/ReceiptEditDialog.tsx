@@ -73,20 +73,36 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
       const total = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-      // If the total cost was manually edited, distribute the difference proportionally
+      // If the total cost was manually edited, distribute the difference
       if (formData.manualCostTtc && formData.manualCostTtc !== costTtc) {
         const costDifference = formData.manualCostTtc - costTtc;
-        const itemsWithCost = formData.items.filter(item => item.cost > 0);
-        const totalWeight = itemsWithCost.reduce((sum, item) => sum + item.cost, 0);
         
-        formData.items = formData.items.map(item => {
-          if (item.cost > 0) {
-            const proportion = item.cost / totalWeight;
-            const costAdjustment = costDifference * proportion;
-            return { ...item, cost: item.cost + costAdjustment };
+        // Handle single item or all items having 0 cost
+        if (formData.items.length === 1 || formData.items.every(item => item.cost === 0)) {
+          formData.items = formData.items.map(item => ({
+            ...item,
+            cost: formData.manualCostTtc / formData.items.length
+          }));
+        } else {
+          // Distribute proportionally for multiple items
+          const totalWeight = formData.items.reduce((sum, item) => sum + (item.cost || 0), 0);
+          
+          if (totalWeight === 0) {
+            // If all costs are 0, distribute equally
+            const equalShare = costDifference / formData.items.length;
+            formData.items = formData.items.map(item => ({
+              ...item,
+              cost: equalShare
+            }));
+          } else {
+            // Distribute proportionally based on existing costs
+            formData.items = formData.items.map(item => {
+              const proportion = (item.cost || 0) / totalWeight;
+              const costAdjustment = costDifference * proportion;
+              return { ...item, cost: (item.cost || 0) + costAdjustment };
+            });
           }
-          return item;
-        });
+        }
       }
       const { error: receiptError } = await supabase
         .from('receipts')
