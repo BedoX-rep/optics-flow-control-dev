@@ -792,94 +792,70 @@ const NewReceipt = () => {
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-5 bg-white border border-neutral-100 rounded-xl shadow-sm mb-4 hover:border-primary/20 hover:shadow-md transition-all duration-200">
+                <div key={item.id} className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
-                      <Label htmlFor={`custom-${item.id}`} className="text-sm font-medium text-neutral-600">Custom Item Name</Label>
+                      <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
                       <Input
                         id={`custom-${item.id}`}
                         value={item.customName || ''}
                         onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                        className="mt-1.5"
-                        placeholder="Enter item name..."
                       />
                     </div>
                   ) : (
                     <div className="flex-1">
-                      <Label htmlFor={`product-${item.id}`} className="text-sm font-medium text-neutral-600">Product</Label>
-                      <div className="space-y-2 mt-1.5">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
-                          <Input
-                            type="text"
-                            placeholder="Search products..."
-                            value={productSearchTerm}
-                            onChange={(e) => setProductSearchTerm(e.target.value)}
-                            className="pl-9 bg-white"
-                          />
-                        </div>
+                      <Label htmlFor={`product-${item.id}`}>Product</Label>
+                      <div className="space-y-2">
+                        <Input
+                          type="text"
+                          placeholder="Search products..."
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          className="mb-2"
+                        />
                         <Select
                           value={item.productId}
                           onValueChange={(value) => updateItem(item.id, 'productId', value)}
                         >
-                          <SelectTrigger 
-                            id={`product-${item.id}`}
-                            className="bg-white border-neutral-200 hover:border-neutral-300 transition-colors"
-                          >
+                          <SelectTrigger id={`product-${item.id}`}>
                             <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                           <SelectContent>
-                            <div className="max-h-[280px] overflow-y-auto">
-                              {filteredProducts.map(product => (
-                                <SelectItem 
-                                  key={product.id} 
-                                  value={product.id}
-                                  className="cursor-pointer hover:bg-neutral-50"
-                                >
-                                  <div className="flex justify-between items-center w-full gap-4 py-1">
-                                    <div className="flex flex-col">
-                                      <span className="font-medium text-neutral-900">{product.name}</span>
-                                      <span className="text-xs text-neutral-500">{product.category}</span>
-                                    </div>
-                                    <span className="text-sm font-semibold text-primary tabular-nums">{product.price.toFixed(2)} DH</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </div>
+                            {filteredProducts.map(product => (
+                              <SelectItem key={product.id} value={product.id}>
+                                <div className="flex justify-between items-center w-full gap-4">
+                                  <span className="font-medium">{product.name}</span>
+                                  <span className="text-sm text-blue-900 tabular-nums">{product.price.toFixed(2)} DH</span>
+                                </div>
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
                   )}
 
-                  <div className="w-24">
-                    <Label htmlFor={`quantity-${item.id}`} className="text-sm font-medium text-neutral-600">Quantity</Label>
-                    <div className="relative mt-1.5">
-                      <Input
-                        id={`quantity-${item.id}`}
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                        className="bg-white text-center font-medium"
-                      />
-                    </div>
+                  <div className="w-20">
+                    <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                    <Input
+                      id={`quantity-${item.id}`}
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                    />
                   </div>
 
-                  <div className="w-36">
-                    <Label htmlFor={`price-${item.id}`} className="text-sm font-medium text-neutral-600">Price</Label>
-                    <div className="relative mt-1.5">
-                      <Input
-                        id={`price-${item.id}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.price}
-                        onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                        className="bg-white text-right pr-12 font-medium"
-                      />
-                      <span className="absolute right-3 top-2.5 text-sm text-neutral-500">DH</span>
-                    </div>
+                  <div className="w-32">
+                    <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
+                    <Input
+                      id={`price-${item.id}`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.price}
+                      onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                    />
                   </div>
 
                   <div className="w-32">
