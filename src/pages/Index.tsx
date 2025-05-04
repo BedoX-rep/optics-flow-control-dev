@@ -216,7 +216,7 @@ const IndexPage = () => {
             <div className="relative order-1 md:order-2">
               <div className="rounded-xl overflow-hidden shadow-2xl transform -rotate-6">
                 <img 
-                  src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
+                  src="/lovable-uploads/2e06dd1e-f886-4184-8b53-def6765f32d3.png" 
                   alt="Lensly software interface" 
                   className="w-full h-auto"
                 />
