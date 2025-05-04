@@ -24,16 +24,13 @@ const LanguageSwitcher: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="relative z-20 flex gap-2 items-center rounded-full border shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
-        >
-          <span className="text-lg leading-none">{currentLanguage.flag}</span>
-          <span className="sr-only md:not-sr-only md:inline-block text-xs font-medium">{currentLanguage.name}</span>
+        <div className="flex items-center gap-1 text-sm font-medium cursor-pointer hover:opacity-80">
+          <span className="text-base">{currentLanguage.flag}</span>
+          <span>{currentLanguage.code === 'en' ? 'English' : currentLanguage.name}</span>
+          <span className="text-xs">▼</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[150px]">
+      <DropdownMenuContent align="end" className="min-w-[130px] mt-1">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
