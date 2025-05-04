@@ -29,7 +29,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  cost_ttc: number; // Changed from Cost to cost_ttc
+  cost_ttc: number; 
   category: string;
 }
 
@@ -131,7 +131,7 @@ const NewReceipt = () => {
         if (productsResult.error) throw productsResult.error;
         if (clientsResult.error) throw clientsResult.error;
 
-        // Map database products to match our interface
+        
         const mappedProducts = (productsResult.data || []).map(product => ({
           ...product
         }));
@@ -205,61 +205,10 @@ const NewReceipt = () => {
             ...item,
             productId: value.toString(),
             price: product.price || 0,
-            cost: product.cost_ttc || 0, // Use cost_ttc instead of Cost
+            cost: product.cost_ttc || 0, 
             appliedMarkup: 0
           };
 
-          // Handle montage costs when a lens product is selected
-          if (autoMontage && (product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses')) {
-            setTimeout(() => {
-              setItems(prevItems => {
-                let countSingleVision = prevItems.reduce((count, item) => {
-                  const prod = products.find(p => p.id === item.productId);
-                  return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
-                }, 0);
-
-                let countProgressive = prevItems.reduce((count, item) => {
-                  const prod = products.find(p => p.id === item.productId);
-                  return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
-                }, 0);
-
-                const totalLensQuantity = countSingleVision + countProgressive;
-                const wholePairs = Math.floor(totalLensQuantity / 2);
-                const hasExtraLens = totalLensQuantity % 2 === 1;
-
-                const montageItem = prevItems.find(i => i.customName === 'Montage costs');
-                const baseCostSV = 20;
-                const baseCostPG = 40;
-
-                let totalMontageCost = 0;
-                if (wholePairs > 0) {
-                  totalMontageCost += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
-                }
-                if (hasExtraLens) {
-                  totalMontageCost += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
-                }
-
-                if (totalLensQuantity > 0) {
-                  if (montageItem) {
-                    return prevItems.map(item =>
-                      item.id === montageItem.id
-                        ? { ...item, price: totalMontageCost, cost: totalMontageCost }
-                        : item
-                    );
-                  } else {
-                    return [...prevItems, {
-                      id: `montage-${Date.now()}`,
-                      customName: 'Montage costs',
-                      quantity: 1,
-                      price: totalMontageCost,
-                      cost: totalMontageCost,
-                    }];
-                  }
-                }
-                return prevItems;
-              });
-            }, 0);
-          }
 
           // Only calculate markup for lenses if eye is linked
           if ((product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses') && item.linkedEye) {
@@ -314,10 +263,36 @@ const NewReceipt = () => {
   const subtotal = items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
+  let montageCosts = 0;
+  if (autoMontage) {
+    let countSingleVision = items.reduce((count, item) => {
+      const prod = products.find(p => p.id === item.productId);
+      return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+    }, 0);
+
+    let countProgressive = items.reduce((count, item) => {
+      const prod = products.find(p => p.id === item.productId);
+      return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+    }, 0);
+
+    const totalLensQuantity = countSingleVision + countProgressive;
+    const wholePairs = Math.floor(totalLensQuantity / 2);
+    const hasExtraLens = totalLensQuantity % 2 === 1;
+    const baseCostSV = 20;
+    const baseCostPG = 40;
+
+    if (wholePairs > 0) {
+      montageCosts += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
+    }
+    if (hasExtraLens) {
+      montageCosts += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
+    }
+  }
+
   // Calculate percentage-based discount
   // Calculate tax first
-  const taxAmount = tax > subtotal ? (tax - subtotal) * taxIndicator : 0;
-  const afterTax = subtotal + taxAmount;
+  const taxAmount = tax > subtotal + montageCosts ? (tax - (subtotal + montageCosts)) * taxIndicator : 0;
+  const afterTax = subtotal + montageCosts + taxAmount;
 
   // Calculate percentage discount
   const percentageDiscountAmount = (afterTax * discount) / 100;
@@ -330,7 +305,7 @@ const NewReceipt = () => {
   const total = afterPercentageDiscount - numericDiscount;
 
   // Calculate profit
-  const profit = total - totalCost;
+  const profit = total - totalCost - montageCosts;
 
   const fetchClientPrescription = async (clientId: string) => {
     if (!user) return;
@@ -401,12 +376,6 @@ const NewReceipt = () => {
     fetchClientPrescription(clientId);
   };
 
-  // useEffect(() => { //Removed this useEffect as per the user request
-  //   if (selectedClient) {
-  //     updateClientPrescription();
-  //   }
-  // }, [rightEye, leftEye, add]);
-
   const updatePaymentStatus = (newBalance: number) => {
     if (newBalance <= 0) {
       setPaymentStatus('Paid');
@@ -462,10 +431,10 @@ const NewReceipt = () => {
           left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
           add: add ? parseFloat(add) : null,
           subtotal,
-          tax_base: tax > subtotal ? tax : subtotal,
+          tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
           tax: taxAmount,
-          cost: totalCost,
-          cost_ttc: totalCost,
+          cost: totalCost + montageCosts,
+          cost_ttc: totalCost + montageCosts,
           profit: profit,
           discount_amount: totalDiscount,
           discount_percentage: discount,
@@ -474,14 +443,15 @@ const NewReceipt = () => {
           advance_payment: advancePayment,
           payment_status: paymentStatus,
           delivery_status: 'Undelivered',
-          montage_status: 'UnOrdered'
+          montage_status: 'UnOrdered',
+          montage_costs: montageCosts
         })
         .select()
         .single();
 
       if (receiptError) throw receiptError;
 
-      // Update client prescription after receipt is saved
+      
       if (selectedClient) {
         const { error: prescriptionError } = await supabase
           .from('clients')
@@ -500,7 +470,7 @@ const NewReceipt = () => {
         if (prescriptionError) throw prescriptionError;
       }
 
-      // Insert receipt items with current prices and totals
+      
       const receiptItems = items.map(item => ({
         user_id: user.id,
         receipt_id: receipt.id,
@@ -611,7 +581,7 @@ const NewReceipt = () => {
                       value={rightEye.sph}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, sph: e.target.value });
-                        // Update items linked to right eye
+                        
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -641,7 +611,7 @@ const NewReceipt = () => {
                       value={rightEye.cyl}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, cyl: e.target.value });
-                        // Update items linked to right eye
+                        
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -685,7 +655,7 @@ const NewReceipt = () => {
                       value={leftEye.sph}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, sph: e.target.value });
-                        // Update items linked to left eye
+                        
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -713,7 +683,7 @@ const NewReceipt = () => {
                       value={leftEye.cyl}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, cyl: e.target.value });
-                        // Update items linked to left eye
+                        
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -889,48 +859,15 @@ const NewReceipt = () => {
                   </div>
 
                   <div className="flex gap-1">
-                    {item.customName === 'Montage costs' ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const duplicatedItem = {...item, id: `item-${Date.now()}`};
-                            if (item.linkedEye) {
-                              duplicatedItem.linkedEye = item.linkedEye === 'RE' ? 'LE' : 'RE';
-                              if (duplicatedItem.productId) {
-                                const product = products.find(p => p.id === duplicatedItem.productId);
-                                if (product) {
-                                  const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
-                                  const markup = calculateMarkup(sph, cyl);
-                                  duplicatedItem.appliedMarkup = markup;
-                                  duplicatedItem.price = product.price * (1 + markup / 100);
-                                }
-                              }
-                            }
-                            setItems([...items, duplicatedItem]);
-                          }}
-                          className="hover:bg-blue-100"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
+                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                    
                   </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
@@ -1023,6 +960,13 @@ const NewReceipt = () => {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
+
+                  {montageCosts > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Montage Costs</span>
+                      <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
+                    </div>
+                  )}
 
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
