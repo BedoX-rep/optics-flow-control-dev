@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -116,10 +117,10 @@ const IndexPage = () => {
                 <ContactMenu />
               </NavigationMenuList>
             </NavigationMenu>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 relative z-10">
               <button
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white hover:bg-white/90 rounded-md text-primary font-medium transition-colors relative z-20 cursor-pointer"
               >
                 {user ? "Go to Dashboard" : "Sign In / Register"}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -141,7 +142,7 @@ const IndexPage = () => {
           <div className="relative z-[1]">
             <button 
               onClick={() => navigate("/auth")}
-              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors"
+              className="inline-flex items-center px-6 py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors cursor-pointer"
             >
               START A FREE TRIAL
               <ArrowRight className="ml-2 h-4 w-4" />
