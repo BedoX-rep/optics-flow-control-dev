@@ -66,7 +66,8 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                         <p className="text-sm text-gray-600">Montage Costs: <span className="font-medium">{receipt.montage_costs?.toFixed(2) || '0.00'} DH</span></p>
                       )}
                       <p className="text-sm text-gray-800 font-medium mt-1.5">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
-                      <p className="text-sm text-gray-600 mt-2">Cost TTC: <span className="font-medium">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</span></p>
+                      <p className="text-sm text-gray-600">Products Cost: <span className="font-medium">{receipt.products_cost?.toFixed(2) || '0.00'} DH</span></p>
+                      <p className="text-sm text-gray-600">Cost TTC: <span className="font-medium">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</span></p>
                       <p className="text-sm text-gray-600">Profit: <span className="font-medium">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</span></p>
                       <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</span></p>
                       <p className="text-sm text-gray-600">Balance: <span className="font-medium">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</span></p>
