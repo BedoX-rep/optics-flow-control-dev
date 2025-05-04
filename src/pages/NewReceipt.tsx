@@ -758,22 +758,23 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-2 flex flex-row justify-between items-center">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <div className="flex items-center gap-2">
-                <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="ghost" size="sm" className="h-8">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Markup
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <div className="flex gap-3">
+                <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
+                  <Plus className="h-4 w-4 mr-2" /> Add Product
+                </Button>
+                <Button onClick={() => addItem('custom')} variant="outline" size="default">
+                  <Plus className="h-4 w-4 mr-2" /> Add Custom Item
                 </Button>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => addItem('product')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Product
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Custom
+              <Button 
+                onClick={() => setIsMarkupSettingsOpen(true)} 
+                variant="ghost" 
+                size="sm" 
+                className="text-neutral-600 hover:text-neutral-900"
+              >
+                Markup Settings
               </Button>
             </div>
           </CardHeader>
