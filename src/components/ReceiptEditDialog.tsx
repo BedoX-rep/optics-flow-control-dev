@@ -234,6 +234,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
 
           <TabsContent value="status" className="space-y-4">
             <div>
+              <Label>Products Cost</Label>
+              <Input
+                type="number"
+                value={formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0)}
+                disabled
+              />
+            </div>
+            <div>
               <Label>Montage Costs</Label>
               <Input
                 type="number"
@@ -319,8 +327,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                       value={item.price}
                       onChange={(e) => {
                         const newItems = [...formData.items];
-                        newItems[index] = { ...item, price: parseFloat(e.target.value) || 0 };
-                        setFormData({ ...formData, items: newItems });
+                        const newPrice = parseFloat(e.target.value) || 0;
+                        newItems[index] = { ...item, price: newPrice };
+                        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                        setFormData({ ...formData, items: newItems, total: newTotal });
                       }}
                     />
                   </div>
