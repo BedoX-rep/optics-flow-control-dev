@@ -791,7 +791,7 @@ const NewReceipt = () => {
               </div>
 
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
+                <div key={item.id} className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
@@ -876,14 +876,14 @@ const NewReceipt = () => {
 
                   <div className="w-32">
                     <Label>Total</Label>
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                    <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
                       {(item.price * item.quantity).toFixed(2)} DH
                     </div>
                   </div>
 
                   <div className="w-32">
                     <Label>Profit</Label>
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
+                    <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
                       {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
                     </div>
                   </div>
@@ -941,13 +941,23 @@ const NewReceipt = () => {
                           size="icon"
                           className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
-                            const updatedItem = { ...item, linkedEye: 'LE' };
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const { sph, cyl } = getEyeValues('LE');
-                              const markup = calculateMarkup(sph, cyl);
-                              updatedItem.appliedMarkup = markup;
-                              updatedItem.price = product.price * (1 + markup / 100);
+                            const updatedItem = { ...item };
+                            if (item.linkedEye === 'LE') {
+                              updatedItem.linkedEye = undefined;
+                              updatedItem.appliedMarkup = 0;
+                              const product = products.find(p => p.id === item.productId);
+                              if (product) {
+                                updatedItem.price = product.price;
+                              }
+                            } else {
+                              updatedItem.linkedEye = 'LE';
+                              const product = products.find(p => p.id === item.productId);
+                              if (product) {
+                                const { sph, cyl } = getEyeValues('LE');
+                                const markup = calculateMarkup(sph, cyl);
+                                updatedItem.appliedMarkup = markup;
+                                updatedItem.price = product.price * (1 + markup / 100);
+                              }
                             }
                             setItems(items.map(i => i.id === item.id ? updatedItem : i));
                           }}
@@ -960,13 +970,23 @@ const NewReceipt = () => {
                           size="icon"
                           className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
-                            const updatedItem = { ...item, linkedEye: 'RE' };
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const { sph, cyl } = getEyeValues('RE');
-                              const markup = calculateMarkup(sph, cyl);
-                              updatedItem.appliedMarkup = markup;
-                              updatedItem.price = product.price * (1 + markup / 100);
+                            const updatedItem = { ...item };
+                            if (item.linkedEye === 'RE') {
+                              updatedItem.linkedEye = undefined;
+                              updatedItem.appliedMarkup = 0;
+                              const product = products.find(p => p.id === item.productId);
+                              if (product) {
+                                updatedItem.price = product.price;
+                              }
+                            } else {
+                              updatedItem.linkedEye = 'RE';
+                              const product = products.find(p => p.id === item.productId);
+                              if (product) {
+                                const { sph, cyl } = getEyeValues('RE');
+                                const markup = calculateMarkup(sph, cyl);
+                                updatedItem.appliedMarkup = markup;
+                                updatedItem.price = product.price * (1 + markup / 100);
+                              }
                             }
                             setItems(items.map(i => i.id === item.id ? updatedItem : i));
                           }}
