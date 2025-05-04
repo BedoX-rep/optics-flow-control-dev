@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from './LanguageProvider';
 import { Button } from '@/components/ui/button';
-import { Globe } from 'lucide-react';
+import { Globe, Flag } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,27 +14,35 @@ const LanguageSwitcher: React.FC = () => {
   const { language, setLanguage } = useLanguage();
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'ar', name: 'العربية' }
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ar', name: 'العربية', flag: '🇲🇦' }
   ];
 
+  // Find current language data
+  const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Globe className="h-5 w-5" />
-          <span className="sr-only">Toggle language</span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="relative z-20 flex gap-2 items-center rounded-full border shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+        >
+          <span className="text-lg">{currentLanguage.flag}</span>
+          <span className="sr-only md:not-sr-only md:inline-block text-xs font-medium">{currentLanguage.code.toUpperCase()}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="min-w-[120px]">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code as 'en' | 'fr' | 'ar')}
-            className={language === lang.code ? "bg-muted" : ""}
+            className={`flex items-center gap-2 ${language === lang.code ? "bg-muted" : ""} cursor-pointer`}
           >
-            {lang.name}
+            <span className="text-lg">{lang.flag}</span>
+            <span>{lang.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

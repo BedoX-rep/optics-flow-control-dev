@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -88,7 +87,7 @@ const IndexPage = () => {
         <header className="container mx-auto py-4 px-4 md:px-6 lg:px-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold">Lensly</h1>
+              <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
             </div>
             
             {/* Desktop Navigation */}
@@ -120,7 +119,7 @@ const IndexPage = () => {
                   <NavigationMenuItem>
                     <button
                       onClick={() => navigate("/pricing")}
-                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white"
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white cursor-pointer"
                     >
                       {t('pricing')}
                     </button>
@@ -130,7 +129,7 @@ const IndexPage = () => {
               </NavigationMenu>
               
               {/* Language Switcher */}
-              <div className="mx-2">
+              <div className="mx-2 z-20">
                 <LanguageSwitcher />
               </div>
               
@@ -146,13 +145,13 @@ const IndexPage = () => {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center">
-              <div className="mr-2">
+            <div className="md:hidden flex items-center gap-2">
+              <div className="z-20">
                 <LanguageSwitcher />
               </div>
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-                className="p-2 rounded-md hover:bg-white/10"
+                className="p-2 rounded-md hover:bg-white/10 z-20"
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -161,20 +160,34 @@ const IndexPage = () => {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden absolute top-16 left-0 right-0 bg-teal-700 z-50 px-4 py-5 shadow-lg animate-in fade-in slide-in-from-top">
-              <div className="flex flex-col space-y-4">
-                <button onClick={() => navigate("/pricing")} className="text-white py-2 text-lg font-medium">
+            <div className="md:hidden fixed inset-0 top-16 bg-teal-700 z-50 px-4 py-5 shadow-lg animate-in fade-in slide-in-from-top overflow-auto">
+              <div className="flex flex-col space-y-6">
+                <button onClick={() => {
+                  navigate("/pricing");
+                  setMobileMenuOpen(false);
+                }} className="text-white py-3 text-xl font-medium">
                   {t('pricing')}
                 </button>
-                <button onClick={() => navigate("/contact")} className="text-white py-2 text-lg font-medium">
-                  Contact
-                </button>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-white/80">{t('features')}</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {features.map((feature, i) => (
+                      <div key={i} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg">
+                        <div className="mt-1">{React.cloneElement(feature.icon, { className: "h-5 w-5" })}</div>
+                        <div>
+                          <h4 className="font-medium">{feature.title}</h4>
+                          <p className="text-sm text-white/70">{feature.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <button
                   onClick={() => {
                     navigate(user ? "/dashboard" : "/auth");
                     setMobileMenuOpen(false);
                   }}
-                  className="bg-white text-primary py-2 px-4 rounded-md font-medium mt-4"
+                  className="bg-white text-primary py-3 px-4 rounded-md font-medium mt-4 text-center"
                 >
                   {user ? t('goToDashboard') : t('signInRegister')}
                 </button>
@@ -184,17 +197,17 @@ const IndexPage = () => {
         </header>
 
         {/* Combined Hero and Effortless Section */}
-        <section className="container mx-auto py-8 md:py-16 px-4 md:px-6 lg:px-10 text-center relative">
-          <h1 className="text-2xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
+        <section className="container mx-auto pt-8 pb-20 md:py-16 px-4 md:px-6 lg:px-10 text-center relative">
+          <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             {t('heroTitle')}
           </h1>
-          <p className="text-sm md:text-lg mb-8 text-white/90 max-w-xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg mb-8 text-white/90 max-w-xl mx-auto leading-relaxed">
             {t('heroSubtitle')}
           </p>
           <div className="relative z-[1]">
             <button 
               onClick={() => navigate("/auth")}
-              className="inline-flex items-center px-4 py-3 md:px-6 md:py-5 text-base bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center px-5 py-3 md:px-7 md:py-4 text-base md:text-lg bg-[#FF3B9A] hover:bg-[#FF3B9A]/90 text-white rounded-md font-medium transition-colors cursor-pointer shadow-lg"
             >
               {t('startFreeTrial')}
               <ArrowRight className={`${direction === 'rtl' ? 'mr-2 rotate-180' : 'ml-2'} h-4 w-4`} />
@@ -266,7 +279,7 @@ const IndexPage = () => {
               </Button>
             </div>
 
-            <div className={`relative order-1 ${direction === 'rtl' ? 'md:order-1' : 'md:order-2'} md:scale-[1.32]`}>
+            <div className={`relative order-1 ${direction === 'rtl' ? 'md:order-1' : 'md:order-2'} md:scale-[1.32] mt-8 md:mt-0`}>
               <div className="rounded-xl overflow-hidden shadow-2xl transform -rotate-6">
                 <img 
                   src="/lovable-uploads/2e06dd1e-f886-4184-8b53-def6765f32d3.png" 
@@ -288,7 +301,7 @@ const IndexPage = () => {
             <h2 className="text-2xl md:text-4xl font-bold mb-4">{t('powerfulFeatures')}</h2>
             <p className="text-gray-500 max-w-2xl mx-auto text-base md:text-lg">{t('featuresSubtitle')}</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {features.map((feature, idx) => (
               <div key={idx} className="bg-white p-4 md:p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 text-primary flex items-center justify-center rounded-lg mb-4">
@@ -322,14 +335,14 @@ const IndexPage = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-8 md:py-12 px-4 md:px-6 lg:px-10">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-6 md:gap-10">
+          <div className="grid md:grid-cols-3 gap-8">
             <div>
               <h3 className="text-white text-base md:text-lg font-semibold mb-4">Lensly</h3>
               <p className="text-xs md:text-sm">The comprehensive management solution designed specifically for opticians in Morocco and across Africa.</p>
             </div>
             <div>
               <h4 className="text-white text-sm md:text-base font-medium mb-4">Quick Links</h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 <li><button onClick={() => navigate("/")} className="w-full text-left text-xs md:text-sm text-gray-300 hover:text-white transition-colors">Features</button></li>
                 <li><button onClick={() => navigate("/pricing")} className="w-full text-left text-xs md:text-sm text-gray-300 hover:text-white transition-colors">Pricing</button></li>
                 <li><button onClick={() => navigate("/auth")} className="w-full text-left text-xs md:text-sm text-gray-300 hover:text-white transition-colors">Sign In</button></li>
@@ -348,15 +361,10 @@ const IndexPage = () => {
                   <span>+1-234-567-8900</span>
                 </li>
               </ul>
-              {/* Language switcher in footer for mobile */}
-              <div className="mt-4 flex md:hidden">
-                <div className="flex space-x-3">
-                  <button 
-                    onClick={() => navigate(window.location.pathname, { replace: true })} 
-                    className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded"
-                  >
-                    <LanguageSwitcher />
-                  </button>
+              {/* Language switcher in footer */}
+              <div className="mt-4">
+                <div className="z-20">
+                  <LanguageSwitcher />
                 </div>
               </div>
             </div>

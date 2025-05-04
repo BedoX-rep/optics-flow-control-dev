@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ const Pricing = () => {
   
   // Check if user has a subscription and if it's the quarterly plan
   const isQuarterlyPlan = subscription?.subscription_status === 'active' && 
-                          subscription?.subscription_plan === 'quarterly';
+                          subscription?.subscription_type === 'quarterly';
 
   const pricingPlans = [
     {
