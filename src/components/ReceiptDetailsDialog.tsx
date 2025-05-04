@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileText, Printer, User, Phone, Receipt, Package } from "lucide-react"
+import { FileText, Printer, User, Phone, Receipt, Package, ShoppingBag } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ReceiptDetailsDialogProps {
@@ -25,11 +24,10 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Receipt className="h-5 w-5 text-primary" />
-            Receipt Details
+            <ShoppingBag className="h-5 w-5 text-primary" />
           </DialogTitle>
         </DialogHeader>
-        
+
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Details</TabsTrigger>
