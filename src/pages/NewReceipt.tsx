@@ -23,7 +23,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
-import MarkupSettingsDialog from '@/components/MarkupSettingsDialog'; // Added import
 
 interface Product {
   id: string;
@@ -202,7 +201,7 @@ const NewReceipt = () => {
     setItems(prevItems => {
       return prevItems.map(item => {
         if (!item.productId || !item.linkedEye) return item;
-
+        
         const product = products.find(p => p.id === item.productId);
         if (!product || !['Single Vision Lenses', 'Progressive Lenses'].includes(product.category || '')) {
           return item;
@@ -211,7 +210,7 @@ const NewReceipt = () => {
         const { sph, cyl } = getEyeValues(item.linkedEye);
         const markup = calculateMarkup(sph, cyl);
         const basePrice = product.price || 0;
-
+        
         return {
           ...item,
           appliedMarkup: markup,
