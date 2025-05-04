@@ -291,8 +291,8 @@ const NewReceipt = () => {
 
   // Calculate percentage-based discount
   // Calculate tax first
-  const taxAmount = tax > subtotal + montageCosts ? (tax - (subtotal + montageCosts)) * taxIndicator : 0;
-  const afterTax = subtotal + montageCosts + taxAmount;
+  const taxAmount = tax > subtotal ? (tax - subtotal) * taxIndicator : 0;
+  const afterTax = subtotal + taxAmount;
 
   // Calculate percentage discount
   const percentageDiscountAmount = (afterTax * discount) / 100;
@@ -960,27 +960,6 @@ const NewReceipt = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
-                  </div>
-
-                  {tax > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tax</span>
-                      <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
-                    </div>
-                  )}
-
-                  {(discount > 0 || numericDiscount > 0) && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
-                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
-                    </div>
-                  )}
-
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Total</span>
-                      <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
-                    </div>
                   </div>
 
                   {tax > 0 && (
