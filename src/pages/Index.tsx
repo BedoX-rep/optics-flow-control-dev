@@ -213,7 +213,7 @@ const IndexPage = () => {
               </Button>
             </div>
 
-            <div className="relative order-1 md:order-2">
+            <div className="relative order-1 md:order-2 scale-150">
               <div className="rounded-xl overflow-hidden shadow-2xl transform -rotate-6">
                 <img 
                   src="/lovable-uploads/2e06dd1e-f886-4184-8b53-def6765f32d3.png" 
