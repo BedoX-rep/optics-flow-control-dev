@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -66,10 +65,10 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         gender: values.gender as "Mr" | "Mme" | "Enf" | undefined,
         right_eye_sph: values.right_eye_sph ? parseFloat(values.right_eye_sph) : 0,
         right_eye_cyl: values.right_eye_cyl ? parseFloat(values.right_eye_cyl) : 0,
-        right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe) : 0,
+        right_eye_axe: values.right_eye_axe ? parseInt(values.right_eye_axe, 10) || 0 : 0,
         left_eye_sph: values.left_eye_sph ? parseFloat(values.left_eye_sph) : 0,
         left_eye_cyl: values.left_eye_cyl ? parseFloat(values.left_eye_cyl) : 0,
-        left_eye_axe: values.left_eye_axe ? parseInt(values.left_eye_axe) : 0,
+        left_eye_axe: values.left_eye_axe ? parseInt(values.left_eye_axe, 10) || 0 : 0,
         Add: values.Add ? parseFloat(values.Add) : 0,
         assurance: values.assurance || null
       }
@@ -230,8 +229,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                             inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
-                              field.onChange(value);
+                              const value = e.target.value;
+                              if (value === '') {
+                                field.onChange(undefined);
+                                return;
+                              }
+                              if (/^\d*$/.test(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -309,8 +314,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                             inputMode="numeric"
                             {...field} 
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
-                              field.onChange(value);
+                              const value = e.target.value;
+                              if (value === '') {
+                                field.onChange(undefined);
+                                return;
+                              }
+                              if (/^\d*$/.test(value)) {
+                                field.onChange(value);
+                              }
                             }} 
                             className="h-8"
                           />
