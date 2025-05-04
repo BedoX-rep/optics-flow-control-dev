@@ -128,7 +128,7 @@ const IndexPage = () => {
           </div>
         </header>
 
-        {/* Hero Section - Part of the gradient background */}
+        {/* Combined Hero and Effortless Section */}
         <section className="container mx-auto py-16 px-6 lg:px-10 text-center relative">
           <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             Optical Software For All Your Eye Care Needs
@@ -149,19 +149,19 @@ const IndexPage = () => {
           </div>
         </section>
 
-        {/* Diagonal cut for hero section */}
+        {/* Diagonal cut that spans both sections */}
         <div className="absolute inset-0 z-0">
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 80%, 100% 45%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 85%, 100% 65%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
       </div>
 
-      {/* Effortless, Fast, Simple Section with twisted image */}
-      <section className="pt-0 -mt-52 px-6 lg:px-10 bg-transparent relative z-10">
+      {/* Effortless Section Content */}
+      <section className="pt-0 -mt-32 px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
