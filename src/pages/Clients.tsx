@@ -249,7 +249,11 @@ const Clients = () => {
                   <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
                     <TableCell className="py-3">
                       <div className="flex items-center gap-2">
-                        <ClientAvatar gender={client.gender} name={client.name} className="w-11 h-11" />
+                        <ClientAvatar 
+                          gender={client.gender as "Mr" | "Mme" | "Enf" | null} 
+                          name={client.name} 
+                          className="w-11 h-11" 
+                        />
                         <div className="flex flex-col gap-1">
                           {editingCell?.id === client.id && editingCell.field === "name" ? (
                             <input
