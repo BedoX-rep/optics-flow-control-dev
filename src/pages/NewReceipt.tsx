@@ -777,25 +777,20 @@ const NewReceipt = () => {
         </div>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6">
-            <div>
-                <div className="border-b border-gray-100">
-                  <div className="px-6 py-4 flex items-center gap-3 bg-gray-50/50">
-                    <Switch
-                      id="autoMontage"
-                      checked={autoMontage}
-                      onCheckedChange={(checked) => setAutoMontage(checked)}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                    <Label htmlFor="autoMontage" className="font-medium text-gray-700">
-                      Auto-add Montage costs
-                    </Label>
-                  </div>
-                </div>
+            <div className="space-y-2">
+              <div className="flex items-center mb-6 bg-black/5 p-4 rounded-xl border border-black/10">
+                <Switch
+                  id="autoMontage"
+                  checked={autoMontage}
+                  onCheckedChange={(checked) => setAutoMontage(checked)}
+                />
+                <Label htmlFor="autoMontage" className="ml-3 font-medium">
+                  Auto-add Montage costs
+                </Label>
+              </div>
 
-                <div className="divide-y divide-gray-100">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-4 p-6 bg-white hover:bg-gray-50/50 transition-all duration-200 group">
-                      <div className="flex items-start gap-6">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-4 p-6 bg-white border border-black/10 rounded-xl shadow-sm mb-4 hover:border-primary/30 transition-all duration-200">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`} className="text-sm text-gray-600">Custom Item Name <span className="text-blue-500">*</span></Label>
@@ -935,8 +930,8 @@ const NewReceipt = () => {
                       </>
                     )}
                   </div>
-                      {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                        <div className="flex items-center gap-2">
+                  {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                    <div className="flex items-center gap-2">
                       <Select
                         value={item.linkedEye || ""}
                         onValueChange={(value: 'RE' | 'LE') => {
