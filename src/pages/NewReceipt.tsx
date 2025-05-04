@@ -794,7 +794,8 @@ const NewReceipt = () => {
 
                 <div className="divide-y divide-gray-100">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-start gap-6 p-6 bg-white hover:bg-gray-50/50 transition-all duration-200 group">
+                    <div key={item.id} className="flex flex-col gap-4 p-6 bg-white hover:bg-gray-50/50 transition-all duration-200 group">
+                      <div className="flex items-start gap-6">
                   {item.customName !== undefined ? (
                     <div className="flex-1">
                       <Label htmlFor={`custom-${item.id}`} className="text-sm text-gray-600">Custom Item Name <span className="text-blue-500">*</span></Label>
@@ -934,8 +935,8 @@ const NewReceipt = () => {
                       </>
                     )}
                   </div>
-                  {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                    <div className="flex items-center gap-2">
+                      {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                        <div className="flex items-center gap-2">
                       <Select
                         value={item.linkedEye || ""}
                         onValueChange={(value: 'RE' | 'LE') => {
