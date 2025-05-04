@@ -165,7 +165,7 @@ const IndexPage = () => {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block mb-6">
+              <div className="inline-block mb-4">
                 <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-24 h-24" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
