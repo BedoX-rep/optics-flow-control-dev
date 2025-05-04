@@ -154,14 +154,14 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 70%, 100% 35%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 80%, 100% 45%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
       </div>
 
       {/* Effortless, Fast, Simple Section with twisted image */}
-      <section className="pt-0 -mt-72 px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-0 -mt-52 px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
