@@ -64,6 +64,11 @@ const NewReceipt = () => {
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
   const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
   const [add, setAdd] = useState('');
+
+  // Update markups whenever prescription changes
+  useEffect(() => {
+    updateItemsMarkup();
+  }, [rightEye, leftEye, updateItemsMarkup]);
   const [prescriptionOpen, setPrescriptionOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(true);
   const [discount, setDiscount] = useState(0);
@@ -192,6 +197,29 @@ const NewReceipt = () => {
     setItems(items.filter(item => item.id !== id));
   };
 
+  const updateItemsMarkup = useCallback(() => {
+    setItems(prevItems => {
+      return prevItems.map(item => {
+        if (!item.productId || !item.linkedEye) return item;
+        
+        const product = products.find(p => p.id === item.productId);
+        if (!product || !['Single Vision Lenses', 'Progressive Lenses'].includes(product.category || '')) {
+          return item;
+        }
+
+        const { sph, cyl } = getEyeValues(item.linkedEye);
+        const markup = calculateMarkup(sph, cyl);
+        const basePrice = product.price || 0;
+        
+        return {
+          ...item,
+          appliedMarkup: markup,
+          price: basePrice * (1 + markup / 100)
+        };
+      });
+    });
+  }, [products, rightEye, leftEye]);
+
   const updateItem = (id: string, field: string, value: string | number) => {
     setItems(prevItems => {
       return prevItems.map(item => {
@@ -205,7 +233,7 @@ const NewReceipt = () => {
             ...item,
             productId: value.toString(),
             price: product.price || 0,
-            cost: product.cost_ttc || 0, // Use cost_ttc instead of Cost
+            cost: product.cost_ttc || 0,
             appliedMarkup: 0
           };
 
@@ -261,7 +289,7 @@ const NewReceipt = () => {
             }, 0);
           }
 
-          // Only calculate markup for lenses if eye is linked
+          // Calculate initial markup if eye is linked
           if ((product.category === 'Single Vision Lenses' || product.category === 'Progressive Lenses') && item.linkedEye) {
             const { sph, cyl } = getEyeValues(item.linkedEye);
             const markup = calculateMarkup(sph, cyl);
