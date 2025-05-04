@@ -161,7 +161,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless, Fast, Simple Section with twisted image */}
-      <section className="pt-0 -mt-52 px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-10 -mt-52 px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
