@@ -76,7 +76,7 @@ const NewReceipt = () => {
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [advancePayment, setAdvancePayment] = useState(0);
@@ -172,14 +172,13 @@ const NewReceipt = () => {
     setFilteredClients(filtered);
   }, [searchTerm, clients]);
 
-  useEffect(() => {
-    const searchWords = productSearchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
-    const filtered = products.filter(product => {
+  const getFilteredProducts = (searchTerm: string) => {
+    const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+    return products.filter(product => {
       const productName = product.name.toLowerCase();
       return searchWords.every(word => productName.includes(word));
     });
-    setFilteredProducts(filtered);
-  }, [productSearchTerm, products]);
+  };
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
@@ -814,7 +813,7 @@ const NewReceipt = () => {
                             <SelectValue placeholder="Select a product" />
                           </SelectTrigger>
                           <SelectContent>
-                            {filteredProducts.map(product => (
+                            {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
                               <SelectItem key={product.id} value={product.id}>
                                 <div className="flex justify-between items-center w-full gap-4">
                                   <span className="font-medium">{product.name}</span>
@@ -827,8 +826,13 @@ const NewReceipt = () => {
                         <Input
                           type="text"
                           placeholder="Search products..."
-                          value={productSearchTerm}
-                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          value={productSearchTerms[item.id] || ''}
+                          onChange={(e) => {
+                            setProductSearchTerms(prev => ({
+                              ...prev,
+                              [item.id]: e.target.value
+                            }));
+                          }}
                           className="w-48"
                         />
                       </div>
@@ -930,29 +934,12 @@ const NewReceipt = () => {
                   </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
-                      <div className="flex rounded-md overflow-hidden border">
-                        <Button
-                          type="button"
-                          variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
-                          className={`px-3 py-1 h-8 rounded-none ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
-                          onClick={() => {
-                            const updatedItem = { ...item, linkedEye: 'RE' };
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const { sph, cyl } = getEyeValues('RE');
-                              const markup = calculateMarkup(sph, cyl);
-                              updatedItem.appliedMarkup = markup;
-                              updatedItem.price = product.price * (1 + markup / 100);
-                            }
-                            setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                          }}
-                        >
-                          Right Eye
-                        </Button>
+                      <div className="flex gap-2 items-center">
                         <Button
                           type="button"
                           variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
-                          className={`px-3 py-1 h-8 rounded-none ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          size="icon"
+                          className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
                             const updatedItem = { ...item, linkedEye: 'LE' };
                             const product = products.find(p => p.id === item.productId);
@@ -965,7 +952,26 @@ const NewReceipt = () => {
                             setItems(items.map(i => i.id === item.id ? updatedItem : i));
                           }}
                         >
-                          Left Eye
+                          👁️
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                          size="icon"
+                          className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          onClick={() => {
+                            const updatedItem = { ...item, linkedEye: 'RE' };
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const { sph, cyl } = getEyeValues('RE');
+                              const markup = calculateMarkup(sph, cyl);
+                              updatedItem.appliedMarkup = markup;
+                              updatedItem.price = product.price * (1 + markup / 100);
+                            }
+                            setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                          }}
+                        >
+                          👁️
                         </Button>
                       </div>
                       {item.appliedMarkup > 0 && (
