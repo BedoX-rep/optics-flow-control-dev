@@ -757,40 +757,30 @@ const NewReceipt = () => {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="autoMontage"
-                  checked={autoMontage}
-                  onChange={(e) => setAutoMontage(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <Label htmlFor="autoMontage" className="text-sm text-muted-foreground">Auto-add Montage costs</Label>
-              </div>
-              <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="outline" size="sm" className="h-8">
-                <span className="mr-2">⚙️</span> Markup Settings
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => addItem('product')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Add Product
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="sm" className="h-8">
-                <Plus className="h-4 w-4 mr-1" /> Add Custom Item
-              </Button>
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle>Receipt Items</CardTitle>
+            <Button onClick={() => setIsMarkupSettingsOpen(true)} variant="ghost" size="icon">
+              Settings
+            </Button>
           </CardHeader>
           <CardContent className="p-2 pt-0">
             <div className="space-y-2">
-              <div className="border rounded-lg p-2 bg-slate-50/50">
-                <div className="text-sm text-muted-foreground mb-2">No items added yet. Use the buttons above to add items to this receipt.</div>
-                <div className="flex justify-center gap-2">
-                  <Button onClick={() => addItem('product')} variant="outline" size="sm" className="h-8">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="autoMontage"
+                    checked={autoMontage}
+                    onChange={(e) => setAutoMontage(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="autoMontage">Auto-add Montage costs</Label>
+                </div>
+                <div className="flex space-x-2">
+                  <Button onClick={() => addItem('product')} variant="outline" size="sm">
                     <Plus className="h-4 w-4 mr-1" /> Add Product
                   </Button>
-                  <Button onClick={() => addItem('custom')} variant="outline" size="sm" className="h-8">
+                  <Button onClick={() => addItem('custom')} variant="outline" size="sm">
                     <Plus className="h-4 w-4 mr-1" /> Add Custom Item
                   </Button>
                 </div>
