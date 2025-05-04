@@ -68,42 +68,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       setLoading(true);
 
       // Calculate products cost and cost_ttc
-      // Calculate total and costs
       const totalProductsCost = formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
       const total = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-      // If the total cost was manually edited, distribute the difference
-      if (formData.manualCostTtc && formData.manualCostTtc !== costTtc) {
-        const costDifference = formData.manualCostTtc - costTtc;
-        
-        // Handle single item or all items having 0 cost
-        if (formData.items.length === 1 || formData.items.every(item => item.cost === 0)) {
-          formData.items = formData.items.map(item => ({
-            ...item,
-            cost: formData.manualCostTtc / formData.items.length
-          }));
-        } else {
-          // Distribute proportionally for multiple items
-          const totalWeight = formData.items.reduce((sum, item) => sum + (item.cost || 0), 0);
-          
-          if (totalWeight === 0) {
-            // If all costs are 0, distribute equally
-            const equalShare = costDifference / formData.items.length;
-            formData.items = formData.items.map(item => ({
-              ...item,
-              cost: equalShare
-            }));
-          } else {
-            // Distribute proportionally based on existing costs
-            formData.items = formData.items.map(item => {
-              const proportion = (item.cost || 0) / totalWeight;
-              const costAdjustment = costDifference * proportion;
-              return { ...item, cost: (item.cost || 0) + costAdjustment };
-            });
-          }
-        }
-      }
       const { error: receiptError } = await supabase
         .from('receipts')
         .update({
@@ -270,11 +237,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
               <Label>Products Cost</Label>
               <Input
                 type="number"
-                value={formData.manualCostTtc || formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0)}
-                onChange={(e) => {
-                  const newCost = parseFloat(e.target.value) || 0;
-                  setFormData(prev => ({ ...prev, manualCostTtc: newCost }));
-                }}
+                value={formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0)}
+                disabled
               />
             </div>
             <div>
