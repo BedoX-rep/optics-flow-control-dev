@@ -72,6 +72,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
 
       // Update receipt
+      const total = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const { error: receiptError } = await supabase
         .from('receipts')
         .update({
@@ -87,7 +88,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
           delivery_status: formData.delivery_status,
           montage_status: formData.montage_status,
           products_cost: totalProductsCost,
-          cost_ttc: costTtc
+          cost_ttc: costTtc,
+          total: total
         })
         .eq('id', receipt.id);
 
@@ -315,8 +317,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                       value={item.quantity}
                       onChange={(e) => {
                         const newItems = [...formData.items];
-                        newItems[index] = { ...item, quantity: parseInt(e.target.value) || 1 };
-                        setFormData({ ...formData, items: newItems });
+                        const newQuantity = parseInt(e.target.value) || 1;
+                        newItems[index] = { ...item, quantity: newQuantity };
+                        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                        setFormData({ ...formData, items: newItems, total: newTotal });
                       }}
                     />
                   </div>
@@ -348,6 +352,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                   </div>
                 </div>
               ))}
+              <div className="text-right text-sm font-medium">
+                Total: {formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)} DH
+              </div>
             </div>
           </TabsContent>
         </Tabs>
