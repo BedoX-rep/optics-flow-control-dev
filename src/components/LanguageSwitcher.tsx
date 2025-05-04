@@ -2,7 +2,6 @@
 import React from 'react';
 import { useLanguage } from './LanguageProvider';
 import { Button } from '@/components/ui/button';
-import { Globe, Flag } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,19 +29,19 @@ const LanguageSwitcher: React.FC = () => {
           size="sm" 
           className="relative z-20 flex gap-2 items-center rounded-full border shadow-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
         >
-          <span className="text-lg">{currentLanguage.flag}</span>
-          <span className="sr-only md:not-sr-only md:inline-block text-xs font-medium">{currentLanguage.code.toUpperCase()}</span>
+          <span className="text-lg leading-none">{currentLanguage.flag}</span>
+          <span className="sr-only md:not-sr-only md:inline-block text-xs font-medium">{currentLanguage.name}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[120px]">
+      <DropdownMenuContent align="end" className="min-w-[150px]">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code as 'en' | 'fr' | 'ar')}
-            className={`flex items-center gap-2 ${language === lang.code ? "bg-muted" : ""} cursor-pointer`}
+            className={`flex items-center gap-2 cursor-pointer ${language === lang.code ? "bg-muted" : ""}`}
           >
-            <span className="text-lg">{lang.flag}</span>
-            <span>{lang.name}</span>
+            <span className="text-lg leading-none">{lang.flag}</span>
+            <span className="text-sm">{lang.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
