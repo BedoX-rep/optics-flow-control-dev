@@ -231,8 +231,8 @@ const IndexPage = () => {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-12`}>
-              <div className="hidden md:inline-block mb-4">
-                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-16 h-16 md:w-24 md:h-24" />
+              <div className="hidden md:inline-block -mt-15">
+                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-16 h-16 md:w-20 md:h-20" />
               </div>
               <h2 className="text-lg md:text-xl font-bold mb-4 text-teal-600">
                 {t('effortlessTitle')}
