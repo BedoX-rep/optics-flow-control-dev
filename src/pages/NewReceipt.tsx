@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -879,23 +879,50 @@ const NewReceipt = () => {
                     </div>
                   </div>
 
-                  {item.customName === 'Montage costs' ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <div className="flex gap-1">
+                    {item.customName === 'Montage costs' ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const duplicatedItem = {...item, id: `item-${Date.now()}`};
+                            if (item.linkedEye) {
+                              duplicatedItem.linkedEye = item.linkedEye === 'RE' ? 'LE' : 'RE';
+                              if (duplicatedItem.productId) {
+                                const product = products.find(p => p.id === duplicatedItem.productId);
+                                if (product) {
+                                  const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
+                                  const markup = calculateMarkup(sph, cyl);
+                                  duplicatedItem.appliedMarkup = markup;
+                                  duplicatedItem.price = product.price * (1 + markup / 100);
+                                }
+                              }
+                            }
+                            setItems([...items, duplicatedItem]);
+                          }}
+                          className="hover:bg-blue-100"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
                       <Select
