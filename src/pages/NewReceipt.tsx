@@ -821,6 +821,9 @@ const NewReceipt = () => {
                   Auto-add Montage costs
                 </Label>
               </div>
+            </div>
+          </div>
+        </div>
 
               {items.map((item) => (
                 <div key={item.id} className="group flex flex-wrap lg:flex-nowrap items-start gap-4 p-6 bg-white hover:bg-gray-50/50 border-b border-gray-100 last:border-b-0 transition-all duration-200">
