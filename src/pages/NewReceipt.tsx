@@ -983,21 +983,6 @@ const NewReceipt = () => {
                     </div>
                   </div>
 
-                  <div className="pt-3 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Products Cost</span>
-                      <span className="font-medium">{totalCost.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Montage Costs</span>
-                      <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className="text-gray-800">Total Cost (TTC)</span>
-                      <span className="text-red-600 font-semibold">{(totalCost + montageCosts).toFixed(2)} DH</span>
-                    </div>
-                  </div>
-
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax</span>
@@ -1019,10 +1004,18 @@ const NewReceipt = () => {
                     </div>
                   </div>
 
-                  <div className="py-3 space-y-2 border-t border-b">
+                  <div className="py-3 space-y-2 border-t">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Cost</span>
-                      <span className="font-medium text-red-600">{totalCost.toFixed(2)} DH</span>
+                      <span className="text-gray-600">Products Cost</span>
+                      <span className="font-medium">{totalCost.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Montage Costs</span>
+                      <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-gray-800">Total Cost (TTC)</span>
+                      <span className="text-red-600">{(totalCost + montageCosts).toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-900">Profit</span>
