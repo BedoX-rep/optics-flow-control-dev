@@ -170,9 +170,9 @@ const IndexPage = () => {
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-6 text-sm">
-                Running an optical salon is a complex task. You need optical software that simplifies<br/>
-                your daily operations while enhancing your services — both in quality and<br/>
-                quantity. Lensly is incredibly intuitive, helping you find 
+                Running an optical salon is a complex task. You need optical software that simplifies
+                your daily operations while enhancing your services — both in quality and quantity.<br/>
+                Lensly is incredibly intuitive, helping you find 
                 the perfect lenses for every client.
               </p>
 
