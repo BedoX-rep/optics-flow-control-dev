@@ -220,14 +220,14 @@ const IndexPage = () => {
           <div 
             className="absolute inset-0 bg-white"
             style={{
-              clipPath: 'polygon(0% 80%, 100% 60%, 100% 100%, 0% 100%)'
+              clipPath: 'polygon(0% 85%, 100% 70%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
       </div>
 
       {/* Effortless Section Content */}
-      <section className="pt-0 -mt-20 md:-mt-60 px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-0 -mt-32 sm:-mt-40 md:-mt-60 px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'}`}>
