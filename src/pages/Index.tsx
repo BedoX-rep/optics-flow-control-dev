@@ -227,7 +227,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless Section Content */}
-      <section className="pt-0 -mt-24 sm:-mt-32 md:-mt-[50px] px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
+      <section className="pt-0 -mt-24 sm:-mt-32 md:-mt-[65px] px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-12`}>
