@@ -962,7 +962,28 @@ const NewReceipt = () => {
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
 
-                  <div className="pt-3 border-t space-y-2">
+                  {tax > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tax</span>
+                      <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
+                    </div>
+                  )}
+
+                  {(discount > 0 || numericDiscount > 0) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
+                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total</span>
+                      <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Products Cost</span>
                       <span className="font-medium">{totalCost.toFixed(2)} DH</span>
@@ -973,7 +994,7 @@ const NewReceipt = () => {
                     </div>
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-gray-800">Total Cost (TTC)</span>
-                      <span className="text-primary">{(totalCost + montageCosts).toFixed(2)} DH</span>
+                      <span className="text-red-600 font-semibold">{(totalCost + montageCosts).toFixed(2)} DH</span>
                     </div>
                   </div>
 
