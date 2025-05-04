@@ -166,7 +166,7 @@ const IndexPage = () => {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1">
               <div className="inline-block mb-4">
-                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-24 h-24" />
+                <img src="/lovable-uploads/icon-recept (1).png" alt="Icon" className="w-32 h-32" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-teal-600">Effortless, Fast, And Simple!</h2>
               <p className="text-gray-600 mb-6 text-sm">
@@ -179,32 +179,32 @@ const IndexPage = () => {
 
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Client Management - Track client histories, appointments, and prescriptions in one place</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Client Management - Track client histories, appointments, and prescriptions in one place</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Inventory Control - Manage your frames, lenses, and other products with real-time stock updates</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Inventory Control - Manage your frames, lenses, and other products with real-time stock updates</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Statistics - Comprehensive analytics and reporting on your business performance</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Statistics - Comprehensive analytics and reporting on your business performance</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">Access Control - Manage user permissions and control access to sensitive data</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">Access Control - Manage user permissions and control access to sensitive data</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">And so much more!</span>
+                  <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">And so much more!</span>
                 </li>
               </ul>
 
