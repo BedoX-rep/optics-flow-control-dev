@@ -57,6 +57,10 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
     .filter(receipt => receipt.montage_status !== 'Paid costs')
     .reduce((sum, receipt) => sum + (receipt.montage_costs || 0), 0);
 
+  const totalProductsCost = filteredReceipts.reduce((sum, receipt) => 
+    sum + (receipt.products_cost || 0), 0
+  );
+
   const lensTypeCosts = filteredReceipts.reduce((acc, receipt) => {
     if (Array.isArray(receipt.receipt_items)) {
       receipt.receipt_items.forEach(item => {
@@ -158,6 +162,14 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
                   <span className="font-semibold text-blue-900">{totalRevenue.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Products Cost</span>
+                  <span className="font-semibold text-red-600">{totalProductsCost.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Montage Costs</span>
+                  <span className="font-semibold text-red-600">{totalMontageCosts.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
                   <span className="text-gray-600">Total Costs</span>
                   <span className="font-semibold text-red-600">{totalCosts.toFixed(2)} DH</span>
                 </div>
@@ -204,6 +216,10 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
                 <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
                   <span className="text-gray-600">Outstanding Balance</span>
                   <span className="font-semibold text-amber-600">{outstandingBalance.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Unpaid Montage Costs</span>
+                  <span className="font-semibold text-amber-600">{unpaidMontageCosts.toFixed(2)} DH</span>
                 </div>
               </div>
             </CardContent>
