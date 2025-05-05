@@ -32,6 +32,7 @@ import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/Tr
 import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
 
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
+import { useQuery } from '@tanstack/react-query';
 
 interface Product extends ProductSortable {
   // All properties are already defined in ProductSortable
@@ -49,13 +50,11 @@ const DEFAULT_FILTERS = {
 const Products = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [isLoading, setIsLoading] = useState(false);
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
   const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
@@ -95,58 +94,37 @@ const Products = () => {
   }, []);
 
   const fetchProducts = async () => {
-    try {
-      setIsLoading(true);
-      if (!user) return;
+    if (!user) return [];
 
-      let query = supabase
-        .from('products')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false);
+    let query = supabase
+      .from('products')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_deleted', false);
 
-      if (filters.category && filters.category !== "all_categories") {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.index && filters.index !== "all_indexes") {
-        query = query.eq('index', filters.index);
-      }
-      if (filters.treatment && filters.treatment !== "all_treatments") {
-        query = query.eq('treatment', filters.treatment);
-      }
-      if (filters.company && filters.company !== "all_companies") {
-        query = query.eq('company', filters.company);
-      }
-
-      if (filters.sort === "latest") {
-        query = query.order('created_at', { ascending: false });
-      } else {
-        query = query
-          .order('category', { ascending: true })
-          .order('index', { ascending: true })
-          .order('treatment', { ascending: true })
-          .order('company', { ascending: true });
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      if (mountedRef.current) setProducts(data || []);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load products. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    if (filters.category && filters.category !== "all_categories") {
+      query = query.eq('category', filters.category);
     }
+    if (filters.index && filters.index !== "all_indexes") {
+      query = query.eq('index', filters.index);
+    }
+    if (filters.treatment && filters.treatment !== "all_treatments") {
+      query = query.eq('treatment', filters.treatment);
+    }
+    if (filters.company && filters.company !== "all_companies") {
+      query = query.eq('company', filters.company);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchProducts();
-    }
-  }, [filters]);
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products', user?.id, filters],
+    queryFn: fetchProducts,
+    enabled: !!user,
+  });
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -188,7 +166,7 @@ const Products = () => {
       setIsOpen(false);
       setEditingProduct(null);
       setFormInitial({ name: '', price: 0, cost_ttc: 0 });
-      fetchProducts();
+      //fetchProducts(); // Removed as data is updated via React Query
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -211,7 +189,7 @@ const Products = () => {
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;
-        setProducts(products.filter(product => product.id !== id));
+        //setProducts(products.filter(product => product.id !== id)); // Removed as data is updated via React Query
         toast({
           title: "Success",
           description: "Product deleted successfully",
@@ -268,9 +246,9 @@ const Products = () => {
 
       if (error) throw error;
 
-      setProducts(prev => prev.map(p => 
-        p.id === product.id ? { ...p, [editingCell.field]: val } : p
-      ));
+      //setProducts(prev => prev.map(p => 
+      //  p.id === product.id ? { ...p, [editingCell.field]: val } : p
+      //)); // Removed as data is updated via React Query
       toast({ title: "Updated", description: "Product updated successfully" });
     } catch (error) {
       console.error('Error updating product:', error);
@@ -294,9 +272,9 @@ const Products = () => {
         .eq('id', product.id)
         .eq('user_id', user.id);
       if (error) throw error;
-      setProducts(prev => prev.map(p =>
-        p.id === product.id ? { ...p, image: null } : p
-      ));
+      //setProducts(prev => prev.map(p =>
+      //  p.id === product.id ? { ...p, image: null } : p
+      //)); // Removed as data is updated via React Query
       toast({ title: "Image Removed" });
     } catch {
       toast({ title: "Error", description: "Could not remove image." });
@@ -335,9 +313,9 @@ const Products = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setProducts(prev =>
-        prev.map(p => p.id === product.id ? { ...p, [field]: newValue } : p)
-      );
+      //setProducts(prev =>
+      //  prev.map(p => p.id === product.id ? { ...p, [field]: newValue } : p)
+      //); // Removed as data is updated via React Query
       toast({ title: "Updated", description: "Product updated successfully" });
     } catch (error) {
       toast({

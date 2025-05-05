@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDistanceToNow, format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 
 
 interface Receipt {
@@ -233,62 +234,47 @@ const Receipts = () => {
   };
 
   const fetchReceipts = async () => {
-    if (!user) return;
+    if (!user) return [];
 
-    try {
-      setIsLoading(true);
-
-      const { data: receiptsData, error: receiptsError } = await supabase
-        .from('receipts')
-        .select(`
-          *,
-          clients (
-            name,
-            phone
-          ),
-          receipt_items (
-            id,
-            quantity,
-            price,
-            cost,
-            profit,
-            custom_item_name,
-            product:product_id (
-              name
-            )
+    const { data: receiptsData, error: receiptsError } = await supabase
+      .from('receipts')
+      .select(`
+        *,
+        clients (
+          name,
+          phone
+        ),
+        receipt_items (
+          id,
+          quantity,
+          price,
+          cost,
+          profit,
+          custom_item_name,
+          product:product_id (
+            name
           )
-        `)
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false });
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: false });
 
-      if (receiptsError) throw receiptsError;
+    if (receiptsError) throw receiptsError;
 
-      const formattedReceipts = receiptsData.map(receipt => ({
-        ...receipt,
-        client_name: receipt.clients?.name || 'No Client',
-        client_phone: receipt.clients?.phone || 'N/A',
-        balance: receipt.total - (receipt.advance_payment || 0) // Calculate balance
-      }));
-
-      setReceipts(formattedReceipts);
-    } catch (error) {
-      console.error('Error fetching receipts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load receipts. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    return receiptsData.map(receipt => ({
+      ...receipt,
+      client_name: receipt.clients?.name || 'No Client',
+      client_phone: receipt.clients?.phone || 'N/A',
+      balance: receipt.total - (receipt.advance_payment || 0)
+    }));
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchReceipts();
-    }
-  }, [dateFilter]);
+  const { data: receipts = [], isLoading } = useQuery({
+    queryKey: ['receipts', user?.id, dateFilter],
+    queryFn: fetchReceipts,
+    enabled: !!user,
+  });
 
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch = 

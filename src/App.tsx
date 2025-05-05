@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,11 +17,13 @@ import Pricing from "./pages/Pricing";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 
-// Create a client
+// Create a client with caching options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // Data remains fresh for 5 minutes
+      cacheTime: 10 * 60 * 1000, // Cache is kept for 10 minutes
+      refetchOnWindowFocus: false, // Prevents refetching on window focus
       retry: 1,
     },
   },

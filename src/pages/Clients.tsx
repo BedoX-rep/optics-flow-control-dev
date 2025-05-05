@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/AuthProvider";
+import { useQuery } from '@tanstack/react-query';
 
 interface Client {
   id: string;
@@ -60,58 +61,48 @@ export default function Clients() {
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
 
-  // Fetch clients with their latest receipts
   const fetchClients = async () => {
-    setIsLoading(true);
+    if (!user) return [];
 
-    try {
-      if (!user) return;
+    const { data: clientsData, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_deleted', false)
+      .order('name');
 
-      const { data: clientsData, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('name');
+    if (error) throw error;
 
-      if (error) {
-        throw error;
-      }
+    const clientsWithReceipts = await Promise.all(
+      clientsData.map(async (client) => {
+        const { data: receiptsData, error: receiptsError } = await supabase
+          .from('receipts')
+          .select('*')
+          .eq('client_id', client.id)
+          .eq('is_deleted', false)
+          .order('created_at', { ascending: false });
 
-      // For each client, get their receipts
-      const clientsWithReceipts = await Promise.all(
-        clientsData.map(async (client) => {
-          const { data: receiptsData, error: receiptsError } = await supabase
-            .from('receipts')
-            .select('*')
-            .eq('client_id', client.id)
-            .eq('is_deleted', false)
-            .order('created_at', { ascending: false });
+        if (receiptsError) {
+          console.error('Error fetching receipts:', receiptsError);
+          return { ...client, receipts: [] };
+        }
 
-          if (receiptsError) {
-            console.error('Error fetching receipts:', receiptsError);
-            return { ...client, receipts: [] };
-          }
+        return { ...client, receipts: receiptsData };
+      })
+    );
 
-          return { ...client, receipts: receiptsData };
-        })
-      );
-
-      setClients(clientsWithReceipts);
-      setFilteredClients(clientsWithReceipts);
-    } catch (error: any) {
-      toast.error('Error fetching clients: ' + error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    return clientsWithReceipts;
   };
 
+  const { data: clients = [], isLoading } = useQuery({
+    queryKey: ['clients', user?.id],
+    queryFn: fetchClients,
+    enabled: !!user,
+  });
+
   useEffect(() => {
-    // Only fetch if user exists and clients array is empty
-    if (user && clients.length === 0) {
-      fetchClients();
-    }
-  }, [user]);
+    setFilteredClients(clients);
+  }, [clients]);
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
@@ -120,8 +111,8 @@ export default function Clients() {
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(client => 
-        client.name.toLowerCase().includes(term) || 
+      filtered = filtered.filter(client =>
+        client.name.toLowerCase().includes(term) ||
         client.phone.includes(term)
       );
     }
@@ -147,9 +138,9 @@ export default function Clients() {
 
       const { data, error } = await supabase
         .from('clients')
-        .insert({ 
-          name, 
-          phone, 
+        .insert({
+          name,
+          phone,
           user_id: user.id
         })
         .select()
@@ -330,7 +321,7 @@ export default function Clients() {
       });
 
       await Promise.all(updatePromises);
-      
+
       // Clear the edited state of all cards
       editedCards.forEach(card => {
         card.setAttribute('data-is-edited', 'false');
@@ -389,28 +380,28 @@ export default function Clients() {
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <div className="flex gap-2 w-full sm:w-auto">
-              <Button 
-                size="default"
-                onClick={() => setIsAddClientOpen(true)}
-                className="bg-black hover:bg-neutral-800 text-white px-6"
-              >
-                <UserPlus size={18} className="mr-2" />
-                New Client
-              </Button>
-              <Button
-                variant="outline"
-                size="default"
-                onClick={handleSaveAllChanges}
-                className="border-neutral-200"
-              >
-                <Save size={18} className="mr-2" />
-                Save All Changes
-              </Button>
-            </div>
+            <Button
+              size="default"
+              onClick={() => setIsAddClientOpen(true)}
+              className="bg-black hover:bg-neutral-800 text-white px-6"
+            >
+              <UserPlus size={18} className="mr-2" />
+              New Client
+            </Button>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={handleSaveAllChanges}
+              className="border-neutral-200"
+            >
+              <Save size={18} className="mr-2" />
+              Save All Changes
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <SearchInput 
+          <SearchInput
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Search clients..."
@@ -429,16 +420,16 @@ export default function Clients() {
           </Select>
 
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="default"
               onClick={findDuplicateClients}
               className="text-neutral-600 hover:text-neutral-900"
             >
               Find Duplicates
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="default"
               onClick={() => setIsImportDialogOpen(true)}
               className="text-neutral-600 hover:text-neutral-900"
@@ -460,10 +451,10 @@ export default function Clients() {
       ) : filteredClients.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
           {filteredClients.map((client) => (
-            <ClientCard 
-              key={client.id} 
-              client={client} 
-              onEdit={handleEditClient} 
+            <ClientCard
+              key={client.id}
+              client={client}
+              onEdit={handleEditClient}
               onDelete={openDeleteDialog}
               onRefresh={fetchClients}
             />
@@ -476,13 +467,13 @@ export default function Clients() {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-1">No clients found</h3>
           <p className="text-gray-500 max-w-md mb-4">
-            {searchTerm 
+            {searchTerm
               ? `No clients match your search "${searchTerm}"`
               : "You haven't added any clients yet. Get started by adding your first client."
             }
           </p>
           {!searchTerm && (
-            <Button 
+            <Button
               onClick={() => setIsAddClientOpen(true)}
               className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
             >
@@ -497,15 +488,15 @@ export default function Clients() {
       <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
 
       {/* Add client dialog */}
-      <AddClientDialog 
-        isOpen={isAddClientOpen} 
-        onClose={() => setIsAddClientOpen(false)} 
+      <AddClientDialog
+        isOpen={isAddClientOpen}
+        onClose={() => setIsAddClientOpen(false)}
         onAddClient={handleAddClient}
       />
 
       {/* Edit client dialog */}
       {clientToEdit && (
-        <EditClientDialog 
+        <EditClientDialog
           client={clientToEdit}
           isOpen={!!clientToEdit}
           onClose={() => setClientToEdit(null)}
@@ -514,8 +505,8 @@ export default function Clients() {
       )}
 
       {/* Import clients dialog */}
-      <ImportClientsDialog 
-        isOpen={isImportDialogOpen} 
+      <ImportClientsDialog
+        isOpen={isImportDialogOpen}
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportClients}
       />
@@ -547,7 +538,7 @@ export default function Clients() {
               {duplicateClients.length > 0 && (
                 <>
                   <p className="mb-2">
-                    {duplicateClients.length} duplicate clients found with the same phone numbers. 
+                    {duplicateClients.length} duplicate clients found with the same phone numbers.
                     For each duplicate set, the first client will be kept and others marked as deleted.
                   </p>
                   <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
