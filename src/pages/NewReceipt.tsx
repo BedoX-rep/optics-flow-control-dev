@@ -313,16 +313,17 @@ const NewReceipt = () => {
 
       if (clientData) {
         setRightEye({
-          sph: clientData.right_eye_sph !== null ? clientData.right_eye_sph.toString() : '',
-          cyl: clientData.right_eye_cyl !== null ? clientData.right_eye_cyl.toString() : '',
-          axe: clientData.right_eye_axe !== null ? clientData.right_eye_axe.toString() : ''
+          sph: clientData.right_eye_sph !== null ? clientData.right_eye_sph.toString() : '0',
+          cyl: clientData.right_eye_cyl !== null ? clientData.right_eye_cyl.toString() : '0',
+          axe: clientData.right_eye_axe !== null ? clientData.right_eye_axe.toString() : '0'
         });
         setLeftEye({
-          sph: clientData.left_eye_sph !== null ? clientData.left_eye_sph.toString() : '',
-          cyl: clientData.left_eye_cyl !== null ? clientData.left_eye_cyl.toString() : '',
-          axe: clientData.left_eye_axe !== null ? clientData.left_eye_axe.toString() : ''
+          sph: clientData.left_eye_sph !== null ? clientData.left_eye_sph.toString() : '0',
+          cyl: clientData.left_eye_cyl !== null ? clientData.left_eye_cyl.toString() : '0',
+          axe: clientData.left_eye_axe !== null ? clientData.left_eye_axe.toString() : '0'
         });
-        setAdd(clientData.Add !== null ? clientData.Add.toString() : '');
+        setAdd(clientData.Add !== null ? clientData.Add.toString() : '0');
+        setPrescriptionOpen(true); // Automatically show prescription details
       }
     } catch (error) {
       console.error('Error fetching client prescription:', error);
@@ -1151,9 +1152,13 @@ const NewReceipt = () => {
             if (clientsError) throw clientsError;
             const updatedClients = clientsData || [];
             setClients(updatedClients);
+            setFilteredClients(updatedClients);
             setSelectedClient(client.id);
             setSearchTerm(client.name);
             setIsAddClientOpen(false);
+            
+            // Fetch and set prescription data for the new client
+            await fetchClientPrescription(client.id);
           } catch (error) {
             console.error('Error fetching clients:', error);
             toast({
