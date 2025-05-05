@@ -161,7 +161,12 @@ const ReceiptCard = ({
                     key={status}
                     whileHover={{ scale: 1.02 }}
                     className={`relative h-2 rounded-full cursor-pointer transition-all ${
-                      isCompleted ? 'bg-teal-500' : 'bg-gray-200'
+                      receipt.montage_status === 'UnOrdered' ? 'bg-gray-500' :
+                      receipt.montage_status === 'Ordered' ? 'bg-blue-500' :
+                      receipt.montage_status === 'InStore' ? 'bg-orange-500' :
+                      receipt.montage_status === 'InCutting' ? 'bg-purple-500' :
+                      receipt.montage_status === 'Ready' ? 'bg-pink-500' :
+                      receipt.montage_status === 'Paid costs' ? 'bg-teal-500' : 'bg-gray-200'
                     }`}
                     onClick={() => onMontageChange(status)}
                   >
