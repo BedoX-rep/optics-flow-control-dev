@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDistanceToNow, format } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 interface Receipt {
@@ -47,7 +47,7 @@ interface Receipt {
 }
 
 const Receipts = () => {
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
 
@@ -79,7 +79,6 @@ const Receipts = () => {
   };
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
@@ -218,7 +217,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      setReceipts(receipts.filter(receipt => receipt.id !== id));
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Deleted",
         description: "Receipt has been successfully deleted.",
