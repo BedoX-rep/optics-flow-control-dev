@@ -172,26 +172,15 @@ const ReceiptCard = ({
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
                     <div className="flex items-center gap-1">
-                      <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
-                      <button
-                        onClick={() => setEditingAdvance(true)}
-                        className="opacity-50 hover:opacity-100 transition-opacity"
-                      >
-                        <Pin className="h-3 w-3" />
-                      </button>
+                      <input
+                        type="number"
+                        value={advanceValue}
+                        onChange={handleAdvanceChange}
+                        className="w-24 bg-transparent text-gray-600 hover:bg-gray-50 focus:bg-white focus:ring-1 focus:ring-primary rounded px-2 py-0.5 transition-all"
+                        style={{ appearance: 'textfield' }}
+                      />
+                      <span className="text-gray-600">DH</span>
                     </div>
-                    {editingAdvance && (
-                      <div className="absolute z-10 bg-white shadow-lg rounded-lg p-2 mt-1">
-                        <input
-                          type="number"
-                          value={advanceValue}
-                          onChange={handleAdvanceChange}
-                          className="w-24 px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-primary"
-                          autoFocus
-                          onBlur={() => setEditingAdvance(false)}
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
