@@ -217,29 +217,40 @@ const Receipts = () => {
   const [dateFilter, setDateFilter] = useState('all');
 
   const isReceiptInDateRange = (receipt: Receipt) => {
-    const receiptDate = new Date(receipt.created_at);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    if (!receipt?.created_at) return false;
+    
+    try {
+      const receiptDate = new Date(receipt.created_at);
+      if (isNaN(receiptDate.getTime())) return false;
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    const receiptDay = new Date(receiptDate);
-    receiptDay.setHours(0, 0, 0, 0);
+      const receiptDay = new Date(receiptDate);
+      receiptDay.setHours(0, 0, 0, 0);
 
-    switch (dateFilter) {
-      case 'today':
-        return receiptDay.getTime() === today.getTime();
-      case 'week': {
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
-        return receiptDate >= weekStart;
+      switch (dateFilter) {
+        case 'today':
+          return receiptDay.getTime() === today.getTime();
+        case 'week': {
+          const weekStart = new Date(today);
+          weekStart.setDate(today.getDate() - today.getDay());
+          return receiptDate >= weekStart;
+        }
+        case 'month': {
+          return receiptDate.getMonth() === today.getMonth() && 
+                 receiptDate.getFullYear() === today.getFullYear();
+        }
+        case 'year':
+          return receiptDate.getFullYear() === today.getFullYear();
+        case 'all':
+          return true;
+        default:
+          return true;
       }
-      case 'month': {
-        return receiptDate.getMonth() === today.getMonth() && 
-               receiptDate.getFullYear() === today.getFullYear();
-      }
-      case 'year':
-        return receiptDate.getFullYear() === today.getFullYear();
-      default:
-        return true;
+    } catch (error) {
+      console.error('Error in date filtering:', error);
+      return false;
     }
   };
   const [paymentFilter, setPaymentFilter] = useState('all');
@@ -469,16 +480,22 @@ const Receipts = () => {
   });
 
   const filteredReceipts = React.useMemo(() => {
+    if (!Array.isArray(receipts)) return [];
+    
+    const search = searchTerm.toLowerCase().trim();
+    
     return receipts.filter(receipt => {
-      const matchesSearch = 
-        (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (!receipt) return false;
+      
+      const matchesSearch = !search || 
+        ((receipt.client_name || '').toLowerCase().includes(search) ||
+         (receipt.client_phone || '').toLowerCase().includes(search));
 
       const matchesPayment = 
         paymentFilter === 'all' ? true :
-        paymentFilter === 'paid' ? receipt.balance === 0 :
-        paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
-        receipt.balance === receipt.total;
+        paymentFilter === 'paid' ? (receipt.balance || 0) === 0 :
+        paymentFilter === 'partial' ? ((receipt.balance || 0) > 0 && (receipt.advance_payment || 0) > 0) :
+        (receipt.balance || 0) === (receipt.total || 0);
 
       const matchesDelivery = 
         deliveryFilter === 'all' ? true :
