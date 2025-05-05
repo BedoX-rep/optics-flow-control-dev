@@ -19,12 +19,13 @@ import { useQueryClient } from "@tanstack/react-query";
 interface ReceiptEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  receipt: any;
+  receipt: Receipt | null;
 }
 
-const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDialogProps) => {
+const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',

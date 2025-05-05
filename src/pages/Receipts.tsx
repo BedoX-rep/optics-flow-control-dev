@@ -285,9 +285,11 @@ const Receipts = () => {
     queryKey: ['receipts'],
     queryFn: fetchReceipts,
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
-    refetchOnWindowFocus: false
+    staleTime: Infinity, // Don't mark data as stale automatically
+    cacheTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false
   });
 
   const filteredReceipts = receipts.filter(receipt => {
