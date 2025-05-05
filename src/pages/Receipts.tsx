@@ -139,7 +139,7 @@ const ReceiptCard = ({
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                    <p className="font-medium text-blue-600">{(receipt.total - (receipt.total_discount || 0) + (receipt.tax || 0)).toFixed(2)} DH</p>
+                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>

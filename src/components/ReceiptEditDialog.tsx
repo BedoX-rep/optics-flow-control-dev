@@ -61,6 +61,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         add: receipt.add !== null ? String(receipt.add) : '',
         montage_costs: receipt.montage_costs || 0,
         total_discount: receipt.total_discount || 0,
+        tax: receipt.tax || 0,
         advance_payment: receipt.advance_payment || 0,
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
