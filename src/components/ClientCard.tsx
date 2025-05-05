@@ -199,11 +199,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     >
       <div className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${avatarColor}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${avatarColor}`}>
               {nameInitial}
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center">
                 <input 
                   type="text" 
@@ -226,38 +226,38 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={toggleFavorite}
-              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors min-w-9`}
+              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors h-8 w-8`}
             >
               <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
             </Button>
             {isEdited && (
               <Button 
                 variant="ghost" 
-                size="sm" 
+                size="icon"
                 onClick={handleSaveChanges}
-                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors min-w-9"
+                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors h-8 w-8"
               >
                 <Save size={16} />
               </Button>
             )}
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="icon"
               onClick={() => onEdit(client)}
-              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors min-w-9"
+              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors h-8 w-8"
             >
               <Edit size={16} />
             </Button>
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="icon"
               onClick={() => onDelete(client)}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors min-w-9"
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
             >
               <Trash2 size={16} />
             </Button>
