@@ -86,7 +86,7 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8]">
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -95,7 +95,7 @@ const ReceiptCard = ({
                   <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
                   <div className="flex items-center gap-1">
                     <Phone className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs text-green-600">{receipt.client_phone}</span>
+                    <span className="text-xs text-blue-600">{receipt.client_phone}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -141,7 +141,7 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
                   </div>
                 </div>
               </div>
@@ -153,7 +153,7 @@ const ReceiptCard = ({
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Cost</p>
-                    <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Profit</p>
