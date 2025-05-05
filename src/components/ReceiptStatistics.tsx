@@ -49,17 +49,21 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
   });
 
   // Calculate metrics based on filtered receipts
-  const totalMontageCosts = filteredReceipts.reduce((sum, receipt) => 
-    sum + (receipt.montage_costs || 0), 0
-  );
+  let totalMontageCosts = 0;
+  let unpaidMontageCosts = 0;
+  let totalProductsCost = 0;
 
-  const unpaidMontageCosts = filteredReceipts
-    .filter(receipt => receipt.montage_status !== 'Paid costs')
-    .reduce((sum, receipt) => sum + (receipt.montage_costs || 0), 0);
+  for (const receipt of filteredReceipts) {
+    const montageCost = receipt.montage_costs || 0;
+    const productCost = receipt.products_cost || 0;
 
-  const totalProductsCost = filteredReceipts.reduce((sum, receipt) => 
-    sum + (receipt.products_cost || 0), 0
-  );
+    totalMontageCosts += montageCost;
+    totalProductsCost += productCost;
+
+    if (receipt.montage_status !== 'Paid costs') {
+      unpaidMontageCosts += montageCost;
+    }
+  }
 
   const lensTypeCosts = filteredReceipts.reduce((acc, receipt) => {
     if (Array.isArray(receipt.receipt_items)) {
