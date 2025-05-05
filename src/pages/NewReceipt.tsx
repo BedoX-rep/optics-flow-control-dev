@@ -423,41 +423,9 @@ const NewReceipt = () => {
     }
   };
 
-  const handleClientSelect = async (clientId: string) => {
-    if (!clientId) return;
-    
+  const handleClientSelect = (clientId: string) => {
     setSelectedClient(clientId);
-    try {
-      const { data: clientData, error } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', clientId)
-        .single();
-
-      if (error) throw error;
-
-      if (clientData) {
-        setRightEye({
-          sph: clientData.right_eye_sph?.toString() || '0',
-          cyl: clientData.right_eye_cyl?.toString() || '0',
-          axe: clientData.right_eye_axe?.toString() || '0'
-        });
-        setLeftEye({
-          sph: clientData.left_eye_sph?.toString() || '0',
-          cyl: clientData.left_eye_cyl?.toString() || '0',
-          axe: clientData.left_eye_axe?.toString() || '0'
-        });
-        setAdd(clientData.Add?.toString() || '0');
-        setPrescriptionOpen(true);
-      }
-    } catch (error) {
-      console.error('Error fetching client prescription:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load client prescription",
-        variant: "destructive",
-      });
-    }
+    fetchClientPrescription(clientId);
   };
 
   const updatePaymentStatus = (newBalance: number) => {
