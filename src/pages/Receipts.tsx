@@ -69,61 +69,50 @@ const ReceiptCard = ({
     >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
         <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">{receipt.client_name}</h3>
-              <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">{receipt.client_name}</h3>
+                <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
+                  {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+                </Badge>
+                <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
+                  {receipt.delivery_status}
+                </Badge>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
-                {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
-              </Badge>
-              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
-                {receipt.delivery_status}
-              </Badge>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <p className="text-sm text-gray-500">Total</p>
-              <p className="font-semibold">{receipt.total.toFixed(2)} DH</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Balance</p>
-              <p className="font-semibold text-red-600">{receipt.balance.toFixed(2)} DH</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Cost TTC</p>
-              <p className="font-semibold">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Profit</p>
-              <p className="font-semibold text-green-600">
-                {(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH
-              </p>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-sm text-gray-500 mb-2">Progress</p>
-            <div className="flex items-center gap-1">
-              {MONTAGE_STATUSES.map((status, index) => (
-                <React.Fragment key={status}>
-                  <div
-                    className={`h-2 flex-1 rounded ${
-                      index <= currentMontageIndex
-                        ? 'bg-blue-500'
-                        : 'bg-gray-200'
+            <div className="grid grid-cols-6 gap-1 w-full relative">
+              {MONTAGE_STATUSES.map((status, index) => {
+                const isCompleted = currentMontageIndex >= index;
+                const isCurrent = currentMontageIndex === index;
+                return (
+                  <motion.button
+                    key={status}
+                    whileHover={{ scale: 1.02 }}
+                    className={`relative h-2 rounded-full cursor-pointer transition-all ${
+                      isCompleted ? 'bg-teal-500' : 'bg-gray-200'
                     }`}
-                  />
-                  {index < MONTAGE_STATUSES.length - 1 && (
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  )}
-                </React.Fragment>
-              ))}
+                    onClick={() => onMontageChange(status)}
+                  >
+                    <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium whitespace-nowrap ${
+                      isCurrent ? 'text-teal-600' : 'text-gray-500'
+                    }`}>
+                      {status}
+                    </div>
+                    {isCurrent && (
+                      <motion.div
+                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
+                        layoutId="currentStep"
+                      />
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
-            <p className="text-sm text-gray-600 mt-1">{receipt.montage_status}</p>
           </div>
 
           <div className="flex justify-between items-center">
