@@ -444,7 +444,7 @@ export default function Clients() {
       </div>
 
       {/* Client cards */}
-      {isLoading ? (
+      {isLoading || !filteredClients ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm space-y-4">
@@ -468,7 +468,7 @@ export default function Clients() {
             </div>
           ))}
         </div>
-      ) : filteredClients.length > 0 ? (
+      ) : filteredClients?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
           {filteredClients.map((client) => (
             <ClientCard
