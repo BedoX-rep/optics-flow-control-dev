@@ -284,6 +284,39 @@ export default function Clients() {
     setIsDuplicateDialogOpen(true);
   };
 
+  // Function to save all changes
+  const handleSaveAllChanges = async () => {
+    try {
+      // Get all edited clients that need saving
+      const editedCards = document.querySelectorAll('[data-is-edited="true"]');
+      if (editedCards.length === 0) {
+        toast.info("No changes to save");
+        return;
+      }
+
+      // Save all changes
+      await Promise.all(Array.from(editedCards).map(async (card) => {
+        const clientId = card.getAttribute('data-client-id');
+        if (clientId) {
+          const clientData = clients.find(c => c.id === clientId);
+          if (clientData) {
+            const { error } = await supabase
+              .from('clients')
+              .update(clientData)
+              .eq('id', clientId);
+            
+            if (error) throw error;
+          }
+        }
+      }));
+
+      toast.success(`Saved changes for ${editedCards.length} clients`);
+      fetchClients(); // Refresh the list
+    } catch (error: any) {
+      toast.error("Failed to save all changes: " + error.message);
+    }
+  };
+
   const handleDeleteDuplicates = async () => {
     try {
       // Group by phone number and take the first client from each group
@@ -326,60 +359,64 @@ export default function Clients() {
   };
 
   return (
-    <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-8 space-y-8">
-      <PageTitle title="Clients" />
-      
-      {/* Search and filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="w-full sm:w-64 md:w-80">
+    <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-3 flex-1">
+          <Button 
+            size="default"
+            onClick={() => setIsAddClientOpen(true)}
+            className="bg-black hover:bg-neutral-800 text-white px-6"
+          >
+            <UserPlus size={18} className="mr-2" />
+            New Client
+          </Button>
+          <Button
+            variant="outline"
+            size="default"
+            onClick={handleSaveAllChanges}
+            className="border-neutral-200"
+          >
+            <Save size={18} className="mr-2" />
+            Save All
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-3">
           <SearchInput 
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Search clients..."
+            className="w-64"
           />
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-          <div className="flex gap-2">
-            <div className="w-40">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name (A-Z)</SelectItem>
-                  <SelectItem value="recent">Recently Added</SelectItem>
-                  <SelectItem value="phone">Phone Number</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
           
-          <div className="flex gap-2">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Name (A-Z)</SelectItem>
+              <SelectItem value="recent">Recently Added</SelectItem>
+              <SelectItem value="phone">Phone Number</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-2">
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="ghost" 
+              size="default"
               onClick={findDuplicateClients}
-              className="flex items-center gap-1"
+              className="text-neutral-600 hover:text-neutral-900"
             >
               Find Duplicates
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="ghost" 
+              size="default"
               onClick={() => setIsImportDialogOpen(true)}
-              className="flex items-center gap-1"
+              className="text-neutral-600 hover:text-neutral-900"
             >
-              <Upload size={16} />
+              <Upload size={18} className="mr-2" />
               Import
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => setIsAddClientOpen(true)}
-              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500 flex items-center gap-1"
-            >
-              <UserPlus size={16} />
-              New Client
             </Button>
           </div>
         </div>
