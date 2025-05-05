@@ -347,6 +347,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
+                    <Label>Tax</Label>
+                    <Input
+                      type="number"
+                      value={formData.tax}
+                      onChange={(e) => setFormData({ ...formData, tax: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
                     <Label>Advance Payment</Label>
                     <Input
                       type="number"
