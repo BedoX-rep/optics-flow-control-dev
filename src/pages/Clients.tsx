@@ -95,12 +95,14 @@ export default function Clients() {
   };
 
   const [page, setPage] = useState(0);
-  const { data: { clients = [], hasMore = false } = {}, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['clients', user?.id, page, searchTerm, sortBy],
-    queryKey: ['clients', user?.id],
     queryFn: fetchClients,
     enabled: !!user,
   });
+
+  const clients = data?.clients || [];
+  const hasMore = data?.hasMore || false;
 
   useEffect(() => {
     setFilteredClients(clients);
@@ -150,9 +152,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Add the new client to the state
-      const newClient = { ...data, receipts: [] };
-      setClients([...clients, newClient]);
+      // Invalidate and refetch clients
+      queryClient.invalidateQueries(['clients']);
       toast.success('Client added successfully!');
       setIsAddClientOpen(false);
     } catch (error: any) {
@@ -173,12 +174,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Update the client in the state
-      setClients(
-        clients.map((client) =>
-          client.id === id ? { ...client, name, phone } : client
-        )
-      );
+      // Invalidate and refetch clients
+      queryClient.invalidateQueries(['clients']);
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
@@ -203,8 +200,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Remove the client from the state
-      setClients(clients.filter((c) => c.id !== clientToDelete.id));
+      // Invalidate and refetch clients
+      queryClient.invalidateQueries(['clients']);
       toast.success('Client deleted successfully!');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
