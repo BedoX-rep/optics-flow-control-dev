@@ -45,18 +45,30 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddCli
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await onAddClient(values.name, values.phone)
+      if (!user) return;
+
+      const { data: client, error } = await supabase
+        .from('clients')
+        .insert({
+          user_id: user.id,
+          name: values.name,
+          phone: values.phone
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      // If onClientAdded is provided (from NewReceipt page), call it with the values
-      if (onClientAdded) {
-        const client = { name: values.name, phone: values.phone };
+      // If onClientAdded is provided (from NewReceipt page), call it with the client
+      if (onClientAdded && client) {
         await onClientAdded(client);
       } else {
         // Invalidate the clients query to refresh the list
         await queryClient.invalidateQueries(['clients']);
       }
       
-      form.reset()
+      form.reset();
+      onClose();
     } catch (error: any) {
       toast({
         title: "Error",

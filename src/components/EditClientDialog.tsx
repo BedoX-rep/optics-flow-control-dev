@@ -136,7 +136,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       if (error) throw error
 
       // Invalidate the clients query to trigger a refresh
-      await queryClient.invalidateQueries(['clients', user?.id]);
+      await queryClient.invalidateQueries(['clients']);
+      
+      if (onClientUpdated) {
+        onClientUpdated(client.id, values.name, values.phone);
+      }
 
       toast({
         title: "Success",

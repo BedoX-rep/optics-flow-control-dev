@@ -179,6 +179,24 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({ is_deleted: true })
+        .eq('id', client.id);
+
+      if (error) throw error;
+
+      // Invalidate clients query to refresh the list
+      await queryClient.invalidateQueries(['clients']);
+      toast.success("Client deleted successfully");
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error("Failed to delete client");
+    }
+  };
+
   return (
     <div 
       className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
@@ -244,7 +262,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => onDelete(client)}
+              onClick={handleDelete}
               className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
             >
               <Trash2 size={16} />
