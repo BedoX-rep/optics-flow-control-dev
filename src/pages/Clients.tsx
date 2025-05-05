@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
@@ -10,29 +9,43 @@ import PageTitle from "@/components/PageTitle";
 import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
-import { Filter, UserPlus, Upload, ChevronDown } from "lucide-react";
+import { UserPlus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/components/AuthProvider";
 
 interface Client {
   id: string;
   name: string;
   phone: string;
   created_at: string;
+  right_eye_sph?: number | null;
+  right_eye_cyl?: number | null;
+  right_eye_axe?: number | null;
+  left_eye_sph?: number | null;
+  left_eye_cyl?: number | null;
+  left_eye_axe?: number | null;
+  Add?: number | null;
   receipts?: Array<{
     id: string;
-    right_eye_sph?: number;
-    right_eye_cyl?: number;
-    right_eye_axe?: number;
-    left_eye_sph?: number;
-    left_eye_cyl?: number;
-    left_eye_axe?: number;
+    created_at: string;
+    right_eye_sph?: number | null;
+    right_eye_cyl?: number | null;
+    right_eye_axe?: number | null;
+    left_eye_sph?: number | null;
+    left_eye_cyl?: number | null;
+    left_eye_axe?: number | null;
+    total?: number;
+    advance_payment?: number;
+    balance?: number;
+    payment_status?: string;
   }>;
 }
 
 export default function Clients() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
@@ -43,52 +56,58 @@ export default function Clients() {
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [sortBy, setSortBy] = useState<string>('name');
-  const [showFilters, setShowFilters] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
 
   // Fetch clients with their latest receipts
-  useEffect(() => {
-    async function getClients() {
-      setIsLoading(true);
+  const fetchClients = async () => {
+    setIsLoading(true);
+    
+    try {
+      if (!user) return;
       
-      try {
-        const { data: clientsData, error } = await supabase
-          .from('clients')
-          .select('*')
-          .order('name');
+      const { data: clientsData, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name');
 
-        if (error) {
-          throw error;
-        }
-
-        // For each client, get their receipts
-        const clientsWithReceipts = await Promise.all(
-          clientsData.map(async (client) => {
-            const { data: receiptsData, error: receiptsError } = await supabase
-              .from('receipts')
-              .select('*')
-              .eq('client_id', client.id)
-              .order('created_at', { ascending: false });
-              
-            if (receiptsError) {
-              console.error('Error fetching receipts:', receiptsError);
-              return { ...client, receipts: [] };
-            }
-            
-            return { ...client, receipts: receiptsData };
-          })
-        );
-
-        setClients(clientsWithReceipts);
-        setFilteredClients(clientsWithReceipts);
-      } catch (error: any) {
-        toast.error('Error fetching clients: ' + error.message);
-      } finally {
-        setIsLoading(false);
+      if (error) {
+        throw error;
       }
-    }
 
-    getClients();
-  }, []);
+      // For each client, get their receipts
+      const clientsWithReceipts = await Promise.all(
+        clientsData.map(async (client) => {
+          const { data: receiptsData, error: receiptsError } = await supabase
+            .from('receipts')
+            .select('*')
+            .eq('client_id', client.id)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: false });
+            
+          if (receiptsError) {
+            console.error('Error fetching receipts:', receiptsError);
+            return { ...client, receipts: [] };
+          }
+          
+          return { ...client, receipts: receiptsData };
+        })
+      );
+
+      setClients(clientsWithReceipts);
+      setFilteredClients(clientsWithReceipts);
+    } catch (error: any) {
+      toast.error('Error fetching clients: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, [user]);
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
@@ -124,7 +143,11 @@ export default function Clients() {
       
       const { data, error } = await supabase
         .from('clients')
-        .insert({ name, phone, user_id: user.id })
+        .insert({ 
+          name, 
+          phone, 
+          user_id: user.id
+        })
         .select()
         .single();
 
@@ -178,7 +201,7 @@ export default function Clients() {
     try {
       const { error } = await supabase
         .from('clients')
-        .delete()
+        .update({ is_deleted: true })
         .eq('id', clientToDelete.id);
 
       if (error) throw error;
@@ -193,15 +216,108 @@ export default function Clients() {
     }
   };
 
-  const handleImportClients = (importedClients: any[]) => {
-    // Implement client import functionality
-    toast.success(`${importedClients.length} clients imported successfully!`);
-    setIsImportDialogOpen(false);
+  const handleImportClients = async (importedClients: any[]) => {
+    try {
+      if (!user) return;
+      
+      // Check for duplicates
+      const phoneNumbers = new Set(clients.map(client => client.phone));
+      const newClients = importedClients.filter(client => !phoneNumbers.has(client.phone));
+      
+      if (newClients.length === 0) {
+        toast.warning("All imported clients already exist in your database");
+        setIsImportDialogOpen(false);
+        return;
+      }
+      
+      // Add user_id to each client
+      const clientsWithUserId = newClients.map(client => ({
+        ...client,
+        user_id: user.id
+      }));
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .insert(clientsWithUserId)
+        .select();
+
+      if (error) throw error;
+      
+      toast.success(`${data.length} clients imported successfully!`);
+      fetchClients(); // Refresh clients list
+      setIsImportDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Error importing clients: ${error.message}`);
+    }
+  };
+
+  const findDuplicateClients = () => {
+    // Group clients by phone number
+    const phoneGroups = clients.reduce((groups: any, client) => {
+      const phone = client.phone;
+      if (!groups[phone]) {
+        groups[phone] = [];
+      }
+      groups[phone].push(client);
+      return groups;
+    }, {});
     
-    // Refresh clients list
-    setIsLoading(true);
-    // Logic to refresh clients would go here
-    setIsLoading(false);
+    // Find groups with more than one client (duplicates)
+    const duplicates: any[] = [];
+    Object.values(phoneGroups).forEach((group: any) => {
+      if (group.length > 1) {
+        duplicates.push(...group);
+      }
+    });
+    
+    if (duplicates.length === 0) {
+      toast.info("No duplicate clients found");
+      return;
+    }
+    
+    setDuplicateClients(duplicates);
+    setIsDuplicateDialogOpen(true);
+  };
+
+  const handleDeleteDuplicates = async () => {
+    try {
+      // Group by phone number and take the first client from each group
+      const phoneGroups: any = {};
+      duplicateClients.forEach(client => {
+        if (!phoneGroups[client.phone]) {
+          phoneGroups[client.phone] = [client];
+        } else {
+          phoneGroups[client.phone].push(client);
+        }
+      });
+      
+      // For each group, keep the first client and mark others as deleted
+      const clientsToDelete: string[] = [];
+      Object.values(phoneGroups).forEach((group: any) => {
+        for (let i = 1; i < group.length; i++) {
+          clientsToDelete.push(group[i].id);
+        }
+      });
+      
+      if (clientsToDelete.length === 0) {
+        toast.info("No duplicates to delete");
+        setIsDuplicateDialogOpen(false);
+        return;
+      }
+      
+      const { error } = await supabase
+        .from('clients')
+        .update({ is_deleted: true })
+        .in('id', clientsToDelete);
+
+      if (error) throw error;
+      
+      toast.success(`${clientsToDelete.length} duplicate clients removed`);
+      fetchClients(); // Refresh client list
+      setIsDuplicateDialogOpen(false);
+    } catch (error: any) {
+      toast.error(`Error deleting duplicates: ${error.message}`);
+    }
   };
 
   return (
@@ -220,16 +336,6 @@ export default function Clients() {
         
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter size={16} />
-              Filters
-              <ChevronDown size={14} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </Button>
             <div className="w-40">
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="h-9">
@@ -245,6 +351,14 @@ export default function Clients() {
           </div>
           
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={findDuplicateClients}
+              className="flex items-center gap-1"
+            >
+              Find Duplicates
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -266,18 +380,6 @@ export default function Clients() {
         </div>
       </div>
       
-      {/* Filter options (expandable) */}
-      {showFilters && (
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm animate-accordion-down">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Filter options would go here */}
-            <div className="text-sm text-gray-500">
-              Additional filter options can be implemented here
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* Client cards */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
@@ -292,7 +394,8 @@ export default function Clients() {
               key={client.id} 
               client={client} 
               onEdit={handleEditClient} 
-              onDelete={openDeleteDialog} 
+              onDelete={openDeleteDialog}
+              onRefresh={fetchClients}
             />
           ))}
         </div>
@@ -360,6 +463,38 @@ export default function Clients() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Duplicates dialog */}
+      <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Duplicate Clients Found</AlertDialogTitle>
+            <AlertDialogDescription>
+              {duplicateClients.length > 0 && (
+                <>
+                  <p className="mb-2">
+                    {duplicateClients.length} duplicate clients found with the same phone numbers. 
+                    For each duplicate set, the first client will be kept and others marked as deleted.
+                  </p>
+                  <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
+                    {duplicateClients.map(client => (
+                      <div key={client.id} className="py-1 border-b last:border-0">
+                        {client.name} ({client.phone})
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteDuplicates} className="bg-red-500 hover:bg-red-600">
+              Delete Duplicates
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

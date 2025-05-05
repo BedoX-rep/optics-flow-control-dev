@@ -1,138 +1,320 @@
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import Papa from 'papaparse';
+import { useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
+import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
+import Papa from "papaparse"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface ImportClientsDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onImportComplete: () => void;
+  isOpen: boolean
+  onClose: () => void
+  onImport: (importedClients: any[]) => void
 }
 
-interface CSVRow {
-  name: string;
-  phone?: string;
-  gender?: "Mr" | "Mme" | "Enf";
-  right_eye_sph?: string;
-  right_eye_cyl?: string;
-  right_eye_axe?: string;
-  left_eye_sph?: string;
-  left_eye_cyl?: string;
-  left_eye_axe?: string;
-  Add?: string;
-  notes?: string;
-}
-
-export function ImportClientsDialog({ isOpen, onClose, onImportComplete }: ImportClientsDialogProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        try {
-          const rows = results.data as CSVRow[];
-          
-          if (rows.length > 50) {
-            throw new Error('Maximum 50 rows allowed per import');
-          }
-
-          const user = (await supabase.auth.getUser()).data.user;
-          if (!user) throw new Error('User not authenticated');
-
-          const clientsToInsert = rows.map(row => ({
-            name: row.name,
-            phone: row.phone || null,
-            gender: (row.gender as "Mr" | "Mme" | "Enf" | undefined) || null,
-            right_eye_sph: row.right_eye_sph ? parseFloat(row.right_eye_sph) : 0,
-            right_eye_cyl: row.right_eye_cyl ? parseFloat(row.right_eye_cyl) : 0,
-            right_eye_axe: row.right_eye_axe ? parseInt(row.right_eye_axe) : 0,
-            left_eye_sph: row.left_eye_sph ? parseFloat(row.left_eye_sph) : 0,
-            left_eye_cyl: row.left_eye_cyl ? parseFloat(row.left_eye_cyl) : 0,
-            left_eye_axe: row.left_eye_axe ? parseInt(row.left_eye_axe) : 0,
-            Add: row.Add ? parseFloat(row.Add) : 0,
-            notes: row.notes || null,
-            user_id: user.id,
-            favorite: false,
-            is_deleted: false
-          }));
-
-          const { error } = await supabase
-            .from('clients')
-            .insert(clientsToInsert);
-
-          if (error) throw error;
-
-          toast({
-            title: "Success",
-            description: `${rows.length} clients imported successfully`,
-          });
-          
-          onImportComplete();
-          onClose();
-        } catch (error: any) {
-          console.error('Import error:', error);
-          toast({
-            title: "Error",
-            description: error.message || "Failed to import clients",
-            variant: "destructive",
-          });
-        } finally {
-          setIsUploading(false);
+export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClientsDialogProps) => {
+  const { toast } = useToast()
+  const [file, setFile] = useState<File | null>(null)
+  const [previewData, setPreviewData] = useState<any[]>([])
+  const [hasHeaders, setHasHeaders] = useState(true)
+  const [nameColumn, setNameColumn] = useState("name")
+  const [phoneColumn, setPhoneColumn] = useState("phone")
+  const [availableColumns, setAvailableColumns] = useState<string[]>([])
+  const [step, setStep] = useState(1)
+  const [errors, setErrors] = useState<string[]>([])
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    
+    if (!selectedFile) {
+      setFile(null)
+      setPreviewData([])
+      setAvailableColumns([])
+      return
+    }
+    
+    // Check if file is CSV
+    if (!selectedFile.name.endsWith('.csv')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a CSV file",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    setFile(selectedFile)
+    
+    // Parse CSV for preview
+    Papa.parse(selectedFile, {
+      header: hasHeaders,
+      skipEmptyLines: true,
+      preview: 5, // Preview first 5 rows
+      complete: (results) => {
+        setPreviewData(results.data)
+        
+        // Get column names
+        if (hasHeaders && results.meta.fields) {
+          setAvailableColumns(results.meta.fields)
+        } else if (!hasHeaders && results.data.length > 0) {
+          // Generate column names (Column 0, Column 1, etc.)
+          const firstRow = results.data[0] as any
+          const columns = Object.keys(firstRow).map((key, index) => `Column ${index}`)
+          setAvailableColumns(columns)
         }
       },
       error: (error) => {
-        console.error('CSV parsing error:', error);
         toast({
-          title: "Error",
-          description: "Failed to parse CSV file",
+          title: "Error parsing CSV",
+          description: error.message,
           variant: "destructive",
-        });
-        setIsUploading(false);
+        })
       }
-    });
-  };
+    })
+  }
 
+  const validateClients = (clients: any[]) => {
+    const errors = []
+    
+    // Check for missing required fields
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i]
+      if (!client.name || client.name.trim() === "") {
+        errors.push(`Row ${i + 1}: Missing name`)
+      }
+      if (!client.phone || client.phone.trim() === "") {
+        errors.push(`Row ${i + 1}: Missing phone number`)
+      }
+    }
+    
+    return errors
+  }
+  
+  const handleImport = () => {
+    if (!file) return
+    
+    Papa.parse(file, {
+      header: hasHeaders,
+      skipEmptyLines: true,
+      complete: (results) => {
+        let clients = results.data.map((row: any) => {
+          // Map columns based on user selection
+          const clientName = hasHeaders ? row[nameColumn] : row[parseInt(nameColumn.replace("Column ", ""))]
+          const clientPhone = hasHeaders ? row[phoneColumn] : row[parseInt(phoneColumn.replace("Column ", ""))]
+          
+          return {
+            name: clientName,
+            phone: clientPhone
+          }
+        })
+        
+        // Validate clients
+        const validationErrors = validateClients(clients)
+        if (validationErrors.length > 0) {
+          setErrors(validationErrors)
+          setStep(3) // Show errors
+          return
+        }
+        
+        onImport(clients)
+      },
+      error: (error) => {
+        toast({
+          title: "Error importing CSV",
+          description: error.message,
+          variant: "destructive",
+        })
+      }
+    })
+  }
+  
+  const resetDialog = () => {
+    setFile(null)
+    setPreviewData([])
+    setAvailableColumns([])
+    setStep(1)
+    setErrors([])
+  }
+  
+  const handleClose = () => {
+    resetDialog()
+    onClose()
+  }
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Import Clients</DialogTitle>
+          <DialogDescription>
+            Import your clients from a CSV file. The file should contain at least name and phone columns.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-sm text-neutral-500">
-            Upload a CSV file with the following columns:<br/>
-            name*, phone, gender (Mr/Mme/Enf), right_eye_sph, right_eye_cyl, right_eye_axe,<br/>
-            left_eye_sph, left_eye_cyl, left_eye_axe, Add, notes<br/>
-            <br/>
-            * Required field
-          </p>
-          <div className="flex gap-4">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium"
-            />
+        
+        {step === 1 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                  <p className="mb-2 text-sm text-gray-500">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500">CSV file</p>
+                </div>
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            
+            {file && (
+              <div className="flex items-center p-2 bg-green-50 rounded border border-green-200">
+                <FileText className="h-5 w-5 text-green-500 mr-2" />
+                <span className="text-sm text-green-700 font-medium">{file.name}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <Input 
+                type="checkbox" 
+                id="hasHeaders" 
+                className="w-4 h-4" 
+                checked={hasHeaders} 
+                onChange={(e) => setHasHeaders(e.target.checked)} 
+              />
+              <label htmlFor="hasHeaders" className="text-sm text-gray-700">
+                File has header row
+              </label>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => setStep(2)} 
+                disabled={!file}
+              >
+                Next
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isUploading}
-          >
-            Cancel
-          </Button>
-        </div>
+        )}
+        
+        {step === 2 && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name Column
+                </label>
+                <select 
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                  value={nameColumn}
+                  onChange={(e) => setNameColumn(e.target.value)}
+                >
+                  {availableColumns.map((column) => (
+                    <option key={column} value={column}>{column}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Column
+                </label>
+                <select 
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                  value={phoneColumn}
+                  onChange={(e) => setPhoneColumn(e.target.value)}
+                >
+                  {availableColumns.map((column) => (
+                    <option key={column} value={column}>{column}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Preview</h4>
+              <div className="border rounded overflow-x-auto max-h-60">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Phone
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {previewData.map((row: any, index) => (
+                      <tr key={index}>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {hasHeaders ? row[nameColumn] : row[parseInt(nameColumn.replace("Column ", ""))]}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {hasHeaders ? row[phoneColumn] : row[parseInt(phoneColumn.replace("Column ", ""))]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <Button onClick={handleImport}>
+                Import Clients
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {step === 3 && (
+          <div className="space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Import failed</AlertTitle>
+              <AlertDescription>
+                Please fix the following issues and try again:
+              </AlertDescription>
+            </Alert>
+            
+            <div className="max-h-60 overflow-y-auto border rounded p-3">
+              <ul className="list-disc pl-5 space-y-1">
+                {errors.map((error, index) => (
+                  <li key={index} className="text-sm text-red-600">
+                    {error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setStep(1)}>
+                Back
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

@@ -1,35 +1,56 @@
 
 import React, { useState } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2 } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
 import { EyePrescriptionDisplay } from "./EyePrescriptionDisplay";
+import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Receipt {
+  id: string;
+  created_at: string;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  total?: number;
+  advance_payment?: number;
+  balance?: number;
+  payment_status?: string;
+  receipt_items?: Array<any>;
+  discount_amount?: number;
+}
 
 interface Client {
   id: string;
   name: string;
   phone: string;
   created_at: string;
-  receipts?: Array<{
-    id: string;
-    right_eye_sph?: number;
-    right_eye_cyl?: number;
-    right_eye_axe?: number;
-    left_eye_sph?: number;
-    left_eye_cyl?: number;
-    left_eye_axe?: number;
-  }>;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  Add?: number;
+  receipts?: Receipt[];
 }
 
 interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
   onDelete: (client: Client) => void;
+  onRefresh: () => void;
 }
 
-export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
+export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   
   // Get the latest receipt if available
   const latestReceipt = client.receipts && client.receipts.length > 0 
@@ -57,6 +78,70 @@ export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
   };
 
   const avatarColor = getColor(client.name);
+
+  const handleViewReceipt = async (receipt: Receipt) => {
+    try {
+      // Get full receipt details with items
+      const { data, error } = await supabase
+        .from('receipts')
+        .select('*, receipt_items(*)')
+        .eq('id', receipt.id)
+        .eq('is_deleted', false)
+        .single();
+      
+      if (error) throw error;
+      
+      setSelectedReceipt(data);
+      setIsReceiptDialogOpen(true);
+    } catch (error) {
+      console.error("Error fetching receipt details:", error);
+      toast.error("Failed to load receipt details");
+    }
+  };
+
+  const handleEditReceipt = (receipt: Receipt) => {
+    // In a real app, you would navigate to or open a dialog for editing the receipt
+    toast.info("Receipt edit functionality to be implemented");
+    setIsReceiptDialogOpen(false);
+  };
+
+  const handleDeleteReceipt = async (receipt: Receipt) => {
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ is_deleted: true })
+        .eq('id', receipt.id);
+      
+      if (error) throw error;
+      
+      toast.success("Receipt deleted successfully");
+      onRefresh(); // Refresh the client list to update the UI
+    } catch (error) {
+      console.error("Error deleting receipt:", error);
+      toast.error("Failed to delete receipt");
+    }
+  };
+
+  // Direct edit prescription on the card
+  const handleUpdatePrescription = async (eyeSide: 'right' | 'left', field: 'sph' | 'cyl' | 'axe', value: number | null) => {
+    try {
+      const updateData: any = {};
+      updateData[`${eyeSide}_eye_${field}`] = value;
+      
+      const { error } = await supabase
+        .from('clients')
+        .update(updateData)
+        .eq('id', client.id);
+        
+      if (error) throw error;
+      
+      toast.success(`Updated ${eyeSide} eye ${field}`);
+      onRefresh(); // Refresh client list
+    } catch (error) {
+      console.error(`Error updating ${eyeSide} eye ${field}:`, error);
+      toast.error("Failed to update prescription");
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
@@ -95,22 +180,103 @@ export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
           </div>
         </div>
         
-        {latestReceipt && (
-          <div className="mt-4 grid grid-cols-2 gap-6">
-            <EyePrescriptionDisplay
-              side="right"
-              sph={latestReceipt.right_eye_sph}
-              cyl={latestReceipt.right_eye_cyl}
-              axe={latestReceipt.right_eye_axe}
-            />
-            <EyePrescriptionDisplay
-              side="left"
-              sph={latestReceipt.left_eye_sph}
-              cyl={latestReceipt.left_eye_cyl}
-              axe={latestReceipt.left_eye_axe}
-            />
+        {/* Editable prescription data */}
+        <div className="mt-4 grid grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Right Eye</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">SPH</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.right_eye_sph !== undefined && client.right_eye_sph !== null ? client.right_eye_sph : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('right', 'sph', value);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">CYL</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? client.right_eye_cyl : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('right', 'cyl', value);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">AXE</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.right_eye_axe !== undefined && client.right_eye_axe !== null ? client.right_eye_axe : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseInt(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('right', 'axe', value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
-        )}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Left Eye</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">SPH</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.left_eye_sph !== undefined && client.left_eye_sph !== null ? client.left_eye_sph : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('left', 'sph', value);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">CYL</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? client.left_eye_cyl : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('left', 'cyl', value);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">AXE</span>
+                <input 
+                  type="text"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  value={client.left_eye_axe !== undefined && client.left_eye_axe !== null ? client.left_eye_axe : ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : parseInt(e.target.value);
+                    if (e.target.value === "" || !isNaN(value as number)) {
+                      handleUpdatePrescription('left', 'axe', value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className="bg-gray-50 px-4 py-2 flex justify-between items-center">
@@ -130,12 +296,28 @@ export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
       
       {expanded && (
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 animate-accordion-down">
-          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">History</h4>
+          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">Purchase History</h4>
           {client.receipts && client.receipts.length > 0 ? (
             <div className="space-y-2">
               {client.receipts.map(receipt => (
-                <div key={receipt.id} className="text-sm p-2 bg-white rounded border border-gray-100">
-                  Receipt #{receipt.id.substring(0, 8)}
+                <div key={receipt.id} className="text-sm p-2 bg-white rounded border border-gray-100 flex justify-between items-center">
+                  <div>
+                    <div className="font-medium">Receipt #{receipt.id.substring(0, 8)}</div>
+                    <div className="text-xs text-gray-500">{receipt.created_at 
+                      ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
+                      : 'Unknown date'}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
+                      onClick={() => handleViewReceipt(receipt)}
+                    >
+                      <Eye size={16} />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -144,6 +326,14 @@ export const ClientCard = ({ client, onEdit, onDelete }: ClientCardProps) => {
           )}
         </div>
       )}
+      
+      <ReceiptDetailsMiniDialog 
+        isOpen={isReceiptDialogOpen} 
+        onClose={() => setIsReceiptDialogOpen(false)} 
+        receipt={selectedReceipt} 
+        onEdit={handleEditReceipt} 
+        onDelete={handleDeleteReceipt} 
+      />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -20,26 +21,39 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState, useEffect } from 'react';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
-  gender: z.enum(["Mr", "Mme", "Enf"]),
-  right_eye_sph: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
-  right_eye_cyl: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  right_eye_sph: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number()
+  ]).nullable(),
+  right_eye_cyl: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number()
+  ]).nullable(),
   right_eye_axe: z.union([
     z.string().transform((val) => val === '' ? null : parseInt(val)),
     z.number()
   ]).nullable(),
-  left_eye_sph: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
-  left_eye_cyl: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  left_eye_sph: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number()
+  ]).nullable(),
+  left_eye_cyl: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number()
+  ]).nullable(),
   left_eye_axe: z.union([
     z.string().transform((val) => val === '' ? null : parseInt(val)),
     z.number()
   ]).nullable(),
-  Add: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  Add: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number()
+  ]).nullable(),
   assurance: z.string().nullable().optional(),
   notes: z.string().nullable().optional()
 })
@@ -47,12 +61,11 @@ const formSchema = z.object({
 interface EditClientDialogProps {
   isOpen: boolean
   onClose: () => void
-  onClientUpdated: (client: { id: string; name: string }) => void
+  onClientUpdated: (id: string, name: string, phone: string) => void
   client: {
     id: string;
     name: string;
     phone: string;
-    gender: "Mr" | "Mme" | "Enf";
     right_eye_sph?: number | null;
     right_eye_cyl?: number | null;
     right_eye_axe?: number | null;
@@ -60,27 +73,29 @@ interface EditClientDialogProps {
     left_eye_cyl?: number | null;
     left_eye_axe?: number | null;
     notes?: string | null;
+    Add?: number | null;
+    assurance?: string | null;
   };
 }
 
 const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
-  const [gender, setGender] = useState<"Mr" | "Mme" | "Enf">(client?.gender || "Mr");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: client?.name || "",
       phone: client?.phone || "",
-      gender: client?.gender,
-      right_eye_sph: client?.right_eye_sph !== undefined && client?.right_eye_sph !== null ? String(client.right_eye_sph) : "",
-      right_eye_cyl: client?.right_eye_cyl !== undefined && client?.right_eye_cyl !== null ? String(client.right_eye_cyl) : "",
+      right_eye_sph: client?.right_eye_sph !== undefined && client?.right_eye_sph !== null ? client.right_eye_sph : null,
+      right_eye_cyl: client?.right_eye_cyl !== undefined && client?.right_eye_cyl !== null ? client.right_eye_cyl : null,
       right_eye_axe: client?.right_eye_axe !== undefined && client?.right_eye_axe !== null ? client.right_eye_axe : null,
-      left_eye_sph: client?.left_eye_sph !== undefined && client?.left_eye_sph !== null ? String(client.left_eye_sph) : "",
-      left_eye_cyl: client?.left_eye_cyl !== undefined && client?.left_eye_cyl !== null ? String(client.left_eye_cyl) : "",
+      left_eye_sph: client?.left_eye_sph !== undefined && client?.left_eye_sph !== null ? client.left_eye_sph : null,
+      left_eye_cyl: client?.left_eye_cyl !== undefined && client?.left_eye_cyl !== null ? client.left_eye_cyl : null,
       left_eye_axe: client?.left_eye_axe !== undefined && client?.left_eye_axe !== null ? client.left_eye_axe : null,
-      notes: client?.notes || ""
+      Add: client?.Add !== undefined && client?.Add !== null ? client.Add : null,
+      notes: client?.notes || "",
+      assurance: client?.assurance || ""
     },
   })
 
@@ -89,23 +104,25 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       form.reset({
         name: client.name,
         phone: client.phone,
-        gender: client.gender,
-        right_eye_sph: client.right_eye_sph !== undefined && client.right_eye_sph !== null ? String(client.right_eye_sph) : "",
-        right_eye_cyl: client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? String(client.right_eye_cyl) : "",
+        right_eye_sph: client.right_eye_sph !== undefined && client.right_eye_sph !== null ? client.right_eye_sph : null,
+        right_eye_cyl: client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? client.right_eye_cyl : null,
         right_eye_axe: client.right_eye_axe,
-        left_eye_sph: client.left_eye_sph !== undefined && client.left_eye_sph !== null ? String(client.left_eye_sph) : "",
-        left_eye_cyl: client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? String(client.left_eye_cyl) : "",
+        left_eye_sph: client.left_eye_sph !== undefined && client.left_eye_sph !== null ? client.left_eye_sph : null,
+        left_eye_cyl: client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? client.left_eye_cyl : null,
         left_eye_axe: client.left_eye_axe,
-        notes: client.notes || ""
+        Add: client.Add,
+        notes: client.notes || "",
+        assurance: client.assurance || ""
       });
-      setGender(client.gender);
     }
   }, [client, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (!user?.id) return;
+      
       const clientData = {
-        user_id: user?.id,
+        user_id: user.id,
         ...values
       }
 
@@ -123,10 +140,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         description: "Client updated successfully",
       })
 
-      onClientUpdated({
-        id: data.id,
-        name: data.name,
-      })
+      onClientUpdated(
+        data.id,
+        data.name,
+        data.phone
+      )
       onClose()
       form.reset()
     } catch (error) {
@@ -175,27 +193,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Mr">Mr</SelectItem>
-                      <SelectItem value="Mme">Mme</SelectItem>
-                      <SelectItem value="Enf">Enf</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <h3 className="text-sm font-medium">Right Eye</h3>
@@ -209,11 +207,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '') {
-                                field.onChange(undefined);
+                                field.onChange(null);
                                 return;
                               }
                               if (/^-?\d*\.?\d*$/.test(value)) {
@@ -236,11 +234,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '') {
-                                field.onChange(undefined);
+                                field.onChange(null);
                                 return;
                               }
                               if (/^-?\d*\.?\d*$/.test(value)) {
@@ -264,10 +262,17 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="text"
                             inputMode="numeric"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
-                              field.onChange(value);
+                              const value = e.target.value;
+                              if (value === '') {
+                                field.onChange(null);
+                                return;
+                              }
+                              const numValue = parseInt(value);
+                              if (!isNaN(numValue)) {
+                                field.onChange(numValue);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -291,11 +296,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '') {
-                                field.onChange(undefined);
+                                field.onChange(null);
                                 return;
                               }
                               if (/^-?\d*\.?\d*$/.test(value)) {
@@ -318,11 +323,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                         <FormControl>
                           <Input 
                             type="text"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '') {
-                                field.onChange(undefined);
+                                field.onChange(null);
                                 return;
                               }
                               if (/^-?\d*\.?\d*$/.test(value)) {
@@ -346,10 +351,17 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           <Input 
                             type="text"
                             inputMode="numeric"
-                            {...field} 
+                            value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Math.round(Number(e.target.value));
-                              field.onChange(value);
+                              const value = e.target.value;
+                              if (value === '') {
+                                field.onChange(null);
+                                return;
+                              }
+                              const numValue = parseInt(value);
+                              if (!isNaN(numValue)) {
+                                field.onChange(numValue);
+                              }
                             }} 
                             className="h-8"
                           />
@@ -370,11 +382,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                   <FormControl>
                     <Input 
                       type="text"
-                      {...field} 
+                      value={field.value !== null ? field.value : ''}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === '') {
-                          field.onChange(undefined);
+                          field.onChange(null);
                           return;
                         }
                         if (/^-?\d*\.?\d*$/.test(value)) {
