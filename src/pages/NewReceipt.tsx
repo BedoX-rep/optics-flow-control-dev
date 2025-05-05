@@ -58,77 +58,11 @@ interface ReceiptItem {
   order_type?: 'Montage' | 'Retoyage' | 'Sell' | 'Unspecified';
 }
 
-const STORAGE_KEY = 'new_receipt_data';
-const STORAGE_TIMESTAMP_KEY = 'new_receipt_timestamp';
-const STORAGE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
-
 const NewReceipt = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-
-  // Load saved data on component mount
-  useEffect(() => {
-    const savedTimestamp = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
-    const currentTime = new Date().getTime();
-    
-    if (savedTimestamp && (currentTime - parseInt(savedTimestamp)) <= STORAGE_EXPIRY) {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        setSelectedClient(data.selectedClient || '');
-        setItems(data.items || []);
-        setRightEye(data.rightEye || { sph: '', cyl: '', axe: '' });
-        setLeftEye(data.leftEye || { sph: '', cyl: '', axe: '' });
-        setAdd(data.add || '');
-        setDiscount(data.discount || 0);
-        setNumericDiscount(data.numericDiscount || 0);
-        setTax(data.tax || 0);
-        setAdvancePayment(data.advancePayment || 0);
-        setOrderType(data.orderType || 'Unspecified');
-      }
-    } else {
-      clearAllData();
-    }
-  }, []);
-
-  // Save data whenever it changes
-  useEffect(() => {
-    const dataToSave = {
-      selectedClient,
-      items,
-      rightEye,
-      leftEye,
-      add,
-      discount,
-      numericDiscount,
-      tax,
-      advancePayment,
-      orderType
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-    localStorage.setItem(STORAGE_TIMESTAMP_KEY, new Date().getTime().toString());
-  }, [selectedClient, items, rightEye, leftEye, add, discount, numericDiscount, tax, advancePayment, orderType]);
-
-  const clearAllData = () => {
-    setSelectedClient('');
-    setItems([]);
-    setRightEye({ sph: '', cyl: '', axe: '' });
-    setLeftEye({ sph: '', cyl: '', axe: '' });
-    setAdd('');
-    setDiscount(0);
-    setNumericDiscount(0);
-    setTax(0);
-    setAdvancePayment(0);
-    setOrderType('Unspecified');
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STORAGE_TIMESTAMP_KEY);
-    toast({
-      title: "Data Cleared",
-      description: "All form data has been cleared.",
-    });
-  };
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -584,16 +518,6 @@ const NewReceipt = () => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          onClick={clearAllData}
-          className="gap-2"
-        >
-          <X className="h-4 w-4" />
-          Clear Form
-        </Button>
-      </div>
       <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
