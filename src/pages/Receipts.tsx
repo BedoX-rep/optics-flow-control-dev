@@ -111,7 +111,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      fetchReceipts();
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Success",
         description: "Receipt updated successfully.",
@@ -270,11 +270,12 @@ const Receipts = () => {
   };
 
   const { data: receipts = [], isLoading } = useQuery({
-    queryKey: ['receipts', dateFilter],
+    queryKey: ['receipts'],
     queryFn: fetchReceipts,
     enabled: !!user,
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
     cacheTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false
   });
 
   const filteredReceipts = receipts.filter(receipt => {

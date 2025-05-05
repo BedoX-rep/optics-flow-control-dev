@@ -128,7 +128,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
         description: "Receipt updated successfully",
       });
 
-      onUpdate();
+      queryClient.invalidateQueries(['receipts']);
       onClose();
     } catch (error) {
       console.error('Error updating receipt:', error);
