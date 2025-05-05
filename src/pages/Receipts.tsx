@@ -599,18 +599,6 @@ const Receipts = () => {
                    paymentFilter === 'paid' ? 'Paid' :
                    paymentFilter === 'partial' ? 'Partial' : 'Unpaid'}
                 </SelectValue>
-                {paymentFilter !== 'all' && (
-                  <div
-                    className="ml-auto p-1 rounded-full hover:bg-black/5 cursor-pointer"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setPaymentFilter('all');
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </div>
-                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="text-gray-600">All Payments</SelectItem>
@@ -636,18 +624,6 @@ const Receipts = () => {
                   {deliveryFilter === 'all' ? 'Delivery' :
                    deliveryFilter === 'Completed' ? 'Delivered' : 'Undelivered'}
                 </SelectValue>
-                {deliveryFilter !== 'all' && (
-                  <div
-                    className="ml-auto p-1 rounded-full hover:bg-black/5 cursor-pointer"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setDeliveryFilter('all');
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </div>
-                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="text-gray-600">All Deliveries</SelectItem>
