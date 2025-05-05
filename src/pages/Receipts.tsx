@@ -81,27 +81,29 @@ const ReceiptCard = ({
     }
   };
 
-  const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAdvance = e.target.value === '' ? 0 : parseFloat(e.target.value);
-    if (isNaN(newAdvance)) return;
-    
-    setAdvanceValue(newAdvance);
+  const handleAdvanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === '' ? '' : parseFloat(e.target.value);
+    setAdvanceValue(value === '' ? 0 : value);
+  };
 
+  const handleAdvanceBlur = async () => {
     try {
       const { error } = await supabase
         .from('receipts')
         .update({ 
-          advance_payment: newAdvance,
-          balance: receipt.total - newAdvance
+          advance_payment: advanceValue,
+          balance: receipt.total - advanceValue
         })
         .eq('id', receipt.id);
 
       if (error) throw error;
-
+      
       await queryClient.invalidateQueries(['receipts']);
+      setEditingAdvance(false);
     } catch (error) {
       console.error('Error updating advance:', error);
       setAdvanceValue(receipt.advance_payment || 0);
+      setEditingAdvance(false);
     }
   };
 
@@ -174,7 +176,7 @@ const ReceiptCard = ({
                           type="number"
                           value={advanceValue}
                           onChange={handleAdvanceChange}
-                          onBlur={() => setEditingAdvance(false)}
+                          onBlur={handleAdvanceBlur}
                           className="w-24 border rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           autoFocus
                         />
