@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, Plus, ChevronDown, Copy, Settings } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -19,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import PageTitle from '@/components/PageTitle';
@@ -163,11 +161,7 @@ const NewReceipt = () => {
     ],
   });
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
-  const [formData, setFormData] = useState<{
-  montage_costs?: number;
-  items?: any[];
-  orderType?: string;
-}>({}); // Added formData state
+  const [formData, setFormData] = useState({}); // Added formData state
 
 
   useEffect(() => {
