@@ -142,7 +142,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      fetchReceipts();
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: "Receipt has been marked as paid.",
@@ -168,7 +168,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      fetchReceipts();
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: `Montage status has been updated to ${newStatus}.`,
@@ -193,7 +193,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      fetchReceipts();
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: `Receipt has been marked as ${newStatus.toLowerCase()}.`,
