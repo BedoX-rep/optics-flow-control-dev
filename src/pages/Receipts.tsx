@@ -89,34 +89,52 @@ const ReceiptCard = ({
   const handleAdvanceBlur = async () => {
     try {
       const queryKey = ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter];
+      const newBalance = receipt.total - advanceValue;
       
-      // Optimistically update UI with correct query key
+      // Optimistically update UI
       queryClient.setQueryData(queryKey, (old: any) => {
-        return old?.map((r: any) => r.id === receipt.id ? {
-          ...r,
-          advance_payment: advanceValue,
-          balance: receipt.total - advanceValue
-        } : r);
+        if (!old) return old;
+        return old.map((r: any) => 
+          r.id === receipt.id 
+            ? {
+                ...r,
+                advance_payment: advanceValue,
+                balance: newBalance
+              } 
+            : r
+        );
       });
 
       const { error } = await supabase
         .from('receipts')
         .update({ 
           advance_payment: advanceValue,
-          balance: receipt.total - advanceValue
+          balance: newBalance
         })
         .eq('id', receipt.id);
 
       if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Advance payment updated successfully",
+      });
       
-      // Force immediate refetch
-      await queryClient.invalidateQueries(queryKey);
-      await queryClient.refetchQueries(queryKey);
+      // Invalidate and refetch to ensure data consistency
+      await queryClient.invalidateQueries({ queryKey });
       setEditingAdvance(false);
     } catch (error) {
       console.error('Error updating advance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update advance payment",
+        variant: "destructive",
+      });
       setAdvanceValue(receipt.advance_payment || 0);
       setEditingAdvance(false);
+      
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['receipts'] });
     }
   };
 
