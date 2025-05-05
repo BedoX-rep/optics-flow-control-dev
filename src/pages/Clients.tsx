@@ -107,8 +107,8 @@ export default function Clients() {
   };
 
   useEffect(() => {
-    // Only fetch if user exists and we haven't fetched before
-    if (user && (clients.length === 0 || !clients[0]?.receipts)) {
+    // Only fetch if user exists and clients array is empty
+    if (user && clients.length === 0) {
       fetchClients();
     }
   }, [user]);
