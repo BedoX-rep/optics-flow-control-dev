@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -515,15 +516,16 @@ const Receipts = () => {
             </Button>
           </Link>
           <ReceiptStatsSummary receipts={receipts} />
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-xl border-2 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
-            onClick={() => setIsStatsOpen(true)}
-          >
-            <BarChart2 className="h-4 w-4" />
-          </Button>
         </div>
+        <Button
+          variant="outline"
+          size="lg"
+          className="rounded-xl border-2 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200 shadow-lg"
+          onClick={() => setIsStatsOpen(true)}
+        >
+          <BarChart2 className="h-5 w-5 mr-2" />
+          Statistics
+        </Button>
       </div>
 
       <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
@@ -539,42 +541,84 @@ const Receipts = () => {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-[180px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
-                <SelectValue placeholder="Filter by date" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="year">This Year</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-3">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-2 bg-white/10 hover:bg-white/20 shadow-md rounded-xl"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Date
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-2">
+                <Select value={dateFilter} onValueChange={setDateFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Filter by date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="year">This Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PopoverContent>
+            </Popover>
 
-            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-              <SelectTrigger className="w-[150px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
-                <SelectValue placeholder="Payment Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Payments</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="partial">Partially Paid</SelectItem>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-2 bg-white/10 hover:bg-white/20 shadow-md rounded-xl"
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  Payment
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-2">
+                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Payment Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Payments</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="partial">Partially Paid</SelectItem>
+                    <SelectItem value="unpaid">Unpaid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PopoverContent>
+            </Popover>
 
-            <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-              <SelectTrigger className="w-[150px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
-                <SelectValue placeholder="Delivery Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Deliveries</SelectItem>
-                <SelectItem value="Completed">Delivered</SelectItem>
-                <SelectItem value="Undelivered">Undelivered</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="border-2 bg-white/10 hover:bg-white/20 shadow-md rounded-xl"
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Delivery
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-2">
+                <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Delivery Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Deliveries</SelectItem>
+                    <SelectItem value="Completed">Delivered</SelectItem>
+                    <SelectItem value="Undelivered">Undelivered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
