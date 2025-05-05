@@ -60,6 +60,21 @@ const ReceiptCard = ({
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
 
+  const getTimeDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
+    const diffInHours = diffInMinutes / 60;
+
+    if (diffInMinutes < 60) {
+      return `${Math.floor(diffInMinutes)} minutes ago`;
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)} hours ago`;
+    } else {
+      return format(date, 'MMM dd, yyyy');
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,26 +86,25 @@ const ReceiptCard = ({
         <CardContent className="p-6">
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold mb-1">{receipt.client_name}</h3>
-                <p className="text-sm text-gray-500">{receipt.client_phone}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {format(new Date(receipt.created_at), 'MMM dd, yyyy')}
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex gap-2">
-                  <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
-                    {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
-                  </Badge>
-                  <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
-                    {receipt.delivery_status}
-                  </Badge>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold">{receipt.client_name}</h3>
+                  <span className="text-sm text-gray-500">{getTimeDisplay(receipt.created_at)}</span>
                 </div>
+                <p className="text-sm text-gray-500">{receipt.client_phone}</p>
               </div>
             </div>
 
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2">
+              <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
+                {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+              </Badge>
+              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
+                {receipt.delivery_status}
+              </Badge>
+            </div>
+
+            <div className="flex gap-2">
               {receipt.balance > 0 && (
                 <Button
                   variant="ghost"
@@ -180,10 +194,6 @@ const ReceiptCard = ({
                 );
               })}
             </div>
-          </div>
-
-          <div className="text-sm text-gray-500 mt-2">
-            {formatDistanceToNow(new Date(receipt.created_at), { addSuffix: true })}
           </div>
         </CardContent>
       </Card>
