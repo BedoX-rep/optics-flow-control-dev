@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Filter, Eye } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +19,7 @@ import { useAuth } from '@/components/AuthProvider';
 import ReceiptDetailsMiniDialog from '@/components/ReceiptDetailsMiniDialog';
 import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
+import ReceiptStatistics from '@/components/ReceiptStatistics';
 import {
   Select,
   SelectContent,
@@ -81,6 +82,7 @@ const Receipts = () => {
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
 
@@ -360,6 +362,14 @@ const Receipts = () => {
           <span>
             <ReceiptStatsSummary receipts={receipts} />
           </span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="ml-2"
+            onClick={() => setIsStatsOpen(true)}
+          >
+            <BarChart2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -707,6 +717,12 @@ const Receipts = () => {
         isOpen={!!editingReceipt}
         onClose={() => setEditingReceipt(null)}
         receipt={editingReceipt}
+      />
+
+      <ReceiptStatistics
+        isOpen={isStatsOpen}
+        onClose={() => setIsStatsOpen(false)}
+        receipts={receipts}
       />
     </div>
   );
