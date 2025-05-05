@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -77,7 +78,7 @@ interface EditClientDialogProps {
   };
 }
 
-const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClientDialogProps) => {
+const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
 
