@@ -96,14 +96,6 @@ export default function Clients() {
     queryKey: ['clients', user?.id],
     queryFn: fetchClients,
     enabled: !!user,
-    staleTime: 1000 * 60 * 30, // 30 minutes
-    cacheTime: 1000 * 60 * 60, // 1 hour
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    retry: false,
-    networkMode: 'offlineFirst',
-    refetchInterval: false
   });
 
   useEffect(() => {
