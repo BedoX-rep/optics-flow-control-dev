@@ -150,7 +150,7 @@ const ReceiptDetailsMiniDialog = ({
                   </>
                 )}
                 {receipt.total_discount > 0 && (
-                  <p className="text-sm text-gray-600">Discount: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
+                  <p className="text-sm text-gray-600">Discount ({receipt.discount_percentage}% + {receipt.discount_amount} DH): <span className="font-medium text-red-600">-{receipt.total_discount.toFixed(2)} DH</span></p>
                 )}
                 <p className="text-sm font-medium">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
                 <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || "0.00"} DH</span></p>
