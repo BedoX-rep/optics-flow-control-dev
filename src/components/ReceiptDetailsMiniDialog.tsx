@@ -143,7 +143,13 @@ const ReceiptDetailsMiniDialog = ({
             <div className="grid grid-cols-2 gap-x-8 gap-y-2">
               <div className="space-y-1.5">
                 <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || "0.00"} DH</span></p>
-                {receipt.discount_amount > 0 && (
+                {receipt.tax > 0 && (
+                  <>
+                    <p className="text-sm text-gray-600">Tax Base Amount: <span className="font-medium">{receipt.tax_base?.toFixed(2) || "0.00"} DH</span></p>
+                    <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || "0.00"} DH</span></p>
+                  </>
+                )}
+                {receipt.total_discount > 0 && (
                   <p className="text-sm text-gray-600">Discount: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
                 )}
                 <p className="text-sm font-medium">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>

@@ -289,20 +289,18 @@ const NewReceipt = () => {
     }
   }
 
-  // Calculate percentage-based discount
   // Calculate tax first
   const taxAmount = tax > subtotal ? (tax - subtotal) * taxIndicator : 0;
   const afterTax = subtotal + taxAmount;
 
-  // Calculate percentage discount
+  // Calculate percentage discount based on after-tax amount
   const percentageDiscountAmount = (afterTax * discount) / 100;
-  const afterPercentageDiscount = afterTax - percentageDiscountAmount;
-
-  // Apply fixed discount
+  
+  // Calculate total discount (percentage + fixed)
   const totalDiscount = percentageDiscountAmount + numericDiscount;
 
   // Calculate final total
-  const total = afterPercentageDiscount - numericDiscount;
+  const total = afterTax - totalDiscount;
 
   // Calculate profit
   const profit = total - totalCost - montageCosts;
@@ -436,7 +434,8 @@ const NewReceipt = () => {
           cost: totalCost + montageCosts,
           cost_ttc: totalCost + montageCosts,
           profit: profit,
-          discount_amount: totalDiscount,
+          total_discount: totalDiscount,
+          discount_amount: numericDiscount,
           discount_percentage: discount,
           total,
           balance,
