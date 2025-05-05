@@ -895,7 +895,19 @@ const NewReceipt = () => {
                   </div>
 
                   <div className="flex gap-1">
-
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const duplicatedItem = {
+                          ...item,
+                          id: `item-${Date.now()}`
+                        };
+                        setItems(prevItems => [...prevItems, duplicatedItem]);
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -903,7 +915,6 @@ const NewReceipt = () => {
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
-
                   </div>
                   {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
                     <div className="flex items-center gap-2">
