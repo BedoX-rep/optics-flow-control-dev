@@ -178,7 +178,27 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 <TableBody>
                   {receipt.receipt_items?.map((item: any, index: number) => (
                     <TableRow key={index}>
-                      <TableCell>{item.custom_item_name || item.product?.name || 'Unknown Item'}</TableCell>
+                      <TableCell className="flex items-center gap-2">
+                        {item.custom_item_name || item.product?.name || 'Unknown Item'}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            const newItem = {
+                              ...item,
+                              id: `${item.id}-copy-${Date.now()}`
+                            };
+                            const updatedReceipt = {
+                              ...receipt,
+                              receipt_items: [...receipt.receipt_items, newItem]
+                            };
+                            onEdit(updatedReceipt);
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell className="text-right">{item.price?.toFixed(2)} DH</TableCell>
                       <TableCell className="text-right">{item.cost?.toFixed(2)} DH</TableCell>
