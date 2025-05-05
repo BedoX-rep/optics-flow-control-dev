@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Check } from 'lucide-react';
+import { Calendar, Check, Phone, CreditCard, RefreshCw } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
@@ -142,9 +143,65 @@ const Subscriptions = () => {
     }
   };
 
-  const renderSubscriptionPlans = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+  const PaymentInfo = () => (
+  <div className="w-full bg-white/80 backdrop-blur p-6 rounded-lg shadow-md mb-8">
+    <h3 className="text-xl font-semibold mb-4">Payment Methods</h3>
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="flex items-start space-x-4">
+        <div className="p-3 bg-teal-50 rounded-full">
+          <Phone className="h-6 w-6 text-teal-600" />
+        </div>
+        <div>
+          <h4 className="font-medium">Bank Transfer</h4>
+          <p className="text-sm text-gray-600">Contact admin at +212 62706249</p>
+        </div>
+      </div>
+      <div className="flex items-start space-x-4">
+        <div className="p-3 bg-teal-50 rounded-full">
+          <CreditCard className="h-6 w-6 text-teal-600" />
+        </div>
+        <div>
+          <h4 className="font-medium">Online Payment</h4>
+          <p className="text-sm text-gray-600">Pay with PayPal or credit card</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; onToggle: () => void }) => (
+  <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur rounded-lg shadow-sm mb-6">
+    <div className="flex items-center space-x-3">
+      <div className={`p-2 rounded-full ${isRecurring ? 'bg-teal-100' : 'bg-gray-100'}`}>
+        <RefreshCw className={`h-5 w-5 ${isRecurring ? 'text-teal-600' : 'text-gray-500'}`} />
+      </div>
+      <div>
+        <h3 className="font-medium">Auto-Renewal</h3>
+        <p className="text-sm text-gray-500">{isRecurring ? 'Your subscription will renew automatically' : 'Manual renewal required'}</p>
+      </div>
+    </div>
+    <Switch
+      checked={isRecurring}
+      onCheckedChange={onToggle}
+      className={`${isRecurring ? 'bg-teal-600' : 'bg-gray-200'}`}
+    />
+  </div>
+);
+
+const renderSubscriptionPlans = () => {
+  return (
+    <>
+      <PaymentInfo />
+      {currentSubscription && (
+        <AutoRenewalToggle 
+          isRecurring={currentSubscription.is_recurring || false}
+          onToggle={() => updateSubscription(
+            currentSubscription.subscription_type as any,
+            !currentSubscription.is_recurring
+          )}
+        />
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {['Monthly', 'Quarterly', 'Lifetime'].map((type) => (
           <motion.div
             key={type}
@@ -182,7 +239,11 @@ const Subscriptions = () => {
                 </div>
                 <ul className="space-y-4">
                   {[
-                    'Full access to all features',
+                    'Client Management System',
+'Receipt Generation',
+'Product Inventory',
+'Sales Analytics',
+'Prescription Management',
                     type === 'Quarterly' && 'Priority support',
                     type === 'Lifetime' && 'Lifetime updates',
                     type === 'Lifetime' && 'No recurring payments'
@@ -213,6 +274,7 @@ const Subscriptions = () => {
           </motion.div>
         ))}
       </div>
+    </>
     );
   };
 
