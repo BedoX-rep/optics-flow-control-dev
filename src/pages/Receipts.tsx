@@ -90,6 +90,49 @@ const ReceiptCard = ({
               </div>
             </div>
 
+            <div className="flex gap-2 mt-2">
+              {receipt.balance > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onPaid}
+                  className="hover:bg-green-100"
+                >
+                  <Check className="h-4 w-4 text-green-600" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelivered}
+                className="hover:bg-blue-100"
+              >
+                <Package className="h-4 w-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                className="hover:bg-red-100"
+              >
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onView}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50/50 rounded-lg p-3">
               <div>
                 <p className="text-gray-500">Total</p>
@@ -139,52 +182,8 @@ const ReceiptCard = ({
             </div>
           </div>
 
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">
-              {formatDistanceToNow(new Date(receipt.created_at), { addSuffix: true })}
-            </span>
-            <div className="flex gap-2">
-              {receipt.balance > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onPaid}
-                  className="hover:bg-green-100"
-                >
-                  <Check className="h-4 w-4 text-green-600" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDelivered}
-                className="hover:bg-blue-100"
-              >
-                <Package className="h-4 w-4 text-blue-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDelete}
-                className="hover:bg-red-100"
-              >
-                <Trash2 className="h-4 w-4 text-red-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onView}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="text-sm text-gray-500 mt-2">
+            {formatDistanceToNow(new Date(receipt.created_at), { addSuffix: true })}
           </div>
         </CardContent>
       </Card>
