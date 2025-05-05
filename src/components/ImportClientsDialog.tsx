@@ -112,7 +112,17 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           
           return {
             name: clientName,
-            phone: clientPhone
+            phone: clientPhone,
+            // Map other client fields if columns are available
+            right_eye_sph: hasHeaders && row["right_eye_sph"] ? parseFloat(row["right_eye_sph"]) : null,
+            right_eye_cyl: hasHeaders && row["right_eye_cyl"] ? parseFloat(row["right_eye_cyl"]) : null,
+            right_eye_axe: hasHeaders && row["right_eye_axe"] ? parseInt(row["right_eye_axe"]) : null,
+            left_eye_sph: hasHeaders && row["left_eye_sph"] ? parseFloat(row["left_eye_sph"]) : null,
+            left_eye_cyl: hasHeaders && row["left_eye_cyl"] ? parseFloat(row["left_eye_cyl"]) : null,
+            left_eye_axe: hasHeaders && row["left_eye_axe"] ? parseInt(row["left_eye_axe"]) : null,
+            Add: hasHeaders && row["Add"] ? parseFloat(row["Add"]) : null,
+            assurance: hasHeaders && row["assurance"] ? row["assurance"] : null,
+            notes: hasHeaders && row["notes"] ? row["notes"] : null
           }
         })
         
@@ -148,6 +158,21 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
     resetDialog()
     onClose()
   }
+
+  // The list of all possible client fields for mapping
+  const clientFields = [
+    { id: "name", label: "Name", required: true },
+    { id: "phone", label: "Phone", required: true },
+    { id: "right_eye_sph", label: "Right Eye SPH", required: false },
+    { id: "right_eye_cyl", label: "Right Eye CYL", required: false },
+    { id: "right_eye_axe", label: "Right Eye AXE", required: false },
+    { id: "left_eye_sph", label: "Left Eye SPH", required: false },
+    { id: "left_eye_cyl", label: "Left Eye CYL", required: false },
+    { id: "left_eye_axe", label: "Left Eye AXE", required: false },
+    { id: "Add", label: "Add", required: false },
+    { id: "assurance", label: "Assurance", required: false },
+    { id: "notes", label: "Notes", required: false }
+  ];
   
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -186,6 +211,21 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
               </div>
             )}
             
+            <Alert variant="default" className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle>CSV Format Guide</AlertTitle>
+              <AlertDescription className="text-sm">
+                <p>Your CSV file should include the following columns:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  {clientFields.map(field => (
+                    <li key={field.id} className={field.required ? "font-medium" : ""}>
+                      {field.label} {field.required ? "(required)" : "(optional)"}
+                    </li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+
             <div className="flex items-center space-x-2">
               <Input 
                 type="checkbox" 
@@ -200,12 +240,13 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" onClick={handleClose} className="border-green-200">
                 Cancel
               </Button>
               <Button 
                 onClick={() => setStep(2)} 
                 disabled={!file}
+                className="bg-green-600 hover:bg-green-700"
               >
                 Next
               </Button>
@@ -229,7 +270,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                   Name Column (required)
                 </label>
                 <select 
-                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                  className="w-full rounded-md border border-green-200 p-2 text-sm"
                   value={nameColumn}
                   onChange={(e) => setNameColumn(e.target.value)}
                 >
@@ -243,7 +284,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                   Phone Column (required)
                 </label>
                 <select 
-                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                  className="w-full rounded-md border border-green-200 p-2 text-sm"
                   value={phoneColumn}
                   onChange={(e) => setPhoneColumn(e.target.value)}
                 >
@@ -256,9 +297,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Preview</h4>
-              <div className="border rounded overflow-x-auto max-h-60">
+              <div className="border rounded overflow-x-auto max-h-60 border-green-200">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-green-50">
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
@@ -285,10 +326,10 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => setStep(1)} className="border-green-200">
                 Back
               </Button>
-              <Button onClick={handleImport}>
+              <Button onClick={handleImport} className="bg-green-600 hover:bg-green-700">
                 Import Clients
               </Button>
             </div>
@@ -316,7 +357,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => setStep(1)} className="border-green-200">
                 Back
               </Button>
             </div>

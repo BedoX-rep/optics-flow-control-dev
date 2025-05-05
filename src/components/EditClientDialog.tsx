@@ -173,7 +173,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="border-green-200 focus-visible:ring-green-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,7 +186,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input {...field} type="tel" />
+                      <Input {...field} type="tel" className="border-green-200 focus-visible:ring-green-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,7 +218,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(value);
                               }
                             }}
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -245,7 +245,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(value);
                               }
                             }}
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -274,7 +274,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(numValue);
                               }
                             }} 
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -307,7 +307,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(value);
                               }
                             }}
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -334,7 +334,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(value);
                               }
                             }}
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -363,7 +363,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                                 field.onChange(numValue);
                               }
                             }} 
-                            className="h-8"
+                            className="h-8 border-green-200 focus-visible:ring-green-300"
                           />
                         </FormControl>
                         <FormMessage />
@@ -393,7 +393,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                           field.onChange(value);
                         }
                       }}
-                      className="h-8"
+                      className="h-8 border-green-200 focus-visible:ring-green-300"
                     />
                   </FormControl>
                   <FormMessage />
@@ -407,7 +407,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                 <FormItem>
                   <FormLabel>Assurance</FormLabel>
                   <FormControl>
-                    <Input {...field} type="text" className="h-8" />
+                    <Input {...field} type="text" className="h-8 border-green-200 focus-visible:ring-green-300" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -420,17 +420,17 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Input {...field} type="text" />
+                    <Input {...field} type="text" className="border-green-200 focus-visible:ring-green-300" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className="border-green-200">
                 Cancel
               </Button>
-              <Button type="submit">Update Client</Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">Update Client</Button>
             </div>
           </form>
         </Form>

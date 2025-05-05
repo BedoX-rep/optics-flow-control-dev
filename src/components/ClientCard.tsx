@@ -22,6 +22,7 @@ interface Receipt {
   payment_status?: string;
   receipt_items?: Array<any>;
   discount_amount?: number;
+  is_deleted?: boolean;
 }
 
 interface Client {
@@ -74,27 +75,13 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Get first letter of name for avatar
   const nameInitial = editedClient.name ? editedClient.name.charAt(0).toUpperCase() : '?';
   
-  // Generate a color based on the name
-  const getColor = (name: string) => {
-    const colors = [
-      'bg-teal-50 text-teal-700 border-teal-200', 
-      'bg-blue-50 text-blue-700 border-blue-200',
-      'bg-purple-50 text-purple-700 border-purple-200',
-      'bg-pink-50 text-pink-700 border-pink-200',
-      'bg-amber-50 text-amber-700 border-amber-200',
-      'bg-indigo-50 text-indigo-700 border-indigo-200',
-      'bg-emerald-50 text-emerald-700 border-emerald-200'
-    ];
-    
-    let sum = 0;
-    for (let i = 0; i < name.length; i++) {
-      sum += name.charCodeAt(i);
-    }
-    return colors[sum % colors.length];
+  // Generate a color based on the name - now only green variations
+  const getColor = () => {
+    return 'bg-green-50 text-green-700 border-green-200';
   };
 
-  const cardColor = getColor(client.name);
-  const avatarColor = getColor(client.name);
+  const cardColor = getColor();
+  const avatarColor = getColor();
 
   const handleViewReceipt = async (receipt: Receipt) => {
     try {
@@ -221,7 +208,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="sm" 
               onClick={() => onEdit(client)}
-              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+              className="text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
             >
               <Edit size={16} />
             </Button>
@@ -344,7 +331,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           variant="ghost" 
           size="sm" 
           onClick={toggleExpanded}
-          className="text-gray-500 hover:text-teal-600 p-1 h-auto"
+          className="text-gray-500 hover:text-green-600 p-1 h-auto"
         >
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </Button>
@@ -370,7 +357,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
+                      className="h-8 w-8 p-0 rounded-full text-green-600 hover:bg-green-50"
                       onClick={() => handleViewReceipt(receipt)}
                     >
                       <Eye size={16} />
