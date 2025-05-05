@@ -87,21 +87,42 @@ const ReceiptCard = ({
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{receipt.client_name}</h3>
-                  <span className="text-sm text-gray-500">{getTimeDisplay(receipt.created_at)}</span>
+                  <div className="flex gap-2">
+                    <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
+                      {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+                    </Badge>
+                    <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
+                      {receipt.delivery_status}
+                    </Badge>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+                <p className="text-sm text-gray-500 mt-1">{receipt.client_phone}</p>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
-                {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
-              </Badge>
-              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
-                {receipt.delivery_status}
-              </Badge>
+            <div className="grid grid-cols-2 gap-3 bg-gray-50/50 rounded-lg p-3">
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Total</p>
+                <p className="text-sm font-semibold text-blue-900">{receipt.total?.toFixed(2)} DH</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Advance</p>
+                <p className="text-sm font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Balance</p>
+                <p className="text-sm font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 mb-1">Cost</p>
+                <p className="text-sm font-medium text-gray-800">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs font-medium text-gray-500 mb-1">Profit</p>
+                <p className="text-sm font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+              </div>
             </div>
 
             <div className="flex gap-2">
