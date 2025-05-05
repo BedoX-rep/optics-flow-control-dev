@@ -588,9 +588,10 @@ const Receipts = () => {
             >
               <SelectTrigger className={cn(
                 "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                paymentFilter !== 'all'
-                  ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200"
-                  : "bg-white/10 hover:bg-white/20"
+                paymentFilter === 'paid' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
+                paymentFilter === 'partial' ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" :
+                paymentFilter === 'unpaid' ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200" :
+                "bg-white/10 hover:bg-white/20"
               )}>
                 <Wallet className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Payment">
@@ -599,20 +600,22 @@ const Receipts = () => {
                    paymentFilter === 'partial' ? 'Partial' : 'Unpaid'}
                 </SelectValue>
                 {paymentFilter !== 'all' && (
-                  <X
-                    className="h-3 w-3 ml-auto hover:text-emerald-900 cursor-pointer"
+                  <button
+                    className="ml-auto p-1 rounded-full hover:bg-black/5"
                     onClick={(e) => {
                       e.stopPropagation();
                       setPaymentFilter('all');
                     }}
-                  />
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Payments</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="partial">Partially Paid</SelectItem>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="all" className="text-gray-600">All Payments</SelectItem>
+                <SelectItem value="paid" className="text-green-600">Paid</SelectItem>
+                <SelectItem value="partial" className="text-yellow-600">Partially Paid</SelectItem>
+                <SelectItem value="unpaid" className="text-red-600">Unpaid</SelectItem>
               </SelectContent>
             </Select>
 
@@ -623,9 +626,9 @@ const Receipts = () => {
             >
               <SelectTrigger className={cn(
                 "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                deliveryFilter !== 'all'
-                  ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
-                  : "bg-white/10 hover:bg-white/20"
+                deliveryFilter === 'Completed' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
+                deliveryFilter === 'Undelivered' ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200" :
+                "bg-white/10 hover:bg-white/20"
               )}>
                 <Package className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Delivery">
@@ -633,19 +636,21 @@ const Receipts = () => {
                    deliveryFilter === 'Completed' ? 'Delivered' : 'Undelivered'}
                 </SelectValue>
                 {deliveryFilter !== 'all' && (
-                  <X
-                    className="h-3 w-3 ml-auto hover:text-purple-900 cursor-pointer"
+                  <button
+                    className="ml-auto p-1 rounded-full hover:bg-black/5"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeliveryFilter('all');
                     }}
-                  />
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Deliveries</SelectItem>
-                <SelectItem value="Completed">Delivered</SelectItem>
-                <SelectItem value="Undelivered">Undelivered</SelectItem>
+                <SelectItem value="all" className="text-gray-600">All Deliveries</SelectItem>
+                <SelectItem value="Completed" className="text-green-600">Delivered</SelectItem>
+                <SelectItem value="Undelivered" className="text-orange-600">Undelivered</SelectItem>
               </SelectContent>
             </Select>
           </div>
