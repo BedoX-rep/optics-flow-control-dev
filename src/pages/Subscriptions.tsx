@@ -201,11 +201,6 @@ const renderSubscriptionPlans = () => {
                       {type === 'Lifetime' ? 'One-time payment' : `Billed ${type.toLowerCase()}`}
                     </p>
                   </div>
-                  {currentSubscription?.subscription_type === type && (
-                    <span className="px-3 py-1 bg-teal-500 text-white text-sm rounded-full">
-                      Current Plan
-                    </span>
-                  )}
                 </div>
                 <div className="mt-4">
                   <div className="flex items-baseline">
