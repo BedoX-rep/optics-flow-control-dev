@@ -172,7 +172,15 @@ const ReceiptCard = ({
                     </div>
                     {isCurrent && (
                       <motion.div
-                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
+                        className={`absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 ${
+                          status === 'UnOrdered' ? 'border-gray-500'
+                          : status === 'Ordered' ? 'border-blue-500'
+                          : status === 'InStore' ? 'border-orange-500'
+                          : status === 'InCutting' ? 'border-purple-500'
+                          : status === 'Ready' ? 'border-pink-500'
+                          : status === 'Paid costs' ? 'border-green-500'
+                          : 'border-gray-500'
+                        }`}
                         layoutId="currentStep"
                       />
                     )}
