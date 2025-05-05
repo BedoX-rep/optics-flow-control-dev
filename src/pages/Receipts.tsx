@@ -83,7 +83,7 @@ const ReceiptCard = ({
       className="w-full"
     >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-        <CardContent className="p-4">
+        <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -103,7 +103,7 @@ const ReceiptCard = ({
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-1">
                 {receipt.balance > 0 && (
                   <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
