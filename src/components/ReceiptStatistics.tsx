@@ -1,5 +1,5 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import { format, startOfMonth } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 
 interface Receipt {
   montage_costs: number;
@@ -35,22 +36,28 @@ interface ReceiptStatisticsProps {
 }
 
 const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, receipts }) => {
-  // Calculate total montage costs
-  const totalMontageCosts = receipts.reduce((sum, receipt) => 
+  const defaultStartDate = format(startOfMonth(new Date()), "yyyy-MM-dd'T'HH:mm");
+  const defaultEndDate = format(new Date(), "yyyy-MM-dd'T'HH:mm");
+
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
+
+  // Filter receipts by date range
+  const filteredReceipts = receipts.filter(receipt => {
+    const receiptDate = new Date(receipt.created_at);
+    return receiptDate >= new Date(startDate) && receiptDate <= new Date(endDate);
+  });
+
+  // Calculate metrics based on filtered receipts
+  const totalMontageCosts = filteredReceipts.reduce((sum, receipt) => 
     sum + (receipt.montage_costs || 0), 0
   );
 
-  // Calculate unpaid montage costs
-  const unpaidMontageCosts = receipts
+  const unpaidMontageCosts = filteredReceipts
     .filter(receipt => receipt.montage_status !== 'Paid costs')
     .reduce((sum, receipt) => sum + (receipt.montage_costs || 0), 0);
 
-  // Calculate costs for different lens types with proper category checking
-  const lensTypeCosts = receipts.reduce((acc, receipt) => {
-    if (!Array.isArray(receipt.receipt_items)) {
-      console.warn('Receipt items is not an array for receipt:', receipt.id);
-      return acc;
-    }
+  const lensTypeCosts = filteredReceipts.reduce((acc, receipt) => {
     if (Array.isArray(receipt.receipt_items)) {
       receipt.receipt_items.forEach(item => {
         const quantity = Number(item.quantity) || 1;
@@ -96,209 +103,146 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
     singleVisionCount: 0, progressiveCount: 0, framesCount: 0, sunglassesCount: 0, accessoriesCount: 0 
   });
 
-  // Calculate financial metrics
-  const totalRevenue = receipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
-  const totalCosts = receipts.reduce((sum, receipt) => sum + (receipt.cost_ttc || 0), 0);
+  const totalRevenue = filteredReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
+  const totalCosts = filteredReceipts.reduce((sum, receipt) => sum + (receipt.cost_ttc || 0), 0);
   const totalProfit = totalRevenue - totalCosts;
-  const averageProfit = receipts.length > 0 ? totalProfit / receipts.length : 0;
-  const averageTicket = receipts.length > 0 ? totalRevenue / receipts.length : 0;
+  const averageProfit = filteredReceipts.length > 0 ? totalProfit / filteredReceipts.length : 0;
+  const averageTicket = filteredReceipts.length > 0 ? totalRevenue / filteredReceipts.length : 0;
 
-  // Calculate collection metrics
-  const outstandingBalance = receipts.reduce((sum, receipt) => 
+  const outstandingBalance = filteredReceipts.reduce((sum, receipt) => 
     sum + (receipt.balance || 0), 0
   );
   const collectionRate = totalRevenue > 0 
     ? ((totalRevenue - outstandingBalance) / totalRevenue * 100)
     : 0;
 
-  // Calculate delivery metrics
-  const deliveredCount = receipts.filter(r => r.delivery_status === 'Completed').length;
-  const deliveryRate = receipts.length > 0 
-    ? (deliveredCount / receipts.length * 100)
+  const deliveredCount = filteredReceipts.filter(r => r.delivery_status === 'Completed').length;
+  const deliveryRate = filteredReceipts.length > 0 
+    ? (deliveredCount / filteredReceipts.length * 100)
     : 0;
-
-  // Time-based metrics
-  const today = new Date();
-  const thisMonth = receipts.filter(receipt => {
-    const receiptDate = new Date(receipt.created_at);
-    return receiptDate.getMonth() === today.getMonth() && 
-           receiptDate.getFullYear() === today.getFullYear();
-  });
-  const monthlyRevenue = thisMonth.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
-  const monthlyProfit = thisMonth.reduce((sum, receipt) => 
-    sum + ((receipt.total || 0) - (receipt.cost_ttc || 0)), 0
-  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Receipt Statistics</DialogTitle>
+          <DialogTitle className="text-2xl font-bold mb-6">Business Analytics</DialogTitle>
+          <div className="flex gap-4 mb-6">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">Start Date</label>
+              <Input
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">End Date</label>
+              <Input
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
         </DialogHeader>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-          <Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Montage Analysis</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Montage Costs:</span>
-                  <span className="font-medium">{totalMontageCosts.toFixed(2)} DH</span>
+              <h3 className="text-lg font-semibold mb-4 text-blue-900">Financial Overview</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Revenue</span>
+                  <span className="font-semibold text-blue-900">{totalRevenue.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Unpaid Montage Costs:</span>
-                  <span className="font-medium text-amber-600">{unpaidMontageCosts.toFixed(2)} DH</span>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Costs</span>
+                  <span className="font-semibold text-red-600">{totalCosts.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Profit</span>
+                  <span className="font-semibold text-green-600">{totalProfit.toFixed(2)} DH</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Product Categories</h3>
-              <div className="space-y-4">
-                {Object.entries({
-                  'Single Vision': { count: lensTypeCosts.singleVisionCount, revenue: lensTypeCosts.singleVision, cost: lensTypeCosts.singleVisionCost },
-                  'Progressive': { count: lensTypeCosts.progressiveCount, revenue: lensTypeCosts.progressive, cost: lensTypeCosts.progressiveCost },
-                  'Frames': { count: lensTypeCosts.framesCount, revenue: lensTypeCosts.frames, cost: lensTypeCosts.framesCost },
-                  'Sunglasses': { count: lensTypeCosts.sunglassesCount, revenue: lensTypeCosts.sunglasses, cost: lensTypeCosts.sunglassesCost },
-                  'Accessories': { count: lensTypeCosts.accessoriesCount, revenue: lensTypeCosts.accessories, cost: lensTypeCosts.accessoriesCost }
-                }).map(([category, data]) => (
-                  <div key={category} className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-900 font-medium">{category} ({data.count})</span>
+              <h3 className="text-lg font-semibold mb-4 text-green-900">Average Metrics</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Average Ticket</span>
+                  <span className="font-semibold text-green-900">{averageTicket.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Average Profit</span>
+                  <span className="font-semibold text-green-600">{averageProfit.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Collection Rate</span>
+                  <span className="font-semibold">{collectionRate.toFixed(1)}%</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4 text-purple-900">Operational Metrics</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Total Orders</span>
+                  <span className="font-semibold">{filteredReceipts.length}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Delivery Rate</span>
+                  <span className="font-semibold">{deliveryRate.toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                  <span className="text-gray-600">Outstanding Balance</span>
+                  <span className="font-semibold text-amber-600">{outstandingBalance.toFixed(2)} DH</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-3 bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4 text-amber-900">Product Categories</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[
+                  { title: 'Single Vision', data: { revenue: lensTypeCosts.singleVision, cost: lensTypeCosts.singleVisionCost, count: lensTypeCosts.singleVisionCount } },
+                  { title: 'Progressive', data: { revenue: lensTypeCosts.progressive, cost: lensTypeCosts.progressiveCost, count: lensTypeCosts.progressiveCount } },
+                  { title: 'Frames', data: { revenue: lensTypeCosts.frames, cost: lensTypeCosts.framesCost, count: lensTypeCosts.framesCount } },
+                  { title: 'Sunglasses', data: { revenue: lensTypeCosts.sunglasses, cost: lensTypeCosts.sunglassesCost, count: lensTypeCosts.sunglassesCount } },
+                  { title: 'Accessories', data: { revenue: lensTypeCosts.accessories, cost: lensTypeCosts.accessoriesCost, count: lensTypeCosts.accessoriesCount } }
+                ].map(({ title, data }) => (
+                  <div key={title} className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-amber-900">{title}</h4>
+                      <span className="text-sm font-medium bg-amber-100 px-2 py-1 rounded">
+                        {data.count} units
+                      </span>
                     </div>
-                    <div className="text-sm space-y-0.5">
+                    <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Revenue:</span>
+                        <span className="text-gray-600">Revenue</span>
                         <span className="font-medium">{data.revenue.toFixed(2)} DH</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Cost:</span>
+                        <span className="text-gray-600">Cost</span>
                         <span className="font-medium text-red-600">{data.cost.toFixed(2)} DH</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Profit:</span>
+                        <span className="text-gray-600">Profit</span>
                         <span className="font-medium text-green-600">{(data.revenue - data.cost).toFixed(2)} DH</span>
                       </div>
                     </div>
                   </div>
                 ))}
-                <div className="pt-3 border-t space-y-1">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Revenue</span>
-                    <span className="font-medium">{(
-                      lensTypeCosts.singleVision +
-                      lensTypeCosts.progressive +
-                      lensTypeCosts.frames +
-                      lensTypeCosts.sunglasses +
-                      lensTypeCosts.accessories
-                    ).toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Cost</span>
-                    <span className="font-medium text-red-600">{(
-                      lensTypeCosts.singleVisionCost +
-                      lensTypeCosts.progressiveCost +
-                      lensTypeCosts.framesCost +
-                      lensTypeCosts.sunglassesCost +
-                      lensTypeCosts.accessoriesCost
-                    ).toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total Profit</span>
-                    <span className="font-medium text-green-600">{(
-                      (lensTypeCosts.singleVision - lensTypeCosts.singleVisionCost) +
-                      (lensTypeCosts.progressive - lensTypeCosts.progressiveCost) +
-                      (lensTypeCosts.frames - lensTypeCosts.framesCost) +
-                      (lensTypeCosts.sunglasses - lensTypeCosts.sunglassesCost) +
-                      (lensTypeCosts.accessories - lensTypeCosts.accessoriesCost)
-                    ).toFixed(2)} DH</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Financial Overview</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Revenue:</span>
-                  <span className="font-medium">{totalRevenue.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Costs:</span>
-                  <span className="font-medium text-red-600">{totalCosts.toFixed(2)} DH</span>
-                </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Profit:</span>
-                  <span className="font-medium text-green-600">{totalProfit.toFixed(2)} DH</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Average Metrics</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Average Ticket:</span>
-                  <span className="font-medium">{averageTicket.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Average Profit:</span>
-                  <span className="font-medium text-green-600">{averageProfit.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Profit Margin:</span>
-                  <span className="font-medium">
-                    {totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0'}%
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Monthly Performance</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Revenue:</span>
-                  <span className="font-medium">{monthlyRevenue.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Profit:</span>
-                  <span className="font-medium text-green-600">{monthlyProfit.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Orders:</span>
-                  <span className="font-medium">{thisMonth.length}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Operational Metrics</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Collection Rate:</span>
-                  <span className="font-medium">{collectionRate.toFixed(1)}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Outstanding Balance:</span>
-                  <span className="font-medium text-amber-600">{outstandingBalance.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Rate:</span>
-                  <span className="font-medium">{deliveryRate.toFixed(1)}%</span>
-                </div>
               </div>
             </CardContent>
           </Card>
