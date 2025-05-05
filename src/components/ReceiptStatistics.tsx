@@ -132,21 +132,21 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
           <DialogTitle className="text-2xl font-bold mb-6">Business Analytics</DialogTitle>
           <div className="flex gap-4 mb-6">
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Start Date</label>
+              <label className="text-sm font-medium mb-2 block text-gray-600">Start Date</label>
               <Input
                 type="datetime-local"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full"
+                className="w-full h-11 rounded-lg border-gray-200 focus-visible:ring-teal-400 focus-visible:ring-offset-0 transition-all"
               />
             </div>
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">End Date</label>
+              <label className="text-sm font-medium mb-2 block text-gray-600">End Date</label>
               <Input
                 type="datetime-local"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full"
+                className="w-full h-11 rounded-lg border-gray-200 focus-visible:ring-teal-400 focus-visible:ring-offset-0 transition-all"
               />
             </div>
           </div>
