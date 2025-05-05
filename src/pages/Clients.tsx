@@ -1,482 +1,367 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Search, Users, Upload } from 'lucide-react';
-import { ImportClientsDialog } from '@/components/ImportClientsDialog';
-import { ClientAvatar } from '@/components/ClientAvatar';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/components/AuthProvider';
-import AddClientDialog from '@/components/AddClientDialog';
-import EditClientDialog from '@/components/EditClientDialog';
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../integrations/supabase/client";
+import { toast } from "sonner";
+import { ClientCard } from "@/components/ClientCard";
+import { SearchInput } from "@/components/SearchInput";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { PageTitle } from "@/components/PageTitle";
+import { EditClientDialog } from "@/components/EditClientDialog";
+import { ImportClientsDialog } from "@/components/ImportClientsDialog";
+import { AddClientDialog } from "@/components/AddClientDialog";
+import { Filter, UserPlus, Upload, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Client {
   id: string;
   name: string;
   phone: string;
-  gender: "Mr" | "Mme" | "Enf";
-  right_eye_sph?: number;
-  right_eye_cyl?: number;
-  right_eye_axe?: number;
-  left_eye_sph?: number;
-  left_eye_cyl?: number;
-  left_eye_axe?: number;
-  Add?: number;
-  notes?: string;
-  favorite?: boolean;
-  created_at?: string;
-  is_deleted?: boolean;
-  last_prescription_update?: string;
-  assurance?: string;
+  created_at: string;
+  receipts?: Array<{
+    id: string;
+    right_eye_sph?: number;
+    right_eye_cyl?: number;
+    right_eye_axe?: number;
+    left_eye_sph?: number;
+    left_eye_cyl?: number;
+    left_eye_axe?: number;
+  }>;
 }
 
-const Clients = () => {
-  const [clients, setClients] = useState<Client[]>([]);
+export default function Clients() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
-  const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Client } | null>(null);
-  const [cellEditValue, setCellEditValue] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [sortBy, setSortBy] = useState<string>('name');
+  const [showFilters, setShowFilters] = useState(false);
 
+  // Fetch clients with their latest receipts
   useEffect(() => {
-    fetchClients();
-  }, []);
+    async function getClients() {
+      setIsLoading(true);
+      
+      try {
+        const { data: clientsData, error } = await supabase
+          .from('clients')
+          .select('*')
+          .order('name');
 
-  const fetchClients = async () => {
-    if (!user) return;
-    setIsLoading(true);
+        if (error) {
+          throw error;
+        }
 
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+        // For each client, get their receipts
+        const clientsWithReceipts = await Promise.all(
+          clientsData.map(async (client) => {
+            const { data: receiptsData, error: receiptsError } = await supabase
+              .from('receipts')
+              .select('*')
+              .eq('client_id', client.id)
+              .order('created_at', { ascending: false });
+              
+            if (receiptsError) {
+              console.error('Error fetching receipts:', receiptsError);
+              return { ...client, receipts: [] };
+            }
+            
+            return { ...client, receipts: receiptsData };
+          })
+        );
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch clients",
-        variant: "destructive",
-      });
-      return;
+        setClients(clientsWithReceipts);
+        setFilteredClients(clientsWithReceipts);
+      } catch (error: any) {
+        toast.error('Error fetching clients: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    setClients((data || []) as Client[]);
-    setIsLoading(false);
+    getClients();
+  }, []);
+
+  // Filter and sort clients based on search term and sort option
+  useEffect(() => {
+    let filtered = [...clients];
+    
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(client => 
+        client.name.toLowerCase().includes(term) || 
+        client.phone.includes(term)
+      );
+    }
+    
+    // Sort clients
+    filtered.sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'recent') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else if (sortBy === 'phone') {
+        return a.phone.localeCompare(b.phone);
+      }
+      return 0;
+    });
+    
+    setFilteredClients(filtered);
+  }, [clients, searchTerm, sortBy]);
+
+  const handleAddClient = async (name: string, phone: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([{ name, phone }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add the new client to the state
+      const newClient = { ...data, receipts: [] };
+      setClients([...clients, newClient]);
+      toast.success('Client added successfully!');
+      setIsAddClientOpen(false);
+    } catch (error: any) {
+      toast.error('Error adding client: ' + error.message);
+    }
   };
 
-  const handleDeleteClient = async (id: string) => {
+  const handleEditClient = (client: Client) => {
+    setClientToEdit(client);
+  };
+
+  const handleUpdateClient = async (id: string, name: string, phone: string) => {
     try {
       const { error } = await supabase
         .from('clients')
-        .update({ is_deleted: true })
+        .update({ name, phone })
         .eq('id', id);
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Client deleted successfully",
-      });
+      // Update the client in the state
+      setClients(
+        clients.map((client) =>
+          client.id === id ? { ...client, name, phone } : client
+        )
+      );
 
-      fetchClients();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete client",
-        variant: "destructive",
-      });
+      toast.success('Client updated successfully!');
+      setClientToEdit(null);
+    } catch (error: any) {
+      toast.error('Error updating client: ' + error.message);
     }
   };
 
-  const filteredClients = clients.filter(client => 
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone.includes(searchTerm)
-  );
-
-  const startInlineEdit = (client: Client, field: keyof Client) => {
-    setEditingCell({ id: client.id, field });
-    setCellEditValue(String(client[field] ?? ''));
+  const openDeleteDialog = (client: Client) => {
+    setClientToDelete(client);
+    setIsDeleteDialogOpen(true);
   };
 
-  const endInlineEdit = async (client: Client) => {
-    if (!editingCell || !user) return;
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return;
 
     try {
-      setIsSubmitting(true);
       const { error } = await supabase
         .from('clients')
-        .update({ [editingCell.field]: cellEditValue })
-        .eq('id', client.id);
+        .delete()
+        .eq('id', clientToDelete.id);
 
       if (error) throw error;
 
-      setClients(prev => prev.map(c => 
-        c.id === client.id ? { ...c, [editingCell.field]: cellEditValue } : c
-      ));
-      toast({ title: "Updated", description: "Client updated successfully" });
-    } catch (error) {
-      console.error('Error updating client:', error);
-      toast({ 
-        title: "Error", 
-        description: "Failed to update client",
-        variant: "destructive"
-      });
-    } finally {
-      setEditingCell(null);
-      setIsSubmitting(false);
+      // Remove the client from the state
+      setClients(clients.filter((c) => c.id !== clientToDelete.id));
+      toast.success('Client deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setClientToDelete(null);
+    } catch (error: any) {
+      toast.error('Error deleting client: ' + error.message);
     }
   };
 
+  const handleImportClients = (importedClients: any[]) => {
+    // Implement client import functionality
+    toast.success(`${importedClients.length} clients imported successfully!`);
+    setIsImportDialogOpen(false);
+    
+    // Refresh clients list
+    setIsLoading(true);
+    // Logic to refresh clients would go here
+    setIsLoading(false);
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100svh-68px)]" style={{
-      width: "100%",
-      paddingLeft: "1rem",
-      paddingRight: "1rem",
-      paddingTop: "1.5rem",
-      transition: "all 0.2s ease",
-      minHeight: "calc(100svh - 68px)",
-    }}>
-      <div className="flex flex-col gap-4 mb-4 w-full">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              <Button
-                className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
-                onClick={() => setIsOpen(true)}
-              >
-                <span className="mr-2 flex items-center"><Plus size={18} /></span>
-                Add Client
-              </Button>
-              <Button
-                variant="outline"
-                className="!px-5 !py-2.5 rounded-full font-semibold flex items-center"
-                onClick={() => setIsImportOpen(true)}
-              >
-                <span className="mr-2 flex items-center"><Upload size={18} /></span>
-                Import CSV
-              </Button>
+    <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-8 space-y-8">
+      <PageTitle>Clients</PageTitle>
+      
+      {/* Search and filters */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="w-full sm:w-64 md:w-80">
+          <SearchInput 
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search clients..."
+          />
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter size={16} />
+              Filters
+              <ChevronDown size={14} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </Button>
+            <div className="w-40">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name (A-Z)</SelectItem>
+                  <SelectItem value="recent">Recently Added</SelectItem>
+                  <SelectItem value="phone">Phone Number</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
-              <div className="flex items-baseline gap-1">
-                <span className="text-[1.35rem] leading-none font-bold text-black">{clients.length}</span>
-                <span className="text-gray-400 text-xs font-medium font-inter">clients</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                  This Month: {clients.filter(client => {
-                    const clientDate = new Date(client.created_at || '');
-                    const now = new Date();
-                    return clientDate.getMonth() === now.getMonth() && 
-                           clientDate.getFullYear() === now.getFullYear();
-                  }).length}
-                </span>
-                <span className="border border-black/15 px-1.5 py-0.5 rounded-full bg-white font-medium text-xs text-black/70">
-                  Favorites: {clients.filter(client => client.favorite).length}
-                </span>
-              </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsImportDialogOpen(true)}
+              className="flex items-center gap-1"
+            >
+              <Upload size={16} />
+              Import
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => setIsAddClientOpen(true)}
+              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500 flex items-center gap-1"
+            >
+              <UserPlus size={16} />
+              New Client
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Filter options (expandable) */}
+      {showFilters && (
+        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm animate-accordion-down">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Filter options would go here */}
+            <div className="text-sm text-gray-500">
+              Additional filter options can be implemented here
             </div>
           </div>
         </div>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
-          <Input
-            type="text"
-            placeholder="Search clients..."
-            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      )}
+      
+      {/* Client cards */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="bg-gray-100 rounded-lg h-48"></div>
+          ))}
         </div>
-      </div>
-
-      <div className="flex-grow min-h-0 flex flex-col">
-        <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold w-[200px]">Client Info</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Right Eye</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Left Eye</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-14">Add</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Assurance</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Created At</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[120px]">Last Updated</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Notes</TableHead>
-                <TableHead className="text-right text-black text-xs font-semibold w-[80px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 animate-pulse">
-                    <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : filteredClients.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-neutral-400 font-medium">
-                    No clients found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredClients.map((client) => (
-                  <TableRow key={client.id} className="hover:bg-[#FAFAFA] transition-all group rounded-lg">
-                    <TableCell className="py-3">
-                      <div className="flex items-center gap-2">
-                        <ClientAvatar gender={client.gender} name={client.name} className="w-11 h-11" />
-                        <div className="flex flex-col gap-1">
-                          {editingCell?.id === client.id && editingCell.field === "name" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(client)}
-                              onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
-                              autoFocus
-                            />
-                          ) : (
-                            <span
-                              className="font-semibold text-black hover:underline cursor-pointer"
-                              onClick={() => startInlineEdit(client, "name")}
-                              tabIndex={0}
-                              title="Edit"
-                            >{client.name}</span>
-                          )}
-                          {editingCell?.id === client.id && editingCell.field === "phone" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(client)}
-                              onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
-                              autoFocus
-                            />
-                          ) : (
-                            <span
-                              className="text-sm text-gray-500 hover:underline cursor-pointer flex items-center gap-1.5"
-                              onClick={() => startInlineEdit(client, "phone")}
-                              tabIndex={0}
-                              title="Edit"
-                            >
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                              </svg>
-                              {client.phone}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {(client.right_eye_sph !== null && client.right_eye_sph !== undefined) ? 
-                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
-                          <span className="whitespace-nowrap">
-                            {client.right_eye_sph === 0 && client.right_eye_cyl === 0 ? 'Plan' :
-                              client.right_eye_cyl === 0 ? client.right_eye_sph :
-                              client.right_eye_sph === 0 ? `(${client.right_eye_cyl} a ${client.right_eye_axe}°)` :
-                              `${client.right_eye_sph} (${client.right_eye_cyl} a ${client.right_eye_axe}°)`
-                            }
-                          </span>
-                        </div>
-                        : '-'}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {(client.left_eye_sph !== null && client.left_eye_sph !== undefined) ? 
-                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
-                          <span className="whitespace-nowrap">
-                            {client.left_eye_sph === 0 && client.left_eye_cyl === 0 ? 'Plan' :
-                              client.left_eye_cyl === 0 ? client.left_eye_sph :
-                              client.left_eye_sph === 0 ? `(${client.left_eye_cyl} a ${client.left_eye_axe}°)` :
-                              `${client.left_eye_sph} (${client.left_eye_cyl} a ${client.left_eye_axe}°)`
-                            }
-                          </span>
-                        </div>
-                        : '-'}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {client.Add ? 
-                        <div className="bg-[#1e7575] text-[#F0F0F0] px-3 py-1.5 rounded-md text-sm font-medium inline-block">
-                          {client.Add}
-                        </div>
-                        : '-'}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className={`${client.assurance ? "border rounded-full py-1 px-2.5 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"}`}>
-                        {client.assurance || '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className="text-neutral-600 text-xs">
-                        {client.created_at 
-                          ? new Date(client.created_at).toLocaleString(undefined, {
-                              year: 'numeric',
-                              month: 'numeric',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          : '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className="text-neutral-600 text-xs">
-                        {client.last_prescription_update 
-                          ? new Date(client.last_prescription_update).toLocaleString(undefined, {
-                              year: 'numeric',
-                              month: 'numeric',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })
-                          : '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {editingCell?.id === client.id && editingCell.field === "notes" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(client)}
-                          onKeyDown={e => e.key === 'Enter' && endInlineEdit(client)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className="hover:underline cursor-pointer text-neutral-500"
-                          onClick={() => startInlineEdit(client, "notes")}
-                        >
-                          {client.notes || 'Écrivez ici vos observations ou rappels !'}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="py-3 text-right">
-                      <div className="flex justify-end space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="hover:bg-black/10"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const newFavorite = !client.favorite;
-                            const { error } = await supabase
-                              .from('clients')
-                              .update({ favorite: newFavorite })
-                              .eq('id', client.id);
-
-                            if (error) {
-                              toast({
-                                title: "Error",
-                                description: "Failed to update favorite status",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-
-                            setClients(clients.map(c => 
-                              c.id === client.id ? {...c, favorite: newFavorite} : c
-                            ));
-                          }}
-                        >
-                          <svg 
-                            width="20" 
-                            height="20" 
-                            viewBox="0 0 24 24" 
-                            fill={client.favorite ? "#FFD700" : "none"}
-                            stroke={client.favorite ? "#FFD700" : "currentColor"}
-                            strokeWidth="2"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="hover:bg-black/10"
-                          onClick={() => {
-                            setEditingClient(client);
-                            setIsOpen(true);
-                          }}
-                        >
-                          <Pencil size={16} className="text-black" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="hover:bg-[#222]/10"
-                          onClick={() => handleDeleteClient(client.id)}
-                        >
-                          <Trash2 size={16} className="text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+      ) : filteredClients.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
+          {filteredClients.map((client) => (
+            <ClientCard 
+              key={client.id} 
+              client={client} 
+              onEdit={handleEditClient} 
+              onDelete={openDeleteDialog} 
+            />
+          ))}
         </div>
-      </div>
-
-      {editingClient ? (
-        <EditClientDialog
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-            setEditingClient(null);
-          }}
-          onClientUpdated={() => {
-            fetchClients();
-            setIsOpen(false);
-            setEditingClient(null);
-          }}
-          client={editingClient}
-        />
       ) : (
-        <AddClientDialog
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-          }}
-          onClientAdded={(client) => {
-            fetchClients();
-            setIsOpen(false);
-          }}
+        <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
+          <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
+            <UserPlus size={24} className="text-teal-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">No clients found</h3>
+          <p className="text-gray-500 max-w-md mb-4">
+            {searchTerm 
+              ? `No clients match your search "${searchTerm}"`
+              : "You haven't added any clients yet. Get started by adding your first client."
+            }
+          </p>
+          {!searchTerm && (
+            <Button 
+              onClick={() => setIsAddClientOpen(true)}
+              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
+            >
+              <UserPlus size={16} className="mr-2" />
+              Add Your First Client
+            </Button>
+          )}
+        </div>
+      )}
+      
+      {/* Floating action button */}
+      <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
+
+      {/* Add client dialog */}
+      <AddClientDialog 
+        open={isAddClientOpen} 
+        onClose={() => setIsAddClientOpen(false)} 
+        onAddClient={handleAddClient}
+      />
+      
+      {/* Edit client dialog */}
+      {clientToEdit && (
+        <EditClientDialog 
+          client={clientToEdit}
+          open={!!clientToEdit}
+          onClose={() => setClientToEdit(null)}
+          onUpdateClient={handleUpdateClient}
         />
       )}
-
-      <ImportClientsDialog
-        isOpen={isImportOpen}
-        onClose={() => setIsImportOpen(false)}
-        onImportComplete={fetchClients}
+      
+      {/* Import clients dialog */}
+      <ImportClientsDialog 
+        open={isImportDialogOpen} 
+        onClose={() => setIsImportDialogOpen(false)}
+        onImport={handleImportClients}
       />
+      
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Client</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {clientToDelete?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-};
-
-export default Clients;
+}

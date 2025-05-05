@@ -203,8 +203,10 @@ export type Database = {
           left_eye_axe: number | null
           left_eye_cyl: number | null
           left_eye_sph: number | null
+          montage_costs: number | null
           montage_status: string
           payment_status: string | null
+          products_cost: number | null
           profit: number | null
           right_eye_axe: number | null
           right_eye_cyl: number | null
@@ -231,8 +233,10 @@ export type Database = {
           left_eye_axe?: number | null
           left_eye_cyl?: number | null
           left_eye_sph?: number | null
+          montage_costs?: number | null
           montage_status?: string
           payment_status?: string | null
+          products_cost?: number | null
           profit?: number | null
           right_eye_axe?: number | null
           right_eye_cyl?: number | null
@@ -259,8 +263,10 @@ export type Database = {
           left_eye_axe?: number | null
           left_eye_cyl?: number | null
           left_eye_sph?: number | null
+          montage_costs?: number | null
           montage_status?: string
           payment_status?: string | null
+          products_cost?: number | null
           profit?: number | null
           right_eye_axe?: number | null
           right_eye_cyl?: number | null
