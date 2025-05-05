@@ -221,7 +221,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 -ml-1">
             <Button
               variant="ghost"
               size="sm"

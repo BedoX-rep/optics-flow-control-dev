@@ -140,7 +140,8 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         description: "Client updated successfully",
       })
 
-      onClientUpdated(
+      // Trigger a full refresh instead of just updating name/phone
+      await onClientUpdated(
         data.id,
         data.name,
         data.phone

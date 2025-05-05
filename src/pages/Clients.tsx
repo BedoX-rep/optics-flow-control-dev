@@ -108,7 +108,10 @@ export default function Clients() {
   };
 
   useEffect(() => {
-    fetchClients();
+    // Only fetch if user exists and clients array is empty
+    if (user && clients.length === 0) {
+      fetchClients();
+    }
   }, [user]);
 
   // Filter and sort clients based on search term and sort option
