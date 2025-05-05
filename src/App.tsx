@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +18,6 @@ import Pricing from "./pages/Pricing";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,7 +27,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
   requiresActiveSubscription = true 
@@ -41,7 +40,6 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Only check subscription after loading is complete and if route requires active subscription
   if (!isLoading && requiresActiveSubscription && subscription) {
     const subStatus = subscription.subscription_status.toLowerCase();
     if (subStatus !== 'active') {
@@ -49,7 +47,6 @@ const ProtectedRoute = ({
     }
   }
 
-  // Show loading state while subscription data is being fetched
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
@@ -64,65 +61,58 @@ const ProtectedRoute = ({
   return <>{children}</>;
 };
 
-// App Routes
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/pricing" element={<Pricing />} />
-
-    <Route path="/dashboard" element={
-      <ProtectedRoute>
-        <Layout><Dashboard /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/products" element={
-      <ProtectedRoute>
-        <Layout><Products /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/clients" element={
-      <ProtectedRoute>
-        <Layout><Clients /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/receipts" element={
-      <ProtectedRoute>
-        <Layout><Receipts /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/new-receipt" element={
-      <ProtectedRoute>
-        <Layout><NewReceipt /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/subscriptions" element={
-      <ProtectedRoute requiresActiveSubscription={false}>
-        <Layout><Subscriptions /></Layout>
-      </ProtectedRoute>
-    } />
-
+    
+    <Route element={<Layout />}>
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/products" element={
+        <ProtectedRoute>
+          <Products />
+        </ProtectedRoute>
+      } />
+      <Route path="/clients" element={
+        <ProtectedRoute>
+          <Clients />
+        </ProtectedRoute>
+      } />
+      <Route path="/receipts" element={
+        <ProtectedRoute>
+          <Receipts />
+        </ProtectedRoute>
+      } />
+      <Route path="/new-receipt" element={
+        <ProtectedRoute>
+          <NewReceipt />
+        </ProtectedRoute>
+      } />
+      <Route path="/subscriptions" element={
+        <ProtectedRoute requiresActiveSubscription={false}>
+          <Subscriptions />
+        </ProtectedRoute>
+      } />
+    </Route>
+    
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
 
-// Main App Component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <LanguageProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
-            <div className="app">
-              <AppRoutes />
-            </div>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
           </BrowserRouter>
         </AuthProvider>
       </LanguageProvider>
