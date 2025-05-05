@@ -11,12 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, Package2, User, Receipt, Banknote, FileText } from "lucide-react";
+import { User, Eye, Package2, Receipt, Banknote, FileText } from "lucide-react";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -154,7 +153,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
             <FileText className="h-5 w-5 text-primary" />
@@ -162,114 +161,106 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="client" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="client">Client Info</TabsTrigger>
-            <TabsTrigger value="prescription">Prescription</TabsTrigger>
-            <TabsTrigger value="status">Status</TabsTrigger>
-            <TabsTrigger value="items">Items</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="client" className="space-y-4 pt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <User className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Client Information</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Name</Label>
-                    <Input
-                      value={formData.client_name}
-                      onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Phone</Label>
-                    <Input
-                      value={formData.client_phone}
-                      onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="prescription" className="space-y-4 pt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Prescription Details</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Right Eye</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label>SPH</Label>
-                        <Input
-                          value={formData.right_eye_sph}
-                          onChange={(e) => setFormData({ ...formData, right_eye_sph: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>CYL</Label>
-                        <Input
-                          value={formData.right_eye_cyl}
-                          onChange={(e) => setFormData({ ...formData, right_eye_cyl: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>AXE</Label>
-                        <Input
-                          value={formData.right_eye_axe}
-                          onChange={(e) => setFormData({ ...formData, right_eye_axe: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Left Eye</h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label>SPH</Label>
-                        <Input
-                          value={formData.left_eye_sph}
-                          onChange={(e) => setFormData({ ...formData, left_eye_sph: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>CYL</Label>
-                        <Input
-                          value={formData.left_eye_cyl}
-                          onChange={(e) => setFormData({ ...formData, left_eye_cyl: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>AXE</Label>
-                        <Input
-                          value={formData.left_eye_axe}
-                          onChange={(e) => setFormData({ ...formData, left_eye_axe: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 w-1/3">
-                  <Label>ADD</Label>
+        <div className="space-y-6">
+          {/* Client Information */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Client Information</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Name</Label>
                   <Input
-                    value={formData.add}
-                    onChange={(e) => setFormData({ ...formData, add: e.target.value })}
+                    value={formData.client_name}
+                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    value={formData.client_phone}
+                    onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="status" className="grid grid-cols-2 gap-4 pt-4">
+          {/* Prescription */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Prescription Details</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Right Eye</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label>SPH</Label>
+                      <Input
+                        value={formData.right_eye_sph}
+                        onChange={(e) => setFormData({ ...formData, right_eye_sph: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>CYL</Label>
+                      <Input
+                        value={formData.right_eye_cyl}
+                        onChange={(e) => setFormData({ ...formData, right_eye_cyl: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>AXE</Label>
+                      <Input
+                        value={formData.right_eye_axe}
+                        onChange={(e) => setFormData({ ...formData, right_eye_axe: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium">Left Eye</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label>SPH</Label>
+                      <Input
+                        value={formData.left_eye_sph}
+                        onChange={(e) => setFormData({ ...formData, left_eye_sph: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>CYL</Label>
+                      <Input
+                        value={formData.left_eye_cyl}
+                        onChange={(e) => setFormData({ ...formData, left_eye_cyl: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>AXE</Label>
+                      <Input
+                        value={formData.left_eye_axe}
+                        onChange={(e) => setFormData({ ...formData, left_eye_axe: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 w-1/3">
+                <Label>ADD</Label>
+                <Input
+                  value={formData.add}
+                  onChange={(e) => setFormData({ ...formData, add: e.target.value })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Status and Financial Details */}
+          <div className="grid grid-cols-2 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -366,83 +357,82 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="items" className="space-y-4 pt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Package2 className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Items</h3>
-                  </div>
-                  <div className="text-lg font-semibold">
-                    Total: {calculateItemsTotal().toFixed(2)} DH
-                  </div>
+          {/* Items */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Package2 className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Items</h3>
                 </div>
-                <div className="space-y-4">
-                  {formData.items.map((item, index) => (
-                    <Card key={index} className="border-dashed">
-                      <CardContent className="pt-4">
-                        <div className="grid grid-cols-4 gap-4">
-                          <div>
-                            <Label>Name</Label>
-                            <Input
-                              value={item.custom_item_name || item.product?.name || ''}
-                              onChange={(e) => {
-                                const newItems = [...formData.items];
-                                newItems[index] = { ...item, custom_item_name: e.target.value };
-                                setFormData({ ...formData, items: newItems });
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label>Quantity</Label>
-                            <Input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const newItems = [...formData.items];
-                                const newQuantity = parseInt(e.target.value) || 1;
-                                newItems[index] = { ...item, quantity: newQuantity };
-                                setFormData({ ...formData, items: newItems });
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label>Price</Label>
-                            <Input
-                              type="number"
-                              value={item.price}
-                              onChange={(e) => {
-                                const newItems = [...formData.items];
-                                const newPrice = parseFloat(e.target.value) || 0;
-                                newItems[index] = { ...item, price: newPrice };
-                                setFormData({ ...formData, items: newItems });
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <Label>Cost</Label>
-                            <Input
-                              type="number"
-                              value={item.cost}
-                              onChange={(e) => {
-                                const newItems = [...formData.items];
-                                newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
-                                setFormData({ ...formData, items: newItems });
-                              }}
-                            />
-                          </div>
+                <div className="text-lg font-semibold">
+                  Total: {calculateItemsTotal().toFixed(2)} DH
+                </div>
+              </div>
+              <div className="space-y-4">
+                {formData.items.map((item, index) => (
+                  <Card key={index} className="border-dashed">
+                    <CardContent className="pt-4">
+                      <div className="grid grid-cols-4 gap-4">
+                        <div>
+                          <Label>Name</Label>
+                          <Input
+                            value={item.custom_item_name || item.product?.name || ''}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...item, custom_item_name: e.target.value };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                        <div>
+                          <Label>Quantity</Label>
+                          <Input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              const newQuantity = parseInt(e.target.value) || 1;
+                              newItems[index] = { ...item, quantity: newQuantity };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label>Price</Label>
+                          <Input
+                            type="number"
+                            value={item.price}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              const newPrice = parseFloat(e.target.value) || 0;
+                              newItems[index] = { ...item, price: newPrice };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label>Cost</Label>
+                          <Input
+                            type="number"
+                            value={item.cost}
+                            onChange={(e) => {
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
