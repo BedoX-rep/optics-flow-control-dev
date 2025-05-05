@@ -73,7 +73,10 @@ const ReceiptDetailsMiniDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <FileText className="h-5 w-5 text-teal-600" />
-            Receipt Details
+            <div className="flex flex-col">
+              <span className="text-base font-medium">{receipt.clients?.name || receipt.client_name}</span>
+              <span className="text-sm text-gray-500">{receipt.clients?.phone || receipt.client_phone}</span>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
