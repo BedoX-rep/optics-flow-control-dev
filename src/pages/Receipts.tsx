@@ -82,7 +82,9 @@ const ReceiptCard = ({
   };
 
   const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAdvance = parseFloat(e.target.value) || 0;
+    const newAdvance = e.target.value === '' ? 0 : parseFloat(e.target.value);
+    if (isNaN(newAdvance)) return;
+    
     setAdvanceValue(newAdvance);
 
     try {
@@ -94,14 +96,9 @@ const ReceiptCard = ({
         })
         .eq('id', receipt.id);
 
-      if (error) {
-        console.error("Error updating advance:", error);
-        // Revert to previous value
-        setAdvanceValue(receipt.advance_payment || 0);
-      } else {
-        queryClient.invalidateQueries(['receipts']);
-        setEditingAdvance(false);
-      }
+      if (error) throw error;
+
+      await queryClient.invalidateQueries(['receipts']);
     } catch (error) {
       console.error('Error updating advance:', error);
       setAdvanceValue(receipt.advance_payment || 0);
@@ -178,7 +175,7 @@ const ReceiptCard = ({
                           value={advanceValue}
                           onChange={handleAdvanceChange}
                           onBlur={() => setEditingAdvance(false)}
-                          className="w-24 border rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-24 border rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           autoFocus
                         />
                       ) : (
