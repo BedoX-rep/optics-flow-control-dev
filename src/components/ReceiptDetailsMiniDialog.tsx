@@ -149,18 +149,24 @@ const ReceiptDetailsMiniDialog = ({
                     <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || "0.00"} DH</span></p>
                   </>
                 )}
-                {receipt.total_discount > 0 && (
-                  <p className="text-sm text-gray-600">Discount ({receipt.discount_percentage}% + {receipt.discount_amount} DH): <span className="font-medium text-red-600">-{receipt.total_discount.toFixed(2)} DH</span></p>
+                {(receipt.discount_percentage > 0 || receipt.discount_amount > 0) && (
+                  <p className="text-sm text-gray-600">
+                    Total Discount
+                    {receipt.discount_percentage > 0 && <> ({receipt.discount_percentage}%)</>}
+                    {receipt.discount_amount > 0 && receipt.discount_percentage > 0 && " + "}
+                    {receipt.discount_amount > 0 && `${receipt.discount_amount} DH`}: 
+                    <span className="font-medium text-red-600"> -{receipt.total_discount?.toFixed(2) || "0.00"} DH</span>
+                  </p>
                 )}
                 <p className="text-sm font-medium">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
                 <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || "0.00"} DH</span></p>
                 <p className="text-sm text-gray-600">Balance: <span className="font-medium">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</span></p>
               </div>
               <div className="space-y-1.5">
-                <p className="text-sm text-gray-600">Montage Costs: <span className="font-medium">{receipt.montage_costs?.toFixed(2) || "0.00"} DH</span></p>
                 <p className="text-sm text-gray-600">Products Cost: <span className="font-medium">{receipt.products_cost?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Total Cost (TTC): <span className="font-medium">{receipt.cost_ttc?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Profit: <span className="font-medium text-green-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</span></p>
+                <p className="text-sm text-gray-600">Montage Costs: <span className="font-medium">{receipt.montage_costs?.toFixed(2) || "0.00"} DH</span></p>
+                <p className="text-sm text-gray-600">Total Cost (TTC): <span className="font-medium text-gray-800">{receipt.cost_ttc?.toFixed(2) || "0.00"} DH</span></p>
+                <p className="text-sm text-gray-600">Profit: <span className="font-medium text-green-600">{((receipt.total || 0) - (receipt.cost_ttc || 0)).toFixed(2)} DH</span></p>
               </div>
             </div>
           </div>
