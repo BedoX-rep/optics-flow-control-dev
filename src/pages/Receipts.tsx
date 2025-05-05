@@ -16,7 +16,7 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
-import ReceiptDetailsMiniDialog from '@/components/ReceiptDetailsMiniDialog';
+import ReceiptDetailsDialog from '@/components/ReceiptDetailsDialog';
 import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
 import {
@@ -680,12 +680,10 @@ const Receipts = () => {
         </div>
       </div>
 
-      <ReceiptDetailsMiniDialog
+      <ReceiptDetailsDialog
         isOpen={!!selectedReceipt}
         onClose={() => setSelectedReceipt(null)}
         receipt={selectedReceipt}
-        onEdit={setEditingReceipt}
-        onDelete={handleDelete}
       />
 
       <ReceiptEditDialog

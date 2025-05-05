@@ -436,7 +436,6 @@ const NewReceipt = () => {
           cost: totalCost + montageCosts,
           cost_ttc: totalCost + montageCosts,
           profit: profit,
-          total_discount: totalDiscount,
           discount_amount: totalDiscount,
           discount_percentage: discount,
           total,

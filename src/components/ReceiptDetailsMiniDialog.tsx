@@ -48,23 +48,14 @@ const ReceiptDetailsMiniDialog = ({
     }
   };
 
-  const getStatusColor = (type: string, status: string) => {
-    switch (type) {
-      case 'payment':
-        return status === 'Paid' ? 'bg-green-100 text-green-800' :
-               status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-               'bg-red-100 text-red-800';
-      case 'delivery':
-        return status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
-               'bg-yellow-100 text-yellow-800';
-      case 'montage':
-        return status === 'Ready' ? 'bg-emerald-100 text-emerald-800' :
-               status === 'Ordered' ? 'bg-blue-100 text-blue-800' :
-               status === 'InStore' ? 'bg-orange-100 text-orange-800' :
-               status === 'InCutting' ? 'bg-amber-100 text-amber-800' :
-               'bg-gray-100 text-gray-800';
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'Paid':
+        return 'bg-green-100 text-green-800';
+      case 'Partially Paid':
+        return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-red-100 text-red-800';
     }
   };
 
@@ -85,18 +76,10 @@ const ReceiptDetailsMiniDialog = ({
               <p>{formatDate(receipt.created_at)}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Status</h3>
-              <div className="flex flex-col gap-1.5 mt-1">
-                <Badge variant="outline" className={getStatusColor('payment', receipt.payment_status)}>
-                  Payment: {receipt.payment_status || "Unpaid"}
-                </Badge>
-                <Badge variant="outline" className={getStatusColor('delivery', receipt.delivery_status)}>
-                  Delivery: {receipt.delivery_status || "Undelivered"}
-                </Badge>
-                <Badge variant="outline" className={getStatusColor('montage', receipt.montage_status)}>
-                  Montage: {receipt.montage_status || "UnOrdered"}
-                </Badge>
-              </div>
+              <h3 className="text-sm font-medium text-gray-500">Payment Status</h3>
+              <Badge variant="outline" className={getPaymentStatusColor(receipt.payment_status)}>
+                {receipt.payment_status || "Unpaid"}
+              </Badge>
             </div>
           </div>
 
@@ -140,32 +123,21 @@ const ReceiptDetailsMiniDialog = ({
 
           <div>
             <h3 className="text-sm font-medium mb-2">Financial Details</h3>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-              <div className="space-y-1.5">
-                <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || "0.00"} DH</span></p>
-                {receipt.tax > 0 && (
-                  <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || "0.00"} DH</span></p>
-                )}
-                {receipt.discount_percentage > 0 && receipt.discount_amount > receipt.subtotal * (receipt.discount_percentage / 100) && (
-                  <>
-                    <p className="text-sm text-gray-600">Percentage Discount ({receipt.discount_percentage}%): <span className="font-medium text-red-600">-{(receipt.subtotal * (receipt.discount_percentage / 100)).toFixed(2)} DH</span></p>
-                    <p className="text-sm text-gray-600">Numerical Discount: <span className="font-medium text-red-600">-{(receipt.discount_amount - (receipt.subtotal * (receipt.discount_percentage / 100))).toFixed(2)} DH</span></p>
-                    <p className="text-sm text-gray-600">Total Discount: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
-                  </>
-                )}
-                {(receipt.discount_amount > 0 && (!receipt.discount_percentage || receipt.discount_amount <= receipt.subtotal * (receipt.discount_percentage / 100))) && (
-                  <p className="text-sm text-gray-600">Discount{receipt.discount_percentage ? ` (${receipt.discount_percentage}%)` : ''}: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
-                )}
-                <p className="text-sm font-medium">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
-                <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Balance: <span className="font-medium">{(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH</span></p>
+            <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+              <div>
+                <span className="text-gray-500">Total:</span> {receipt.total?.toFixed(2) || "0.00"} DH
               </div>
-              <div className="space-y-1.5">
-                <p className="text-sm text-gray-600">Montage Costs: <span className="font-medium">{receipt.montage_costs?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Products Cost: <span className="font-medium">{receipt.products_cost?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Total Cost (TTC): <span className="font-medium">{receipt.cost_ttc?.toFixed(2) || "0.00"} DH</span></p>
-                <p className="text-sm text-gray-600">Profit: <span className="font-medium text-green-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</span></p>
+              <div>
+                <span className="text-gray-500">Advance Payment:</span> {receipt.advance_payment?.toFixed(2) || "0.00"} DH
               </div>
+              <div>
+                <span className="text-gray-500">Balance:</span> {receipt.balance?.toFixed(2) || "0.00"} DH
+              </div>
+              {receipt.discount_amount > 0 && (
+                <div>
+                  <span className="text-gray-500">Discount:</span> {receipt.discount_amount.toFixed(2)} DH
+                </div>
+              )}
             </div>
           </div>
           
@@ -181,20 +153,14 @@ const ReceiptDetailsMiniDialog = ({
                       <TableHead>Item</TableHead>
                       <TableHead className="text-right">Qty</TableHead>
                       <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Cost</TableHead>
-                      <TableHead className="text-right">Profit</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {receipt.receipt_items.map((item: any, index: number) => (
                       <TableRow key={index}>
-                        <TableCell>{item.custom_item_name || item.product?.name || "Item"}</TableCell>
+                        <TableCell>{item.custom_item_name || "Item"}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>
                         <TableCell className="text-right">{item.price?.toFixed(2)} DH</TableCell>
-                        <TableCell className="text-right">{item.cost?.toFixed(2)} DH</TableCell>
-                        <TableCell className="text-right">{((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH</TableCell>
-                        <TableCell className="text-right">{(item.quantity * item.price).toFixed(2)} DH</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
