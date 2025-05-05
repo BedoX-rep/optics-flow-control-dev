@@ -226,12 +226,12 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
 
-          <div className="flex items-center space-x-1 -ml-1">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleFavorite}
-              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors`}
+              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors min-w-9`}
             >
               <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
             </Button>
@@ -240,7 +240,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 variant="ghost" 
                 size="sm" 
                 onClick={handleSaveChanges}
-                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors"
+                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors min-w-9"
               >
                 <Save size={16} />
               </Button>
@@ -249,7 +249,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="sm" 
               onClick={() => onEdit(client)}
-              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors min-w-9"
             >
               <Edit size={16} />
             </Button>
@@ -257,7 +257,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="sm" 
               onClick={() => onDelete(client)}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors min-w-9"
             >
               <Trash2 size={16} />
             </Button>

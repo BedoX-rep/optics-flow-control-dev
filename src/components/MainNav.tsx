@@ -27,7 +27,16 @@ const navigation = [
 const MainNav = () => {
   const location = useLocation();
   const { user } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setCollapsed(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
