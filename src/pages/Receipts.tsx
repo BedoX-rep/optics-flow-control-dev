@@ -275,8 +275,7 @@ const Receipts = () => {
           profit,
           custom_item_name,
           product:product_id (
-            name,
-            category
+            name
           )
         )
       `)
