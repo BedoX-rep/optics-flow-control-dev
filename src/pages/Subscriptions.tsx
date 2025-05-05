@@ -2,7 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Check, Phone, CreditCard, RefreshCw } from 'lucide-react';
+import { Calendar, Check, Phone, CreditCard, RefreshCw, Copy } from 'lucide-react';
+import BankTransferDialog from '@/components/BankTransferDialog';
 import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
@@ -150,9 +151,16 @@ const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; on
   </div>
 );
 
+const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
+
 const renderSubscriptionPlans = () => {
   return (
     <>
+      <BankTransferDialog 
+        isOpen={bankTransferDialogOpen}
+        onClose={() => setBankTransferDialogOpen(false)}
+      />
+      
       {currentSubscription && (
         <AutoRenewalToggle 
           isRecurring={currentSubscription.is_recurring || false}
@@ -170,92 +178,97 @@ const renderSubscriptionPlans = () => {
             transition={{ duration: 0.3 }}
           >
             <Card className={`
-              border-2 h-full transition-all duration-300
+              relative overflow-hidden h-full transition-all duration-300
               ${currentSubscription?.subscription_type === type ? 
-                'border-teal-500 shadow-teal-200 shadow-lg' : 
-                'hover:border-teal-300'
+                'border-2 border-teal-500 shadow-xl' : 
+                'hover:shadow-lg hover:border-teal-300'
               }
             `}>
+              {type === 'Quarterly' && (
+                <div className="absolute -right-12 top-6 rotate-45 bg-teal-500 text-white px-12 py-1 text-sm">
+                  Popular
+                </div>
+              )}
               <CardHeader className={`
-                ${type === 'Quarterly' ? 'bg-gradient-to-r from-teal-50 to-teal-100' : ''}
+                ${type === 'Quarterly' ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
                 ${currentSubscription?.subscription_type === type ? 'bg-teal-50' : ''}
+                pb-4
               `}>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl font-bold text-gray-800">{type}</CardTitle>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-800">{type}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {type === 'Lifetime' ? 'One-time payment' : `Billed ${type.toLowerCase()}`}
+                    </p>
+                  </div>
                   {currentSubscription?.subscription_type === type && (
                     <span className="px-3 py-1 bg-teal-500 text-white text-sm rounded-full">
                       Current Plan
                     </span>
                   )}
                 </div>
+                <div className="mt-4">
+                  <div className="flex items-baseline">
+                    <span className="text-4xl font-bold text-gray-900">
+                      {SUBSCRIPTION_PRICES[type as keyof typeof SUBSCRIPTION_PRICES]}
+                    </span>
+                    <span className="ml-1 text-gray-600">DH</span>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="mb-6">
-                  <p className="text-4xl font-bold text-gray-900">
-                    {SUBSCRIPTION_PRICES[type as keyof typeof SUBSCRIPTION_PRICES]} DH
-                  </p>
-                  <p className="text-gray-500 mt-2">
-                    {type === 'Lifetime' ? 'One-time payment' : `${type.toLowerCase()} billing`}
-                  </p>
-                </div>
-                <ul className="space-y-4">
+                <ul className="space-y-3">
                   {[
                     'Client Management System',
-'Receipt Generation',
-'Product Inventory',
-'Sales Analytics',
-'Prescription Management',
+                    'Receipt Generation',
+                    'Product Inventory',
+                    'Sales Analytics',
+                    'Prescription Management',
                     type === 'Quarterly' && 'Priority support',
                     type === 'Lifetime' && 'Lifetime updates',
                     type === 'Lifetime' && 'No recurring payments'
                   ].filter(Boolean).map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-teal-500" />
+                    <li key={index} className="flex items-center gap-2 text-sm">
+                      <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                        <Check className="h-3 w-3 text-teal-600" />
+                      </div>
                       <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter className="pt-6 flex flex-col gap-4">
-                <div className="flex flex-col gap-3 w-full">
-                  <Button 
-                    onClick={() => {
-                      window.location.href = `tel:+21262706249`;
-                    }}
-                    variant="outline"
-                    className="w-full flex items-center gap-2 border-teal-200 hover:bg-teal-50"
-                  >
-                    <Phone className="h-4 w-4" />
-                    Pay via Bank Transfer
-                  </Button>
-                  <p className="text-xs text-center text-muted-foreground">Contact +212 62706249</p>
-                </div>
+              <CardFooter className="pt-6 flex flex-col gap-3">
+                <Button 
+                  onClick={() => setBankTransferDialogOpen(true)}
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2 border-teal-200 hover:bg-teal-50 h-11"
+                >
+                  <Phone className="h-4 w-4" />
+                  Pay via Bank Transfer
+                </Button>
 
-                <div className="flex flex-col gap-3 w-full">
-                  <Button 
-                    onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
-                    disabled={currentSubscription?.subscription_type === type}
-                    className={`
-                      w-full ${type === 'Quarterly' ? 
-                      'bg-teal-600 hover:bg-teal-700' : 
-                      'bg-gray-800 hover:bg-gray-900'}
-                    `}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    {currentSubscription?.subscription_type === type ? 
-                      'Current Plan' : 
-                      'Pay with Card/PayPal'}
-                  </Button>
-                  <p className="text-xs text-center text-muted-foreground">Secure online payment</p>
-                </div>
+                <Button 
+                  onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
+                  disabled={currentSubscription?.subscription_type === type}
+                  className={`
+                    w-full h-11 ${type === 'Quarterly' ? 
+                    'bg-teal-600 hover:bg-teal-700' : 
+                    'bg-gray-800 hover:bg-gray-900'}
+                  `}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {currentSubscription?.subscription_type === type ? 
+                    'Current Plan' : 
+                    'Pay with Card/PayPal'}
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
         ))}
       </div>
     </>
-    );
-  };
+  );
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
