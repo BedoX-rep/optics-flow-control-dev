@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // Added import for React Query
 import {
   Card,
   CardContent,
@@ -57,6 +58,7 @@ interface ReceiptItem {
 }
 
 const NewReceipt = () => {
+  const queryClient = useQueryClient(); // Added for query invalidation
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -105,57 +107,56 @@ const NewReceipt = () => {
     localStorage.setItem('autoMontage', JSON.stringify(autoMontage));
   }, [autoMontage]);
 
+  const { data: productsData } = useQuery({
+    queryKey: ['products', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user
+  });
+
+  const { data: clientsData } = useQuery({
+    queryKey: ['clients', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!user) {
-          navigate('/auth');
-          return;
-        }
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
 
-        const [productsResult, clientsResult] = await Promise.all([
-          supabase
-            .from('products')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('is_deleted', false)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('clients')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('is_deleted', false)
-            .order('name', { ascending: true })
-        ]);
+    if (productsData) {
+      setProducts(productsData);
+      setFilteredProducts(productsData);
+    }
 
-        if (productsResult.error) throw productsResult.error;
-        if (clientsResult.error) throw clientsResult.error;
-
-
-        const mappedProducts = (productsResult.data || []).map(product => ({
-          ...product
-        }));
-
-        setProducts(mappedProducts);
-        setFilteredProducts(mappedProducts);
-        setClients(clientsResult.data || []);
-        setFilteredClients(clientsResult.data || []);
-
-        if (clientsError) throw clientsError;
-        setClients(clientsData || []);
-        setFilteredClients(clientsData || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load data. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchData();
-  }, [navigate, toast, user]);
+    if (clientsData) {
+      setClients(clientsData);
+      setFilteredClients(clientsData);
+    }
+  }, [productsData, clientsData, user, navigate]);
 
   useEffect(() => {
     const filtered = clients.filter(client =>
@@ -288,7 +289,7 @@ const NewReceipt = () => {
 
   // Calculate percentage discount based on after-tax amount
   const percentageDiscountAmount = (afterTax * discount) / 100;
-  
+
   // Calculate total discount (percentage + fixed)
   const totalDiscount = percentageDiscountAmount + numericDiscount;
 
@@ -485,6 +486,9 @@ const NewReceipt = () => {
         console.error('Error saving receipt items:', itemsError);
         throw itemsError;
       }
+
+      //Invalidate the receipts query after a successful save
+      queryClient.invalidateQueries(['receipts']);
 
       toast({
         title: "Success",
@@ -869,7 +873,7 @@ const NewReceipt = () => {
                           type="button"
                           variant={item.linkedEye ==='LE' ? 'default' : 'ghost'}
                           size="icon"
-                          className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          className={``h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
                             const updatedItem = { ...item };
                             if (item.linkedEye === 'LE') {
