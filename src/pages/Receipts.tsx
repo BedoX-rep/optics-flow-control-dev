@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Filter, Eye, BarChart2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import PageTitle from '@/components/PageTitle';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/components/AuthProvider';
-import ReceiptDetailsMiniDialog from '@/components/ReceiptDetailsMiniDialog';
-import ReceiptEditDialog from '@/components/ReceiptEditDialog';
-import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
-import ReceiptStatistics from '@/components/ReceiptStatistics';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -27,9 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/components/AuthProvider';
+import ReceiptDetailsMiniDialog from '@/components/ReceiptDetailsMiniDialog';
+import ReceiptEditDialog from '@/components/ReceiptEditDialog';
+import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
+import ReceiptStatistics from '@/components/ReceiptStatistics';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-
 
 interface Receipt {
   id: string;
@@ -46,6 +39,145 @@ interface Receipt {
   cost_ttc?: number;
   profit?: number;
 }
+
+const ReceiptCard = ({ 
+  receipt, 
+  onPaid, 
+  onDelivered, 
+  onDelete, 
+  onView, 
+  onEdit, 
+  onMontageChange 
+}: {
+  receipt: Receipt;
+  onPaid: () => void;
+  onDelivered: () => void;
+  onDelete: () => void;
+  onView: () => void;
+  onEdit: () => void;
+  onMontageChange: (status: string) => void;
+}) => {
+  const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
+  const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="w-full"
+    >
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">{receipt.client_name}</h3>
+              <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+            </div>
+            <div className="flex gap-2">
+              <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
+                {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+              </Badge>
+              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
+                {receipt.delivery_status}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p className="text-sm text-gray-500">Total</p>
+              <p className="font-semibold">{receipt.total.toFixed(2)} DH</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Balance</p>
+              <p className="font-semibold text-red-600">{receipt.balance.toFixed(2)} DH</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Cost TTC</p>
+              <p className="font-semibold">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Profit</p>
+              <p className="font-semibold text-green-600">
+                {(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-sm text-gray-500 mb-2">Progress</p>
+            <div className="flex items-center gap-1">
+              {MONTAGE_STATUSES.map((status, index) => (
+                <React.Fragment key={status}>
+                  <div
+                    className={`h-2 flex-1 rounded ${
+                      index <= currentMontageIndex
+                        ? 'bg-blue-500'
+                        : 'bg-gray-200'
+                    }`}
+                  />
+                  {index < MONTAGE_STATUSES.length - 1 && (
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <p className="text-sm text-gray-600 mt-1">{receipt.montage_status}</p>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">
+              {formatDistanceToNow(new Date(receipt.created_at), { addSuffix: true })}
+            </span>
+            <div className="flex gap-2">
+              {receipt.balance > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onPaid}
+                  className="hover:bg-green-100"
+                >
+                  <Check className="h-4 w-4 text-green-600" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelivered}
+                className="hover:bg-blue-100"
+              >
+                <Package className="h-4 w-4 text-blue-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                className="hover:bg-red-100"
+              >
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onView}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
 
 const Receipts = () => {
   const queryClient = useQueryClient();
@@ -103,7 +235,7 @@ const Receipts = () => {
 
       const updates: any = {
         [editingCell.field]: editingCell.field.includes('phone') ? value : 
-                           isNaN(Number(value)) ? value : Number(value)
+                             isNaN(Number(value)) ? value : Number(value)
       };
 
       await queryClient.cancelQueries(['receipts']);
@@ -174,8 +306,6 @@ const Receipts = () => {
       });
     }
   };
-
-  const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
 
   const handleMontageStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -344,29 +474,20 @@ const Receipts = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100svh-68px)]" style={{
-      width: "100%",
-      paddingLeft: "1rem",
-      paddingRight: "1rem",
-      paddingTop: "1.5rem",
-      transition: "all 0.2s ease",
-      minHeight: "calc(100svh - 68px)",
-    }}>
-      <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-6 w-full">
+    <div className="flex flex-col h-[calc(100svh-68px)] p-6">
+      <div className="flex flex-row items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Link to="/new-receipt">
-            <Button className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center">
+            <Button className="rounded-full font-semibold bg-black text-white hover:bg-neutral-800">
               <Plus className="h-4 w-4 mr-2" />
               New Receipt
             </Button>
           </Link>
-          <span>
-            <ReceiptStatsSummary receipts={receipts} />
-          </span>
+          <ReceiptStatsSummary receipts={receipts} />
           <Button
             variant="outline"
             size="icon"
-            className="ml-2"
+            className="rounded-full"
             onClick={() => setIsStatsOpen(true)}
           >
             <BarChart2 className="h-4 w-4" />
@@ -374,38 +495,36 @@ const Receipts = () => {
         </div>
       </div>
 
-      <Card className="mb-6 card-shadow border border-gray-100">
+      <Card className="mb-6">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input 
                 type="text" 
                 placeholder="Search receipts..." 
-                className="pl-9 pr-4 py-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black"
+                className="pl-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <Select value={dateFilter} onValueChange={setDateFilter}>
-                  <SelectTrigger className="w-[180px] border-gray-200 h-9">
-                    <SelectValue placeholder="Filter by date" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Select defaultValue="all" onValueChange={(value) => setPaymentFilter(value)}>
-                <SelectTrigger className="w-[150px] border-gray-200 h-9">
+            <div className="flex flex-wrap items-center gap-4">
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Payment Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -415,8 +534,9 @@ const Receipts = () => {
                   <SelectItem value="unpaid">Unpaid</SelectItem>
                 </SelectContent>
               </Select>
-              <Select defaultValue="all" onValueChange={(value) => setDeliveryFilter(value)}>
-                <SelectTrigger className="w-[150px] border-gray-200 h-9">
+
+              <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
+                <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Delivery Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -430,281 +550,40 @@ const Receipts = () => {
         </CardContent>
       </Card>
 
-      <div className="flex-grow min-h-0 flex flex-col">
-        <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-          <Table className="min-w-[980px] w-full">
-            <TableHeader>
-              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold">Client Info</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Total</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Advance</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Balance</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Cost TTC</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Profit</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Payment Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Delivery Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Montage Status</TableHead>
-                <TableHead className="text-black text-xs font-semibold">Created At</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 animate-pulse">
-                    <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : filteredReceipts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={12} className="text-center py-10 text-neutral-400 font-medium">
-                    No receipts found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredReceipts.map((receipt) => (
-                  <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group">
-                    <TableCell className="py-3">
-                      <div className="flex flex-col">
-                        <span className="font-medium hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_name")}>
-                          {editingCell?.id === receipt.id && editingCell.field === "client_name" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(receipt)}
-                              autoFocus
-                            />
-                          ) : receipt.client_name}
-                        </span>
-                        <span className="text-sm text-neutral-500 hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_phone")}>
-                          {editingCell?.id === receipt.id && editingCell.field === "client_phone" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(receipt)}
-                              autoFocus
-                            />
-                          ) : receipt.client_phone || 'Add phone'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
-                        tabIndex={0}
-                        title="Edit"
-                        onClick={() => startInlineEdit(receipt, "total")}
-                      >
-                        {editingCell?.id === receipt.id && editingCell.field === "total" ? (
-                          <input
-                            type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
-                            value={cellEditValue}
-                            onChange={e => setCellEditValue(e.target.value)}
-                            onBlur={() => endInlineEdit(receipt)}
-                            autoFocus
-                          />
-                        ) : `${receipt.total.toFixed(2)} DH`}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
-                        tabIndex={0}
-                        title="Edit"
-                        onClick={() => startInlineEdit(receipt, "advance_payment")}
-                      >
-                        {editingCell?.id === receipt.id && editingCell.field === "advance_payment" ? (
-                          <input
-                            type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
-                            value={cellEditValue}
-                            onChange={e => setCellEditValue(e.target.value)}
-                            onBlur={() => endInlineEdit(receipt)}
-                            autoFocus
-                          />
-                        ) : `${receipt.advance_payment?.toFixed(2) || '0.00'} DH`}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span 
-                        className={`border rounded-full py-1 px-3 text-sm font-medium ${
-                          receipt.balance > 0 
-                            ? 'bg-red-100 border-red-200 text-red-700' 
-                            : 'bg-green-50 border-green-100 text-green-700'
-                        }`}
-                      >
-                        {(receipt.total - (receipt.advance_payment || 0)).toFixed(2)} DH
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
-                        tabIndex={0}
-                        title="Edit"
-                        onClick={() => startInlineEdit(receipt, "cost_ttc")}
-                      >
-                        {editingCell?.id === receipt.id && editingCell.field === "cost_ttc" ? (
-                          <input
-                            type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
-                            value={cellEditValue}
-                            onChange={e => setCellEditValue(e.target.value)}
-                            onBlur={() => endInlineEdit(receipt)}
-                            autoFocus
-                          />
-                        ) : `${receipt.cost_ttc?.toFixed(2) || '0.00'} DH`}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">
-                        {(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        receipt.balance === 0 ? 'bg-green-100 text-green-800' :
-                        receipt.advance_payment > 0 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {receipt.balance === 0 ? 'Paid' : 
-                         receipt.advance_payment > 0 ? 'Partially Paid' : 'Unpaid'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        receipt.delivery_status === 'Completed' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {receipt.delivery_status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full hover:bg-gray-100 transition-colors"
-                          onClick={() => {
-                            const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
-                            const prevIndex = (currentIndex - 1 + MONTAGE_STATUSES.length) % MONTAGE_STATUSES.length;
-                            handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[prevIndex]);
-                          }}
-                        >
-                          <span className="text-gray-600">⟵</span>
-                        </Button>
-                        <Select
-                          value={receipt.montage_status}
-                          onValueChange={(value) => handleMontageStatusChange(receipt.id, value)}
-                        >
-                          <SelectTrigger className={`h-7 w-[120px] text-xs font-medium ${
-                            receipt.montage_status === 'UnOrdered' ? 'bg-gray-50 text-gray-700 border-gray-200' :
-                            receipt.montage_status === 'Ordered' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                            receipt.montage_status === 'InStore' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                            receipt.montage_status === 'InCutting' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                            receipt.montage_status === 'Ready' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            receipt.montage_status === 'Paid costs' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                            ''
-                          }`}>
-                            <SelectValue>{receipt.montage_status}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {MONTAGE_STATUSES.map((status) => (
-                              <SelectItem 
-                                key={status} 
-                                value={status}
-                                className={`text-xs ${
-                                  status === 'UnOrdered' ? 'text-gray-700' :
-                                  status === 'Ordered' ? 'text-blue-700' :
-                                  status === 'InStore' ? 'text-orange-700' :
-                                  status === 'InCutting' ? 'text-amber-700' :
-                                  status === 'Ready' ? 'text-emerald-700' :
-                                  ''
-                                }`}
-                              >
-                                {status}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full hover:bg-gray-100 transition-colors"
-                          onClick={() => {
-                            const currentIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
-                            const nextIndex = (currentIndex + 1) % MONTAGE_STATUSES.length;
-                            handleMontageStatusChange(receipt.id, MONTAGE_STATUSES[nextIndex]);
-                          }}
-                        >
-                          <span className="text-gray-600">⟶</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {formatDate(receipt.created_at)}
-                    </TableCell>
-                    <TableCell className="py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        {receipt.balance > 0 && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleMarkAsPaid(receipt.id, receipt.total)}
-                            className="hover:bg-green-100"
-                            title="Mark as Paid"
-                          >
-                            <span className="text-green-600">✓</span>
-                          </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
-                          className="hover:bg-blue-100"
-                          title={`${receipt.delivery_status === 'Completed' ? 'Mark as Undelivered' : 'Mark as Delivered'}`}
-                        >
-                          <span className="text-blue-600">📦</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDelete(receipt.id)}
-                          className="hover:bg-red-100"
-                          title="Delete Receipt"
-                        >
-                          <span className="text-red-600">🗑️</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => setSelectedReceipt(receipt)}
-                          className="hover:bg-black/10"
-                        >
-                          <Eye className="h-4 w-4 text-black" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => setEditingReceipt(receipt)}
-                          className="hover:bg-black/10"
-                        >
-                          ✏️
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+      <ScrollArea className="flex-grow">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
+          <AnimatePresence>
+            {isLoading ? (
+              Array(6).fill(0).map((_, i) => (
+                <Card key={i} className="p-6 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                  <div className="space-y-3">
+                    <div className="h-3 bg-gray-200 rounded" />
+                    <div className="h-3 bg-gray-200 rounded w-5/6" />
+                  </div>
+                </Card>
+              ))
+            ) : filteredReceipts.length === 0 ? (
+              <div className="col-span-full text-center py-10 text-gray-500">
+                No receipts found
+              </div>
+            ) : (
+              filteredReceipts.map((receipt) => (
+                <ReceiptCard
+                  key={receipt.id}
+                  receipt={receipt}
+                  onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
+                  onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
+                  onDelete={() => handleDelete(receipt.id)}
+                  onView={() => setSelectedReceipt(receipt)}
+                  onEdit={() => setEditingReceipt(receipt)}
+                  onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
+                />
+              ))
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </ScrollArea>
 
       <ReceiptDetailsMiniDialog
         isOpen={!!selectedReceipt}
