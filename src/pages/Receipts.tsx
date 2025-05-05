@@ -466,35 +466,32 @@ const Receipts = () => {
                   <TableRow key={receipt.id} className="hover:bg-[#FAFAFA] transition-all group">
                     <TableCell className="py-3">
                       <div className="flex flex-col">
-                        <span className="font-medium hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_name")}>
+                        <span 
+                          className="font-medium group relative inline-flex items-center"
+                          onClick={() => startInlineEdit(receipt, "client_name")}
+                        >
                           {editingCell?.id === receipt.id && editingCell.field === "client_name" ? (
                             <input
                               type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
+                              className="border-2 border-primary bg-white px-2 py-1 rounded-md text-sm w-full focus:ring-2 focus:ring-primary/20 shadow-sm"
                               value={cellEditValue}
                               onChange={e => setCellEditValue(e.target.value)}
                               onBlur={() => endInlineEdit(receipt)}
                               autoFocus
                             />
-                          ) : receipt.client_name}
+                          ) : (
+                            <>
+                              {receipt.client_name}
+                              <span className="invisible group-hover:visible ml-1 text-primary/60">✎</span>
+                            </>
+                          )}
                         </span>
-                        <span className="text-sm text-neutral-500 hover:underline cursor-pointer" onClick={() => startInlineEdit(receipt, "client_phone")}>
-                          {editingCell?.id === receipt.id && editingCell.field === "client_phone" ? (
-                            <input
-                              type="text"
-                              className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                              value={cellEditValue}
-                              onChange={e => setCellEditValue(e.target.value)}
-                              onBlur={() => endInlineEdit(receipt)}
-                              autoFocus
-                            />
-                          ) : receipt.client_phone || 'Add phone'}
-                        </span>
+                        <span className="text-sm text-gray-500 select-none">{receipt.client_phone || 'Add phone'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-3">
                       <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
+                        className="bg-gray-50 rounded-md py-1.5 px-3 text-sm font-medium text-gray-900 select-none inline-block min-w-[100px] text-right"
                         tabIndex={0}
                         title="Edit"
                         onClick={() => startInlineEdit(receipt, "total")}
@@ -502,7 +499,7 @@ const Receipts = () => {
                         {editingCell?.id === receipt.id && editingCell.field === "total" ? (
                           <input
                             type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
+                            className="border-2 border-primary bg-white px-2 py-1 rounded-md text-sm w-32 focus:ring-2 focus:ring-primary/20 shadow-sm text-right"
                             value={cellEditValue}
                             onChange={e => setCellEditValue(e.target.value)}
                             onBlur={() => endInlineEdit(receipt)}
@@ -513,7 +510,7 @@ const Receipts = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
+                        className="bg-gray-50 rounded-md py-1.5 px-3 text-sm font-medium text-gray-900 select-none inline-block min-w-[100px] text-right"
                         tabIndex={0}
                         title="Edit"
                         onClick={() => startInlineEdit(receipt, "advance_payment")}
@@ -521,7 +518,7 @@ const Receipts = () => {
                         {editingCell?.id === receipt.id && editingCell.field === "advance_payment" ? (
                           <input
                             type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
+                            className="border-2 border-primary bg-white px-2 py-1 rounded-md text-sm w-32 focus:ring-2 focus:ring-primary/20 shadow-sm text-right"
                             value={cellEditValue}
                             onChange={e => setCellEditValue(e.target.value)}
                             onBlur={() => endInlineEdit(receipt)}
@@ -543,7 +540,7 @@ const Receipts = () => {
                     </TableCell>
                     <TableCell className="py-3">
                       <span
-                        className="font-semibold text-black hover:underline cursor-pointer"
+                        className="bg-gray-50 rounded-md py-1.5 px-3 text-sm font-medium text-gray-900 select-none inline-block min-w-[100px] text-right"
                         tabIndex={0}
                         title="Edit"
                         onClick={() => startInlineEdit(receipt, "cost_ttc")}
@@ -551,7 +548,7 @@ const Receipts = () => {
                         {editingCell?.id === receipt.id && editingCell.field === "cost_ttc" ? (
                           <input
                             type="number"
-                            className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-32 focus:ring-2 focus:ring-black text-right"
+                            className="border-2 border-primary bg-white px-2 py-1 rounded-md text-sm w-32 focus:ring-2 focus:ring-primary/20 shadow-sm text-right"
                             value={cellEditValue}
                             onChange={e => setCellEditValue(e.target.value)}
                             onBlur={() => endInlineEdit(receipt)}
@@ -561,7 +558,7 @@ const Receipts = () => {
                       </span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <span className="border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700">
+                      <span className="bg-gray-50 rounded-md py-1.5 px-3 text-sm font-medium text-gray-900 select-none inline-block min-w-[100px] text-right">
                         {(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH
                       </span>
                     </TableCell>
