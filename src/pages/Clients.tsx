@@ -81,7 +81,7 @@ export default function Clients() {
       .eq('user_id', user.id)
       .eq('is_deleted', false)
       .order(sortBy === 'name' ? 'name' : sortBy === 'phone' ? 'phone' : 'created_at', { ascending: sortBy === 'recent' ? false : true })
-      .range(0, 29); // Get first 30 results
+      .range(page * 30, (page * 30) + (page === 0 ? 29 : 69)); // Get 30 initially, then 70 more
 
     // Apply search filter if exists
     if (searchTerm) {
@@ -91,10 +91,12 @@ export default function Clients() {
     const { data: clientsData, error, count } = await query;
 
     if (error) throw error;
-    return clientsData || [];
+    return { clients: clientsData || [], hasMore: count ? count > ((page + 1) * 30) : false };
   };
 
-  const { data: clients = [], isLoading } = useQuery({
+  const [page, setPage] = useState(0);
+  const { data: { clients = [], hasMore = false } = {}, isLoading } = useQuery({
+    queryKey: ['clients', user?.id, page, searchTerm, sortBy],
     queryKey: ['clients', user?.id],
     queryFn: fetchClients,
     enabled: !!user,
@@ -459,6 +461,19 @@ export default function Clients() {
               onRefresh={fetchClients}
             />
           ))}
+          {hasMore && (
+            <div className="col-span-full flex justify-center mt-4">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setPage(prev => prev + 1)}
+                className="w-full max-w-xs"
+              >
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Load More Clients
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">

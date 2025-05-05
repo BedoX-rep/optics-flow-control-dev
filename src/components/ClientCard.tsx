@@ -76,6 +76,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Get first letter of name for avatar
   const nameInitial = editedClient.name ? editedClient.name.charAt(0).toUpperCase() : '?';
 
+  const queryClient = useQueryClient();
+
   // Toggle favorite status
   const toggleFavorite = async () => {
     try {
@@ -86,7 +88,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       if (error) throw error;
 
-      onRefresh(); // Refresh client list
+      // Invalidate clients query to refresh the list
+      await queryClient.invalidateQueries(['clients']);
       toast.success(client.is_favorite ? "Removed from favorites" : "Added to favorites");
     } catch (error: any) {
       toast.error("Failed to update favorite status");
