@@ -19,6 +19,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import { cn } from '@/lib/utils';
 import ReceiptDetailsMiniDialog from '@/components/ReceiptDetailsMiniDialog';
 import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
