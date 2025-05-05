@@ -21,10 +21,12 @@ import { LanguageProvider } from "./components/LanguageProvider";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // Data remains fresh for 5 minutes
-      cacheTime: 10 * 60 * 1000, // Cache is kept for 10 minutes
-      refetchOnWindowFocus: false, // Prevents refetching on window focus
-      retry: 1,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: false,
+      networkMode: 'offlineFirst',
+      refetchInterval: false
     },
   },
 });

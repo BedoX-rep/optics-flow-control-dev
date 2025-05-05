@@ -282,14 +282,17 @@ const Receipts = () => {
   };
 
   const { data: receipts = [], isLoading } = useQuery({
-    queryKey: ['receipts'],
+    queryKey: ['receipts', user?.id],
     queryFn: fetchReceipts,
     enabled: !!user,
-    staleTime: Infinity, // Don't mark data as stale automatically
-    cacheTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    cacheTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    refetchOnReconnect: false
+    refetchOnReconnect: false,
+    retry: false,
+    networkMode: 'offlineFirst',
+    refetchInterval: false
   });
 
   const filteredReceipts = React.useMemo(() => {
