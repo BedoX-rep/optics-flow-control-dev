@@ -25,7 +25,7 @@ import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
 import ReceiptStatistics from '@/components/ReceiptStatistics';
 import { formatDistanceToNow, format } from 'date-fns';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Receipt {
   id: string;
@@ -63,6 +63,7 @@ const ReceiptCard = ({
 }) => {
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+
   const getTimeDisplay = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -78,61 +79,6 @@ const ReceiptCard = ({
     }
   };
 
-  const updateAdvanceMutation = useMutation({
-    mutationFn: async ({ id, amount }: { id: string; amount: number }) => {
-      const { data, error } = await supabase
-        .from('receipts')
-        .update({ 
-          advance_payment: amount,
-          balance: receipt.total - amount 
-        })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onMutate: async ({ id, amount }) => {
-      await queryClient.cancelQueries(['receipts']);
-      
-      const previousReceipts = queryClient.getQueryData(['receipts']);
-      
-      queryClient.setQueryData(['receipts'], (old: any) => {
-        return old?.map((r: Receipt) => 
-          r.id === id 
-            ? { 
-                ...r, 
-                advance_payment: amount,
-                balance: r.total - amount
-              } 
-            : r
-        );
-      });
-      
-      return { previousReceipts };
-    },
-    onError: (err, newReceipt, context) => {
-      queryClient.setQueryData(['receipts'], context?.previousReceipts);
-      toast({
-        title: "Error",
-        description: "Failed to update advance payment",
-        variant: "destructive"
-      });
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: "Advance payment updated successfully",
-      });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(['receipts']);
-    }
-  });
-
-  
-
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -140,7 +86,7 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8]">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -148,8 +94,8 @@ const ReceiptCard = ({
                 <div className="flex items-baseline gap-2">
                   <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
                   <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3 text-blue-600" />
-                    <span className="text-xs text-blue-600">{receipt.client_phone}</span>
+                    <Phone className="h-3 w-3 text-gray-400" />
+                    <span className="text-xs text-green-600">{receipt.client_phone}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -195,30 +141,7 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="text"
-                        defaultValue={receipt.advance_payment?.toFixed(2) || "0.00"}
-                        onBlur={(e) => {
-                          const value = parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0;
-                          if (value <= receipt.total) {
-                            updateAdvanceMutation.mutate({ 
-                              id: receipt.id, 
-                              amount: value 
-                            });
-                          } else {
-                            toast({
-                              title: "Error",
-                              description: "Advance cannot exceed total amount",
-                              variant: "destructive"
-                            });
-                            e.target.value = (receipt.advance_payment || 0).toFixed(2);
-                          }
-                        }}
-                        className="w-24 h-7 px-2 text-sm"
-                      />
-                      <span className="text-xs text-gray-500">DH</span>
-                    </div>
+                    <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
                   </div>
                 </div>
               </div>
@@ -230,7 +153,7 @@ const ReceiptCard = ({
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Cost</p>
-                    <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Profit</p>
