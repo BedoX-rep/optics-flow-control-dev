@@ -117,13 +117,25 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
     }
   }, [client, form]);
 
+  const queryClient = useQueryClient();
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (!user?.id) return;
       
       const clientData = {
         user_id: user.id,
-        ...values
+        name: values.name,
+        phone: values.phone,
+        right_eye_sph: values.right_eye_sph,
+        right_eye_cyl: values.right_eye_cyl,
+        right_eye_axe: values.right_eye_axe,
+        left_eye_sph: values.left_eye_sph,
+        left_eye_cyl: values.left_eye_cyl,
+        left_eye_axe: values.left_eye_axe,
+        Add: values.Add,
+        assurance: values.assurance,
+        notes: values.notes
       }
 
       const { data, error } = await supabase
@@ -131,9 +143,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         .update(clientData)
         .eq('id', client.id)
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
+      if (error) throw error;
 
       // Invalidate the clients query to trigger a refresh
       await queryClient.invalidateQueries(['clients']);
@@ -145,10 +157,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       toast({
         title: "Success",
         description: "Client updated successfully",
-      })
+      });
 
-      onClose()
-      form.reset()
+      onClose();
     } catch (error) {
       console.error("Error updating client:", error)
       toast({

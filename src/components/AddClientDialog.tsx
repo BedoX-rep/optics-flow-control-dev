@@ -19,6 +19,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from "@/components/AuthProvider"
+import { useQueryClient } from '@tanstack/react-query'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -28,12 +31,13 @@ const formSchema = z.object({
 interface AddClientDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddClient: (name: string, phone: string) => Promise<void>
-  onClientAdded?: (client: any) => Promise<void> // Add optional property for NewReceipt page
+  onClientAdded?: (client: any) => Promise<void>
 }
 
-const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddClientDialogProps) => {
+const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {
   const { toast } = useToast()
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +56,8 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddCli
         .insert({
           user_id: user.id,
           name: values.name,
-          phone: values.phone
+          phone: values.phone,
+          is_deleted: false
         })
         .select()
         .single();
@@ -69,6 +74,11 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddCli
       
       form.reset();
       onClose();
+      
+      toast({
+        title: "Success",
+        description: "Client added successfully",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
