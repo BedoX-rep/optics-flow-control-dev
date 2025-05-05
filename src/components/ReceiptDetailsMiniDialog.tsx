@@ -143,8 +143,18 @@ const ReceiptDetailsMiniDialog = ({
             <div className="grid grid-cols-2 gap-x-8 gap-y-2">
               <div className="space-y-1.5">
                 <p className="text-sm text-gray-600">Subtotal: <span className="font-medium">{receipt.subtotal?.toFixed(2) || "0.00"} DH</span></p>
-                {receipt.discount_amount > 0 && (
-                  <p className="text-sm text-gray-600">Discount: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
+                {receipt.tax > 0 && (
+                  <p className="text-sm text-gray-600">Tax: <span className="font-medium">{receipt.tax?.toFixed(2) || "0.00"} DH</span></p>
+                )}
+                {receipt.discount_percentage > 0 && receipt.discount_amount > receipt.subtotal * (receipt.discount_percentage / 100) && (
+                  <>
+                    <p className="text-sm text-gray-600">Percentage Discount ({receipt.discount_percentage}%): <span className="font-medium text-red-600">-{(receipt.subtotal * (receipt.discount_percentage / 100)).toFixed(2)} DH</span></p>
+                    <p className="text-sm text-gray-600">Numerical Discount: <span className="font-medium text-red-600">-{(receipt.discount_amount - (receipt.subtotal * (receipt.discount_percentage / 100))).toFixed(2)} DH</span></p>
+                    <p className="text-sm text-gray-600">Total Discount: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
+                  </>
+                )}
+                {(receipt.discount_amount > 0 && (!receipt.discount_percentage || receipt.discount_amount <= receipt.subtotal * (receipt.discount_percentage / 100))) && (
+                  <p className="text-sm text-gray-600">Discount{receipt.discount_percentage ? ` (${receipt.discount_percentage}%)` : ''}: <span className="font-medium text-red-600">-{receipt.discount_amount.toFixed(2)} DH</span></p>
                 )}
                 <p className="text-sm font-medium">Total: <span className="text-primary">{receipt.total.toFixed(2)} DH</span></p>
                 <p className="text-sm text-gray-600">Advance Payment: <span className="font-medium">{receipt.advance_payment?.toFixed(2) || "0.00"} DH</span></p>
