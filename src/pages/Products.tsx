@@ -32,7 +32,7 @@ import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/Tr
 import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
 
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Product extends ProductSortable {
   // All properties are already defined in ProductSortable
@@ -50,6 +50,7 @@ const DEFAULT_FILTERS = {
 const Products = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
@@ -155,18 +156,19 @@ const Products = () => {
           .eq('id', editingProduct.id)
           .eq('user_id', user.id);
         if (error) throw error;
+        await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
         const { error } = await supabase
           .from('products')
           .insert({ ...form, user_id: user.id });
         if (error) throw error;
+        await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
       }
       setIsOpen(false);
       setEditingProduct(null);
       setFormInitial({ name: '', price: 0, cost_ttc: 0 });
-      //fetchProducts(); // Removed as data is updated via React Query
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -189,7 +191,7 @@ const Products = () => {
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;
-        //setProducts(products.filter(product => product.id !== id)); // Removed as data is updated via React Query
+        await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({
           title: "Success",
           description: "Product deleted successfully",
@@ -246,9 +248,7 @@ const Products = () => {
 
       if (error) throw error;
 
-      //setProducts(prev => prev.map(p => 
-      //  p.id === product.id ? { ...p, [editingCell.field]: val } : p
-      //)); // Removed as data is updated via React Query
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({ title: "Updated", description: "Product updated successfully" });
     } catch (error) {
       console.error('Error updating product:', error);
@@ -272,9 +272,7 @@ const Products = () => {
         .eq('id', product.id)
         .eq('user_id', user.id);
       if (error) throw error;
-      //setProducts(prev => prev.map(p =>
-      //  p.id === product.id ? { ...p, image: null } : p
-      //)); // Removed as data is updated via React Query
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({ title: "Image Removed" });
     } catch {
       toast({ title: "Error", description: "Could not remove image." });
@@ -313,9 +311,7 @@ const Products = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      //setProducts(prev =>
-      //  prev.map(p => p.id === product.id ? { ...p, [field]: newValue } : p)
-      //); // Removed as data is updated via React Query
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({ title: "Updated", description: "Product updated successfully" });
     } catch (error) {
       toast({
