@@ -28,7 +28,7 @@ export const SearchInput = ({ value, onChange, placeholder = "Search..." }: Sear
         placeholder={placeholder}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className="pl-10 h-11 rounded-full border border-green-200 focus-visible:ring-green-400 focus-visible:ring-offset-0 transition-all"
+        className="pl-10 h-11 rounded-full border border-gray-200 focus-visible:ring-teal-400 focus-visible:ring-offset-0 transition-all"
       />
       {value && (
         <button

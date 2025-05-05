@@ -104,7 +104,7 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddCli
               }}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-green-600 hover:bg-green-700">Add Client</Button>
+              <Button type="submit">Add Client</Button>
             </div>
           </form>
         </Form>

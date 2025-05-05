@@ -10,7 +10,7 @@ import PageTitle from "@/components/PageTitle";
 import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
-import { UserPlus, Upload } from "lucide-react";
+import { UserPlus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,10 +57,9 @@ export default function Clients() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-  const [sortBy, setSortBy] = useState<string>('recent');
+  const [sortBy, setSortBy] = useState<string>('name');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
-  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   // Fetch clients with their latest receipts
   const fetchClients = async () => {
@@ -101,7 +100,6 @@ export default function Clients() {
 
       setClients(clientsWithReceipts);
       setFilteredClients(clientsWithReceipts);
-      setHasInitiallyLoaded(true);
     } catch (error: any) {
       toast.error('Error fetching clients: ' + error.message);
     } finally {
@@ -110,10 +108,8 @@ export default function Clients() {
   };
 
   useEffect(() => {
-    if (user && !hasInitiallyLoaded) {
-      fetchClients();
-    }
-  }, [user, hasInitiallyLoaded]);
+    fetchClients();
+  }, [user]);
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
@@ -191,9 +187,6 @@ export default function Clients() {
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
-      
-      // Refresh client list to show updated data
-      fetchClients();
     } catch (error: any) {
       toast.error('Error updating client: ' + error.message);
     }
@@ -333,47 +326,38 @@ export default function Clients() {
     <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-8 space-y-8">
       <PageTitle title="Clients" />
       
-      {/* Search and filters - REDESIGNED */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <Button 
-            size="lg" 
-            onClick={() => setIsAddClientOpen(true)}
-            className="min-w-[180px] h-12 bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 flex items-center gap-2 text-base"
-          >
-            <UserPlus size={20} />
-            New Client
-          </Button>
-          
-          <div className="w-full sm:w-64 md:w-80">
-            <SearchInput 
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Search clients..."
-            />
-          </div>
+      {/* Search and filters */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="w-full sm:w-64 md:w-80">
+          <SearchInput 
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search clients..."
+          />
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-          <div className="w-40">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-10 border-green-200 focus:ring-green-300">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
-                <SelectItem value="recent">Recently Added</SelectItem>
-                <SelectItem value="phone">Phone Number</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <div className="flex gap-2">
+            <div className="w-40">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name (A-Z)</SelectItem>
+                  <SelectItem value="recent">Recently Added</SelectItem>
+                  <SelectItem value="phone">Phone Number</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={findDuplicateClients}
-              className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-300 h-10"
+              className="flex items-center gap-1"
             >
               Find Duplicates
             </Button>
@@ -381,10 +365,18 @@ export default function Clients() {
               variant="outline" 
               size="sm" 
               onClick={() => setIsImportDialogOpen(true)}
-              className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-300 flex items-center gap-1 h-10"
+              className="flex items-center gap-1"
             >
               <Upload size={16} />
               Import
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => setIsAddClientOpen(true)}
+              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500 flex items-center gap-1"
+            >
+              <UserPlus size={16} />
+              New Client
             </Button>
           </div>
         </div>
@@ -394,7 +386,7 @@ export default function Clients() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-green-50 rounded-lg h-48"></div>
+            <div key={i} className="bg-gray-100 rounded-lg h-48"></div>
           ))}
         </div>
       ) : filteredClients.length > 0 ? (
@@ -410,9 +402,9 @@ export default function Clients() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center bg-green-50 rounded-lg">
-          <div className="w-16 h-16 mb-4 rounded-full bg-green-100 flex items-center justify-center">
-            <UserPlus size={24} className="text-green-600" />
+        <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
+          <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
+            <UserPlus size={24} className="text-teal-600" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-1">No clients found</h3>
           <p className="text-gray-500 max-w-md mb-4">
@@ -424,7 +416,7 @@ export default function Clients() {
           {!searchTerm && (
             <Button 
               onClick={() => setIsAddClientOpen(true)}
-              className="bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500"
+              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
             >
               <UserPlus size={16} className="mr-2" />
               Add Your First Client
