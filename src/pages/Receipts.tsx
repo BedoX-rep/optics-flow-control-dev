@@ -139,7 +139,7 @@ const ReceiptCard = ({
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                    <p className="font-medium text-blue-600">{receipt.total?.toFixed(2)} DH</p>
+                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
@@ -149,7 +149,7 @@ const ReceiptCard = ({
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Balance</p>
-                <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
+                <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
@@ -159,7 +159,7 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Profit</p>
-                    <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+                    <p className="font-medium text-emerald-600">{receipt.profit?.toFixed(2) || '0.00'} DH</p>
                   </div>
                 </div>
               </div>
