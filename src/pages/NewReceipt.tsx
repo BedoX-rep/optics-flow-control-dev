@@ -901,8 +901,18 @@ const NewReceipt = () => {
                       onClick={() => {
                         const duplicatedItem = {
                           ...item,
-                          id: `item-${Date.now()}`
+                          id: `item-${Date.now()}`,
+                          linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
                         };
+                        if (duplicatedItem.linkedEye && duplicatedItem.productId) {
+                          const product = products.find(p => p.id === duplicatedItem.productId);
+                          if (product) {
+                            const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
+                            const markup = calculateMarkup(sph, cyl);
+                            duplicatedItem.appliedMarkup = markup;
+                            duplicatedItem.price = product.price * (1 + markup / 100);
+                          }
+                        }
                         setItems(prevItems => [...prevItems, duplicatedItem]);
                       }}
                     >
