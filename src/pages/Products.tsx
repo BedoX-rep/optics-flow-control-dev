@@ -1,41 +1,27 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Dialog, 
   DialogContent, 
-  DialogFooter, 
   DialogHeader, 
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Search, Grid2X2, List } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
-import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
-
-import CategoryCellEditor, { CATEGORY_OPTIONS } from "@/components/products/CategoryCellEditor";
-import IndexCellEditor, { INDEX_OPTIONS } from "@/components/products/IndexCellEditor";
-import TreatmentCellEditor, { TREATMENT_OPTIONS } from "@/components/products/TreatmentCellEditor";
-import CompanyCellEditor, { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
-
+import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
+import ProductCard from "@/components/products/ProductCard";
+import ProductDetailsDialog from '@/components/products/ProductDetailsDialog';
 
 interface Product extends ProductSortable {
   // All properties are already defined in ProductSortable
-  cost_ttc?: number;
 }
 
 const DEFAULT_FILTERS = {
@@ -57,42 +43,19 @@ const Products = () => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [isLoading, setIsLoading] = useState(false);
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
-  const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
-  const [cellEditValue, setCellEditValue] = useState<string>('');
-  const [pageReady, setPageReady] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showDetails, setShowDetails] = useState(false);
   const mountedRef = useRef(true);
-  const [sidebarWidth, setSidebarWidth] = useState(256);
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
-    setPageReady(true);
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
+
   useEffect(() => {
     sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
   }, [filters]);
-
-  useEffect(() => {
-    function handleSidebar() {
-      const el = document.querySelector('.sidebar-gradient');
-      if (el) {
-        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || 
-                          (el instanceof HTMLElement && el.style.width === '48px'));
-        setSidebarExpanded(expanded);
-        setSidebarWidth(el.clientWidth || 256);
-      }
-    }
-    window.addEventListener('resize', handleSidebar);
-    handleSidebar();
-    const observer = new MutationObserver(handleSidebar);
-    const sidebarEl = document.querySelector('.sidebar-gradient');
-    if (sidebarEl) observer.observe(sidebarEl, { attributes: true, attributeFilter: ['class', 'style'] });
-    return () => {
-      window.removeEventListener('resize', handleSidebar);
-      observer.disconnect();
-    }
-  }, []);
 
   const fetchProducts = async () => {
     try {
@@ -146,7 +109,7 @@ const Products = () => {
     if (user) {
       fetchProducts();
     }
-  }, [filters]);
+  }, [filters, user]);
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -234,97 +197,7 @@ const Products = () => {
     }));
   };
 
-  const startInlineEdit = (product: Product, field: keyof Product) => {
-    setEditingCell({ id: product.id, field });
-    setCellEditValue(String(product[field] ?? ''));
-  };
-
-  const endInlineEdit = async (product: Product) => {
-    if (!editingCell || !user) return;
-    let val: string | number | null = cellEditValue;
-
-    if (editingCell.field === "price" || editingCell.field === "cost_ttc") {
-      val = Number(cellEditValue);
-    } else if (cellEditValue === "none_selected" || cellEditValue === "") {
-      val = null;
-    }
-
-    if (["category", "index", "treatment", "company"].includes(editingCell.field)) {
-      val = cellEditValue === "Custom" ? null : cellEditValue;
-    }
-
-    if (val === (product[editingCell.field] ?? null)) {
-      setEditingCell(null);
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ [editingCell.field]: val })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setProducts(prev => prev.map(p => 
-        p.id === product.id ? { ...p, [editingCell.field]: val } : p
-      ));
-      toast({ title: "Updated", description: "Product updated successfully" });
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast({ 
-        title: "Error", 
-        description: "Failed to update product. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setEditingCell(null);
-      setIsSubmitting(false);
-    }
-  };
-
-  const removeProductImage = async (product: Product) => {
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ image: null })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      setProducts(prev => prev.map(p =>
-        p.id === product.id ? { ...p, image: null } : p
-      ));
-      toast({ title: "Image Removed" });
-    } catch {
-      toast({ title: "Error", description: "Could not remove image." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (!editingCell) return;
-      if (e.key === "Escape") setEditingCell(null);
-      if (e.key === "Enter") {
-        const prod = products.find(p => p.id === editingCell.id);
-        if (prod) endInlineEdit(prod);
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [editingCell, cellEditValue, products]);
-
-  const filteredProducts = sortProducts(
-    products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  async function handleInlineUpdate(product: Product, field: keyof Product, newValue: string | null) {
+  const handleStockUpdate = async (product: Product, field: string, newValue: string | null) => {
     if (!user) return;
     try {
       setIsSubmitting(true);
@@ -338,18 +211,29 @@ const Products = () => {
       setProducts(prev =>
         prev.map(p => p.id === product.id ? { ...p, [field]: newValue } : p)
       );
-      toast({ title: "Updated", description: "Product updated successfully" });
+      toast({ title: "Updated", description: "Stock updated successfully" });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update product. Please try again.",
+        description: "Failed to update stock. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setEditingCell(null);
       setIsSubmitting(false);
     }
-  }
+  };
+
+  const filteredProducts = sortProducts(
+    products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    filters.sort
+  );
+
+  const handleShowDetails = (product: Product) => {
+    setSelectedProduct(product);
+    setShowDetails(true);
+  };
 
   return (
     <div
@@ -365,309 +249,199 @@ const Products = () => {
     >
       <div className="flex flex-row items-end justify-between gap-2 flex-wrap mb-6 w-full">
         <div className="flex items-center gap-3 flex-shrink-0">
-          <Button
-            className="!px-5 !py-2.5 rounded-full font-semibold bg-black text-white hover:bg-neutral-800 border border-black shadow flex items-center"
-            onClick={() => handleOpen(null)}
-          >
-            <span className="mr-2 flex items-center"><Plus size={18} /></span>
-            Add Product
-          </Button>
-          <span>
-            <ProductStatsSummary products={products} />
-          </span>
+          <ProductStatsSummary products={products} />
         </div>
         <div className="flex-grow flex items-end justify-end">
           <ProductFilters filters={filters} onChange={handleFilterChange} />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-4" style={{ minHeight: 0 }}>
+      <div className="flex items-center gap-4 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
           <Input
             type="text"
             placeholder="Search products..."
-            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
+            className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg font-inter h-10 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             tabIndex={0}
           />
         </div>
-      </div>
 
-      <div className="flex-grow min-h-0 flex flex-col">
-        <div className="w-full h-full flex-grow bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto">
-          <Table className="table-fixed min-w-[980px] w-full">
-            <TableHeader>
-              <TableRow className="border-b border-neutral-100 bg-[#f6f6f7] sticky top-0 z-10">
-                <TableHead className="text-black text-xs font-semibold w-14">Image</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-[230px]">Name</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-20 text-right">Price</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-20 text-right">Stock</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-32">Category</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-16">Index</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-24">Treatment</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-28">Company</TableHead>
-                <TableHead className="text-black text-xs font-semibold w-28">Created At</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right w-20">Cost TTC</TableHead>
-                <TableHead className="text-black text-xs font-semibold text-right w-[84px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 animate-pulse">
-                    <div className="h-6 w-1/2 bg-[#F7FAFC] rounded mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : filteredProducts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={11} className="text-center py-10 text-neutral-400 font-medium">
-                    No products found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredProducts.map((product, index) => (
-                  <TableRow
-                    key={product.id}
-                    className="hover:bg-[#FAFAFA] transition-all group rounded-lg"
-                  >
-                    <TableCell>
-                      <ProductImage
-                        src={typeof product.image === "string" ? product.image : undefined}
-                        alt={product.category || product.name}
-                        removable={!!product.image}
-                        onRemove={() => removeProductImage(product)}
-                        className="!w-11 !h-11"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "name" ? (
-                        <input
-                          type="text"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm w-full focus:ring-2 focus:ring-black"
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className="font-semibold text-black hover:underline cursor-pointer"
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "name")}
-                        >
-                          {product.name}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {editingCell?.id === product.id && editingCell.field === "price" ? (
-                        <input
-                          type="number"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
-                          min={0}
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className="font-semibold text-black hover:underline cursor-pointer"
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "price")}
-                        >
-                          {Number(product.price).toFixed(2)} DH
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "stock" ? (
-                        <input
-                          type="number"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
-                          min={0}
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <div className="flex items-center justify-between px-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newStock = Math.max(0, (product.stock || 0) - 1);
-                              handleInlineUpdate(product, "stock", String(newStock));
-                            }}
-                          >
-                            -
-                          </Button>
-                          <span
-                            className={`font-semibold ${(product.stock || 0) === 0 ? 'text-red-600' : 'text-black'} cursor-pointer mx-2`}
-                            tabIndex={0}
-                            title="Edit"
-                            onClick={() => startInlineEdit(product, "stock")}
-                          >
-                            {(product.stock || 0) === 0 ? "Out of stock" : product.stock}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newStock = (product.stock || 0) + 1;
-                              handleInlineUpdate(product, "stock", String(newStock));
-                            }}
-                          >
-                            +
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "category" ? (
-                        <CategoryCellEditor
-                          value={product.category || ""}
-                          onChange={val =>
-                            val === product.category
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "category", val)
-                          }
-                        />
-                      ) : (
-                        <span
-                          className="border rounded-full py-0.5 px-2 text-xs font-medium text-neutral-700 bg-white border-black/10 cursor-pointer hover:bg-gray-50"
-                          onClick={() => setEditingCell({ id: product.id, field: "category" })}
-                          tabIndex={0}
-                        >
-                          {product.category || "-"}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "index" ? (
-                        <IndexCellEditor
-                          value={product.index || ""}
-                          onChange={val =>
-                            val === product.index
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "index", val)
-                          }
-                        />
-                      ) : (
-                        <span
-                          className={`${product.index ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => setEditingCell({ id: product.id, field: "index" })}
-                          tabIndex={0}
-                        >
-                          {product.index || "-"}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "treatment" ? (
-                        <TreatmentCellEditor
-                          value={product.treatment || ""}
-                          onChange={val =>
-                            val === product.treatment
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "treatment", val)
-                          }
-                        />
-                      ) : (
-                        <span
-                          className={`${product.treatment ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => setEditingCell({ id: product.id, field: "treatment" })}
-                          tabIndex={0}
-                        >
-                          {product.treatment || "-"}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "company" ? (
-                        <CompanyCellEditor
-                          value={product.company || ""}
-                          onChange={val =>
-                            val === product.company
-                              ? setEditingCell(null)
-                              : handleInlineUpdate(product, "company", val)
-                          }
-                        />
-                      ) : (
-                        <span
-                          className={`${product.company ? "border rounded-full py-0.5 px-2 text-xs font-medium bg-gray-50 border-neutral-100 text-neutral-700" : "text-neutral-400"} cursor-pointer hover:bg-gray-100`}
-                          onClick={() => setEditingCell({ id: product.id, field: "company" })}
-                          tabIndex={0}
-                        >
-                          {product.company || "-"}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-neutral-600 text-xs">
-                        {product.created_at ? new Date(product.created_at).toLocaleString() : '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {editingCell?.id === product.id && editingCell.field === "cost_ttc" ? (
-                        <input
-                          type="number"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
-                          min={0}
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
-                      ) : (
-                        <span
-                          className="font-semibold text-black hover:underline cursor-pointer"
-                          tabIndex={0}
-                          title="Edit"
-                          onClick={() => startInlineEdit(product, "cost_ttc")}
-                        >
-                          {Number(product.cost_ttc || 0).toFixed(2)} DH
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="hover:bg-black/10"
-                          onClick={() => handleOpen(product)}
-                          aria-label="Edit"
-                        >
-                          <Edit size={16} className="text-black" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="hover:bg-[#222]/10"
-                          onClick={() => handleDeleteProduct(product.id)}
-                          aria-label="Delete"
-                        >
-                          <Trash2 size={16} className="text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <div className="flex items-center gap-2 border rounded-lg bg-white p-1">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('grid')}
+            className={viewMode === 'grid' ? 'bg-teal-500 hover:bg-teal-600' : ''}
+          >
+            <Grid2X2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('list')}
+            className={viewMode === 'list' ? 'bg-teal-500 hover:bg-teal-600' : ''}
+          >
+            <List className="h-4 w-4" />
+          </Button>
         </div>
       </div>
+
+      <div className="flex-grow min-h-0 overflow-auto bg-gray-50 rounded-xl">
+        {isLoading ? (
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 w-32 bg-gray-200 rounded-md mx-auto"></div>
+              <div className="h-4 w-48 bg-gray-200 rounded-md mx-auto"></div>
+            </div>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="h-full w-full flex flex-col items-center justify-center text-gray-500 p-10">
+            <div className="text-lg font-medium mb-2">No products found</div>
+            <p className="text-sm max-w-md text-center mb-4">
+              {searchTerm ? 
+                "Try adjusting your search or filters to find what you're looking for." : 
+                "Get started by adding your first product."}
+            </p>
+            <Button onClick={() => handleOpen(null)} className="bg-teal-500 hover:bg-teal-600">
+              <Plus className="mr-2 h-4 w-4" /> Add Product
+            </Button>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+            {filteredProducts.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onEdit={handleOpen}
+                onDelete={handleDeleteProduct}
+                onStockUpdate={handleStockUpdate}
+                onShowDetails={handleShowDetails}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="p-4">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 p-4 font-medium text-sm text-gray-500 border-b border-gray-100 bg-gray-50">
+                <div>Image</div>
+                <div>Name</div>
+                <div className="text-right">Price</div>
+                <div className="text-center">Stock</div>
+                <div className="text-right">Actions</div>
+              </div>
+              
+              {filteredProducts.map(product => (
+                <div 
+                  key={product.id}
+                  className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 p-4 border-b border-gray-100 items-center hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleShowDetails(product)}
+                >
+                  <div className="w-12 h-12 bg-gray-50 rounded overflow-hidden flex items-center justify-center">
+                    <ProductImage
+                      src={typeof product.image === "string" ? product.image : undefined}
+                      alt={product.name}
+                      className="w-full h-full object-contain p-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium text-gray-900">{product.name}</h3>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {product.category && (
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+                          {product.category}
+                        </span>
+                      )}
+                      {product.index && (
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+                          {product.index}
+                        </span>
+                      )}
+                      {product.treatment && (
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+                          {product.treatment}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="font-semibold text-gray-900">{Number(product.price).toFixed(2)} DH</div>
+                    {product.cost_ttc !== undefined && (
+                      <div className="text-xs text-gray-500">Cost: {Number(product.cost_ttc).toFixed(2)} DH</div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStock = Math.max(0, (product.stock || 0) - 1);
+                        handleStockUpdate(product, "stock", String(newStock));
+                      }}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    
+                    <span className={`text-sm font-medium ${(product.stock || 0) === 0 ? 'text-red-600' : 'text-gray-700'} mx-2 w-12 text-center`}>
+                      {(product.stock || 0) === 0 ? "Out" : product.stock}
+                    </span>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStock = (product.stock || 0) + 1;
+                        handleStockUpdate(product, "stock", String(newStock));
+                      }}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="h-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpen(product);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="h-8 text-red-500 border-red-200 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteProduct(product.id);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <FloatingActionButton 
+        onClick={() => handleOpen(null)}
+        className="bg-teal-500 hover:bg-teal-600 shadow-teal-200/50"
+      />
 
       <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
         <DialogContent className="sm:max-w-[500px]">
@@ -684,6 +458,13 @@ const Products = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <ProductDetailsDialog
+        product={selectedProduct}
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        onEdit={handleOpen}
+      />
     </div>
   );
 };
