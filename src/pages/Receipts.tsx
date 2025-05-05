@@ -521,7 +521,7 @@ const Receipts = () => {
         <Button
           variant="outline"
           size="lg"
-          className="rounded-xl border-2 bg-green-500 text-white hover:bg-green-600 border-green-400 hover:border-green-500 transition-all duration-200 shadow-lg hover:shadow-green-500/20"
+          className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
           onClick={() => setIsStatsOpen(true)}
         >
           <BarChart2 className="h-5 w-5 mr-2" />
@@ -548,11 +548,12 @@ const Receipts = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className={
+                  className={cn(
+                    "border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
                     dateFilter !== 'all' 
-                      ? "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200" 
-                      : "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white hover:bg-gray-100"
-                  }
+                      ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200" 
+                      : "bg-white/10 hover:bg-white/20"
+                  )}
                 >
                   <Calendar className="h-4 w-4" />
                   {dateFilter === 'all' ? 'Date' : 
@@ -599,11 +600,12 @@ const Receipts = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className={
+                  className={cn(
+                    "border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
                     paymentFilter !== 'all' 
-                      ? "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200" 
-                      : "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white hover:bg-gray-100"
-                  }
+                      ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200" 
+                      : "bg-white/10 hover:bg-white/20"
+                  )}
                 >
                   <Wallet className="h-4 w-4" />
                   {paymentFilter === 'all' ? 'Payment' :
@@ -645,11 +647,12 @@ const Receipts = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className={
+                  className={cn(
+                    "border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
                     deliveryFilter !== 'all' 
-                      ? "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200" 
-                      : "border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white hover:bg-gray-100"
-                  }
+                      ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200" 
+                      : "bg-white/10 hover:bg-white/20"
+                  )}
                 >
                   <Package className="h-4 w-4" />
                   {deliveryFilter === 'all' ? 'Delivery' :
