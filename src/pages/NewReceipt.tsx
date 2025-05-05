@@ -873,7 +873,7 @@ const NewReceipt = () => {
                           type="button"
                           variant={item.linkedEye ==='LE' ? 'default' : 'ghost'}
                           size="icon"
-                          className={``h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                          className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                           onClick={() => {
                             const updatedItem = { ...item };
                             if (item.linkedEye === 'LE') {
