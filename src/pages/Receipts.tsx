@@ -41,6 +41,7 @@ interface Receipt {
   cost?: number;
   cost_ttc?: number;
   profit?: number;
+  order_type?: string;
 }
 
 const ReceiptCard = ({ 

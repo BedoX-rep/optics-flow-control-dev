@@ -216,6 +216,7 @@ export type Database = {
           tax_base: number | null
           total: number
           user_id: string
+          order_type: string | null
         }
         Insert: {
           add?: number | null
@@ -246,6 +247,7 @@ export type Database = {
           tax_base?: number | null
           total: number
           user_id: string
+          order_type?: string | null
         }
         Update: {
           add?: number | null
@@ -276,6 +278,7 @@ export type Database = {
           tax_base?: number | null
           total?: number
           user_id?: string
+          order_type?: string | null
         }
         Relationships: [
           {

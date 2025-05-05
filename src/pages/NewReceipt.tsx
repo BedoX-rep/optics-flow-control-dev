@@ -55,6 +55,7 @@ interface ReceiptItem {
   cost: number;
   linkedEye?: 'RE' | 'LE';
   appliedMarkup?: number;
+  order_type?: 'Montage' | 'Retoyage' | 'Sell' | 'Unspecified';
 }
 
 const NewReceipt = () => {
