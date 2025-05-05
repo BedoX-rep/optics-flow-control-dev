@@ -149,8 +149,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
   const calculateItemsTotal = () => {
     const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const discountedTotal = subtotal - (formData.total_discount || 0);
-    return discountedTotal + (formData.tax || 0);
+    const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
+    return total;
   };
 
   return (
