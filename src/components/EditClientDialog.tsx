@@ -121,10 +121,16 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to update a client",
+          variant: "destructive",
+        })
+        return;
+      }
       
       const clientData = {
-        user_id: user.id,
         name: values.name,
         phone: values.phone,
         right_eye_sph: values.right_eye_sph,
@@ -134,20 +140,21 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         left_eye_cyl: values.left_eye_cyl,
         left_eye_axe: values.left_eye_axe,
         Add: values.Add,
-        assurance: values.assurance,
-        notes: values.notes
+        assurance: values.assurance || null,
+        notes: values.notes || null
       }
 
       const { data, error } = await supabase
         .from('clients')
         .update(clientData)
         .eq('id', client.id)
+        .eq('user_id', user.id)
         .select()
         .single();
 
       if (error) throw error;
 
-      // Invalidate the clients query to trigger a refresh
+      // Update local state and trigger refresh
       await queryClient.invalidateQueries(['clients']);
       
       if (onClientUpdated) {
