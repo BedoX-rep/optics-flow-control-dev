@@ -285,12 +285,12 @@ const Receipts = () => {
     queryKey: ['receipts', user?.id],
     queryFn: fetchReceipts,
     enabled: !!user,
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: Infinity, // Only refetch when explicitly invalidated
     cacheTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: 'if-required',
     refetchOnReconnect: false,
-    retry: false,
+    retry: 1,
     networkMode: 'offlineFirst',
     refetchInterval: false
   });

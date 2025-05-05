@@ -184,7 +184,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       toast.success("Client updated successfully");
       setIsEdited(false);
-      onRefresh(); // Refresh client list
+      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
     } catch (error) {
       console.error("Error updating client:", error);
       toast.error("Failed to update client");

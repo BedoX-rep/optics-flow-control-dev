@@ -326,7 +326,7 @@ export default function Clients() {
       });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      await fetchClients(); // Refresh the list
+      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
