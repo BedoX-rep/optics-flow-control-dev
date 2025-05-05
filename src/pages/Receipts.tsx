@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, Pin } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -81,60 +81,27 @@ const ReceiptCard = ({
     }
   };
 
-  const handleAdvanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value === '' ? '' : parseFloat(e.target.value);
-    setAdvanceValue(value === '' ? 0 : value);
-  };
+  const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAdvance = parseFloat(e.target.value) || 0;
+    setAdvanceValue(newAdvance);
+    setEditingAdvance(true);
 
-  const handleAdvanceBlur = async () => {
     try {
-      const queryKey = ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter];
-      const newBalance = receipt.total - advanceValue;
-      
-      // Optimistically update UI
-      queryClient.setQueryData(queryKey, (old: any) => {
-        if (!old) return old;
-        return old.map((r: any) => 
-          r.id === receipt.id 
-            ? {
-                ...r,
-                advance_payment: advanceValue,
-                balance: newBalance
-              } 
-            : r
-        );
-      });
-
       const { error } = await supabase
         .from('receipts')
-        .update({ 
-          advance_payment: advanceValue,
-          balance: newBalance
-        })
+        .update({ advance_payment: newAdvance })
         .eq('id', receipt.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating advance:", error);
+        // Optionally, revert to previous value
+      } else {
+          setEditingAdvance(false);
+      }
 
-      toast({
-        title: "Success",
-        description: "Advance payment updated successfully",
-      });
-      
-      // Invalidate and refetch to ensure data consistency
-      await queryClient.invalidateQueries({ queryKey });
-      setEditingAdvance(false);
     } catch (error) {
       console.error('Error updating advance:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update advance payment",
-        variant: "destructive",
-      });
-      setAdvanceValue(receipt.advance_payment || 0);
-      setEditingAdvance(false);
-      
-      // Revert optimistic update on error
-      queryClient.invalidateQueries({ queryKey: ['receipts'] });
+      // Optionally, revert to previous value
     }
   };
 
@@ -201,27 +168,13 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <div className="flex items-center gap-1">
-                      {editingAdvance ? (
-                        <input
-                          type="number"
-                          value={advanceValue}
-                          onChange={handleAdvanceChange}
-                          onBlur={handleAdvanceBlur}
-                          className="w-24 border rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          autoFocus
-                        />
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
-                          <button
-                            onClick={() => setEditingAdvance(true)}
-                            className="opacity-50 hover:opacity-100 transition-opacity"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
+                    <div className={`inline-block ml-1 ${editingAdvance ? 'border-primary' : 'border-gray-400'} border-b border-dashed focus:outline-none text-gray-600 hover:bg-gray-100 px-1`}>
+                      <input
+                        type="number"
+                        value={advanceValue}
+                        onChange={handleAdvanceChange}
+                        className="w-20 bg-transparent focus:outline-none text-gray-600"
+                      /> DH
                     </div>
                   </div>
                 </div>
