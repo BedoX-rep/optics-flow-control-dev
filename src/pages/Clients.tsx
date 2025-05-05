@@ -301,7 +301,17 @@ export default function Clients() {
           if (clientData) {
             const { error } = await supabase
               .from('clients')
-              .update(clientData)
+              .update({
+                name: clientData.name,
+                phone: clientData.phone,
+                right_eye_sph: clientData.right_eye_sph,
+                right_eye_cyl: clientData.right_eye_cyl,
+                right_eye_axe: clientData.right_eye_axe,
+                left_eye_sph: clientData.left_eye_sph,
+                left_eye_cyl: clientData.left_eye_cyl,
+                left_eye_axe: clientData.left_eye_axe,
+                Add: clientData.Add
+              })
               .eq('id', clientId);
 
             if (error) throw error;
