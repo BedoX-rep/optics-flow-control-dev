@@ -125,24 +125,28 @@ const ReceiptCard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 text-sm">
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                <p className="font-medium">{receipt.total?.toFixed(2)} DH</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Cost</p>
                 <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2">
+              <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Profit</p>
                 <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                    <p className="font-medium text-blue-600">{receipt.total?.toFixed(2)} DH</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Advance</p>
+                    <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-2 col-span-2">
+              <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Balance</p>
                 <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
               </div>
