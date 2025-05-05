@@ -458,7 +458,7 @@ export default function Clients() {
           ))}
         </div>
       ) : filteredClients.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
           {filteredClients.map((client) => (
             <ClientCard 
               key={client.id} 
