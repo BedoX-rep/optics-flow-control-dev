@@ -129,7 +129,21 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       const { error } = await supabase
         .from('receipts')
         .update({ is_deleted: true })
-        .eq('id', receipt.id);
+        .eq('id', receipt.id)
+        .select(`
+          *,
+          receipt_items (
+            id,
+            quantity,
+            price,
+            cost,
+            profit,
+            custom_item_name,
+            product:product_id (
+              name
+            )
+          )
+        `);
 
       if (error) throw error;
 
