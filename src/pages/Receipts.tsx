@@ -509,7 +509,7 @@ const Receipts = () => {
       <div className="flex flex-row items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0">
           <Link to="/new-receipt">
-            <Button className="rounded-full font-semibold bg-black text-white hover:bg-neutral-800">
+            <Button className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
               <Plus className="h-4 w-4 mr-2" />
               New Receipt
             </Button>
@@ -518,7 +518,7 @@ const Receipts = () => {
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full"
+            className="rounded-xl border-2 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
             onClick={() => setIsStatsOpen(true)}
           >
             <BarChart2 className="h-4 w-4" />
@@ -526,60 +526,58 @@ const Receipts = () => {
         </div>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input 
-                type="text" 
-                placeholder="Search receipts..." 
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="year">This Year</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Payment Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Payments</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="partial">Partially Paid</SelectItem>
-                  <SelectItem value="unpaid">Unpaid</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Delivery Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Deliveries</SelectItem>
-                  <SelectItem value="Completed">Delivered</SelectItem>
-                  <SelectItem value="Undelivered">Undelivered</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Search receipts..." 
+              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <Select value={dateFilter} onValueChange={setDateFilter}>
+              <SelectTrigger className="w-[180px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
+                <SelectValue placeholder="Filter by date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger className="w-[150px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
+                <SelectValue placeholder="Payment Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="partial">Partially Paid</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={deliveryFilter} onValueChange={setDeliveryFilter}>
+              <SelectTrigger className="w-[150px] bg-white/5 border-white/10 rounded-xl hover:bg-white/10">
+                <SelectValue placeholder="Delivery Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Deliveries</SelectItem>
+                <SelectItem value="Completed">Delivered</SelectItem>
+                <SelectItem value="Undelivered">Undelivered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
       <ScrollArea className="flex-grow">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
