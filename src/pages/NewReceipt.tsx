@@ -59,6 +59,51 @@ interface ReceiptItem {
 }
 
 const NewReceipt = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [selectedClient, setSelectedClient] = useState('');
+  const [items, setItems] = useState<ReceiptItem[]>([]);
+  const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
+  const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
+  const [add, setAdd] = useState('');
+  const [prescriptionOpen, setPrescriptionOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(true);
+  const [discount, setDiscount] = useState(0);
+  const [numericDiscount, setNumericDiscount] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [taxIndicator, setTaxIndicator] = useState(0.4);
+  const [orderType, setOrderType] = useState('Unspecified');
+  const [advancePayment, setAdvancePayment] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState('Unpaid');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [autoMontage, setAutoMontage] = useState(() => {
+    const saved = localStorage.getItem('autoMontage');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isMarkupSettingsOpen, setIsMarkupSettingsOpen] = useState(false);
+  const [markupSettings, setMarkupSettings] = useState({
+    sph: [
+      { min: 0, max: 4, markup: 0 },
+      { min: 4, max: 8, markup: 15 },
+      { min: 8, max: Infinity, markup: 30 },
+    ],
+    cyl: [
+      { min: 0, max: 2, markup: 0 },
+      { min: 2, max: 4, markup: 15 },
+      { min: 4, max: Infinity, markup: 30 },
+    ],
+  });
+
   // Load saved data from localStorage on component mount
   useEffect(() => {
     const savedData = localStorage.getItem('newReceiptData');
@@ -117,51 +162,7 @@ const NewReceipt = () => {
     advancePayment,
     orderType
   ]);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const [selectedClient, setSelectedClient] = useState('');
-  const [items, setItems] = useState<ReceiptItem[]>([]);
-  const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
-  const [leftEye, setLeftEye] = useState({ sph: '', cyl: '', axe: '' });
-  const [add, setAdd] = useState('');
-  const [prescriptionOpen, setPrescriptionOpen] = useState(false);
-  const [paymentOpen, setPaymentOpen] = useState(true);
-  const [discount, setDiscount] = useState(0);
-  const [numericDiscount, setNumericDiscount] = useState(0);
-  const [tax, setTax] = useState(0);
-  const [taxIndicator, setTaxIndicator] = useState(0.4);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
-  const [advancePayment, setAdvancePayment] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [paymentStatus, setPaymentStatus] = useState('Unpaid');
-  const [autoMontage, setAutoMontage] = useState(() => {
-    const saved = localStorage.getItem('autoMontage');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-  const [isMarkupSettingsOpen, setIsMarkupSettingsOpen] = useState(false);
-  const [markupSettings, setMarkupSettings] = useState({
-    sph: [
-      { min: 0, max: 4, markup: 0 },
-      { min: 4, max: 8, markup: 15 },
-      { min: 8, max: Infinity, markup: 30 },
-    ],
-    cyl: [
-      { min: 0, max: 2, markup: 0 },
-      { min: 2, max: 4, markup: 15 },
-      { min: 4, max: Infinity, markup: 30 },
-    ],
-  });
-  const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
-  const [formData, setFormData] = useState({}); // Added formData state
+  
 
 
   useEffect(() => {
