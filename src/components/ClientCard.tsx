@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
@@ -29,6 +29,7 @@ interface Client {
   name: string;
   phone: string;
   created_at: string;
+  is_favorite?: boolean;
   right_eye_sph?: number | null;
   right_eye_cyl?: number | null;
   right_eye_axe?: number | null;
@@ -74,27 +75,41 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Get first letter of name for avatar
   const nameInitial = editedClient.name ? editedClient.name.charAt(0).toUpperCase() : '?';
   
-  // Generate a color based on the name
-  const getColor = (name: string) => {
-    const colors = [
-      'bg-teal-50 text-teal-700 border-teal-200', 
-      'bg-blue-50 text-blue-700 border-blue-200',
-      'bg-purple-50 text-purple-700 border-purple-200',
-      'bg-pink-50 text-pink-700 border-pink-200',
-      'bg-amber-50 text-amber-700 border-amber-200',
-      'bg-indigo-50 text-indigo-700 border-indigo-200',
-      'bg-emerald-50 text-emerald-700 border-emerald-200'
-    ];
-    
-    let sum = 0;
-    for (let i = 0; i < name.length; i++) {
-      sum += name.charCodeAt(i);
+  // Toggle favorite status
+  const toggleFavorite = async () => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({ is_favorite: !client.is_favorite })
+        .eq('id', client.id);
+
+      if (error) throw error;
+      
+      onRefresh(); // Refresh client list
+      toast.success(client.is_favorite ? "Removed from favorites" : "Added to favorites");
+    } catch (error: any) {
+      toast.error("Failed to update favorite status");
     }
-    return colors[sum % colors.length];
   };
 
-  const cardColor = getColor(client.name);
-  const avatarColor = getColor(client.name);
+  // Get color scheme based on favorite status
+  const getColorScheme = () => {
+    if (client.is_favorite) {
+      return {
+        card: 'bg-amber-50 text-amber-700 border-amber-200',
+        avatar: 'bg-amber-50 text-amber-700 border-amber-200'
+      };
+    }
+    
+    // Alternate between blue and green for non-favorites
+    const isEven = client.id.charCodeAt(0) % 2 === 0;
+    return {
+      card: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200',
+      avatar: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'
+    };
+  };
+
+  const { card: cardColor, avatar: avatarColor } = getColorScheme();
 
   const handleViewReceipt = async (receipt: Receipt) => {
     try {
@@ -207,6 +222,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           </div>
           
           <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleFavorite}
+              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors`}
+            >
+              <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
+            </Button>
             {isEdited && (
               <Button 
                 variant="ghost" 
