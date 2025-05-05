@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import MainNav from './MainNav';
 import { Button } from '@/components/ui/button';
 import { Bell, LogOut, ChevronDown, Users, Copy } from 'lucide-react';
@@ -80,7 +81,7 @@ const Layout = ({ children }: LayoutProps) => {
         </header>
         <main className="flex-1 overflow-y-auto">
           <div className="h-full animate-fade-in">
-            {children}
+            <Outlet />
           </div>
         </main>
 
