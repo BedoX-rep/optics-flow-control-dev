@@ -143,31 +143,6 @@ const Subscriptions = () => {
     }
   };
 
-  const PaymentInfo = () => (
-  <div className="w-full bg-white/80 backdrop-blur p-6 rounded-lg shadow-md mb-8">
-    <h3 className="text-xl font-semibold mb-4">Payment Methods</h3>
-    <div className="grid md:grid-cols-2 gap-6">
-      <div className="flex items-start space-x-4">
-        <div className="p-3 bg-teal-50 rounded-full">
-          <Phone className="h-6 w-6 text-teal-600" />
-        </div>
-        <div>
-          <h4 className="font-medium">Bank Transfer</h4>
-          <p className="text-sm text-gray-600">Contact admin at +212 62706249</p>
-        </div>
-      </div>
-      <div className="flex items-start space-x-4">
-        <div className="p-3 bg-teal-50 rounded-full">
-          <CreditCard className="h-6 w-6 text-teal-600" />
-        </div>
-        <div>
-          <h4 className="font-medium">Online Payment</h4>
-          <p className="text-sm text-gray-600">Pay with PayPal or credit card</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; onToggle: () => void }) => (
   <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur rounded-lg shadow-sm mb-6">
@@ -191,7 +166,6 @@ const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; on
 const renderSubscriptionPlans = () => {
   return (
     <>
-      <PaymentInfo />
       {currentSubscription && (
         <AutoRenewalToggle 
           isRecurring={currentSubscription.is_recurring || false}
@@ -269,7 +243,7 @@ const renderSubscriptionPlans = () => {
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">Contact +212 62706249</p>
                 </div>
-                
+
                 <div className="flex flex-col gap-3 w-full">
                   <Button 
                     onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
