@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, Pin } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -84,24 +84,27 @@ const ReceiptCard = ({
   const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAdvance = parseFloat(e.target.value) || 0;
     setAdvanceValue(newAdvance);
-    setEditingAdvance(true);
 
     try {
       const { error } = await supabase
         .from('receipts')
-        .update({ advance_payment: newAdvance })
+        .update({ 
+          advance_payment: newAdvance,
+          balance: receipt.total - newAdvance
+        })
         .eq('id', receipt.id);
 
       if (error) {
         console.error("Error updating advance:", error);
-        // Optionally, revert to previous value
+        // Revert to previous value
+        setAdvanceValue(receipt.advance_payment || 0);
       } else {
-          setEditingAdvance(false);
+        queryClient.invalidateQueries(['receipts']);
+        setEditingAdvance(false);
       }
-
     } catch (error) {
       console.error('Error updating advance:', error);
-      // Optionally, revert to previous value
+      setAdvanceValue(receipt.advance_payment || 0);
     }
   };
 
@@ -168,14 +171,27 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <div className={`inline-block ml-1 ${editingAdvance ? 'border-primary' : 'border-gray-400'} border-b border-dashed focus:outline-none text-gray-600 hover:bg-gray-100 px-1`}>
-                      <input
-                        type="number"
-                        value={advanceValue}
-                        onChange={handleAdvanceChange}
-                        className="w-20 bg-transparent focus:outline-none text-gray-600"
-                      /> DH
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
+                      <button
+                        onClick={() => setEditingAdvance(true)}
+                        className="opacity-50 hover:opacity-100 transition-opacity"
+                      >
+                        <Pin className="h-3 w-3" />
+                      </button>
                     </div>
+                    {editingAdvance && (
+                      <div className="absolute z-10 bg-white shadow-lg rounded-lg p-2 mt-1">
+                        <input
+                          type="number"
+                          value={advanceValue}
+                          onChange={handleAdvanceChange}
+                          className="w-24 px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                          autoFocus
+                          onBlur={() => setEditingAdvance(false)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
