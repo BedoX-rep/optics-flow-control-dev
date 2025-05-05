@@ -105,7 +105,7 @@ const Receipts = () => {
       };
 
       await queryClient.cancelQueries(['receipts']);
-      
+
       const previousReceipts = queryClient.getQueryData(['receipts']);
 
       queryClient.setQueryData(['receipts'], (old: any) => {
@@ -144,6 +144,11 @@ const Receipts = () => {
 
   const handleMarkAsPaid = async (id: string, total: number) => {
     try {
+      const updates = { balance: 0, advance_payment: total };
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { ...r, ...updates } : r);
+      });
       const { error } = await supabase
         .from('receipts')
         .update({ 
@@ -154,7 +159,6 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: "Receipt has been marked as paid.",
@@ -173,6 +177,10 @@ const Receipts = () => {
 
   const handleMontageStatusChange = async (id: string, newStatus: string) => {
     try {
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { ...r, montage_status: newStatus } : r);
+      });
       const { error } = await supabase
         .from('receipts')
         .update({ montage_status: newStatus })
@@ -180,7 +188,6 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: `Montage status has been updated to ${newStatus}.`,
@@ -198,6 +205,10 @@ const Receipts = () => {
   const handleMarkAsDelivered = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'Completed' ? 'Undelivered' : 'Completed';
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { ...r, delivery_status: newStatus } : r);
+      });
       const { error } = await supabase
         .from('receipts')
         .update({ delivery_status: newStatus })
@@ -205,7 +216,6 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Receipt Updated",
         description: `Receipt has been marked as ${newStatus.toLowerCase()}.`,
@@ -282,17 +292,15 @@ const Receipts = () => {
   };
 
   const { data: receipts = [], isLoading } = useQuery({
-    queryKey: ['receipts', user?.id],
+    queryKey: ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter],
     queryFn: fetchReceipts,
     enabled: !!user,
-    staleTime: Infinity, // Only refetch when explicitly invalidated
-    cacheTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 3, // 3 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
-    refetchOnMount: 'if-required',
+    refetchOnMount: true,
     refetchOnReconnect: false,
-    retry: 1,
-    networkMode: 'offlineFirst',
-    refetchInterval: false
+    retry: 1
   });
 
   const filteredReceipts = React.useMemo(() => {
