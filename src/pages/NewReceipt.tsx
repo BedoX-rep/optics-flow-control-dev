@@ -103,6 +103,7 @@ const NewReceipt = () => {
     ],
   });
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
+  const [formData, setFormData] = useState({}); // Added formData state
 
 
   useEffect(() => {
@@ -730,25 +731,59 @@ const NewReceipt = () => {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <div className="flex gap-3">
-                <div className="flex items-center">
-                  <Select value={orderType} onValueChange={setOrderType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Order Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Unspecified">Unspecified</SelectItem>
-                      <SelectItem value="Montage">Montage</SelectItem>
-                      <SelectItem value="Retoyage">Retoyage</SelectItem>
-                      <SelectItem value="Sell">Sell</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
                 <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
                   <Plus className="h-4 w-4 mr-2" /> Add Product
                 </Button>
                 <Button onClick={() => addItem('custom')} variant="outline" size="default">
                   <Plus className="h-4 w-4 mr-2" /> Add Custom Item
                 </Button>
+                <Select value={orderType} onValueChange={(value) => {
+                    setOrderType(value);
+                    // Recalculate montage costs based on new order type
+                    if (autoMontage) {
+                      let newMontageCosts = 0;
+                      if (value === 'Retoyage') {
+                        // Count frame items and multiply by 10 DH
+                        newMontageCosts = items.reduce((sum, item) => {
+                          const product = products.find(p => p.id === item.productId);
+                          return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
+                        }, 0);
+                      } else if (value === 'Montage') {
+                        // Original montage costs calculation
+                        let countSingleVision = items.reduce((count, item) => {
+                          const prod = products.find(p => p.id === item.productId);
+                          return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+                        }, 0);
+                        let countProgressive = items.reduce((count, item) => {
+                          const prod = products.find(p => p.id === item.productId);
+                          return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
+                        }, 0);
+                        const totalLensQuantity = countSingleVision + countProgressive;
+                        const wholePairs = Math.floor(totalLensQuantity / 2);
+                        const hasExtraLens = totalLensQuantity % 2 === 1;
+                        const baseCostSV = 20;
+                        const baseCostPG = 40;
+                        if (wholePairs > 0) {
+                          newMontageCosts += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
+                        }
+                        if (hasExtraLens) {
+                          newMontageCosts += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
+                        }
+                      }
+                      // For 'Sell' type, montage costs remain 0
+                      setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
+                    }
+                  }}>
+                  <SelectTrigger className="w-[180px] bg-blue-50 border-blue-200 hover:bg-blue-100/80">
+                    <SelectValue placeholder="Order Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Unspecified">Unspecified</SelectItem>
+                    <SelectItem value="Montage">Montage</SelectItem>
+                    <SelectItem value="Retoyage">Retoyage</SelectItem>
+                    <SelectItem value="Sell">Sell</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button
                 onClick={() => setIsMarkupSettingsOpen(true)}
@@ -813,7 +848,7 @@ const NewReceipt = () => {
                           onChange={(e) => {
                             setProductSearchTerms(prev => ({
                               ...prev,
-                              [item.id]: e.target.value
+                                                            [item.id]: e.target.value
                             }));
                           }}
                           className="w-48"
