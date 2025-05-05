@@ -161,14 +161,7 @@ const ReceiptCard = ({
                     key={status}
                     whileHover={{ scale: 1.02 }}
                     className={`relative h-2 rounded-full cursor-pointer transition-all ${
-                      isCompleted 
-                        ? index === 0 ? 'bg-blue-500'
-                        : index === 1 ? 'bg-purple-500'
-                        : index === 2 ? 'bg-orange-500'
-                        : index === 3 ? 'bg-pink-500'
-                        : index === 4 ? 'bg-yellow-500'
-                        : 'bg-green-500'
-                        : 'bg-gray-200'
+                      isCompleted ? 'bg-teal-500' : 'bg-gray-200'
                     }`}
                     onClick={() => onMontageChange(status)}
                   >
@@ -179,14 +172,7 @@ const ReceiptCard = ({
                     </div>
                     {isCurrent && (
                       <motion.div
-                        className={`absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 ${
-                          index === 0 ? 'border-blue-500'
-                          : index === 1 ? 'border-purple-500'
-                          : index === 2 ? 'border-orange-500'
-                          : index === 3 ? 'border-pink-500'
-                          : index === 4 ? 'border-yellow-500'
-                          : 'border-green-500'
-                        }`}
+                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
                         layoutId="currentStep"
                       />
                     )}
