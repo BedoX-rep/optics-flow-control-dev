@@ -51,6 +51,9 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddCli
       if (onClientAdded) {
         const client = { name: values.name, phone: values.phone };
         await onClientAdded(client);
+      } else {
+        // Invalidate the clients query to refresh the list
+        await queryClient.invalidateQueries(['clients']);
       }
       
       form.reset()

@@ -63,11 +63,11 @@ export default function Clients() {
   const fetchClients = async () => {
     if (!user) return [];
 
-    const { data: clientsData, error } = await supabase
+    let query = supabase
       .from('clients')
       .select(`
         *,
-        receipts!inner(
+        receipts!left(
           id,
           created_at,
           total,
@@ -77,14 +77,21 @@ export default function Clients() {
           is_deleted,
           receipt_items(*)
         )
-      `)
+      `, { count: 'exact' })
       .eq('user_id', user.id)
       .eq('is_deleted', false)
-      .eq('receipts.is_deleted', false)
-      .order('name');
+      .order(sortBy === 'name' ? 'name' : sortBy === 'phone' ? 'phone' : 'created_at', { ascending: sortBy === 'recent' ? false : true })
+      .range(0, 29); // Get first 30 results
+
+    // Apply search filter if exists
+    if (searchTerm) {
+      query = query.or(`name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+    }
+
+    const { data: clientsData, error, count } = await query;
 
     if (error) throw error;
-    return clientsData;
+    return clientsData || [];
   };
 
   const { data: clients = [], isLoading } = useQuery({
