@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Check, Phone, CreditCard, RefreshCw } from 'lucide-react';
@@ -35,18 +36,11 @@ const SUBSCRIPTION_PRICES = {
 const Subscriptions = () => {
   const { user, subscription: userSubscription } = useAuth();
   const { toast } = useToast();
-  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchSubscription = async () => {
-    try {
-      setIsLoading(true);
-
-      if (!user) {
-        setCurrentSubscription(null);
-        setIsLoading(false);
-        return;
-      }
+  const { data: currentSubscription, isLoading } = useQuery({
+    queryKey: ['subscriptions', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
       const { data, error } = await supabase
         .from('subscriptions')
@@ -56,30 +50,23 @@ const Subscriptions = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          setCurrentSubscription(null);
-        } else {
-          throw error;
+          return null;
         }
-      } else {
-        setCurrentSubscription(data);
+        throw error;
       }
-    } catch (error) {
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes stale time
+    enabled: !!user,
+    onError: (error) => {
       console.error('Error fetching subscription:', error);
       toast({
         title: "Error",
         description: "Failed to load subscription data. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchSubscription();
-    }
-  }, [user]);
+  });
 
   const contactAdmin = () => {
     toast({
