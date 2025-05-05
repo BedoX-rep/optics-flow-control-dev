@@ -25,7 +25,7 @@ import ReceiptEditDialog from '@/components/ReceiptEditDialog';
 import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
 import ReceiptStatistics from '@/components/ReceiptStatistics';
 import { formatDistanceToNow, format } from 'date-fns';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface Receipt {
   id: string;
@@ -81,28 +81,46 @@ const ReceiptCard = ({
     }
   };
 
-  const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAdvance = parseFloat(e.target.value) || 0;
-    setAdvanceValue(newAdvance);
-    setEditingAdvance(true);
-
-    try {
+  const updateAdvanceMutation = useMutation({
+    mutationFn: async ({ id, amount }: { id: string; amount: number }) => {
       const { error } = await supabase
         .from('receipts')
-        .update({ advance_payment: newAdvance })
-        .eq('id', receipt.id);
-
-      if (error) {
-        console.error("Error updating advance:", error);
-        // Optionally, revert to previous value
-      } else {
-          setEditingAdvance(false);
+        .update({ advance_payment: amount })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, amount }) => {
+      await queryClient.cancelQueries(['receipts']);
+      const previousReceipts = queryClient.getQueryData(['receipts']);
+      
+      queryClient.setQueryData(['receipts'], (old: any) => {
+        return old?.map((r: Receipt) => 
+          r.id === id ? { ...r, advance_payment: amount, balance: r.total - amount } : r
+        );
+      });
+      
+      return { previousReceipts };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousReceipts) {
+        queryClient.setQueryData(['receipts'], context.previousReceipts);
       }
-
-    } catch (error) {
-      console.error('Error updating advance:', error);
-      // Optionally, revert to previous value
+      toast({
+        title: "Error",
+        description: "Failed to update advance payment",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['receipts']);
+      setEditingAdvance(false);
     }
+  });
+
+  const handleAdvanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAdvance = parseFloat(e.target.value) || 0;
+    setAdvanceValue(newAdvance);
+    updateAdvanceMutation.mutate({ id: receipt.id, amount: newAdvance });
   };
 
 
