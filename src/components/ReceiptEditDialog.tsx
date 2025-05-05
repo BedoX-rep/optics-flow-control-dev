@@ -132,7 +132,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         description: "Receipt updated successfully",
       });
 
-      queryClient.invalidateQueries(['receipts']);
+      // Force immediate refetch after update
+      await queryClient.invalidateQueries(['receipts']);
+      await queryClient.refetchQueries(['receipts']);
       onClose();
     } catch (error) {
       console.error('Error updating receipt:', error);
