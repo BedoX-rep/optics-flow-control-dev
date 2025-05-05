@@ -261,29 +261,26 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   let montageCosts = 0;
-  if (autoMontage) {
-    let countSingleVision = items.reduce((count, item) => {
-      const prod = products.find(p => p.id === item.productId);
-      return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
-    }, 0);
-
-    let countProgressive = items.reduce((count, item) => {
-      const prod = products.find(p => p.id === item.productId);
-      return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
-    }, 0);
-
-    const totalLensQuantity = countSingleVision + countProgressive;
-    const wholePairs = Math.floor(totalLensQuantity / 2);
-    const hasExtraLens = totalLensQuantity % 2 === 1;
-    const baseCostSV = 20;
-    const baseCostPG = 40;
-
-    if (wholePairs > 0) {
-      montageCosts += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
+  if (autoMontage && orderType !== 'Unspecified') {
+    if (orderType === 'Retoyage') {
+      // For Retoyage, only count Frames category and charge 10 DH per quantity
+      montageCosts = items.reduce((sum, item) => {
+        const product = products.find(p => p.id === item.productId);
+        return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
+      }, 0);
+    } else if (orderType === 'Montage') {
+      // For Montage, charge based on lens types
+      montageCosts = items.reduce((sum, item) => {
+        const product = products.find(p => p.id === item.productId);
+        if (product?.category === 'Single Vision Lenses') {
+          return sum + (10 * item.quantity); // 10 DH per Single Vision lens
+        } else if (product?.category === 'Progressive Lenses') {
+          return sum + (20 * item.quantity); // 20 DH per Progressive lens
+        }
+        return sum;
+      }, 0);
     }
-    if (hasExtraLens) {
-      montageCosts += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
-    }
+    // For 'Sell' type, montage costs remain 0
   }
 
   // Calculate tax first
@@ -739,40 +736,31 @@ const NewReceipt = () => {
                 </Button>
                 <Select value={orderType} onValueChange={(value) => {
                     setOrderType(value);
-                    // Recalculate montage costs based on new order type
-                    if (autoMontage) {
-                      let newMontageCosts = 0;
+                    // Reset montage costs when changing order type
+                    let newMontageCosts = 0;
+                    
+                    if (autoMontage && value !== 'Unspecified') {
                       if (value === 'Retoyage') {
-                        // Count frame items and multiply by 10 DH
+                        // For Retoyage, only count Frames category
                         newMontageCosts = items.reduce((sum, item) => {
                           const product = products.find(p => p.id === item.productId);
                           return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
                         }, 0);
                       } else if (value === 'Montage') {
-                        // Original montage costs calculation
-                        let countSingleVision = items.reduce((count, item) => {
-                          const prod = products.find(p => p.id === item.productId);
-                          return count + ((prod?.category === 'Single Vision Lenses' ? item.quantity : 0) || 0);
+                        // For Montage, calculate based on lens types
+                        newMontageCosts = items.reduce((sum, item) => {
+                          const product = products.find(p => p.id === item.productId);
+                          if (product?.category === 'Single Vision Lenses') {
+                            return sum + (10 * item.quantity);
+                          } else if (product?.category === 'Progressive Lenses') {
+                            return sum + (20 * item.quantity);
+                          }
+                          return sum;
                         }, 0);
-                        let countProgressive = items.reduce((count, item) => {
-                          const prod = products.find(p => p.id === item.productId);
-                          return count + ((prod?.category === 'Progressive Lenses' ? item.quantity : 0) || 0);
-                        }, 0);
-                        const totalLensQuantity = countSingleVision + countProgressive;
-                        const wholePairs = Math.floor(totalLensQuantity / 2);
-                        const hasExtraLens = totalLensQuantity % 2 === 1;
-                        const baseCostSV = 20;
-                        const baseCostPG = 40;
-                        if (wholePairs > 0) {
-                          newMontageCosts += wholePairs * (countProgressive > 0 ? baseCostPG : baseCostSV);
-                        }
-                        if (hasExtraLens) {
-                          newMontageCosts += (countProgressive > 0 ? baseCostPG : baseCostSV) / 2;
-                        }
                       }
                       // For 'Sell' type, montage costs remain 0
-                      setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
                     }
+                    setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
                   }}>
                   <SelectTrigger className="w-[180px] bg-blue-50 border-blue-200 hover:bg-blue-100/80">
                     <SelectValue placeholder="Order Type" />
