@@ -63,6 +63,8 @@ const ReceiptCard = ({
 }) => {
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+  const [editingAdvance, setEditingAdvance] = useState(false);
+  const [advanceValue, setAdvanceValue] = useState(receipt.advance_payment || 0);
 
   const getTimeDisplay = (dateString: string) => {
     const date = new Date(dateString);
@@ -79,6 +81,31 @@ const ReceiptCard = ({
     }
   };
 
+  const handleAdvanceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAdvance = parseFloat(e.target.value) || 0;
+    setAdvanceValue(newAdvance);
+    setEditingAdvance(true);
+
+    try {
+      const { error } = await supabase
+        .from('receipts')
+        .update({ advance_payment: newAdvance })
+        .eq('id', receipt.id);
+
+      if (error) {
+        console.error("Error updating advance:", error);
+        // Optionally, revert to previous value
+      } else {
+          setEditingAdvance(false);
+      }
+
+    } catch (error) {
+      console.error('Error updating advance:', error);
+      // Optionally, revert to previous value
+    }
+  };
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -86,7 +113,7 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8]">
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -94,8 +121,8 @@ const ReceiptCard = ({
                 <div className="flex items-baseline gap-2">
                   <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
                   <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs text-green-600">{receipt.client_phone}</span>
+                    <Phone className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs text-blue-600">{receipt.client_phone}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -141,7 +168,14 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+                    <div className={`inline-block ml-1 ${editingAdvance ? 'border-primary' : 'border-gray-400'} border-b border-dashed focus:outline-none text-gray-600 hover:bg-gray-100 px-1`}>
+                      <input
+                        type="number"
+                        value={advanceValue}
+                        onChange={handleAdvanceChange}
+                        className="w-20 bg-transparent focus:outline-none text-gray-600"
+                      /> DH
+                    </div>
                   </div>
                 </div>
               </div>
@@ -153,7 +187,7 @@ const ReceiptCard = ({
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Cost</p>
-                    <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Profit</p>
