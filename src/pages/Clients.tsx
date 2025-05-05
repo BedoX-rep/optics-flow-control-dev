@@ -515,7 +515,6 @@ export default function Clients() {
           client={clientToEdit}
           isOpen={!!clientToEdit}
           onClose={() => setClientToEdit(null)}
-          onClientUpdated={handleUpdateClient}
         />
       )}
 

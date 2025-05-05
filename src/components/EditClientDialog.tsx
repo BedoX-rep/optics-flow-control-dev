@@ -61,7 +61,6 @@ const formSchema = z.object({
 interface EditClientDialogProps {
   isOpen: boolean
   onClose: () => void
-  onClientUpdated: (id: string, name: string, phone: string) => void
   client: {
     id: string;
     name: string;
@@ -154,13 +153,9 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
 
       if (error) throw error;
 
-      // Update local state and trigger refresh
-      await queryClient.invalidateQueries(['clients']);
+      // Invalidate and refetch queries
+      await queryClient.invalidateQueries({ queryKey: ['clients'] });
       
-      if (onClientUpdated) {
-        onClientUpdated(client.id, values.name, values.phone);
-      }
-
       toast({
         title: "Success",
         description: "Client updated successfully",
