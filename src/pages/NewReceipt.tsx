@@ -141,13 +141,6 @@ const NewReceipt = () => {
         setClients(clientsResult.data || []);
         setFilteredClients(clientsResult.data || []);
 
-        const { data: clientsData, error: clientsError } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('is_deleted', false)
-          .order('name', { ascending: true });
-
         if (clientsError) throw clientsError;
         setClients(clientsData || []);
         setFilteredClients(clientsData || []);
