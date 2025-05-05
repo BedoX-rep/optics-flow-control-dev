@@ -88,8 +88,10 @@ const ReceiptCard = ({
 
   const handleAdvanceBlur = async () => {
     try {
-      // Optimistically update UI
-      queryClient.setQueryData(['receipts'], (old: any) => {
+      const queryKey = ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter];
+      
+      // Optimistically update UI with correct query key
+      queryClient.setQueryData(queryKey, (old: any) => {
         return old?.map((r: any) => r.id === receipt.id ? {
           ...r,
           advance_payment: advanceValue,
@@ -107,14 +109,14 @@ const ReceiptCard = ({
 
       if (error) throw error;
       
-      // Refetch to ensure consistency
-      queryClient.invalidateQueries(['receipts']);
+      // Force immediate refetch
+      await queryClient.invalidateQueries(queryKey);
+      await queryClient.refetchQueries(queryKey);
       setEditingAdvance(false);
     } catch (error) {
       console.error('Error updating advance:', error);
       setAdvanceValue(receipt.advance_payment || 0);
       setEditingAdvance(false);
-      queryClient.invalidateQueries(['receipts']);
     }
   };
 
