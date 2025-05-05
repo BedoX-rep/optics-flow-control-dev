@@ -83,86 +83,68 @@ const ReceiptCard = ({
       className="w-full"
     >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-start">
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold">{receipt.client_name}</h3>
-                  <span className="text-sm text-gray-500">{getTimeDisplay(receipt.created_at)}</span>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                  <span className="text-xs text-gray-500">{receipt.client_phone}</span>
                 </div>
-                <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-400">{getTimeDisplay(receipt.created_at)}</span>
+                  <div className="flex gap-1.5">
+                    <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} className="text-xs">
+                      {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+                    </Badge>
+                    <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
+                      {receipt.delivery_status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-1">
+                {receipt.balance > 0 && (
+                  <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
+                  <Package className="h-4 w-4 text-blue-600" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
+                  <Trash2 className="h-4 w-4 text-red-600" />
+                </Button>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
-                {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
-              </Badge>
-              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
-                {receipt.delivery_status}
-              </Badge>
-            </div>
-
-            <div className="flex gap-2">
-              {receipt.balance > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onPaid}
-                  className="hover:bg-green-100"
-                >
-                  <Check className="h-4 w-4 text-green-600" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDelivered}
-                className="hover:bg-blue-100"
-              >
-                <Package className="h-4 w-4 text-blue-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDelete}
-                className="hover:bg-red-100"
-              >
-                <Trash2 className="h-4 w-4 text-red-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onView}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50/50 rounded-lg p-3">
-              <div>
-                <p className="text-gray-500">Total</p>
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              <div className="bg-gray-50 rounded-lg p-2">
+                <p className="text-xs text-gray-500 mb-0.5">Total</p>
                 <p className="font-medium">{receipt.total?.toFixed(2)} DH</p>
               </div>
-              <div>
-                <p className="text-gray-500">Advance</p>
+              <div className="bg-gray-50 rounded-lg p-2">
+                <p className="text-xs text-gray-500 mb-0.5">Cost</p>
+                <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2">
+                <p className="text-xs text-gray-500 mb-0.5">Profit</p>
+                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2">
+                <p className="text-xs text-gray-500 mb-0.5">Advance</p>
                 <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
               </div>
-              <div>
-                <p className="text-gray-500">Balance</p>
+              <div className="bg-gray-50 rounded-lg p-2 col-span-2">
+                <p className="text-xs text-gray-500 mb-0.5">Balance</p>
                 <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Profit</p>
-                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
               </div>
             </div>
 
