@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -10,11 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, Package2, User, Receipt, Banknote } from "lucide-react";
+import { Eye, Package2, User, Receipt, Banknote, FileText } from "lucide-react";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -41,6 +43,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
+    order_type: '',
     items: [] as any[],
     total: 0
   });
@@ -62,6 +65,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         advance_payment: receipt.advance_payment || 0,
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
+        order_type: receipt.order_type || '',
         items: receipt.receipt_items || [],
         total: receipt.total || 0
       });
@@ -89,6 +93,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           advance_payment: formData.advance_payment,
           delivery_status: formData.delivery_status,
           montage_status: formData.montage_status,
+          order_type: formData.order_type,
           products_cost: totalProductsCost,
           cost_ttc: costTtc,
           total: total
@@ -149,275 +154,303 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Edit Receipt</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
+            <FileText className="h-5 w-5 text-primary" />
+            Edit Receipt
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-          {/* Client Information */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <User className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Client Information</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <Label>Name</Label>
-                  <Input
-                    value={formData.client_name}
-                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Phone</Label>
-                  <Input
-                    value={formData.client_phone}
-                    onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="client" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="client">Client Info</TabsTrigger>
+            <TabsTrigger value="prescription">Prescription</TabsTrigger>
+            <TabsTrigger value="status">Status</TabsTrigger>
+            <TabsTrigger value="items">Items</TabsTrigger>
+          </TabsList>
 
-          {/* Prescription */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Eye className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Prescription</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Right Eye</h4>
-                  <div>
-                    <Label>SPH</Label>
-                    <Input
-                      value={formData.right_eye_sph}
-                      onChange={(e) => setFormData({ ...formData, right_eye_sph: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>CYL</Label>
-                    <Input
-                      value={formData.right_eye_cyl}
-                      onChange={(e) => setFormData({ ...formData, right_eye_cyl: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>AXE</Label>
-                    <Input
-                      value={formData.right_eye_axe}
-                      onChange={(e) => setFormData({ ...formData, right_eye_axe: e.target.value })}
-                    />
-                  </div>
+          <TabsContent value="client" className="space-y-4 pt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <User className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Client Information</h3>
                 </div>
-                <div className="space-y-4">
-                  <h4 className="font-medium">Left Eye</h4>
-                  <div>
-                    <Label>SPH</Label>
-                    <Input
-                      value={formData.left_eye_sph}
-                      onChange={(e) => setFormData({ ...formData, left_eye_sph: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>CYL</Label>
-                    <Input
-                      value={formData.left_eye_cyl}
-                      onChange={(e) => setFormData({ ...formData, left_eye_cyl: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>AXE</Label>
-                    <Input
-                      value={formData.left_eye_axe}
-                      onChange={(e) => setFormData({ ...formData, left_eye_axe: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Label>ADD</Label>
-                <Input
-                  value={formData.add}
-                  onChange={(e) => setFormData({ ...formData, add: e.target.value })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status and Costs */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Receipt className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Status</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <Label>Delivery Status</Label>
-                  <Select
-                    value={formData.delivery_status}
-                    onValueChange={(value) => setFormData({ ...formData, delivery_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Undelivered">Undelivered</SelectItem>
-                      <SelectItem value="Completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Order Type</Label>
-                  <Select
-                    value={formData.order_type || 'Unspecified'}
-                    onValueChange={(value) => setFormData({ ...formData, order_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select order type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Unspecified">Unspecified</SelectItem>
-                      <SelectItem value="Montage">Montage</SelectItem>
-                      <SelectItem value="Retoyage">Retoyage</SelectItem>
-                      <SelectItem value="Sell">Sell</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Label className="mt-4">Montage Status</Label>
-                  <Select
-                    value={formData.montage_status}
-                    onValueChange={(value) => setFormData({ ...formData, montage_status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="UnOrdered">UnOrdered</SelectItem>
-                      <SelectItem value="Ordered">Ordered</SelectItem>
-                      <SelectItem value="InStore">InStore</SelectItem>
-                      <SelectItem value="InCutting">InCutting</SelectItem>
-                      <SelectItem value="Ready">Ready</SelectItem>
-                      <SelectItem value="Paid costs">Paid costs</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Financial Information */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Banknote className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Financial Information</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <Label>Montage Costs</Label>
-                  <Input
-                    type="number"
-                    value={formData.montage_costs}
-                    onChange={(e) => setFormData({ ...formData, montage_costs: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-                <div>
-                  <Label>Total Discount</Label>
-                  <Input
-                    type="number"
-                    value={formData.total_discount}
-                    onChange={(e) => setFormData({ ...formData, total_discount: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-                <div>
-                  <Label>Advance Payment</Label>
-                  <Input
-                    type="number"
-                    value={formData.advance_payment}
-                    onChange={(e) => setFormData({ ...formData, advance_payment: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Items */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Package2 className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">Items</h3>
-            </div>
-            <div className="space-y-4">
-              {formData.items.map((item, index) => (
-                <div key={index} className="grid grid-cols-4 gap-4 p-4 border rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Name</Label>
                     <Input
-                      value={item.custom_item_name || item.product?.name || ''}
-                      onChange={(e) => {
-                        const newItems = [...formData.items];
-                        newItems[index] = { ...item, custom_item_name: e.target.value };
-                        setFormData({ ...formData, items: newItems });
-                      }}
+                      value={formData.client_name}
+                      onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>Quantity</Label>
+                    <Label>Phone</Label>
                     <Input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        const newItems = [...formData.items];
-                        const newQuantity = parseInt(e.target.value) || 1;
-                        newItems[index] = { ...item, quantity: newQuantity };
-                        setFormData({ ...formData, items: newItems });
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label>Price</Label>
-                    <Input
-                      type="number"
-                      value={item.price}
-                      onChange={(e) => {
-                        const newItems = [...formData.items];
-                        const newPrice = parseFloat(e.target.value) || 0;
-                        newItems[index] = { ...item, price: newPrice };
-                        setFormData({ ...formData, items: newItems });
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label>Cost</Label>
-                    <Input
-                      type="number"
-                      value={item.cost}
-                      onChange={(e) => {
-                        const newItems = [...formData.items];
-                        newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
-                        setFormData({ ...formData, items: newItems });
-                      }}
+                      value={formData.client_phone}
+                      onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
                     />
                   </div>
                 </div>
-              ))}
-              <div className="text-right font-medium">
-                Total: {calculateItemsTotal().toFixed(2)} DH
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="prescription" className="space-y-4 pt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Prescription Details</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Right Eye</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label>SPH</Label>
+                        <Input
+                          value={formData.right_eye_sph}
+                          onChange={(e) => setFormData({ ...formData, right_eye_sph: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>CYL</Label>
+                        <Input
+                          value={formData.right_eye_cyl}
+                          onChange={(e) => setFormData({ ...formData, right_eye_cyl: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>AXE</Label>
+                        <Input
+                          value={formData.right_eye_axe}
+                          onChange={(e) => setFormData({ ...formData, right_eye_axe: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Left Eye</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label>SPH</Label>
+                        <Input
+                          value={formData.left_eye_sph}
+                          onChange={(e) => setFormData({ ...formData, left_eye_sph: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>CYL</Label>
+                        <Input
+                          value={formData.left_eye_cyl}
+                          onChange={(e) => setFormData({ ...formData, left_eye_cyl: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>AXE</Label>
+                        <Input
+                          value={formData.left_eye_axe}
+                          onChange={(e) => setFormData({ ...formData, left_eye_axe: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 w-1/3">
+                  <Label>ADD</Label>
+                  <Input
+                    value={formData.add}
+                    onChange={(e) => setFormData({ ...formData, add: e.target.value })}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="status" className="grid grid-cols-2 gap-4 pt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Receipt className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Order Status</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Delivery Status</Label>
+                    <Select
+                      value={formData.delivery_status}
+                      onValueChange={(value) => setFormData({ ...formData, delivery_status: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Undelivered">Undelivered</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Order Type</Label>
+                    <Select
+                      value={formData.order_type || 'Unspecified'}
+                      onValueChange={(value) => setFormData({ ...formData, order_type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select order type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Unspecified">Unspecified</SelectItem>
+                        <SelectItem value="Montage">Montage</SelectItem>
+                        <SelectItem value="Retoyage">Retoyage</SelectItem>
+                        <SelectItem value="Sell">Sell</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Montage Status</Label>
+                    <Select
+                      value={formData.montage_status}
+                      onValueChange={(value) => setFormData({ ...formData, montage_status: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UnOrdered">UnOrdered</SelectItem>
+                        <SelectItem value="Ordered">Ordered</SelectItem>
+                        <SelectItem value="InStore">InStore</SelectItem>
+                        <SelectItem value="InCutting">InCutting</SelectItem>
+                        <SelectItem value="Ready">Ready</SelectItem>
+                        <SelectItem value="Paid costs">Paid costs</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Banknote className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Financial Details</h3>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Montage Costs</Label>
+                    <Input
+                      type="number"
+                      value={formData.montage_costs}
+                      onChange={(e) => setFormData({ ...formData, montage_costs: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Total Discount</Label>
+                    <Input
+                      type="number"
+                      value={formData.total_discount}
+                      onChange={(e) => setFormData({ ...formData, total_discount: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Advance Payment</Label>
+                    <Input
+                      type="number"
+                      value={formData.advance_payment}
+                      onChange={(e) => setFormData({ ...formData, advance_payment: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="items" className="space-y-4 pt-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Package2 className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold">Items</h3>
+                  </div>
+                  <div className="text-lg font-semibold">
+                    Total: {calculateItemsTotal().toFixed(2)} DH
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {formData.items.map((item, index) => (
+                    <Card key={index} className="border-dashed">
+                      <CardContent className="pt-4">
+                        <div className="grid grid-cols-4 gap-4">
+                          <div>
+                            <Label>Name</Label>
+                            <Input
+                              value={item.custom_item_name || item.product?.name || ''}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[index] = { ...item, custom_item_name: e.target.value };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label>Quantity</Label>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                const newQuantity = parseInt(e.target.value) || 1;
+                                newItems[index] = { ...item, quantity: newQuantity };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label>Price</Label>
+                            <Input
+                              type="number"
+                              value={item.price}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                const newPrice = parseFloat(e.target.value) || 0;
+                                newItems[index] = { ...item, price: newPrice };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label>Cost</Label>
+                            <Input
+                              type="number"
+                              value={item.cost}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={loading}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={loading}
+            className="bg-primary hover:bg-primary/90"
+          >
             {loading ? "Updating..." : "Update Receipt"}
           </Button>
         </DialogFooter>
