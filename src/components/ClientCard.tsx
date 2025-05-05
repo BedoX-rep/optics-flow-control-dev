@@ -425,12 +425,18 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
       )}
 
-      <ReceiptDetailsMiniDialog 
-        isOpen={isReceiptDialogOpen} 
-        onClose={() => setIsReceiptDialogOpen(false)} 
-        receipt={selectedReceipt} 
-        onEdit={handleEditReceipt} 
-        onDelete={handleDeleteReceipt} 
+      <ReceiptDetailsMiniDialog
+        isOpen={isReceiptDialogOpen}
+        onClose={() => setIsReceiptDialogOpen(false)}
+        receipt={selectedReceipt}
+        onEdit={(receipt) => {
+          handleEditReceipt(receipt);
+          setIsReceiptDialogOpen(false);
+        }}
+        onDelete={(receipt) => {
+          handleDeleteReceipt(receipt);
+          setIsReceiptDialogOpen(false);
+        }}
       />
     </div>
   );
