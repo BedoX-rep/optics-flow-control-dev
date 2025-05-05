@@ -113,25 +113,16 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   const { card: cardColor, avatar: avatarColor } = getColorScheme();
 
-  const handleViewReceipt = (receipt: Receipt) => {
-    setSelectedReceipt(receipt);
-    setIsReceiptDialogOpen(true);
-  };
-
-  const handleEditReceipt = (receipt: Receipt) => {
-    // In a real app, you would navigate to or open a dialog for editing the receipt
-    toast.info("Receipt edit functionality to be implemented");
-    setIsReceiptDialogOpen(false);
-  };
-
-  const handleDeleteReceipt = async (receipt: Receipt) => {
+  const handleViewReceipt = async (receipt: Receipt) => {
     try {
-      const { error } = await supabase
+      const { data: fullReceipt, error } = await supabase
         .from('receipts')
-        .update({ is_deleted: true })
-        .eq('id', receipt.id)
         .select(`
           *,
+          clients (
+            name,
+            phone
+          ),
           receipt_items (
             id,
             quantity,
@@ -143,9 +134,57 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               name
             )
           )
-        `);
+        `)
+        .eq('id', receipt.id)
+        .single();
 
       if (error) throw error;
+      setSelectedReceipt(fullReceipt);
+      setIsReceiptDialogOpen(true);
+    } catch (error) {
+      console.error('Error fetching receipt details:', error);
+      toast.error('Failed to load receipt details');
+    }
+  };
+
+  const handleEditReceipt = (receipt: Receipt) => {
+    // In a real app, you would navigate to or open a dialog for editing the receipt
+    toast.info("Receipt edit functionality to be implemented");
+    setIsReceiptDialogOpen(false);
+  };
+
+  const handleDeleteReceipt = async (receipt: Receipt) => {
+    try {
+      const { data: updatedReceipt, error } = await supabase
+        .from('receipts')
+        .update({ is_deleted: true })
+        .eq('id', receipt.id)
+        .select(`
+          *,
+          clients (
+            name,
+            phone
+          ),
+          receipt_items (
+            id,
+            quantity,
+            price,
+            cost,
+            profit,
+            custom_item_name,
+            product:product_id (
+              name
+            )
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      // Update the selected receipt if it matches
+      if (selectedReceipt?.id === receipt.id) {
+        setSelectedReceipt(updatedReceipt);
+      }
 
       toast.success("Receipt deleted successfully");
       onRefresh(); // Refresh the client list to update the UI
