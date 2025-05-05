@@ -83,31 +83,53 @@ const ReceiptCard = ({
 
   const updateAdvanceMutation = useMutation({
     mutationFn: async ({ id, amount }: { id: string; amount: number }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('receipts')
         .update({ 
           advance_payment: amount,
           balance: receipt.total - amount 
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
+      
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['receipts']);
+    onMutate: async ({ amount }) => {
+      await queryClient.cancelQueries(['receipts']);
+      const previousReceipts = queryClient.getQueryData(['receipts']);
+      
+      queryClient.setQueryData(['receipts'], (old: any) => {
+        return old?.map((r: any) => 
+          r.id === receipt.id 
+            ? { ...r, advance_payment: amount, balance: receipt.total - amount }
+            : r
+        );
+      });
+      
+      return { previousReceipts };
+    },
+    onSuccess: (data) => {
+      setAdvanceValue(data.advance_payment || 0);
       setEditingAdvance(false);
+      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Success",
         description: "Advance payment updated successfully",
       });
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
       console.error('Error updating advance:', error);
+      if (context?.previousReceipts) {
+        queryClient.setQueryData(['receipts'], context.previousReceipts);
+      }
+      setAdvanceValue(receipt.advance_payment || 0);
       toast({
         title: "Error",
         description: "Failed to update advance payment",
         variant: "destructive"
       });
-      setAdvanceValue(receipt.advance_payment || 0);
     }
   });
 
