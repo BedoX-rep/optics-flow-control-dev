@@ -47,35 +47,44 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
 
   // Calculate costs for different lens types with proper category checking
   const lensTypeCosts = receipts.reduce((acc, receipt) => {
-    receipt.receipt_items?.forEach(item => {
-      const quantity = item.quantity || 1;
-      const cost = item.cost || 0;
-      const price = item.price || 0;
-      const totalItemRevenue = price * quantity;
-      const totalItemCost = cost * quantity;
+    if (Array.isArray(receipt.receipt_items)) {
+      receipt.receipt_items.forEach(item => {
+        const quantity = Number(item.quantity) || 1;
+        const cost = Number(item.cost) || 0;
+        const price = Number(item.price) || 0;
+        const totalItemRevenue = price * quantity;
+        const totalItemCost = cost * quantity;
+        const category = item.product?.category || 'Unknown';
 
-      if (item.product?.category === 'Single Vision Lenses') {
-        acc.singleVision += totalItemRevenue;
-        acc.singleVisionCost += totalItemCost;
-        acc.singleVisionCount += quantity;
-      } else if (item.product?.category === 'Progressive Lenses') {
-        acc.progressive += totalItemRevenue;
-        acc.progressiveCost += totalItemCost;
-        acc.progressiveCount += quantity;
-      } else if (item.product?.category === 'Frames') {
-        acc.frames += totalItemRevenue;
-        acc.framesCost += totalItemCost;
-        acc.framesCount += quantity;
-      } else if (item.product?.category === 'Sunglasses') {
-        acc.sunglasses += totalItemRevenue;
-        acc.sunglassesCost += totalItemCost;
-        acc.sunglassesCount += quantity;
-      } else if (item.product?.category === 'Accessories') {
-        acc.accessories += totalItemRevenue;
-        acc.accessoriesCost += totalItemCost;
-        acc.accessoriesCount += quantity;
-      }
-    });
+        switch(category) {
+          case 'Single Vision Lenses':
+            acc.singleVision += totalItemRevenue;
+            acc.singleVisionCost += totalItemCost;
+            acc.singleVisionCount += quantity;
+            break;
+          case 'Progressive Lenses':
+            acc.progressive += totalItemRevenue;
+            acc.progressiveCost += totalItemCost;
+            acc.progressiveCount += quantity;
+            break;
+          case 'Frames':
+            acc.frames += totalItemRevenue;
+            acc.framesCost += totalItemCost;
+            acc.framesCount += quantity;
+            break;
+          case 'Sunglasses':
+            acc.sunglasses += totalItemRevenue;
+            acc.sunglassesCost += totalItemCost;
+            acc.sunglassesCount += quantity;
+            break;
+          case 'Accessories':
+            acc.accessories += totalItemRevenue;
+            acc.accessoriesCost += totalItemCost;
+            acc.accessoriesCount += quantity;
+            break;
+        }
+      });
+    }
     return acc;
   }, { 
     singleVision: 0, progressive: 0, frames: 0, sunglasses: 0, accessories: 0,
