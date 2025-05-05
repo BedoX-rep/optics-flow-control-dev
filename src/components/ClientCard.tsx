@@ -193,7 +193,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   };
 
   return (
-    <div className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}>
+    <div 
+      className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
+      data-client-id={client.id}
+      data-is-edited={isEdited}
+    >
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">

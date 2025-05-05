@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
@@ -10,7 +9,7 @@ import PageTitle from "@/components/PageTitle";
 import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
-import { UserPlus, Upload, ChevronDown } from "lucide-react";
+import { UserPlus, Upload, ChevronDown, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -64,10 +63,10 @@ export default function Clients() {
   // Fetch clients with their latest receipts
   const fetchClients = async () => {
     setIsLoading(true);
-    
+
     try {
       if (!user) return;
-      
+
       const { data: clientsData, error } = await supabase
         .from('clients')
         .select('*')
@@ -88,12 +87,12 @@ export default function Clients() {
             .eq('client_id', client.id)
             .eq('is_deleted', false)
             .order('created_at', { ascending: false });
-            
+
           if (receiptsError) {
             console.error('Error fetching receipts:', receiptsError);
             return { ...client, receipts: [] };
           }
-          
+
           return { ...client, receipts: receiptsData };
         })
       );
@@ -117,7 +116,7 @@ export default function Clients() {
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
     let filtered = [...clients];
-    
+
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -126,7 +125,7 @@ export default function Clients() {
         client.phone.includes(term)
       );
     }
-    
+
     // Sort clients
     filtered.sort((a, b) => {
       if (sortBy === 'name') {
@@ -138,14 +137,14 @@ export default function Clients() {
       }
       return 0;
     });
-    
+
     setFilteredClients(filtered);
   }, [clients, searchTerm, sortBy]);
 
   const handleAddClient = async (name: string, phone: string) => {
     try {
       if (!user) return;
-      
+
       const { data, error } = await supabase
         .from('clients')
         .insert({ 
@@ -224,30 +223,30 @@ export default function Clients() {
   const handleImportClients = async (importedClients: any[]) => {
     try {
       if (!user) return;
-      
+
       // Check for duplicates
       const phoneNumbers = new Set(clients.map(client => client.phone));
       const newClients = importedClients.filter(client => !phoneNumbers.has(client.phone));
-      
+
       if (newClients.length === 0) {
         toast.warning("All imported clients already exist in your database");
         setIsImportDialogOpen(false);
         return;
       }
-      
+
       // Add user_id to each client
       const clientsWithUserId = newClients.map(client => ({
         ...client,
         user_id: user.id
       }));
-      
+
       const { data, error } = await supabase
         .from('clients')
         .insert(clientsWithUserId)
         .select();
 
       if (error) throw error;
-      
+
       toast.success(`${data?.length} clients imported successfully!`);
       fetchClients(); // Refresh clients list
       setIsImportDialogOpen(false);
@@ -266,7 +265,7 @@ export default function Clients() {
       groups[phone].push(client);
       return groups;
     }, {});
-    
+
     // Find groups with more than one client (duplicates)
     const duplicates: any[] = [];
     Object.values(phoneGroups).forEach((group: any) => {
@@ -274,12 +273,12 @@ export default function Clients() {
         duplicates.push(...group);
       }
     });
-    
+
     if (duplicates.length === 0) {
       toast.info("No duplicate clients found");
       return;
     }
-    
+
     setDuplicateClients(duplicates);
     setIsDuplicateDialogOpen(true);
   };
@@ -304,7 +303,7 @@ export default function Clients() {
               .from('clients')
               .update(clientData)
               .eq('id', clientId);
-            
+
             if (error) throw error;
           }
         }
@@ -328,7 +327,7 @@ export default function Clients() {
           phoneGroups[client.phone].push(client);
         }
       });
-      
+
       // For each group, keep the first client and mark others as deleted
       const clientsToDelete: string[] = [];
       Object.values(phoneGroups).forEach((group: any) => {
@@ -336,20 +335,20 @@ export default function Clients() {
           clientsToDelete.push(group[i].id);
         }
       });
-      
+
       if (clientsToDelete.length === 0) {
         toast.info("No duplicates to delete");
         setIsDuplicateDialogOpen(false);
         return;
       }
-      
+
       const { error } = await supabase
         .from('clients')
         .update({ is_deleted: true })
         .in('id', clientsToDelete);
 
       if (error) throw error;
-      
+
       toast.success(`${clientsToDelete.length} duplicate clients removed`);
       fetchClients(); // Refresh client list
       setIsDuplicateDialogOpen(false);
@@ -362,23 +361,25 @@ export default function Clients() {
     <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-6 space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-lg shadow-sm">
         <div className="flex items-center gap-3 flex-1">
-          <Button 
-            size="default"
-            onClick={() => setIsAddClientOpen(true)}
-            className="bg-black hover:bg-neutral-800 text-white px-6"
-          >
-            <UserPlus size={18} className="mr-2" />
-            New Client
-          </Button>
-          <Button
-            variant="outline"
-            size="default"
-            onClick={handleSaveAllChanges}
-            className="border-neutral-200"
-          >
-            <Save size={18} className="mr-2" />
-            Save All
-          </Button>
+          <div className="flex gap-2">
+              <Button 
+                size="default"
+                onClick={() => setIsAddClientOpen(true)}
+                className="bg-black hover:bg-neutral-800 text-white px-6"
+              >
+                <UserPlus size={18} className="mr-2" />
+                New Client
+              </Button>
+              <Button
+                variant="outline"
+                size="default"
+                onClick={handleSaveAllChanges}
+                className="border-neutral-200"
+              >
+                <Save size={18} className="mr-2" />
+                Save All Changes
+              </Button>
+            </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -388,7 +389,7 @@ export default function Clients() {
             placeholder="Search clients..."
             className="w-64"
           />
-          
+
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Sort by" />
@@ -421,7 +422,7 @@ export default function Clients() {
           </div>
         </div>
       </div>
-      
+
       {/* Client cards */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
@@ -464,7 +465,7 @@ export default function Clients() {
           )}
         </div>
       )}
-      
+
       {/* Floating action button */}
       <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
 
@@ -474,7 +475,7 @@ export default function Clients() {
         onClose={() => setIsAddClientOpen(false)} 
         onAddClient={handleAddClient}
       />
-      
+
       {/* Edit client dialog */}
       {clientToEdit && (
         <EditClientDialog 
@@ -484,14 +485,14 @@ export default function Clients() {
           onClientUpdated={handleUpdateClient}
         />
       )}
-      
+
       {/* Import clients dialog */}
       <ImportClientsDialog 
         isOpen={isImportDialogOpen} 
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportClients}
       />
-      
+
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
