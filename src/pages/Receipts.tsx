@@ -89,7 +89,10 @@ const ReceiptCard = ({
               <div className="flex-1">
                 <div className="flex items-baseline gap-2">
                   <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
-                  <span className="text-xs text-gray-500">{receipt.client_phone}</span>
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-3 w-3 text-gray-400" />
+                    <span className="text-xs text-green-600">{receipt.client_phone}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-gray-400">{getTimeDisplay(receipt.created_at)}</span>
@@ -143,12 +146,16 @@ const ReceiptCard = ({
                 <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">Cost</p>
-                <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">Profit</p>
-                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Cost</p>
+                    <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Profit</p>
+                    <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -181,8 +188,8 @@ const ReceiptCard = ({
                           status === 'UnOrdered' ? 'border-gray-500'
                           : status === 'Ordered' ? 'border-blue-500'
                           : status === 'InStore' ? 'border-orange-500'
-                          : status === 'InCutting' ? 'border-purple-500'
-                          : status === 'Ready' ? 'border-pink-500'
+                          : status === 'InCutting' ? 'border-red-500'
+                          : status === 'Ready' ? 'border-purple-500'
                           : status === 'Paid costs' ? 'border-green-500'
                           : 'border-gray-500'
                         }`}
