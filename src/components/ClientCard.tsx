@@ -76,8 +76,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Get first letter of name for avatar
   const nameInitial = editedClient.name ? editedClient.name.charAt(0).toUpperCase() : '?';
 
-  const queryClient = useQueryClient();
-
   // Toggle favorite status
   const toggleFavorite = async () => {
     try {
