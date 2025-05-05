@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,7 +23,7 @@ const ReceiptDetailsMiniDialog = ({
   onDelete 
 }: ReceiptDetailsMiniDialogProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   if (!receipt) return null;
 
   const handleDelete = async () => {
@@ -77,7 +76,7 @@ const ReceiptDetailsMiniDialog = ({
             Receipt Details
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -99,9 +98,13 @@ const ReceiptDetailsMiniDialog = ({
               </div>
             </div>
           </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Order Type</span>
+            <p>{receipt.order_type || 'Unspecified'}</p>
+          </div>
 
           <Separator />
-          
+
           <div>
             <h3 className="text-sm font-medium mb-2">Prescription</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -170,7 +173,7 @@ const ReceiptDetailsMiniDialog = ({
               </div>
             </div>
           </div>
-          
+
           <Separator />
 
           {receipt.receipt_items && receipt.receipt_items.length > 0 && (

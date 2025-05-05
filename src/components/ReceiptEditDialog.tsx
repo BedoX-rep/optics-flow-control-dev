@@ -270,7 +270,23 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                   </Select>
                 </div>
                 <div>
-                  <Label>Montage Status</Label>
+                  <Label>Order Type</Label>
+                  <Select
+                    value={formData.order_type || 'Unspecified'}
+                    onValueChange={(value) => setFormData({ ...formData, order_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select order type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Unspecified">Unspecified</SelectItem>
+                      <SelectItem value="Montage">Montage</SelectItem>
+                      <SelectItem value="Retoyage">Retoyage</SelectItem>
+                      <SelectItem value="Sell">Sell</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Label className="mt-4">Montage Status</Label>
                   <Select
                     value={formData.montage_status}
                     onValueChange={(value) => setFormData({ ...formData, montage_status: value })}

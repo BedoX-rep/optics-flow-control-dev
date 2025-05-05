@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query'; // Added import for React Query
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -30,7 +30,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  cost_ttc: number; 
+  cost_ttc: number;
   category: string;
 }
 
@@ -58,7 +58,7 @@ interface ReceiptItem {
 }
 
 const NewReceipt = () => {
-  const queryClient = useQueryClient(); // Added for query invalidation
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -101,6 +101,7 @@ const NewReceipt = () => {
       { min: 4, max: Infinity, markup: 30 },
     ],
   });
+  const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
 
 
   useEffect(() => {
@@ -199,7 +200,7 @@ const NewReceipt = () => {
             ...item,
             productId: value.toString(),
             price: product.price || 0,
-            cost: product.cost_ttc || 0, 
+            cost: product.cost_ttc || 0,
             appliedMarkup: 0
           };
 
@@ -323,7 +324,7 @@ const NewReceipt = () => {
           axe: clientData.left_eye_axe !== null ? clientData.left_eye_axe.toString() : '0'
         });
         setAdd(clientData.Add !== null ? clientData.Add.toString() : '0');
-        setPrescriptionOpen(true); // Automatically show prescription details
+        setPrescriptionOpen(true);
       }
     } catch (error) {
       console.error('Error fetching client prescription:', error);
@@ -439,7 +440,8 @@ const NewReceipt = () => {
           delivery_status: 'Undelivered',
           montage_status: 'UnOrdered',
           montage_costs: montageCosts,
-          products_cost: totalCost // Added products_cost
+          products_cost: totalCost,
+          order_type: orderType // Added order type to receipt
         })
         .select()
         .single();
@@ -488,7 +490,6 @@ const NewReceipt = () => {
         throw itemsError;
       }
 
-      //Invalidate the receipts query after a successful save
       queryClient.invalidateQueries(['receipts']);
 
       toast({
@@ -728,6 +729,19 @@ const NewReceipt = () => {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <div className="flex gap-3">
+                <div className="flex items-center">
+                  <Select value={orderType} onValueChange={setOrderType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Order Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Unspecified">Unspecified</SelectItem>
+                      <SelectItem value="Montage">Montage</SelectItem>
+                      <SelectItem value="Retoyage">Retoyage</SelectItem>
+                      <SelectItem value="Sell">Sell</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
                   <Plus className="h-4 w-4 mr-2" /> Add Product
                 </Button>
@@ -735,13 +749,13 @@ const NewReceipt = () => {
                   <Plus className="h-4 w-4 mr-2" /> Add Custom Item
                 </Button>
               </div>
-              <Button 
-                onClick={() => setIsMarkupSettingsOpen(true)} 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                onClick={() => setIsMarkupSettingsOpen(true)}
+                variant="ghost"
+                size="sm"
                 className="text-neutral-600 hover:text-neutral-900"
               >
-                Markup Settings
+                <Settings className="h-4 w-4 mr-2"/> Markup Settings
               </Button>
             </div>
           </CardHeader>
@@ -1156,8 +1170,7 @@ const NewReceipt = () => {
             setSelectedClient(client.id);
             setSearchTerm(client.name);
             setIsAddClientOpen(false);
-            
-            // Fetch and set prescription data for the new client
+
             await fetchClientPrescription(client.id);
           } catch (error) {
             console.error('Error fetching clients:', error);
