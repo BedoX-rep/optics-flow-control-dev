@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -53,13 +52,13 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   const [editedClient, setEditedClient] = useState<Client>({...client});
   const [isEdited, setIsEdited] = useState(false);
-  
+
   // Reset edited client when client changes
   useEffect(() => {
     setEditedClient({...client});
     setIsEdited(false);
   }, [client]);
-  
+
   // Get the latest receipt if available
   const latestReceipt = client.receipts && client.receipts.length > 0 
     ? client.receipts[0] 
@@ -67,14 +66,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   // Format the date
   const formattedDate = client.created_at ? format(new Date(client.created_at), 'MMM d, yyyy') : '';
-  
+
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
 
   // Get first letter of name for avatar
   const nameInitial = editedClient.name ? editedClient.name.charAt(0).toUpperCase() : '?';
-  
+
   // Toggle favorite status
   const toggleFavorite = async () => {
     try {
@@ -84,7 +83,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         .eq('id', client.id);
 
       if (error) throw error;
-      
+
       onRefresh(); // Refresh client list
       toast.success(client.is_favorite ? "Removed from favorites" : "Added to favorites");
     } catch (error: any) {
@@ -100,7 +99,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         avatar: 'bg-amber-50 text-amber-700 border-amber-200'
       };
     }
-    
+
     // Alternate between blue and green for non-favorites
     const isEven = client.id.charCodeAt(0) % 2 === 0;
     return {
@@ -120,9 +119,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         .eq('id', receipt.id)
         .eq('is_deleted', false)
         .single();
-      
+
       if (error) throw error;
-      
+
       setSelectedReceipt(data);
       setIsReceiptDialogOpen(true);
     } catch (error) {
@@ -143,9 +142,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         .from('receipts')
         .update({ is_deleted: true })
         .eq('id', receipt.id);
-      
+
       if (error) throw error;
-      
+
       toast.success("Receipt deleted successfully");
       onRefresh(); // Refresh the client list to update the UI
     } catch (error) {
@@ -163,7 +162,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     });
   };
 
-  // Save all edited fields
+  // Save all edited fields - UPDATED to use name attributes from input fields
   const handleSaveChanges = async () => {
     try {
       const { error } = await supabase
@@ -180,9 +179,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           Add: editedClient.Add
         })
         .eq('id', client.id);
-        
+
       if (error) throw error;
-      
+
       toast.success("Client updated successfully");
       setIsEdited(false);
       onRefresh(); // Refresh client list
@@ -208,6 +207,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               <div className="flex items-center">
                 <input 
                   type="text" 
+                  name="name" // Added name attribute
                   className="font-medium text-gray-900 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
                   value={editedClient.name}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
@@ -217,6 +217,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <Phone size={14} className="mr-1" />
                 <input 
                   type="text" 
+                  name="phone" // Added name attribute
                   className="bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
                   value={editedClient.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
@@ -224,7 +225,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-1 -ml-1">
             <Button
               variant="ghost"
@@ -262,7 +263,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </Button>
           </div>
         </div>
-        
+
         {/* Editable prescription data */}
         <div className="mt-4 grid grid-cols-2 gap-6">
           <div className="space-y-3">
@@ -272,6 +273,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">SPH</span>
                 <input 
                   type="text"
+                  name="right_eye_sph" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
                   onChange={(e) => {
@@ -286,6 +288,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">CYL</span>
                 <input 
                   type="text"
+                  name="right_eye_cyl" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
                   onChange={(e) => {
@@ -300,6 +303,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">AXE</span>
                 <input 
                   type="text"
+                  name="right_eye_axe" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
                   onChange={(e) => {
@@ -319,6 +323,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">SPH</span>
                 <input 
                   type="text"
+                  name="left_eye_sph" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
                   onChange={(e) => {
@@ -333,6 +338,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">CYL</span>
                 <input 
                   type="text"
+                  name="left_eye_cyl" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
                   onChange={(e) => {
@@ -347,6 +353,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">AXE</span>
                 <input 
                   type="text"
+                  name="left_eye_axe" // Added name attribute
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full"
                   value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
                   onChange={(e) => {
@@ -361,7 +368,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white bg-opacity-30 px-4 py-2 flex justify-between items-center">
         <div className="flex items-center text-xs text-gray-500">
           <Calendar size={14} className="mr-1" />
@@ -376,7 +383,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </Button>
       </div>
-      
+
       {expanded && (
         <div className="px-4 py-3 bg-white border-t border-gray-100 animate-accordion-down">
           <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">Purchase History</h4>
@@ -411,7 +418,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           )}
         </div>
       )}
-      
+
       <ReceiptDetailsMiniDialog 
         isOpen={isReceiptDialogOpen} 
         onClose={() => setIsReceiptDialogOpen(false)} 

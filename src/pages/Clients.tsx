@@ -297,27 +297,35 @@ export default function Clients() {
       const updatePromises = Array.from(editedCards).map(async (card) => {
         const clientId = card.getAttribute('data-client-id');
         if (clientId) {
-          const clientData = clients.find(c => c.id === clientId);
-          if (clientData) {
-            const { data, error } = await supabase
-              .from('clients')
-              .update({
-                name: clientData.name,
-                phone: clientData.phone,
-                right_eye_sph: clientData.right_eye_sph,
-                right_eye_cyl: clientData.right_eye_cyl,
-                right_eye_axe: clientData.right_eye_axe,
-                left_eye_sph: clientData.left_eye_sph,
-                left_eye_cyl: clientData.left_eye_cyl,
-                left_eye_axe: clientData.left_eye_axe,
-                Add: clientData.Add
-              })
-              .eq('id', clientId)
-              .select();
+          // Get input values directly from the card
+          const nameInput = card.querySelector('input[name="name"]') as HTMLInputElement;
+          const phoneInput = card.querySelector('input[name="phone"]') as HTMLInputElement;
+          const rightSphInput = card.querySelector('input[name="right_eye_sph"]') as HTMLInputElement;
+          const rightCylInput = card.querySelector('input[name="right_eye_cyl"]') as HTMLInputElement;
+          const rightAxeInput = card.querySelector('input[name="right_eye_axe"]') as HTMLInputElement;
+          const leftSphInput = card.querySelector('input[name="left_eye_sph"]') as HTMLInputElement;
+          const leftCylInput = card.querySelector('input[name="left_eye_cyl"]') as HTMLInputElement;
+          const leftAxeInput = card.querySelector('input[name="left_eye_axe"]') as HTMLInputElement;
+          const addInput = card.querySelector('input[name="Add"]') as HTMLInputElement;
 
-            if (error) throw error;
-            return data;
-          }
+          const { data, error } = await supabase
+            .from('clients')
+            .update({
+              name: nameInput?.value,
+              phone: phoneInput?.value,
+              right_eye_sph: rightSphInput?.value ? parseFloat(rightSphInput.value) : null,
+              right_eye_cyl: rightCylInput?.value ? parseFloat(rightCylInput.value) : null,
+              right_eye_axe: rightAxeInput?.value ? parseInt(rightAxeInput.value) : null,
+              left_eye_sph: leftSphInput?.value ? parseFloat(leftSphInput.value) : null,
+              left_eye_cyl: leftCylInput?.value ? parseFloat(leftCylInput.value) : null,
+              left_eye_axe: leftAxeInput?.value ? parseInt(leftAxeInput.value) : null,
+              Add: addInput?.value ? parseFloat(addInput.value) : null
+            })
+            .eq('id', clientId)
+            .select();
+
+          if (error) throw error;
+          return data;
         }
       });
 
