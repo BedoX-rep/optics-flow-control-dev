@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Receipt {
   id: string;
@@ -47,6 +48,7 @@ interface ClientCardProps {
 }
 
 export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardProps) => {
+  const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
