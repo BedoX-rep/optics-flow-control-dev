@@ -104,14 +104,26 @@ const Receipts = () => {
                            isNaN(Number(value)) ? value : Number(value)
       };
 
+      await queryClient.cancelQueries(['receipts']);
+      
+      const previousReceipts = queryClient.getQueryData(['receipts']);
+
+      queryClient.setQueryData(['receipts'], (old: any) => {
+        return old?.map((r: Receipt) => 
+          r.id === receipt.id ? { ...r, [editingCell.field]: updates[editingCell.field] } : r
+        );
+      });
+
       const { error } = await supabase
         .from('receipts')
         .update(updates)
         .eq('id', receipt.id);
 
-      if (error) throw error;
+      if (error) {
+        queryClient.setQueryData(['receipts'], previousReceipts);
+        throw error;
+      }
 
-      queryClient.invalidateQueries(['receipts']);
       toast({
         title: "Success",
         description: "Receipt updated successfully.",
@@ -680,7 +692,6 @@ const Receipts = () => {
         isOpen={!!editingReceipt}
         onClose={() => setEditingReceipt(null)}
         receipt={editingReceipt}
-        onUpdate={fetchReceipts}
       />
     </div>
   );

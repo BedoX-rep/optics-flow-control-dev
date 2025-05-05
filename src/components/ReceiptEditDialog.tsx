@@ -14,12 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   receipt: any;
-  onUpdate: () => void;
 }
 
 const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDialogProps) => {
