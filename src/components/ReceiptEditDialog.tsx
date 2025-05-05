@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -38,6 +37,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     left_eye_axe: '',
     add: '',
     montage_costs: 0,
+    total_discount: 0,
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
@@ -58,6 +58,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         left_eye_axe: receipt.left_eye_axe !== null ? String(receipt.left_eye_axe) : '',
         add: receipt.add !== null ? String(receipt.add) : '',
         montage_costs: receipt.montage_costs || 0,
+        total_discount: receipt.total_discount || 0,
         advance_payment: receipt.advance_payment || 0,
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
@@ -285,7 +286,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       <SelectItem value="Sell">Sell</SelectItem>
                     </SelectContent>
                   </Select>
-                  
+
                   <Label className="mt-4">Montage Status</Label>
                   <Select
                     value={formData.montage_status}
@@ -322,6 +323,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     type="number"
                     value={formData.montage_costs}
                     onChange={(e) => setFormData({ ...formData, montage_costs: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label>Total Discount</Label>
+                  <Input
+                    type="number"
+                    value={formData.total_discount}
+                    onChange={(e) => setFormData({ ...formData, total_discount: parseFloat(e.target.value) || 0 })}
                   />
                 </div>
                 <div>
