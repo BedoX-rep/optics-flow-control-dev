@@ -125,15 +125,7 @@ const ReceiptCard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">Cost</p>
-                <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">Profit</p>
-                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
-              </div>
+            <div className="grid grid-cols-2 gap-2 text-sm mb-6">
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
@@ -149,6 +141,14 @@ const ReceiptCard = ({
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Balance</p>
                 <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-0.5">Cost</p>
+                <p className="font-medium text-gray-700">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-0.5">Profit</p>
+                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
               </div>
             </div>
 
