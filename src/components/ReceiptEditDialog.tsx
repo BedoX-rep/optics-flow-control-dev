@@ -77,7 +77,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       setLoading(true);
       const totalProductsCost = formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
-      const total = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
 
       const { error: receiptError } = await supabase
         .from('receipts')
