@@ -141,13 +141,13 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       })
 
       // Trigger a full refresh instead of just updating name/phone
-      await onClientUpdated(
+      await onClose()
+      form.reset()
+      onClientUpdated(
         data.id,
         data.name,
         data.phone
       )
-      onClose()
-      form.reset()
     } catch (error) {
       console.error("Error updating client:", error)
       toast({
