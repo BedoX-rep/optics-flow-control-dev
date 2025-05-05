@@ -46,6 +46,15 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
     .reduce((sum, receipt) => sum + (receipt.montage_costs || 0), 0);
 
   // Calculate costs for different lens types with proper category checking
+  console.log("Receipt items with products:", receipts.flatMap(r => 
+    r.receipt_items?.map(item => ({
+      item_id: item.id,
+      product_id: item.product_id,
+      product: item.product,
+      category: item.product?.category
+    }))
+  ));
+
   const lensTypeCosts = receipts.reduce((acc, receipt) => {
     if (Array.isArray(receipt.receipt_items)) {
       receipt.receipt_items.forEach(item => {
