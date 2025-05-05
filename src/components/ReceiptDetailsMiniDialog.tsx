@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,7 +23,7 @@ const ReceiptDetailsMiniDialog = ({
   onDelete 
 }: ReceiptDetailsMiniDialogProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   if (!receipt) return null;
 
   const handleDelete = async () => {
@@ -68,7 +67,7 @@ const ReceiptDetailsMiniDialog = ({
             Receipt Details
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -84,7 +83,7 @@ const ReceiptDetailsMiniDialog = ({
           </div>
 
           <Separator />
-          
+
           <div>
             <h3 className="text-sm font-medium mb-2">Prescription</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -127,20 +126,27 @@ const ReceiptDetailsMiniDialog = ({
               <div>
                 <span className="text-gray-500">Total:</span> {receipt.total?.toFixed(2) || "0.00"} DH
               </div>
+              {receipt.tax > 0 && (
+                <div>
+                  <span className="text-gray-500">Tax:</span> {receipt.tax?.toFixed(2) || "0.00"} DH
+                </div>
+              )}
+              {receipt.total_discount > 0 && (
+                <div>
+                  <span className="text-gray-500">
+                    Discount ({receipt.discount_percentage}% + {receipt.discount_amount?.toFixed(2)} DH):
+                  </span> {receipt.total_discount?.toFixed(2)} DH
+                </div>
+              )}
               <div>
                 <span className="text-gray-500">Advance Payment:</span> {receipt.advance_payment?.toFixed(2) || "0.00"} DH
               </div>
               <div>
                 <span className="text-gray-500">Balance:</span> {receipt.balance?.toFixed(2) || "0.00"} DH
               </div>
-              {receipt.discount_amount > 0 && (
-                <div>
-                  <span className="text-gray-500">Discount:</span> {receipt.discount_amount.toFixed(2)} DH
-                </div>
-              )}
             </div>
           </div>
-          
+
           <Separator />
 
           {receipt.receipt_items && receipt.receipt_items.length > 0 && (
