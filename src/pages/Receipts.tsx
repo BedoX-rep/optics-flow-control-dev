@@ -572,22 +572,24 @@ const Receipts = () => {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-2 rounded-lg border-blue-100 shadow-lg">
-                <Command className="rounded-lg">
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search date..." className="h-9" />
+                  <CommandEmpty>No date found.</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem onSelect={() => setDateFilter('today')} className="hover:bg-blue-50">
+                    <CommandItem onSelect={() => setDateFilter('today')}>
                       <Check className={cn("mr-2 h-4 w-4", dateFilter === 'today' ? "opacity-100" : "opacity-0")} />
                       Today
                     </CommandItem>
-                    <CommandItem onSelect={() => setDateFilter('week')} className="hover:bg-blue-50">
+                    <CommandItem onSelect={() => setDateFilter('week')}>
                       <Check className={cn("mr-2 h-4 w-4", dateFilter === 'week' ? "opacity-100" : "opacity-0")} />
                       This Week
                     </CommandItem>
-                    <CommandItem onSelect={() => setDateFilter('month')} className="hover:bg-blue-50">
+                    <CommandItem onSelect={() => setDateFilter('month')}>
                       <Check className={cn("mr-2 h-4 w-4", dateFilter === 'month' ? "opacity-100" : "opacity-0")} />
                       This Month
                     </CommandItem>
-                    <CommandItem onSelect={() => setDateFilter('year')} className="hover:bg-blue-50">
+                    <CommandItem onSelect={() => setDateFilter('year')}>
                       <Check className={cn("mr-2 h-4 w-4", dateFilter === 'year' ? "opacity-100" : "opacity-0")} />
                       This Year
                     </CommandItem>
@@ -623,18 +625,20 @@ const Receipts = () => {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-2 rounded-lg border-emerald-100 shadow-lg">
-                <Command className="rounded-lg">
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search payment..." className="h-9" />
+                  <CommandEmpty>No payment status found.</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem onSelect={() => setPaymentFilter('paid')} className="hover:bg-emerald-50">
+                    <CommandItem onSelect={() => setPaymentFilter('paid')}>
                       <Check className={cn("mr-2 h-4 w-4", paymentFilter === 'paid' ? "opacity-100" : "opacity-0")} />
                       Paid
                     </CommandItem>
-                    <CommandItem onSelect={() => setPaymentFilter('partial')} className="hover:bg-emerald-50">
+                    <CommandItem onSelect={() => setPaymentFilter('partial')}>
                       <Check className={cn("mr-2 h-4 w-4", paymentFilter === 'partial' ? "opacity-100" : "opacity-0")} />
                       Partially Paid
                     </CommandItem>
-                    <CommandItem onSelect={() => setPaymentFilter('unpaid')} className="hover:bg-emerald-50">
+                    <CommandItem onSelect={() => setPaymentFilter('unpaid')}>
                       <Check className={cn("mr-2 h-4 w-4", paymentFilter === 'unpaid' ? "opacity-100" : "opacity-0")} />
                       Unpaid
                     </CommandItem>
@@ -669,14 +673,16 @@ const Receipts = () => {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-2 rounded-lg border-purple-100 shadow-lg">
-                <Command className="rounded-lg">
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search delivery..." className="h-9" />
+                  <CommandEmpty>No delivery status found.</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem onSelect={() => setDeliveryFilter('Completed')} className="hover:bg-purple-50">
+                    <CommandItem onSelect={() => setDeliveryFilter('Completed')}>
                       <Check className={cn("mr-2 h-4 w-4", deliveryFilter === 'Completed' ? "opacity-100" : "opacity-0")} />
                       Delivered
                     </CommandItem>
-                    <CommandItem onSelect={() => setDeliveryFilter('Undelivered')} className="hover:bg-purple-50">
+                    <CommandItem onSelect={() => setDeliveryFilter('Undelivered')}>
                       <Check className={cn("mr-2 h-4 w-4", deliveryFilter === 'Undelivered' ? "opacity-100" : "opacity-0")} />
                       Undelivered
                     </CommandItem>
