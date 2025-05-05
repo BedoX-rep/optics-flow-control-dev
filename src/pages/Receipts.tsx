@@ -63,9 +63,6 @@ const ReceiptCard = ({
 }) => {
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
-  const [editingAdvance, setEditingAdvance] = useState(false);
-  const [advanceValue, setAdvanceValue] = useState(receipt.advance_payment || 0);
-
   const getTimeDisplay = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -176,54 +173,29 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <div className="flex items-center gap-2">
-                      {editingAdvance ? (
-                        <div className="flex items-center gap-1">
-                          <Input
-                            type="text"
-                            value={advanceValue}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^\d.]/g, '');
-                              const parsedValue = parseFloat(value) || 0;
-                              setAdvanceValue(parsedValue);
-                            }}
-                            className="w-24 h-7 px-2 text-sm"
-                          />
-                          <Button 
-                            size="sm"
-                            variant="outline"
-                            className="h-7 px-2 text-xs"
-                            onClick={() => {
-                              if (advanceValue <= receipt.total) {
-                                updateAdvanceMutation.mutate({ 
-                                  id: receipt.id, 
-                                  amount: advanceValue 
-                                });
-                              } else {
-                                toast({
-                                  title: "Error",
-                                  description: "Advance cannot exceed total amount",
-                                  variant: "destructive"
-                                });
-                              }
-                            }}
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setEditingAdvance(true)}
-                            className="h-6 px-1"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="text"
+                        defaultValue={receipt.advance_payment?.toFixed(2) || "0.00"}
+                        onBlur={(e) => {
+                          const value = parseFloat(e.target.value.replace(/[^\d.]/g, '')) || 0;
+                          if (value <= receipt.total) {
+                            updateAdvanceMutation.mutate({ 
+                              id: receipt.id, 
+                              amount: value 
+                            });
+                          } else {
+                            toast({
+                              title: "Error",
+                              description: "Advance cannot exceed total amount",
+                              variant: "destructive"
+                            });
+                            e.target.value = (receipt.advance_payment || 0).toFixed(2);
+                          }
+                        }}
+                        className="w-24 h-7 px-2 text-sm"
+                      />
+                      <span className="text-xs text-gray-500">DH</span>
                     </div>
                   </div>
                 </div>
