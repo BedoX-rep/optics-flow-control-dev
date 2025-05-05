@@ -385,10 +385,10 @@ export default function Clients() {
   };
 
   return (
-    <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="flex gap-2">
+    <div className="container px-2 sm:px-4 md:px-6 max-w-7xl mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex gap-2 w-full sm:w-auto">
               <Button 
                 size="default"
                 onClick={() => setIsAddClientOpen(true)}
@@ -409,12 +409,12 @@ export default function Clients() {
             </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <SearchInput 
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Search clients..."
-            className="w-64"
+            className="w-full sm:w-64"
           />
 
           <Select value={sortBy} onValueChange={setSortBy}>
@@ -458,7 +458,7 @@ export default function Clients() {
           ))}
         </div>
       ) : filteredClients.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 animate-fade-in">
           {filteredClients.map((client) => (
             <ClientCard 
               key={client.id} 
