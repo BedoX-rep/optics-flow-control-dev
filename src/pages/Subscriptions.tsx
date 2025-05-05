@@ -255,20 +255,38 @@ const renderSubscriptionPlans = () => {
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter className="pt-6">
-                <Button 
-                  onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
-                  disabled={currentSubscription?.subscription_type === type}
-                  className={`
-                    w-full ${type === 'Quarterly' ? 
-                    'bg-teal-600 hover:bg-teal-700' : 
-                    'bg-gray-800 hover:bg-gray-900'}
-                  `}
-                >
-                  {currentSubscription?.subscription_type === type ? 
-                    'Current Plan' : 
-                    type === 'Lifetime' ? 'Get Lifetime Access' : 'Subscribe Now'}
-                </Button>
+              <CardFooter className="pt-6 flex flex-col gap-4">
+                <div className="flex flex-col gap-3 w-full">
+                  <Button 
+                    onClick={() => {
+                      window.location.href = `tel:+21262706249`;
+                    }}
+                    variant="outline"
+                    className="w-full flex items-center gap-2 border-teal-200 hover:bg-teal-50"
+                  >
+                    <Phone className="h-4 w-4" />
+                    Pay via Bank Transfer
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">Contact +212 62706249</p>
+                </div>
+                
+                <div className="flex flex-col gap-3 w-full">
+                  <Button 
+                    onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
+                    disabled={currentSubscription?.subscription_type === type}
+                    className={`
+                      w-full ${type === 'Quarterly' ? 
+                      'bg-teal-600 hover:bg-teal-700' : 
+                      'bg-gray-800 hover:bg-gray-900'}
+                    `}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    {currentSubscription?.subscription_type === type ? 
+                      'Current Plan' : 
+                      'Pay with Card/PayPal'}
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">Secure online payment</p>
+                </div>
               </CardFooter>
             </Card>
           </motion.div>
