@@ -25,6 +25,10 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <ShoppingBag className="h-5 w-5 text-primary" />
+            <div className="flex flex-col">
+              <span className="text-base font-medium">{receipt.client_name}</span>
+              <span className="text-sm text-gray-500">{receipt.client_phone}</span>
+            </div>
           </DialogTitle>
         </DialogHeader>
 

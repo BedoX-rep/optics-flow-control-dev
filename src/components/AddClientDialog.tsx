@@ -25,7 +25,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(8, "Phone must be at least 8 characters"),
+  phone: z.string().optional().nullable(),
   right_eye_sph: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   right_eye_cyl: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   right_eye_axe: z.union([z.string().transform(val => val === '' ? null : parseInt(val)), z.number()]).nullable(),
