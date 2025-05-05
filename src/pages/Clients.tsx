@@ -294,12 +294,12 @@ export default function Clients() {
       }
 
       // Save all changes
-      await Promise.all(Array.from(editedCards).map(async (card) => {
+      const updatePromises = Array.from(editedCards).map(async (card) => {
         const clientId = card.getAttribute('data-client-id');
         if (clientId) {
           const clientData = clients.find(c => c.id === clientId);
           if (clientData) {
-            const { error } = await supabase
+            const { data, error } = await supabase
               .from('clients')
               .update({
                 name: clientData.name,
@@ -312,15 +312,24 @@ export default function Clients() {
                 left_eye_axe: clientData.left_eye_axe,
                 Add: clientData.Add
               })
-              .eq('id', clientId);
+              .eq('id', clientId)
+              .select();
 
             if (error) throw error;
+            return data;
           }
         }
-      }));
+      });
+
+      await Promise.all(updatePromises);
+      
+      // Clear the edited state of all cards
+      editedCards.forEach(card => {
+        card.setAttribute('data-is-edited', 'false');
+      });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      fetchClients(); // Refresh the list
+      await fetchClients(); // Refresh the list
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
