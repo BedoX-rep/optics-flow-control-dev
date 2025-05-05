@@ -112,24 +112,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   const { card: cardColor, avatar: avatarColor } = getColorScheme();
 
-  const handleViewReceipt = async (receipt: Receipt) => {
-    try {
-      // Get full receipt details with items
-      const { data, error } = await supabase
-        .from('receipts')
-        .select('*, receipt_items(*)')
-        .eq('id', receipt.id)
-        .eq('is_deleted', false)
-        .single();
-
-      if (error) throw error;
-
-      setSelectedReceipt(data);
-      setIsReceiptDialogOpen(true);
-    } catch (error) {
-      console.error("Error fetching receipt details:", error);
-      toast.error("Failed to load receipt details");
-    }
+  const handleViewReceipt = (receipt: Receipt) => {
+    setSelectedReceipt(receipt);
+    setIsReceiptDialogOpen(true);
   };
 
   const handleEditReceipt = (receipt: Receipt) => {

@@ -65,32 +65,26 @@ export default function Clients() {
 
     const { data: clientsData, error } = await supabase
       .from('clients')
-      .select('*')
+      .select(`
+        *,
+        receipts!inner(
+          id,
+          created_at,
+          total,
+          advance_payment,
+          balance,
+          payment_status,
+          is_deleted,
+          receipt_items(*)
+        )
+      `)
       .eq('user_id', user.id)
       .eq('is_deleted', false)
+      .eq('receipts.is_deleted', false)
       .order('name');
 
     if (error) throw error;
-
-    const clientsWithReceipts = await Promise.all(
-      clientsData.map(async (client) => {
-        const { data: receiptsData, error: receiptsError } = await supabase
-          .from('receipts')
-          .select('*')
-          .eq('client_id', client.id)
-          .eq('is_deleted', false)
-          .order('created_at', { ascending: false });
-
-        if (receiptsError) {
-          console.error('Error fetching receipts:', receiptsError);
-          return { ...client, receipts: [] };
-        }
-
-        return { ...client, receipts: receiptsData };
-      })
-    );
-
-    return clientsWithReceipts;
+    return clientsData;
   };
 
   const { data: clients = [], isLoading } = useQuery({
