@@ -184,8 +184,9 @@ const ReceiptCard = ({
                     </div>
                     {isCurrent && (
                       <motion.div
-                        initial={{ opacity: 1, scale: 1 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={false}
+                        layoutId="progressCircle"
+                        transition={{ type: "spring", duration: 0.5 }}
                         className={`absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 ${
                           status === 'UnOrdered' ? 'border-gray-500'
                           : status === 'Ordered' ? 'border-blue-500'
