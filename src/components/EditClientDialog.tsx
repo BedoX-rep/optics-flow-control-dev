@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -28,20 +27,20 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(8, "Phone must be at least 8 characters"),
   gender: z.enum(["Mr", "Mme", "Enf"]),
-  right_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  right_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
+  right_eye_sph: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  right_eye_cyl: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
   right_eye_axe: z.union([
-    z.string().transform((val) => val === '' ? undefined : parseInt(val)),
+    z.string().transform((val) => val === '' ? null : parseInt(val)),
     z.number()
-  ]).optional(),
-  left_eye_sph: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  left_eye_cyl: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
+  ]).nullable(),
+  left_eye_sph: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  left_eye_cyl: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
   left_eye_axe: z.union([
-    z.string().transform((val) => val === '' ? undefined : parseInt(val)),
+    z.string().transform((val) => val === '' ? null : parseInt(val)),
     z.number()
-  ]).optional(),
-  Add: z.string().transform((val) => val === '' ? undefined : parseFloat(val)).optional(),
-  assurance: z.string().optional(),
+  ]).nullable(),
+  Add: z.string().transform((val) => val === '' ? null : parseFloat(val)).nullable(),
+  assurance: z.string().nullable().optional(),
   notes: z.string().nullable().optional()
 })
 
@@ -54,13 +53,13 @@ interface EditClientDialogProps {
     name: string;
     phone: string;
     gender: "Mr" | "Mme" | "Enf";
-    right_eye_sph?: number;
-    right_eye_cyl?: number;
-    right_eye_axe?: number;
-    left_eye_sph?: number;
-    left_eye_cyl?: number;
-    left_eye_axe?: number;
-    notes?: string;
+    right_eye_sph?: number | null;
+    right_eye_cyl?: number | null;
+    right_eye_axe?: number | null;
+    left_eye_sph?: number | null;
+    left_eye_cyl?: number | null;
+    left_eye_axe?: number | null;
+    notes?: string | null;
   };
 }
 
@@ -75,12 +74,12 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
       name: client?.name || "",
       phone: client?.phone || "",
       gender: client?.gender,
-      right_eye_sph: client?.right_eye_sph?.toString() || "",
-      right_eye_cyl: client?.right_eye_cyl?.toString() || "",
-      right_eye_axe: client?.right_eye_axe,
-      left_eye_sph: client?.left_eye_sph?.toString() || "",
-      left_eye_cyl: client?.left_eye_cyl?.toString() || "",
-      left_eye_axe: client?.left_eye_axe,
+      right_eye_sph: client?.right_eye_sph !== undefined && client?.right_eye_sph !== null ? String(client.right_eye_sph) : "",
+      right_eye_cyl: client?.right_eye_cyl !== undefined && client?.right_eye_cyl !== null ? String(client.right_eye_cyl) : "",
+      right_eye_axe: client?.right_eye_axe !== undefined && client?.right_eye_axe !== null ? client.right_eye_axe : null,
+      left_eye_sph: client?.left_eye_sph !== undefined && client?.left_eye_sph !== null ? String(client.left_eye_sph) : "",
+      left_eye_cyl: client?.left_eye_cyl !== undefined && client?.left_eye_cyl !== null ? String(client.left_eye_cyl) : "",
+      left_eye_axe: client?.left_eye_axe !== undefined && client?.left_eye_axe !== null ? client.left_eye_axe : null,
       notes: client?.notes || ""
     },
   })
@@ -91,11 +90,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         name: client.name,
         phone: client.phone,
         gender: client.gender,
-        right_eye_sph: client.right_eye_sph !== undefined ? client.right_eye_sph.toString() : "",
-        right_eye_cyl: client.right_eye_cyl !== undefined ? client.right_eye_cyl.toString() : "",
+        right_eye_sph: client.right_eye_sph !== undefined && client.right_eye_sph !== null ? String(client.right_eye_sph) : "",
+        right_eye_cyl: client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? String(client.right_eye_cyl) : "",
         right_eye_axe: client.right_eye_axe,
-        left_eye_sph: client.left_eye_sph !== undefined ? client.left_eye_sph.toString() : "",
-        left_eye_cyl: client.left_eye_cyl !== undefined ? client.left_eye_cyl.toString() : "",
+        left_eye_sph: client.left_eye_sph !== undefined && client.left_eye_sph !== null ? String(client.left_eye_sph) : "",
+        left_eye_cyl: client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? String(client.left_eye_cyl) : "",
         left_eye_axe: client.left_eye_axe,
         notes: client.notes || ""
       });

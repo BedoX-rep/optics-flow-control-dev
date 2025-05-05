@@ -39,7 +39,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
-    items: [] as any[]
+    items: [] as any[],
+    total: 0
   });
 
   useEffect(() => {
@@ -47,18 +48,19 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       setFormData({
         client_name: receipt.client_name || '',
         client_phone: receipt.client_phone || '',
-        right_eye_sph: receipt.right_eye_sph || '',
-        right_eye_cyl: receipt.right_eye_cyl || '',
-        right_eye_axe: receipt.right_eye_axe || '',
-        left_eye_sph: receipt.left_eye_sph || '',
-        left_eye_cyl: receipt.left_eye_cyl || '',
-        left_eye_axe: receipt.left_eye_axe || '',
-        add: receipt.add || '',
+        right_eye_sph: receipt.right_eye_sph !== null ? String(receipt.right_eye_sph) : '',
+        right_eye_cyl: receipt.right_eye_cyl !== null ? String(receipt.right_eye_cyl) : '',
+        right_eye_axe: receipt.right_eye_axe !== null ? String(receipt.right_eye_axe) : '',
+        left_eye_sph: receipt.left_eye_sph !== null ? String(receipt.left_eye_sph) : '',
+        left_eye_cyl: receipt.left_eye_cyl !== null ? String(receipt.left_eye_cyl) : '',
+        left_eye_axe: receipt.left_eye_axe !== null ? String(receipt.left_eye_axe) : '',
+        add: receipt.add !== null ? String(receipt.add) : '',
         montage_costs: receipt.montage_costs || 0,
         advance_payment: receipt.advance_payment || 0,
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
-        items: receipt.receipt_items || []
+        items: receipt.receipt_items || [],
+        total: receipt.total || 0
       });
     }
   }, [receipt]);
@@ -74,13 +76,13 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
       const { error: receiptError } = await supabase
         .from('receipts')
         .update({
-          right_eye_sph: formData.right_eye_sph || null,
-          right_eye_cyl: formData.right_eye_cyl || null,
-          right_eye_axe: formData.right_eye_axe || null,
-          left_eye_sph: formData.left_eye_sph || null,
-          left_eye_cyl: formData.left_eye_cyl || null,
-          left_eye_axe: formData.left_eye_axe || null,
-          add: formData.add || null,
+          right_eye_sph: formData.right_eye_sph ? parseFloat(formData.right_eye_sph) : null,
+          right_eye_cyl: formData.right_eye_cyl ? parseFloat(formData.right_eye_cyl) : null,
+          right_eye_axe: formData.right_eye_axe ? parseInt(formData.right_eye_axe) : null,
+          left_eye_sph: formData.left_eye_sph ? parseFloat(formData.left_eye_sph) : null,
+          left_eye_cyl: formData.left_eye_cyl ? parseFloat(formData.left_eye_cyl) : null,
+          left_eye_axe: formData.left_eye_axe ? parseInt(formData.left_eye_axe) : null,
+          add: formData.add ? parseFloat(formData.add) : null,
           montage_costs: formData.montage_costs,
           advance_payment: formData.advance_payment,
           delivery_status: formData.delivery_status,
@@ -138,6 +140,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateItemsTotal = () => {
+    return formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
   return (
@@ -317,8 +323,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                         const newItems = [...formData.items];
                         const newQuantity = parseInt(e.target.value) || 1;
                         newItems[index] = { ...item, quantity: newQuantity };
-                        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                        setFormData({ ...formData, items: newItems, total: newTotal });
+                        setFormData({ ...formData, items: newItems });
                       }}
                     />
                   </div>
@@ -331,8 +336,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                         const newItems = [...formData.items];
                         const newPrice = parseFloat(e.target.value) || 0;
                         newItems[index] = { ...item, price: newPrice };
-                        const newTotal = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                        setFormData({ ...formData, items: newItems, total: newTotal });
+                        setFormData({ ...formData, items: newItems });
                       }}
                     />
                   </div>
@@ -351,7 +355,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt, onUpdate }: ReceiptEditDi
                 </div>
               ))}
               <div className="text-right text-sm font-medium">
-                Total: {formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)} DH
+                Total: {calculateItemsTotal().toFixed(2)} DH
               </div>
             </div>
           </TabsContent>

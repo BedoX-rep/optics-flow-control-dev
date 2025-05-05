@@ -6,10 +6,10 @@ import { toast } from "sonner";
 import { ClientCard } from "@/components/ClientCard";
 import { SearchInput } from "@/components/SearchInput";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { PageTitle } from "@/components/PageTitle";
-import { EditClientDialog } from "@/components/EditClientDialog";
+import PageTitle from "@/components/PageTitle";
+import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
-import { AddClientDialog } from "@/components/AddClientDialog";
+import AddClientDialog from "@/components/AddClientDialog";
 import { Filter, UserPlus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -120,9 +120,11 @@ export default function Clients() {
 
   const handleAddClient = async (name: string, phone: string) => {
     try {
+      if (!user) return;
+      
       const { data, error } = await supabase
         .from('clients')
-        .insert([{ name, phone }])
+        .insert({ name, phone, user_id: user.id })
         .select()
         .single();
 
@@ -204,7 +206,7 @@ export default function Clients() {
 
   return (
     <div className="container px-4 sm:px-6 max-w-7xl mx-auto py-8 space-y-8">
-      <PageTitle>Clients</PageTitle>
+      <PageTitle title="Clients" />
       
       {/* Search and filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -323,7 +325,7 @@ export default function Clients() {
 
       {/* Add client dialog */}
       <AddClientDialog 
-        open={isAddClientOpen} 
+        isOpen={isAddClientOpen} 
         onClose={() => setIsAddClientOpen(false)} 
         onAddClient={handleAddClient}
       />
@@ -332,15 +334,15 @@ export default function Clients() {
       {clientToEdit && (
         <EditClientDialog 
           client={clientToEdit}
-          open={!!clientToEdit}
+          isOpen={!!clientToEdit}
           onClose={() => setClientToEdit(null)}
-          onUpdateClient={handleUpdateClient}
+          onClientUpdated={handleUpdateClient}
         />
       )}
       
       {/* Import clients dialog */}
       <ImportClientsDialog 
-        open={isImportDialogOpen} 
+        isOpen={isImportDialogOpen} 
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportClients}
       />

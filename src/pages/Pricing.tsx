@@ -12,8 +12,8 @@ const Pricing = () => {
   const { user, subscription } = useAuth();
   
   // Check if user has a subscription and if it's the quarterly plan
-  const isQuarterlyPlan = subscription?.subscription_status === 'active' && 
-                          subscription?.subscription_type === 'quarterly';
+  const isQuarterlyPlan = subscription?.subscription_status === 'Active' && 
+                          subscription?.subscription_type === 'Quarterly';
 
   const pricingPlans = [
     {
