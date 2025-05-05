@@ -85,35 +85,29 @@ const ReceiptCard = ({
     mutationFn: async ({ id, amount }: { id: string; amount: number }) => {
       const { error } = await supabase
         .from('receipts')
-        .update({ advance_payment: amount })
+        .update({ 
+          advance_payment: amount,
+          balance: receipt.total - amount 
+        })
         .eq('id', id);
       if (error) throw error;
     },
-    onMutate: async ({ id, amount }) => {
-      await queryClient.cancelQueries(['receipts']);
-      const previousReceipts = queryClient.getQueryData(['receipts']);
-      
-      queryClient.setQueryData(['receipts'], (old: any) => {
-        return old?.map((r: Receipt) => 
-          r.id === id ? { ...r, advance_payment: amount, balance: r.total - amount } : r
-        );
+    onSuccess: () => {
+      queryClient.invalidateQueries(['receipts']);
+      setEditingAdvance(false);
+      toast({
+        title: "Success",
+        description: "Advance payment updated successfully",
       });
-      
-      return { previousReceipts };
     },
-    onError: (err, variables, context) => {
-      if (context?.previousReceipts) {
-        queryClient.setQueryData(['receipts'], context.previousReceipts);
-      }
+    onError: (error) => {
+      console.error('Error updating advance:', error);
       toast({
         title: "Error",
         description: "Failed to update advance payment",
         variant: "destructive"
       });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(['receipts']);
-      setEditingAdvance(false);
+      setAdvanceValue(receipt.advance_payment || 0);
     }
   });
 
@@ -184,36 +178,51 @@ const ReceiptCard = ({
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
                     <div className="flex items-center gap-2">
                       {editingAdvance ? (
-                        <>
-                          <input
-                            type="number"
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="text"
                             value={advanceValue}
-                            onChange={(e) => setAdvanceValue(parseFloat(e.target.value) || 0)}
-                            className="w-20 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^\d.]/g, '');
+                              const parsedValue = parseFloat(value) || 0;
+                              setAdvanceValue(parsedValue);
+                            }}
+                            className="w-24 h-7 px-2 text-sm"
                           />
                           <Button 
-                            variant="ghost" 
-                            size="icon"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2 text-xs"
                             onClick={() => {
-                              updateAdvanceMutation.mutate({ id: receipt.id, amount: advanceValue });
+                              if (advanceValue <= receipt.total) {
+                                updateAdvanceMutation.mutate({ 
+                                  id: receipt.id, 
+                                  amount: advanceValue 
+                                });
+                              } else {
+                                toast({
+                                  title: "Error",
+                                  description: "Advance cannot exceed total amount",
+                                  variant: "destructive"
+                                });
+                              }
                             }}
-                            className="h-6 w-6 hover:bg-red-100"
                           >
-                            <Check className="h-3 w-3 text-red-600" />
+                            Save
                           </Button>
-                        </>
+                        </div>
                       ) : (
-                        <>
+                        <div className="flex items-center gap-1">
                           <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
                           <Button 
                             variant="ghost" 
-                            size="icon"
+                            size="sm"
                             onClick={() => setEditingAdvance(true)}
-                            className="h-6 w-6"
+                            className="h-6 px-1"
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
