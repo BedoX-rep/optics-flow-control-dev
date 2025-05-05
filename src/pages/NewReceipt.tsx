@@ -59,6 +59,64 @@ interface ReceiptItem {
 }
 
 const NewReceipt = () => {
+  // Load saved data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('newReceiptData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setSelectedClient(parsedData.selectedClient || '');
+      setItems(parsedData.items || []);
+      setRightEye(parsedData.rightEye || { sph: '', cyl: '', axe: '' });
+      setLeftEye(parsedData.leftEye || { sph: '', cyl: '', axe: '' });
+      setAdd(parsedData.add || '');
+      setPrescriptionOpen(parsedData.prescriptionOpen || false);
+      setPaymentOpen(parsedData.paymentOpen || true);
+      setDiscount(parsedData.discount || 0);
+      setNumericDiscount(parsedData.numericDiscount || 0);
+      setTax(parsedData.tax || 0);
+      setAdvancePayment(parsedData.advancePayment || 0);
+      setOrderType(parsedData.orderType || 'Unspecified');
+    }
+  }, []);
+
+  // Save data to localStorage whenever relevant state changes
+  useEffect(() => {
+    const dataToSave = {
+      selectedClient,
+      items,
+      rightEye,
+      leftEye,
+      add,
+      prescriptionOpen,
+      paymentOpen,
+      discount,
+      numericDiscount,
+      tax,
+      advancePayment,
+      orderType
+    };
+    localStorage.setItem('newReceiptData', JSON.stringify(dataToSave));
+
+    // Set up auto-clear after 5 minutes
+    const clearTimeout = setTimeout(() => {
+      localStorage.removeItem('newReceiptData');
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearTimeout(clearTimeout);
+  }, [
+    selectedClient,
+    items,
+    rightEye,
+    leftEye,
+    add,
+    prescriptionOpen,
+    paymentOpen,
+    discount,
+    numericDiscount,
+    tax,
+    advancePayment,
+    orderType
+  ]);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -518,6 +576,34 @@ const NewReceipt = () => {
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={() => {
+            // Clear form data and localStorage
+            localStorage.removeItem('newReceiptData');
+            setSelectedClient('');
+            setItems([]);
+            setRightEye({ sph: '', cyl: '', axe: '' });
+            setLeftEye({ sph: '', cyl: '', axe: '' });
+            setAdd('');
+            setPrescriptionOpen(false);
+            setPaymentOpen(true);
+            setDiscount(0);
+            setNumericDiscount(0);
+            setTax(0);
+            setAdvancePayment(0);
+            setBalance(0);
+            setPaymentStatus('Unpaid');
+            setSearchTerm('');
+            setProductSearchTerms({});
+            setOrderType('Unspecified');
+          }}
+        >
+          <X className="h-4 w-4" /> Clear Form
+        </Button>
+      </div>
       <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
