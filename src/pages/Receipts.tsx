@@ -292,25 +292,27 @@ const Receipts = () => {
     refetchOnReconnect: false
   });
 
-  const filteredReceipts = receipts.filter(receipt => {
-    const matchesSearch = 
-      (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredReceipts = React.useMemo(() => {
+    return receipts.filter(receipt => {
+      const matchesSearch = 
+        (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesPayment = 
-      paymentFilter === 'all' ? true :
-      paymentFilter === 'paid' ? receipt.balance === 0 :
-      paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
-      receipt.balance === receipt.total;
+      const matchesPayment = 
+        paymentFilter === 'all' ? true :
+        paymentFilter === 'paid' ? receipt.balance === 0 :
+        paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
+        receipt.balance === receipt.total;
 
-    const matchesDelivery = 
-      deliveryFilter === 'all' ? true :
-      receipt.delivery_status === deliveryFilter;
+      const matchesDelivery = 
+        deliveryFilter === 'all' ? true :
+        receipt.delivery_status === deliveryFilter;
 
-    const matchesDate = isReceiptInDateRange(receipt);
+      const matchesDate = isReceiptInDateRange(receipt);
 
-    return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
-  });
+      return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
+    });
+  }, [receipts, searchTerm, paymentFilter, deliveryFilter, dateFilter]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
