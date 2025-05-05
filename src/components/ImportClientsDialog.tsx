@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
-import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Upload, FileText, AlertCircle, CheckCircle2, Info } from "lucide-react"
 import Papa from "papaparse"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -215,10 +215,18 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         
         {step === 2 && (
           <div className="space-y-4">
+            <Alert variant="default" className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle>Column Mapping</AlertTitle>
+              <AlertDescription className="text-sm">
+                Please match the columns from your CSV file to the correct client fields.
+              </AlertDescription>
+            </Alert>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name Column
+                  Name Column (required)
                 </label>
                 <select 
                   className="w-full rounded-md border border-gray-300 p-2 text-sm"
@@ -232,7 +240,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Column
+                  Phone Column (required)
                 </label>
                 <select 
                   className="w-full rounded-md border border-gray-300 p-2 text-sm"

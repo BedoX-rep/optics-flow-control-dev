@@ -106,11 +106,11 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
         phone: client.phone,
         right_eye_sph: client.right_eye_sph !== undefined && client.right_eye_sph !== null ? client.right_eye_sph : null,
         right_eye_cyl: client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? client.right_eye_cyl : null,
-        right_eye_axe: client.right_eye_axe,
+        right_eye_axe: client.right_eye_axe !== undefined && client.right_eye_axe !== null ? client.right_eye_axe : null,
         left_eye_sph: client.left_eye_sph !== undefined && client.left_eye_sph !== null ? client.left_eye_sph : null,
         left_eye_cyl: client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? client.left_eye_cyl : null,
-        left_eye_axe: client.left_eye_axe,
-        Add: client.Add,
+        left_eye_axe: client.left_eye_axe !== undefined && client.left_eye_axe !== null ? client.left_eye_axe : null,
+        Add: client.Add !== undefined && client.Add !== null ? client.Add : null,
         notes: client.notes || "",
         assurance: client.assurance || ""
       });
@@ -203,7 +203,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="right_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Sph</FormLabel>
+                        <FormLabel className="text-xs">SPH</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -230,7 +230,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="right_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Cyl</FormLabel>
+                        <FormLabel className="text-xs">CYL</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -257,7 +257,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="right_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Axe</FormLabel>
+                        <FormLabel className="text-xs">AXE</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -292,7 +292,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="left_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Sph</FormLabel>
+                        <FormLabel className="text-xs">SPH</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -319,7 +319,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="left_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Cyl</FormLabel>
+                        <FormLabel className="text-xs">CYL</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -346,7 +346,7 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
                     name="left_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Axe</FormLabel>
+                        <FormLabel className="text-xs">AXE</FormLabel>
                         <FormControl>
                           <Input 
                             type="text"
@@ -438,4 +438,5 @@ const EditClientDialog = ({ isOpen, onClose, onClientUpdated, client }: EditClie
     </Dialog>
   )
 }
+
 export default EditClientDialog

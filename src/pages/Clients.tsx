@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
@@ -40,6 +41,7 @@ interface Client {
     advance_payment?: number;
     balance?: number;
     payment_status?: string;
+    is_deleted?: boolean;
   }>;
 }
 
@@ -243,7 +245,7 @@ export default function Clients() {
 
       if (error) throw error;
       
-      toast.success(`${data.length} clients imported successfully!`);
+      toast.success(`${data?.length} clients imported successfully!`);
       fetchClients(); // Refresh clients list
       setIsImportDialogOpen(false);
     } catch (error: any) {

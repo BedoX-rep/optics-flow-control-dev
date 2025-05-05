@@ -29,9 +29,10 @@ interface AddClientDialogProps {
   isOpen: boolean
   onClose: () => void
   onAddClient: (name: string, phone: string) => Promise<void>
+  onClientAdded?: (client: any) => Promise<void> // Add optional property for NewReceipt page
 }
 
-const AddClientDialog = ({ isOpen, onClose, onAddClient }: AddClientDialogProps) => {
+const AddClientDialog = ({ isOpen, onClose, onAddClient, onClientAdded }: AddClientDialogProps) => {
   const { toast } = useToast()
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,6 +46,13 @@ const AddClientDialog = ({ isOpen, onClose, onAddClient }: AddClientDialogProps)
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await onAddClient(values.name, values.phone)
+      
+      // If onClientAdded is provided (from NewReceipt page), call it with the values
+      if (onClientAdded) {
+        const client = { name: values.name, phone: values.phone };
+        await onClientAdded(client);
+      }
+      
       form.reset()
     } catch (error: any) {
       toast({
