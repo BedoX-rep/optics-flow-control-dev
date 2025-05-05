@@ -69,19 +69,43 @@ const ReceiptCard = ({
     >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
         <CardContent className="p-6">
-          <div className="flex flex-col gap-4 mb-4">
+          <div className="flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold mb-1">{receipt.client_name}</h3>
                 <p className="text-sm text-gray-500">{receipt.client_phone}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {format(new Date(receipt.created_at), 'MMM dd, yyyy')}
+                </p>
               </div>
-              <div className="flex gap-2">
-                <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
-                  {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
-                </Badge>
-                <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
-                  {receipt.delivery_status}
-                </Badge>
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex gap-2">
+                  <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}>
+                    {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+                  </Badge>
+                  <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}>
+                    {receipt.delivery_status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50/50 rounded-lg p-3">
+              <div>
+                <p className="text-gray-500">Total</p>
+                <p className="font-medium">{receipt.total?.toFixed(2)} DH</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Advance</p>
+                <p className="font-medium text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Balance</p>
+                <p className="font-medium text-red-600">{receipt.balance?.toFixed(2)} DH</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Profit</p>
+                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
               </div>
             </div>
 
