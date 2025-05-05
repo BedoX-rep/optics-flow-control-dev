@@ -90,10 +90,12 @@ const ReceiptCard = ({
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
-                  <div className="flex items-center gap-1">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <Phone className="h-3 w-3 text-gray-400" />
                     <span className="text-xs text-blue-600">{receipt.client_phone}</span>
                   </div>
@@ -111,7 +113,7 @@ const ReceiptCard = ({
                 </div>
               </div>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-shrink-0">
                 {receipt.balance > 0 && (
                   <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
                     <Check className="h-4 w-4 text-green-600" />
