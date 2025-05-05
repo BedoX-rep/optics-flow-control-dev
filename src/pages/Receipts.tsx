@@ -117,11 +117,7 @@ const ReceiptCard = ({
     }
   });
 
-  const handleAdvanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAdvance = parseFloat(e.target.value) || 0;
-    setAdvanceValue(newAdvance);
-    updateAdvanceMutation.mutate({ id: receipt.id, amount: newAdvance });
-  };
+  
 
 
   return (
@@ -186,13 +182,39 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Advance</p>
-                    <div className={`inline-block ml-1 ${editingAdvance ? 'border-primary' : 'border-gray-400'} border-b border-dashed focus:outline-none text-gray-600 hover:bg-gray-100 px-1`}>
-                      <input
-                        type="number"
-                        value={advanceValue}
-                        onChange={handleAdvanceChange}
-                        className="w-20 bg-transparent focus:outline-none text-gray-600"
-                      /> DH
+                    <div className="flex items-center gap-2">
+                      {editingAdvance ? (
+                        <>
+                          <input
+                            type="number"
+                            value={advanceValue}
+                            onChange={(e) => setAdvanceValue(parseFloat(e.target.value) || 0)}
+                            className="w-20 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              updateAdvanceMutation.mutate({ id: receipt.id, amount: advanceValue });
+                            }}
+                            className="h-6 w-6 hover:bg-red-100"
+                          >
+                            <Check className="h-3 w-3 text-red-600" />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-gray-600">{advanceValue.toFixed(2)} DH</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => setEditingAdvance(true)}
+                            className="h-6 w-6"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
