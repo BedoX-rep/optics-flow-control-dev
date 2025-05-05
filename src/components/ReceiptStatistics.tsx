@@ -50,28 +50,36 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
     receipt.receipt_items?.forEach(item => {
       const quantity = item.quantity || 1;
       const cost = item.cost || 0;
+      const price = item.price || 0;
+      const totalItemRevenue = price * quantity;
       const totalItemCost = cost * quantity;
 
       if (item.product?.category === 'Single Vision Lenses') {
-        acc.singleVision += totalItemCost;
+        acc.singleVision += totalItemRevenue;
+        acc.singleVisionCost += totalItemCost;
         acc.singleVisionCount += quantity;
       } else if (item.product?.category === 'Progressive Lenses') {
-        acc.progressive += totalItemCost;
+        acc.progressive += totalItemRevenue;
+        acc.progressiveCost += totalItemCost;
         acc.progressiveCount += quantity;
       } else if (item.product?.category === 'Frames') {
-        acc.frames += totalItemCost;
+        acc.frames += totalItemRevenue;
+        acc.framesCost += totalItemCost;
         acc.framesCount += quantity;
       } else if (item.product?.category === 'Sunglasses') {
-        acc.sunglasses += totalItemCost;
+        acc.sunglasses += totalItemRevenue;
+        acc.sunglassesCost += totalItemCost;
         acc.sunglassesCount += quantity;
       } else if (item.product?.category === 'Accessories') {
-        acc.accessories += totalItemCost;
+        acc.accessories += totalItemRevenue;
+        acc.accessoriesCost += totalItemCost;
         acc.accessoriesCount += quantity;
       }
     });
     return acc;
   }, { 
     singleVision: 0, progressive: 0, frames: 0, sunglasses: 0, accessories: 0,
+    singleVisionCost: 0, progressiveCost: 0, framesCost: 0, sunglassesCost: 0, accessoriesCost: 0,
     singleVisionCount: 0, progressiveCount: 0, framesCount: 0, sunglassesCount: 0, accessoriesCount: 0 
   });
 
@@ -135,26 +143,65 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold mb-4">Product Categories</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Single Vision ({lensTypeCosts.singleVisionCount}):</span>
-                  <span className="font-medium">{lensTypeCosts.singleVision.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Progressive ({lensTypeCosts.progressiveCount}):</span>
-                  <span className="font-medium">{lensTypeCosts.progressive.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Frames ({lensTypeCosts.framesCount}):</span>
-                  <span className="font-medium">{lensTypeCosts.frames.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Sunglasses ({lensTypeCosts.sunglassesCount}):</span>
-                  <span className="font-medium">{lensTypeCosts.sunglasses.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Accessories ({lensTypeCosts.accessoriesCount}):</span>
-                  <span className="font-medium">{lensTypeCosts.accessories.toFixed(2)} DH</span>
+              <div className="space-y-4">
+                {Object.entries({
+                  'Single Vision': { count: lensTypeCosts.singleVisionCount, revenue: lensTypeCosts.singleVision, cost: lensTypeCosts.singleVisionCost },
+                  'Progressive': { count: lensTypeCosts.progressiveCount, revenue: lensTypeCosts.progressive, cost: lensTypeCosts.progressiveCost },
+                  'Frames': { count: lensTypeCosts.framesCount, revenue: lensTypeCosts.frames, cost: lensTypeCosts.framesCost },
+                  'Sunglasses': { count: lensTypeCosts.sunglassesCount, revenue: lensTypeCosts.sunglasses, cost: lensTypeCosts.sunglassesCost },
+                  'Accessories': { count: lensTypeCosts.accessoriesCount, revenue: lensTypeCosts.accessories, cost: lensTypeCosts.accessoriesCost }
+                }).map(([category, data]) => (
+                  <div key={category} className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-900 font-medium">{category} ({data.count})</span>
+                    </div>
+                    <div className="text-sm space-y-0.5">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Revenue:</span>
+                        <span className="font-medium">{data.revenue.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cost:</span>
+                        <span className="font-medium text-red-600">{data.cost.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Profit:</span>
+                        <span className="font-medium text-green-600">{(data.revenue - data.cost).toFixed(2)} DH</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-3 border-t space-y-1">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Total Revenue</span>
+                    <span className="font-medium">{(
+                      lensTypeCosts.singleVision +
+                      lensTypeCosts.progressive +
+                      lensTypeCosts.frames +
+                      lensTypeCosts.sunglasses +
+                      lensTypeCosts.accessories
+                    ).toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Total Cost</span>
+                    <span className="font-medium text-red-600">{(
+                      lensTypeCosts.singleVisionCost +
+                      lensTypeCosts.progressiveCost +
+                      lensTypeCosts.framesCost +
+                      lensTypeCosts.sunglassesCost +
+                      lensTypeCosts.accessoriesCost
+                    ).toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Total Profit</span>
+                    <span className="font-medium text-green-600">{(
+                      (lensTypeCosts.singleVision - lensTypeCosts.singleVisionCost) +
+                      (lensTypeCosts.progressive - lensTypeCosts.progressiveCost) +
+                      (lensTypeCosts.frames - lensTypeCosts.framesCost) +
+                      (lensTypeCosts.sunglasses - lensTypeCosts.sunglassesCost) +
+                      (lensTypeCosts.accessories - lensTypeCosts.accessoriesCost)
+                    ).toFixed(2)} DH</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
