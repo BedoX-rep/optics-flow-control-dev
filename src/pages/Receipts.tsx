@@ -159,7 +159,7 @@ const ReceiptCard = ({
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">Profit</p>
-                    <p className="font-medium text-emerald-600">{receipt.profit?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
                   </div>
                 </div>
               </div>
