@@ -1237,11 +1237,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
+const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave, autoMontage, onAutoMontageChange }: {
   isOpen: boolean;
   onClose: () => void;
   settings: any;
   onSave: (settings: any) => void;
+  autoMontage: boolean;
+  onAutoMontageChange: (checked: boolean) => void;
 }) => {
   const [localSettings, setLocalSettings] = useState({
     sph: settings.sph || [],
@@ -1280,6 +1282,16 @@ const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave }: {
       <DialogContent>
         <DialogTitle>Markup Settings</DialogTitle>
         <div className="space-y-4">
+          <div className="flex items-center bg-primary/5 p-3 rounded-lg mb-4">
+            <Switch
+              id="autoMontage"
+              checked={autoMontage}
+              onCheckedChange={onAutoMontageChange}
+            />
+            <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
+              Auto-add Montage costs
+            </Label>
+          </div>
           <h3>SPH Ranges</h3>
           {localSettings.sph.map((range, index) => (
             <div key={index} className="grid grid-cols-4 gap-2">
