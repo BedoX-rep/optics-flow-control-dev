@@ -69,7 +69,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
-    stock_status: initialValues.stock_status || 'Order',
+    stock_status: 'Order',
     ...initialValues
   });
   const [autoName, setAutoName] = useState<boolean>(!!initialValues.category); // default on if editing and has category
