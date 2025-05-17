@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -18,9 +19,12 @@ import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import { supabase } from "@/integrations/supabase/client";
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Product extends ProductSortable {
   cost_ttc?: number;
+  stock_status?: 'Order' | 'inStock' | 'Fabrication';
+  stock?: number;
 }
 
 const DEFAULT_FILTERS = {
@@ -43,10 +47,6 @@ const Products = () => {
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
-  const [sidebarWidth, setSidebarWidth] = useState(256);
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Product } | null>(null);
-  const [cellEditValue, setCellEditValue] = useState<string>('');
 
   useEffect(() => {
     setPageReady(true);
@@ -57,27 +57,6 @@ const Products = () => {
   useEffect(() => {
     sessionStorage.setItem("lensly_products_filters", JSON.stringify(filters));
   }, [filters]);
-
-  useEffect(() => {
-    function handleSidebar() {
-      const el = document.querySelector('.sidebar-gradient');
-      if (el) {
-        const expanded = !(el.classList.contains('group-data-[state=collapsed]') || 
-                          (el instanceof HTMLElement && el.style.width === '48px'));
-        setSidebarExpanded(expanded);
-        setSidebarWidth(el.clientWidth || 256);
-      }
-    }
-    window.addEventListener('resize', handleSidebar);
-    handleSidebar();
-    const observer = new MutationObserver(handleSidebar);
-    const sidebarEl = document.querySelector('.sidebar-gradient');
-    if (sidebarEl) observer.observe(sidebarEl, { attributes: true, attributeFilter: ['class', 'style'] });
-    return () => {
-      window.removeEventListener('resize', handleSidebar);
-      observer.disconnect();
-    }
-  }, []);
 
   const fetchProducts = async () => {
     if (!user) return [];
@@ -124,7 +103,9 @@ const Products = () => {
       image: editing.image ?? undefined,
       created_at: editing.created_at ?? undefined,
       cost_ttc: editing.cost_ttc ?? 0,
-    } : { name: '', price: 0, cost_ttc: 0 });
+      stock_status: editing.stock_status ?? 'Order',
+      stock: editing.stock ?? 0,
+    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     setIsOpen(true);
   };
 
@@ -161,7 +142,7 @@ const Products = () => {
     }));
   };
 
-    const handleFormSubmit = async (form: ProductFormValues) => {
+  const handleFormSubmit = async (form: ProductFormValues) => {
     if (!user) return;
     try {
       setIsSubmitting(true);
@@ -186,7 +167,7 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0 });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -199,110 +180,51 @@ const Products = () => {
     }
   };
 
-  const startInlineEdit = (product: Product, field: keyof Product) => {
-    setEditingCell({ id: product.id, field });
-    setCellEditValue(String(product[field] ?? ''));
-  };
-
-  const endInlineEdit = async (product: Product) => {
-    if (!editingCell || !user) return;
-    let val: string | number | null = cellEditValue;
-
-    if (editingCell.field === "price" || editingCell.field === "cost_ttc") {
-      val = Number(cellEditValue);
-    } else if (cellEditValue === "none_selected" || cellEditValue === "") {
-      val = null;
-    }
-
-    if (["category", "index", "treatment", "company"].includes(editingCell.field)) {
-      val = cellEditValue === "Custom" ? null : cellEditValue;
-    }
-
-    if (val === (product[editingCell.field] ?? null)) {
-      setEditingCell(null);
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ [editingCell.field]: val })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: "Updated", description: "Product updated successfully" });
-    } catch (error) {
-      console.error('Error updating product:', error);
-      toast({ 
-        title: "Error", 
-        description: "Failed to update product. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setEditingCell(null);
-      setIsSubmitting(false);
-    }
-  };
-
-  const removeProductImage = async (product: Product) => {
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ image: null })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: "Image Removed" });
-    } catch {
-      toast({ title: "Error", description: "Could not remove image." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (!editingCell) return;
-      if (e.key === "Escape") setEditingCell(null);
-      if (e.key === "Enter") {
-        const prod = products.find(p => p.id === editingCell.id);
-        if (prod) endInlineEdit(prod);
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [editingCell, cellEditValue, products]);
-
-  const handleInlineUpdate = async (product: Product, field: keyof Product, newValue: string | null) {
+  const handleStockStatusChange = async (product: Product, newStatus: 'Order' | 'inStock' | 'Fabrication') => {
     if (!user) return;
     try {
       setIsSubmitting(true);
       const { error } = await supabase
         .from('products')
-        .update({ [field]: newValue })
+        .update({ stock_status: newStatus })
         .eq('id', product.id)
         .eq('user_id', user.id);
-
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: "Updated", description: "Product updated successfully" });
+      toast({ title: "Success", description: "Stock status updated successfully" });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update product. Please try again.",
+        description: "Failed to update stock status",
         variant: "destructive"
       });
     } finally {
-      setEditingCell(null);
       setIsSubmitting(false);
     }
-  }
+  };
+
+  const handleStockChange = async (product: Product, newStock: number) => {
+    if (!user) return;
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('products')
+        .update({ stock: newStock })
+        .eq('id', product.id)
+        .eq('user_id', user.id);
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast({ title: "Success", description: "Stock updated successfully" });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update stock",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const filteredProducts = sortProducts(
     products.filter(product =>
@@ -411,6 +333,40 @@ const Products = () => {
                     <p className="text-neutral-500">Cost TTC</p>
                     <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-neutral-500">Stock Status:</span>
+                    <Select
+                      value={product.stock_status || 'Order'}
+                      onValueChange={(value: 'Order' | 'inStock' | 'Fabrication') => 
+                        handleStockStatusChange(product, value)
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Order">Order</SelectItem>
+                        <SelectItem value="inStock">In Stock</SelectItem>
+                        <SelectItem value="Fabrication">Fabrication</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {product.stock_status === 'inStock' && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-neutral-500">Stock:</span>
+                      <Input
+                        type="number"
+                        value={product.stock || 0}
+                        onChange={(e) => handleStockChange(product, Number(e.target.value))}
+                        className="h-8 w-24"
+                        min={0}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2">
