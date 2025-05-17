@@ -43,8 +43,8 @@ const ProductImage: React.FC<ProductImageProps> = ({
         <span className="flex items-center justify-center w-full h-full">
           {alt ? (
             <img 
-              src={`/src/Icons%20categories/${
-                alt === "Single Vision Lenses" ? "Single%20Vision.png" :
+              src={`/Icons categories/${
+                alt === "Single Vision Lenses" ? "Single VIsion.png" :
                 alt === "Progressive Lenses" ? "Progressive.png" :
                 alt === "Frames" ? "Frames.png" :
                 alt === "Sunglasses" ? "Sunglasses.png" :

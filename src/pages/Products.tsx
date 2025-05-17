@@ -67,8 +67,7 @@ const Products = () => {
       .from('products')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
-      .eq('is_deleted', false)
-      .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
+      .eq('is_deleted', false);
 
     // Apply search filter if exists
     if (searchTerm) {
@@ -322,7 +321,7 @@ const Products = () => {
                 <div className="flex items-center gap-4">
                   <ProductImage
                     src={product.image}
-                    alt={product.name}
+                    alt={product.category}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div className="flex-1 min-w-0">
