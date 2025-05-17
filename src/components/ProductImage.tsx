@@ -44,7 +44,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
           {alt ? (
             <img 
               src={`/Icons categories/${
-                alt === "Single Vision Lenses" ? "Single VIsion.png" :
+                alt === "Single Vision Lenses" ? "Single Vision.png" :
                 alt === "Progressive Lenses" ? "Progressive.png" :
                 alt === "Frames" ? "Frames.png" :
                 alt === "Sunglasses" ? "Sunglasses.png" :

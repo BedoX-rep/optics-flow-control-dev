@@ -67,7 +67,8 @@ const Products = () => {
       .from('products')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
-      .eq('is_deleted', false);
+      .eq('is_deleted', false)
+      .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
 
     // Apply search filter if exists
     if (searchTerm) {
@@ -454,3 +455,4 @@ const Products = () => {
 };
 
 export default Products;
+```
