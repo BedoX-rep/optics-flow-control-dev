@@ -99,14 +99,26 @@ export default function Clients() {
     queryKey: ['clients', user?.id, page, searchTerm, sortBy],
     queryFn: fetchClients,
     enabled: !!user,
+    keepPreviousData: true,
   });
 
-  const clients = data?.clients || [];
+  const [allClients, setAllClients] = useState<Client[]>([]);
+
+  useEffect(() => {
+    if (data?.clients) {
+      if (page === 0) {
+        setAllClients(data.clients);
+      } else {
+        setAllClients(prev => [...prev, ...data.clients]);
+      }
+    }
+  }, [data?.clients, page]);
+
   const hasMore = data?.hasMore || false;
 
   useEffect(() => {
-    setFilteredClients(clients);
-  }, [clients]);
+    setFilteredClients(allClients);
+  }, [allClients]);
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {

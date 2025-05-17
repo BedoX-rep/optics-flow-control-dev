@@ -95,9 +95,22 @@ const Products = () => {
     queryKey: ['products', user?.id, filters, page],
     queryFn: fetchProducts,
     enabled: !!user,
+    keepPreviousData: true,
   });
 
-  const { products, hasMore } = data;
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (data.products) {
+      if (page === 0) {
+        setAllProducts(data.products);
+      } else {
+        setAllProducts(prev => [...prev, ...data.products]);
+      }
+    }
+  }, [data.products, page]);
+
+  const { hasMore } = data;
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -235,7 +248,7 @@ const Products = () => {
   };
 
   const filteredProducts = sortProducts(
-    products.filter(product =>
+    allProducts.filter(product =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
