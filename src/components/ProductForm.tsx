@@ -89,8 +89,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
       if (form.company) parts.push(form.company?.toUpperCase());
-      if (form.stock_status === 'inStock') parts.push('INSTOCK');
-      if (form.stock_status === 'Fabrication') parts.push('FABRICATION');
+      if (form.stock_status === 'inStock' || form.stock_status === 'Fabrication') {
+        parts.push(form.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
+      }
 
       setForm(f => ({
         ...f,
