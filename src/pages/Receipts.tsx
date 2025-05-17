@@ -90,7 +90,7 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8]">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -581,9 +581,9 @@ const Receipts = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-7xl mx-auto py-4 sm:py-6 min-w-[320px] flex flex-col h-[calc(100svh-68px)]">
-      <div className="flex flex-col sm:flex-row items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0">
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px] flex flex-col h-[calc(100svh-68px)] overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
+        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
           <Link to="/new-receipt">
             <Button className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
               <Plus className="h-4 w-4 mr-2" />
@@ -708,8 +708,8 @@ const Receipts = () => {
         </div>
       </div>
 
-      <ScrollArea className="flex-grow overflow-y-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+      <ScrollArea className="flex-grow overflow-y-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-4 pb-6">
           <AnimatePresence>
             {isLoading ? (
               Array(6).fill(0).map((_, i) => (
