@@ -785,16 +785,7 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-2">
-              <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-lg">
-                <Switch
-                  id="autoMontage"
-                  checked={autoMontage}
-                  onCheckedChange={(checked) => setAutoMontage(checked)}
-                />
-                <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
-                  Auto-add Montage costs
-                </Label>
-              </div>
+              
 
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">

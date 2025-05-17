@@ -50,6 +50,14 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
   onSave,
 }) => {
   const [localSettings, setLocalSettings] = useState<MarkupSettings>(settings);
+  const [autoMontage, setAutoMontage] = useState(() => {
+    const saved = localStorage.getItem('autoMontage');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('autoMontage', JSON.stringify(autoMontage));
+  }, [autoMontage]);
 
   const validateRanges = (ranges: MarkupRange[]) => {
     // Sort ranges by min value
@@ -96,6 +104,16 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
           <DialogTitle>Markup Settings</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="flex items-center bg-primary/5 p-3 rounded-lg">
+            <Switch
+              id="autoMontage"
+              checked={autoMontage}
+              onCheckedChange={(checked) => setAutoMontage(checked)}
+            />
+            <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
+              Auto-add Montage costs
+            </Label>
+          </div>
           <div className="space-y-4">
             <h3 className="font-medium">SPH Ranges (±)</h3>
             {localSettings.sph.map((range, index) => (
