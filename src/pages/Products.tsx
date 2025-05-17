@@ -92,11 +92,13 @@ const Products = () => {
     };
   };
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products', user?.id, filters],
+  const { data = { products: [], hasMore: false }, isLoading } = useQuery({
+    queryKey: ['products', user?.id, filters, page],
     queryFn: fetchProducts,
     enabled: !!user,
   });
+  
+  const { products, hasMore } = data;
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
