@@ -28,6 +28,8 @@ interface MarkupSettingsDialogProps {
   onClose: () => void;
   settings: MarkupSettings;
   onSave: (settings: MarkupSettings) => void;
+  autoMontage: boolean;
+  onAutoMontageChange: (checked: boolean) => void;
 }
 
 export const defaultMarkupSettings: MarkupSettings = {
@@ -50,14 +52,7 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
   onSave,
 }) => {
   const [localSettings, setLocalSettings] = useState<MarkupSettings>(settings);
-  const [autoMontage, setAutoMontage] = useState(() => {
-    const saved = localStorage.getItem('autoMontage');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('autoMontage', JSON.stringify(autoMontage));
-  }, [autoMontage]);
+  
 
   const validateRanges = (ranges: MarkupRange[]) => {
     // Sort ranges by min value
@@ -107,8 +102,8 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
           <div className="flex items-center bg-primary/5 p-3 rounded-lg">
             <Switch
               id="autoMontage"
-              checked={autoMontage}
-              onCheckedChange={(checked) => setAutoMontage(checked)}
+              checked={props.autoMontage}
+              onCheckedChange={props.onAutoMontageChange}
             />
             <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
               Auto-add Montage costs

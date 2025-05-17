@@ -1223,6 +1223,8 @@ const NewReceipt = () => {
         onClose={() => setIsMarkupSettingsOpen(false)}
         settings={markupSettings}
         onSave={setMarkupSettings}
+        autoMontage={autoMontage}
+        onAutoMontageChange={setAutoMontage}
       />
     </div>
   );
