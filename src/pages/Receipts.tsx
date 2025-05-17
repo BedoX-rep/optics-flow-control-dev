@@ -42,6 +42,8 @@ interface Receipt {
   cost_ttc?: number;
   profit?: number;
   order_type?: string;
+  call_status: string;
+  time_called?: string;
 }
 
 const ReceiptCard = ({ 
@@ -51,7 +53,8 @@ const ReceiptCard = ({
   onDelete, 
   onView, 
   onEdit, 
-  onMontageChange 
+  onMontageChange,
+  onCallStatusChange 
 }: {
   receipt: Receipt;
   onPaid: () => void;
@@ -60,6 +63,7 @@ const ReceiptCard = ({
   onView: () => void;
   onEdit: () => void;
   onMontageChange: (status: string) => void;
+  onCallStatusChange: (status: string) => void;
 }) => {
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
@@ -114,6 +118,25 @@ const ReceiptCard = ({
               </div>
 
               <div className="flex gap-1 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onCallStatusChange(
+                    receipt.call_status === 'Not Called' ? 'Called' :
+                    receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                  )}
+                  className={cn("h-8 w-8", 
+                    receipt.call_status === 'Called' ? "hover:bg-green-100" :
+                    receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
+                    "hover:bg-gray-100"
+                  )}
+                >
+                  <Phone className={cn("h-4 w-4",
+                    receipt.call_status === 'Called' ? "text-green-600" :
+                    receipt.call_status === 'Unresponsive' ? "text-red-600" :
+                    "text-gray-600"
+                  )} />
+                </Button>
                 {receipt.balance > 0 && (
                   <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
                     <Check className="h-4 w-4 text-green-600" />
@@ -339,6 +362,41 @@ const Receipts = () => {
       toast({
         title: "Error",
         description: "Failed to update receipt. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCallStatusChange = async (id: string, newStatus: string) => {
+    try {
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { 
+          ...r, 
+          call_status: newStatus,
+          time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
+        } : r);
+      });
+      
+      const { error } = await supabase
+        .from('receipts')
+        .update({ 
+          call_status: newStatus,
+          time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Call Status Updated",
+        description: `Call status has been updated to ${newStatus}.`,
+      });
+    } catch (error) {
+      console.error('Error updating call status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update call status. Please try again.",
         variant: "destructive",
       });
     }
@@ -666,6 +724,7 @@ const Receipts = () => {
                   onView={() => setSelectedReceipt(receipt)}
                   onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
+                  onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
                 />
               ))
             )}
