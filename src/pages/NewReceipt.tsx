@@ -762,7 +762,7 @@ const NewReceipt = () => {
                     }
                     setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
                   }}>
-                  <SelectTrigger className="w-[180px] bg-blue-50 border-blue-200 hover:bg-blue-100/80">
+                  <SelectTrigger className="w-[180px] bg-amber-100 border-amber-300 hover:bg-amber-200 ring-2 ring-amber-500/20 shadow-lg shadow-amber-100/50 font-medium text-amber-900">
                     <SelectValue placeholder="Order Type" />
                   </SelectTrigger>
                   <SelectContent>
