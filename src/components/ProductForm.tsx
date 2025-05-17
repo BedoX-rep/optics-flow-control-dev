@@ -44,12 +44,13 @@ export interface ProductFormValues {
   price: number;
   cost_ttc?: number;
   stock?: number;
+  stock_status: 'Order' | 'inStock' | 'Fabrication';
   category?: string;
   index?: string;
   treatment?: string;
   company?: string;
   image?: string;
-  created_at?: string; // Added this field to match what's being passed in Products.tsx
+  created_at?: string;
 }
 
 interface ProductFormProps {
@@ -68,6 +69,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
+    stock_status: 'Order',
     ...initialValues
   });
   const [autoName, setAutoName] = useState<boolean>(!!initialValues.category); // default on if editing and has category
@@ -87,6 +89,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
       if (form.company) parts.push(form.company?.toUpperCase());
+      if (form.stock_status === 'inStock') parts.push('INSTOCK');
+      if (form.stock_status === 'Fabrication') parts.push('FABRICATION');
 
       setForm(f => ({
         ...f,
@@ -229,16 +233,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         />
       </div>
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="stock">Stock</Label>
-        <Input
-          id="stock"
-          type="number"
-          className="col-span-3"
-          value={form.stock ?? 0}
-          onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
-          min={0}
-        />
+        <Label htmlFor="stock_status">Stock Status</Label>
+        <Select
+          value={form.stock_status}
+          onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication', stock: v !== 'inStock' ? undefined : f.stock }))}
+        >
+          <SelectTrigger className="col-span-3" id="stock_status">
+            <SelectValue placeholder="Select Stock Status" />
+          </SelectTrigger>
+          <SelectContent className="z-50 bg-white">
+            <SelectItem value="Order">Order</SelectItem>
+            <SelectItem value="inStock">In Stock</SelectItem>
+            <SelectItem value="Fabrication">Fabrication</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+      {form.stock_status === 'inStock' && (
+        <div className="grid grid-cols-4 items-center gap-3">
+          <Label htmlFor="stock">Stock</Label>
+          <Input
+            id="stock"
+            type="number"
+            className="col-span-3"
+            value={form.stock ?? 0}
+            onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
+            min={0}
+          />
+        </div>
+      )}
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="image">Image</Label>
         <input

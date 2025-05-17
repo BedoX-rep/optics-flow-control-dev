@@ -459,50 +459,60 @@ const Products = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {editingCell?.id === product.id && editingCell.field === "stock" ? (
-                        <input
-                          type="number"
-                          className="border border-neutral-300 bg-[#fafafa] px-2 py-1 rounded text-sm text-right w-full focus:ring-2 focus:ring-black"
-                          min={0}
-                          value={cellEditValue}
-                          onChange={e => setCellEditValue(e.target.value)}
-                          onBlur={() => endInlineEdit(product)}
-                          autoFocus
-                        />
+                      {editingCell?.id === product.id && editingCell.field === "stock_status" ? (
+                        <Select
+                          value={product.stock_status || "Order"}
+                          onValueChange={val => handleInlineUpdate(product, "stock_status", val)}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Order">Order</SelectItem>
+                            <SelectItem value="inStock">In Stock</SelectItem>
+                            <SelectItem value="Fabrication">Fabrication</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
-                        <div className="flex items-center justify-between px-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newStock = Math.max(0, (product.stock || 0) - 1);
-                              handleInlineUpdate(product, "stock", String(newStock));
-                            }}
-                          >
-                            -
-                          </Button>
+                        <div className="flex items-center">
                           <span
-                            className={`font-semibold ${(product.stock || 0) === 0 ? 'text-red-600' : 'text-black'} cursor-pointer mx-2`}
-                            tabIndex={0}
-                            title="Edit"
-                            onClick={() => startInlineEdit(product, "stock")}
+                            className={`cursor-pointer ${product.stock_status === 'inStock' ? '' : 'text-neutral-500'}`}
+                            onClick={() => setEditingCell({ id: product.id, field: "stock_status" })}
                           >
-                            {(product.stock || 0) === 0 ? "Out of stock" : product.stock}
+                            {product.stock_status === 'inStock' ? (
+                              <div className="flex items-center justify-between px-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newStock = Math.max(0, (product.stock || 0) - 1);
+                                    handleInlineUpdate(product, "stock", String(newStock));
+                                  }}
+                                >
+                                  -
+                                </Button>
+                                <span className={`font-semibold ${(product.stock || 0) === 0 ? 'text-red-600' : 'text-black'} mx-2`}>
+                                  {product.stock || 0}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newStock = (product.stock || 0) + 1;
+                                    handleInlineUpdate(product, "stock", String(newStock));
+                                  }}
+                                >
+                                  +
+                                </Button>
+                              </div>
+                            ) : (
+                              "Not in Stock"
+                            )}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newStock = (product.stock || 0) + 1;
-                              handleInlineUpdate(product, "stock", String(newStock));
-                            }}
-                          >
-                            +
-                          </Button>
                         </div>
                       )}
                     </TableCell>
