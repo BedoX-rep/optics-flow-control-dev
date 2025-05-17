@@ -400,17 +400,22 @@ const Products = () => {
               </div>
             </Card>
           ))}
-          {hasMore && (
-            <div className="col-span-full flex justify-center mt-4">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setPage(prev => prev + 1)}
-                className="w-full max-w-xs"
-              >
-                <ChevronDown className="mr-2 h-4 w-4" />
-                Load More Products
-              </Button>
+          <div ref={(el) => {
+            if (!el) return;
+            const observer = new IntersectionObserver(
+              (entries) => {
+                if (entries[0].isIntersecting && hasMore && !isLoading) {
+                  setPage(prev => prev + 1);
+                }
+              },
+              { threshold: 1.0 }
+            );
+            observer.observe(el);
+            return () => observer.disconnect();
+          }} className="h-10 w-full col-span-full"/>
+          {isLoading && hasMore && (
+            <div className="col-span-full flex justify-center p-4">
+              <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"/>
             </div>
           )}
         </div>
