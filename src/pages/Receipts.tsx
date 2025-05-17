@@ -95,17 +95,19 @@ const ReceiptCard = ({
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Phone className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs text-blue-600">{receipt.client_phone}</span>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                      <div className="flex items-center gap-1.5 text-blue-600">
+                        <Phone className="h-3.5 w-3.5" />
+                        <span className="text-xs font-medium">{receipt.client_phone}</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-500 mt-0.5 block">{getTimeDisplay(receipt.created_at)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-400">{getTimeDisplay(receipt.created_at)}</span>
+                <div className="flex items-center gap-2">
                   <div className="flex gap-1.5">
                     <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} className="text-xs">
                       {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
@@ -113,6 +115,16 @@ const ReceiptCard = ({
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
                       {receipt.delivery_status}
                     </Badge>
+                    <div className="flex items-center gap-1">
+                      <div className={cn("w-2 h-2 rounded-full",
+                        receipt.call_status === 'Called' ? "bg-green-500" :
+                        receipt.call_status === 'Unresponsive' ? "bg-red-500" :
+                        "bg-gray-400"
+                      )} />
+                      <span className="text-xs font-medium">
+                        {receipt.call_status || 'Not Called'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
