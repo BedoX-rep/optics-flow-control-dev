@@ -727,28 +727,18 @@ const NewReceipt = () => {
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
-                <div className="flex gap-3 items-center">
-                  <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-                    <Plus className="h-4 w-4 mr-2" /> Add Product
-                  </Button>
-                  <Button onClick={() => addItem('custom')} variant="outline" size="default">
-                    <Plus className="h-4 w-4 mr-2" /> Add Custom Item
-                  </Button>
-                  <div className="flex items-center gap-2 px-2">
-                    <Switch
-                      id="autoMontage"
-                      checked={autoMontage}
-                      onCheckedChange={(checked) => setAutoMontage(checked)}
-                    />
-                    <Label htmlFor="autoMontage" className="text-xs text-muted-foreground">
-                      Auto Montage
-                    </Label>
-                  </div>
-                  <Select value={orderType} onValueChange={(value) => {
+              <div className="flex gap-3">
+                <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
+                  <Plus className="h-4 w-4 mr-2" /> Add Product
+                </Button>
+                <Button onClick={() => addItem('custom')} variant="outline" size="default">
+                  <Plus className="h-4 w-4 mr-2" /> Add Custom Item
+                </Button>
+                <Select value={orderType} onValueChange={(value) => {
                     setOrderType(value);
                     // Reset montage costs when changing order type
                     let newMontageCosts = 0;
-
+                    
                     if (autoMontage && value !== 'Unspecified') {
                       if (value === 'Retoyage') {
                         // For Retoyage, only count Frames category
@@ -796,8 +786,14 @@ const NewReceipt = () => {
           <CardContent className="p-4">
             <div className="space-y-2">
               <div className="flex items-center mb-4 bg-primary/5 p-3 rounded-lg">
-                
-
+                <Switch
+                  id="autoMontage"
+                  checked={autoMontage}
+                  onCheckedChange={(checked) => setAutoMontage(checked)}
+                />
+                <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
+                  Auto-add Montage costs
+                </Label>
               </div>
 
               {items.map((item) => (
