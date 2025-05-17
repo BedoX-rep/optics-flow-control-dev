@@ -107,6 +107,29 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                     <p className="text-sm text-gray-500 mb-1">Payment Status</p>
                     <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                       receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
+                    }`}>
+                      {receipt.payment_status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Call Status</p>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      receipt.call_status === 'Called' ? 'bg-green-100 text-green-800' :
+                      receipt.call_status === 'Unresponsive' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {receipt.call_status || 'Not Called'}
+                    </span>
+                    {receipt.time_called && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Called: {format(new Date(receipt.time_called), 'MMM dd, yyyy HH:mm')}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Payment Status</p>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
                       receipt.payment_status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
                     }`}>

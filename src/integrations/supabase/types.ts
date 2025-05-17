@@ -248,6 +248,8 @@ export type Database = {
           total: number
           user_id: string
           order_type?: string | null
+          call_status: string
+          time_called?: string | null
         }
         Update: {
           add?: number | null
