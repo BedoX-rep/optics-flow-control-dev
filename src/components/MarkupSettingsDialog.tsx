@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 
 export interface MarkupRange {
@@ -50,9 +51,10 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
   onClose,
   settings,
   onSave,
+  autoMontage,
+  onAutoMontageChange
 }) => {
   const [localSettings, setLocalSettings] = useState<MarkupSettings>(settings);
-  
 
   const validateRanges = (ranges: MarkupRange[]) => {
     // Sort ranges by min value
@@ -102,8 +104,8 @@ const MarkupSettingsDialog: React.FC<MarkupSettingsDialogProps> = ({
           <div className="flex items-center bg-primary/5 p-3 rounded-lg">
             <Switch
               id="autoMontage"
-              checked={props.autoMontage}
-              onCheckedChange={props.onAutoMontageChange}
+              checked={autoMontage}
+              onCheckedChange={onAutoMontageChange}
             />
             <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
               Auto-add Montage costs
