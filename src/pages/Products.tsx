@@ -67,8 +67,12 @@ const Products = () => {
       .from('products')
       .select('*', { count: 'exact' })
       .eq('user_id', user.id)
-      .eq('is_deleted', false)
-      .range(page * ITEMS_PER_PAGE, (page * ITEMS_PER_PAGE) + (page === 0 ? ITEMS_PER_PAGE - 1 : ITEMS_PER_PAGE + 39));
+      .eq('is_deleted', false);
+
+    // Apply search filter if exists
+    if (searchTerm) {
+      query = query.ilike('name', `%${searchTerm}%`);
+    }
 
     if (filters.category && filters.category !== "all_categories") {
       query = query.eq('category', filters.category);
@@ -92,7 +96,7 @@ const Products = () => {
   };
 
   const { data = { products: [], hasMore: false }, isLoading } = useQuery({
-    queryKey: ['products', user?.id, filters, page],
+    queryKey: ['products', user?.id, filters, page, searchTerm],
     queryFn: fetchProducts,
     enabled: !!user,
     keepPreviousData: true,
@@ -247,11 +251,7 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = sortProducts(
-    (allProducts || []).filter(product =>
-      product?.name?.toLowerCase().includes((searchTerm || '').toLowerCase())
-    )
-  );
+  const filteredProducts = sortProducts(allProducts || []);
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-7xl mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
