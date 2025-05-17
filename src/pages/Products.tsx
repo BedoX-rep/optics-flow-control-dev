@@ -35,6 +35,8 @@ const DEFAULT_FILTERS = {
   sort: "arrange",
 };
 
+const ITEMS_PER_PAGE = 30;
+
 const Products = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -47,6 +49,7 @@ const Products = () => {
   const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     setPageReady(true);
@@ -59,13 +62,14 @@ const Products = () => {
   }, [filters]);
 
   const fetchProducts = async () => {
-    if (!user) return [];
+    if (!user) return { products: [], hasMore: false };
 
     let query = supabase
       .from('products')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('user_id', user.id)
-      .eq('is_deleted', false);
+      .eq('is_deleted', false)
+      .range(page * ITEMS_PER_PAGE, (page * ITEMS_PER_PAGE) + (page === 0 ? ITEMS_PER_PAGE - 1 : ITEMS_PER_PAGE + 39));
 
     if (filters.category && filters.category !== "all_categories") {
       query = query.eq('category', filters.category);
@@ -80,9 +84,12 @@ const Products = () => {
       query = query.eq('company', filters.company);
     }
 
-    const { data, error } = await query;
+    const { data: productsData, error, count } = await query;
     if (error) throw error;
-    return data || [];
+    return { 
+      products: productsData || [], 
+      hasMore: count ? count > ((page + 1) * ITEMS_PER_PAGE) : false 
+    };
   };
 
   const { data: products = [], isLoading } = useQuery({
@@ -392,6 +399,19 @@ const Products = () => {
               </div>
             </Card>
           ))}
+          {hasMore && (
+            <div className="col-span-full flex justify-center mt-4">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setPage(prev => prev + 1)}
+                className="w-full max-w-xs"
+              >
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Load More Products
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

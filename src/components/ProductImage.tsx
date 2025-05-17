@@ -50,8 +50,13 @@ const ProductImage: React.FC<ProductImageProps> = ({
                 alt === "Sunglasses" ? "Sunglasses.png" :
                 alt === "Contact Lenses" ? "contactlens.png" :
                 alt === "Accessories" ? "Accessories.png" :
-                ""
+                "placeholder.svg"
               }`}
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
               alt={alt}
               className="w-7 h-7"
             />
