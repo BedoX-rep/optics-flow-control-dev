@@ -476,22 +476,22 @@ export default function Clients() {
               onRefresh={fetchClients}
             />
           ))}
-          <div ref={(el) => {
-            if (!el) return;
-            const observer = new IntersectionObserver(
-              (entries) => {
-                if (entries[0].isIntersecting && hasMore && !isLoading) {
-                  setPage(prev => prev + 1);
-                }
-              },
-              { threshold: 1.0 }
-            );
-            observer.observe(el);
-            return () => observer.disconnect();
-          }} className="h-10 w-full col-span-full"/>
-          {isLoading && hasMore && (
+          {hasMore && (
             <div className="col-span-full flex justify-center p-4">
-              <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"/>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => !isLoading && setPage(prev => prev + 1)}
+                className="w-full max-w-xs gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"/>
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+                Load More Clients
+              </Button>
             </div>
           )}
         </div>
