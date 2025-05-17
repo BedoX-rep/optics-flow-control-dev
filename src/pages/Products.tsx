@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import {
   DialogHeader, 
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
@@ -97,7 +96,7 @@ const Products = () => {
     queryFn: fetchProducts,
     enabled: !!user,
   });
-  
+
   const { products, hasMore } = data;
 
   const handleOpen = (editing: Product | null = null) => {
@@ -302,7 +301,7 @@ const Products = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fade-in">
           {filteredProducts.map((product) => (
             <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
               <div className="p-4">
