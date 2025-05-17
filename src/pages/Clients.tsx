@@ -122,10 +122,10 @@ export default function Clients() {
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
-    let filtered = [...(allClients || [])];
+    let filtered = allClients || [];
 
     // Apply search filter
-    if (searchTerm) {
+    if (searchTerm && filtered.length > 0) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(client =>
         client.name.toLowerCase().includes(term) ||
@@ -146,7 +146,7 @@ export default function Clients() {
     });
 
     setFilteredClients(filtered);
-  }, [clients, searchTerm, sortBy]);
+  }, [allClients, searchTerm, sortBy]);
 
   const handleAddClient = async (name: string, phone: string) => {
     try {
