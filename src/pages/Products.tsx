@@ -248,8 +248,8 @@ const Products = () => {
   };
 
   const filteredProducts = sortProducts(
-    allProducts.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (allProducts || []).filter(product =>
+      product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 

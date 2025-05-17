@@ -122,7 +122,7 @@ export default function Clients() {
 
   // Filter and sort clients based on search term and sort option
   useEffect(() => {
-    let filtered = [...clients];
+    let filtered = [...(allClients || [])];
 
     // Apply search filter
     if (searchTerm) {
