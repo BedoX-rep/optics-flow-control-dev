@@ -117,10 +117,8 @@ const NewReceipt = () => {
   const [clientSkipped, setClientSkipped] = useState(false);
 
   const steps = [
-    { id: 'client', label: 'Client Details' },
-    { id: 'prescription', label: 'Prescription' },
-    { id: 'items', label: 'Items' },
-    { id: 'payment', label: 'Payment' }
+    { id: 'details', label: 'Client & Prescription' },
+    { id: 'order', label: 'Items & Payment' }
   ];
 
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
@@ -477,8 +475,8 @@ const NewReceipt = () => {
             </Button>
           </div>
 
-          <div className="grid gap-4">
-            {filteredClients.map(client => (
+          <div className="grid gap-4 max-h-[400px] overflow-y-auto">
+            {filteredClients.slice(0, 8).map(client => (
               <div
                 key={client.id}
                 className={`p-4 rounded-lg border-2 transition-all cursor-pointer
@@ -1145,18 +1143,31 @@ const NewReceipt = () => {
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">New Receipt</h1>
-        <p className="text-muted-foreground mt-1">Create a new receipt by following the steps below</p>
-      </div>
-
       {renderStepIndicator()}
 
       <AnimatePresence mode="wait">
-        {currentStep === 'client' && renderClientStep()}
-        {currentStep === 'prescription' && renderPrescriptionStep()}
-        {currentStep === 'items' && renderItemsStep()}
-        {currentStep === 'payment' && renderPaymentStep()}
+        {currentStep === 'details' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="grid gap-6 lg:grid-cols-2"
+          >
+            {renderClientStep()}
+            {renderPrescriptionStep()}
+          </motion.div>
+        )}
+        {currentStep === 'order' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="grid gap-6 lg:grid-cols-2"
+          >
+            {renderItemsStep()}
+            {renderPaymentStep()}
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <div className="flex justify-between mt-8">
