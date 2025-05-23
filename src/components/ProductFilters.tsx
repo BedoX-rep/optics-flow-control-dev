@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Calendar, Filter, Package, Building2, Glasses, Album } from "lucide-react";
+import { Filter, Glasses, Album, Building2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -33,8 +33,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Glasses className="h-4 w-4 mr-2" />
-          <SelectValue placeholder="Category" />
+          <Glasses className="h-4 w-4" />
+          <span>Category</span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_categories">All Categories</SelectItem>
@@ -52,8 +52,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Album className="h-4 w-4 mr-2" />
-          <SelectValue placeholder="Index" />
+          <Album className="h-4 w-4" />
+          <span>Index</span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_indexes">All Indexes</SelectItem>
@@ -71,8 +71,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Filter className="h-4 w-4 mr-2" />
-          <SelectValue placeholder="Treatment" />
+          <Filter className="h-4 w-4" />
+          <span>Treatment</span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_treatments">All Treatments</SelectItem>
@@ -90,8 +90,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Building2 className="h-4 w-4 mr-2" />
-          <SelectValue placeholder="Company" />
+          <Building2 className="h-4 w-4" />
+          <span>Company</span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_companies">All Companies</SelectItem>
