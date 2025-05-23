@@ -387,7 +387,7 @@ export default function Clients() {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-7xl mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <div className="flex gap-2 w-full sm:w-auto">
