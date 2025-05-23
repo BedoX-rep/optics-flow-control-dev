@@ -18,13 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import AddClientDialog from '@/components/AddClientDialog';
+import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 
 interface Product {
   id: string;
@@ -104,6 +110,8 @@ const NewReceipt = () => {
   });
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
   const [formData, setFormData] = useState({}); // Added formData state
+  const [currentStep, setCurrentStep] = useState<'client' | 'details'>('client');
+  const [clientSkipped, setClientSkipped] = useState(false);
 
 
   useEffect(() => {
@@ -379,351 +387,87 @@ const NewReceipt = () => {
     }
   };
 
-
-  const handleSaveReceipt = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be logged in to save receipts.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedClient) {
-      toast({
-        title: "Missing Information",
-        description: "Please select a client before saving.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items.length === 0) {
-      toast({
-        title: "Missing Items",
-        description: "Please add at least one item to the receipt.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const { data: receipt, error: receiptError } = await supabase
-        .from('receipts')
-        .insert({
-          user_id: user.id,
-          client_id: selectedClient,
-          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-          add: add ? parseFloat(add) : null,
-          subtotal,
-          tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
-          tax: taxAmount,
-          cost: totalCost + montageCosts,
-          cost_ttc: totalCost + montageCosts,
-          profit: profit,
-          total_discount: totalDiscount,
-          discount_amount: numericDiscount,
-          discount_percentage: discount,
-          total,
-          balance,
-          advance_payment: advancePayment,
-          payment_status: paymentStatus,
-          delivery_status: 'Undelivered',
-          montage_status: 'UnOrdered',
-          montage_costs: montageCosts,
-          products_cost: totalCost,
-          order_type: orderType // Added order type to receipt
-        })
-        .select()
-        .single();
-
-      if (receiptError) throw receiptError;
-
-
-      if (selectedClient) {
-        const { error: prescriptionError } = await supabase
-          .from('clients')
-          .update({
-            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-            Add: add ? parseFloat(add) : null,
-            last_prescription_update: new Date().toISOString()
-          })
-          .eq('id', selectedClient);
-
-        if (prescriptionError) throw prescriptionError;
-      }
-
-
-      const receiptItems = items.map(item => ({
-        user_id: user.id,
-        receipt_id: receipt.id,
-        product_id: item.productId || null,
-        custom_item_name: item.customName || null,
-        quantity: item.quantity || 1,
-        price: item.price || 0,
-        cost: item.cost || 0,
-        profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
-        linked_eye: item.linkedEye || null,
-        applied_markup: item.appliedMarkup || 0
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('receipt_items')
-        .insert(receiptItems);
-
-      if (itemsError) {
-        console.error('Error saving receipt items:', itemsError);
-        throw itemsError;
-      }
-
-      queryClient.invalidateQueries(['receipts']);
-
-      toast({
-        title: "Success",
-        description: "Receipt saved successfully.",
-      });
-
-      navigate('/receipts');
-    } catch (error) {
-      console.error('Error saving receipt:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save receipt. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const newBalance = total - advancePayment;
-    setBalance(newBalance);
-    updatePaymentStatus(newBalance);
-  }, [total, advancePayment]);
-
-
-  return (
-    <div>
-      <div className="grid grid-cols-1 gap-4">
+    // Render the client selection step
+    const renderClientStep = () => (
+      <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Client Information</CardTitle>
+            <CardTitle>Select Client</CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  id="client-search"
-                  placeholder="Search by name or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-9"
-                />
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    id="client-search"
+                    placeholder="Search by name or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <Button onClick={() => setIsAddClientOpen(true)}>Add New Client</Button>
               </div>
-              <div className="flex-1">
-                <Select value={selectedClient} onValueChange={handleClientSelect}>
-                  <SelectTrigger id="client">
-                    <SelectValue placeholder="Select a client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredClients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        <div className="flex justify-between items-center w-full gap-4">
-                          <span className="font-medium">{client.name}</span>
-                          <span className="text-sm text-green-600/75 tabular-nums">{client.phone}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Button className="w-full" onClick={() => setIsAddClientOpen(true)}>Add New Client</Button>
+  
+              <Select value={selectedClient} onValueChange={handleClientSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredClients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      <div className="flex justify-between items-center w-full gap-4">
+                        <span className="font-medium">{client.name}</span>
+                        <span className="text-sm text-green-600/75 tabular-nums">{client.phone}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+  
+              <div className="flex justify-between items-center mt-6 pt-6 border-t">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setCurrentStep('details');
+                    setClientSkipped(true);
+                  }}
+                >
+                  Skip for now
+                </Button>
+                <Button
+                  onClick={() => setCurrentStep('details')}
+                  disabled={!selectedClient}
+                  className="gap-2"
+                >
+                  Continue <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="cursor-pointer" onClick={() => setPrescriptionOpen(!prescriptionOpen)}>
-            <div className="flex justify-between items-center">
-              <CardTitle>Prescription Details</CardTitle>
-              <ChevronDown className={`h-4 w-4 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
-            </div>
-          </CardHeader>
-          <CardContent className={`${prescriptionOpen ? '' : 'hidden'} p-3`}>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3">Right Eye</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="rightSph">SPH</Label>
-                    <Input
-                      id="rightSph"
-                      type="text"
-                      inputMode="decimal"
-                      value={rightEye.sph}
-                      onChange={(e) => {
-                        setRightEye({ ...rightEye, sph: e.target.value });
-
-                        setItems(prevItems => prevItems.map(item => {
-                          if (item.linkedEye === 'RE' && item.productId) {
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const markup = calculateMarkup(
-                                e.target.value ? parseFloat(e.target.value) : null,
-                                rightEye.cyl ? parseFloat(rightEye.cyl) : null
-                              );
-                              return {
-                                ...item,
-                                appliedMarkup: markup,
-                                price: product.price * (1 + markup / 100)
-                              };
-                            }
-                          }
-                          return item;
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="rightCyl">CYL</Label>
-                    <Input
-                      id="rightCyl"
-                      type="text"
-                      inputMode="decimal"
-                      value={rightEye.cyl}
-                      onChange={(e) => {
-                        setRightEye({ ...rightEye, cyl: e.target.value });
-
-                        setItems(prevItems => prevItems.map(item => {
-                          if (item.linkedEye === 'RE' && item.productId) {
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const markup = calculateMarkup(
-                                rightEye.sph ? parseFloat(rightEye.sph) : null,
-                                e.target.value ? parseFloat(e.target.value) : null
-                              );
-                              return {
-                                ...item,
-                                appliedMarkup: markup,
-                                price: product.price * (1 + markup / 100)
-                              };
-                            }
-                          }
-                          return item;
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="rightAxe">AXE</Label>
-                    <Input
-                      id="rightAxe"
-                      type="text"
-                      inputMode="numeric"
-                      value={rightEye.axe}
-                      onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-medium mb-3">Left Eye</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="leftSph">SPH</Label>
-                    <Input
-                      id="leftSph"
-                      value={leftEye.sph}
-                      onChange={(e) => {
-                        setLeftEye({ ...leftEye, sph: e.target.value });
-
-                        setItems(prevItems => prevItems.map(item => {
-                          if (item.linkedEye === 'LE' && item.productId) {
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const markup = calculateMarkup(
-                                e.target.value ? parseFloat(e.target.value) : null,
-                                leftEye.cyl ? parseFloat(leftEye.cyl) : null
-                              );
-                              return {
-                                ...item,
-                                appliedMarkup: markup,
-                                price: product.price * (1 + markup / 100)
-                              };
-                            }
-                          }
-                          return item;
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="leftCyl">CYL</Label>
-                    <Input
-                      id="leftCyl"
-                      value={leftEye.cyl}
-                      onChange={(e) => {
-                        setLeftEye({ ...leftEye, cyl: e.target.value });
-
-                        setItems(prevItems => prevItems.map(item => {
-                          if (item.linkedEye === 'LE' && item.productId) {
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const markup = calculateMarkup(
-                                leftEye.sph ? parseFloat(leftEye.sph) : null,
-                                e.target.value ? parseFloat(e.target.value) : null
-                              );
-                              return {
-                                ...item,
-                                appliedMarkup: markup,
-                                price: product.price * (1 + markup / 100)
-                              };
-                            }
-                          }
-                          return item;
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="leftAxe">AXE</Label>
-                    <Input
-                      id="leftAxe"
-                      value={leftEye.axe}
-                      onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <Label htmlFor="add">ADD</Label>
-                <Input
-                  id="add"
-                  value={add}
-                  onChange={(e) => setAdd(e.target.value)}
-                  placeholder="Enter ADD value"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      </div>
+    );
+  
+    // Render the details step
+    const renderDetailsStep = () => (
+      <div className="space-y-4">
+        {clientSkipped && (
+          <Alert variant="warning" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>No client selected</AlertTitle>
+            <AlertDescription>
+              You haven't selected a client yet. You'll need to select one before finalizing the receipt.
+              <Button
+                variant="link"
+                className="px-0 text-warning-foreground"
+                onClick={() => setCurrentStep('client')}
+              >
+                Select a client now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+  
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
@@ -786,7 +530,7 @@ const NewReceipt = () => {
           <CardContent className="p-4">
             <div className="space-y-2">
               
-
+  
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
                   {item.customName !== undefined ? (
@@ -835,7 +579,7 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   )}
-
+  
                   <div className="w-20">
                     <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
                     <Input
@@ -846,7 +590,7 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
                     <Input
@@ -858,7 +602,7 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
                     <Input
@@ -870,21 +614,21 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label>Total</Label>
                     <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
                       {(item.price * item.quantity).toFixed(2)} DH
                     </div>
                   </div>
-
+  
                   <div className="w-32">
                     <Label>Profit</Label>
                     <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
                       {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
                     </div>
                   </div>
-
+  
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
@@ -988,7 +732,7 @@ const NewReceipt = () => {
                   )}
                 </div>
               ))}
-
+  
               {items.length === 0 && (
                 <div className="text-center p-8 text-gray-500">
                   <p>No items added yet. Click the buttons above to add items.</p>
@@ -997,7 +741,7 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
+  
         <Card>
           <CardContent className="p-4">
             <div className="flex gap-8">
@@ -1008,28 +752,28 @@ const NewReceipt = () => {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
-
+  
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax</span>
                       <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
                     </div>
                   )}
-
+  
                   {(discount > 0 || numericDiscount > 0) && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
                       <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
                     </div>
                   )}
-
+  
                   <div className="pt-3 border-t">
                     <div className="flex justify-between">
                       <span className="font-medium">Total</span>
                       <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
                     </div>
                   </div>
-
+  
                   <div className="py-3 space-y-2 border-t">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Products Cost</span>
@@ -1048,7 +792,7 @@ const NewReceipt = () => {
                       <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
                     </div>
                   </div>
-
+  
                   <div className="pt-2 space-y-2"><div className="flex justify-between text-sm">
                       <span className="text-gray-600">Advance Payment</span>
                       <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
@@ -1060,7 +804,7 @@ const NewReceipt = () => {
                   </div>
                 </div>
               </div>
-
+  
               <div className="flex-1 p-6 space-y-4 border rounded-lg">
                 <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
                 <div className="grid gap-4">
@@ -1103,7 +847,7 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   </div>
-
+  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="tax">Tax Base Amount</Label>
@@ -1136,7 +880,7 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   </div>
-
+  
                   <div className="pt-4 border-t">
                     <Label htmlFor="advancePayment">Advance Payment</Label>
                     <div className="relative">
@@ -1154,7 +898,7 @@ const NewReceipt = () => {
                       <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
                     </div>
                   </div>
-
+  
                   <div className="pt-4">
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
@@ -1169,7 +913,174 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
+  
+        <Card>
+          <CardHeader className="cursor-pointer" onClick={() => setPrescriptionOpen(!prescriptionOpen)}>
+            <div className="flex justify-between items-center">
+              <CardTitle>Prescription Details</CardTitle>
+              <ChevronDown className={`h-4 w-4 transition-transform ${prescriptionOpen ? 'transform rotate-180' : ''}`} />
+            </div>
+          </CardHeader>
+          <CardContent className={`${prescriptionOpen ? '' : 'hidden'} p-3`}>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-3">Right Eye</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="rightSph">SPH</Label>
+                    <Input
+                      id="rightSph"
+                      type="text"
+                      inputMode="decimal"
+                      value={rightEye.sph}
+                      onChange={(e) => {
+                        setRightEye({ ...rightEye, sph: e.target.value });
+  
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'RE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                e.target.value ? parseFloat(e.target.value) : null,
+                                rightEye.cyl ? parseFloat(rightEye.cyl) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="rightCyl">CYL</Label>
+                    <Input
+                      id="rightCyl"
+                      type="text"
+                      inputMode="decimal"
+                      value={rightEye.cyl}
+                      onChange={(e) => {
+                        setRightEye({ ...rightEye, cyl: e.target.value });
+  
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'RE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                rightEye.sph ? parseFloat(rightEye.sph) : null,
+                                e.target.value ? parseFloat(e.target.value) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="rightAxe">AXE</Label>
+                    <Input
+                      id="rightAxe"
+                      type="text"
+                      inputMode="numeric"
+                      value={rightEye.axe}
+                      onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+  
+              <div>
+                <h3 className="text-lg font-medium mb-3">Left Eye</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="leftSph">SPH</Label>
+                    <Input
+                      id="leftSph"
+                      value={leftEye.sph}
+                      onChange={(e) => {
+                        setLeftEye({ ...leftEye, sph: e.target.value });
+  
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'LE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                e.target.value ? parseFloat(e.target.value) : null,
+                                leftEye.cyl ? parseFloat(leftEye.cyl) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="leftCyl">CYL</Label>
+                    <Input
+                      id="leftCyl"
+                      value={leftEye.cyl}
+                      onChange={(e) => {
+                        setLeftEye({ ...leftEye, cyl: e.target.value });
+  
+                        setItems(prevItems => prevItems.map(item => {
+                          if (item.linkedEye === 'LE' && item.productId) {
+                            const product = products.find(p => p.id === item.productId);
+                            if (product) {
+                              const markup = calculateMarkup(
+                                leftEye.sph ? parseFloat(leftEye.sph) : null,
+                                e.target.value ? parseFloat(e.target.value) : null
+                              );
+                              return {
+                                ...item,
+                                appliedMarkup: markup,
+                                price: product.price * (1 + markup / 100)
+                              };
+                            }
+                          }
+                          return item;
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="leftAxe">AXE</Label>
+                    <Input
+                      id="leftAxe"
+                      value={leftEye.axe}
+                      onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
+                <Label htmlFor="add">ADD</Label>
+                <Input
+                  id="add"
+                  value={add}
+                  onChange={(e) => setAdd(e.target.value)}
+                  placeholder="Enter ADD value"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+  
         <div className="mt-4 flex justify-end space-x-4">
           <Button
             variant="outline"
@@ -1180,185 +1091,197 @@ const NewReceipt = () => {
           </Button>
           <Button
             onClick={handleSaveReceipt}
-            disabled={isLoading}
+            disabled={isLoading || (clientSkipped && !selectedClient)}
           >
-            {isLoading ? "Saving..." : "Save Receipt"}
+            {isLoading ? "Saving..." : (clientSkipped ? "Select Client & Save" : "Save Receipt")}
           </Button>
         </div>
       </div>
-
-      <AddClientDialog
-        isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
-        onClientAdded={async (client) => {
-          if (!user) return;
-          try {
-            const { data: clientsData, error: clientsError } = await supabase
-              .from('clients')
-              .select('*')
-              .eq('user_id', user.id)
-              .order('name', { ascending: true });
-
-            if (clientsError) throw clientsError;
-            const updatedClients = clientsData || [];
-            setClients(updatedClients);
-            setFilteredClients(updatedClients);
-            setSelectedClient(client.id);
-            setSearchTerm(client.name);
-            setIsAddClientOpen(false);
-
-            await fetchClientPrescription(client.id);
-          } catch (error) {
-            console.error('Error fetching clients:', error);
-            toast({
-              title: "Error",
-              description: "Failed to refresh clients list",
-              variant: "destructive",
-            });
-          }
-        }}
-      />
-      <MarkupSettingsDialog
-        isOpen={isMarkupSettingsOpen}
-        onClose={() => setIsMarkupSettingsOpen(false)}
-        settings={markupSettings}
-        onSave={setMarkupSettings}
-        autoMontage={autoMontage}
-        onAutoMontageChange={setAutoMontage}
-      />
-    </div>
-  );
-};
-
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-const MarkupSettingsDialog = ({ isOpen, onClose, settings, onSave, autoMontage, onAutoMontageChange }: {
-  isOpen: boolean;
-  onClose: () => void;
-  settings: any;
-  onSave: (settings: any) => void;
-  autoMontage: boolean;
-  onAutoMontageChange: (checked: boolean) => void;
-}) => {
-  const [localSettings, setLocalSettings] = useState({
-    sph: settings.sph || [],
-    cyl: settings.cyl || []
-  });
-
-  const updateRange = (type: 'sph' | 'cyl', index: number, field: string, value: number) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      [type]: prev[type].map((range, i) =>
-        i === index ? { ...range, [field]: value } : range
-      )
-    }));
+    );
+  
+    const handleSaveReceipt = async () => {
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to save receipts.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      if (!selectedClient && !clientSkipped) {
+        setCurrentStep('client');
+        toast({
+          title: "Missing Information",
+          description: "Please select a client before saving.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      if (items.length === 0) {
+        toast({
+          title: "Missing Items",
+          description: "Please add at least one item to the receipt.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      try {
+        setIsLoading(true);
+  
+        const { data: receipt, error: receiptError } = await supabase
+          .from('receipts')
+          .insert({
+            user_id: user.id,
+            client_id: selectedClient,
+            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+            add: add ? parseFloat(add) : null,
+            subtotal,
+            tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
+            tax: taxAmount,
+            cost: totalCost + montageCosts,
+            cost_ttc: totalCost + montageCosts,
+            profit: profit,
+            total_discount: totalDiscount,
+            discount_amount: numericDiscount,
+            discount_percentage: discount,
+            total,
+            balance,
+            advance_payment: advancePayment,
+            payment_status: paymentStatus,
+            delivery_status: 'Undelivered',
+            montage_status: 'UnOrdered',
+            montage_costs: montageCosts,
+            products_cost: totalCost,
+            order_type: orderType // Added order type to receipt
+          })
+          .select()
+          .single();
+  
+        if (receiptError) throw receiptError;
+  
+  
+        if (selectedClient) {
+          const { error: prescriptionError } = await supabase
+            .from('clients')
+            .update({
+              right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+              right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+              right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+              left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+              left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+              left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+              Add: add ? parseFloat(add) : null,
+              last_prescription_update: new Date().toISOString()
+            })
+            .eq('id', selectedClient);
+  
+          if (prescriptionError) throw prescriptionError;
+        }
+  
+  
+        const receiptItems = items.map(item => ({
+          user_id: user.id,
+          receipt_id: receipt.id,
+          product_id: item.productId || null,
+          custom_item_name: item.customName || null,
+          quantity: item.quantity || 1,
+          price: item.price || 0,
+          cost: item.cost || 0,
+          profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+          linked_eye: item.linkedEye || null,
+          applied_markup: item.appliedMarkup || 0
+        }));
+  
+        const { error: itemsError } = await supabase
+          .from('receipt_items')
+          .insert(receiptItems);
+  
+        if (itemsError) {
+          console.error('Error saving receipt items:', itemsError);
+          throw itemsError;
+        }
+  
+        queryClient.invalidateQueries(['receipts']);
+  
+        toast({
+          title: "Success",
+          description: "Receipt saved successfully.",
+        });
+  
+        navigate('/receipts');
+      } catch (error) {
+        console.error('Error saving receipt:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save receipt. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      const newBalance = total - advancePayment;
+      setBalance(newBalance);
+      updatePaymentStatus(newBalance);
+    }, [total, advancePayment]);
+  
+  
+    return (
+      <div>
+        {currentStep === 'client' ? renderClientStep() : renderDetailsStep()}
+  
+        <AddClientDialog
+          isOpen={isAddClientOpen}
+          onClose={() => setIsAddClientOpen(false)}
+          onClientAdded={async (client) => {
+            if (!user) return;
+            try {
+              const { data: clientsData, error: clientsError } = await supabase
+                .from('clients')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('name', { ascending: true });
+  
+              if (clientsError) throw clientsError;
+              const updatedClients = clientsData || [];
+              setClients(updatedClients);
+              setFilteredClients(updatedClients);
+              setSelectedClient(client.id);
+              setSearchTerm(client.name);
+              setIsAddClientOpen(false);
+              setCurrentStep('details');
+  
+              await fetchClientPrescription(client.id);
+            } catch (error) {
+              console.error('Error fetching clients:', error);
+              toast({
+                title: "Error",
+                description: "Failed to refresh clients list",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+        <MarkupSettingsDialog
+          isOpen={isMarkupSettingsOpen}
+          onClose={() => setIsMarkupSettingsOpen(false)}
+          settings={markupSettings}
+          onSave={setMarkupSettings}
+          autoMontage={autoMontage}
+          onAutoMontageChange={setAutoMontage}
+        />
+      </div>
+    );
   };
-
-  const removeRange = (type: 'sph' | 'cyl', index: number) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
-    }));
-  };
-
-  const addRange = (type: 'sph' | 'cyl') => {
-    const newRange = type === 'sph' ?
-      { min: 0, max: 4, markup: 0 } :
-      { min: 0, max: 2, markup: 0 };
-
-    setLocalSettings(prev => ({
-      ...prev,
-      [type]: [...prev[type], newRange]
-    }));
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogTitle>Markup Settings</DialogTitle>
-        <div className="space-y-4">
-          <div className="flex items-center bg-primary/5 p-3 rounded-lg mb-4">
-            <Switch
-              id="autoMontage"
-              checked={autoMontage}
-              onCheckedChange={onAutoMontageChange}
-            />
-            <Label htmlFor="autoMontage" className="ml-2 text-sm text-muted-foreground">
-              Auto-add Montage costs
-            </Label>
-          </div>
-          <h3>SPH Ranges</h3>
-          {localSettings.sph.map((range, index) => (
-            <div key={index} className="grid grid-cols-4 gap-2">
-              <Input
-                type="number"
-                value={range.min}
-                onChange={(e) => updateRange('sph', index, 'min', parseFloat(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={range.max === Infinity ? 999 : range.max}
-                onChange={(e) => updateRange('sph', index, 'max', parseFloat(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={range.markup}
-                onChange={(e) => updateRange('sph', index, 'markup', parseFloat(e.target.value))}
-              />
-              <Button
-                onClick={() => removeRange('sph', index)}
-                variant="ghost"
-                size="icon"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button onClick={() => addRange('sph')} variant="outline">Add SPH Range</Button>
-
-          <h3>CYL Ranges</h3>
-          {localSettings.cyl.map((range, index) => (
-            <div key={index} className="grid grid-cols-4 gap-2">
-              <Input
-                type="number"
-                value={range.min}
-                onChange={(e) => updateRange('cyl', index, 'min', parseFloat(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={range.max === Infinity ? 999 : range.max}
-                onChange={(e) => updateRange('cyl', index, 'max', parseFloat(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={range.markup}
-                onChange={(e) => updateRange('cyl', index, 'markup', parseFloat(e.target.value))}
-              />
-              <Button
-                onClick={() => removeRange('cyl', index)}
-                variant="ghost"
-                size="icon"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button onClick={() => addRange('cyl')} variant="outline">Add CYL Range</Button>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <Button onClick={() => {
-            onSave(localSettings);
-            onClose();
-          }}>Save</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export default NewReceipt;
+  
+  export default NewReceipt;
