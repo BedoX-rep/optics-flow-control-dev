@@ -71,7 +71,10 @@ const Products = () => {
 
     // Apply search filter if exists
     if (searchTerm) {
-      query = query.ilike('name', `%${searchTerm}%`);
+      const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+      searchWords.forEach(word => {
+        query = query.ilike('name', `%${word}%`);
+      });
     }
 
     if (filters.category && filters.category !== "all_categories") {
