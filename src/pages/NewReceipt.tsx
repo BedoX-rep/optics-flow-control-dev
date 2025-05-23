@@ -702,8 +702,6 @@ const NewReceipt = () => {
   );
 
   const renderOrderTab = () => {
-    const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
-
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
