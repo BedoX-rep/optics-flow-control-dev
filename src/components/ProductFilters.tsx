@@ -33,8 +33,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Glasses className="h-4 w-4" />
-          <span>Category</span>
+          {filters.category === 'all_categories' ? (
+            <>
+              <Glasses className="h-4 w-4" />
+              <span>Category</span>
+            </>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_categories">All Categories</SelectItem>
@@ -52,8 +58,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Album className="h-4 w-4" />
-          <span>Index</span>
+          {filters.index === 'all_indexes' ? (
+            <>
+              <Album className="h-4 w-4" />
+              <span>Index</span>
+            </>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_indexes">All Indexes</SelectItem>
@@ -71,8 +83,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Filter className="h-4 w-4" />
-          <span>Treatment</span>
+          {filters.treatment === 'all_treatments' ? (
+            <>
+              <Filter className="h-4 w-4" />
+              <span>Treatment</span>
+            </>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_treatments">All Treatments</SelectItem>
@@ -90,8 +108,14 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
-          <Building2 className="h-4 w-4" />
-          <span>Company</span>
+          {filters.company === 'all_companies' ? (
+            <>
+              <Building2 className="h-4 w-4" />
+              <span>Company</span>
+            </>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_companies">All Companies</SelectItem>
