@@ -27,10 +27,10 @@ interface Product extends ProductSortable {
 }
 
 const DEFAULT_FILTERS = {
-  category: "",
-  index: "",
-  treatment: "",
-  company: "",
+  category: "all_categories",
+  index: "all_indexes",
+  treatment: "all_treatments",
+  company: "all_companies",
   sort: "arrange",
 };
 

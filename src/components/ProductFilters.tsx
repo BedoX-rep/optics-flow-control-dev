@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Filter, Package, Building2, Glasses, Album } from "lucide-react";
+import { Calendar, Filter, Package, Building2, Glasses, Album } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -26,10 +26,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
   return (
     <div className="flex items-center gap-3">
       {/* Category Filter */}
-      <Select value={filters.category} onValueChange={v => onChange({ category: v })}>
+      <Select value={filters.category || "all_categories"} onValueChange={v => onChange({ category: v })}>
         <SelectTrigger className={cn(
           "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.category
+          filters.category !== 'all_categories'
             ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
@@ -37,7 +37,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
           <SelectValue placeholder="Category" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Categories</SelectItem>
+          <SelectItem value="all_categories">All Categories</SelectItem>
           {CATEGORY_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
@@ -45,10 +45,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </Select>
 
       {/* Index Filter */}
-      <Select value={filters.index} onValueChange={v => onChange({ index: v })}>
+      <Select value={filters.index || "all_indexes"} onValueChange={v => onChange({ index: v })}>
         <SelectTrigger className={cn(
           "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.index
+          filters.index !== 'all_indexes'
             ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
@@ -56,7 +56,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
           <SelectValue placeholder="Index" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Indexes</SelectItem>
+          <SelectItem value="all_indexes">All Indexes</SelectItem>
           {INDEX_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
@@ -64,10 +64,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </Select>
 
       {/* Treatment Filter */}
-      <Select value={filters.treatment} onValueChange={v => onChange({ treatment: v })}>
+      <Select value={filters.treatment || "all_treatments"} onValueChange={v => onChange({ treatment: v })}>
         <SelectTrigger className={cn(
           "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.treatment
+          filters.treatment !== 'all_treatments'
             ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
@@ -75,7 +75,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
           <SelectValue placeholder="Treatment" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Treatments</SelectItem>
+          <SelectItem value="all_treatments">All Treatments</SelectItem>
           {TREATMENT_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
@@ -83,10 +83,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       </Select>
 
       {/* Company Filter */}
-      <Select value={filters.company} onValueChange={v => onChange({ company: v })}>
+      <Select value={filters.company || "all_companies"} onValueChange={v => onChange({ company: v })}>
         <SelectTrigger className={cn(
           "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.company
+          filters.company !== 'all_companies'
             ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
             : "bg-white/10 hover:bg-white/20"
         )}>
@@ -94,7 +94,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
           <SelectValue placeholder="Company" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Companies</SelectItem>
+          <SelectItem value="all_companies">All Companies</SelectItem>
           {COMPANY_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
