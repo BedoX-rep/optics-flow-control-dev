@@ -407,7 +407,7 @@ const NewReceipt = () => {
                 </div>
                 <Button onClick={() => setIsAddClientOpen(true)}>Add New Client</Button>
               </div>
-
+  
               <Select value={selectedClient} onValueChange={handleClientSelect}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a client" />
@@ -423,7 +423,7 @@ const NewReceipt = () => {
                   ))}
                 </SelectContent>
               </Select>
-
+  
               <div className="flex justify-between items-center mt-6 pt-6 border-t">
                 <Button
                   variant="ghost"
@@ -447,7 +447,7 @@ const NewReceipt = () => {
         </Card>
       </div>
     );
-
+  
     // Render the details step
     const renderDetailsStep = () => (
       <div className="space-y-4">
@@ -467,7 +467,7 @@ const NewReceipt = () => {
             </AlertDescription>
           </Alert>
         )}
-
+  
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
@@ -482,7 +482,7 @@ const NewReceipt = () => {
                     setOrderType(value);
                     // Reset montage costs when changing order type
                     let newMontageCosts = 0;
-
+                    
                     if (autoMontage && value !== 'Unspecified') {
                       if (value === 'Retoyage') {
                         // For Retoyage, only count Frames category
@@ -529,8 +529,8 @@ const NewReceipt = () => {
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-2">
-
-
+              
+  
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
                   {item.customName !== undefined ? (
@@ -579,7 +579,7 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   )}
-
+  
                   <div className="w-20">
                     <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
                     <Input
@@ -590,7 +590,7 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
                     <Input
@@ -602,7 +602,7 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
                     <Input
@@ -614,21 +614,21 @@ const NewReceipt = () => {
                       onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
                     />
                   </div>
-
+  
                   <div className="w-32">
                     <Label>Total</Label>
                     <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
                       {(item.price * item.quantity).toFixed(2)} DH
                     </div>
                   </div>
-
+  
                   <div className="w-32">
                     <Label>Profit</Label>
                     <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
                       {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
                     </div>
                   </div>
-
+  
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
@@ -732,7 +732,7 @@ const NewReceipt = () => {
                   )}
                 </div>
               ))}
-
+  
               {items.length === 0 && (
                 <div className="text-center p-8 text-gray-500">
                   <p>No items added yet. Click the buttons above to add items.</p>
@@ -741,7 +741,7 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
+  
         <Card>
           <CardContent className="p-4">
             <div className="flex gap-8">
@@ -752,28 +752,28 @@ const NewReceipt = () => {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
-
+  
                   {tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax</span>
                       <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
                     </div>
                   )}
-
+  
                   {(discount > 0 || numericDiscount > 0) && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
                       <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
                     </div>
                   )}
-
+  
                   <div className="pt-3 border-t">
                     <div className="flex justify-between">
                       <span className="font-medium">Total</span>
                       <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
                     </div>
                   </div>
-
+  
                   <div className="py-3 space-y-2 border-t">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Products Cost</span>
@@ -792,7 +792,7 @@ const NewReceipt = () => {
                       <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
                     </div>
                   </div>
-
+  
                   <div className="pt-2 space-y-2"><div className="flex justify-between text-sm">
                       <span className="text-gray-600">Advance Payment</span>
                       <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
@@ -804,14 +804,14 @@ const NewReceipt = () => {
                   </div>
                 </div>
               </div>
-
+  
               <div className="flex-1 p-6 space-y-4 border rounded-lg">
                 <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
                 <div className="grid gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="discount">Percentage Discount</Label>
-                      <div className="relative group">
+                      <div className="relative">
                         <Input
                           id="discount"
                           type="number"
@@ -830,7 +830,7 @@ const NewReceipt = () => {
                     </div>
                     <div>
                       <Label htmlFor="numericDiscount">Fixed Discount</Label>
-                      <div className="relative group">
+                      <div className="relative">
                         <Input
                           id="numericDiscount"
                           type="number"
@@ -847,11 +847,11 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   </div>
-
+  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="tax">Tax Base Amount</Label>
-                      <div className="relative group">
+                      <div className="relative">
                         <Input
                           id="tax"
                           type="number"
@@ -865,7 +865,7 @@ const NewReceipt = () => {
                     </div>
                     <div>
                       <Label htmlFor="taxIndicator">Tax Rate</Label>
-                      <div className="relative group">
+                      <div className="relative">
                         <Input
                           id="taxIndicator"
                           type="number"
@@ -880,10 +880,10 @@ const NewReceipt = () => {
                       </div>
                     </div>
                   </div>
-
+  
                   <div className="pt-4 border-t">
                     <Label htmlFor="advancePayment">Advance Payment</Label>
-                    <div className="relative group">
+                    <div className="relative">
                       <Input
                         id="advancePayment"
                         type="number"
@@ -898,7 +898,7 @@ const NewReceipt = () => {
                       <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
                     </div>
                   </div>
-
+  
                   <div className="pt-4">
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
@@ -913,7 +913,7 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
+  
         <Card>
           <CardHeader className="cursor-pointer" onClick={() => setPrescriptionOpen(!prescriptionOpen)}>
             <div className="flex justify-between items-center">
@@ -935,7 +935,7 @@ const NewReceipt = () => {
                       value={rightEye.sph}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, sph: e.target.value });
-
+  
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -965,7 +965,7 @@ const NewReceipt = () => {
                       value={rightEye.cyl}
                       onChange={(e) => {
                         setRightEye({ ...rightEye, cyl: e.target.value });
-
+  
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'RE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -998,7 +998,7 @@ const NewReceipt = () => {
                   </div>
                 </div>
               </div>
-
+  
               <div>
                 <h3 className="text-lg font-medium mb-3">Left Eye</h3>
                 <div className="grid grid-cols-3 gap-4">
@@ -1009,7 +1009,7 @@ const NewReceipt = () => {
                       value={leftEye.sph}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, sph: e.target.value });
-
+  
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -1037,7 +1037,7 @@ const NewReceipt = () => {
                       value={leftEye.cyl}
                       onChange={(e) => {
                         setLeftEye({ ...leftEye, cyl: e.target.value });
-
+  
                         setItems(prevItems => prevItems.map(item => {
                           if (item.linkedEye === 'LE' && item.productId) {
                             const product = products.find(p => p.id === item.productId);
@@ -1080,7 +1080,7 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         </Card>
-
+  
         <div className="mt-4 flex justify-end space-x-4">
           <Button
             variant="outline"
@@ -1092,14 +1092,13 @@ const NewReceipt = () => {
           <Button
             onClick={handleSaveReceipt}
             disabled={isLoading || (clientSkipped && !selectedClient)}
-            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             {isLoading ? "Saving..." : (clientSkipped ? "Select Client & Save" : "Save Receipt")}
           </Button>
         </div>
       </div>
     );
-
+  
     const handleSaveReceipt = async () => {
       if (!user) {
         toast({
@@ -1109,7 +1108,7 @@ const NewReceipt = () => {
         });
         return;
       }
-
+  
       if (!selectedClient && !clientSkipped) {
         setCurrentStep('client');
         toast({
@@ -1119,7 +1118,7 @@ const NewReceipt = () => {
         });
         return;
       }
-
+  
       if (items.length === 0) {
         toast({
           title: "Missing Items",
@@ -1128,10 +1127,10 @@ const NewReceipt = () => {
         });
         return;
       }
-
+  
       try {
         setIsLoading(true);
-
+  
         const { data: receipt, error: receiptError } = await supabase
           .from('receipts')
           .insert({
@@ -1165,10 +1164,10 @@ const NewReceipt = () => {
           })
           .select()
           .single();
-
+  
         if (receiptError) throw receiptError;
-
-
+  
+  
         if (selectedClient) {
           const { error: prescriptionError } = await supabase
             .from('clients')
@@ -1178,16 +1177,16 @@ const NewReceipt = () => {
               right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
               left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
               left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-              left_eye_axe: parseInt(leftEye.axe) : null,
+              left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
               Add: add ? parseFloat(add) : null,
               last_prescription_update: new Date().toISOString()
             })
             .eq('id', selectedClient);
-
+  
           if (prescriptionError) throw prescriptionError;
         }
-
-
+  
+  
         const receiptItems = items.map(item => ({
           user_id: user.id,
           receipt_id: receipt.id,
@@ -1200,23 +1199,23 @@ const NewReceipt = () => {
           linked_eye: item.linkedEye || null,
           applied_markup: item.appliedMarkup || 0
         }));
-
+  
         const { error: itemsError } = await supabase
           .from('receipt_items')
           .insert(receiptItems);
-
+  
         if (itemsError) {
           console.error('Error saving receipt items:', itemsError);
           throw itemsError;
         }
-
+  
         queryClient.invalidateQueries(['receipts']);
-
+  
         toast({
           title: "Success",
           description: "Receipt saved successfully.",
         });
-
+  
         navigate('/receipts');
       } catch (error) {
         console.error('Error saving receipt:', error);
@@ -1229,18 +1228,18 @@ const NewReceipt = () => {
         setIsLoading(false);
       }
     };
-
+  
     useEffect(() => {
       const newBalance = total - advancePayment;
       setBalance(newBalance);
       updatePaymentStatus(newBalance);
     }, [total, advancePayment]);
-
-
+  
+  
     return (
       <div>
         {currentStep === 'client' ? renderClientStep() : renderDetailsStep()}
-
+  
         <AddClientDialog
           isOpen={isAddClientOpen}
           onClose={() => setIsAddClientOpen(false)}
@@ -1252,7 +1251,7 @@ const NewReceipt = () => {
                 .select('*')
                 .eq('user_id', user.id)
                 .order('name', { ascending: true });
-
+  
               if (clientsError) throw clientsError;
               const updatedClients = clientsData || [];
               setClients(updatedClients);
@@ -1261,7 +1260,7 @@ const NewReceipt = () => {
               setSearchTerm(client.name);
               setIsAddClientOpen(false);
               setCurrentStep('details');
-
+  
               await fetchClientPrescription(client.id);
             } catch (error) {
               console.error('Error fetching clients:', error);
@@ -1284,5 +1283,5 @@ const NewReceipt = () => {
       </div>
     );
   };
-
+  
   export default NewReceipt;
