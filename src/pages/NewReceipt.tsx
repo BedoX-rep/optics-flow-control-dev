@@ -1143,8 +1143,22 @@ const NewReceipt = () => {
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
-      <div className="w-full max-w-4xl mx-auto mb-4">
-        <div className="flex justify-end mb-4">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-3">
+          {steps.map((step, index) => (
+            <Button
+              key={step.id}
+              variant={currentStep === step.id ? "default" : "ghost"}
+              className={`relative ${currentStep === step.id ? 'text-primary' : 'text-muted-foreground'}`}
+              onClick={() => setCurrentStep(step.id as any)}
+              disabled={index > currentStepIndex + 1}
+            >
+              <span className="font-medium">{step.label}</span>
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex justify-between items-center mb-2">
           {currentStepIndex > 0 && (
             <Button
               variant="outline"
@@ -1152,38 +1166,28 @@ const NewReceipt = () => {
                 const prevIndex = Math.max(0, currentStepIndex - 1);
                 setCurrentStep(steps[prevIndex].id as any);
               }}
-              className="mr-auto"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
           )}
 
-          <Button
-            size="lg"
-            className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
-            onClick={() => {
-              if (currentStepIndex === steps.length - 1) {
-                handleSaveReceipt();
-              } else {
+          {currentStepIndex < steps.length - 1 && (
+            <Button
+              size="lg"
+              className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl ml-auto"
+              onClick={() => {
                 const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
                 setCurrentStep(steps[nextIndex].id as any);
-              }
-            }}
-          >
-            {currentStepIndex === steps.length - 1 ? (
-              'Save Receipt'
-            ) : (
-              <>
-                Next Step
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </>
-            )}
-          </Button>
+              }}
+            >
+              Next Step
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          )}
         </div>
-      </div>
 
-      {renderStepIndicator()}
+        <Progress value={progress} className="h-2 mb-6" />
 
       <AnimatePresence mode="wait">
         {currentStep === 'details' && (
@@ -1202,10 +1206,22 @@ const NewReceipt = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid gap-6 lg:grid-cols-2"
+            className="space-y-6"
           >
-            {renderItemsStep()}
-            {renderPaymentStep()}
+            <div className="grid gap-6 lg:grid-cols-2">
+              {renderItemsStep()}
+              {renderPaymentStep()}
+            </div>
+            <div className="flex justify-center">
+              <Button
+                size="lg"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl w-full max-w-md"
+                onClick={handleSaveReceipt}
+              >
+                Save Receipt
+                <Check className="h-5 w-5 ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
