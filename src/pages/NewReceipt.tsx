@@ -8,6 +8,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check, User, Phone, Eye, Receipt, CreditCard } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import {
   Alert,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -115,13 +117,15 @@ const NewReceipt = () => {
   const [formData, setFormData] = useState({}); // Added formData state
   const [currentStep, setCurrentStep] = useState('details');
   const [clientSkipped, setClientSkipped] = useState(false);
+  const [currentTab, setCurrentTab] = useState('client');
 
   const steps = [
-    { id: 'details', label: 'Client & Prescription' },
-    { id: 'order', label: 'Items & Payment' }
+    { id: 'client', label: 'Client Selection', icon: User },
+    { id: 'order', label: 'Order Details', icon: Receipt },
+    { id: 'finalize', label: 'Finalize', icon: CreditCard }
   ];
 
-  const currentStepIndex = steps.findIndex(step => step.id === currentStep);
+  const currentStepIndex = steps.findIndex(step => step.id === currentTab);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
   useEffect(() => {
@@ -428,36 +432,46 @@ const NewReceipt = () => {
 
   const renderStepIndicator = () => (
     <div className="w-full max-w-4xl mx-auto mb-8">
-      <div className="flex justify-between mb-2">
-        {steps.map((step, index) => (
-          <Button
-            key={step.id}
-            variant={currentStep === step.id ? "default" : "ghost"}
-            className={`relative ${currentStep === step.id ? 'text-primary' : 'text-muted-foreground'}`}
-            onClick={() => setCurrentStep(step.id as any)}
-            disabled={index > currentStepIndex + 1}
-          >
-            <span className="font-medium">{step.label}</span>
-          </Button>
-        ))}
+      <div className="flex justify-between mb-6">
+        {steps.map((step, index) => {
+          const StepIcon = step.icon;
+          const isActive = currentTab === step.id;
+          const isCompleted = index < currentStepIndex;
+
+          return (
+            <div key={step.id} className="flex-1 relative">
+              <div className={`flex flex-col items-center ${index < steps.length - 1 ? 'after:content-[""] after:absolute after:w-full after:h-[2px] after:bg-gray-200 after:top-5 after:left-1/2 after:-z-10' : ''}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                  isActive ? 'bg-primary text-white scale-110' :
+                  isCompleted ? 'bg-green-500 text-white' :
+                  'bg-gray-100 text-gray-400'
+                }`}>
+                  {isCompleted ? <Check className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
+                </div>
+                <span className={`mt-2 text-sm font-medium ${isActive ? 'text-primary' : 'text-gray-500'}`}>
+                  {step.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <Progress value={progress} className="h-2" />
     </div>
   );
 
-  const renderClientStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-3xl mx-auto"
-    >
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl">Select Client</CardTitle>
+  const renderClientTab = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <User className="w-5 h-5" />
+            Select Client
+          </CardTitle>
+          <CardDescription>Choose an existing client or create a new one</CardDescription>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="flex gap-3">
+        <CardContent className="p-6">
+          <div className="flex gap-3 mb-6">
             <div className="flex-1">
               <Input
                 placeholder="Search by name or phone..."
@@ -501,24 +515,19 @@ const NewReceipt = () => {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
-  );
 
-  const renderPrescriptionStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-3xl mx-auto"
-    >
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl">Prescription Details</CardTitle>
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            Prescription Details
+          </CardTitle>
+          <CardDescription>Enter or update client's prescription</CardDescription>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-6">
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-3">Right Eye</h3>
+            <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
+              <h3 className="text-lg font-medium mb-3 text-blue-900">Right Eye</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="rightSph">SPH</Label>
@@ -548,6 +557,7 @@ const NewReceipt = () => {
                         return item;
                       }));
                     }}
+                    className="bg-white"
                   />
                 </div>
                 <div>
@@ -578,6 +588,7 @@ const NewReceipt = () => {
                         return item;
                       }));
                     }}
+                    className="bg-white"
                   />
                 </div>
                 <div>
@@ -588,18 +599,21 @@ const NewReceipt = () => {
                     inputMode="numeric"
                     value={rightEye.axe}
                     onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
+                    className="bg-white"
                   />
                 </div>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-medium mb-3">Left Eye</h3>
+            <div className="bg-purple-50/50 rounded-lg p-4 border border-purple-100">
+              <h3 className="text-lg font-medium mb-3 text-purple-900">Left Eye</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="leftSph">SPH</Label>
                   <Input
                     id="leftSph"
+                    type="text"
+                    inputMode="decimal"
                     value={leftEye.sph}
                     onChange={(e) => {
                       setLeftEye({ ...leftEye, sph: e.target.value });
@@ -622,12 +636,15 @@ const NewReceipt = () => {
                         return item;
                       }));
                     }}
+                    className="bg-white"
                   />
                 </div>
                 <div>
                   <Label htmlFor="leftCyl">CYL</Label>
                   <Input
                     id="leftCyl"
+                    type="text"
+                    inputMode="decimal"
                     value={leftEye.cyl}
                     onChange={(e) => {
                       setLeftEye({ ...leftEye, cyl: e.target.value });
@@ -650,564 +667,683 @@ const NewReceipt = () => {
                         return item;
                       }));
                     }}
+                    className="bg-white"
                   />
                 </div>
                 <div>
                   <Label htmlFor="leftAxe">AXE</Label>
                   <Input
                     id="leftAxe"
+                    type="text"
+                    inputMode="numeric"
                     value={leftEye.axe}
                     onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
+                    className="bg-white"
                   />
                 </div>
               </div>
             </div>
-            <div className="mt-6">
+
+            <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
               <Label htmlFor="add">ADD</Label>
               <Input
                 id="add"
+                type="text"
                 value={add}
                 onChange={(e) => setAdd(e.target.value)}
                 placeholder="Enter ADD value"
+                className="bg-white"
               />
             </div>
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 
-  const renderItemsStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-3xl mx-auto"
-    >
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <div className="flex gap-3">
-              <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-                <Plus className="h-4 w-4 mr-2" /> Add Product
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="default">
-                <Plus className="h-4 w-4 mr-2" /> Add Custom Item
-              </Button>
-              <Select value={orderType} onValueChange={(value) => {
-                setOrderType(value);
-                // Reset montage costs when changing order type
-                let newMontageCosts = 0;
+  const renderOrderTab = () => {
+    const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
 
-                if (autoMontage && value !== 'Unspecified') {
-                  if (value === 'Retoyage') {
-                    // For Retoyage, only count Frames category
-                    newMontageCosts = items.reduce((sum, item) => {
-                      const product = products.find(p => p.id === item.productId);
-                      return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
-                    }, 0);
-                  } else if (value === 'Montage') {
-                    // For Montage, calculate based on lens types
-                    newMontageCosts = items.reduce((sum, item) => {
-                      const product = products.find(p => p.id === item.productId);
-                      if (product?.category === 'Single Vision Lenses') {
-                        return sum + (10 * item.quantity);
-                      } else if (product?.category === 'Progressive Lenses') {
-                        return sum + (20 * item.quantity);
-                      }
-                      return sum;
-                    }, 0);
-                  }
-                  // For 'Sell' type, montage costs remain 0
-                }
-                setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
-              }}>
-                <SelectTrigger className="w-[180px] bg-amber-100 border-amber-300 hover:bg-amber-200 ring-2 ring-amber-500/20 shadow-lg shadow-amber-100/50 font-medium text-amber-900">
-                  <SelectValue placeholder="Order Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Unspecified">Unspecified</SelectItem>
-                  <SelectItem value="Montage">Montage</SelectItem>
-                  <SelectItem value="Retoyage">Retoyage</SelectItem>
-                  <SelectItem value="Sell">Sell</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={() => setIsMarkupSettingsOpen(true)}
-              variant="ghost"
-              size="sm"
-              className="text-neutral-600 hover:text-neutral-900"
-            >
-              <Settings className="h-4 w-4 mr-2" /> Markup Settings
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-2">
-
-
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
-                {item.customName !== undefined ? (
-                  <div className="flex-1">
-                    <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
-                    <Input
-                      id={`custom-${item.id}`}
-                      value={item.customName || ''}
-                      onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex-1">
-                    <Label htmlFor={`product-${item.id}`}>Product</Label>
-                    <div className="flex gap-2">
-                      <Select
-                        value={item.productId}
-                        onValueChange={(value) => updateItem(item.id, 'productId', value)}
-                      >
-                        <SelectTrigger id={`product-${item.id}`}>
-                          <SelectValue placeholder="Select a product" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
-                            <SelectItem key={product.id} value={product.id}>
-                              <div className="flex justify-between items-center w-full gap-4">
-                                <span className="font-medium">{product.name}</span>
-                                <span className="text-sm text-blue-900 tabular-nums">{product.price.toFixed(2)} DH</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        type="text"
-                        placeholder="Search products..."
-                        value={productSearchTerms[item.id] || ''}
-                        onChange={(e) => {
-                          setProductSearchTerms(prev => ({
-                            ...prev,
-                            [item.id]: e.target.value
-                          }));
-                        }}
-                        className="w-48"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="w-20">
-                  <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
-                  <Input
-                    id={`quantity-${item.id}`}
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                  />
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gray-50 border-b">
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="w-5 h-5" />
+                  Order Items
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button onClick={() => addItem('product')} size="sm">
+                    <Plus className="h-4 w-4 mr-2" /> Add Product
+                  </Button>
+                  <Button onClick={() => addItem('custom')} variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-2" /> Custom Item
+                  </Button>
                 </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                {/* Order type selector */}
+                <Select value={orderType} onValueChange={(value) => {
+                  setOrderType(value);
+                  // Reset montage costs when changing order type
+                  let newMontageCosts = 0;
 
-                <div className="w-32">
-                  <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
-                  <Input
-                    id={`price-${item.id}`}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.price}
-                    onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-
-                <div className="w-32">
-                  <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
-                  <Input
-                    id={`cost-${item.id}`}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.cost}
-                    onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-
-                <div className="w-32">
-                  <Label>Total</Label>
-                  <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
-                    {(item.price * item.quantity).toFixed(2)} DH
-                  </div>
-                </div>
-
-                <div className="w-32">
-                  <Label>Profit</Label>
-                  <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
-                    {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
-                  </div>
-                </div>
-
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      const duplicatedItem = {
-                        ...item,
-                        id: `item-${Date.now()}`,
-                        linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
-                      };
-                      if (duplicatedItem.linkedEye && duplicatedItem.productId) {
-                        const product = products.find(p => p.id === duplicatedItem.productId);
-                        if (product) {
-                          const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
-                          const markup = calculateMarkup(sph, cyl);
-                          duplicatedItem.appliedMarkup = markup;
-                          duplicatedItem.price = product.price * (1 + markup / 100);
+                  if (autoMontage && value !== 'Unspecified') {
+                    if (value === 'Retoyage') {
+                      // For Retoyage, only count Frames category
+                      newMontageCosts = items.reduce((sum, item) => {
+                        const product = products.find(p => p.id === item.productId);
+                        return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
+                      }, 0);
+                    } else if (value === 'Montage') {
+                      // For Montage, calculate based on lens types
+                      newMontageCosts = items.reduce((sum, item) => {
+                        const product = products.find(p => p.id === item.productId);
+                        if (product?.category === 'Single Vision Lenses') {
+                          return sum + (10 * item.quantity);
+                        } else if (product?.category === 'Progressive Lenses') {
+                          return sum + (20 * item.quantity);
                         }
-                      }
-                      setItems(prevItems => [...prevItems, duplicatedItem]);
-                    }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(item.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                        return sum;
+                      }, 0);
+                    }
+                    // For 'Sell' type, montage costs remain 0
+                  }
+                  setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
+                }}>
+                  <SelectTrigger className="w-full bg-amber-50 border-amber-200">
+                    <SelectValue placeholder="Select Order Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Unspecified">Unspecified</SelectItem>
+                    <SelectItem value="Montage">Montage</SelectItem>
+                    <SelectItem value="Retoyage">Retoyage</SelectItem>
+                    <SelectItem value="Sell">Sell</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Items list */}
+                <div className="space-y-4">
+                  {items.map((item) => (
+                    <Card key={item.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
+                          {item.customName !== undefined ? (
+                            <div className="flex-1">
+                              <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
+                              <Input
+                                id={`custom-${item.id}`}
+                                value={item.customName || ''}
+                                onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1">
+                              <Label htmlFor={`product-${item.id}`}>Product</Label>
+                              <div className="flex gap-2">
+                                <Select
+                                  value={item.productId}
+                                  onValueChange={(value) => updateItem(item.id, 'productId', value)}
+                                >
+                                  <SelectTrigger id={`product-${item.id}`}>
+                                    <SelectValue placeholder="Select a product" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
+                                      <SelectItem key={product.id} value={product.id}>
+                                        <div className="flex justify-between items-center w-full gap-4">
+                                          <span className="font-medium">{product.name}</span>
+                                          <span className="text-sm text-blue-900 tabular-nums">{product.price.toFixed(2)} DH</span>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="text"
+                                  placeholder="Search products..."
+                                  value={productSearchTerms[item.id] || ''}
+                                  onChange={(e) => {
+                                    setProductSearchTerms(prev => ({
+                                      ...prev,
+                                      [item.id]: e.target.value
+                                    }));
+                                  }}
+                                  className="w-48"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="w-20">
+                            <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                            <Input
+                              id={`quantity-${item.id}`}
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                            />
+                          </div>
+
+                          <div className="w-32">
+                            <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
+                            <Input
+                              id={`price-${item.id}`}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.price}
+                              onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
+
+                          <div className="w-32">
+                            <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+                            <Input
+                              id={`cost-${item.id}`}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.cost}
+                              onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
+
+                          <div className="w-32">
+                            <Label>Total</Label>
+                            <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
+                              {(item.price * item.quantity).toFixed(2)} DH
+                            </div>
+                          </div>
+
+                          <div className="w-32">
+                            <Label>Profit</Label>
+                            <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
+                              {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
+                            </div>
+                          </div>
+
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const duplicatedItem = {
+                                  ...item,
+                                  id: `item-${Date.now()}`,
+                                  linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
+                                };
+                                if (duplicatedItem.linkedEye && duplicatedItem.productId) {
+                                  const product = products.find(p => p.id === duplicatedItem.productId);
+                                  if (product) {
+                                    const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
+                                    const markup = calculateMarkup(sph, cyl);
+                                    duplicatedItem.appliedMarkup = markup;
+                                    duplicatedItem.price = product.price * (1 + markup / 100);
+                                  }
+                                }
+                                setItems(prevItems => [...prevItems, duplicatedItem]);
+                              }}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeItem(item.id)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                            <div className="flex items-center gap-2">
+                              <div className="flex gap-2 items-center">
+                                <Button
+                                  type="button"
+                                  variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                                  size="icon"
+                                  className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                                  onClick={() => {
+                                    const updatedItem = { ...item };
+                                    if (item.linkedEye === 'LE') {
+                                      updatedItem.linkedEye = undefined;
+                                      updatedItem.appliedMarkup = 0;
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        updatedItem.price = product.price;
+                                      }
+                                    } else {
+                                      updatedItem.linkedEye = 'LE';
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        const { sph, cyl } = getEyeValues('LE');
+                                        const markup = calculateMarkup(sph, cyl);
+                                        updatedItem.appliedMarkup = markup;
+                                        updatedItem.price = product.price * (1 + markup / 100);
+                                      }
+                                    }
+                                    setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                                  }}
+                                >
+                                  👁️
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                                  size="icon"
+                                  className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+                                  onClick={() => {
+                                    const updatedItem = { ...item };
+                                    if (item.linkedEye === 'RE') {
+                                      updatedItem.linkedEye = undefined;
+                                      updatedItem.appliedMarkup = 0;
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        updatedItem.price = product.price;
+                                      }
+                                    } else {
+                                      updatedItem.linkedEye = 'RE';
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        const { sph, cyl } = getEyeValues('RE');
+                                        const markup = calculateMarkup(sph, cyl);
+                                        updatedItem.appliedMarkup = markup;
+                                        updatedItem.price = product.price * (1 + markup / 100);
+                                      }
+                                    }
+                                    setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                                  }}
+                                >
+                                  👁️
+                                </Button>
+                              </div>
+                              {item.appliedMarkup > 0 && (
+                                <span className="text-sm text-muted-foreground">
+                                  (+{item.appliedMarkup}% markup)
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-2 items-center">
-                      <Button
-                        type="button"
-                        variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
-                        size="icon"
-                        className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
-                        onClick={() => {
-                          const updatedItem = { ...item };
-                          if (item.linkedEye === 'LE') {
-                            updatedItem.linkedEye = undefined;
-                            updatedItem.appliedMarkup = 0;
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              updatedItem.price = product.price;
-                            }
-                          } else {
-                            updatedItem.linkedEye = 'LE';
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const { sph, cyl } = getEyeValues('LE');
-                              const markup = calculateMarkup(sph, cyl);
-                              updatedItem.appliedMarkup = markup;
-                              updatedItem.price = product.price * (1 + markup / 100);
-                            }
-                          }
-                          setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                        }}
-                      >
-                        👁️
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
-                        size="icon"
-                        className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
-                        onClick={() => {
-                          const updatedItem = { ...item };
-                          if (item.linkedEye === 'RE') {
-                            updatedItem.linkedEye = undefined;
-                            updatedItem.appliedMarkup = 0;
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              updatedItem.price = product.price;
-                            }
-                          } else {
-                            updatedItem.linkedEye = 'RE';
-                            const product = products.find(p => p.id === item.productId);
-                            if (product) {
-                              const { sph, cyl } = getEyeValues('RE');
-                              const markup = calculateMarkup(sph, cyl);
-                              updatedItem.appliedMarkup = markup;
-                              updatedItem.price = product.price * (1 + markup / 100);
-                            }
-                          }
-                          setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                        }}
-                      >
-                        👁️
-                      </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gray-50 border-b">
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Payment Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex gap-8">
+              <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
+                <h3 className="font-semibold text-xl text-gray-900">Order Summary</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">{subtotal.toFixed(2)} DH</span>
+                  </div>
+
+                  {tax > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tax</span>
+                      <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
                     </div>
-                    {item.appliedMarkup > 0 && (
-                      <span className="text-sm text-muted-foreground">
-                        (+{item.appliedMarkup}% markup)
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
 
-            {items.length === 0 && (
-              <div className="text-center p-8 text-gray-500">
-                <p>No items added yet. Click the buttons above to add items.</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+                  {(discount > 0 || numericDiscount > 0) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
+                      <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
+                    </div>
+                  )}
 
-  const renderPaymentStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-3xl mx-auto"
-    >
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-8">
-            <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
-              <h3 className="font-semibold text-xl text-gray-900">Order Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">{subtotal.toFixed(2)} DH</span>
-                </div>
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total</span>
+                      <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
+                    </div>
+                  </div>
 
-                {tax > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
+                  <div className="py-3 space-y-2 border-t">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Products Cost</span>
+                      <span className="font-medium">{totalCost.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Montage Costs</span>
+                      <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-gray-800">Total Cost (TTC)</span>
+                      <span className="text-red-600">{(totalCost + montageCosts).toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-900">Profit</span>
+                      <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
+                    </div>
                   </div>
-                )}
 
-                {(discount > 0 || numericDiscount > 0) && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Discount ({discount}% + {numericDiscount} DH)</span>
-                    <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
+                  <div className="pt-2 space-y-2"><div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Advance Payment</span>
+                    <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
                   </div>
-                )}
-
-                <div className="pt-3 border-t">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Total</span>
-                    <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
-                  </div>
-                </div>
-
-                <div className="py-3 space-y-2 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Products Cost</span>
-                    <span className="font-medium">{totalCost.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Montage Costs</span>
-                    <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-gray-800">Total Cost (TTC)</span>
-                    <span className="text-red-600">{(totalCost + montageCosts).toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-900">Profit</span>
-                    <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
-                  </div>
-                </div>
-
-                <div className="pt-2 space-y-2"><div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Advance Payment</span>
-                  <span className="font-medium">{advancePayment.toFixed(2)} DH</span>
-                </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Balance Due</span>
-                    <span className="font-semibold text-lg">{balance.toFixed(2)} DH</span>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Balance Due</span>
+                      <span className="font-semibold text-lg">{balance.toFixed(2)} DH</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex-1 p-6 space-y-4 border rounded-lg">
-              <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
-              <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="discount">Percentage Discount</Label>
+              <div className="flex-1 p-6 space-y-4 border rounded-lg">
+                <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="discount">Percentage Discount</Label>
+                      <div className="relative">
+                        <Input
+                          id="discount"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={discount}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setDiscount(value === '' ? 0 : parseFloat(value));
+                          }}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="numericDiscount">Fixed Discount</Label>
+                      <div className="relative">
+                        <Input
+                          id="numericDiscount"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={numericDiscount}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setNumericDiscount(value === '' ? 0 : parseFloat(value));
+                          }}
+                          className="pr-12"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="tax">Tax Base Amount</Label>
+                      <div className="relative">
+                        <Input
+                          id="tax"
+                          type="number"
+                          min="0"
+                          value={tax}
+                          onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                          className="pr-12"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="taxIndicator">Tax Rate</Label>
+                      <div className="relative">
+                        <Input
+                          id="taxIndicator"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={taxIndicator}
+                          onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-2.5 text-gray-500">×</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <Label htmlFor="advancePayment">Advance Payment</Label>
                     <div className="relative">
                       <Input
-                        id="discount"
+                        id="advancePayment"
                         type="number"
                         min="0"
-                        max="100"
-                        step="0.01"
-                        value={discount}
+                        value={advancePayment}
                         onChange={(e) => {
-                          const value = e.target.value;
-                          setDiscount(value === '' ? 0 : parseFloat(value));
-                        }}
-                        className="pr-8"
-                      />
-                      <span className="absolute right-3 top-2.5 text-gray-500">%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="numericDiscount">Fixed Discount</Label>
-                    <div className="relative">
-                      <Input
-                        id="numericDiscount"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={numericDiscount}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setNumericDiscount(value === '' ? 0 : parseFloat(value));
+                          const value = parseFloat(e.target.value) || 0;
+                          setAdvancePayment(value);
                         }}
                         className="pr-12"
                       />
                       <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="tax">Tax Base Amount</Label>
-                    <div className="relative">
-                      <Input
-                        id="tax"
-                        type="number"
-                        min="0"
-                        value={tax}
-                        onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                        className="pr-12"
-                      />
-                      <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                  <div className="pt-4">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                        paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                    }`}>
+                      {paymentStatus}
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="taxIndicator">Tax Rate</Label>
-                    <div className="relative">
-                      <Input
-                        id="taxIndicator"
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={taxIndicator}
-                        onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
-                        className="pr-8"
-                      />
-                      <span className="absolute right-3 top-2.5 text-gray-500">×</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <Label htmlFor="advancePayment">Advance Payment</Label>
-                  <div className="relative">
-                    <Input
-                      id="advancePayment"
-                      type="number"
-                      min="0"
-                      value={advancePayment}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
-                        setAdvancePayment(value);
-                      }}
-                      className="pr-12"
-                    />
-                    <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
-                      paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                  }`}>
-                    {paymentStatus}
                   </div>
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  };
+
+  const renderFinalizeTab = () => (
+    <Card className="border-0 shadow-lg">
+      <CardHeader className="bg-gray-50 border-b">
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="w-5 h-5" />
+          Receipt Summary
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Client Information</h3>
+              <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
+              <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Prescription</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Right Eye</p>
+                  <p>SPH: {rightEye.sph || 'N/A'}</p>
+                  <p>CYL: {rightEye.cyl || 'N/A'}</p>
+                  <p>AXE: {rightEye.axe || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Left Eye</p>
+                  <p>SPH: {leftEye.sph || 'N/A'}</p>
+                  <p>CYL: {leftEye.cyl || 'N/A'}</p>
+                  <p>AXE: {leftEye.axe || 'N/A'}</p>
+                </div>
+              </div>
+              <p className="mt-2">ADD: {add || 'N/A'}</p>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Order Summary</h3>
+              <p className="text-sm">Order Type: <span className="font-medium">{orderType}</span></p>
+              <p className="text-sm">Total Items: <span className="font-medium">{items.length}</span></p>
+              <p className="text-sm">Subtotal: <span className="font-medium">{subtotal.toFixed(2)} DH</span></p>
+              <p className="text-sm">Total: <span className="font-medium text-primary">{total.toFixed(2)} DH</span></p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Payment Status</h3>
+              <p className="text-sm">Advance Payment: <span className="font-medium">{advancePayment.toFixed(2)} DH</span></p>
+              <p className="text-sm">Balance Due: <span className="font-medium">{balance.toFixed(2)} DH</span></p>
+              <p className="text-sm">Status: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>{paymentStatus}</span></p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
+
+  const handleSaveReceipt = async () => {
+    setIsLoading(true);
+    if (!user) return;
+
+    const receiptData = {
+      user_id: user.id,
+      client_id: selectedClient,
+      items: items.map(item => ({
+        product_id: item.productId,
+        custom_name: item.customName,
+        quantity: item.quantity,
+        price: item.price,
+        cost: item.cost,
+        linked_eye: item.linkedEye,
+        applied_markup: item.appliedMarkup,
+        order_type: item.order_type,
+      })),
+      right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+      right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+      right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+      left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+      left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+      left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+      add: add ? parseFloat(add) : null,
+      discount: discount,
+      numeric_discount: numericDiscount,
+      tax: tax,
+      tax_indicator: taxIndicator,
+      advance_payment: advancePayment,
+      balance: balance,
+      payment_status: paymentStatus,
+      subtotal: subtotal,
+      total_cost: totalCost,
+      montage_costs: montageCosts,
+      total: total,
+      profit: profit,
+      order_type: orderType,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('receipts')
+        .insert([receiptData])
+        .select()
+
+      if (error) {
+        console.error('Error saving receipt:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save receipt",
+          variant: "destructive",
+        });
+      } else {
+        console.log('Receipt saved successfully:', data);
+        toast({
+          title: "Success",
+          description: "Receipt saved successfully",
+        });
+        queryClient.invalidateQueries(['receipts', user.id]);
+        navigate('/receipts');
+      }
+    } catch (error) {
+      console.error('Error saving receipt:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
-      <div className="w-full max-w-4xl mx-auto mb-4">
-        <div className="flex justify-end mb-4">
-          {currentStepIndex > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                const prevIndex = Math.max(0, currentStepIndex - 1);
-                setCurrentStep(steps[prevIndex].id as any);
-              }}
-              className="mr-auto"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-          )}
-
-          <Button
-            size="lg"
-            className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
-            onClick={() => {
-              if (currentStepIndex === steps.length - 1) {
-                handleSaveReceipt();
-              } else {
-                const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-                setCurrentStep(steps[nextIndex].id as any);
-              }
-            }}
-          >
-            {currentStepIndex === steps.length - 1 ? (
-              'Save Receipt'
-            ) : (
-              <>
-                Next Step
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
       {renderStepIndicator()}
 
+      <div className="mb-6 flex justify-between items-center">
+        <Button
+          variant="outline"
+          onClick={() => {
+            const prevIndex = Math.max(0, currentStepIndex - 1);
+            setCurrentTab(steps[prevIndex].id);
+          }}
+          disabled={currentStepIndex === 0}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Previous
+        </Button>
+
+        <Button
+          className="bg-primary"
+          onClick={() => {
+            if (currentStepIndex === steps.length - 1) {
+              handleSaveReceipt();
+            } else {
+              const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
+              setCurrentTab(steps[nextIndex].id);
+            }
+          }}
+        >
+          {currentStepIndex === steps.length - 1 ? (
+            <>Save Receipt</>
+          ) : (
+            <>Next <ArrowRight className="h-4 w-4 ml-2" /></>
+          )}
+        </Button>
+      </div>
+
       <AnimatePresence mode="wait">
-        {currentStep === 'details' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="grid gap-6 lg:grid-cols-2"
-          >
-            {renderClientStep()}
-            {renderPrescriptionStep()}
-          </motion.div>
-        )}
-        {currentStep === 'order' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="grid gap-6 lg:grid-cols-2"
-          >
-            {renderItemsStep()}
-            {renderPaymentStep()}
-          </motion.div>
-        )}
+        <motion.div
+          key={currentTab}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+        >
+          {currentTab === 'client' && renderClientTab()}
+          {currentTab === 'order' && renderOrderTab()}
+          {currentTab === 'finalize' && renderFinalizeTab()}
+        </motion.div>
       </AnimatePresence>
 
       <AddClientDialog
