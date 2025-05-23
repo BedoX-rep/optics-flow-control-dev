@@ -467,6 +467,9 @@ const NewReceipt = () => {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Prescription Details Card */}
+        
   
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-2">
