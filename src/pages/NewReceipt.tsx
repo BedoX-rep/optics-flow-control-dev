@@ -1143,6 +1143,46 @@ const NewReceipt = () => {
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">
+      <div className="w-full max-w-4xl mx-auto mb-4">
+        <div className="flex justify-end mb-4">
+          {currentStepIndex > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                const prevIndex = Math.max(0, currentStepIndex - 1);
+                setCurrentStep(steps[prevIndex].id as any);
+              }}
+              className="mr-auto"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+          )}
+
+          <Button
+            size="lg"
+            className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
+            onClick={() => {
+              if (currentStepIndex === steps.length - 1) {
+                handleSaveReceipt();
+              } else {
+                const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
+                setCurrentStep(steps[nextIndex].id as any);
+              }
+            }}
+          >
+            {currentStepIndex === steps.length - 1 ? (
+              'Save Receipt'
+            ) : (
+              <>
+                Next Step
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
       {renderStepIndicator()}
 
       <AnimatePresence mode="wait">
@@ -1169,44 +1209,6 @@ const NewReceipt = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <div className="w-full flex justify-end mb-2">
-        {currentStepIndex > 0 && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              const prevIndex = Math.max(0, currentStepIndex - 1);
-              setCurrentStep(steps[prevIndex].id as any);
-            }}
-            className="mr-auto"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-        )}
-
-        <Button
-          size="lg"
-          className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
-          onClick={() => {
-            if (currentStepIndex === steps.length - 1) {
-              handleSaveReceipt();
-            } else {
-              const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-              setCurrentStep(steps[nextIndex].id as any);
-            }
-          }}
-        >
-          {currentStepIndex === steps.length - 1 ? (
-            'Save Receipt'
-          ) : (
-            <>
-              Next Step
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </>
-          )}
-        </Button>
-      </div>
 
       <AddClientDialog
         isOpen={isAddClientOpen}
