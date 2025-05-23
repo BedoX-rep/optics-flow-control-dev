@@ -1,6 +1,8 @@
+
 import React from "react";
-import { ChevronDown } from "lucide-react";
+import { Calendar, Filter, Package, Building2, Glasses, Album } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",
@@ -11,6 +13,10 @@ const CATEGORY_OPTIONS = [
   "Accessories"
 ];
 
+const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.60", "1.67", "1.74"];
+const TREATMENT_OPTIONS = ["Standard", "Blue Cut", "Photochromic", "Polarized"];
+const COMPANY_OPTIONS = ["Essilor", "Hoya", "Zeiss", "Rodenstock", "Shamir"];
+
 export interface ProductFiltersProps {
   filters: Record<string, string>;
   onChange: (filters: Record<string, string>) => void;
@@ -18,30 +24,80 @@ export interface ProductFiltersProps {
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
   return (
-    <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-      {/* Category filter */}
+    <div className="flex items-center gap-3">
+      {/* Category Filter */}
       <Select value={filters.category || "all_categories"} onValueChange={v => onChange({ category: v })}>
-        <SelectTrigger className="rounded-lg border border-black/10 min-w-[100px] text-xs h-8 pr-6 bg-white focus:ring-1 focus:ring-black font-inter font-medium shadow-none transition">
+        <SelectTrigger className={cn(
+          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          filters.category !== 'all_categories'
+            ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
+            : "bg-white/10 hover:bg-white/20"
+        )}>
+          <Glasses className="h-4 w-4 mr-2" />
           <SelectValue placeholder="Category" />
-          <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
         </SelectTrigger>
-        <SelectContent className="z-[80] bg-white shadow-xl border border-black/10 rounded-lg min-w-[120px] py-1">
-          <SelectItem value="all_categories">All</SelectItem>
+        <SelectContent>
+          <SelectItem value="all_categories">All Categories</SelectItem>
           {CATEGORY_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {/* Sort Selector */}
-      <Select value={filters.sort || "arrange"} onValueChange={v => onChange({ sort: v })}>
-        <SelectTrigger className="rounded-lg border border-black/10 min-w-[90px] text-xs h-8 pr-6 bg-white focus:ring-1 focus:ring-black font-inter font-medium shadow-none transition">
-          <SelectValue placeholder="Sort" />
-          <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
+      {/* Index Filter */}
+      <Select value={filters.index || "all_indexes"} onValueChange={v => onChange({ index: v })}>
+        <SelectTrigger className={cn(
+          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          filters.index !== 'all_indexes'
+            ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+            : "bg-white/10 hover:bg-white/20"
+        )}>
+          <Album className="h-4 w-4 mr-2" />
+          <SelectValue placeholder="Index" />
         </SelectTrigger>
-        <SelectContent className="z-[80] bg-white shadow-xl border border-black/10 rounded-lg min-w-[110px] py-1">
-          <SelectItem value="arrange">Sort: Category</SelectItem>
-          <SelectItem value="latest">Sort: Latest</SelectItem>
+        <SelectContent>
+          <SelectItem value="all_indexes">All Indexes</SelectItem>
+          {INDEX_OPTIONS.map(opt => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Treatment Filter */}
+      <Select value={filters.treatment || "all_treatments"} onValueChange={v => onChange({ treatment: v })}>
+        <SelectTrigger className={cn(
+          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          filters.treatment !== 'all_treatments'
+            ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
+            : "bg-white/10 hover:bg-white/20"
+        )}>
+          <Filter className="h-4 w-4 mr-2" />
+          <SelectValue placeholder="Treatment" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all_treatments">All Treatments</SelectItem>
+          {TREATMENT_OPTIONS.map(opt => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Company Filter */}
+      <Select value={filters.company || "all_companies"} onValueChange={v => onChange({ company: v })}>
+        <SelectTrigger className={cn(
+          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          filters.company !== 'all_companies'
+            ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
+            : "bg-white/10 hover:bg-white/20"
+        )}>
+          <Building2 className="h-4 w-4 mr-2" />
+          <SelectValue placeholder="Company" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all_companies">All Companies</SelectItem>
+          {COMPANY_OPTIONS.map(opt => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

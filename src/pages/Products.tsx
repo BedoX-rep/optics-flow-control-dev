@@ -257,33 +257,36 @@ const Products = () => {
   const filteredProducts = sortProducts(allProducts || []);
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button
-              size="default"
-              onClick={() => handleOpen(null)}
-              className="bg-black hover:bg-neutral-800 text-white px-6"
-            >
-              <Plus size={18} className="mr-2" />
-              New Product
-            </Button>
-          </div>
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
+        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+          <Button
+            onClick={() => handleOpen(null)}
+            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Product
+          </Button>
+          <ProductStatsSummary products={data.products || []} />
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Search products..." 
+              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <ProductFilters filters={filters} onChange={handleFilterChange} />
+
+          <div className="flex items-center gap-3">
+            <ProductFilters filters={filters} onChange={handleFilterChange} />
+          </div>
         </div>
       </div>
 
