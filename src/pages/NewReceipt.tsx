@@ -703,7 +703,7 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pl-2" style={{ width: '130%' }}>
         <div className="space-y-6">
           <Card className="border-0 shadow-lg">
             <CardHeader className="bg-gray-50 border-b">
@@ -828,7 +828,7 @@ const NewReceipt = () => {
                             />
                           </div>
 
-                          <div className="w-32">
+                                                    <div className="w-32">
                             <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
                             <Input
                               id={`price-${item.id}`}
@@ -1169,11 +1169,19 @@ const NewReceipt = () => {
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Client Information</h3>
-              <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-              <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
-            </div>
+            {selectedClient ? (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="font-medium mb-2">Client Information</h3>
+                <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
+                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
+              </div>
+            ) : (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>No Client Selected</AlertTitle>
+                <AlertDescription>Please select a client to continue.</AlertDescription>
+              </Alert>
+            )}
 
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="font-medium mb-2">Prescription</h3>
@@ -1216,6 +1224,52 @@ const NewReceipt = () => {
             </div>
           </div>
         </div>
+        {!selectedClient && (
+          <CardContent className="p-6">
+            <div className="flex gap-3 mb-6">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search by name or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-12"
+                />
+              </div>
+              <Button
+                onClick={() => setIsAddClientOpen(true)}
+                className="h-12 px-6"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                New Client
+              </Button>
+            </div>
+
+            <div className="grid gap-4 max-h-[400px] overflow-y-auto">
+              {filteredClients.slice(0, 8).map(client => (
+                <div
+                  key={client.id}
+                  className={`p-4 rounded-lg border-2 transition-all cursor-pointer
+                    ${selectedClient === client.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-transparent bg-gray-50 hover:border-primary/20'}`}
+                  onClick={() => handleClientSelect(client.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{client.name}</h3>
+                      <p className="text-sm text-muted-foreground">{client.phone}</p>
+                    </div>
+                    {selectedClient === client.id && (
+                      <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
+                        <Check className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
       </CardContent>
     </Card>
   );
