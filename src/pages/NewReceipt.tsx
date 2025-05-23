@@ -1170,43 +1170,44 @@ const NewReceipt = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col items-end gap-4 mt-8">
-        <div className="w-full flex justify-between">
+      {currentStep === 'details' ? (
+        <div className="flex justify-end mt-8">
           <Button
-            variant="outline"
+            size="lg"
+            className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
+            onClick={() => {
+              const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
+              setCurrentStep(steps[nextIndex].id as any);
+            }}
+          >
+            Next Step
+            <ArrowRight className="h-5 w-5 ml-2" />
+          </Button>
+        </div>
+      ) : (
+        <div className="flex justify-between mt-8">
+          <Button
+            size="lg"
+            className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
             onClick={() => {
               const prevIndex = Math.max(0, currentStepIndex - 1);
               setCurrentStep(steps[prevIndex].id as any);
             }}
-            disabled={currentStepIndex === 0}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Previous Step
           </Button>
 
           <Button
             size="lg"
             className="bg-black hover:bg-neutral-800 text-white px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl"
-            onClick={() => {
-              if (currentStepIndex === steps.length - 1) {
-                handleSaveReceipt();
-              } else {
-                const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-                setCurrentStep(steps[nextIndex].id as any);
-              }
-            }}
+            onClick={handleSaveReceipt}
           >
-            {currentStepIndex === steps.length - 1 ? (
-              'Save Receipt'
-            ) : (
-              <>
-                Next Step
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </>
-            )}
+            Save Receipt
+            <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
         </div>
-      </div>
+      )}
 
       <AddClientDialog
         isOpen={isAddClientOpen}
