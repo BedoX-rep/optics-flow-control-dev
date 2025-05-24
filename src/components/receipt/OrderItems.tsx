@@ -243,26 +243,30 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             size="icon"
                             className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                             onClick={() => {
-                            const updatedItem = { ...item };
-                            const product = products.find(p => p.id === item.productId);
-                            
-                            if (item.linkedEye === 'RE') {
-                              updatedItem.linkedEye = undefined;
-                              updatedItem.appliedMarkup = 0;
-                              if (product) {
-                                updatedItem.price = product.price;
-                              }
-                            } else {
-                              updatedItem.linkedEye = 'RE';
-                              if (product) {
+                              const product = products.find(p => p.id === item.productId);
+                              if (!product) return;
+
+                              const isUnlinking = item.linkedEye === 'RE';
+                              const updatedItem = {
+                                ...item,
+                                linkedEye: isUnlinking ? undefined : 'RE',
+                                appliedMarkup: 0,
+                                price: product.price
+                              };
+
+                              if (!isUnlinking) {
                                 const { sph, cyl } = getEyeValues('RE');
-                                const markup = sph !== null && cyl !== null ? calculateMarkup(Math.abs(sph), Math.abs(cyl)) : 0;
-                                updatedItem.appliedMarkup = markup;
-                                updatedItem.price = product.price * (1 + markup / 100);
+                                if (sph !== null && cyl !== null) {
+                                  const markup = calculateMarkup(Math.abs(sph), Math.abs(cyl));
+                                  updatedItem.appliedMarkup = markup;
+                                  updatedItem.price = product.price * (1 + markup / 100);
+                                }
                               }
-                            }
-                            setItems(prevItems => prevItems.map(i => i.id === item.id ? updatedItem : i));
-                          }}
+
+                              setItems(prevItems => 
+                                prevItems.map(i => i.id === item.id ? updatedItem : i)
+                              );
+                            }}
                           >
                             👁️
                           </Button>

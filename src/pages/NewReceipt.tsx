@@ -296,22 +296,24 @@ const NewReceipt = () => {
   };
 
   const getEyeValues = (eye: 'RE' | 'LE'): { sph: number | null; cyl: number | null } => {
-    if (eye === 'RE') {
-      return {
-        sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-        cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-      };
-    } else {
-      return {
-        sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-        cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-      };
-    }
+    const eyeData = eye === 'RE' ? rightEye : leftEye;
+    const parseValue = (value: string): number | null => {
+      const parsed = parseFloat(value);
+      return !isNaN(parsed) ? parsed : null;
+    };
+
+    return {
+      sph: parseValue(eyeData.sph),
+      cyl: parseValue(eyeData.cyl)
+    };
   };
 
   const calculateMarkup = (sph: number | null, cyl: number | null): number => {
-    const sphMarkup = sph !== null ? getMarkup(sph, markupSettings.sph) : 0;
-    const cylMarkup = cyl !== null ? getMarkup(cyl, markupSettings.cyl) : 0;
+    if (sph === null && cyl === null) return 0;
+    
+    const sphMarkup = sph !== null ? getMarkup(Math.abs(sph), markupSettings.sph) : 0;
+    const cylMarkup = cyl !== null ? getMarkup(Math.abs(cyl), markupSettings.cyl) : 0;
+    
     return Math.max(sphMarkup, cylMarkup);
   };
 
