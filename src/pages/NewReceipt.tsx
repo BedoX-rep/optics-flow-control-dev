@@ -1155,11 +1155,10 @@ const NewReceipt = () => {
     </div>
   );
 
-  const renderOrderTab = () => {
-    return (
-      <div className="flex flex-col space-y-6 max-w-[1400px] mx-auto">
-        {/* Order Type Selection */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-amber-100/50 p-6 rounded-xl border border-amber-200">
+  const renderOrderTab = () => (
+    <div className="flex flex-col space-y-6 max-w-[1400px] mx-auto">
+      {/* Order Type Selection */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-amber-100/50 p-6 rounded-xl border border-amber-200">
         <div className="flex items-center gap-4">
           <div className="bg-amber-100 p-2 rounded-lg">
             <Receipt className="w-6 h-6 text-amber-700" />
@@ -1213,9 +1212,8 @@ const NewReceipt = () => {
         <TabsContent value="items" className="space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div className="xl:col-span-2 space-y-4">
-            <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
-              {/* Items Section */}
-              <div className="xl:col-span-2 space-y-4">
+            {/* Items Section */}
+            <div className="space-y-4">
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Order Items</h2>
