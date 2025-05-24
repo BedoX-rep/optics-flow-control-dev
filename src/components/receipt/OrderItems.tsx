@@ -75,7 +75,14 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                 <SelectValue placeholder="Order Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Unspecified">Unspecified</SelectItem>
+                <SelectItem value="Unspecified" className="relative">
+                  Unspecified
+                  {orderType === 'Unspecified' && (
+                    <span className="block text-xs text-red-600 mt-0.5">
+                      Please select an order type
+                    </span>
+                  )}
+                </SelectItem>
                 <SelectItem value="Montage">Montage</SelectItem>
                 <SelectItem value="Retoyage">Retoyage</SelectItem>
                 <SelectItem value="Sell">Sell</SelectItem>
@@ -83,13 +90,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             </Select>
           </div>
         </div>
-        {orderType === 'Unspecified' && (
-          <Alert className="mt-3 bg-red-50 text-red-700 border-red-200">
-            <AlertDescription>
-              Please select an order type
-            </AlertDescription>
-          </Alert>
-        )}
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-3">
