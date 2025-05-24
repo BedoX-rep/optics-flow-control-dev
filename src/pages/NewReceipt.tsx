@@ -1277,85 +1277,124 @@ const NewReceipt = () => {
   );
 
   const handleSaveReceipt = async () => {
-    setIsLoading(true);
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to save receipts.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const receiptData = {
-      user_id: user.id,
-      client_id: selectedClient,
-      right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-      right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-      right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-      left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-      left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-      left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-      add: add ? parseFloat(add) : null,
-      discount_percentage: discount,
-      discount_amount: numericDiscount,
-      tax: tax,
-      tax_base: tax,
-      advance_payment: advancePayment,
-      balance: total - advancePayment,
-      payment_status: paymentStatus,
-      subtotal: subtotal,
-      products_cost: totalCost,
-      montage_costs: montageCosts,
-      total: total,
-      profit: total - totalCost - montageCosts,
-      order_type: orderType,
-      created_at: new Date().toISOString(),
-      call_status: 'Not Called',
-      delivery_status: 'Pending',
-      montage_status: 'Pending',
-      is_deleted: false,
-    };
+    if (!selectedClient) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a client before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "Missing Items",
+        description: "Please add at least one item to the receipt.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // First insert the receipt
-      const { data: receiptData, error: receiptError } = await supabase
+      setIsLoading(true);
+
+      const { data: receipt, error: receiptError } = await supabase
         .from('receipts')
-        .insert([receiptData])
+        .insert({
+          user_id: user.id,
+          client_id: selectedClient,
+          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+          add: add ? parseFloat(add) : null,
+          subtotal,
+          tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
+          tax: taxAmount,
+          cost: totalCost + montageCosts,
+          cost_ttc: totalCost + montageCosts,
+          profit: profit,
+          total_discount: totalDiscount,
+          discount_amount: numericDiscount,
+          discount_percentage: discount,
+          total,
+          balance: total - advancePayment,
+          advance_payment: advancePayment,
+          payment_status: paymentStatus,
+          delivery_status: 'Undelivered',
+          montage_status: 'UnOrdered',
+          montage_costs: montageCosts,
+          products_cost: totalCost,
+          order_type: orderType,
+          call_status: 'Not Called',
+          created_at: new Date().toISOString(),
+          is_deleted: false
+        })
         .select()
         .single();
 
-      if (receiptError) {
-        throw receiptError;
+      if (receiptError) throw receiptError;
+
+      if (selectedClient) {
+        const { error: prescriptionError } = await supabase
+          .from('clients')
+          .update({
+            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
+            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
+            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
+            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
+            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
+            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+            Add: add ? parseFloat(add) : null,
+            last_prescription_update: new Date().toISOString()
+          })
+          .eq('id', selectedClient);
+
+        if (prescriptionError) throw prescriptionError;
       }
 
-      // Then insert the receipt items with the receipt_id
-      const { data: itemsData, error: itemsError } = await supabase
+      const receiptItems = items.map(item => ({
+        user_id: user.id,
+        receipt_id: receipt.id,
+        product_id: item.productId || null,
+        custom_item_name: item.customName || null,
+        quantity: item.quantity || 1,
+        price: item.price || 0,
+        cost: item.cost || 0,
+        profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+        linked_eye: item.linkedEye || null,
+        applied_markup: item.appliedMarkup || 0,
+        is_deleted: false
+      }));
+
+      const { error: itemsError } = await supabase
         .from('receipt_items')
-        .insert(
-          items.map(item => ({
-            receipt_id: receiptData.id,
-            product_id: item.productId || null,
-            custom_item_name: item.customName || null,
-            quantity: item.quantity,
-            price: item.price || 0,
-            cost: item.cost || 0,
-            linked_eye: item.linkedEye || null,
-            applied_markup: item.appliedMarkup || 0,
-            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
-            user_id: user.id,
-            is_deleted: false
-          }))
-        )
-        .select();
+        .insert(receiptItems);
 
       if (itemsError) throw itemsError;
 
-      console.log('Receipt saved successfully:', receiptData);
+      queryClient.invalidateQueries(['receipts', user.id]);
       toast({
         title: "Success",
         description: "Receipt saved successfully",
       });
-      queryClient.invalidateQueries(['receipts', user.id]);
       navigate('/receipts');
     } catch (error) {
       console.error('Error saving receipt:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Failed to save receipt. Please try again.",
         variant: "destructive",
       });
     } finally {
