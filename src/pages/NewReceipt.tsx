@@ -488,8 +488,6 @@ const NewReceipt = () => {
           const StepIcon = step.icon;
           const isActive = currentTab === step.id;
           const isCompleted = index < currentStepIndex;
-          const hasError = (step.id === 'client' && !selectedClient && currentStepIndex > index) || 
-                          (step.id === 'order' && items.length === 0 && currentStepIndex > index);
 
           return (
             <div key={step.id} className="flex-1 relative">
