@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -214,26 +213,33 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             size="icon"
                             className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                             onClick={() => {
-                              const updatedItem = { ...item };
-                              if (item.linkedEye === 'LE') {
-                                updatedItem.linkedEye = undefined;
-                                updatedItem.appliedMarkup = 0;
-                                const product = products.find(p => p.id === item.productId);
-                                if (product) {
-                                  updatedItem.price = product.price;
-                                }
-                              } else {
-                                updatedItem.linkedEye = 'LE';
-                                const product = products.find(p => p.id === item.productId);
-                                if (product) {
-                                  const { sph, cyl } = getEyeValues('LE');
-                                  const markup = calculateMarkup(sph, cyl);
-                                  updatedItem.appliedMarkup = markup;
-                                  updatedItem.price = product.price * (1 + markup / 100);
-                                }
+                            const updatedItem = { ...item };
+                            const product = products.find(p => p.id === item.productId);
+
+                            if (item.linkedEye === 'LE') {
+                              updatedItem.linkedEye = undefined;
+                              updatedItem.appliedMarkup = 0;
+                              if (product) {
+                                updatedItem.price = product.price;
                               }
-                              setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                            }}
+                            } else {
+                              updatedItem.linkedEye = 'LE';
+                              if (product) {
+                                const { sph, cyl } = getEyeValues('LE');
+                                const markup = calculateMarkup(sph, cyl);
+                                updatedItem.appliedMarkup = markup;
+                                updatedItem.price = product.price * (1 + (markup / 100));
+                              }
+                            }
+
+                            updateItem(item.id, 'linkedEye', updatedItem.linkedEye || '');
+                            if (updatedItem.appliedMarkup !== undefined) {
+                              updateItem(item.id, 'appliedMarkup', updatedItem.appliedMarkup);
+                            }
+                            if (updatedItem.price !== undefined) {
+                              updateItem(item.id, 'price', updatedItem.price);
+                            }
+                          }}
                           >
                             👁️
                           </Button>
@@ -243,26 +249,33 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             size="icon"
                             className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
                             onClick={() => {
-                              const updatedItem = { ...item };
-                              if (item.linkedEye === 'RE') {
-                                updatedItem.linkedEye = undefined;
-                                updatedItem.appliedMarkup = 0;
-                                const product = products.find(p => p.id === item.productId);
-                                if (product) {
-                                  updatedItem.price = product.price;
-                                }
-                              } else {
-                                updatedItem.linkedEye = 'RE';
-                                const product = products.find(p => p.id === item.productId);
-                                if (product) {
-                                  const { sph, cyl } = getEyeValues('RE');
-                                  const markup = calculateMarkup(sph, cyl);
-                                  updatedItem.appliedMarkup = markup;
-                                  updatedItem.price = product.price * (1 + markup / 100);
-                                }
+                            const updatedItem = { ...item };
+                            const product = products.find(p => p.id === item.productId);
+
+                            if (item.linkedEye === 'RE') {
+                              updatedItem.linkedEye = undefined;
+                              updatedItem.appliedMarkup = 0;
+                              if (product) {
+                                updatedItem.price = product.price;
                               }
-                              setItems(items.map(i => i.id === item.id ? updatedItem : i));
-                            }}
+                            } else {
+                              updatedItem.linkedEye = 'RE';
+                              if (product) {
+                                const { sph, cyl } = getEyeValues('RE');
+                                const markup = calculateMarkup(sph, cyl);
+                                updatedItem.appliedMarkup = markup;
+                                updatedItem.price = product.price * (1 + (markup / 100));
+                              }
+                            }
+
+                            updateItem(item.id, 'linkedEye', updatedItem.linkedEye || '');
+                            if (updatedItem.appliedMarkup !== undefined) {
+                              updateItem(item.id, 'appliedMarkup', updatedItem.appliedMarkup);
+                            }
+                            if (updatedItem.price !== undefined) {
+                              updateItem(item.id, 'price', updatedItem.price);
+                            }
+                          }}
                           >
                             👁️
                           </Button>
