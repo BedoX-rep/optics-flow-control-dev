@@ -1061,7 +1061,7 @@ const NewReceipt = () => {
     <div className="container max-w-7xl mx-auto py-8 px-4">
       {renderStepIndicator()}
 
-      <div className="fixed top-1/2 left-8 right-8 -translate-y-1/2 flex justify-between items-center pointer-events-none z-50">
+      <div className="fixed top-1/2 left-[calc(var(--sidebar-width,_256px)_+_2rem)] right-8 -translate-y-1/2 flex justify-between items-center pointer-events-none z-50">
         <Button
           variant="outline"
           onClick={() => {
