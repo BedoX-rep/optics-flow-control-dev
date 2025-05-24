@@ -1110,6 +1110,15 @@ const NewReceipt = () => {
             if (currentStepIndex === steps.length - 1) {
               handleSaveReceipt();
             } else {
+              // Check if currently on order tab and no items added
+              if (currentTab === 'order' && items.length === 0) {
+                toast({
+                  title: "Items Required",
+                  description: "Please add at least one item before proceeding.",
+                  variant: "destructive",
+                });
+                return;
+              }
               const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
               setCurrentTab(steps[nextIndex].id);
             }
