@@ -1061,7 +1061,7 @@ const NewReceipt = () => {
     <div className="container max-w-7xl mx-auto py-8 px-4">
       {renderStepIndicator()}
 
-      <div className="fixed top-1/2 left-4 right-4 -translate-y-1/2 flex justify-between items-center pointer-events-none z-50">
+      <div className="fixed top-1/2 left-8 right-8 -translate-y-1/2 flex justify-between items-center pointer-events-none z-50">
         <Button
           variant="outline"
           onClick={() => {
@@ -1069,13 +1069,13 @@ const NewReceipt = () => {
             setCurrentTab(steps[prevIndex].id);
           }}
           disabled={currentStepIndex === 0}
-          className="rounded-full w-12 h-12 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
+          className="rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-6 w-6" />
         </Button>
 
         <Button
-          className="bg-primary rounded-full w-12 h-12 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
+          className="bg-primary rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
           onClick={() => {
             if (currentStepIndex === steps.length - 1) {
               handleSaveReceipt();
@@ -1086,9 +1086,9 @@ const NewReceipt = () => {
           }}
         >
           {currentStepIndex === steps.length - 1 ? (
-            <Check className="h-5 w-5" />
+            <Check className="h-6 w-6" />
           ) : (
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="h-6 w-6" />
           )}
         </Button>
       </div>
