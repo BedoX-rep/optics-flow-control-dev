@@ -387,65 +387,63 @@ export default function Clients() {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button
-              size="default"
-              onClick={() => setIsAddClientOpen(true)}
-              className="bg-black hover:bg-neutral-800 text-white px-6"
-            >
-              <UserPlus size={18} className="mr-2" />
-              New Client
-            </Button>
-            <Button
-              variant="outline"
-              size="default"
-              onClick={handleSaveAllChanges}
-              className="border-neutral-200"
-            >
-              <Save size={18} className="mr-2" />
-              Save All Changes
-            </Button>
-          </div>
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
+        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+          <Button
+            onClick={() => setIsAddClientOpen(true)}
+            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            New Client
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleSaveAllChanges}
+            className="rounded-xl border-neutral-200 shadow-sm"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save All Changes
+          </Button>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <SearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search clients..."
-            className="w-full sm:w-64"
-          />
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search clients..."
+              className="w-full"
+            />
+          </div>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Name (A-Z)</SelectItem>
-              <SelectItem value="recent">Recently Added</SelectItem>
-              <SelectItem value="phone">Phone Number</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Name (A-Z)</SelectItem>
+                <SelectItem value="recent">Recently Added</SelectItem>
+                <SelectItem value="phone">Phone Number</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="default"
               onClick={findDuplicateClients}
-              className="text-neutral-600 hover:text-neutral-900"
+              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
               Find Duplicates
             </Button>
             <Button
               variant="ghost"
-              size="default"
               onClick={() => setIsImportDialogOpen(true)}
-              className="text-neutral-600 hover:text-neutral-900"
+              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
-              <Upload size={18} className="mr-2" />
+              <Upload className="h-4 w-4 mr-2" />
               Import
             </Button>
           </div>
