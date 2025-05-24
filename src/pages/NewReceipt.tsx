@@ -835,6 +835,13 @@ const NewReceipt = () => {
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
+            {items.length === 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>No Items Added</AlertTitle>
+                <AlertDescription>Please add at least one item to the receipt.</AlertDescription>
+              </Alert>
+            )}
             {selectedClient ? (
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-medium mb-2">Client Information</h3>
