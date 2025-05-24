@@ -703,7 +703,455 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pl-2" style={{ width: '130%' }}>
+      <div className="flex flex-col space-y-6 max-w-[1400px] mx-auto">
+        {/* Order Type Selection */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-amber-100/50 p-6 rounded-xl border border-amber-200">
+          <div className="flex items-center gap-4">
+            <div className="bg-amber-100 p-2 rounded-lg">
+              <Receipt className="w-6 h-6 text-amber-700" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-amber-900">Order Type</h3>
+              <p className="text-sm text-amber-700">Select the type of order to process</p>
+            </div>
+          </div>
+          <Select value={orderType} onValueChange={(value) => {
+            setOrderType(value);
+            let newMontageCosts = 0;
+
+            if (autoMontage && value !== 'Unspecified') {
+              if (value === 'Retoyage') {
+                newMontageCosts = items.reduce((sum, item) => {
+                  const product = products.find(p => p.id === item.productId);
+                  return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
+                }, 0);
+              } else if (value === 'Montage') {
+                newMontageCosts = items.reduce((sum, item) => {
+                  const product = products.find(p => p.id === item.productId);
+                  if (product?.category === 'Single Vision Lenses') {
+                    return sum + (10 * item.quantity);
+                  } else if (product?.category === 'Progressive Lenses') {
+                    return sum + (20 * item.quantity);
+                  }
+                  return sum;
+                }, 0);
+              }
+            }
+            setFormData(prev => ({ ...prev, montage_costs: newMontageCosts }));
+          }}>
+            <SelectTrigger className="w-[200px] bg-white border-amber-200">
+              <SelectValue placeholder="Select Order Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Unspecified">Unspecified</SelectItem>
+              <SelectItem value="Montage">Montage</SelectItem>
+              <SelectItem value="Retoyage">Retoyage</SelectItem>
+              <SelectItem value="Sell">Sell</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Items Section */}
+          <div className="xl:col-span-2 space-y-4">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Order Items</h2>
+                <p className="text-sm text-gray-500">Add and manage items in your order</p>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={() => addItem('product')} size="sm" className="bg-primary/90 hover:bg-primary">
+                  <Plus className="h-4 w-4 mr-2" /> Add Product
+                </Button>
+                <Button onClick={() => addItem('custom')} variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-2" /> Custom Item
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {items.map((item) => (
+                <Card key={item.id} className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="bg-white rounded-lg">
+                      <div className="grid grid-cols-12 gap-4">
+                        {/* Item Details */}
+                        <div className="col-span-12 lg:col-span-5">
+                          {item.customName !== undefined ? (
+                            <div>
+                              <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
+                              <Input
+                                id={`custom-${item.id}`}
+                                value={item.customName || ''}
+                                onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                          ) : (
+                            <div>
+                              <Label htmlFor={`product-${item.id}`}>Product</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Select
+                                  value={item.productId}
+                                  onValueChange={(value) => updateItem(item.id, 'productId', value)}
+                                >
+                                  <SelectTrigger id={`product-${item.id}`}>
+                                    <SelectValue placeholder="Select a product" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
+                                      <SelectItem key={product.id} value={product.id}>
+                                        <div className="flex justify-between items-center w-full gap-4">
+                                          <span className="font-medium">{product.name}</span>
+                                          <span className="text-sm text-blue-900 tabular-nums">{product.price.toFixed(2)} DH</span>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="text"
+                                  placeholder="Search products..."
+                                  value={productSearchTerms[item.id] || ''}
+                                  onChange={(e) => {
+                                    setProductSearchTerms(prev => ({
+                                      ...prev,
+                                      [item.id]: e.target.value
+                                    }));
+                                  }}
+                                  className="w-48"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Quantity and Price */}
+                        <div className="col-span-12 lg:col-span-7">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div>
+                              <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                              <Input
+                                id={`quantity-${item.id}`}
+                                type="number"
+                                min="1"
+                                value={item.quantity}
+                                onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
+                              <Input
+                                id={`price-${item.id}`}
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.price}
+                                onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
+                              <Input
+                                id={`cost-${item.id}`}
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.cost}
+                                onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label>Actions</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    const duplicatedItem = {
+                                      ...item,
+                                      id: `item-${Date.now()}`,
+                                      linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
+                                    };
+                                    if (duplicatedItem.linkedEye && duplicatedItem.productId) {
+                                      const product = products.find(p => p.id === duplicatedItem.productId);
+                                      if (product) {
+                                        const { sph, cyl } = getEyeValues(duplicatedItem.linkedEye);
+                                        const markup = calculateMarkup(sph, cyl);
+                                        duplicatedItem.appliedMarkup = markup;
+                                        duplicatedItem.price = product.price * (1 + markup / 100);
+                                      }
+                                    }
+                                    setItems(prevItems => [...prevItems, duplicatedItem]);
+                                  }}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeItem(item.id)}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Summary Row */}
+                        <div className="col-span-12 mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <Label>Total</Label>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {(item.price * item.quantity).toFixed(2)} DH
+                            </div>
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <Label>Profit</Label>
+                            <div className="text-lg font-semibold text-green-700">
+                              {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
+                            </div>
+                          </div>
+                          {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <Label>Eye Selection</Label>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Button
+                                  type="button"
+                                  variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                                  size="sm"
+                                  className={`${item.linkedEye === 'LE' ? 'bg-blue-600' : 'hover:bg-blue-100'}`}
+                                  onClick={() => {
+                                    const updatedItem = { ...item };
+                                    if (item.linkedEye === 'LE') {
+                                      updatedItem.linkedEye = undefined;
+                                      updatedItem.appliedMarkup = 0;
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        updatedItem.price = product.price;
+                                      }
+                                    } else {
+                                      updatedItem.linkedEye = 'LE';
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        const { sph, cyl } = getEyeValues('LE');
+                                        const markup = calculateMarkup(sph, cyl);
+                                        updatedItem.appliedMarkup = markup;
+                                        updatedItem.price = product.price * (1 + markup / 100);
+                                      }
+                                    }
+                                    setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                                  }}
+                                >
+                                  Left Eye
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                                  size="sm"
+                                  className={`${item.linkedEye === 'RE' ? 'bg-blue-600' : 'hover:bg-blue-100'}`}
+                                  onClick={() => {
+                                    const updatedItem = { ...item };
+                                    if (item.linkedEye === 'RE') {
+                                      updatedItem.linkedEye = undefined;
+                                      updatedItem.appliedMarkup = 0;
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        updatedItem.price = product.price;
+                                      }
+                                    } else {
+                                      updatedItem.linkedEye = 'RE';
+                                      const product = products.find(p => p.id === item.productId);
+                                      if (product) {
+                                        const { sph, cyl } = getEyeValues('RE');
+                                        const markup = calculateMarkup(sph, cyl);
+                                        updatedItem.appliedMarkup = markup;
+                                        updatedItem.price = product.price * (1 + markup / 100);
+                                      }
+                                    }
+                                    setItems(items.map(i => i.id === item.id ? updatedItem : i));
+                                  }}
+                                >
+                                  Right Eye
+                                </Button>
+                                {item.appliedMarkup > 0 && (
+                                  <span className="text-sm text-blue-600 font-medium">
+                                    +{item.appliedMarkup}% markup
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Payment Summary Section */}
+          <div className="xl:col-span-1">
+            <div className="sticky top-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="bg-gray-50 border-b">
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Payment Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* Base Calculations */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Subtotal</span>
+                        <span className="font-medium">{subtotal.toFixed(2)} DH</span>
+                      </div>
+                      {tax > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Tax</span>
+                          <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Discount Section */}
+                    <div className="pt-4 border-t space-y-4">
+                      <div>
+                        <Label>Percentage Discount</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={discount}
+                            onChange={(e) => setDiscount(e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-2.5 text-gray-500">%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Fixed Discount</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={numericDiscount}
+                            onChange={(e) => setNumericDiscount(e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                            className="pr-12"
+                          />
+                          <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                        </div>
+                      </div>
+                      {(discount > 0 || numericDiscount > 0) && (
+                        <div className="flex justify-between text-sm text-red-600">
+                          <span>Total Discount</span>
+                          <span>-{totalDiscount.toFixed(2)} DH</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tax Base Section */}
+                    <div className="pt-4 border-t space-y-4">
+                      <div>
+                        <Label>Tax Base Amount</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            type="number"
+                            min="0"
+                            value={tax}
+                            onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                            className="pr-12"
+                          />
+                          <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Tax Rate</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={taxIndicator}
+                            onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-2.5 text-gray-500">×</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Final Calculations */}
+                    <div className="pt-4 border-t space-y-3">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-gray-600">Total</span>
+                        <span className="text-xl font-semibold text-primary">{total.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Cost (TTC)</span>
+                        <span className="font-medium text-red-600">{(totalCost + montageCosts).toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Profit</span>
+                        <span className="font-semibold text-green-600">{profit.toFixed(2)} DH</span>
+                      </div>
+                    </div>
+
+                    {/* Payment Status */}
+                    <div className="pt-4 border-t space-y-4">
+                      <div>
+                        <Label>Advance Payment</Label>
+                        <div className="relative mt-1">
+                          <Input
+                            type="number"
+                            min="0"
+                            value={advancePayment}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              setAdvancePayment(value);
+                              setBalance(total - value);
+                              updatePaymentStatus(total - value);
+                            }}
+                            className="pr-12"
+                          />
+                          <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-gray-600">Balance Due</span>
+                        <span className="text-lg font-semibold">{balance.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600">Status:</span>
+                        <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                          paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                          paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {paymentStatus}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
         <div className="space-y-6">
           <Card className="border-0 shadow-lg">
             <CardHeader className="bg-gray-50 border-b">
