@@ -252,7 +252,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   return (
     <div 
-      className="rounded-lg shadow-lg transition-shadow duration-200 overflow-hidden bg-[#f2f4f8]"
+      className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
       data-client-id={client.id}
       data-is-edited={isEdited}
     >
