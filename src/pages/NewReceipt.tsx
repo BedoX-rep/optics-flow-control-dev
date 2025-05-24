@@ -1323,7 +1323,7 @@ const NewReceipt = () => {
       }
 
       // Then insert the receipt items with the receipt_id
-      const { error: itemsError } = await supabase
+      const { data: itemsData, error: itemsError } = await supabase
         .from('receipt_items')
         .insert(
           items.map(item => ({
@@ -1339,24 +1339,18 @@ const NewReceipt = () => {
             user_id: user.id,
             is_deleted: false
           }))
-        );
+        )
+        .select();
 
-      if (itemsError) {
-        console.error('Error saving receipt:', itemsError);
-        toast({
-          title: "Error",
-          description: "Failed to save receipt",
-          variant: "destructive",
-        });
-      } else {
-        console.log('Receipt saved successfully:', receiptData);
-        toast({
-          title: "Success",
-          description: "Receipt saved successfully",
-        });
-        queryClient.invalidateQueries(['receipts', user.id]);
-        navigate('/receipts');
-      }
+      if (itemsError) throw itemsError;
+
+      console.log('Receipt saved successfully:', receiptData);
+      toast({
+        title: "Success",
+        description: "Receipt saved successfully",
+      });
+      queryClient.invalidateQueries(['receipts', user.id]);
+      navigate('/receipts');
     } catch (error) {
       console.error('Error saving receipt:', error);
       toast({
