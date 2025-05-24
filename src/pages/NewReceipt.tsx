@@ -1283,17 +1283,6 @@ const NewReceipt = () => {
     const receiptData = {
       user_id: user.id,
       client_id: selectedClient,
-      items: items.map(item => ({
-        product_id: item.productId || null,
-        custom_item_name: item.customName || null,
-        quantity: item.quantity,
-        price: item.price || 0,
-        cost: item.cost || 0,
-        linked_eye: item.linkedEye || null,
-        applied_markup: item.appliedMarkup || 0,
-        profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
-        user_id: user.id,
-      })),
       right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
       right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
       right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
@@ -1301,15 +1290,15 @@ const NewReceipt = () => {
       left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
       left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
       add: add ? parseFloat(add) : null,
-      discount: discount,
-      numeric_discount: numericDiscount,
+      discount_percentage: discount,
+      discount_amount: numericDiscount,
       tax: tax,
-      tax_indicator: taxIndicator,
+      tax_base: tax,
       advance_payment: advancePayment,
       balance: total - advancePayment,
       payment_status: paymentStatus,
       subtotal: subtotal,
-      total_cost: totalCost,
+      products_cost: totalCost,
       montage_costs: montageCosts,
       total: total,
       profit: total - totalCost - montageCosts,
@@ -1322,12 +1311,37 @@ const NewReceipt = () => {
     };
 
     try {
-      const { data, error } = await supabase
+      // First insert the receipt
+      const { data: receiptData, error: receiptError } = await supabase
         .from('receipts')
         .insert([receiptData])
         .select()
+        .single();
 
-      if (error) {
+      if (receiptError) {
+        throw receiptError;
+      }
+
+      // Then insert the receipt items with the receipt_id
+      const { error: itemsError } = await supabase
+        .from('receipt_items')
+        .insert(
+          items.map(item => ({
+            receipt_id: receiptData.id,
+            product_id: item.productId || null,
+            custom_item_name: item.customName || null,
+            quantity: item.quantity,
+            price: item.price || 0,
+            cost: item.cost || 0,
+            linked_eye: item.linkedEye || null,
+            applied_markup: item.appliedMarkup || 0,
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+            user_id: user.id,
+            is_deleted: false
+          }))
+        );
+
+      if (itemsError) {
         console.error('Error saving receipt:', error);
         toast({
           title: "Error",
