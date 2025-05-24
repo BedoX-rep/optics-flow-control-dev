@@ -492,13 +492,21 @@ const NewReceipt = () => {
           return (
             <div key={step.id} className="flex-1 relative">
               <div className={`flex flex-col items-center ${index < steps.length - 1 ? 'after:content-[""] after:absolute after:w-full after:h-[2px] after:bg-gray-200 after:top-5 after:left-1/2 after:-z-10' : ''}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                  isActive ? 'bg-primary text-white scale-110' :
-                  isCompleted ? 'bg-green-500 text-white' :
-                  'bg-gray-100 text-gray-400'
-                }`}>
+                <button
+                  onClick={() => {
+                    if (currentStepIndex === 1 && step.id === 'finalize') {
+                      updateClientPrescription();
+                    }
+                    setCurrentTab(step.id);
+                  }}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                    isActive ? 'bg-primary text-white scale-110' :
+                    isCompleted ? 'bg-green-500 text-white hover:bg-green-600' :
+                    'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                  }`}
+                >
                   {isCompleted ? <Check className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
-                </div>
+                </button>
                 <span className={`mt-2 text-sm font-medium ${isActive ? 'text-primary' : 'text-gray-500'}`}>
                   {step.label}
                 </span>
