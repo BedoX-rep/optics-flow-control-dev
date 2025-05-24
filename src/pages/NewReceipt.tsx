@@ -848,7 +848,7 @@ const NewReceipt = () => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-medium mb-2">Client Information</h3>
                 <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}span></p>
+                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
               </div>
             ) : (
               <Alert variant="destructive">
