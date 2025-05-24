@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Copy, Plus, Receipt, Trash } from 'lucide-react';
 
 interface OrderItemsProps {
@@ -51,170 +52,162 @@ const OrderItems: React.FC<OrderItemsProps> = ({
 
   return (
     <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gray-50 border-b">
-        <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="w-5 h-5" />
-            Order Items
-          </CardTitle>
-          <div className="flex gap-2">
-            <Button onClick={() => addItem('product')} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Product
+      <CardHeader className="bg-gray-50 border-b p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Receipt className="w-5 h-5 text-gray-500" />
+            <Select value={orderType} onValueChange={setOrderType}>
+              <SelectTrigger className="w-[140px] bg-amber-50 border-amber-200">
+                <SelectValue placeholder="Order Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Unspecified">Unspecified</SelectItem>
+                <SelectItem value="Montage">Montage</SelectItem>
+                <SelectItem value="Retoyage">Retoyage</SelectItem>
+                <SelectItem value="Sell">Sell</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => addItem('product')} size="sm" variant="default">
+              <Plus className="h-4 w-4 mr-2" /> Product
             </Button>
             <Button onClick={() => addItem('custom')} variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Custom Item
+              <Plus className="h-4 w-4 mr-2" /> Custom
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="space-y-4">
-          <Select value={orderType} onValueChange={setOrderType}>
-            <SelectTrigger className="w-full bg-amber-50 border-amber-200">
-              <SelectValue placeholder="Select Order Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Unspecified">Unspecified</SelectItem>
-              <SelectItem value="Montage">Montage</SelectItem>
-              <SelectItem value="Retoyage">Retoyage</SelectItem>
-              <SelectItem value="Sell">Sell</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="space-y-4">
-            {items.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 p-4 bg-green-50/50 border border-gray-100 rounded-lg shadow-sm mb-3 hover:border-primary/20 transition-colors">
-                    {item.customName !== undefined ? (
-                      <div className="flex-1">
-                        <Label htmlFor={`custom-${item.id}`}>Custom Item Name</Label>
+        <div className="space-y-3">
+          {items.map((item) => (
+            <Card key={item.id} className="border border-gray-100 shadow-sm">
+              <CardContent className="p-3">
+                <div className="grid grid-cols-12 gap-3 items-start">
+                  {item.customName !== undefined ? (
+                    <div className="col-span-4">
+                      <Label htmlFor={`custom-${item.id}`} className="text-xs">Custom Item</Label>
+                      <Input
+                        id={`custom-${item.id}`}
+                        value={item.customName || ''}
+                        onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  ) : (
+                    <div className="col-span-4">
+                      <Label htmlFor={`product-${item.id}`} className="text-xs">Product</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Select
+                          value={item.productId}
+                          onValueChange={(value) => updateItem(item.id, 'productId', value)}
+                        >
+                          <SelectTrigger id={`product-${item.id}`}>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
+                              <SelectItem key={product.id} value={product.id}>
+                                <div className="flex justify-between items-center w-full">
+                                  <span>{product.name}</span>
+                                  <span className="text-sm text-blue-600">{product.price.toFixed(2)} DH</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Input
-                          id={`custom-${item.id}`}
-                          value={item.customName || ''}
-                          onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
+                          placeholder="Search"
+                          value={productSearchTerms[item.id] || ''}
+                          onChange={(e) => {
+                            setProductSearchTerms(prev => ({
+                              ...prev,
+                              [item.id]: e.target.value
+                            }));
+                          }}
+                          className="w-32"
                         />
                       </div>
-                    ) : (
-                      <div className="flex-1">
-                        <Label htmlFor={`product-${item.id}`}>Product</Label>
-                        <div className="flex gap-2">
-                          <Select
-                            value={item.productId}
-                            onValueChange={(value) => updateItem(item.id, 'productId', value)}
-                          >
-                            <SelectTrigger id={`product-${item.id}`}>
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  <div className="flex justify-between items-center w-full gap-4">
-                                    <span className="font-medium">{product.name}</span>
-                                    <span className="text-sm text-blue-900 tabular-nums">{product.price.toFixed(2)} DH</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            type="text"
-                            placeholder="Search products..."
-                            value={productSearchTerms[item.id] || ''}
-                            onChange={(e) => {
-                              setProductSearchTerms(prev => ({
-                                ...prev,
-                                [item.id]: e.target.value
-                              }));
-                            }}
-                            className="w-48"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="w-20">
-                      <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
-                      <Input
-                        id={`quantity-${item.id}`}
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                      />
                     </div>
+                  )}
 
-                    <div className="w-32">
-                      <Label htmlFor={`price-${item.id}`}>Price (DH)</Label>
-                      <Input
-                        id={`price-${item.id}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.price}
-                        onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                      />
+                  <div className="col-span-1">
+                    <Label className="text-xs">Qty</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label className="text-xs">Price (DH)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.price}
+                      onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label className="text-xs">Cost (DH)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.cost}
+                      onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label className="text-xs">Total</Label>
+                    <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-right">
+                      {(item.price * item.quantity).toFixed(2)} DH
                     </div>
+                  </div>
 
-                    <div className="w-32">
-                      <Label htmlFor={`cost-${item.id}`}>Cost (DH)</Label>
-                      <Input
-                        id={`cost-${item.id}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.cost}
-                        onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
+                  <div className="col-span-1 flex items-end gap-1 h-full pb-[5px]">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const duplicatedItem = {
+                          ...item,
+                          id: `item-${Date.now()}`,
+                          linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
+                        };
+                        setItems(prevItems => [...prevItems, duplicatedItem]);
+                      }}
+                      className="h-8 w-8"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                      className="h-8 w-8"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
 
-                    <div className="w-32">
-                      <Label>Total</Label>
-                      <div className="h-10 px-3 py-2 rounded-md bg-gray-100/80 font-medium flex items-center justify-end text-sm">
-                        {(item.price * item.quantity).toFixed(2)} DH
-                      </div>
-                    </div>
-
-                    <div className="w-32">
-                      <Label>Profit</Label>
-                      <div className="h-10 px-3 py-2 rounded-md bg-green-100/80 text-green-800 font-medium flex items-center justify-end text-sm">
-                        {((item.price * item.quantity) - (item.cost * item.quantity)).toFixed(2)} DH
-                      </div>
-                    </div>
-
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const duplicatedItem = {
-                            ...item,
-                            id: `item-${Date.now()}`,
-                            linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
-                          };
-                          setItems(prevItems => [...prevItems, duplicatedItem]);
-                        }}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-2 items-center">
-                          <Button
-                            type="button"
-                            variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
-                            size="icon"
-                            className={`h-8 w-8 rounded-full ${item.linkedEye === 'LE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
-                            onClick={() => {
+                  {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                    <div className="col-span-12 flex items-center gap-2 mt-2">
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                          size="sm"
+                          className={`h-8 ${item.linkedEye === 'LE' ? 'bg-black text-white' : ''}`}
+                          onClick={() => {
                             const product = products.find(p => p.id === item.productId);
                             if (!product) return;
 
@@ -239,55 +232,54 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                               prevItems.map(i => i.id === item.id ? updatedItem : i)
                             );
                           }}
-                          >
-                            👁️
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
-                            size="icon"
-                            className={`h-8 w-8 rounded-full ${item.linkedEye === 'RE' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
-                            onClick={() => {
-                              const product = products.find(p => p.id === item.productId);
-                              if (!product) return;
+                        >
+                          👁️ LE
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                          size="sm"
+                          className={`h-8 ${item.linkedEye === 'RE' ? 'bg-black text-white' : ''}`}
+                          onClick={() => {
+                            const product = products.find(p => p.id === item.productId);
+                            if (!product) return;
 
-                              const isUnlinking = item.linkedEye === 'RE';
-                              const updatedItem = {
-                                ...item,
-                                linkedEye: isUnlinking ? undefined : 'RE',
-                                appliedMarkup: 0,
-                                price: product.price
-                              };
+                            const isUnlinking = item.linkedEye === 'RE';
+                            const updatedItem = {
+                              ...item,
+                              linkedEye: isUnlinking ? undefined : 'RE',
+                              appliedMarkup: 0,
+                              price: product.price
+                            };
 
-                              if (!isUnlinking) {
-                                const { sph, cyl } = getEyeValues('RE');
-                                if (sph !== null && cyl !== null) {
-                                  const markup = calculateMarkup(sph, cyl);
-                                  updatedItem.appliedMarkup = markup;
-                                  updatedItem.price = product.price * (1 + markup / 100);
-                                }
+                            if (!isUnlinking) {
+                              const { sph, cyl } = getEyeValues('RE');
+                              if (sph !== null && cyl !== null) {
+                                const markup = calculateMarkup(sph, cyl);
+                                updatedItem.appliedMarkup = markup;
+                                updatedItem.price = product.price * (1 + markup / 100);
                               }
+                            }
 
-                              setItems(prevItems => 
-                                prevItems.map(i => i.id === item.id ? updatedItem : i)
-                              );
-                            }}
-                          >
-                            👁️
-                          </Button>
-                        </div>
-                        {item.appliedMarkup > 0 && (
-                          <span className="text-sm text-muted-foreground">
-                            (+{item.appliedMarkup}% markup)
-                          </span>
-                        )}
+                            setItems(prevItems => 
+                              prevItems.map(i => i.id === item.id ? updatedItem : i)
+                            );
+                          }}
+                        >
+                          👁️ RE
+                        </Button>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      {item.appliedMarkup > 0 && (
+                        <span className="text-sm text-muted-foreground">
+                          (+{item.appliedMarkup}% markup)
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </CardContent>
     </Card>
