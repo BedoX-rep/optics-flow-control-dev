@@ -1133,6 +1133,8 @@ const NewReceipt = () => {
                         onChange={(e) => {
                           const value = parseFloat(e.target.value) || 0;
                           setAdvancePayment(value);
+                          setBalance(total - value);
+                          updatePaymentStatus(total - value);
                         }}
                         className="pr-12"
                       />
@@ -1289,7 +1291,7 @@ const NewReceipt = () => {
         cost: item.cost,
         linked_eye: item.linkedEye,
         applied_markup: item.appliedMarkup,
-        order_type: item.order_type,
+        order_type: orderType,
       })),
       right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
       right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
@@ -1303,13 +1305,13 @@ const NewReceipt = () => {
       tax: tax,
       tax_indicator: taxIndicator,
       advance_payment: advancePayment,
-      balance: balance,
+      balance: total - advancePayment,
       payment_status: paymentStatus,
       subtotal: subtotal,
       total_cost: totalCost,
       montage_costs: montageCosts,
       total: total,
-      profit: profit,
+      profit: total - totalCost - montageCosts,
       order_type: orderType,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
