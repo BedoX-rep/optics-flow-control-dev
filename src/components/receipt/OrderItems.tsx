@@ -24,7 +24,7 @@ interface OrderItemsProps {
   setProductSearchTerms: (terms: Record<string, string>) => void;
   getFilteredProducts: (searchTerm: string) => any[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
-  calculateMarkup: (sph: number, cyl: number) => number;
+  calculateMarkup: (sph: number | null, cyl: number | null) => number;
 }
 
 const OrderItems: React.FC<OrderItemsProps> = ({
@@ -38,7 +38,8 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   removeItem,
   setProductSearchTerms,
   getFilteredProducts,
-  getEyeValues
+  getEyeValues,
+  calculateMarkup
 }) => {
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
@@ -228,7 +229,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             if (!isUnlinking) {
                               const { sph, cyl } = getEyeValues('LE');
                               if (sph !== null && cyl !== null) {
-                                const markup = calculateMarkup(Math.abs(sph), Math.abs(cyl));
+                                const markup = calculateMarkup(sph, cyl);
                                 updatedItem.appliedMarkup = markup;
                                 updatedItem.price = product.price * (1 + markup / 100);
                               }
@@ -261,7 +262,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                               if (!isUnlinking) {
                                 const { sph, cyl } = getEyeValues('RE');
                                 if (sph !== null && cyl !== null) {
-                                  const markup = calculateMarkup(Math.abs(sph), Math.abs(cyl));
+                                  const markup = calculateMarkup(sph, cyl);
                                   updatedItem.appliedMarkup = markup;
                                   updatedItem.price = product.price * (1 + markup / 100);
                                 }

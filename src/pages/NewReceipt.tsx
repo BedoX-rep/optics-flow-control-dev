@@ -83,6 +83,7 @@ interface OrderItemsProps {
   setProductSearchTerms: (terms: Record<string, string>) => void;
   getFilteredProducts: (searchTerm: string) => Product[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
+  calculateMarkup: (sph: number | null, cyl: number | null) => number;
 }
 
 interface OrderSummaryProps {
@@ -310,10 +311,10 @@ const NewReceipt = () => {
 
   const calculateMarkup = (sph: number | null, cyl: number | null): number => {
     if (sph === null && cyl === null) return 0;
-    
+
     const sphMarkup = sph !== null ? getMarkup(Math.abs(sph), markupSettings.sph) : 0;
     const cylMarkup = cyl !== null ? getMarkup(Math.abs(cyl), markupSettings.cyl) : 0;
-    
+
     return Math.max(sphMarkup, cylMarkup);
   };
 
@@ -766,6 +767,7 @@ const NewReceipt = () => {
           setProductSearchTerms={setProductSearchTerms}
           getFilteredProducts={getFilteredProducts}
           getEyeValues={getEyeValues}
+          calculateMarkup={calculateMarkup}
         />
 
         <Card className="border-0 shadow-lg">
@@ -845,8 +847,7 @@ const NewReceipt = () => {
                 <div>
                   <p className="text-gray-500">Right Eye</p>
                   <p>SPH: {rightEye.sph || 'N/A'}</p>
-                  <p>CYL: {rightEye.cyl || 'N/A'}</p>
-                  <p>AXE: {rightEye.axe || 'N/A'}</p>
+                  <p>CYL: {rightEye.cyl || 'N/A'}</p>                  <p>AXE: {rightEye.axe || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Left Eye</p>
