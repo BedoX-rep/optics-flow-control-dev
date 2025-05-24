@@ -488,6 +488,8 @@ const NewReceipt = () => {
           const StepIcon = step.icon;
           const isActive = currentTab === step.id;
           const isCompleted = index < currentStepIndex;
+          const hasError = (step.id === 'client' && !selectedClient && currentStepIndex > index) || 
+                          (step.id === 'order' && items.length === 0 && currentStepIndex > index);
 
           return (
             <div key={step.id} className="flex-1 relative">
@@ -846,7 +848,7 @@ const NewReceipt = () => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-medium mb-2">Client Information</h3>
                 <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
+                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}span></p>
               </div>
             ) : (
               <Alert variant="destructive">
