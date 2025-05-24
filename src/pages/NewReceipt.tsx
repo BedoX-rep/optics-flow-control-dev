@@ -1110,23 +1110,6 @@ const NewReceipt = () => {
             if (currentStepIndex === steps.length - 1) {
               handleSaveReceipt();
             } else {
-              const currentStep = steps[currentStepIndex];
-              if (currentStep.id === 'client' && !selectedClient) {
-                toast({
-                  title: "Client Required",
-                  description: "Please select a client before proceeding.",
-                  variant: "destructive",
-                });
-                return;
-              }
-              if (currentStep.id === 'order' && items.length === 0) {
-                toast({
-                  title: "Items Required",
-                  description: "Please add at least one item before proceeding.",
-                  variant: "destructive",
-                });
-                return;
-              }
               const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
               setCurrentTab(steps[nextIndex].id);
             }
