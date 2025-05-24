@@ -754,12 +754,7 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="space-y-6"
-      >
+      <div className="space-y-6">
         <OrderItems
           items={items}
           orderType={orderType}
@@ -775,39 +770,49 @@ const NewReceipt = () => {
           calculateMarkup={calculateMarkup}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <OrderSummary
-            subtotal={subtotal}
-            tax={tax}
-            taxAmount={taxAmount}
-            discount={discount}
-            numericDiscount={numericDiscount}
-            totalDiscount={totalDiscount}
-            total={total}
-            totalCost={totalCost}
-            montageCosts={montageCosts}
-            profit={profit}
-            advancePayment={advancePayment}
-            balance={balance}
-          />
-          <PaymentOptions
-            discount={discount}
-            numericDiscount={numericDiscount}
-            tax={tax}
-            taxIndicator={taxIndicator}
-            advancePayment={advancePayment}
-            total={total}
-            paymentStatus={paymentStatus}
-            setDiscount={setDiscount}
-            setNumericDiscount={setNumericDiscount}
-            setTax={setTax}
-            setTaxIndicator={setTaxIndicator}
-            setAdvancePayment={setAdvancePayment}
-            setBalance={setBalance}
-            updatePaymentStatus={updatePaymentStatus}
-          />
-        </div>
-      </motion.div>
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gray-50 border-b">
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Payment Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex gap-8">
+              <OrderSummary
+                subtotal={subtotal}
+                tax={tax}
+                taxAmount={taxAmount}
+                discount={discount}
+                numericDiscount={numericDiscount}
+                totalDiscount={totalDiscount}
+                total={total}
+                totalCost={totalCost}
+                montageCosts={montageCosts}
+                profit={profit}
+                advancePayment={advancePayment}
+                balance={balance}
+              />
+              <PaymentOptions
+                discount={discount}
+                numericDiscount={numericDiscount}
+                tax={tax}
+                taxIndicator={taxIndicator}
+                advancePayment={advancePayment}
+                total={total}
+                paymentStatus={paymentStatus}
+                setDiscount={setDiscount}
+                setNumericDiscount={setNumericDiscount}
+                setTax={setTax}
+                setTaxIndicator={setTaxIndicator}
+                setAdvancePayment={setAdvancePayment}
+                setBalance={setBalance}
+                updatePaymentStatus={updatePaymentStatus}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   };
 
