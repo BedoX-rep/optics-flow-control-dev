@@ -322,8 +322,8 @@ const Products = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fade-in">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-4">
+            <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8]">
+              <div className="p-6">
                 <div className="flex items-center gap-4">
                   <ProductImage
                     src={product.image}

@@ -476,15 +476,17 @@ export default function Clients() {
           ))}
         </div>
       ) : filteredClients?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fade-in">
           {filteredClients.map((client) => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onEdit={handleEditClient}
-              onDelete={openDeleteDialog}
-              onRefresh={fetchClients}
-            />
+            <div className="motion.div" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onDelete={openDeleteDialog}
+                onRefresh={fetchClients}
+              />
+            </div>
           ))}
           {hasMore && (
             <div className="col-span-full flex justify-center p-4">
