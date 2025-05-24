@@ -1164,7 +1164,7 @@ const NewReceipt = () => {
             <Receipt className="w-6 h-6 text-amber-700" />
           </div>
           <div>
-            <h3 className="font-semibold text-amber-900">Order Type</h3>
+            <h3 className="font-semibold text-amber-900 text-sm">Order Type</h3>
             <p className="text-sm text-amber-700">Select the type of order to process</p>
           </div>
         </div>
@@ -1204,382 +1204,46 @@ const NewReceipt = () => {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Items Section */}
-        <div className="xl:col-span-2 space-y-4">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Order Items</h2>
-              <p className="text-sm text-gray-500">Add and manage items in your order</p>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={() => addItem('product')} size="sm" className="bg-primary/90 hover:bg-primary">
-                <Plus className="h-4 w-4 mr-2" /> Add Product
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" /> Custom Item
-              </Button>
-            </div>
-          </div>
-
-          {/* Items list */}
-          <div className="space-y-4">
-            {items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                products={products}
-                productSearchTerms={productSearchTerms}
-                setProductSearchTerms={setProductSearchTerms}
-                updateItem={updateItem}
-                removeItem={removeItem}
-                getEyeValues={getEyeValues}
-                calculateMarkup={calculateMarkup}
-                setItems={setItems}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Payment Summary Section */}
-        <div className="xl:col-span-1">
-          <PaymentSummary
-            subtotal={subtotal}
-            total={total}
-            profit={profit}
-            taxAmount={taxAmount}
-            totalDiscount={totalDiscount}
-            totalCost={totalCost}
-            montageCosts={montageCosts}
-            discount={discount}
-            setDiscount={setDiscount}
-            numericDiscount={numericDiscount}
-            setNumericDiscount={setNumericDiscount}
-            tax={tax}
-            setTax={setTax}
-            taxIndicator={taxIndicator}
-            setTaxIndicator={setTaxIndicator}
-            advancePayment={advancePayment}
-            setAdvancePayment={setAdvancePayment}
-            balance={balance}
-            setBalance={setBalance}
-            paymentStatus={paymentStatus}
-            updatePaymentStatus={updatePaymentStatus}
-            setPaymentStatus={setPaymentStatus}
-          />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderFinalizeTab = () => (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gray-50 border-b">
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Receipt Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            {selectedClient ? (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium mb-2">Client Information</h3>
-                <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
-              </div>
-            ) : (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>No Client Selected</AlertTitle>
-                <AlertDescription>Please select a client to continue.</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Prescription</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Right Eye</p>
-                  <p>SPH: {rightEye.sph || 'N/A'}</p>
-                  <p>CYL: {rightEye.cyl || 'N/A'}</p>
-                  <p>AXE: {rightEye.axe || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Left Eye</p>
-                  <p>SPH: {leftEye.sph || 'N/A'}</p>
-                  <p>CYL: {leftEye.cyl || 'N/A'}</p>
-                  <p>AXE: {leftEye.axe || 'N/A'}</p>
-                </div>
-              </div>
-              <p className="mt-2">ADD: {add || 'N/A'}</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Order Summary</h3>
-              <p className="text-sm">Order Type: <span className="font-medium">{orderType}</span></p>
-              <p className="text-sm">Total Items: <span className="font-medium">{items.length}</span></p>
-              <p className="text-sm">Subtotal: <span className="font-medium">{subtotal.toFixed(2)} DH</span></p>
-              <p className="text-sm">Total: <span className="font-medium text-primary">{total.toFixed(2)} DH</span></p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Payment Status</h3>
-              <p className="text-sm">Advance Payment: <span className="font-medium">{advancePayment.toFixed(2)} DH</span></p>
-              <p className="text-sm">Balance Due: <span className="font-medium">{balance.toFixed(2)} DH</span></p>
-              <p className="text-sm">Status: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
-                paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>{paymentStatus}</span></p>
-            </div>
-          </div>
-        </div>
-        {!selectedClient && (
-          <CardContent className="p-6">
-            <div className="flex gap-3 mb-6">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search by name or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-12"
-                />
-              </div>
-              <Button
-                onClick={() => setIsAddClientOpen(true)}
-                className="h-12 px-6"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                New Client
-              </Button>
-            </div>
-
-            <div className="grid gap-4 max-h-[400px] overflow-y-auto">
-              {filteredClients.slice(0, 8).map(client => (
-                <div
-                  key={client.id}
-                  className={`p-4 rounded-lg border-2 transition-all cursor-pointer
-                    ${selectedClient === client.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-transparent bg-gray-50 hover:border-primary/20'}`}
-                  onClick={() => handleClientSelect(client.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{client.name}</h3>
-                      <p className="text-sm text-muted-foreground">{client.phone}</p>
-                    </div>
-                    {selectedClient === client.id && (
-                      <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    )}
+      <Tabs defaultValue="items">
+        <TabsList>
+          <TabsTrigger value="items">Order Summary</TabsTrigger>
+          <TabsTrigger value="payment">Payment Options</TabsTrigger>
+        </TabsList>
+        <TabsContent value="items" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
+              {/* Items Section */}
+              <div className="xl:col-span-2 space-y-4">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Order Items</h2>
+                    <p className="text-sm text-gray-500">Add and manage items in your order</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={() => addItem('product')} size="sm" className="bg-primary/90 hover:bg-primary">
+                      <Plus className="h-4 w-4 mr-2" /> Add Product
+                    </Button>
+                    <Button onClick={() => addItem('custom')} variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" /> Custom Item
+                    </Button>
                   </div>
                 </div>
-              ))}
+
+                {/* Items list */}
+                <div className="space-y-4">
+                  {items.map((item) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      products={products}
+                      productSearchTerms={productSearchTerms}
+                      setProductSearchTerms={setProductSearchTerms}
+                      updateItem={updateItem}
+                      removeItem={removeItem}
+                      getEyeValues={getEyeValues}
+                      calculateMarkup={calculateMarkup}
+                      setItems={setItems}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-          </CardContent>
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  const handleSaveReceipt = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be logged in to save receipts.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedClient) {
-      toast({
-        title: "Missing Information",
-        description: "Please select a client before saving.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items.length === 0) {
-      toast({
-        title: "Missing Items",
-        description: "Please add at least one item to the receipt.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      const { data: receipt, error: receiptError } = await supabase
-        .from('receipts')
-        .insert({
-          user_id: user.id,
-          client_id: selectedClient,
-          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-          add: add ? parseFloat(add) : null,
-          subtotal,
-          tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
-          tax: taxAmount,
-          cost: totalCost + montageCosts,
-          cost_ttc: totalCost + montageCosts,
-          profit: profit,
-          total_discount: totalDiscount,
-          discount_amount: numericDiscount,
-          discount_percentage: discount,
-          total,
-          balance: total - advancePayment,
-          advance_payment: advancePayment,
-          payment_status: paymentStatus,
-          delivery_status: 'Undelivered',
-          montage_status: 'UnOrdered',
-          montage_costs: montageCosts,
-          products_cost: totalCost,
-          order_type: orderType,
-          call_status: 'Not Called',
-          created_at: new Date().toISOString(),
-          is_deleted: false
-        })
-        .select()
-        .single();
-
-      if (receiptError) throw receiptError;
-
-      if (selectedClient) {
-        const { error: prescriptionError } = await supabase
-          .from('clients')
-          .update({
-            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-            Add: add ? parseFloat(add) : null,
-            last_prescription_update: new Date().toISOString()
-          })
-          .eq('id', selectedClient);
-
-        if (prescriptionError) throw prescriptionError;
-      }
-
-      const receiptItems = items.map(item => ({
-        user_id: user.id,
-        receipt_id: receipt.id,
-        product_id: item.productId || null,
-        custom_item_name: item.customName || null,
-        quantity: item.quantity || 1,
-        price: item.price || 0,
-        cost: item.cost || 0,
-        profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
-        linked_eye: item.linkedEye || null,
-        applied_markup: item.appliedMarkup || 0,
-        is_deleted: false
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('receipt_items')
-        .insert(receiptItems);
-
-      if (itemsError) throw itemsError;
-
-      queryClient.invalidateQueries(['receipts', user.id]);
-      toast({
-        title: "Success",
-        description: "Receipt saved successfully",
-      });
-      navigate('/receipts');
-    } catch (error) {
-      console.error('Error saving receipt:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save receipt. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="container max-w-7xl mx-auto py-8 px-4">
-      {renderStepIndicator()}
-
-      <div className="mb-6 flex justify-center items-center gap-4">
-        <Button
-          variant="outline"
-          onClick={() => {
-            const prevIndex = Math.max(0, currentStepIndex - 1);
-            setCurrentTab(steps[prevIndex].id);
-          }}
-          disabled={currentStepIndex === 0}
-          className="min-w-[120px]"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-
-        <Button
-          className="bg-primary min-w-[120px]"
-          onClick={() => {
-            if (currentStepIndex === steps.length - 1) {
-              handleSaveReceipt();
-            } else {
-              const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-              setCurrentTab(steps[nextIndex].id);
-            }
-          }}
-        >
-          {currentStepIndex === steps.length - 1 ? (
-            <>Save Receipt</>
-          ) : (
-            <>Next <ArrowRight className="h-4 w-4 ml-2" /></>
-          )}
-        </Button>
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentTab}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-        >
-          {currentTab === 'client' && renderClientTab()}
-          {currentTab === 'order' && renderOrderTab()}
-          {currentTab === 'finalize' && renderFinalizeTab()}
-        </motion.div>
-      </AnimatePresence>
-
-      <AddClientDialog
-        isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
-        onClientAdded={handleClientAdded}
-      />
-
-      <MarkupSettingsDialog
-        isOpen={isMarkupSettingsOpen}
-        onClose={() => setIsMarkupSettingsOpen(false)}
-        settings={markupSettings}
-        onSave={setMarkupSettings}
-        autoMontage={autoMontage}
-        onAutoMontageChange={setAutoMontage}
-      />
-    </div>
-  );
-};
-
-export default NewReceipt;

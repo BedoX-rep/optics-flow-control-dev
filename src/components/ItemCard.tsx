@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +37,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
 }) => {
   // Implementation of the ItemCard component...
   // Copy the item card implementation from the main component
+  return (
+    <Card key={item.id} className="overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all group">
+      <CardContent className="p-4">
+        <div className="rounded-lg">
+          {/* Item details here */}
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
 
 export default ItemCard;
