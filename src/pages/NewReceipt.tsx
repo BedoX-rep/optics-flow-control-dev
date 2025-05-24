@@ -848,7 +848,7 @@ const NewReceipt = () => {
                   <p className="text-gray-500">Right Eye</p>
                   <p>SPH: {rightEye.sph || 'N/A'}</p>
                   <p>CYL: {rightEye.cyl || 'N/A'}</p>                  <p>AXE: {rightEye.axe || 'N/A'}</p>
-                </div>
+</div>
                 <div>
                   <p className="text-gray-500">Left Eye</p>
                   <p>SPH: {leftEye.sph || 'N/A'}</p>
