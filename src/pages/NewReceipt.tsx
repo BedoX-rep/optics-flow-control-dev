@@ -703,8 +703,8 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pl-2" style={{ width: '130%' }}>
-        <div className="space-y-6">
+      <div className="space-y-6 pl-2" style={{ width: '150%' }}>
+        <div>
           <Card className="border-0 shadow-lg">
             <CardHeader className="bg-gray-50 border-b">
               <div className="flex justify-between items-center">
@@ -977,7 +977,7 @@ const NewReceipt = () => {
           </Card>
         </div>
 
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg mt-6">
           <CardHeader className="bg-gray-50 border-b">
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5" />
@@ -985,7 +985,7 @@ const NewReceipt = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex gap-8">
+            <div className="grid grid-cols-3 gap-8">
               <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
                 <h3 className="font-semibold text-xl text-gray-900">Order Summary</h3>
                 <div className="space-y-3">
