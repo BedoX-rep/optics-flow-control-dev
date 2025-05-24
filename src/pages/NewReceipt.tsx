@@ -1280,6 +1280,24 @@ const NewReceipt = () => {
     setIsLoading(true);
     if (!user) return;
 
+    if (!selectedClient) {
+      toast({
+        title: "Error",
+        description: "Please select a client",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one item",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const receiptData = {
       user_id: user.id,
       client_id: selectedClient,
@@ -1342,9 +1360,20 @@ const NewReceipt = () => {
         );
 
       if (itemsError) {
-        console.error('Error saving receipt:', error);
-        toast({
-          title: "Error",
+        throw itemsError;
+      }
+
+      toast({
+        title: "Success",
+        description: "Receipt saved successfully",
+      });
+      queryClient.invalidateQueries(['receipts', user.id]);
+      navigate('/receipts');
+
+    } catch (error) {
+      console.error('Error saving receipt:', error);
+      toast({
+        title: "Error",
           description: "Failed to save receipt",
           variant: "destructive",
         });
