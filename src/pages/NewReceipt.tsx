@@ -1342,14 +1342,14 @@ const NewReceipt = () => {
         );
 
       if (itemsError) {
-        console.error('Error saving receipt:', error);
+        console.error('Error saving receipt:', itemsError);
         toast({
           title: "Error",
           description: "Failed to save receipt",
           variant: "destructive",
         });
       } else {
-        console.log('Receipt saved successfully:', data);
+        console.log('Receipt saved successfully:', receiptData);
         toast({
           title: "Success",
           description: "Receipt saved successfully",
