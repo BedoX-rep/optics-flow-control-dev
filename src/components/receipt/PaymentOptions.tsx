@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -40,81 +39,79 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
   return (
     <div className="flex-1 p-6 space-y-4 border rounded-lg">
       <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
-      <div className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="discount">Percentage Discount</Label>
-            <div className="relative">
-              <Input
-                id="discount"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                value={discount}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setDiscount(value === '' ? 0 : parseFloat(value));
-                }}
-                className="pr-8"
-              />
-              <span className="absolute right-3 top-2.5 text-gray-500">%</span>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="numericDiscount">Fixed Discount</Label>
-            <div className="relative">
-              <Input
-                id="numericDiscount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={numericDiscount}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setNumericDiscount(value === '' ? 0 : parseFloat(value));
-                }}
-                className="pr-12"
-              />
-              <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
-            </div>
+      <div className="flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <Label htmlFor="discount">Percentage Discount</Label>
+          <div className="relative">
+            <Input
+              id="discount"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              value={discount}
+              onChange={(e) => {
+                const value = e.target.value;
+                setDiscount(value === '' ? 0 : parseFloat(value));
+              }}
+              className="pr-8"
+            />
+            <span className="absolute right-3 top-2.5 text-gray-500">%</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="tax">Tax Base Amount</Label>
-            <div className="relative">
-              <Input
-                id="tax"
-                type="number"
-                min="0"
-                value={tax}
-                onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                className="pr-12"
-              />
-              <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="taxIndicator">Tax Rate</Label>
-            <div className="relative">
-              <Input
-                id="taxIndicator"
-                type="number"
-                min="0"
-                max="1"
-                step="0.01"
-                value={taxIndicator}
-                onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
-                className="pr-8"
-              />
-              <span className="absolute right-3 top-2.5 text-gray-500">×</span>
-            </div>
+        <div className="flex-1 min-w-[200px]">
+          <Label htmlFor="numericDiscount">Fixed Discount</Label>
+          <div className="relative">
+            <Input
+              id="numericDiscount"
+              type="number"
+              step="0.01"
+              min="0"
+              value={numericDiscount}
+              onChange={(e) => {
+                const value = e.target.value;
+                setNumericDiscount(value === '' ? 0 : parseFloat(value));
+              }}
+              className="pr-12"
+            />
+            <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
           </div>
         </div>
 
-        <div className="pt-4 border-t">
+        <div className="flex-1 min-w-[200px]">
+          <Label htmlFor="tax">Tax Base Amount</Label>
+          <div className="relative">
+            <Input
+              id="tax"
+              type="number"
+              min="0"
+              value={tax}
+              onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+              className="pr-12"
+            />
+            <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
+          <Label htmlFor="taxIndicator">Tax Rate</Label>
+          <div className="relative">
+            <Input
+              id="taxIndicator"
+              type="number"
+              min="0"
+              max="1"
+              step="0.01"
+              value={taxIndicator}
+              onChange={(e) => setTaxIndicator(parseFloat(e.target.value) || 0)}
+              className="pr-8"
+            />
+            <span className="absolute right-3 top-2.5 text-gray-500">×</span>
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
           <Label htmlFor="advancePayment">Advance Payment</Label>
           <div className="relative">
             <Input
@@ -134,7 +131,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
           </div>
         </div>
 
-        <div className="pt-4">
+        <div className="flex items-end pb-2">
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
             paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
             paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
