@@ -37,6 +37,20 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   totalDiscount,
   totalCost,
   montageCosts,
+  discount,
+  setDiscount,
+  numericDiscount,
+  setNumericDiscount,
+  tax,
+  setTax,
+  taxIndicator,
+  setTaxIndicator,
+  advancePayment,
+  setAdvancePayment,
+  balance,
+  setBalance,
+  paymentStatus,
+  updatePaymentStatus,
 }) => {
   return (
     <div className="sticky top-6">
