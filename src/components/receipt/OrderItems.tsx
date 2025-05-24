@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Copy, Plus, Receipt, Trash } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface OrderItemsProps {
   items: any[];
@@ -52,12 +53,25 @@ const OrderItems: React.FC<OrderItemsProps> = ({
 
   return (
     <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gray-50 border-b p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+      <CardHeader className="bg-gray-50/80 border-b p-4">
+        <div className="flex flex-wrap items-center gap-4 justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
+              <Plus className="h-4 w-4 mr-2" /> Add Product
+            </Button>
+            <Button onClick={() => addItem('custom')} variant="outline" size="default">
+              <Plus className="h-4 w-4 mr-2" /> Add Custom
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
             <Receipt className="w-5 h-5 text-gray-500" />
             <Select value={orderType} onValueChange={setOrderType}>
-              <SelectTrigger className="w-[140px] bg-amber-50 border-amber-200">
+              <SelectTrigger className={`w-[160px] ${
+                orderType === 'Unspecified' 
+                  ? 'bg-red-50 border-red-200 text-red-700' 
+                  : 'bg-green-50 border-green-200 text-green-700'
+              }`}>
                 <SelectValue placeholder="Order Type" />
               </SelectTrigger>
               <SelectContent>
@@ -68,24 +82,23 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => addItem('product')} size="sm" variant="default">
-              <Plus className="h-4 w-4 mr-2" /> Product
-            </Button>
-            <Button onClick={() => addItem('custom')} variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Custom
-            </Button>
-          </div>
         </div>
+        {orderType === 'Unspecified' && (
+          <Alert className="mt-3 bg-red-50 text-red-700 border-red-200">
+            <AlertDescription>
+              Please select an order type
+            </AlertDescription>
+          </Alert>
+        )}
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-3">
           {items.map((item) => (
             <Card key={item.id} className="border border-gray-100 shadow-sm">
               <CardContent className="p-3">
-                <div className="grid grid-cols-12 gap-3 items-start">
+                <div className="grid grid-cols-12 gap-4 items-start">
                   {item.customName !== undefined ? (
-                    <div className="col-span-4">
+                    <div className="col-span-5">
                       <Label htmlFor={`custom-${item.id}`} className="text-xs">Custom Item</Label>
                       <Input
                         id={`custom-${item.id}`}
@@ -95,22 +108,22 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
                   ) : (
-                    <div className="col-span-4">
+                    <div className="col-span-5">
                       <Label htmlFor={`product-${item.id}`} className="text-xs">Product</Label>
                       <div className="flex gap-2 mt-1">
                         <Select
                           value={item.productId}
                           onValueChange={(value) => updateItem(item.id, 'productId', value)}
                         >
-                          <SelectTrigger id={`product-${item.id}`}>
+                          <SelectTrigger id={`product-${item.id}`} className="flex-1">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="min-w-[300px]">
                             {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
                               <SelectItem key={product.id} value={product.id}>
-                                <div className="flex justify-between items-center w-full">
-                                  <span>{product.name}</span>
-                                  <span className="text-sm text-blue-600">{product.price.toFixed(2)} DH</span>
+                                <div className="flex justify-between items-center w-full gap-4">
+                                  <span className="truncate flex-1">{product.name}</span>
+                                  <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -166,7 +179,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                     />
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-1">
                     <Label className="text-xs">Total</Label>
                     <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-right">
                       {(item.price * item.quantity).toFixed(2)} DH
@@ -280,6 +293,12 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               </CardContent>
             </Card>
           ))}
+          
+          {items.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No items added yet. Click the buttons above to add items.</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
