@@ -72,7 +72,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   ? 'bg-red-50 border-red-200 text-red-700' 
                   : 'bg-green-50 border-green-200 text-green-700'
               }`}>
-                <SelectValue placeholder="Order Type" />
+                <SelectValue placeholder="Order Type">
+                  {orderType === 'Unspecified' ? 'Please select an order type' : orderType}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Unspecified" className="relative">
