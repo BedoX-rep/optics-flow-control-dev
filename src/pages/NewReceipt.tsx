@@ -1353,7 +1353,7 @@ const NewReceipt = () => {
     <div className="container max-w-7xl mx-auto py-8 px-4">
       {renderStepIndicator()}
 
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex justify-center items-center gap-4">
         <Button
           variant="outline"
           onClick={() => {
@@ -1361,13 +1361,14 @@ const NewReceipt = () => {
             setCurrentTab(steps[prevIndex].id);
           }}
           disabled={currentStepIndex === 0}
+          className="min-w-[120px]"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
 
         <Button
-          className="bg-primary"
+          className="bg-primary min-w-[120px]"
           onClick={() => {
             if (currentStepIndex === steps.length - 1) {
               handleSaveReceipt();
