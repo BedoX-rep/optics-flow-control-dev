@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -25,8 +24,6 @@ interface Product extends ProductSortable {
   cost_ttc?: number;
   stock_status?: 'Order' | 'inStock' | 'Fabrication';
   stock?: number;
-  automated_name?: boolean;
-  gamma?: string;
 }
 
 const DEFAULT_FILTERS = {
@@ -48,15 +45,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ 
-    name: '', 
-    price: 0, 
-    cost_ttc: 0, 
-    stock_status: 'Order', 
-    stock: 0, 
-    automated_name: false, 
-    gamma: "" 
-  });
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
   const [page, setPage] = useState(0);
@@ -144,17 +133,7 @@ const Products = () => {
       cost_ttc: editing.cost_ttc ?? 0,
       stock_status: editing.stock_status ?? 'Order',
       stock: editing.stock ?? 0,
-      automated_name: editing.automated_name ?? false,
-      gamma: editing.gamma ?? "",
-    } : { 
-      name: '', 
-      price: 0, 
-      cost_ttc: 0, 
-      stock_status: 'Order', 
-      stock: 0, 
-      automated_name: false, 
-      gamma: "" 
-    });
+    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     setIsOpen(true);
   };
 
@@ -195,57 +174,28 @@ const Products = () => {
     if (!user) return;
     try {
       setIsSubmitting(true);
-      
-      // Prepare the data object with proper field handling
-      const productData = {
-        name: form.name,
-        price: form.price,
-        cost_ttc: form.cost_ttc || 0,
-        stock: form.stock || null,
-        stock_status: form.stock_status || 'Order',
-        category: form.category || null,
-        index: form.index || null,
-        treatment: form.treatment || null,
-        company: form.company || null,
-        image: form.image || null,
-        automated_name: form.automated_name || false,
-        gamma: form.gamma || null,
-      };
-
       if (editingProduct) {
+        const updates: any = { ...form };
+        delete updates.id;
         const { error } = await supabase
           .from('products')
-          .update(productData)
+          .update(updates)
           .eq('id', editingProduct.id)
           .eq('user_id', user.id);
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
-        }
+        if (error) throw error;
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
         const { error } = await supabase
           .from('products')
-          .insert({ ...productData, user_id: user.id });
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
-        }
+          .insert({ ...form, user_id: user.id });
+        if (error) throw error;
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ 
-        name: '', 
-        price: 0, 
-        cost_ttc: 0, 
-        stock_status: 'Order', 
-        stock: 0, 
-        automated_name: false, 
-        gamma: "" 
-      });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -401,20 +351,12 @@ const Products = () => {
                     <p className="font-medium">{product.treatment || '-'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-neutral-500">Gamma</p>
-                    <p className="font-medium">{product.gamma || '-'}</p>
-                  </div>
-                  <div className="space-y-1">
                     <p className="text-neutral-500">Company</p>
                     <p className="font-medium">{product.company || '-'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-neutral-500">Cost TTC</p>
                     <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Auto Name</p>
-                    <p className="font-medium">{product.automated_name ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
 

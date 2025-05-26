@@ -51,8 +51,6 @@ export interface ProductFormValues {
   company?: string;
   image?: string;
   created_at?: string;
-  automated_name?: boolean;
-  gamma?: string;
 }
 
 interface ProductFormProps {
@@ -72,11 +70,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     name: "",
     price: 0,
     stock_status: 'Order',
-    automated_name: false,
-    gamma: "",
     ...initialValues
   });
-  const [autoName, setAutoName] = useState<boolean>(!!initialValues.automated_name);
+  const [autoName, setAutoName] = useState<boolean>(!!initialValues.category); // default on if editing and has category
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -92,7 +88,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         if (form.index) parts.push(form.index);
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
-      if (form.gamma) parts.push(form.gamma?.toUpperCase());
       if (form.company) parts.push(form.company?.toUpperCase());
       if (form.stock_status === 'inStock' || form.stock_status === 'Fabrication') {
         parts.push(form.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
@@ -103,7 +98,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         name: parts.filter(Boolean).join(" ")
       }));
     }
-  }, [form.category, form.index, form.treatment, form.gamma, form.company, form.stock_status, autoName]);
+  }, [form.category, form.index, form.treatment, form.company, autoName]);
 
   // Determine which extra fields should show
   const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "");
@@ -130,7 +125,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     if (imageFile) {
       imageUrl = await handleImageUpload();
     }
-    onSubmit({ ...form, image: imageUrl, automated_name: autoName });
+    onSubmit({ ...form, image: imageUrl });
   };
 
   return (
@@ -198,16 +193,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </div>
         </>
       )}
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="gamma">Gamma</Label>
-        <Input
-          id="gamma"
-          className="col-span-3"
-          value={form.gamma ?? ""}
-          onChange={e => setForm(f => ({ ...f, gamma: e.target.value }))}
-          placeholder="Enter gamma value"
-        />
-      </div>
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="company">Company</Label>
         <Select
