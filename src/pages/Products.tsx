@@ -11,6 +11,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Search, Package, ChevronDown, Save, SaveAll } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
@@ -483,18 +484,6 @@ const Products = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <input
-                          type="checkbox"
-                          id={`auto-name-${product.id}`}
-                          checked={product.automated_name}
-                          onChange={(e) => handleFieldChange(product.id, 'automated_name', e.target.checked)}
-                          className="w-3 h-3 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-500 cursor-pointer">
-                          Auto Name
-                        </label>
-                      </div>
                       <input
                         type="text"
                         value={product.name}
@@ -646,18 +635,48 @@ const Products = () => {
                     </Select>
                   </div>
 
-                  {product.stock_status === 'inStock' && (
-                    <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Stock</label>
-                      <input
-                        type="number"
-                        value={product.stock || 0}
-                        onChange={(e) => handleFieldChange(product.id, 'stock', Number(e.target.value))}
-                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
-                        min={0}
-                      />
-                    </div>
-                  )}
+                  <div className="flex flex-col justify-between">
+                    {product.stock_status === 'inStock' ? (
+                      <div>
+                        <label className="text-xs text-gray-500 uppercase tracking-wide">Stock</label>
+                        <input
+                          type="number"
+                          value={product.stock || 0}
+                          onChange={(e) => handleFieldChange(product.id, 'stock', Number(e.target.value))}
+                          className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                          min={0}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col justify-end h-full">
+                        <div className="flex items-center justify-between pt-4">
+                          <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-600 font-medium">
+                            Auto Name
+                          </label>
+                          <Switch
+                            id={`auto-name-${product.id}`}
+                            checked={product.automated_name}
+                            onCheckedChange={(checked) => handleFieldChange(product.id, 'automated_name', checked)}
+                            className="scale-75"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {product.stock_status === 'inStock' && (
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-2">
+                        <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-600 font-medium">
+                          Auto Name
+                        </label>
+                        <Switch
+                          id={`auto-name-${product.id}`}
+                          checked={product.automated_name}
+                          onCheckedChange={(checked) => handleFieldChange(product.id, 'automated_name', checked)}
+                          className="scale-75"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center pt-4 border-t border-gray-100">
