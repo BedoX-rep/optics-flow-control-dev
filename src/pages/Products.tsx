@@ -124,20 +124,28 @@ const Products = () => {
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
     setFormInitial(editing ? {
-      name: editing.name,
-      price: editing.price,
-      category: editing.category ?? undefined,
-      index: editing.index ?? undefined,
-      treatment: editing.treatment ?? undefined,
-      company: editing.company ?? undefined,
-      image: editing.image ?? undefined,
-      created_at: editing.created_at ?? undefined,
-      cost_ttc: editing.cost_ttc ?? 0,
-      stock_status: editing.stock_status ?? 'Order',
-      stock: editing.stock ?? 0,
-      automated_name: editing.automated_name ?? false,
-      gamma: editing.gamma ?? "",
-    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+      name: editing.name || '',
+      price: editing.price || 0,
+      category: editing.category || undefined,
+      index: editing.index || undefined,
+      treatment: editing.treatment || undefined,
+      company: editing.company || undefined,
+      image: editing.image || undefined,
+      created_at: editing.created_at || undefined,
+      cost_ttc: editing.cost_ttc || 0,
+      stock_status: editing.stock_status || 'Order',
+      stock: editing.stock || 0,
+      automated_name: editing.automated_name || false,
+      gamma: editing.gamma || "",
+    } : { 
+      name: '', 
+      price: 0, 
+      cost_ttc: 0, 
+      stock_status: 'Order' as const, 
+      stock: 0, 
+      automated_name: false, 
+      gamma: "" 
+    });
     setIsOpen(true);
   };
 
@@ -199,7 +207,15 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+      setFormInitial({ 
+        name: '', 
+        price: 0, 
+        cost_ttc: 0, 
+        stock_status: 'Order' as const, 
+        stock: 0, 
+        automated_name: false, 
+        gamma: "" 
+      });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
