@@ -24,8 +24,6 @@ interface Product extends ProductSortable {
   cost_ttc?: number;
   stock_status?: 'Order' | 'inStock' | 'Fabrication';
   stock?: number;
-  automated_name?: boolean;
-  gamma?: string;
 }
 
 const DEFAULT_FILTERS = {
@@ -73,10 +71,7 @@ const Products = () => {
 
     // Apply search filter if exists
     if (searchTerm) {
-      const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
-      searchWords.forEach(word => {
-        query = query.ilike('name', `%${word}%`);
-      });
+      query = query.ilike('name', `%${searchTerm}%`);
     }
 
     if (filters.category && filters.category !== "all_categories") {
@@ -135,9 +130,7 @@ const Products = () => {
       cost_ttc: editing.cost_ttc ?? 0,
       stock_status: editing.stock_status ?? 'Order',
       stock: editing.stock ?? 0,
-      automated_name: editing.automated_name ?? false,
-      gamma: editing.gamma ?? "",
-    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     setIsOpen(true);
   };
 
@@ -199,7 +192,7 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -261,38 +254,37 @@ const Products = () => {
   const filteredProducts = sortProducts(allProducts || []);
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={() => handleOpen(null)}
-            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Product
-          </Button>
-          <ProductStatsSummary products={data.products || []} />
+    <div className="container px-2 sm:px-4 md:px-6 max-w-7xl mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6 min-w-[320px]">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-between bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              size="default"
+              onClick={() => handleOpen(null)}
+              className="bg-black hover:bg-neutral-800 text-white px-6"
+            >
+              <Plus size={18} className="mr-2" />
+              New Product
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input 
-              type="text" 
-              placeholder="Search products..." 
-              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-400 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              className="pl-9 pr-2 bg-white border border-neutral-200 rounded-lg h-9 text-sm focus:ring-2 focus:ring-black focus:border-black w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          <div className="flex items-center gap-3">
-            <ProductFilters filters={filters} onChange={handleFilterChange} />
-          </div>
+          <ProductFilters filters={filters} onChange={handleFilterChange} />
         </div>
       </div>
+
+      <ProductStatsSummary products={data.products || []} />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -355,20 +347,12 @@ const Products = () => {
                     <p className="font-medium">{product.treatment || '-'}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-neutral-500">Gamma</p>
-                    <p className="font-medium">{product.gamma || '-'}</p>
-                  </div>
-                  <div className="space-y-1">
                     <p className="text-neutral-500">Company</p>
                     <p className="font-medium">{product.company || '-'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-neutral-500">Cost TTC</p>
                     <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Auto Name</p>
-                    <p className="font-medium">{product.automated_name ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
 
