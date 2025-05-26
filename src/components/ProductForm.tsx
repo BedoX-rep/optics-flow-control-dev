@@ -275,20 +275,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="gamma">Gamma</Label>
-        <Select
+        <Input
+          id="gamma"
+          className="col-span-3"
           value={form.gamma ?? ""}
-          onValueChange={v => setForm(f => ({ ...f, gamma: v === "none_selected" ? undefined : v }))}
-        >
-          <SelectTrigger className="col-span-3" id="gamma">
-            <SelectValue placeholder="Select Gamma" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-white">
-            <SelectItem value="none_selected">None</SelectItem>
-            {GAMMA_OPTIONS.map(opt => (
-              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
+          placeholder="Enter gamma value"
+        />
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">

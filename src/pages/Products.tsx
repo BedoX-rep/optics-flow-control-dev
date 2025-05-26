@@ -618,20 +618,13 @@ const Products = () => {
 
                     <div>
                       <label className="text-xs text-gray-500 uppercase tracking-wide">Gamma</label>
-                      <Select
+                      <input
+                        type="text"
                         value={product.gamma || ""}
-                        onValueChange={(value) => handleFieldChange(product.id, 'gamma', value === "none" ? null : value)}
-                      >
-                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          {GAMMA_OPTIONS.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) => handleFieldChange(product.id, 'gamma', e.target.value || null)}
+                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                        placeholder="Enter gamma"
+                      />
                     </div>
 
                     <div>
