@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import {
   DialogHeader, 
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Search, Package, ChevronDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, ChevronDown, Save, SaveAll } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
@@ -28,6 +29,10 @@ interface Product extends ProductSortable {
   gamma?: string;
 }
 
+interface EditableProduct extends Product {
+  isEdited?: boolean;
+}
+
 const DEFAULT_FILTERS = {
   category: "all_categories",
   index: "all_indexes",
@@ -37,6 +42,20 @@ const DEFAULT_FILTERS = {
 };
 
 const ITEMS_PER_PAGE = 30;
+
+const CATEGORY_OPTIONS = [
+  "Single Vision Lenses",
+  "Progressive Lenses", 
+  "Frames",
+  "Sunglasses",
+  "Contact Lenses",
+  "Accessories"
+];
+
+const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
+const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
+const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
+const GAMMA_OPTIONS = ["Standard", "Premium", "High-End", "Budget"];
 
 const Products = () => {
   const { toast } = useToast();
@@ -51,6 +70,8 @@ const Products = () => {
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
   const [page, setPage] = useState(0);
+  const [editableProducts, setEditableProducts] = useState<EditableProduct[]>([]);
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
   useEffect(() => {
     setPageReady(true);
@@ -113,8 +134,10 @@ const Products = () => {
     if (data.products) {
       if (page === 0) {
         setAllProducts(data.products);
+        setEditableProducts(data.products.map(p => ({ ...p, isEdited: false })));
       } else {
         setAllProducts(prev => [...prev, ...data.products]);
+        setEditableProducts(prev => [...prev, ...data.products.map(p => ({ ...p, isEdited: false }))]);
       }
     }
   }, [data.products, page]);
@@ -212,22 +235,46 @@ const Products = () => {
     }
   };
 
-  const handleStockStatusChange = async (product: Product, newStatus: 'Order' | 'inStock' | 'Fabrication') => {
+  const handleFieldChange = (productId: string, field: keyof Product, value: any) => {
+    setEditableProducts(prev => 
+      prev.map(product => {
+        if (product.id === productId) {
+          const originalProduct = allProducts.find(p => p.id === productId);
+          const updated = { ...product, [field]: value };
+          const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
+          return { ...updated, isEdited };
+        }
+        return product;
+      })
+    );
+  };
+
+  const handleSaveProduct = async (productId: string) => {
     if (!user) return;
+    const editedProduct = editableProducts.find(p => p.id === productId);
+    if (!editedProduct) return;
+
     try {
       setIsSubmitting(true);
+      const updates: any = { ...editedProduct };
+      delete updates.id;
+      delete updates.isEdited;
+      
       const { error } = await supabase
         .from('products')
-        .update({ stock_status: newStatus })
-        .eq('id', product.id)
+        .update(updates)
+        .eq('id', productId)
         .eq('user_id', user.id);
+      
       if (error) throw error;
+      
       await queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: "Success", description: "Stock status updated successfully" });
+      toast({ title: "Success", description: "Product updated successfully" });
     } catch (error) {
+      console.error('Error updating product:', error);
       toast({
         title: "Error",
-        description: "Failed to update stock status",
+        description: "Failed to update product",
         variant: "destructive"
       });
     } finally {
@@ -235,30 +282,50 @@ const Products = () => {
     }
   };
 
-  const handleStockChange = async (product: Product, newStock: number) => {
+  const handleSaveAll = async () => {
     if (!user) return;
+    const editedProducts = editableProducts.filter(p => p.isEdited);
+    if (editedProducts.length === 0) {
+      toast({ title: "Info", description: "No changes to save" });
+      return;
+    }
+
     try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from('products')
-        .update({ stock: newStock })
-        .eq('id', product.id)
-        .eq('user_id', user.id);
-      if (error) throw error;
+      setIsSavingAll(true);
+      
+      for (const product of editedProducts) {
+        const updates: any = { ...product };
+        delete updates.id;
+        delete updates.isEdited;
+        
+        const { error } = await supabase
+          .from('products')
+          .update(updates)
+          .eq('id', product.id)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+      }
+      
       await queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: "Success", description: "Stock updated successfully" });
+      toast({ 
+        title: "Success", 
+        description: `${editedProducts.length} product(s) updated successfully` 
+      });
     } catch (error) {
+      console.error('Error updating products:', error);
       toast({
         title: "Error",
-        description: "Failed to update stock",
+        description: "Failed to update some products",
         variant: "destructive"
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSavingAll(false);
     }
   };
 
-  const filteredProducts = sortProducts(allProducts || []);
+  const filteredProducts = sortProducts(editableProducts || []);
+  const hasEditedProducts = editableProducts.some(p => p.isEdited);
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
@@ -272,6 +339,16 @@ const Products = () => {
             New Product
           </Button>
           <ProductStatsSummary products={data.products || []} />
+          {hasEditedProducts && (
+            <Button
+              onClick={handleSaveAll}
+              disabled={isSavingAll}
+              className="rounded-xl font-medium bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/20 transition-all duration-200"
+            >
+              <SaveAll className="h-4 w-4 mr-2" />
+              Save All
+            </Button>
+          )}
         </div>
       </div>
 
@@ -297,12 +374,12 @@ const Products = () => {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="p-4 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 bg-neutral-200 rounded-lg" />
-                <div className="space-y-2 flex-1">
+            <Card key={i} className="p-6 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 bg-neutral-200 rounded-xl" />
+                <div className="space-y-3 flex-1">
+                  <div className="h-5 w-32 bg-neutral-200 rounded" />
                   <div className="h-4 w-24 bg-neutral-200 rounded" />
-                  <div className="h-3 w-32 bg-neutral-200 rounded" />
                 </div>
               </div>
             </Card>
@@ -322,66 +399,166 @@ const Products = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-center gap-4">
+            <Card 
+              key={product.id} 
+              className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
+                product.isEdited 
+                  ? 'border-l-amber-400 shadow-md bg-amber-50/30' 
+                  : 'border-l-blue-400 hover:border-l-blue-500'
+              }`}
+            >
+              <div className="p-6">
+                <div className="flex items-start gap-4 mb-6">
                   <ProductImage
                     src={product.image}
                     alt={product.category}
-                    className="w-16 h-16 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-gray-100"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">{product.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-neutral-500">
-                      <span className="font-medium text-black">{product.price.toFixed(2)} DH</span>
-                      {product.category && (
-                        <span className="px-2 py-0.5 bg-neutral-100 rounded-full text-xs">
-                          {product.category}
-                        </span>
-                      )}
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={product.name}
+                        onChange={(e) => handleFieldChange(product.id, 'name', e.target.value)}
+                        disabled={product.automated_name}
+                        className="font-semibold text-lg w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Price:</span>
+                        <input
+                          type="number"
+                          value={product.price}
+                          onChange={(e) => handleFieldChange(product.id, 'price', Number(e.target.value))}
+                          className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-20"
+                          min={0}
+                          step={0.01}
+                        />
+                        <span className="text-sm text-gray-500">DH</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Index</p>
-                    <p className="font-medium">{product.index || '-'}</p>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Category</label>
+                      <Select
+                        value={product.category || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'category', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {CATEGORY_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Index</label>
+                      <Select
+                        value={product.index || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'index', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {INDEX_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Company</label>
+                      <Select
+                        value={product.company || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'company', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {COMPANY_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Treatment</p>
-                    <p className="font-medium">{product.treatment || '-'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Company</p>
-                    <p className="font-medium">{product.company || '-'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Gamma</p>
-                    <p className="font-medium">{product.gamma || '-'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Cost TTC</p>
-                    <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-neutral-500">Auto Name</p>
-                    <p className="font-medium">{product.automated_name ? 'Yes' : 'No'}</p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Treatment</label>
+                      <Select
+                        value={product.treatment || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'treatment', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {TREATMENT_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Gamma</label>
+                      <Select
+                        value={product.gamma || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'gamma', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {GAMMA_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Cost TTC</label>
+                      <input
+                        type="number"
+                        value={product.cost_ttc || 0}
+                        onChange={(e) => handleFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
+                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                        min={0}
+                        step={0.01}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-neutral-500">Stock Status:</span>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase tracking-wide">Stock Status</label>
                     <Select
                       value={product.stock_status || 'Order'}
                       onValueChange={(value: 'Order' | 'inStock' | 'Fabrication') => 
-                        handleStockStatusChange(product, value)
+                        handleFieldChange(product.id, 'stock_status', value)
                       }
                     >
-                      <SelectTrigger className="h-8 w-32">
+                      <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -393,42 +570,57 @@ const Products = () => {
                   </div>
 
                   {product.stock_status === 'inStock' && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-neutral-500">Stock:</span>
-                      <Input
+                    <div>
+                      <label className="text-xs text-gray-500 uppercase tracking-wide">Stock</label>
+                      <input
                         type="number"
                         value={product.stock || 0}
-                        onChange={(e) => handleStockChange(product, Number(e.target.value))}
-                        className="h-8 w-24"
+                        onChange={(e) => handleFieldChange(product.id, 'stock', Number(e.target.value))}
+                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
                         min={0}
                       />
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleOpen(product)}
-                    className="text-neutral-700 hover:text-black"
-                  >
-                    <Edit size={16} className="mr-1" />
-                    Edit
-                  </Button>
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <div className="flex gap-2">
+                    {product.isEdited && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveProduct(product.id)}
+                        disabled={isSubmitting}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <Save size={14} className="mr-1" />
+                        Save
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpen(product)}
+                      className="text-gray-600 hover:text-blue-600"
+                    >
+                      <Edit size={14} className="mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+                  
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteProduct(product.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
-                    <Trash2 size={16} className="mr-1" />
+                    <Trash2 size={14} className="mr-1" />
                     Delete
                   </Button>
                 </div>
               </div>
             </Card>
           ))}
+          
           {hasMore && (
             <div className="col-span-full flex justify-center p-4">
               <Button
