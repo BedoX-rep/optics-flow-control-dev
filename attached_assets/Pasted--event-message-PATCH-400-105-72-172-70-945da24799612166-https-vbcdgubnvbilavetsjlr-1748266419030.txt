@@ -1,0 +1,181 @@
+{
+  "event_message": "PATCH | 400 | 105.72.172.70 | 945da24799612166 | https://vbcdgubnvbilavetsjlr.supabase.co/rest/v1/products?id=eq.b757b00f-433b-4b25-8d62-c171e29f90f8&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13 | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+  "id": "dc5eeaa4-0b14-436d-8500-c2479300a2a4",
+  "metadata": [
+    {
+      "load_balancer_experimental_routing": null,
+      "load_balancer_geo_aware_info": [],
+      "load_balancer_redirect_identifier": null,
+      "logflare_worker": [
+        {
+          "worker_id": "7C12X1"
+        }
+      ],
+      "request": [
+        {
+          "cf": [
+            {
+              "asOrganization": "inwi",
+              "asn": 36884,
+              "botManagement": [
+                {
+                  "corporateProxy": false,
+                  "detectionIds": [],
+                  "ja3Hash": null,
+                  "jsDetection": [
+                    {
+                      "passed": false
+                    }
+                  ],
+                  "score": 99,
+                  "staticResource": false,
+                  "verifiedBot": false
+                }
+              ],
+              "city": "Casablanca",
+              "clientAcceptEncoding": "gzip, deflate, br, zstd",
+              "clientTcpRtt": null,
+              "clientTrustScore": null,
+              "colo": "MAD",
+              "continent": "AF",
+              "country": "MA",
+              "edgeRequestKeepAliveStatus": 1,
+              "httpProtocol": "HTTP/3",
+              "isEUCountry": null,
+              "latitude": "33.59220",
+              "longitude": "-7.61840",
+              "metroCode": null,
+              "postalCode": null,
+              "region": "Casablanca-Settat",
+              "regionCode": "06",
+              "requestPriority": null,
+              "timezone": "Africa/Casablanca",
+              "tlsCipher": "AEAD-CHACHA20-POLY1305-SHA256",
+              "tlsClientAuth": [
+                {
+                  "certPresented": "0",
+                  "certRevoked": "0",
+                  "certVerified": "NONE"
+                }
+              ],
+              "tlsClientExtensionsSha1": "wlmUxoPYNIKDfSCRB/R7FQidANI=",
+              "tlsClientHelloLength": "1784",
+              "tlsClientRandom": "1vG7wK/QlOIw5bzkkVKdnAR7fO4CQILnTmLnNlEB5p0=",
+              "tlsExportedAuthenticator": [
+                {
+                  "clientFinished": "debe8ba920c5db667cc8e7ae87dd75931fe3ecd32baae1b5b35769f3220c8c63",
+                  "clientHandshake": "3e425a9c31aea7585cdc08b935cbb62619f0ca0078786ee822b8122e58047aa5",
+                  "serverFinished": "c78868601b3ad9abd8801c8be565a7bd9ed064001269d4a9d43baf3d45a087d9",
+                  "serverHandshake": "9f9cb6e74d2612295d6d4fe83675e82711b52c1389539cdb568ae70c20d242b2"
+                }
+              ],
+              "tlsVersion": "TLSv1.3",
+              "verifiedBotCategory": null
+            }
+          ],
+          "headers": [
+            {
+              "accept": "*/*",
+              "cf_cache_status": null,
+              "cf_connecting_ip": "105.72.172.70",
+              "cf_ipcountry": "MA",
+              "cf_ray": "945da24799612166",
+              "content_length": "255",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json",
+              "date": null,
+              "host": "vbcdgubnvbilavetsjlr.supabase.co",
+              "prefer": null,
+              "range": null,
+              "referer": "https://a80ac3c2-cc5e-4e3a-bef5-9604b47bd603-00-mot6w74czdqc.picard.replit.dev/",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": null,
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+              "x_client_info": "supabase-js-web/2.49.4",
+              "x_forwarded_host": null,
+              "x_forwarded_proto": "https",
+              "x_forwarded_user_agent": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_real_ip": "105.72.172.70"
+            }
+          ],
+          "host": "vbcdgubnvbilavetsjlr.supabase.co",
+          "method": "PATCH",
+          "path": "/rest/v1/products",
+          "port": null,
+          "protocol": "https:",
+          "sb": [
+            {
+              "apikey": [],
+              "auth_user": "6ed37d8f-76ec-482a-8f82-d122757caf13",
+              "jwt": [
+                {
+                  "apikey": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2060667806,
+                          "issuer": "supabase",
+                          "role": "anon",
+                          "signature_prefix": "aNeLdg",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ],
+                  "authorization": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 1748267119,
+                          "issuer": "https://vbcdgubnvbilavetsjlr.supabase.co/auth/v1",
+                          "key_id": "UOEerVTa+W5Uj89/",
+                          "role": "authenticated",
+                          "session_id": "2056373d-822a-4cdb-84b5-7e3b6632c475",
+                          "signature_prefix": "zFGzbb",
+                          "subject": "6ed37d8f-76ec-482a-8f82-d122757caf13"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "search": "?id=eq.b757b00f-433b-4b25-8d62-c171e29f90f8&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13",
+          "url": "https://vbcdgubnvbilavetsjlr.supabase.co/rest/v1/products?id=eq.b757b00f-433b-4b25-8d62-c171e29f90f8&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13"
+        }
+      ],
+      "response": [
+        {
+          "headers": [
+            {
+              "cf_cache_status": "DYNAMIC",
+              "cf_ray": "945da247b0922166-MAD",
+              "content_length": null,
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json; charset=utf-8",
+              "date": "Mon, 26 May 2025 13:31:37 GMT",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": "1",
+              "transfer_encoding": "chunked",
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_sb_error_code": null
+            }
+          ],
+          "origin_time": 34,
+          "status_code": 400
+        }
+      ]
+    }
+  ],
+  "timestamp": 1748266297580000
+}
