@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Filter, Glasses, Album, Building2 } from "lucide-react";
+import { Filter, Glasses, Album, Building2, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const CATEGORY_OPTIONS = [
 const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.60", "1.67", "1.74"];
 const TREATMENT_OPTIONS = ["Standard", "Blue Cut", "Photochromic", "Polarized"];
 const COMPANY_OPTIONS = ["Essilor", "Hoya", "Zeiss", "Rodenstock", "Shamir"];
+const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication"];
 
 export interface ProductFiltersProps {
   filters: Record<string, string>;
@@ -121,6 +122,33 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
           <SelectItem value="all_companies">All Companies</SelectItem>
           {COMPANY_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Stock Status Filter */}
+      <Select value={filters.stock_status || "all_stock_statuses"} onValueChange={v => onChange({ stock_status: v })}>
+        <SelectTrigger className={cn(
+          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          filters.stock_status !== 'all_stock_statuses'
+            ? "bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-200"
+            : "bg-white/10 hover:bg-white/20"
+        )}>
+          {filters.stock_status === 'all_stock_statuses' ? (
+            <>
+              <Package className="h-4 w-4" />
+              <span>Stock</span>
+            </>
+          ) : (
+            <SelectValue />
+          )}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all_stock_statuses">All Stock Status</SelectItem>
+          {STOCK_STATUS_OPTIONS.map(opt => (
+            <SelectItem key={opt} value={opt}>
+              {opt === 'inStock' ? 'In Stock' : opt}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>

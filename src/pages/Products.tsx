@@ -39,6 +39,7 @@ const DEFAULT_FILTERS = {
   index: "all_indexes",
   treatment: "all_treatments",
   company: "all_companies",
+  stock_status: "all_stock_statuses",
   sort: "arrange",
 };
 
@@ -112,6 +113,9 @@ const Products = () => {
     }
     if (filters.company && filters.company !== "all_companies") {
       query = query.eq('company', filters.company);
+    }
+    if (filters.stock_status && filters.stock_status !== "all_stock_statuses") {
+      query = query.eq('stock_status', filters.stock_status);
     }
 
     const { data: productsData, error, count } = await query;
