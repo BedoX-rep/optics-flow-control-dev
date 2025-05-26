@@ -1,4 +1,5 @@
 
+
 export interface ProductSortable {
   id: string;
   name: string;
@@ -18,7 +19,7 @@ export interface ProductSortable {
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",
-  "Progressive Lenses", 
+  "Progressive Lenses",
   "Frames",
   "Sunglasses",
   "Contact Lenses",
@@ -27,7 +28,7 @@ const CATEGORY_OPTIONS = [
 
 const INDEX_OPTIONS = [
   "1.56",
-  "1.6", 
+  "1.6",
   "1.67",
   "1.74"
 ];

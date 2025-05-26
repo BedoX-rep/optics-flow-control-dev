@@ -13,9 +13,27 @@ const CATEGORY_OPTIONS = [
   "Accessories"
 ];
 
-const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.60", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["Standard", "Blue Cut", "Photochromic", "Polarized"];
-const COMPANY_OPTIONS = ["Essilor", "Hoya", "Zeiss", "Rodenstock", "Shamir"];
+const INDEX_OPTIONS = [
+  "1.56",
+  "1.6",
+  "1.67",
+  "1.74"
+];
+
+const TREATMENT_OPTIONS = [
+  "White",
+  "AR",
+  "Blue",
+  "Photochromic"
+];
+
+const COMPANY_OPTIONS = [
+  "Indo",
+  "ABlens",
+  "Essilor",
+  "GLASSANDLENS",
+  "Optifak"
+];
 
 export interface ProductFiltersProps {
   filters: Record<string, string>;
@@ -53,7 +71,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Index Filter */}
       <Select value={filters.index || "all_indexes"} onValueChange={v => onChange({ index: v })}>
         <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          "w-[120px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
           filters.index !== 'all_indexes'
             ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
             : "bg-white/10 hover:bg-white/20"
@@ -78,7 +96,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Treatment Filter */}
       <Select value={filters.treatment || "all_treatments"} onValueChange={v => onChange({ treatment: v })}>
         <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+          "w-[130px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
           filters.treatment !== 'all_treatments'
             ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
             : "bg-white/10 hover:bg-white/20"
