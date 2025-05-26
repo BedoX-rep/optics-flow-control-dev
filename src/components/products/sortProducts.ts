@@ -1,9 +1,4 @@
 
-import { CATEGORY_OPTIONS } from "./CategoryCellEditor";
-import { INDEX_OPTIONS } from "./IndexCellEditor";
-import { TREATMENT_OPTIONS } from "./TreatmentCellEditor";
-import { COMPANY_OPTIONS } from "./CompanyCellEditor";
-
 export interface ProductSortable {
   id: string;
   name: string;
@@ -16,6 +11,37 @@ export interface ProductSortable {
   image?: string | null;
   created_at?: string | null;
 }
+
+const CATEGORY_OPTIONS = [
+  "Single Vision Lenses",
+  "Progressive Lenses", 
+  "Frames",
+  "Sunglasses",
+  "Contact Lenses",
+  "Accessories"
+];
+
+const INDEX_OPTIONS = [
+  "1.56",
+  "1.6", 
+  "1.67",
+  "1.74"
+];
+
+const TREATMENT_OPTIONS = [
+  "White",
+  "AR",
+  "Blue",
+  "Photochromic"
+];
+
+const COMPANY_OPTIONS = [
+  "Indo",
+  "ABlens",
+  "Essilor",
+  "GLASSANDLENS",
+  "Optifak"
+];
 
 function idxOrLast(arr: string[], v?: string | null) {
   if (!v) return arr.length; // null/undefined after all explicit options
