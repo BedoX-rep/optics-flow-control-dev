@@ -209,6 +209,7 @@ const Products = () => {
       if (editingProduct) {
         const updates: any = { ...form };
         delete updates.id;
+        delete updates.created_at;
         const { error } = await supabase
           .from('products')
           .update(updates)
@@ -218,10 +219,37 @@ const Products = () => {
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
-        const { error } = await supabase
+        // Prepare the product data for insertion
+        const productData = {
+          name: form.name || '',
+          price: Number(form.price) || 0,
+          cost_ttc: Number(form.cost_ttc) || 0,
+          stock: form.stock_status === 'inStock' ? (Number(form.stock) || 0) : null,
+          stock_status: form.stock_status || 'Order',
+          category: form.category || null,
+          index: form.index || null,
+          treatment: form.treatment || null,
+          company: form.company || null,
+          gamma: form.gamma || null,
+          automated_name: Boolean(form.automated_name),
+          image: form.image || null,
+          user_id: user.id,
+          is_deleted: false
+        };
+
+        console.log('Inserting product:', productData); // Debug log
+
+        const { data, error } = await supabase
           .from('products')
-          .insert({ ...form, user_id: user.id });
-        if (error) throw error;
+          .insert(productData)
+          .select();
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+        
+        console.log('Product inserted successfully:', data); // Debug log
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
       }
@@ -230,9 +258,10 @@ const Products = () => {
       setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: true });
     } catch (error) {
       console.error('Error saving product:', error);
+      const errorMessage = error?.message || "Failed to save product. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to save product. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

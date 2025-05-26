@@ -145,11 +145,35 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
   const onFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!form.name.trim()) {
+      return;
+    }
+
     let imageUrl = form.image;
     if (imageFile) {
       imageUrl = await handleImageUpload();
     }
-    onSubmit({ ...form, image: imageUrl, automated_name: autoName });
+    
+    // Ensure proper data types and clean up the form data
+    const submissionData = {
+      name: form.name.trim(),
+      price: Number(form.price) || 0,
+      cost_ttc: Number(form.cost_ttc) || 0,
+      stock: form.stock_status === 'inStock' ? (Number(form.stock) || 0) : undefined,
+      stock_status: form.stock_status,
+      category: form.category || undefined,
+      index: form.index || undefined,
+      treatment: form.treatment || undefined,
+      company: form.company || undefined,
+      gamma: form.gamma || undefined,
+      automated_name: autoName,
+      image: imageUrl || undefined
+    };
+
+    console.log('Submitting form data:', submissionData); // Debug log
+    onSubmit(submissionData);
   };
 
   const handleAutoNameToggle = (checked: boolean) => {
