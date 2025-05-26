@@ -10,6 +10,10 @@ export interface ProductSortable {
   company?: string | null;
   image?: string | null;
   created_at?: string | null;
+  gamma?: string | null;
+  automated_name?: boolean | null;
+  cost_ttc?: number | null;
+  stock_status?: 'Order' | 'inStock' | 'Fabrication' | null;
 }
 
 const CATEGORY_OPTIONS = [
