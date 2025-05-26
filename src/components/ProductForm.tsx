@@ -79,16 +79,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
-    cost_ttc: 0,
-    stock: 0,
     stock_status: 'Order',
     automated_name: true,
-    category: undefined,
-    index: undefined,
-    treatment: undefined,
-    company: undefined,
-    gamma: undefined,
-    image: undefined,
     ...initialValues
   });
   const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
@@ -157,22 +149,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     if (imageFile) {
       imageUrl = await handleImageUpload();
     }
-    
-    // Clean up the form data to match database schema
-    const cleanedForm = {
-      ...form,
-      image: imageUrl || null,
-      automated_name: autoName,
-      category: form.category || null,
-      index: form.index || null,
-      treatment: form.treatment || null,
-      company: form.company || null,
-      gamma: form.gamma || null,
-      cost_ttc: form.cost_ttc || 0,
-      stock: form.stock_status === 'inStock' ? (form.stock || 0) : null,
-    };
-    
-    onSubmit(cleanedForm);
+    onSubmit({ ...form, image: imageUrl, automated_name: autoName });
   };
 
   const handleAutoNameToggle = (checked: boolean) => {

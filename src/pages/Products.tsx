@@ -218,24 +218,9 @@ const Products = () => {
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
-        // Clean the form data before insertion
-        const insertData = {
-          ...form,
-          user_id: user.id,
-          // Ensure null instead of undefined for optional fields
-          category: form.category || null,
-          index: form.index || null,
-          treatment: form.treatment || null,
-          company: form.company || null,
-          gamma: form.gamma || null,
-          image: form.image || null,
-          cost_ttc: form.cost_ttc || 0,
-          stock: form.stock_status === 'inStock' ? (form.stock || 0) : null,
-        };
-        
         const { error } = await supabase
           .from('products')
-          .insert(insertData);
+          .insert({ ...form, user_id: user.id });
         if (error) throw error;
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
