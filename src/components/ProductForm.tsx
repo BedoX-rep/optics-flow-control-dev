@@ -80,6 +80,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Sync autoName state with form's automated_name when initialValues change
+  useEffect(() => {
+    setAutoName(!!initialValues.automated_name);
+  }, [initialValues.automated_name]);
+
   // Auto-generate name if toggled on and any relevant field changes
   useEffect(() => {
     if (autoName) {
@@ -138,7 +143,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       <div className="flex items-center space-x-2">
         <Checkbox
           checked={autoName}
-          onCheckedChange={v => setAutoName(Boolean(v))}
+          onCheckedChange={v => {
+            const newAutoName = Boolean(v);
+            setAutoName(newAutoName);
+            setForm(f => ({ ...f, automated_name: newAutoName }));
+          }}
           id="auto-name"
         />
         <Label htmlFor="auto-name" className="cursor-pointer">Generate Name Automatically</Label>
