@@ -240,7 +240,72 @@ const Products = () => {
       prev.map(product => {
         if (product.id === productId) {
           const originalProduct = allProducts.find(p => p.id === productId);
-          const updated = { ...product, [field]: value };
+          let updated = { ...product, [field]: value };
+          
+          // Handle automated name generation
+          if (field === 'automated_name' && value === true) {
+            // Generate name automatically when toggle is turned on
+            const getCategoryAbbr = (category: string | undefined) => {
+              switch (category) {
+                case 'Single Vision Lenses': return 'SV';
+                case 'Progressive Lenses': return 'PG';
+                case 'Frames': return 'FR';
+                case 'Sunglasses': return 'SG';
+                case 'Contact Lenses': return 'CL';
+                case 'Accessories': return 'AC';
+                default: return '';
+              }
+            };
+            
+            let abbr = getCategoryAbbr(updated.category);
+            let parts = [abbr];
+
+            if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+              if (updated.index) parts.push(updated.index);
+              if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
+            }
+            if (updated.company) parts.push(updated.company?.toUpperCase());
+            if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
+            if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
+              parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
+            }
+
+            const generatedName = parts.filter(Boolean).join(" ");
+            updated = { ...updated, name: generatedName };
+          } else if (updated.automated_name && (
+            field === 'category' || field === 'index' || field === 'treatment' || 
+            field === 'company' || field === 'gamma' || field === 'stock_status'
+          )) {
+            // Regenerate name when automated_name is true and relevant fields change
+            const getCategoryAbbr = (category: string | undefined) => {
+              switch (category) {
+                case 'Single Vision Lenses': return 'SV';
+                case 'Progressive Lenses': return 'PG';
+                case 'Frames': return 'FR';
+                case 'Sunglasses': return 'SG';
+                case 'Contact Lenses': return 'CL';
+                case 'Accessories': return 'AC';
+                default: return '';
+              }
+            };
+            
+            let abbr = getCategoryAbbr(updated.category);
+            let parts = [abbr];
+
+            if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+              if (updated.index) parts.push(updated.index);
+              if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
+            }
+            if (updated.company) parts.push(updated.company?.toUpperCase());
+            if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
+            if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
+              parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
+            }
+
+            const generatedName = parts.filter(Boolean).join(" ");
+            updated = { ...updated, name: generatedName };
+          }
+          
           const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
           return { ...updated, isEdited };
         }
@@ -418,6 +483,18 @@ const Products = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="space-y-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="checkbox"
+                          id={`auto-name-${product.id}`}
+                          checked={product.automated_name}
+                          onChange={(e) => handleFieldChange(product.id, 'automated_name', e.target.checked)}
+                          className="w-3 h-3 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-500 cursor-pointer">
+                          Auto Name
+                        </label>
+                      </div>
                       <input
                         type="text"
                         value={product.name}
