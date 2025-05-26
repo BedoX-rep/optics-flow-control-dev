@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -47,7 +48,15 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ 
+    name: '', 
+    price: 0, 
+    cost_ttc: 0, 
+    stock_status: 'Order', 
+    stock: 0, 
+    automated_name: false, 
+    gamma: "" 
+  });
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
   const [page, setPage] = useState(0);
@@ -137,7 +146,15 @@ const Products = () => {
       stock: editing.stock ?? 0,
       automated_name: editing.automated_name ?? false,
       gamma: editing.gamma ?? "",
-    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+    } : { 
+      name: '', 
+      price: 0, 
+      cost_ttc: 0, 
+      stock_status: 'Order', 
+      stock: 0, 
+      automated_name: false, 
+      gamma: "" 
+    });
     setIsOpen(true);
   };
 
@@ -178,28 +195,57 @@ const Products = () => {
     if (!user) return;
     try {
       setIsSubmitting(true);
+      
+      // Prepare the data object with proper field handling
+      const productData = {
+        name: form.name,
+        price: form.price,
+        cost_ttc: form.cost_ttc || 0,
+        stock: form.stock || null,
+        stock_status: form.stock_status || 'Order',
+        category: form.category || null,
+        index: form.index || null,
+        treatment: form.treatment || null,
+        company: form.company || null,
+        image: form.image || null,
+        automated_name: form.automated_name || false,
+        gamma: form.gamma || null,
+      };
+
       if (editingProduct) {
-        const updates: any = { ...form };
-        delete updates.id;
         const { error } = await supabase
           .from('products')
-          .update(updates)
+          .update(productData)
           .eq('id', editingProduct.id)
           .eq('user_id', user.id);
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
         const { error } = await supabase
           .from('products')
-          .insert({ ...form, user_id: user.id });
-        if (error) throw error;
+          .insert({ ...productData, user_id: user.id });
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
+      setFormInitial({ 
+        name: '', 
+        price: 0, 
+        cost_ttc: 0, 
+        stock_status: 'Order', 
+        stock: 0, 
+        automated_name: false, 
+        gamma: "" 
+      });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
