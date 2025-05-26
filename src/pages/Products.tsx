@@ -24,6 +24,8 @@ interface Product extends ProductSortable {
   cost_ttc?: number;
   stock_status?: 'Order' | 'inStock' | 'Fabrication';
   stock?: number;
+  automated_name?: boolean;
+  gamma?: string;
 }
 
 const DEFAULT_FILTERS = {
@@ -133,7 +135,9 @@ const Products = () => {
       cost_ttc: editing.cost_ttc ?? 0,
       stock_status: editing.stock_status ?? 'Order',
       stock: editing.stock ?? 0,
-    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
+      automated_name: editing.automated_name ?? false,
+      gamma: editing.gamma ?? "",
+    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
     setIsOpen(true);
   };
 
@@ -195,7 +199,7 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: false, gamma: "" });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -351,12 +355,20 @@ const Products = () => {
                     <p className="font-medium">{product.treatment || '-'}</p>
                   </div>
                   <div className="space-y-1">
+                    <p className="text-neutral-500">Gamma</p>
+                    <p className="font-medium">{product.gamma || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
                     <p className="text-neutral-500">Company</p>
                     <p className="font-medium">{product.company || '-'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-neutral-500">Cost TTC</p>
                     <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-neutral-500">Auto Name</p>
+                    <p className="font-medium">{product.automated_name ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
 
