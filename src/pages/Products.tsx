@@ -24,6 +24,8 @@ interface Product extends ProductSortable {
   cost_ttc?: number;
   stock_status?: 'Order' | 'inStock' | 'Fabrication';
   stock?: number;
+  automated_name?: boolean;
+  gamma?: string;
 }
 
 const DEFAULT_FILTERS = {
@@ -45,7 +47,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<null | Product>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0 });
+  const [formInitial, setFormInitial] = useState<Partial<ProductFormValues>>({ name: '', price: 0, cost_ttc: 0, automated_name: true });
   const [pageReady, setPageReady] = useState(false);
   const mountedRef = useRef(true);
   const [page, setPage] = useState(0);
@@ -128,12 +130,14 @@ const Products = () => {
       index: editing.index ?? undefined,
       treatment: editing.treatment ?? undefined,
       company: editing.company ?? undefined,
+      gamma: editing.gamma ?? undefined,
+      automated_name: editing.automated_name ?? true,
       image: editing.image ?? undefined,
       created_at: editing.created_at ?? undefined,
       cost_ttc: editing.cost_ttc ?? 0,
       stock_status: editing.stock_status ?? 'Order',
       stock: editing.stock ?? 0,
-    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
+    } : { name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: true });
     setIsOpen(true);
   };
 
@@ -195,7 +199,7 @@ const Products = () => {
       }
       setIsOpen(false);
       setEditingProduct(null);
-      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0 });
+      setFormInitial({ name: '', price: 0, cost_ttc: 0, stock_status: 'Order', stock: 0, automated_name: true });
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -355,8 +359,16 @@ const Products = () => {
                     <p className="font-medium">{product.company || '-'}</p>
                   </div>
                   <div className="space-y-1">
+                    <p className="text-neutral-500">Gamma</p>
+                    <p className="font-medium">{product.gamma || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
                     <p className="text-neutral-500">Cost TTC</p>
                     <p className="font-medium">{product.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-neutral-500">Auto Name</p>
+                    <p className="font-medium">{product.automated_name ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
 

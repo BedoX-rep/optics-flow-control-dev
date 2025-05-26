@@ -74,10 +74,12 @@ export type Database = {
       }
       products: {
         Row: {
+          automated_name: boolean | null
           category: string | null
           company: string | null
           cost_ttc: number
           created_at: string | null
+          gamma: string | null
           id: string
           image: string | null
           index: string | null
@@ -90,10 +92,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          automated_name?: boolean | null
           category?: string | null
           company?: string | null
           cost_ttc?: number
           created_at?: string | null
+          gamma?: string | null
           id?: string
           image?: string | null
           index?: string | null
@@ -106,10 +110,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          automated_name?: boolean | null
           category?: string | null
           company?: string | null
           cost_ttc?: number
           created_at?: string | null
+          gamma?: string | null
           id?: string
           image?: string | null
           index?: string | null

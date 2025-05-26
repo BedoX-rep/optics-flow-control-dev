@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -39,6 +40,13 @@ const COMPANY_OPTIONS = [
   "Optifak"
 ];
 
+const GAMMA_OPTIONS = [
+  "Standard",
+  "Premium",
+  "High-End",
+  "Budget"
+];
+
 export interface ProductFormValues {
   name: string;
   price: number;
@@ -49,6 +57,8 @@ export interface ProductFormValues {
   index?: string;
   treatment?: string;
   company?: string;
+  gamma?: string;
+  automated_name?: boolean;
   image?: string;
   created_at?: string;
 }
@@ -70,9 +80,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     name: "",
     price: 0,
     stock_status: 'Order',
+    automated_name: true,
     ...initialValues
   });
-  const [autoName, setAutoName] = useState<boolean>(!!initialValues.category); // default on if editing and has category
+  const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -89,16 +100,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
       if (form.company) parts.push(form.company?.toUpperCase());
+      if (form.gamma) parts.push(form.gamma?.toUpperCase());
       if (form.stock_status === 'inStock' || form.stock_status === 'Fabrication') {
         parts.push(form.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
       }
 
+      const generatedName = parts.filter(Boolean).join(" ");
       setForm(f => ({
         ...f,
-        name: parts.filter(Boolean).join(" ")
+        name: generatedName,
+        automated_name: true
+      }));
+    } else {
+      setForm(f => ({
+        ...f,
+        automated_name: false
       }));
     }
-  }, [form.category, form.index, form.treatment, form.company, autoName]);
+  }, [form.category, form.index, form.treatment, form.company, form.gamma, form.stock_status, autoName]);
+
+  // Update autoName state when form.automated_name changes from external source
+  useEffect(() => {
+    setAutoName(form.automated_name ?? true);
+  }, [form.automated_name]);
 
   // Determine which extra fields should show
   const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "");
@@ -125,7 +149,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     if (imageFile) {
       imageUrl = await handleImageUpload();
     }
-    onSubmit({ ...form, image: imageUrl });
+    onSubmit({ ...form, image: imageUrl, automated_name: autoName });
+  };
+
+  const handleAutoNameToggle = (checked: boolean) => {
+    setAutoName(checked);
+    // If turning off auto-naming, keep the current name but allow editing
+    if (!checked) {
+      setForm(f => ({
+        ...f,
+        automated_name: false
+      }));
+    }
   };
 
   return (
@@ -133,11 +168,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       <div className="flex items-center space-x-2">
         <Checkbox
           checked={autoName}
-          onCheckedChange={v => setAutoName(Boolean(v))}
+          onCheckedChange={handleAutoNameToggle}
           id="auto-name"
         />
         <Label htmlFor="auto-name" className="cursor-pointer">Generate Name Automatically</Label>
       </div>
+      
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="category">Category</Label>
         <Select
@@ -155,6 +191,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </SelectContent>
         </Select>
       </div>
+
       {showIndexTreatment && (
         <>
           <div className="grid grid-cols-4 items-center gap-3">
@@ -193,6 +230,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </div>
         </>
       )}
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="company">Company</Label>
         <Select
@@ -210,6 +248,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </SelectContent>
         </Select>
       </div>
+
+      <div className="grid grid-cols-4 items-center gap-3">
+        <Label htmlFor="gamma">Gamma</Label>
+        <Select
+          value={form.gamma ?? ""}
+          onValueChange={v => setForm(f => ({ ...f, gamma: v === "none_selected" ? undefined : v }))}
+        >
+          <SelectTrigger className="col-span-3" id="gamma">
+            <SelectValue placeholder="Select Gamma" />
+          </SelectTrigger>
+          <SelectContent className="z-50 bg-white">
+            <SelectItem value="none_selected">None</SelectItem>
+            {GAMMA_OPTIONS.map(opt => (
+              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="price">Price</Label>
         <Input
@@ -222,6 +279,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           required
         />
       </div>
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="cost_ttc">Cost TTC</Label>
         <Input
@@ -233,6 +291,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           min={0}
         />
       </div>
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="stock_status">Stock Status</Label>
         <Select
@@ -249,6 +308,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </SelectContent>
         </Select>
       </div>
+
       {form.stock_status === 'inStock' && (
         <div className="grid grid-cols-4 items-center gap-3">
           <Label htmlFor="stock">Stock</Label>
@@ -262,6 +322,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           />
         </div>
       )}
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="image">Image</Label>
         <input
@@ -279,18 +340,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           <img src={form.image} alt="product preview" className="w-12 h-12 object-cover border ml-2" />
         )}
       </div>
-      {!autoName && (
-        <div className="grid grid-cols-4 items-center gap-3">
-          <Label htmlFor="name">Product Name</Label>
-          <Input
-            id="name"
-            className="col-span-3"
-            value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            required
-          />
-        </div>
-      )}
+
+      <div className="grid grid-cols-4 items-center gap-3">
+        <Label htmlFor="name">Product Name</Label>
+        <Input
+          id="name"
+          className="col-span-3"
+          value={form.name}
+          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          disabled={autoName}
+          required
+        />
+      </div>
+
       <DialogFooter>
         <Button
           variant="outline"
