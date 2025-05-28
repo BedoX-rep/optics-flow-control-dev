@@ -93,50 +93,21 @@ const Products = () => {
     setPage(0); // Reset to first page when search changes
   }, [debouncedSearchTerm]);
 
-  const fetchProducts = async () => {
-    if (!user) return { products: [], totalCount: 0 };
+  const fetchAllProducts = async () => {
+    if (!user) return [];
 
-    let query = supabase
+    const { data: allProducts, error } = await supabase
       .from('products')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('user_id', user.id)
-      .eq('is_deleted', false);
-
-    // Apply search filter if exists
-    if (debouncedSearchTerm) {
-      const searchWords = debouncedSearchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
-      searchWords.forEach(word => {
-        query = query.ilike('name', `%${word}%`);
-      });
-    }
-
-    if (filters.category && filters.category !== "all_categories") {
-      query = query.eq('category', filters.category);
-    }
-    if (filters.index && filters.index !== "all_indexes") {
-      query = query.eq('index', filters.index);
-    }
-    if (filters.treatment && filters.treatment !== "all_treatments") {
-      query = query.eq('treatment', filters.treatment);
-    }
-    if (filters.company && filters.company !== "all_companies") {
-      query = query.eq('company', filters.company);
-    }
-    if (filters.stock_status && filters.stock_status !== "all_stock_statuses") {
-      query = query.eq('stock_status', filters.stock_status);
-    }
-
-    // Add pagination
-    query = query
-      .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1)
+      .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
-    const { data: productsData, error, count } = await query;
     if (error) throw error;
 
-        // After fetching, check if stock is 0 and update stock status if necessary
-    if (productsData) {
-      productsData.forEach(async (product) => {
+    // After fetching, check if stock is 0 and update stock status if necessary
+    if (allProducts) {
+      allProducts.forEach(async (product) => {
         if (product.stock === 0 && product.stock_status === 'inStock') {
           await supabase
             .from('products')
@@ -147,36 +118,69 @@ const Products = () => {
       });
     }
 
-    return { 
-      products: productsData || [], 
-      totalCount: count || 0
-    };
-  };
-
-  const fetchAllProducts = async () => {
-    if (!user) return [];
-
-    const { data: allProducts, error } = await supabase
-      .from('products')
-      .select('category')
-      .eq('user_id', user.id)
-      .eq('is_deleted', false);
-
-    if (error) throw error;
     return allProducts || [];
   };
 
-  const { data = { products: [], totalCount: 0 }, isLoading } = useQuery({
-    queryKey: ['products', user?.id, filters, page, debouncedSearchTerm],
-    queryFn: fetchProducts,
-    enabled: !!user,
-  });
-
-  const { data: allProducts = [] } = useQuery({
+  const { data: allProducts = [], isLoading } = useQuery({
     queryKey: ['all-products', user?.id],
     queryFn: fetchAllProducts,
     enabled: !!user,
+    staleTime: Infinity, // Never consider this data stale
+    cacheTime: Infinity, // Keep in cache indefinitely
   });
+
+  // Client-side filtering and pagination
+  const filteredProducts = useMemo(() => {
+    let filtered = [...allProducts];
+
+    // Apply search filter
+    if (debouncedSearchTerm) {
+      const searchWords = debouncedSearchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+      filtered = filtered.filter(product => {
+        const name = product.name?.toLowerCase() || '';
+        return searchWords.every(word => name.includes(word));
+      });
+    }
+
+    // Apply category filter
+    if (filters.category && filters.category !== "all_categories") {
+      filtered = filtered.filter(product => product.category === filters.category);
+    }
+
+    // Apply index filter
+    if (filters.index && filters.index !== "all_indexes") {
+      filtered = filtered.filter(product => product.index === filters.index);
+    }
+
+    // Apply treatment filter
+    if (filters.treatment && filters.treatment !== "all_treatments") {
+      filtered = filtered.filter(product => product.treatment === filters.treatment);
+    }
+
+    // Apply company filter
+    if (filters.company && filters.company !== "all_companies") {
+      filtered = filtered.filter(product => product.company === filters.company);
+    }
+
+    // Apply stock status filter
+    if (filters.stock_status && filters.stock_status !== "all_stock_statuses") {
+      filtered = filtered.filter(product => product.stock_status === filters.stock_status);
+    }
+
+    return filtered;
+  }, [allProducts, debouncedSearchTerm, filters]);
+
+  // Client-side pagination
+  const paginatedProducts = useMemo(() => {
+    const startIndex = page * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, page]);
+
+  const data = useMemo(() => ({
+    products: paginatedProducts,
+    totalCount: filteredProducts.length
+  }), [paginatedProducts, filteredProducts.length]);
 
   useEffect(() => {
     if (data.products) {
@@ -216,7 +220,10 @@ const Products = () => {
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;
-        await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+        queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+          if (!oldData) return oldData;
+          return oldData.filter(p => p.id !== id);
+        });
         toast({
           title: "Success",
           description: "Product deleted successfully",
@@ -254,7 +261,10 @@ const Products = () => {
           .eq('id', editingProduct.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+        queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+          if (!oldData) return oldData;
+          return oldData.map(p => p.id === editingProduct.id ? { ...p, ...updates } : p);
+        });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
         // Prepare the product data for insertion
@@ -302,7 +312,10 @@ const Products = () => {
         }
 
         console.log('Product inserted successfully:', data); // Debug log
-        await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+        queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+          if (!oldData) return [data[0]];
+          return [data[0], ...oldData];
+        });
         toast({ title: "Success", description: "Product added successfully" });
       }
       setIsOpen(false);
@@ -425,7 +438,10 @@ const Products = () => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+      queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(p => p.id === productId ? { ...p, ...updates } : p);
+      });
       toast({ title: "Success", description: "Product updated successfully" });
     } catch (error) {
       console.error('Error updating product:', error);
@@ -469,7 +485,19 @@ const Products = () => {
         if (error) throw error;
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+      queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(product => {
+          const editedProduct = editedProducts.find(ep => ep.id === product.id);
+          if (editedProduct) {
+            const updates = { ...editedProduct };
+            delete updates.id;
+            delete updates.isEdited;
+            return { ...product, ...updates };
+          }
+          return product;
+        });
+      });
       toast({ 
         title: "Success", 
         description: `${editedProducts.length} product(s) updated successfully` 
@@ -505,7 +533,10 @@ const Products = () => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
+      queryClient.setQueryData(['all-products', user.id], (oldData: Product[] | undefined) => {
+        if (!oldData) return productsToInsert;
+        return [...productsToInsert, ...oldData];
+      });
       setIsImportDialogOpen(false);
 
       toast({
@@ -524,7 +555,7 @@ const Products = () => {
     }
   }, [user, queryClient, toast]);
 
-  const filteredProducts = useMemo(() => sortProducts(editableProducts || []), [editableProducts]);
+  const sortedEditableProducts = useMemo(() => sortProducts(editableProducts || []), [editableProducts]);
   const hasEditedProducts = useMemo(() => editableProducts.some(p => p.isEdited), [editableProducts]);
 
   return (
@@ -612,7 +643,7 @@ const Products = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-in">
-            {filteredProducts.map((product) => (
+            {sortedEditableProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
