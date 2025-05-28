@@ -133,9 +133,28 @@ const Products = () => {
     };
   };
 
+  const fetchAllProducts = async () => {
+    if (!user) return [];
+
+    const { data: allProducts, error } = await supabase
+      .from('products')
+      .select('category')
+      .eq('user_id', user.id)
+      .eq('is_deleted', false);
+
+    if (error) throw error;
+    return allProducts || [];
+  };
+
   const { data = { products: [], totalCount: 0 }, isLoading } = useQuery({
     queryKey: ['products', user?.id, filters, page, searchTerm],
     queryFn: fetchProducts,
+    enabled: !!user,
+  });
+
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ['all-products', user?.id],
+    queryFn: fetchAllProducts,
     enabled: !!user,
   });
 
@@ -474,7 +493,7 @@ const Products = () => {
             <Plus className="h-4 w-4 mr-2" />
             New Product
           </Button>
-          <ProductStatsSummary products={data.products || []} />
+          <ProductStatsSummary products={allProducts || []} />
           {hasEditedProducts && (
             <Button
               onClick={handleSaveAll}
