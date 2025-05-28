@@ -12,6 +12,16 @@ import {
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Copy, Plus, Receipt, Trash } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import ProductFilters from '@/components/ProductFilters';
 
 interface OrderItemsProps {
@@ -29,6 +39,8 @@ interface OrderItemsProps {
   getFilteredProducts: (searchTerm: string) => any[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
+  checkOutOfStockWarning?: React.MutableRefObject<(() => boolean) | null>;
+  onProceedWithOutOfStock?: () => void;
 }
 
 const OrderItems: React.FC<OrderItemsProps> = ({
@@ -45,8 +57,13 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   setFilters,
   getFilteredProducts,
   getEyeValues,
-  calculateMarkup
+  calculateMarkup,
+  checkOutOfStockWarning,
+  onProceedWithOutOfStock
 }) => {
+  const [showOutOfStockWarning, setShowOutOfStockWarning] = useState(false);
+  const [outOfStockProducts, setOutOfStockProducts] = useState<string[]>([]);
+
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
       setItems([...items, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
@@ -81,6 +98,34 @@ const OrderItems: React.FC<OrderItemsProps> = ({
     }
     return true;
   });
+
+  const checkAndShowOutOfStockWarning = () => {
+    const outOfStockItems = items.filter(item => {
+      if (item.productId) {
+        const product = products.find(p => p.id === item.productId);
+        return product?.stock_status === 'Out Of Stock';
+      }
+      return false;
+    });
+
+    if (outOfStockItems.length > 0) {
+      const outOfStockNames = outOfStockItems.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return product?.name || 'Unknown Product';
+      });
+      setOutOfStockProducts(outOfStockNames);
+      setShowOutOfStockWarning(true);
+      return true;
+    }
+    return false;
+  };
+
+  // Expose the check function to parent component
+  React.useEffect(() => {
+    if (checkOutOfStockWarning) {
+      checkOutOfStockWarning.current = checkAndShowOutOfStockWarning;
+    }
+  }, [items, products, checkOutOfStockWarning]);
 
   return (
     <Card className="border-0 shadow-lg">
@@ -155,12 +200,27 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                           <SelectTrigger id={`product-${item.id}`} className="flex-1">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
-                          <SelectContent className="min-w-[300px]">
+                          <SelectContent className="min-w-[400px]">
                             {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
                               <SelectItem key={product.id} value={product.id}>
                                 <div className="flex justify-between items-center w-full gap-4">
                                   <span className="truncate flex-1">{product.name}</span>
-                                  <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
+                                  <div className="flex items-center gap-3">
+                                    {product.stock_status === 'inStock' ? (
+                                      <span className="text-xs text-green-600 whitespace-nowrap">
+                                        Stock: {product.stock || 0}
+                                      </span>
+                                    ) : (
+                                      <span className={`text-xs whitespace-nowrap ${
+                                        product.stock_status === 'Out Of Stock' ? 'text-red-600' : 
+                                        product.stock_status === 'Order' ? 'text-orange-600' : 
+                                        'text-blue-600'
+                                      }`}>
+                                        {product.stock_status === 'inStock' ? 'In Stock' : product.stock_status}
+                                      </span>
+                                    )}
+                                    <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
+                                  </div>
                                 </div>
                               </SelectItem>
                             ))}
@@ -338,6 +398,37 @@ const OrderItems: React.FC<OrderItemsProps> = ({
           )}
         </div>
       </CardContent>
+
+      <AlertDialog open={showOutOfStockWarning} onOpenChange={setShowOutOfStockWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Out of Stock Products Detected</AlertDialogTitle>
+            <AlertDialogDescription>
+              The following products in your order are currently out of stock:
+              <ul className="mt-2 list-disc list-inside">
+                {outOfStockProducts.map((productName, index) => (
+                  <li key={index} className="text-red-600">{productName}</li>
+                ))}
+              </ul>
+              Do you want to proceed with creating this receipt?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowOutOfStockWarning(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                setShowOutOfStockWarning(false);
+                onProceedWithOutOfStock?.();
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Proceed Anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };

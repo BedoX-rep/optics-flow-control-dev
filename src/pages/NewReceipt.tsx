@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,6 +45,8 @@ interface Product {
   price: number;
   cost_ttc: number;
   category: string;
+  stock?: number | null;
+  stock_status?: string | null;
 }
 
 interface Client {
@@ -86,6 +88,8 @@ interface OrderItemsProps {
   getFilteredProducts: (searchTerm: string) => Product[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
+  checkOutOfStock: () => boolean;
+  setCheckOutOfStock: (checkOutOfStock: () => boolean) => void;
 }
 
 interface OrderSummaryProps {
@@ -125,6 +129,8 @@ const NewReceipt = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const checkOutOfStockRef = useRef<(() => boolean) | null>(null);
+  const [pendingSave, setPendingSave] = useState(false);
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -176,6 +182,7 @@ const NewReceipt = () => {
   const [currentStep, setCurrentStep] = useState('details');
   const [clientSkipped, setClientSkipped] = useState(false);
   const [currentTab, setCurrentTab] = useState('client');
+  const [checkOutOfStock, setCheckOutOfStock] = useState<() => boolean>(() => () => false);
 
   const steps = [
     { id: 'client', label: 'Client Selection', icon: User },
@@ -827,6 +834,20 @@ const NewReceipt = () => {
           getFilteredProducts={getFilteredProducts}
           getEyeValues={getEyeValues}
           calculateMarkup={calculateMarkup}
+          checkOutOfStock={() => {
+            if (!items.length) return false;
+            for (const item of items) {
+              if (!item.productId) continue;
+              const product = products.find(p => p.id === item.productId);
+              if (product && product.stock_status === 'Out Of Stock') {
+                return true;
+              }
+            }
+            return false;
+          }}
+          setCheckOutOfStock={(checkOutOfStock: () => boolean) => {
+            checkOutOfStockRef.current = checkOutOfStock;
+          }}
         />
 
         <Card className="border-0 shadow-lg">
@@ -997,7 +1018,7 @@ const NewReceipt = () => {
     </Card>
   );
 
-  const handleSaveReceipt = async () => {
+  const handleSave = async () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -1024,6 +1045,18 @@ const NewReceipt = () => {
       });
       return;
     }
+
+    // Check for out-of-stock items
+    if (checkOutOfStockRef.current && checkOutOfStockRef.current()) {
+      setPendingSave(true);
+      return; // Wait for user decision
+    }
+
+    await performSave();
+  };
+
+  const performSave = async () => {
+    setPendingSave(false);
 
     try {
       setIsLoading(true);
@@ -1169,7 +1202,7 @@ const NewReceipt = () => {
           className="bg-primary rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
           onClick={() => {
             if (currentStepIndex === steps.length - 1) {
-              handleSaveReceipt();
+              handleSave();
             } else {
               // Check if currently on order tab and no items added
               if (currentTab === 'order' && items.length === 0) {
@@ -1220,6 +1253,40 @@ const NewReceipt = () => {
         autoMontage={autoMontage}
         onAutoMontageChange={setAutoMontage}
       />
+      <AnimatePresence>
+        {pendingSave && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          >
+            <div className="relative p-4 w-full max-w-md h-auto">
+              <Card className="shadow-lg border-0">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-lg font-semibold">
+                    Out of Stock Warning
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <p className="mb-4 text-sm text-gray-600">
+                    You are about to save a receipt with out-of-stock products.
+                    Do you want to proceed?
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="secondary" onClick={() => setPendingSave(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={performSave}>
+                      Proceed
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
