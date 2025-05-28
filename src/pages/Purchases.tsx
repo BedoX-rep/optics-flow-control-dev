@@ -53,6 +53,9 @@ interface Purchase {
   receipt_number?: string;
   payment_method: string;
   notes?: string;
+  advance_payment?: number;
+  balance?: number;
+  payment_status?: string;
   created_at: string;
   suppliers?: Supplier;
 }
@@ -69,6 +72,7 @@ const EXPENSE_CATEGORIES = [
   'Inventory',
   'Maintenance',
   'Insurance',
+  'Loan',
   'Other'
 ];
 
@@ -129,6 +133,9 @@ const Purchases = () => {
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
     payment_method: 'Cash',
     notes: '',
+    advance_payment: '',
+    balance: '',
+    payment_status: 'Unpaid',
   });
 
   const [supplierFormData, setSupplierFormData] = useState({
@@ -283,6 +290,9 @@ const Purchases = () => {
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
       payment_method: 'Cash',
       notes: '',
+      advance_payment: '',
+      balance: '',
+      payment_status: 'Unpaid',
     });
     setEditingPurchase(null);
   };
@@ -311,6 +321,9 @@ const Purchases = () => {
         purchase_date: format(new Date(purchase.purchase_date), 'yyyy-MM-dd'),
         payment_method: purchase.payment_method,
         notes: purchase.notes || '',
+        advance_payment: (purchase.advance_payment || 0).toString(),
+        balance: (purchase.balance || 0).toString(),
+        payment_status: purchase.payment_status || 'Unpaid',
       });
     } else {
       resetPurchaseForm();
@@ -481,6 +494,9 @@ const Purchases = () => {
       purchase_date: format(new Date(purchase.purchase_date), 'yyyy-MM-dd'),
       payment_method: purchase.payment_method,
       notes: purchase.notes || '',
+      advance_payment: (purchase.advance_payment || 0).toString(),
+      balance: (purchase.balance || 0).toString(),
+      payment_status: purchase.payment_status || 'Unpaid',
     });
   };
 
@@ -489,11 +505,32 @@ const Purchases = () => {
 
     if (!user || !editingPurchase) return;
 
+    if (!purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amountHt = parseFloat(purchaseFormData.amount_ht);
+    const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+    const advancePayment = parseFloat(purchaseFormData.advance_payment) || 0;
+
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
-      const amountHt = parseFloat(purchaseFormData.amount_ht);
-      const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+      const balance = amountTtc - advancePayment;
 
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
@@ -505,6 +542,9 @@ const Purchases = () => {
         purchase_date: purchaseFormData.purchase_date,
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
+        advance_payment: advancePayment,
+        balance: balance,
+        payment_status: purchaseFormData.payment_status,
         user_id: user.id,
       };
 
@@ -887,69 +927,251 @@ const Purchases = () => {
 
       {/* Edit Purchase Dialog */}
       <Dialog open={!!editingPurchase} onOpenChange={() => setEditingPurchase(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Purchase</DialogTitle>
           </DialogHeader>
           {editingPurchase && (
             <form onSubmit={handleUpdatePurchase} className="space-y-4">
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={purchaseFormData.description}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Purchase description"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="amount_ht">Amount HT</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <Label htmlFor="edit_description">Description *</Label>
                   <Input
-                    id="amount_ht"
+                    id="edit_description"
+                    value={purchaseFormData.description}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter purchase description"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_amount_ht">Amount HT (Before Tax) *</Label>
+                  <Input
+                    id="edit_amount_ht"
                     type="number"
                     step="0.01"
+                    min="0.01"
                     value={purchaseFormData.amount_ht}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => {
+                      const newAmountHt = e.target.value;
+                      setPurchaseFormData(prev => {
+                        const amountHt = parseFloat(newAmountHt) || 0;
+                        const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                        const advancePayment = parseFloat(prev.advance_payment) || 0;
+                        const balance = amountTtc - advancePayment;
+                        return { 
+                          ...prev, 
+                          amount_ht: newAmountHt,
+                          balance: balance.toString()
+                        };
+                      });
+                    }}
+                    placeholder="0.00"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="amount_ttc">Amount TTC</Label>
+                  <Label htmlFor="edit_amount_ttc">Amount TTC (After Tax) *</Label>
                   <Input
-                    id="amount_ttc"
+                    id="edit_amount_ttc"
                     type="number"
                     step="0.01"
+                    min="0.01"
                     value={purchaseFormData.amount_ttc}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => {
+                      const newAmountTtc = e.target.value;
+                      setPurchaseFormData(prev => {
+                        const amountTtc = parseFloat(newAmountTtc) || 0;
+                        const advancePayment = parseFloat(prev.advance_payment) || 0;
+                        const balance = amountTtc - advancePayment;
+                        let paymentStatus = 'Unpaid';
+                        if (advancePayment >= amountTtc && amountTtc > 0) {
+                          paymentStatus = 'Paid';
+                        } else if (advancePayment > 0) {
+                          paymentStatus = 'Partially Paid';
+                        }
+                        return { 
+                          ...prev, 
+                          amount_ttc: newAmountTtc,
+                          balance: balance.toString(),
+                          payment_status: paymentStatus
+                        };
+                      });
+                    }}
+                    placeholder="0.00"
                     required
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_advance_payment">Advance Payment</Label>
+                  <Input
+                    id="edit_advance_payment"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={purchaseFormData.advance_payment}
+                    onChange={(e) => {
+                      const newAdvancePayment = e.target.value;
+                      setPurchaseFormData(prev => {
+                        const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                        const advancePayment = parseFloat(newAdvancePayment) || 0;
+                        const balance = amountTtc - advancePayment;
+                        let paymentStatus = 'Unpaid';
+                        if (advancePayment >= amountTtc && amountTtc > 0) {
+                          paymentStatus = 'Paid';
+                        } else if (advancePayment > 0) {
+                          paymentStatus = 'Partially Paid';
+                        }
+                        return { 
+                          ...prev, 
+                          advance_payment: newAdvancePayment,
+                          balance: balance.toString(),
+                          payment_status: paymentStatus
+                        };
+                      });
+                    }}
+                    placeholder="0.00"
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_balance">Balance</Label>
+                  <Input
+                    id="edit_balance"
+                    type="number"
+                    step="0.01"
+                    value={purchaseFormData.balance}
+                    placeholder="0.00"
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_purchase_date">Purchase Date</Label>
+                  <Input
+                    id="edit_purchase_date"
+                    type="date"
+                    value={purchaseFormData.purchase_date}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_supplier">Supplier</Label>
+                  <Select
+                    value={purchaseFormData.supplier_id || undefined}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select supplier (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map(supplier => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_category">Category</Label>
+                  <Select
+                    value={purchaseFormData.category}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPENSE_CATEGORIES.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_payment_method">Payment Method</Label>
+                  <Select
+                    value={purchaseFormData.payment_method}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map(method => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_payment_status">Payment Status</Label>
+                  <Select
+                    value={purchaseFormData.payment_status}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_status: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                      <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="edit_notes">Notes</Label>
+                  <Textarea
+                    id="edit_notes"
+                    value={purchaseFormData.notes}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Additional notes about this purchase (optional)"
+                    rows={3}
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="supplier">Supplier</Label>
-                <Select
-                  value={purchaseFormData.supplier_id || undefined}
-                  onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
+
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setEditingPurchase(null)}
+                  disabled={isSubmitting}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select supplier (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map(supplier => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setEditingPurchase(null)}>
                   Cancel
                 </Button>
-                <Button type="submit">Update Purchase</Button>
-              </div>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc}
+                >
+                  {isSubmitting ? 'Updating...' : 'Update Purchase'}
+                </Button>
+              </DialogFooter>
             </form>
           )}
         </DialogContent>

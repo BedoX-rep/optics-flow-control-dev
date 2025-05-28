@@ -47,6 +47,7 @@ const EXPENSE_CATEGORIES = [
   'Inventory',
   'Maintenance',
   'Insurance',
+  'Loan',
   'Other'
 ];
 
