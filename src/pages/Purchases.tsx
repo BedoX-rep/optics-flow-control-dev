@@ -260,8 +260,12 @@ const Purchases = () => {
   };
 
   const handleRecordNewPurchase = () => {
+    console.log('handleRecordNewPurchase called');
+    console.log('Before reset - editingPurchase:', editingPurchase);
     resetPurchaseForm();
+    console.log('After reset - editingPurchase:', editingPurchase);
     setIsPurchaseDialogOpen(true);
+    console.log('Dialog should be open now');
   };
 
   const handleOpenSupplierDialog = (supplier?: Supplier) => {
@@ -724,6 +728,7 @@ const Purchases = () => {
       </Tabs>
 
       {/* Record Purchase Dialog */}
+      {console.log('Dialog render check:', { isPurchaseDialogOpen, editingPurchase, shouldShow: isPurchaseDialogOpen && !editingPurchase })}
       <RecordPurchaseDialog
         isOpen={isPurchaseDialogOpen && !editingPurchase}
         onClose={() => setIsPurchaseDialogOpen(false)}
