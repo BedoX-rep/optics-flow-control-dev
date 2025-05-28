@@ -983,7 +983,7 @@ const Purchases = () => {
 
       {/* Edit Purchase Dialog */}
       <Dialog open={!!editingPurchase} onOpenChange={() => setEditingPurchase(null)}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Purchase</DialogTitle>
           </DialogHeader>
@@ -1122,6 +1122,17 @@ const Purchases = () => {
                 </div>
 
                 <div>
+                  <Label htmlFor="edit_payment_urgency">Payment Urgency</Label>
+                  <Input
+                    id="edit_payment_urgency"
+                    type="date"
+                    value={purchaseFormData.payment_urgency}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
                   <Label htmlFor="edit_supplier">Supplier</Label>
                   <Select
                     value={purchaseFormData.supplier_id || undefined}
@@ -1197,17 +1208,6 @@ const Purchases = () => {
                       <SelectItem value="Paid">Paid</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="edit_payment_urgency">Payment Urgency</Label>
-                  <Input
-                    id="edit_payment_urgency"
-                    type="date"
-                    value={purchaseFormData.payment_urgency}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
-                    disabled={isSubmitting}
-                  />
                 </div>
 
                 <div>
