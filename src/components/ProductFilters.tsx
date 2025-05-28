@@ -13,9 +13,9 @@ const CATEGORY_OPTIONS = [
   "Accessories"
 ];
 
-const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.60", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["Standard", "Blue Cut", "Photochromic", "Polarized"];
-const COMPANY_OPTIONS = ["Essilor", "Hoya", "Zeiss", "Rodenstock", "Shamir"];
+const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
+const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
+const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
 const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
 
 export interface ProductFiltersProps {
