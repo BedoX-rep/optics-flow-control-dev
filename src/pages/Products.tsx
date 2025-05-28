@@ -44,7 +44,7 @@ const DEFAULT_FILTERS = {
   sort: "arrange",
 };
 
-const ITEMS_PER_PAGE = 30;
+const ITEMS_PER_PAGE = 20;
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",
@@ -88,7 +88,7 @@ const Products = () => {
   }, [filters]);
 
   const fetchProducts = async () => {
-    if (!user) return { products: [], hasMore: false };
+    if (!user) return { products: [], totalCount: 0 };
 
     let query = supabase
       .from('products')
@@ -120,36 +120,33 @@ const Products = () => {
       query = query.eq('stock_status', filters.stock_status);
     }
 
+    // Add pagination
+    query = query
+      .range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1)
+      .order('created_at', { ascending: false });
+
     const { data: productsData, error, count } = await query;
     if (error) throw error;
     return { 
       products: productsData || [], 
-      hasMore: count ? count > ((page + 1) * ITEMS_PER_PAGE) : false 
+      totalCount: count || 0
     };
   };
 
-  const { data = { products: [], hasMore: false }, isLoading } = useQuery({
+  const { data = { products: [], totalCount: 0 }, isLoading } = useQuery({
     queryKey: ['products', user?.id, filters, page, searchTerm],
     queryFn: fetchProducts,
     enabled: !!user,
-    keepPreviousData: true,
   });
-
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (data.products) {
-      if (page === 0) {
-        setAllProducts(data.products);
-        setEditableProducts(data.products.map(p => ({ ...p, isEdited: false })));
-      } else {
-        setAllProducts(prev => [...prev, ...data.products]);
-        setEditableProducts(prev => [...prev, ...data.products.map(p => ({ ...p, isEdited: false }))]);
-      }
+      setEditableProducts(data.products.map(p => ({ ...p, isEdited: false })));
     }
-  }, [data.products, page]);
+  }, [data.products]);
 
-  const { hasMore } = data;
+  const totalPages = Math.ceil(data.totalCount / ITEMS_PER_PAGE);
+  const currentProducts = data.products;
 
   const handleOpen = (editing: Product | null = null) => {
     setEditingProduct(editing);
@@ -202,6 +199,7 @@ const Products = () => {
       ...prevFilters,
       ...newFilters
     }));
+    setPage(0); // Reset to first page when filters change
   };
 
   const handleFormSubmit = async (form: ProductFormValues) => {
@@ -275,7 +273,7 @@ const Products = () => {
     setEditableProducts(prev => 
       prev.map(product => {
         if (product.id === productId) {
-          const originalProduct = allProducts.find(p => p.id === productId);
+          const originalProduct = currentProducts.find(p => p.id === productId);
           let updated = { ...product, [field]: value };
           
           // Handle automated name generation
@@ -508,7 +506,10 @@ const Products = () => {
               placeholder="Search products..." 
               className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(0); // Reset to first page when search changes
+              }}
             />
           </div>
 
@@ -546,7 +547,7 @@ const Products = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-in">
           {filteredProducts.map((product) => (
             <Card 
               key={product.id} 
@@ -556,48 +557,44 @@ const Products = () => {
                   : 'border-l-blue-400 hover:border-l-blue-500'
               }`}
             >
-              <div className="p-6">
-                <div className="flex items-start gap-4 mb-6">
+              <div className="p-4">
+                <div className="flex items-start gap-3 mb-4">
                   <ProductImage
                     src={product.image}
                     alt={product.category}
-                    className="w-20 h-20 rounded-xl object-cover border-2 border-gray-100"
+                    className="w-12 h-12 rounded-lg object-cover border border-gray-100"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={product.name}
+                      onChange={(e) => handleFieldChange(product.id, 'name', e.target.value)}
+                      disabled={product.automated_name}
+                      className="font-semibold text-sm w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-1"
+                    />
+                    <div className="flex items-center gap-1">
                       <input
-                        type="text"
-                        value={product.name}
-                        onChange={(e) => handleFieldChange(product.id, 'name', e.target.value)}
-                        disabled={product.automated_name}
-                        className="font-semibold text-lg w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                        type="number"
+                        value={product.price}
+                        onChange={(e) => handleFieldChange(product.id, 'price', Number(e.target.value))}
+                        className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
+                        min={0}
+                        step={0.01}
                       />
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Price:</span>
-                        <input
-                          type="number"
-                          value={product.price}
-                          onChange={(e) => handleFieldChange(product.id, 'price', Number(e.target.value))}
-                          className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-20"
-                          min={0}
-                          step={0.01}
-                        />
-                        <span className="text-sm text-gray-500">DH</span>
-                      </div>
+                      <span className="text-xs text-gray-500">DH</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="space-y-3">
+                <div className="space-y-2 mb-4">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Category</label>
                       <Select
                         value={product.category || ""}
                         onValueChange={(value) => handleFieldChange(product.id, 'category', value === "none" ? null : value)}
                       >
-                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
-                          <SelectValue placeholder="Select" />
+                        <SelectTrigger className="h-7 text-xs border-gray-200">
+                          <SelectValue placeholder="Category" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
@@ -609,13 +606,12 @@ const Products = () => {
                     </div>
                     
                     <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Index</label>
                       <Select
                         value={product.index || ""}
                         onValueChange={(value) => handleFieldChange(product.id, 'index', value === "none" ? null : value)}
                       >
-                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
-                          <SelectValue placeholder="Select" />
+                        <SelectTrigger className="h-7 text-xs border-gray-200">
+                          <SelectValue placeholder="Index" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
@@ -625,35 +621,16 @@ const Products = () => {
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Company</label>
-                      <Select
-                        value={product.company || ""}
-                        onValueChange={(value) => handleFieldChange(product.id, 'company', value === "none" ? null : value)}
-                      >
-                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          {COMPANY_OPTIONS.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Treatment</label>
                       <Select
                         value={product.treatment || ""}
                         onValueChange={(value) => handleFieldChange(product.id, 'treatment', value === "none" ? null : value)}
                       >
-                        <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
-                          <SelectValue placeholder="Select" />
+                        <SelectTrigger className="h-7 text-xs border-gray-200">
+                          <SelectValue placeholder="Treatment" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
@@ -665,40 +642,51 @@ const Products = () => {
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Gamma</label>
-                      <input
-                        type="text"
-                        value={product.gamma || ""}
-                        onChange={(e) => handleFieldChange(product.id, 'gamma', e.target.value || null)}
-                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
-                        placeholder="Enter gamma"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs text-gray-500 uppercase tracking-wide">Cost TTC</label>
-                      <input
-                        type="number"
-                        value={product.cost_ttc || 0}
-                        onChange={(e) => handleFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
-                        className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
-                        min={0}
-                        step={0.01}
-                      />
+                      <Select
+                        value={product.company || ""}
+                        onValueChange={(value) => handleFieldChange(product.id, 'company', value === "none" ? null : value)}
+                      >
+                        <SelectTrigger className="h-7 text-xs border-gray-200">
+                          <SelectValue placeholder="Company" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          {COMPANY_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="text-xs text-gray-500 uppercase tracking-wide">Stock Status</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={product.gamma || ""}
+                      onChange={(e) => handleFieldChange(product.id, 'gamma', e.target.value || null)}
+                      className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
+                      placeholder="Gamma"
+                    />
+                    
+                    <input
+                      type="number"
+                      value={product.cost_ttc || 0}
+                      onChange={(e) => handleFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
+                      className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
+                      placeholder="Cost TTC"
+                      min={0}
+                      step={0.01}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
                     <Select
                       value={product.stock_status || 'Order'}
                       onValueChange={(value: 'Order' | 'inStock' | 'Fabrication') => 
                         handleFieldChange(product.id, 'stock_status', value)
                       }
                     >
-                      <SelectTrigger className="h-8 mt-1 border-gray-200 hover:border-gray-300">
+                      <SelectTrigger className="h-7 text-xs border-gray-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -707,62 +695,39 @@ const Products = () => {
                         <SelectItem value="Fabrication">Fabrication</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
 
-                  <div className="flex flex-col justify-between">
                     {product.stock_status === 'inStock' ? (
-                      <div>
-                        <label className="text-xs text-gray-500 uppercase tracking-wide">Stock</label>
-                        <input
-                          type="number"
-                          value={product.stock || 0}
-                          onChange={(e) => handleFieldChange(product.id, 'stock', Number(e.target.value))}
-                          className="w-full h-8 mt-1 px-3 text-sm border border-gray-200 rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none"
-                          min={0}
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        value={product.stock || 0}
+                        onChange={(e) => handleFieldChange(product.id, 'stock', Number(e.target.value))}
+                        className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
+                        placeholder="Stock"
+                        min={0}
+                      />
                     ) : (
-                      <div className="flex flex-col justify-end h-full">
-                        <div className="flex items-center justify-between pt-4">
-                          <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-600 font-medium">
-                            Auto Name
-                          </label>
-                          <Switch
-                            id={`auto-name-${product.id}`}
-                            checked={product.automated_name}
-                            onCheckedChange={(checked) => handleFieldChange(product.id, 'automated_name', checked)}
-                            className="scale-75"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {product.stock_status === 'inStock' && (
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-2">
-                        <label htmlFor={`auto-name-${product.id}`} className="text-xs text-gray-600 font-medium">
-                          Auto Name
-                        </label>
+                      <div className="flex items-center justify-center">
                         <Switch
-                          id={`auto-name-${product.id}`}
                           checked={product.automated_name}
                           onCheckedChange={(checked) => handleFieldChange(product.id, 'automated_name', checked)}
                           className="scale-75"
                         />
+                        <span className="text-xs text-gray-500 ml-1">Auto</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                  <div className="flex gap-2">
+                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                  <div className="flex gap-1">
                     {product.isEdited && (
                       <Button
                         size="sm"
                         onClick={() => handleSaveProduct(product.id)}
                         disabled={isSubmitting}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
                       >
-                        <Save size={14} className="mr-1" />
+                        <Save size={12} className="mr-1" />
                         Save
                       </Button>
                     )}
@@ -770,9 +735,9 @@ const Products = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpen(product)}
-                      className="text-gray-600 hover:text-blue-600"
+                      className="text-gray-600 hover:text-blue-600 h-7 px-2 text-xs"
                     >
-                      <Edit size={14} className="mr-1" />
+                      <Edit size={12} className="mr-1" />
                       Edit
                     </Button>
                   </div>
@@ -781,35 +746,76 @@ const Products = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteProduct(product.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2 text-xs"
                   >
-                    <Trash2 size={14} className="mr-1" />
-                    Delete
+                    <Trash2 size={12} />
                   </Button>
                 </div>
               </div>
             </Card>
           ))}
-          
-          {hasMore && (
-            <div className="col-span-full flex justify-center p-4">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => !isLoading && setPage(prev => prev + 1)}
-                className="w-full max-w-xs gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"/>
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-                Load More Products
-              </Button>
-            </div>
-          )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0 || isLoading}
+              className="flex items-center gap-1"
+            >
+              <ChevronDown className="h-4 w-4 rotate-90" />
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i;
+                } else if (page < 3) {
+                  pageNum = i;
+                } else if (page > totalPages - 4) {
+                  pageNum = totalPages - 5 + i;
+                } else {
+                  pageNum = page - 2 + i;
+                }
+                
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={page === pageNum ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPage(pageNum)}
+                    disabled={isLoading}
+                    className="w-10 h-8"
+                  >
+                    {pageNum + 1}
+                  </Button>
+                );
+              })}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+              disabled={page >= totalPages - 1 || isLoading}
+              className="flex items-center gap-1"
+            >
+              Next
+              <ChevronDown className="h-4 w-4 -rotate-90" />
+            </Button>
+          </div>
+        )}
+
+        {data.totalCount > 0 && (
+          <div className="text-center text-sm text-gray-500 mt-4">
+            Showing {page * ITEMS_PER_PAGE + 1} to {Math.min((page + 1) * ITEMS_PER_PAGE, data.totalCount)} of {data.totalCount} products
+          </div>
+        )}
       )}
 
       <Dialog open={isOpen} onOpenChange={v => {if (!v) setIsOpen(false)}}>
