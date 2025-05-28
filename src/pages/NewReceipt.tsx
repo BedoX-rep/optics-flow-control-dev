@@ -1069,6 +1069,31 @@ const NewReceipt = () => {
 
       if (itemsError) throw itemsError;
 
+      // Update stock for products with stock_status 'inStock'
+      for (const item of items) {
+        if (item.productId) {
+          const product = products.find(p => p.id === item.productId);
+          if (product && product.stock_status === 'inStock' && product.stock !== null) {
+            const newStock = Math.max(0, (product.stock || 0) - (item.quantity || 1));
+            const newStockStatus = newStock === 0 ? 'Order' : 'inStock';
+            
+            const { error: stockError } = await supabase
+              .from('products')
+              .update({ 
+                stock: newStock,
+                stock_status: newStockStatus
+              })
+              .eq('id', item.productId)
+              .eq('user_id', user.id);
+            
+            if (stockError) {
+              console.error('Error updating stock:', stockError);
+              // Don't throw error here to avoid breaking the receipt save
+            }
+          }
+        }
+      }
+
       queryClient.invalidateQueries(['receipts', user.id]);
       toast({
         title: "Success",

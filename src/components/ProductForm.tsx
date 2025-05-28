@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -145,7 +144,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
   const onFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!form.name.trim()) {
       return;
@@ -155,7 +154,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     if (imageFile) {
       imageUrl = await handleImageUpload();
     }
-    
+
     // Ensure proper data types and clean up the form data
     const submissionData = {
       name: form.name.trim(),
@@ -197,7 +196,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         />
         <Label htmlFor="auto-name" className="cursor-pointer">Generate Name Automatically</Label>
       </div>
-      
+
       <div className="grid grid-cols-4 items-center gap-3">
         <Label htmlFor="category">Category</Label>
         <Select

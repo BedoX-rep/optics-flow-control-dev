@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
@@ -127,6 +126,20 @@ const Products = () => {
 
     const { data: productsData, error, count } = await query;
     if (error) throw error;
+
+        // After fetching, check if stock is 0 and update stock status if necessary
+    if (productsData) {
+      productsData.forEach(async (product) => {
+        if (product.stock === 0 && product.stock_status === 'inStock') {
+          await supabase
+            .from('products')
+            .update({ stock_status: 'Order' })
+            .eq('id', product.id)
+            .eq('user_id', user.id);
+        }
+      });
+    }
+    
     return { 
       products: productsData || [], 
       totalCount: count || 0
@@ -261,12 +274,26 @@ const Products = () => {
           .from('products')
           .insert(productData)
           .select();
-        
+
         if (error) {
           console.error('Supabase error:', error);
           throw error;
         }
-        
+
+         // After saving, check if stock is 0 and update stock status if necessary
+        if (data && data.length > 0) {
+          const newProduct = data[0];
+          if (newProduct.stock === 0 && newProduct.stock_status === 'inStock') {
+            await supabase
+              .from('products')
+              .update({ stock_status: 'Order' })
+              .eq('id', newProduct.id)
+              .eq('user_id', user.id);
+
+            await queryClient.invalidateQueries({ queryKey: ['products'] });
+          }
+        }
+
         console.log('Product inserted successfully:', data); // Debug log
         await queryClient.invalidateQueries({ queryKey: ['products'] });
         toast({ title: "Success", description: "Product added successfully" });
@@ -290,12 +317,21 @@ const Products = () => {
   const handleFieldChange = (productId: string, field: keyof Product, value: any) => {
     setEditableProducts(prev => 
       prev.map(product => {
-        if (product.id === productId) {
-          const originalProduct = data.products.find(p => p.id === productId);
-          let updated = { ...product, [field]: value };
-          
-          // Handle automated name generation
-          if (field === 'automated_name' && value === true) {
+        if (product.id !== productId) return product;
+
+        const originalProduct = data.products.find(p => p.id === productId);
+        let updated = { ...product, [field]: value };
+
+        // Check stock status automatically when stock or stock_status changes
+        if (field === 'stock' || field === 'stock_status') {
+          if (updated.stock_status === 'inStock' && updated.stock === 0) {
+            updated.stock_status = 'Order';
+          }
+        }
+
+        // Handle automated name generation
+        if (field === 'automated_name' && value === true) {
+
             // Generate name automatically when toggle is turned on
             const getCategoryAbbr = (category: string | undefined) => {
               switch (category) {
@@ -308,7 +344,7 @@ const Products = () => {
                 default: return '';
               }
             };
-            
+
             let abbr = getCategoryAbbr(updated.category);
             let parts = [abbr];
 
@@ -340,7 +376,7 @@ const Products = () => {
                 default: return '';
               }
             };
-            
+
             let abbr = getCategoryAbbr(updated.category);
             let parts = [abbr];
 
@@ -357,7 +393,7 @@ const Products = () => {
             const generatedName = parts.filter(Boolean).join(" ");
             updated = { ...updated, name: generatedName };
           }
-          
+
           const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
           return { ...updated, isEdited };
         }
@@ -376,15 +412,15 @@ const Products = () => {
       const updates: any = { ...editedProduct };
       delete updates.id;
       delete updates.isEdited;
-      
+
       const { error } = await supabase
         .from('products')
         .update(updates)
         .eq('id', productId)
         .eq('user_id', user.id);
-      
+
       if (error) throw error;
-      
+
       await queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({ title: "Success", description: "Product updated successfully" });
     } catch (error) {
@@ -409,21 +445,21 @@ const Products = () => {
 
     try {
       setIsSavingAll(true);
-      
+
       for (const product of editedProducts) {
         const updates: any = { ...product };
         delete updates.id;
         delete updates.isEdited;
-        
+
         const { error } = await supabase
           .from('products')
           .update(updates)
           .eq('id', product.id)
           .eq('user_id', user.id);
-        
+
         if (error) throw error;
       }
-      
+
       await queryClient.invalidateQueries({ queryKey: ['products'] });
       toast({ 
         title: "Success", 
@@ -443,26 +479,26 @@ const Products = () => {
 
   const handleImportProducts = async (importedProducts: any[]) => {
     if (!user) return;
-    
+
     try {
       setIsSubmitting(true);
-      
+
       const productsToInsert = importedProducts.map(product => ({
         ...product,
         user_id: user.id,
         is_deleted: false,
         created_at: new Date().toISOString()
       }));
-      
+
       const { error } = await supabase
         .from('products')
         .insert(productsToInsert);
-      
+
       if (error) throw error;
-      
+
       await queryClient.invalidateQueries({ queryKey: ['products'] });
       setIsImportDialogOpen(false);
-      
+
       toast({
         title: "Success",
         description: `${importedProducts.length} product(s) imported successfully`,
@@ -623,7 +659,7 @@ const Products = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div>
                         <Select
                           value={product.index || ""}
@@ -686,7 +722,7 @@ const Products = () => {
                         className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
                         placeholder="Gamma"
                       />
-                      
+
                       <input
                         type="number"
                         value={product.cost_ttc || 0}
@@ -760,7 +796,7 @@ const Products = () => {
                         Edit
                       </Button>
                     </div>
-                    
+
                     <Button
                       variant="ghost"
                       size="sm"
@@ -788,7 +824,7 @@ const Products = () => {
                 <ChevronDown className="h-4 w-4 rotate-90" />
                 Previous
               </Button>
-              
+
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
@@ -801,7 +837,7 @@ const Products = () => {
                   } else {
                     pageNum = page - 2 + i;
                   }
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -816,7 +852,7 @@ const Products = () => {
                   );
                 })}
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"
