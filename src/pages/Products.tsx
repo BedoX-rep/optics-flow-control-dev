@@ -216,7 +216,7 @@ const Products = () => {
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;
-        await queryClient.invalidateQueries({ queryKey: ['products'] });
+        await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
         toast({
           title: "Success",
           description: "Product deleted successfully",
@@ -254,7 +254,7 @@ const Products = () => {
           .eq('id', editingProduct.id)
           .eq('user_id', user.id);
         if (error) throw error;
-        await queryClient.invalidateQueries({ queryKey: ['products'] });
+        await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
         // Prepare the product data for insertion
@@ -297,12 +297,12 @@ const Products = () => {
               .eq('id', newProduct.id)
               .eq('user_id', user.id);
 
-            await queryClient.invalidateQueries({ queryKey: ['products'] });
+            await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
           }
         }
 
         console.log('Product inserted successfully:', data); // Debug log
-        await queryClient.invalidateQueries({ queryKey: ['products'] });
+        await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
         toast({ title: "Success", description: "Product added successfully" });
       }
       setIsOpen(false);
@@ -425,7 +425,7 @@ const Products = () => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
       toast({ title: "Success", description: "Product updated successfully" });
     } catch (error) {
       console.error('Error updating product:', error);
@@ -469,7 +469,7 @@ const Products = () => {
         if (error) throw error;
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
       toast({ 
         title: "Success", 
         description: `${editedProducts.length} product(s) updated successfully` 
@@ -505,7 +505,7 @@ const Products = () => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['products', user.id] });
       setIsImportDialogOpen(false);
 
       toast({
