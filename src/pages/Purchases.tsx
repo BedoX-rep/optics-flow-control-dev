@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -28,6 +27,8 @@ import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
+import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface Supplier {
   id: string;
@@ -97,6 +98,9 @@ const Purchases = () => {
     to: ''
   });
 
+  const [searchTerm, setSearchTerm] = useState(''); // General search term
+  const [dateFilter, setDateFilter] = useState('all');
+  
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -213,8 +217,32 @@ const Purchases = () => {
       );
     }
 
+    // Date Filter Logic
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      let startDate: Date | null = null;
+
+      if (dateFilter === 'today') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (dateFilter === 'week') {
+        const dayOfWeek = now.getDay();
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+      } else if (dateFilter === 'month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (dateFilter === 'year') {
+        startDate = new Date(now.getFullYear(), 0, 1);
+      }
+
+      if (startDate) {
+        filtered = filtered.filter(purchase => {
+          const purchaseDate = new Date(purchase.purchase_date);
+          return purchaseDate >= startDate;
+        });
+      }
+    }
+
     return filtered;
-  }, [purchases, purchaseSearchTerm, categoryFilter, supplierFilter, dateRange]);
+  }, [purchases, purchaseSearchTerm, categoryFilter, supplierFilter, dateRange, dateFilter]);
 
   // Filter suppliers
   const filteredSuppliers = useMemo(() => {
@@ -480,725 +508,538 @@ const Purchases = () => {
     }
   };
 
+  const handlePurchaseSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['purchases', user?.id] });
+  };
+
+  const handleEditPurchase = (purchase: Purchase) => {
+    setEditingPurchase(purchase);
+    setPurchaseFormData({
+      supplier_id: purchase.supplier_id || '',
+      description: purchase.description,
+      amount_ht: (purchase.amount_ht || purchase.amount).toString(),
+      amount_ttc: (purchase.amount_ttc || purchase.amount).toString(),
+      category: purchase.category || '',
+      purchase_date: format(new Date(purchase.purchase_date), 'yyyy-MM-dd'),
+      payment_method: purchase.payment_method,
+      notes: purchase.notes || '',
+    });
+  };
+
+  const handleUpdatePurchase = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user || !editingPurchase) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const amountHt = parseFloat(purchaseFormData.amount_ht);
+      const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+
+      const purchaseData = {
+        supplier_id: purchaseFormData.supplier_id || null,
+        description: purchaseFormData.description.trim(),
+        amount_ht: amountHt,
+        amount_ttc: amountTtc,
+        amount: amountTtc,
+        category: purchaseFormData.category || null,
+        purchase_date: purchaseFormData.purchase_date,
+        payment_method: purchaseFormData.payment_method,
+        notes: purchaseFormData.notes || null,
+        user_id: user.id,
+      };
+
+      const { error } = await supabase
+        .from('purchases')
+        .update(purchaseData)
+        .eq('id', editingPurchase.id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Purchase updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      setEditingPurchase(null);
+      resetPurchaseForm();
+
+    } catch (error) {
+      console.error('Error updating purchase:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update purchase",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSupplierSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user || !supplierFormData.name.trim()) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const supplierData = {
+        name: supplierFormData.name.trim(),
+        contact_person: supplierFormData.contact_person || null,
+        phone: supplierFormData.phone || null,
+        email: supplierFormData.email || null,
+        address: supplierFormData.address || null,
+        notes: supplierFormData.notes || null,
+        user_id: user.id,
+      };
+
+      if (editingSupplier) {
+        const { error } = await supabase
+          .from('suppliers')
+          .update(supplierData)
+          .eq('id', editingSupplier.id);
+
+        if (error) throw error;
+        toast({ title: "Success", description: "Supplier updated successfully" });
+      } else {
+        const { error } = await supabase
+          .from('suppliers')
+          .insert(supplierData);
+
+        if (error) throw error;
+        toast({ title: "Success", description: "Supplier added successfully" });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['suppliers', user.id] });
+      setIsSupplierDialogOpen(false);
+      resetSupplierForm();
+
+    } catch (error) {
+      console.error('Error saving supplier:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save supplier",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="container px-4 md:px-6 max-w-7xl mx-auto py-6">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl text-white">
-                  <Receipt className="h-8 w-8" />
-                </div>
-                Purchases & Suppliers
-              </h1>
-              <p className="text-gray-600 text-lg">Manage your business expenses and supplier relationships</p>
-            </div>
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+      {console.log('Dialog render check:', { isPurchaseDialogOpen, editingPurchase, shouldShow: isPurchaseDialogOpen && !editingPurchase })}
 
-            {/* Summary Cards */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="h-6 w-6" />
-                    <div>
-                      <p className="text-green-100 text-sm font-medium">Total Expenses</p>
-                      <p className="text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
+        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+          <Button
+            onClick={handleRecordNewPurchase}
+            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Record Purchase
+          </Button>
+          <Button
+            onClick={handleOpenSupplierDialog}
+            variant="outline"
+            className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Supplier
+          </Button>
+        </div>
+      </div>
 
-              <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6" />
-                    <div>
-                      <p className="text-blue-100 text-sm font-medium">This Month</p>
-                      <p className="text-2xl font-bold">${monthlyTotal.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Search purchases or suppliers..." 
+              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Date Filter */}
+            <Select
+              value={dateFilter}
+              onValueChange={(value) => setDateFilter(value)}
+            >
+              <SelectTrigger className={cn(
+                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+                dateFilter !== 'all'
+                  ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
+                  : "bg-white/10 hover:bg-white/20"
+              )}>
+                <Calendar className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Date">
+                  {dateFilter === 'all' ? 'Date' :
+                   dateFilter === 'today' ? 'Today' :
+                   dateFilter === 'week' ? 'This Week' :
+                   dateFilter === 'month' ? 'This Month' : 'This Year'}
+                </SelectValue>
+                {dateFilter !== 'all' && (
+                  <X
+                    className="h-3 w-3 ml-auto hover:text-blue-900 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDateFilter('all');
+                    }}
+                  />
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Dates</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Supplier Filter */}
+            <Select
+              value={supplierFilter}
+              onValueChange={(value) => setSupplierFilter(value)}
+            >
+              <SelectTrigger className={cn(
+                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+                supplierFilter !== 'all'
+                  ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                  : "bg-white/10 hover:bg-white/20"
+              )}>
+                <Building2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Supplier">
+                  {supplierFilter === 'all' ? 'Supplier' : 
+                   suppliers.find(s => s.id === supplierFilter)?.name || 'Unknown'}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-gray-600">All Suppliers</SelectItem>
+                {suppliers.map(supplier => (
+                  <SelectItem key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <TabsList className="grid w-full sm:w-auto grid-cols-2 bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-              <TabsTrigger 
-                value="purchases" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-medium"
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Purchases
-              </TabsTrigger>
-              <TabsTrigger 
-                value="suppliers"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-medium"
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                Suppliers
-              </TabsTrigger>
-            </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
+          <TabsTrigger 
+            value="purchases" 
+            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+          >
+            <Package className="h-4 w-4 mr-2" />
+            Purchases ({filteredPurchases.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="suppliers" 
+            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+          >
+            <Building2 className="h-4 w-4 mr-2" />
+            Suppliers ({suppliers.length})
+          </TabsTrigger>
+        </TabsList>
 
-            <Button
-              onClick={activeTab === 'purchases' ? handleRecordNewPurchase : () => handleOpenSupplierDialog()}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium px-6 py-2.5"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              {activeTab === 'purchases' ? 'Record Purchase' : 'Add Supplier'}
-            </Button>
-          </div>
-
-          <TabsContent value="purchases" className="space-y-6">
-            {/* Purchase Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Receipt className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Purchases</p>
-                      <p className="text-2xl font-bold text-gray-900">{filteredPurchases.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Average Purchase</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        ${filteredPurchases.length > 0 ? (totalExpenses / filteredPurchases.length).toFixed(2) : '0.00'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Building2 className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Active Suppliers</p>
-                      <p className="text-2xl font-bold text-gray-900">{suppliers.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters */}
-            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="relative flex-1 min-w-[280px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input 
-                      type="text" 
-                      placeholder="Search purchases..." 
-                      className="pl-10 bg-white border-gray-200 rounded-xl shadow-sm"
-                      value={purchaseSearchTerm}
-                      onChange={(e) => setPurchaseSearchTerm(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200 px-3 py-2 shadow-sm">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <Input
-                        type="date"
-                        placeholder="From date"
-                        className="border-0 p-0 h-auto bg-transparent w-32"
-                        value={dateRange.from}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                      />
-                      <span className="text-sm text-gray-400">to</span>
-                      <Input
-                        type="date"
-                        placeholder="To date"
-                        className="border-0 p-0 h-auto bg-transparent w-32"
-                        value={dateRange.to}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                      />
-                    </div>
-                    {(dateRange.from || dateRange.to) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDateRange({ from: '', to: '' })}
-                        className="text-sm h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-500" />
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-48 bg-white border-gray-200 rounded-xl shadow-sm">
-                        <SelectValue placeholder="Filter by category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {EXPENSE_CATEGORIES.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-                    <SelectTrigger className="w-48 bg-white border-gray-200 rounded-xl shadow-sm">
-                      <SelectValue placeholder="Filter by supplier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Suppliers</SelectItem>
-                      {suppliers.map(supplier => (
-                        <SelectItem key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        <TabsContent value="purchases" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+            <AnimatePresence>
+              {filteredPurchases.length === 0 ? (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No purchases found
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Purchases List */}
-            {purchasesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="animate-pulse bg-white/70 backdrop-blur-sm border border-gray-200">
-                    <CardContent className="p-6">
-                      <div className="space-y-3">
-                        <div className="h-4 w-32 bg-gray-200 rounded" />
-                        <div className="h-3 w-24 bg-gray-200 rounded" />
-                        <div className="h-3 w-16 bg-gray-200 rounded" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : filteredPurchases.length === 0 ? (
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-12 text-center">
-                  <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
-                    <Receipt className="h-12 w-12 text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No purchases found</h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    {purchaseSearchTerm || categoryFilter !== 'all' || supplierFilter !== 'all'
-                      ? "No purchases match your current filters. Try adjusting your search criteria."
-                      : "Start tracking your business expenses by recording your first purchase."}
-                  </p>
-                  <Button 
-                    onClick={handleRecordNewPurchase}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium"
+              ) : (
+                filteredPurchases.map((purchase) => (
+                  <motion.div
+                    key={purchase.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="w-full"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Record Purchase
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPurchases.map((purchase) => (
-                  <Card key={purchase.id} className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                            {purchase.description}
-                          </CardTitle>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <div className="p-1.5 bg-green-100 rounded-lg">
-                                <DollarSign className="h-4 w-4 text-green-600" />
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="text-base font-semibold truncate">
+                                      {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
+                                    </h3>
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+                                      {purchase.receipt_number}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-gray-500 mt-0.5 block">
+                                    {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
+                                  </span>
+                                </div>
+                              </div>
+                              {purchase.description && (
+                                <p className="text-sm text-gray-600 mb-2">{purchase.description}</p>
+                              )}
+                            </div>
+
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleEditPurchase(purchase)}
+                                className="h-8 w-8"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleDeletePurchase(purchase.id)}
+                                className="h-8 w-8 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-0.5">Amount HT</p>
+                              <p className="font-medium text-blue-600">{purchase.amount_ht.toFixed(2)} DH</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-0.5">Amount TTC</p>
+                              <p className="font-medium text-green-600">{purchase.amount_ttc.toFixed(2)} DH</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="suppliers" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+            <AnimatePresence>
+              {suppliers.length === 0 ? (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No suppliers found
+                </div>
+              ) : (
+                suppliers.filter(supplier => 
+                  supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  supplier.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+                ).map((supplier) => (
+                  <motion.div
+                    key={supplier.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="w-full"
+                  >
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-base font-semibold truncate">{supplier.name}</h3>
+                                  {supplier.phone && (
+                                    <div className="flex items-center gap-1.5 text-blue-600">
+                                      <Phone className="h-3.5 w-3.5" />
+                                      <span className="text-xs font-medium">{supplier.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {supplier.address && (
+                                <p className="text-sm text-gray-600 mb-2">{supplier.address}</p>
+                              )}
+                            </div>
+
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleOpenSupplierDialog(supplier)}
+                                className="h-8 w-8"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleDeleteSupplier(supplier.id)}
+                                className="h-8 w-8 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <div className="flex justify-between items-baseline">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-0.5">Total Purchases</p>
+                                                               <p className="font-medium text-emerald-600">
+                                  {purchases.filter(p => p.supplier_id === supplier.id).length}
+                                </p>
                               </div>
                               <div>
-                                <p className="text-xl font-bold text-green-600">
-                                  ${(purchase.amount_ttc || purchase.amount).toFixed(2)}
+                                <p className="text-xs text-gray-500 mb-0.5">Total Amount</p>
+                                <p className="font-medium text-orange-600">
+                                  {purchases
+                                    .filter(p => p.supplier_id === supplier.id)
+                                    .reduce((sum, p) => sum + p.amount_ttc, 0)
+                                    .toFixed(2)} DH
                                 </p>
-                                <p className="text-xs text-green-600 font-medium">TTC</p>
                               </div>
                             </div>
-                            {purchase.amount_ht && (
-                              <p className="text-sm text-gray-500 ml-8">
-                                ${purchase.amount_ht.toFixed(2)} HT
-                              </p>
-                            )}
                           </div>
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenPurchaseDialog(purchase)}
-                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeletePurchase(purchase.id)}
-                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="space-y-3">
-                        {purchase.suppliers && (
-                          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                            <Building2 className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm font-medium text-blue-900">{purchase.suppliers.name}</span>
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center justify-between">
-                          {purchase.category && (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              {purchase.category}
-                            </span>
-                          )}
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <Calendar className="h-3 w-3" />
-                            <span>{format(new Date(purchase.purchase_date), 'MMM dd')}</span>
-                          </div>
-                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        </TabsContent>
+      </Tabs>
 
-                        {purchase.receipt_number && (
-                          <div className="text-xs text-gray-500 bg-gray-50 rounded px-2 py-1">
-                            Receipt: {purchase.receipt_number}
-                          </div>
-                        )}
-                        
-                        <div className="text-xs text-gray-500 border-t pt-2">
-                          Payment: {purchase.payment_method}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+      {/* Record Purchase Dialog */}
+      <RecordPurchaseDialog
+        isOpen={isPurchaseDialogOpen && !editingPurchase}
+        onClose={() => setIsPurchaseDialogOpen(false)}
+        suppliers={suppliers}
+        onSuccess={handlePurchaseSuccess}
+      />
 
-          <TabsContent value="suppliers" className="space-y-6">
-            {/* Supplier Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Building2 className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Suppliers</p>
-                      <p className="text-2xl font-bold text-gray-900">{filteredSuppliers.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Active Partnerships</p>
-                      <p className="text-2xl font-bold text-gray-900">{suppliers.filter(s => purchases.some(p => p.supplier_id === s.id)).length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Suppliers Search */}
-            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Search suppliers..." 
-                    className="pl-10 bg-white border-gray-200 rounded-xl shadow-sm"
-                    value={supplierSearchTerm}
-                    onChange={(e) => setSupplierSearchTerm(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Suppliers List */}
-            {filteredSuppliers.length === 0 ? (
-              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
-                <CardContent className="p-12 text-center">
-                  <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
-                    <Building2 className="h-12 w-12 text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No suppliers found</h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    {supplierSearchTerm
-                      ? "No suppliers match your search criteria. Try different keywords."
-                      : "Build your supplier network by adding your first business partner."}
-                  </p>
-                  <Button 
-                    onClick={() => handleOpenSupplierDialog()}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Supplier
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredSuppliers.map((supplier) => (
-                  <Card key={supplier.id} className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                              <Building2 className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <span className="line-clamp-1">{supplier.name}</span>
-                          </CardTitle>
-                          {supplier.contact_person && (
-                            <p className="text-sm text-gray-600 ml-9">{supplier.contact_person}</p>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenSupplierDialog(supplier)}
-                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteSupplier(supplier.id)}
-                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="space-y-3">
-                        {supplier.phone && (
-                          <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                            <Phone className="h-4 w-4 text-green-600" />
-                            <span className="text-sm text-green-900">{supplier.phone}</span>
-                          </div>
-                        )}
-                        {supplier.email && (
-                          <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
-                            <Mail className="h-4 w-4 text-purple-600" />
-                            <span className="text-sm text-purple-900 line-clamp-1">{supplier.email}</span>
-                          </div>
-                        )}
-                        {supplier.address && (
-                          <div className="flex items-start gap-2 p-2 bg-orange-50 rounded-lg">
-                            <MapPin className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-orange-900 line-clamp-2">{supplier.address}</span>
-                          </div>
-                        )}
-                        
-                        {/* Purchase count */}
-                        <div className="border-t pt-2">
-                          <p className="text-xs text-gray-500">
-                            {purchases.filter(p => p.supplier_id === supplier.id).length} purchases
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Record Purchase Dialog */}
-        <RecordPurchaseDialog
-          isOpen={isPurchaseDialogOpen && !editingPurchase}
-          onClose={() => setIsPurchaseDialogOpen(false)}
-          suppliers={suppliers}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['purchases', user?.id] });
-          }}
-        />
-
-        {/* Edit Purchase Dialog */}
-        {editingPurchase && (
-          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Edit Purchase</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmitPurchase} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="description">Description *</Label>
-                    <Input
-                      id="description"
-                      value={purchaseFormData.description}
-                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Enter purchase description"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
-                    <Input
-                      id="amount_ht"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={purchaseFormData.amount_ht}
-                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
-                    <Input
-                      id="amount_ttc"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={purchaseFormData.amount_ttc}
-                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="purchase_date">Purchase Date</Label>
-                    <Input
-                      id="purchase_date"
-                      type="date"
-                      value={purchaseFormData.purchase_date}
-                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="supplier">Supplier</Label>
-                    <Select
-                      value={purchaseFormData.supplier_id || undefined}
-                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select supplier (optional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers.map(supplier => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select
-                      value={purchaseFormData.category}
-                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {EXPENSE_CATEGORIES.map(category => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="payment_method">Payment Method</Label>
-                    <Select
-                      value={purchaseFormData.payment_method}
-                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PAYMENT_METHODS.map(method => (
-                          <SelectItem key={method} value={method}>
-                            {method}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="col-span-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={purchaseFormData.notes}
-                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Additional notes about this purchase"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                <DialogFooter>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setIsPurchaseDialogOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc}
-                  >
-                    {isSubmitting ? 'Saving...' : 'Update Purchase'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
-
-        {/* Supplier Dialog */}
-        <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmitSupplier} className="space-y-4">
+      {/* Edit Purchase Dialog */}
+      <Dialog open={!!editingPurchase} onOpenChange={() => setEditingPurchase(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Purchase</DialogTitle>
+          </DialogHeader>
+          {editingPurchase && (
+            <form onSubmit={handleUpdatePurchase} className="space-y-4">
               <div>
-                <Label htmlFor="supplier_name">Supplier Name *</Label>
+                <Label htmlFor="description">Description</Label>
                 <Input
-                  id="supplier_name"
-                  value={supplierFormData.name}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter supplier name"
-                  required
+                  id="description"
+                  value={purchaseFormData.description}
+                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Purchase description"
                 />
               </div>
-
-              <div>
-                <Label htmlFor="contact_person">Contact Person</Label>
-                <Input
-                  id="contact_person"
-                  value={supplierFormData.contact_person}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, contact_person: e.target.value }))}
-                  placeholder="Enter contact person name"
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="amount_ht">Amount HT</Label>
                   <Input
-                    id="phone"
-                    value={supplierFormData.phone}
-                    onChange={(e) => setSupplierFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="Enter phone number"
+                    id="amount_ht"
+                    type="number"
+                    step="0.01"
+                    value={purchaseFormData.amount_ht}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: parseFloat(e.target.value) || 0 }))}
+                    required
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="amount_ttc">Amount TTC</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={supplierFormData.email}
-                    onChange={(e) => setSupplierFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Enter email address"
+                    id="amount_ttc"
+                    type="number"
+                    step="0.01"
+                    value={purchaseFormData.amount_ttc}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: parseFloat(e.target.value) || 0 }))}
+                    required
                   />
                 </div>
               </div>
-
               <div>
-                <Label htmlFor="address">Address</Label>
-                <Textarea
-                  id="address"
-                  value={supplierFormData.address}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Enter supplier address"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="supplier_notes">Notes</Label>
-                <Textarea
-                  id="supplier_notes"
-                  value={supplierFormData.notes}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes about this supplier"
-                  rows={3}
-                />
-              </div>
-
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsSupplierDialogOpen(false)}
-                  disabled={isSubmitting}
+                <Label htmlFor="supplier">Supplier</Label>
+                <Select
+                  value={purchaseFormData.supplier_id || undefined}
+                  onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
                 >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select supplier (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map(supplier => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setEditingPurchase(null)}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || !supplierFormData.name.trim()}
-                >
-                  {isSubmitting ? 'Saving...' : editingSupplier ? 'Update Supplier' : 'Add Supplier'}
-                </Button>
-              </DialogFooter>
+                <Button type="submit">Update Purchase</Button>
+              </div>
             </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Supplier Dialog */}
+      <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{editingSupplier ? 'Edit Supplier' : 'Add Supplier'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSupplierSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Name *</Label>
+              <Input
+                id="name"
+                value={supplierFormData.name}
+                onChange={(e) => setSupplierFormData(prev => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={supplierFormData.phone}
+                onChange={(e) => setSupplierFormData(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                value={supplierFormData.address}
+                onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsSupplierDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingSupplier ? 'Update' : 'Add'} Supplier
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
