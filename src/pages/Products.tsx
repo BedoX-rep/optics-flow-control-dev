@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface Product extends ProductSortable {
   cost_ttc?: number;
-  stock_status?: 'Order' | 'inStock' | 'Fabrication';
+  stock_status?: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock';
   stock?: number;
   automated_name?: boolean;
   gamma?: string;
@@ -133,7 +133,7 @@ const Products = () => {
         if (product.stock === 0 && product.stock_status === 'inStock') {
           await supabase
             .from('products')
-            .update({ stock_status: 'Order' })
+            .update({ stock_status: 'Out Of Stock' })
             .eq('id', product.id)
             .eq('user_id', user.id);
         }
@@ -286,7 +286,7 @@ const Products = () => {
           if (newProduct.stock === 0 && newProduct.stock_status === 'inStock') {
             await supabase
               .from('products')
-              .update({ stock_status: 'Order' })
+              .update({ stock_status: 'Out Of Stock' })
               .eq('id', newProduct.id)
               .eq('user_id', user.id);
 
@@ -325,7 +325,7 @@ const Products = () => {
         // Check stock status automatically when stock or stock_status changes
         if (field === 'stock' || field === 'stock_status') {
           if (updated.stock_status === 'inStock' && updated.stock === 0) {
-            updated.stock_status = 'Order';
+            updated.stock_status = 'Out Of Stock';
           }
         }
 
@@ -737,7 +737,7 @@ const Products = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <Select
                         value={product.stock_status || 'Order'}
-                        onValueChange={(value: 'Order' | 'inStock' | 'Fabrication') => 
+                        onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
                           handleFieldChange(product.id, 'stock_status', value)
                         }
                       >
@@ -748,6 +748,7 @@ const Products = () => {
                           <SelectItem value="Order">Order</SelectItem>
                           <SelectItem value="inStock">In Stock</SelectItem>
                           <SelectItem value="Fabrication">Fabrication</SelectItem>
+                          <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
                         </SelectContent>
                       </Select>
 

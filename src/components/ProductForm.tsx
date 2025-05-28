@@ -49,17 +49,17 @@ const GAMMA_OPTIONS = [
 export interface ProductFormValues {
   name: string;
   price: number;
-  cost_ttc?: number;
-  stock?: number;
-  stock_status: 'Order' | 'inStock' | 'Fabrication';
   category?: string;
   index?: string;
   treatment?: string;
   company?: string;
   gamma?: string;
-  automated_name?: boolean;
   image?: string;
+  automated_name?: boolean;
   created_at?: string;
+  cost_ttc?: number;
+  stock_status?: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock';
+  stock?: number;
 }
 
 interface ProductFormProps {
@@ -312,7 +312,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         <Label htmlFor="stock_status">Stock Status</Label>
         <Select
           value={form.stock_status}
-          onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication', stock: v !== 'inStock' ? undefined : f.stock }))}
+          onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
         >
           <SelectTrigger className="col-span-3" id="stock_status">
             <SelectValue placeholder="Select Stock Status" />
@@ -321,6 +321,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             <SelectItem value="Order">Order</SelectItem>
             <SelectItem value="inStock">In Stock</SelectItem>
             <SelectItem value="Fabrication">Fabrication</SelectItem>
+            <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
           </SelectContent>
         </Select>
       </div>

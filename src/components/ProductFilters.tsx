@@ -16,7 +16,7 @@ const CATEGORY_OPTIONS = [
 const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.60", "1.67", "1.74"];
 const TREATMENT_OPTIONS = ["Standard", "Blue Cut", "Photochromic", "Polarized"];
 const COMPANY_OPTIONS = ["Essilor", "Hoya", "Zeiss", "Rodenstock", "Shamir"];
-const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication"];
+const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
 
 export interface ProductFiltersProps {
   filters: Record<string, string>;
