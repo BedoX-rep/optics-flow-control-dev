@@ -60,6 +60,13 @@ const PAYMENT_METHODS = [
   'Digital Wallet'
 ];
 
+const RECURRING_TYPES = [
+  { value: '1_month', label: '1 Month' },
+  { value: '3_months', label: '3 Months' },
+  { value: '6_months', label: '6 Months' },
+  { value: '1_year', label: '1 Year' }
+];
+
 const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   isOpen,
   onClose,
@@ -78,7 +85,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     category: '',
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
     payment_method: 'Cash',
-    notes: ''
+    notes: '',
+    advance_payment: '',
+    balance: '',
+    payment_status: 'Unpaid',
+    payment_urgency: '',
+    recurring_type: ''
   });
 
   const resetForm = () => {
@@ -90,8 +102,38 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       category: '',
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
       payment_method: 'Cash',
-      notes: ''
+      notes: '',
+      advance_payment: '',
+      balance: '',
+      payment_status: 'Unpaid',
+      payment_urgency: '',
+      recurring_type: ''
     });
+  };
+
+  const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
+    if (!recurringType) return null;
+    
+    const date = new Date(purchaseDate);
+    
+    switch (recurringType) {
+      case '1_month':
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case '3_months':
+        date.setMonth(date.getMonth() + 3);
+        break;
+      case '6_months':
+        date.setMonth(date.getMonth() + 6);
+        break;
+      case '1_year':
+        date.setFullYear(date.getFullYear() + 1);
+        break;
+      default:
+        return null;
+    }
+    
+    return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,6 +159,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
     const amountHt = parseFloat(formData.amount_ht);
     const amountTtc = parseFloat(formData.amount_ttc);
+    const advancePayment = parseFloat(formData.advance_payment) || 0;
     
     if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
       toast({
@@ -136,8 +179,27 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       return;
     }
 
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      
+      const balance = amountTtc - advancePayment;
+      let paymentStatus = 'Unpaid';
+      if (advancePayment >= amountTtc && amountTtc > 0) {
+        paymentStatus = 'Paid';
+      } else if (advancePayment > 0) {
+        paymentStatus = 'Partially Paid';
+      }
+
+      const nextRecurringDate = calculateNextRecurringDate(formData.purchase_date, formData.recurring_type);
       
       const purchaseData = {
         user_id: user.id,
@@ -150,6 +212,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         purchase_date: formData.purchase_date,
         payment_method: formData.payment_method,
         notes: formData.notes || null,
+        advance_payment: advancePayment,
+        balance: balance,
+        payment_status: paymentStatus,
+        payment_urgency: formData.payment_urgency || null,
+        recurring_type: formData.recurring_type || null,
+        next_recurring_date: nextRecurringDate,
         is_deleted: false
       };
 
@@ -191,7 +259,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Record New Purchase</DialogTitle>
         </DialogHeader>
@@ -218,7 +286,20 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 step="0.01"
                 min="0.01"
                 value={formData.amount_ht}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
+                onChange={(e) => {
+                  const newAmountHt = e.target.value;
+                  setFormData(prev => {
+                    const amountHt = parseFloat(newAmountHt) || 0;
+                    const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                    const advancePayment = parseFloat(prev.advance_payment) || 0;
+                    const balance = amountTtc - advancePayment;
+                    return { 
+                      ...prev, 
+                      amount_ht: newAmountHt,
+                      balance: balance.toString()
+                    };
+                  });
+                }}
                 placeholder="0.00"
                 required
                 disabled={isSubmitting}
@@ -233,10 +314,75 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 step="0.01"
                 min="0.01"
                 value={formData.amount_ttc}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
+                onChange={(e) => {
+                  const newAmountTtc = e.target.value;
+                  setFormData(prev => {
+                    const amountTtc = parseFloat(newAmountTtc) || 0;
+                    const advancePayment = parseFloat(prev.advance_payment) || 0;
+                    const balance = amountTtc - advancePayment;
+                    let paymentStatus = 'Unpaid';
+                    if (advancePayment >= amountTtc && amountTtc > 0) {
+                      paymentStatus = 'Paid';
+                    } else if (advancePayment > 0) {
+                      paymentStatus = 'Partially Paid';
+                    }
+                    return { 
+                      ...prev, 
+                      amount_ttc: newAmountTtc,
+                      balance: balance.toString(),
+                      payment_status: paymentStatus
+                    };
+                  });
+                }}
                 placeholder="0.00"
                 required
                 disabled={isSubmitting}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="advance_payment">Advance Payment</Label>
+              <Input
+                id="advance_payment"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.advance_payment}
+                onChange={(e) => {
+                  const newAdvancePayment = e.target.value;
+                  setFormData(prev => {
+                    const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                    const advancePayment = parseFloat(newAdvancePayment) || 0;
+                    const balance = amountTtc - advancePayment;
+                    let paymentStatus = 'Unpaid';
+                    if (advancePayment >= amountTtc && amountTtc > 0) {
+                      paymentStatus = 'Paid';
+                    } else if (advancePayment > 0) {
+                      paymentStatus = 'Partially Paid';
+                    }
+                    return { 
+                      ...prev, 
+                      advance_payment: newAdvancePayment,
+                      balance: balance.toString(),
+                      payment_status: paymentStatus
+                    };
+                  });
+                }}
+                placeholder="0.00"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="balance">Balance</Label>
+              <Input
+                id="balance"
+                type="number"
+                step="0.01"
+                value={formData.balance}
+                placeholder="0.00"
+                disabled
+                className="bg-gray-50"
               />
             </div>
 
@@ -247,6 +393,17 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 type="date"
                 value={formData.purchase_date}
                 onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="payment_urgency">Payment Urgency</Label>
+              <Input
+                id="payment_urgency"
+                type="date"
+                value={formData.payment_urgency}
+                onChange={(e) => setFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
                 disabled={isSubmitting}
               />
             </div>
@@ -305,6 +462,44 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                   {PAYMENT_METHODS.map(method => (
                     <SelectItem key={method} value={method}>
                       {method}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="payment_status">Payment Status</Label>
+              <Select
+                value={formData.payment_status}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Unpaid">Unpaid</SelectItem>
+                  <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                  <SelectItem value="Paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="recurring_type">Recurring Type</Label>
+              <Select
+                value={formData.recurring_type}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recurring period (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECURRING_TYPES.map(type => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

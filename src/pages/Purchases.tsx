@@ -56,6 +56,9 @@ interface Purchase {
   advance_payment?: number;
   balance?: number;
   payment_status?: string;
+  payment_urgency?: string;
+  recurring_type?: string;
+  next_recurring_date?: string;
   created_at: string;
   suppliers?: Supplier;
 }
@@ -83,6 +86,13 @@ const PAYMENT_METHODS = [
   'Bank Transfer',
   'Check',
   'Digital Wallet'
+];
+
+const RECURRING_TYPES = [
+  { value: '1_month', label: '1 Month' },
+  { value: '3_months', label: '3 Months' },
+  { value: '6_months', label: '6 Months' },
+  { value: '1_year', label: '1 Year' }
 ];
 
 const Purchases = () => {
@@ -136,6 +146,8 @@ const Purchases = () => {
     advance_payment: '',
     balance: '',
     payment_status: 'Unpaid',
+    payment_urgency: '',
+    recurring_type: '',
   });
 
   const [supplierFormData, setSupplierFormData] = useState({
@@ -293,6 +305,8 @@ const Purchases = () => {
       advance_payment: '',
       balance: '',
       payment_status: 'Unpaid',
+      payment_urgency: '',
+      recurring_type: '',
     });
     setEditingPurchase(null);
   };
@@ -324,6 +338,8 @@ const Purchases = () => {
         advance_payment: (purchase.advance_payment || 0).toString(),
         balance: (purchase.balance || 0).toString(),
         payment_status: purchase.payment_status || 'Unpaid',
+        payment_urgency: purchase.payment_urgency ? format(new Date(purchase.payment_urgency), 'yyyy-MM-dd') : '',
+        recurring_type: purchase.recurring_type || '',
       });
     } else {
       resetPurchaseForm();
@@ -355,6 +371,31 @@ const Purchases = () => {
 
   const handleSupplierAdded = (supplier: any) => {
     queryClient.invalidateQueries({ queryKey: ['suppliers', user?.id] });
+  };
+
+  const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
+    if (!recurringType) return null;
+    
+    const date = new Date(purchaseDate);
+    
+    switch (recurringType) {
+      case '1_month':
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case '3_months':
+        date.setMonth(date.getMonth() + 3);
+        break;
+      case '6_months':
+        date.setMonth(date.getMonth() + 6);
+        break;
+      case '1_year':
+        date.setFullYear(date.getFullYear() + 1);
+        break;
+      default:
+        return null;
+    }
+    
+    return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
@@ -497,6 +538,8 @@ const Purchases = () => {
       advance_payment: (purchase.advance_payment || 0).toString(),
       balance: (purchase.balance || 0).toString(),
       payment_status: purchase.payment_status || 'Unpaid',
+      payment_urgency: purchase.payment_urgency ? format(new Date(purchase.payment_urgency), 'yyyy-MM-dd') : '',
+      recurring_type: purchase.recurring_type || '',
     });
   };
 
@@ -527,10 +570,20 @@ const Purchases = () => {
       return;
     }
 
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
       const balance = amountTtc - advancePayment;
+      const nextRecurringDate = calculateNextRecurringDate(purchaseFormData.purchase_date, purchaseFormData.recurring_type);
 
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
@@ -545,13 +598,16 @@ const Purchases = () => {
         advance_payment: advancePayment,
         balance: balance,
         payment_status: purchaseFormData.payment_status,
-        user_id: user.id,
+        payment_urgency: purchaseFormData.payment_urgency || null,
+        recurring_type: purchaseFormData.recurring_type || null,
+        next_recurring_date: nextRecurringDate,
       };
 
       const { error } = await supabase
         .from('purchases')
         .update(purchaseData)
-        .eq('id', editingPurchase.id);
+        .eq('id', editingPurchase.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -1139,6 +1195,38 @@ const Purchases = () => {
                       <SelectItem value="Unpaid">Unpaid</SelectItem>
                       <SelectItem value="Partially Paid">Partially Paid</SelectItem>
                       <SelectItem value="Paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_payment_urgency">Payment Urgency</Label>
+                  <Input
+                    id="edit_payment_urgency"
+                    type="date"
+                    value={purchaseFormData.payment_urgency}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_recurring_type">Recurring Type</Label>
+                  <Select
+                    value={purchaseFormData.recurring_type}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, recurring_type: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select recurring period (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No Recurring</SelectItem>
+                      {RECURRING_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
