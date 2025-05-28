@@ -277,22 +277,19 @@ const Purchases = () => {
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Purchase form submitted:', purchaseFormData);
-    console.log('User:', user);
-    console.log('Validation checks:', {
-      hasUser: !!user,
-      hasDescription: !!purchaseFormData.description.trim(),
-      hasAmount: !!purchaseFormData.amount,
-      validAmount: parseFloat(purchaseFormData.amount) > 0
-    });
     
-    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount || parseFloat(purchaseFormData.amount) <= 0) {
-      console.log('Validation failed, returning early');
+    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
       setIsSubmitting(true);
+      
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
@@ -309,8 +306,7 @@ const Purchases = () => {
         const { error } = await supabase
           .from('purchases')
           .update(purchaseData)
-          .eq('id', editingPurchase.id)
-          .eq('user_id', user.id);
+          .eq('id', editingPurchase.id);
 
         if (error) throw error;
         toast({ title: "Success", description: "Purchase updated successfully" });
@@ -328,10 +324,9 @@ const Purchases = () => {
       resetPurchaseForm();
     } catch (error) {
       console.error('Error saving purchase:', error);
-      console.error('Purchase data that failed:', purchaseData);
       toast({
         title: "Error",
-        description: `Failed to save purchase: ${error.message}`,
+        description: "Failed to save purchase",
         variant: "destructive",
       });
     } finally {
@@ -749,12 +744,9 @@ const Purchases = () => {
                   id="amount"
                   type="number"
                   step="0.01"
-                  min="0.01"
+                  min="0"
                   value={purchaseFormData.amount}
-                  onChange={(e) => {
-                    console.log('Amount changed:', e.target.value);
-                    setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }));
-                  }}
+                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }))}
                   placeholder="0.00"
                   required
                 />
@@ -861,7 +853,7 @@ const Purchases = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount || parseFloat(purchaseFormData.amount) <= 0}
+                disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount}
               >
                 {isSubmitting ? 'Saving...' : editingPurchase ? 'Update Purchase' : 'Record Purchase'}
               </Button>
