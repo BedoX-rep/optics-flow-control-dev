@@ -146,7 +146,7 @@ const Products = () => {
         }
       });
     }
-    
+
     return { 
       products: productsData || [], 
       totalCount: count || 0
@@ -240,7 +240,7 @@ const Products = () => {
     setPage(0); // Reset to first page when filters change
   }, []);
 
-  const handleFormSubmit = async (form: ProductFormValues) => {
+  const handleFormSubmit = useCallback(async (form: ProductFormValues) => {
     if (!user) return;
     try {
       setIsSubmitting(true);
@@ -319,7 +319,7 @@ const Products = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, editingProduct, queryClient, toast]);
 
   const handleFieldChange = useCallback((productId: string, field: keyof Product, value: any) => {
     setEditableProducts(prev => 
@@ -401,7 +401,7 @@ const Products = () => {
     );
   }, [data.products]);
 
-  const handleSaveProduct = async (productId: string) => {
+  const handleSaveProduct = useCallback(async (productId: string) => {
     if (!user) return;
     const editedProduct = editableProducts.find(p => p.id === productId);
     if (!editedProduct) return;
@@ -437,7 +437,7 @@ const Products = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, editableProducts, queryClient, toast]);
 
   const handleSaveAll = async () => {
     if (!user) return;
@@ -486,7 +486,7 @@ const Products = () => {
     }
   };
 
-  const handleImportProducts = async (importedProducts: any[]) => {
+  const handleImportProducts = useCallback(async (importedProducts: any[]) => {
     if (!user) return;
 
     try {
@@ -522,7 +522,7 @@ const Products = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, queryClient, toast]);
 
   const filteredProducts = useMemo(() => sortProducts(editableProducts || []), [editableProducts]);
   const hasEditedProducts = useMemo(() => editableProducts.some(p => p.isEdited), [editableProducts]);

@@ -260,6 +260,25 @@ const ProductCard = React.memo<ProductCardProps>(({
       </div>
     </Card>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.name === nextProps.product.name &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.product.cost_ttc === nextProps.product.cost_ttc &&
+    prevProps.product.stock_status === nextProps.product.stock_status &&
+    prevProps.product.stock === nextProps.product.stock &&
+    prevProps.product.automated_name === nextProps.product.automated_name &&
+    prevProps.product.category === nextProps.product.category &&
+    prevProps.product.index === nextProps.product.index &&
+    prevProps.product.treatment === nextProps.product.treatment &&
+    prevProps.product.company === nextProps.product.company &&
+    prevProps.product.gamma === nextProps.product.gamma &&
+    prevProps.product.image === nextProps.product.image &&
+    prevProps.product.isEdited === nextProps.product.isEdited &&
+    prevProps.isSubmitting === nextProps.isSubmitting
+  );
 });
 
 ProductCard.displayName = 'ProductCard';
