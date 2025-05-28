@@ -157,45 +157,37 @@ const OrderItems: React.FC<OrderItemsProps> = ({
         </Alert>
       )}
       <CardHeader className="bg-gray-50/80 border-b p-4">
-        {/* Order Type Section - Prominent Design */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Receipt className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg">Order Type</h3>
-                <p className="text-sm text-gray-600">Select the type of service for this order</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
+          <div className="flex items-center gap-4 flex-1">
+            <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
+              <Plus className="h-4 w-4 mr-2" /> Add Product
+            </Button>
+            <Button onClick={() => addItem('custom')} variant="outline" size="default">
+              <Plus className="h-4 w-4 mr-2" /> Add Custom
+            </Button>
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Order Type:</Label>
               <Select value={orderType} onValueChange={setOrderType}>
-                <SelectTrigger className={`w-[200px] h-12 text-base font-medium shadow-md transition-all ${
+                <SelectTrigger className={`w-[140px] ${
                   orderType === 'Unspecified' 
-                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100' 
-                    : 'bg-white border-blue-300 text-blue-900 hover:bg-blue-50'
+                    ? 'bg-red-50 border-red-300 text-red-700' 
+                    : 'bg-white border-gray-300'
                 }`}>
-                  <SelectValue placeholder="Select Order Type">
-                    <div className="flex items-center gap-2">
+                  <SelectValue placeholder="Select Type">
+                    <div className="flex items-center gap-1">
                       {orderType === 'Unspecified' && (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <AlertCircle className="w-3 h-3 text-red-500" />
                       )}
-                      {orderType === 'Unspecified' ? 'Please select an order type' : orderType}
+                      <span className="truncate">{orderType}</span>
                     </div>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Unspecified" className="relative">
+                  <SelectItem value="Unspecified">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 text-red-500" />
                       Unspecified
                     </div>
-                    {orderType === 'Unspecified' && (
-                      <span className="block text-xs text-red-600 mt-0.5">
-                        Please select an order type
-                      </span>
-                    )}
                   </SelectItem>
                   <SelectItem value="Montage">
                     <div className="flex items-center gap-2">
@@ -218,17 +210,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
-          <div className="flex items-center gap-4 flex-1">
-            <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-              <Plus className="h-4 w-4 mr-2" /> Add Product
-            </Button>
-            <Button onClick={() => addItem('custom')} variant="outline" size="default">
-              <Plus className="h-4 w-4 mr-2" /> Add Custom
-            </Button>
           </div>
         </div>
 
