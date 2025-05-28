@@ -412,6 +412,7 @@ const Purchases = () => {
 
     const amountHt = parseFloat(purchaseFormData.amount_ht);
     const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+    const advancePayment = parseFloat(purchaseFormData.advance_payment) || 0;
 
     if (amountTtc < amountHt) {
       toast({
@@ -422,8 +423,27 @@ const Purchases = () => {
       return;
     }
 
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      
+      const balance = amountTtc - advancePayment;
+      let paymentStatus = 'Unpaid';
+      if (advancePayment >= amountTtc && amountTtc > 0) {
+        paymentStatus = 'Paid';
+      } else if (advancePayment > 0) {
+        paymentStatus = 'Partially Paid';
+      }
+
+      const nextRecurringDate = calculateNextRecurringDate(purchaseFormData.purchase_date, purchaseFormData.recurring_type);
       
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
@@ -435,7 +455,14 @@ const Purchases = () => {
         purchase_date: purchaseFormData.purchase_date,
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
+        advance_payment: advancePayment,
+        balance: balance,
+        payment_status: paymentStatus,
+        payment_urgency: purchaseFormData.payment_urgency || null,
+        recurring_type: purchaseFormData.recurring_type || null,
+        next_recurring_date: nextRecurringDate,
         user_id: user.id,
+        is_deleted: false
       };
 
       if (editingPurchase) {
