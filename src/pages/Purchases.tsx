@@ -22,7 +22,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,6 +44,8 @@ interface Purchase {
   supplier_id?: string;
   description: string;
   amount: number;
+  amount_ht?: number;
+  amount_ttc?: number;
   category?: string;
   purchase_date: string;
   receipt_number?: string;
@@ -229,6 +231,18 @@ const Purchases = () => {
   const totalExpenses = useMemo(() => {
     return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [filteredPurchases]);
+
+  // Calculate monthly total
+  const monthlyTotal = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    return purchases
+      .filter(purchase => {
+        const purchaseDate = new Date(purchase.purchase_date);
+        return purchaseDate.getMonth() === currentMonth && purchaseDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
+  }, [purchases]);
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({
@@ -467,160 +481,265 @@ const Purchases = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Receipt className="h-6 w-6" />
-            Purchases & Suppliers
-          </h1>
-          {activeTab === 'purchases' && (
-            <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-1 rounded-full">
-              <DollarSign className="h-4 w-4" />
-              Total: ${totalExpenses.toFixed(2)}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="container px-4 md:px-6 max-w-7xl mx-auto py-6">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl text-white">
+                  <Receipt className="h-8 w-8" />
+                </div>
+                Purchases & Suppliers
+              </h1>
+              <p className="text-gray-600 text-lg">Manage your business expenses and supplier relationships</p>
             </div>
-          )}
+
+            {/* Summary Cards */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="h-6 w-6" />
+                    <div>
+                      <p className="text-green-100 text-sm font-medium">Total Expenses</p>
+                      <p className="text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-6 w-6" />
+                    <div>
+                      <p className="text-blue-100 text-sm font-medium">This Month</p>
+                      <p className="text-2xl font-bold">${monthlyTotal.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="purchases">Purchases</TabsTrigger>
-          <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="purchases">
-          <div className="space-y-6">
-            {/* Purchases Header */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-1 rounded-full">
-                <Receipt className="h-4 w-4" />
-                {filteredPurchases.length} purchases
-              </div>
-              <Button
-                onClick={handleRecordNewPurchase}
-                className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90"
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <TabsList className="grid w-full sm:w-auto grid-cols-2 bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+              <TabsTrigger 
+                value="purchases" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-medium"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Record Purchase
-              </Button>
+                <Package className="h-4 w-4 mr-2" />
+                Purchases
+              </TabsTrigger>
+              <TabsTrigger 
+                value="suppliers"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-medium"
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Suppliers
+              </TabsTrigger>
+            </TabsList>
+
+            <Button
+              onClick={activeTab === 'purchases' ? handleRecordNewPurchase : () => handleOpenSupplierDialog()}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium px-6 py-2.5"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              {activeTab === 'purchases' ? 'Record Purchase' : 'Add Supplier'}
+            </Button>
+          </div>
+
+          <TabsContent value="purchases" className="space-y-6">
+            {/* Purchase Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Receipt className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Purchases</p>
+                      <p className="text-2xl font-bold text-gray-900">{filteredPurchases.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Average Purchase</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        ${filteredPurchases.length > 0 ? (totalExpenses / filteredPurchases.length).toFixed(2) : '0.00'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Building2 className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Active Suppliers</p>
+                      <p className="text-2xl font-bold text-gray-900">{suppliers.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Purchases Filters */}
-            <div className="backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="relative flex-1 min-w-[240px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Search purchases..." 
-                    className="pl-9 bg-white/5 border-white/10 rounded-xl"
-                    value={purchaseSearchTerm}
-                    onChange={(e) => setPurchaseSearchTerm(e.target.value)}
-                  />
+            {/* Filters */}
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="relative flex-1 min-w-[280px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                      type="text" 
+                      placeholder="Search purchases..." 
+                      className="pl-10 bg-white border-gray-200 rounded-xl shadow-sm"
+                      value={purchaseSearchTerm}
+                      onChange={(e) => setPurchaseSearchTerm(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-200 px-3 py-2 shadow-sm">
+                      <Calendar className="h-4 w-4 text-gray-500" />
+                      <Input
+                        type="date"
+                        placeholder="From date"
+                        className="border-0 p-0 h-auto bg-transparent w-32"
+                        value={dateRange.from}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                      />
+                      <span className="text-sm text-gray-400">to</span>
+                      <Input
+                        type="date"
+                        placeholder="To date"
+                        className="border-0 p-0 h-auto bg-transparent w-32"
+                        value={dateRange.to}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                      />
+                    </div>
+                    {(dateRange.from || dateRange.to) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDateRange({ from: '', to: '' })}
+                        className="text-sm h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-500" />
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-48 bg-white border-gray-200 rounded-xl shadow-sm">
+                        <SelectValue placeholder="Filter by category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {EXPENSE_CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+                    <SelectTrigger className="w-48 bg-white border-gray-200 rounded-xl shadow-sm">
+                      <SelectValue placeholder="Filter by supplier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Suppliers</SelectItem>
+                      {suppliers.map(supplier => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="date"
-                    placeholder="From date"
-                    className="w-40"
-                    value={dateRange.from}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                  />
-                  <span className="text-sm text-gray-500">to</span>
-                  <Input
-                    type="date"
-                    placeholder="To date"
-                    className="w-40"
-                    value={dateRange.to}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                  />
-                  {(dateRange.from || dateRange.to) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDateRange({ from: '', to: '' })}
-                      className="text-sm"
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {EXPENSE_CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Suppliers</SelectItem>
-                    {suppliers.map(supplier => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Purchases List */}
             {purchasesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse bg-white/70 backdrop-blur-sm border border-gray-200">
                     <CardContent className="p-6">
                       <div className="space-y-3">
-                        <div className="h-4 w-32 bg-neutral-200 rounded" />
-                        <div className="h-3 w-24 bg-neutral-200 rounded" />
-                        <div className="h-3 w-16 bg-neutral-200 rounded" />
+                        <div className="h-4 w-32 bg-gray-200 rounded" />
+                        <div className="h-3 w-24 bg-gray-200 rounded" />
+                        <div className="h-3 w-16 bg-gray-200 rounded" />
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : filteredPurchases.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Receipt className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium mb-2">No purchases found</h3>
-                <p className="text-gray-500 mb-4">
-                  {purchaseSearchTerm || categoryFilter !== 'all' || supplierFilter !== 'all'
-                    ? "No purchases match your current filters"
-                    : "Start by recording your first business purchase"}
-                </p>
-                <Button onClick={handleRecordNewPurchase}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Record Purchase
-                </Button>
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
+                    <Receipt className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No purchases found</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    {purchaseSearchTerm || categoryFilter !== 'all' || supplierFilter !== 'all'
+                      ? "No purchases match your current filters. Try adjusting your search criteria."
+                      : "Start tracking your business expenses by recording your first purchase."}
+                  </p>
+                  <Button 
+                    onClick={handleRecordNewPurchase}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Record Purchase
+                  </Button>
+                </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPurchases.map((purchase) => (
-                  <Card key={purchase.id} className="hover:shadow-md transition-shadow">
+                  <Card key={purchase.id} className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold mb-1">
+                          <CardTitle className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                             {purchase.description}
                           </CardTitle>
                           <div className="space-y-1">
-                            <p className="text-lg font-bold text-green-600">
-                              ${(purchase.amount_ttc || purchase.amount).toFixed(2)} TTC
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <div className="p-1.5 bg-green-100 rounded-lg">
+                                <DollarSign className="h-4 w-4 text-green-600" />
+                              </div>
+                              <div>
+                                <p className="text-xl font-bold text-green-600">
+                                  ${(purchase.amount_ttc || purchase.amount).toFixed(2)}
+                                </p>
+                                <p className="text-xs text-green-600 font-medium">TTC</p>
+                              </div>
+                            </div>
                             {purchase.amount_ht && (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 ml-8">
                                 ${purchase.amount_ht.toFixed(2)} HT
                               </p>
                             )}
@@ -631,6 +750,7 @@ const Purchases = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenPurchaseDialog(purchase)}
+                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -638,6 +758,7 @@ const Purchases = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeletePurchase(purchase.id)}
+                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -645,28 +766,33 @@ const Purchases = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="space-y-3">
                         {purchase.suppliers && (
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4" />
-                            <span>{purchase.suppliers.name}</span>
+                          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                            <Building2 className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-900">{purchase.suppliers.name}</span>
                           </div>
                         )}
-                        {purchase.category && (
-                          <div className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                            {purchase.category}
+                        
+                        <div className="flex items-center justify-between">
+                          {purchase.category && (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              {purchase.category}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar className="h-3 w-3" />
+                            <span>{format(new Date(purchase.purchase_date), 'MMM dd')}</span>
                           </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
                         </div>
+
                         {purchase.receipt_number && (
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 bg-gray-50 rounded px-2 py-1">
                             Receipt: {purchase.receipt_number}
                           </div>
                         )}
-                        <div className="text-xs text-gray-500">
+                        
+                        <div className="text-xs text-gray-500 border-t pt-2">
                           Payment: {purchase.payment_method}
                         </div>
                       </div>
@@ -675,68 +801,93 @@ const Purchases = () => {
                 ))}
               </div>
             )}
-          </div>
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="suppliers">
-          <div className="space-y-6">
-            {/* Suppliers Header */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-1 rounded-full">
-                <Building2 className="h-4 w-4" />
-                {filteredSuppliers.length} suppliers
-              </div>
-              <Button
-                onClick={() => handleOpenSupplierDialog()}
-                className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Supplier
-              </Button>
+          <TabsContent value="suppliers" className="space-y-6">
+            {/* Supplier Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Building2 className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Suppliers</p>
+                      <p className="text-2xl font-bold text-gray-900">{filteredSuppliers.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Active Partnerships</p>
+                      <p className="text-2xl font-bold text-gray-900">{suppliers.filter(s => purchases.some(p => p.supplier_id === s.id)).length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Suppliers Search */}
-            <div className="backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input 
-                  type="text" 
-                  placeholder="Search suppliers..." 
-                  className="pl-9 bg-white/5 border-white/10 rounded-xl"
-                  value={supplierSearchTerm}
-                  onChange={(e) => setSupplierSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+              <CardContent className="p-6">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input 
+                    type="text" 
+                    placeholder="Search suppliers..." 
+                    className="pl-10 bg-white border-gray-200 rounded-xl shadow-sm"
+                    value={supplierSearchTerm}
+                    onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Suppliers List */}
             {filteredSuppliers.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium mb-2">No suppliers found</h3>
-                <p className="text-gray-500 mb-4">
-                  {supplierSearchTerm
-                    ? "No suppliers match your search"
-                    : "Start by adding your first supplier"}
-                </p>
-                <Button onClick={() => handleOpenSupplierDialog()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Supplier
-                </Button>
+              <Card className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <div className="p-4 bg-gray-100 rounded-full w-fit mx-auto mb-4">
+                    <Building2 className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No suppliers found</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    {supplierSearchTerm
+                      ? "No suppliers match your search criteria. Try different keywords."
+                      : "Build your supplier network by adding your first business partner."}
+                  </p>
+                  <Button 
+                    onClick={() => handleOpenSupplierDialog()}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-lg rounded-xl font-medium"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Supplier
+                  </Button>
+                </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredSuppliers.map((supplier) => (
-                  <Card key={supplier.id} className="hover:shadow-md transition-shadow">
+                  <Card key={supplier.id} className="bg-white/70 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg font-semibold mb-1 flex items-center gap-2">
-                            <Building2 className="h-5 w-5" />
-                            {supplier.name}
+                          <CardTitle className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <Building2 className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <span className="line-clamp-1">{supplier.name}</span>
                           </CardTitle>
                           {supplier.contact_person && (
-                            <p className="text-sm text-gray-600">{supplier.contact_person}</p>
+                            <p className="text-sm text-gray-600 ml-9">{supplier.contact_person}</p>
                           )}
                         </div>
                         <div className="flex gap-1">
@@ -744,6 +895,7 @@ const Purchases = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleOpenSupplierDialog(supplier)}
+                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -751,6 +903,7 @@ const Purchases = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteSupplier(supplier.id)}
+                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -758,289 +911,294 @@ const Purchases = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="space-y-3">
                         {supplier.phone && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="h-4 w-4" />
-                            <span>{supplier.phone}</span>
+                          <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                            <Phone className="h-4 w-4 text-green-600" />
+                            <span className="text-sm text-green-900">{supplier.phone}</span>
                           </div>
                         )}
                         {supplier.email && (
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4" />
-                            <span>{supplier.email}</span>
+                          <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
+                            <Mail className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm text-purple-900 line-clamp-1">{supplier.email}</span>
                           </div>
                         )}
                         {supplier.address && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>{supplier.address}</span>
+                          <div className="flex items-start gap-2 p-2 bg-orange-50 rounded-lg">
+                            <MapPin className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-orange-900 line-clamp-2">{supplier.address}</span>
                           </div>
                         )}
+                        
+                        {/* Purchase count */}
+                        <div className="border-t pt-2">
+                          <p className="text-xs text-gray-500">
+                            {purchases.filter(p => p.supplier_id === supplier.id).length} purchases
+                          </p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             )}
-          </div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
 
-      {/* Record Purchase Dialog */}
-      <RecordPurchaseDialog
-        isOpen={isPurchaseDialogOpen && !editingPurchase}
-        onClose={() => setIsPurchaseDialogOpen(false)}
-        suppliers={suppliers}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['purchases', user?.id] });
-        }}
-      />
+        {/* Record Purchase Dialog */}
+        <RecordPurchaseDialog
+          isOpen={isPurchaseDialogOpen && !editingPurchase}
+          onClose={() => setIsPurchaseDialogOpen(false)}
+          suppliers={suppliers}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['purchases', user?.id] });
+          }}
+        />
 
-      {/* Edit Purchase Dialog */}
-      {editingPurchase && (
-        <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
+        {/* Edit Purchase Dialog */}
+        {editingPurchase && (
+          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Edit Purchase</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmitPurchase} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <Label htmlFor="description">Description *</Label>
+                    <Input
+                      id="description"
+                      value={purchaseFormData.description}
+                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Enter purchase description"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
+                    <Input
+                      id="amount_ht"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={purchaseFormData.amount_ht}
+                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
+                    <Input
+                      id="amount_ttc"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={purchaseFormData.amount_ttc}
+                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="purchase_date">Purchase Date</Label>
+                    <Input
+                      id="purchase_date"
+                      type="date"
+                      value={purchaseFormData.purchase_date}
+                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="supplier">Supplier</Label>
+                    <Select
+                      value={purchaseFormData.supplier_id || undefined}
+                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select supplier (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map(supplier => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={purchaseFormData.category}
+                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EXPENSE_CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="payment_method">Payment Method</Label>
+                    <Select
+                      value={purchaseFormData.payment_method}
+                      onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_METHODS.map(method => (
+                          <SelectItem key={method} value={method}>
+                            {method}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <Label htmlFor="notes">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      value={purchaseFormData.notes}
+                      onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Additional notes about this purchase"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsPurchaseDialogOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc}
+                  >
+                    {isSubmitting ? 'Saving...' : 'Update Purchase'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Supplier Dialog */}
+        <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Purchase</DialogTitle>
+              <DialogTitle>
+                {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmitPurchase} className="space-y-4">
+            <form onSubmit={handleSubmitSupplier} className="space-y-4">
+              <div>
+                <Label htmlFor="supplier_name">Supplier Name *</Label>
+                <Input
+                  id="supplier_name"
+                  value={supplierFormData.name}
+                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter supplier name"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="contact_person">Contact Person</Label>
+                <Input
+                  id="contact_person"
+                  value={supplierFormData.contact_person}
+                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, contact_person: e.target.value }))}
+                  placeholder="Enter contact person name"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="description">Description *</Label>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
                   <Input
-                    id="description"
-                    value={purchaseFormData.description}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter purchase description"
-                    required
+                    id="phone"
+                    value={supplierFormData.phone}
+                    onChange={(e) => setSupplierFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter phone number"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="amount_ht"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={purchaseFormData.amount_ht}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
-                    placeholder="0.00"
-                    required
+                    id="email"
+                    type="email"
+                    value={supplierFormData.email}
+                    onChange={(e) => setSupplierFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
-                  <Input
-                    id="amount_ttc"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={purchaseFormData.amount_ttc}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Textarea
+                  id="address"
+                  value={supplierFormData.address}
+                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="Enter supplier address"
+                  rows={2}
+                />
+              </div>
 
-                <div>
-                  <Label htmlFor="purchase_date">Purchase Date</Label>
-                  <Input
-                    id="purchase_date"
-                    type="date"
-                    value={purchaseFormData.purchase_date}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="supplier">Supplier</Label>
-                  <Select
-                    value={purchaseFormData.supplier_id || undefined}
-                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select supplier (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.map(supplier => (
-                        <SelectItem key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={purchaseFormData.category}
-                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EXPENSE_CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="payment_method">Payment Method</Label>
-                  <Select
-                    value={purchaseFormData.payment_method}
-                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map(method => (
-                        <SelectItem key={method} value={method}>
-                          {method}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                
-
-                <div className="col-span-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={purchaseFormData.notes}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Additional notes about this purchase"
-                    rows={3}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="supplier_notes">Notes</Label>
+                <Textarea
+                  id="supplier_notes"
+                  value={supplierFormData.notes}
+                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Additional notes about this supplier"
+                  rows={3}
+                />
               </div>
 
               <DialogFooter>
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setIsPurchaseDialogOpen(false)}
+                  onClick={() => setIsSupplierDialogOpen(false)}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc}
+                  disabled={isSubmitting || !supplierFormData.name.trim()}
                 >
-                  {isSubmitting ? 'Saving...' : 'Update Purchase'}
+                  {isSubmitting ? 'Saving...' : editingSupplier ? 'Update Supplier' : 'Add Supplier'}
                 </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
-      )}
-
-      {/* Supplier Dialog */}
-      <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmitSupplier} className="space-y-4">
-            <div>
-              <Label htmlFor="supplier_name">Supplier Name *</Label>
-              <Input
-                id="supplier_name"
-                value={supplierFormData.name}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter supplier name"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="contact_person">Contact Person</Label>
-              <Input
-                id="contact_person"
-                value={supplierFormData.contact_person}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, contact_person: e.target.value }))}
-                placeholder="Enter contact person name"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={supplierFormData.phone}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="Enter phone number"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={supplierFormData.email}
-                  onChange={(e) => setSupplierFormData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                value={supplierFormData.address}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
-                placeholder="Enter supplier address"
-                rows={2}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="supplier_notes">Notes</Label>
-              <Textarea
-                id="supplier_notes"
-                value={supplierFormData.notes}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Additional notes about this supplier"
-                rows={3}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsSupplierDialogOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || !supplierFormData.name.trim()}
-              >
-                {isSubmitting ? 'Saving...' : editingSupplier ? 'Update Supplier' : 'Add Supplier'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      </div>
     </div>
   );
 };
