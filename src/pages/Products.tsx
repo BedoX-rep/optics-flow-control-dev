@@ -322,12 +322,7 @@ const Products = () => {
         const originalProduct = data.products.find(p => p.id === productId);
         let updated = { ...product, [field]: value };
 
-        // Check stock status automatically when stock or stock_status changes
-        if (field === 'stock' || field === 'stock_status') {
-          if (updated.stock_status === 'inStock' && updated.stock === 0) {
-            updated.stock_status = 'Out Of Stock';
-          }
-        }
+        // Allow manual stock status changes without automatic override
 
         // Handle automated name generation
         if (field === 'automated_name' && value === true) {
@@ -410,6 +405,11 @@ const Products = () => {
       delete updates.id;
       delete updates.isEdited;
 
+      // Check if stock is 0 and stock_status is inStock, then change to Out Of Stock
+      if (updates.stock_status === 'inStock' && updates.stock === 0) {
+        updates.stock_status = 'Out Of Stock';
+      }
+
       const { error } = await supabase
         .from('products')
         .update(updates)
@@ -447,6 +447,11 @@ const Products = () => {
         const updates: any = { ...product };
         delete updates.id;
         delete updates.isEdited;
+
+        // Check if stock is 0 and stock_status is inStock, then change to Out Of Stock
+        if (updates.stock_status === 'inStock' && updates.stock === 0) {
+          updates.stock_status = 'Out Of Stock';
+        }
 
         const { error } = await supabase
           .from('products')

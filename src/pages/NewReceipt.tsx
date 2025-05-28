@@ -1075,7 +1075,7 @@ const NewReceipt = () => {
           const product = products.find(p => p.id === item.productId);
           if (product && product.stock_status === 'inStock' && product.stock !== null) {
             const newStock = Math.max(0, (product.stock || 0) - (item.quantity || 1));
-            const newStockStatus = newStock === 0 ? 'Order' : 'inStock';
+            const newStockStatus = newStock === 0 ? 'Out Of Stock' : 'inStock';
             
             const { error: stockError } = await supabase
               .from('products')
