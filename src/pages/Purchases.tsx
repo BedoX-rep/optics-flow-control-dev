@@ -133,6 +133,36 @@ const Purchases = () => {
     }
   }, [location.pathname]);
 
+  // Check and create recurring purchases on page mount
+  useEffect(() => {
+    const checkRecurringPurchases = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase.functions.invoke('create-recurring-purchases');
+        
+        if (error) {
+          console.error('Error checking recurring purchases:', error);
+          return;
+        }
+
+        if (data?.processed > 0) {
+          toast({
+            title: "Recurring Purchases Created",
+            description: `${data.processed} recurring purchase(s) have been automatically created.`,
+          });
+          
+          // Refresh the purchases list
+          queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+        }
+      } catch (error) {
+        console.error('Error invoking create-recurring-purchases function:', error);
+      }
+    };
+
+    checkRecurringPurchases();
+  }, [user, toast, queryClient]);
+
   // Form states
   const [purchaseFormData, setPurchaseFormData] = useState({
     supplier_id: '',
