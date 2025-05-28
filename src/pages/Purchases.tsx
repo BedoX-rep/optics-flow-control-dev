@@ -277,7 +277,19 @@ const Purchases = () => {
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount) return;
+    console.log('Purchase form submitted:', purchaseFormData);
+    console.log('User:', user);
+    console.log('Validation checks:', {
+      hasUser: !!user,
+      hasDescription: !!purchaseFormData.description.trim(),
+      hasAmount: !!purchaseFormData.amount,
+      validAmount: parseFloat(purchaseFormData.amount) > 0
+    });
+    
+    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount || parseFloat(purchaseFormData.amount) <= 0) {
+      console.log('Validation failed, returning early');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -316,9 +328,10 @@ const Purchases = () => {
       resetPurchaseForm();
     } catch (error) {
       console.error('Error saving purchase:', error);
+      console.error('Purchase data that failed:', purchaseData);
       toast({
         title: "Error",
-        description: "Failed to save purchase",
+        description: `Failed to save purchase: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -736,9 +749,12 @@ const Purchases = () => {
                   id="amount"
                   type="number"
                   step="0.01"
-                  min="0"
+                  min="0.01"
                   value={purchaseFormData.amount}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('Amount changed:', e.target.value);
+                    setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }));
+                  }}
                   placeholder="0.00"
                   required
                 />
@@ -845,7 +861,7 @@ const Purchases = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount}
+                disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount || parseFloat(purchaseFormData.amount) <= 0}
               >
                 {isSubmitting ? 'Saving...' : editingPurchase ? 'Update Purchase' : 'Record Purchase'}
               </Button>
