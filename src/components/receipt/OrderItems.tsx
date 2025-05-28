@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -56,6 +55,33 @@ const OrderItems: React.FC<OrderItemsProps> = ({
     }
   };
 
+  const handleFilterChange = (newFilters: Record<string, string>) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      ...newFilters
+    }));
+  };
+
+  // Filter products based on selected filters
+  const filteredProducts = products.filter(product => {
+    if (filters.category && filters.category !== "all_categories" && product.category !== filters.category) {
+      return false;
+    }
+    if (filters.index && filters.index !== "all_indexes" && product.index !== filters.index) {
+      return false;
+    }
+    if (filters.treatment && filters.treatment !== "all_treatments" && product.treatment !== filters.treatment) {
+      return false;
+    }
+    if (filters.company && filters.company !== "all_companies" && product.company !== filters.company) {
+      return false;
+    }
+    if (filters.stock_status && filters.stock_status !== "all_stock_statuses" && product.stock_status !== filters.stock_status) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="bg-gray-50/80 border-b p-4">
@@ -68,7 +94,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               <Plus className="h-4 w-4 mr-2" /> Add Custom
             </Button>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Receipt className="w-5 h-5 text-gray-500" />
             <Select value={orderType} onValueChange={setOrderType}>
@@ -97,9 +123,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             </Select>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3">
-          <ProductFilters filters={filters} onChange={setFilters} />
+          <ProductFilters filters={filters} onChange={handleFilterChange} />
         </div>
       </CardHeader>
       <CardContent className="p-4">
@@ -304,7 +330,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               </CardContent>
             </Card>
           ))}
-          
+
           {items.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <p>No items added yet. Click the buttons above to add items.</p>
