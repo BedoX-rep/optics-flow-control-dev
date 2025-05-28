@@ -42,24 +42,24 @@ const ProductImage: React.FC<ProductImageProps> = ({
       ) : (
         <span className="flex items-center justify-center w-full h-full">
           {alt ? (
-            <img 
-              src={`/Icons categories/${
-                alt === "Single Vision Lenses" ? "Single VIsion.png" :
-                alt === "Progressive Lenses" ? "Progressive.png" :
-                alt === "Frames" ? "Frames.png" :
-                alt === "Sunglasses" ? "Sunglasses.png" :
-                alt === "Contact Lenses" ? "contactlens.png" :
-                alt === "Accessories" ? "Accessories.png" :
-                "placeholder.svg"
-              }`}
-              loading="lazy"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/placeholder.svg';
-              }}
-              alt={alt}
-              className="w-7 h-7"
-            />
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs ${
+              alt === "Single Vision Lenses" ? "bg-blue-500" :
+              alt === "Progressive Lenses" ? "bg-purple-500" :
+              alt === "Frames" ? "bg-green-500" :
+              alt === "Sunglasses" ? "bg-orange-500" :
+              alt === "Contact Lenses" ? "bg-cyan-500" :
+              alt === "Accessories" ? "bg-pink-500" :
+              "bg-gray-400"
+            }`}>
+              {alt === "Single Vision Lenses" ? "SV" :
+               alt === "Progressive Lenses" ? "PG" :
+               alt === "Frames" ? "FR" :
+               alt === "Sunglasses" ? "SG" :
+               alt === "Contact Lenses" ? "CL" :
+               alt === "Accessories" ? "AC" :
+               "?"
+              }
+            </div>
           ) : (
             <Image size={22} className="text-neutral-200" />
           )}
