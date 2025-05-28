@@ -27,6 +27,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
+import AddSupplierDialog from '@/components/AddSupplierDialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -339,6 +340,10 @@ const Purchases = () => {
     setIsSupplierDialogOpen(true);
   };
 
+  const handleSupplierAdded = (supplier: any) => {
+    queryClient.invalidateQueries({ queryKey: ['suppliers', user?.id] });
+  };
+
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -411,54 +416,7 @@ const Purchases = () => {
     }
   };
 
-  const handleSubmitSupplier = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !supplierFormData.name.trim()) return;
-
-    try {
-      setIsSubmitting(true);
-      const supplierData = {
-        name: supplierFormData.name.trim(),
-        contact_person: supplierFormData.contact_person || null,
-        phone: supplierFormData.phone || null,
-        email: supplierFormData.email || null,
-        address: supplierFormData.address || null,
-        notes: supplierFormData.notes || null,
-        user_id: user.id,
-      };
-
-      if (editingSupplier) {
-        const { error } = await supabase
-          .from('suppliers')
-          .update(supplierData)
-          .eq('id', editingSupplier.id)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-        toast({ title: "Success", description: "Supplier updated successfully" });
-      } else {
-        const { error } = await supabase
-          .from('suppliers')
-          .insert(supplierData);
-
-        if (error) throw error;
-        toast({ title: "Success", description: "Supplier added successfully" });
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['suppliers', user.id] });
-      setIsSupplierDialogOpen(false);
-      resetSupplierForm();
-    } catch (error) {
-      console.error('Error saving supplier:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save supplier",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -998,48 +956,11 @@ const Purchases = () => {
       </Dialog>
 
       {/* Add/Edit Supplier Dialog */}
-      <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{editingSupplier ? 'Edit Supplier' : 'Add Supplier'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSupplierSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={supplierFormData.name}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, name: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={supplierFormData.phone}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, phone: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                value={supplierFormData.address}
-                onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsSupplierDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                {editingSupplier ? 'Update' : 'Add'} Supplier
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <AddSupplierDialog
+        isOpen={isSupplierDialogOpen}
+        onClose={() => setIsSupplierDialogOpen(false)}
+        onSupplierAdded={handleSupplierAdded}
+      />
     </div>
   );
 };
