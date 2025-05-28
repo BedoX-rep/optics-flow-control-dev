@@ -336,6 +336,98 @@ export type Database = {
           },
         ]
       }
+      suppliers: {
+        Row: {
+          id: string
+          name: string
+          contact_person: string | null
+          phone: string | null
+          email: string | null
+          address: string | null
+          notes: string | null
+          is_deleted: boolean | null
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          contact_person?: string | null
+          phone?: string | null
+          email?: string | null
+          address?: string | null
+          notes?: string | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          contact_person?: string | null
+          phone?: string | null
+          email?: string | null
+          address?: string | null
+          notes?: string | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          id: string
+          supplier_id: string | null
+          description: string
+          amount: number
+          category: string | null
+          purchase_date: string | null
+          receipt_number: string | null
+          payment_method: string | null
+          notes: string | null
+          is_deleted: boolean | null
+          created_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          supplier_id?: string | null
+          description: string
+          amount: number
+          category?: string | null
+          purchase_date?: string | null
+          receipt_number?: string | null
+          payment_method?: string | null
+          notes?: string | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          supplier_id?: string | null
+          description?: string
+          amount?: number
+          category?: string | null
+          purchase_date?: string | null
+          receipt_number?: string | null
+          payment_method?: string | null
+          notes?: string | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string | null
@@ -358,7 +450,7 @@ export type Database = {
             | null
           trial_used: boolean | null
           user_id: string
-        }
+        }</old_str>
         Insert: {
           created_at?: string | null
           display_name?: string

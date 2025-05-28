@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'fr' | 'ar';
@@ -214,6 +213,44 @@ const pricingTranslations: Translations = {
 const allTranslations: Translations = {
   ...homeTranslations,
   ...pricingTranslations,
+  navigation: {
+    en: {
+      home: 'Home',
+      products: 'Products',
+      receipts: 'Receipts',
+      purchases: 'Purchases',
+      dashboard: 'Dashboard',
+      subscriptions: 'Subscriptions',
+      settings: 'Settings',
+      logout: 'Logout',
+      login: 'Login',
+      register: 'Register',
+    },
+    fr: {
+      home: 'Accueil',
+      products: 'Produits',
+      receipts: 'Reçus',
+      purchases: 'Achats',
+      dashboard: 'Tableau de bord',
+      subscriptions: 'Abonnements',
+      settings: 'Paramètres',
+      logout: 'Déconnexion',
+      login: 'Connexion',
+      register: 'S\'inscrire',
+    },
+    ar: {
+      home: 'الرئيسية',
+      products: 'منتجات',
+      receipts: 'إيصالات',
+      purchases: 'المشتريات',
+      dashboard: 'لوحة التحكم',
+      subscriptions: 'الاشتراكات',
+      settings: 'إعدادات',
+      logout: 'تسجيل الخروج',
+      login: 'تسجيل الدخول',
+      register: 'تسجيل',
+    },
+  },
 };
 
 const LanguageContext = createContext<LanguageContextType>({
@@ -236,10 +273,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     // Save language preference to localStorage
     localStorage.setItem('language', language);
-    
+
     // Set document direction based on language
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-    
+
     // Set html lang attribute
     document.documentElement.lang = language;
   }, [language]);
