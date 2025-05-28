@@ -10,7 +10,7 @@ import {
   DialogHeader, 
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Search, Package, ChevronDown, Save, SaveAll } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, ChevronDown, Save, SaveAll, Upload } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
@@ -18,6 +18,7 @@ import ProductForm, { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
+import { ImportProductsDialog } from "@/components/ImportProductsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { sortProducts, ProductSortable } from "@/components/products/sortProducts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,6 +75,7 @@ const Products = () => {
   const [page, setPage] = useState(0);
   const [editableProducts, setEditableProducts] = useState<EditableProduct[]>([]);
   const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   useEffect(() => {
     setPageReady(true);
@@ -423,6 +425,44 @@ const Products = () => {
     }
   };
 
+  const handleImportProducts = async (importedProducts: any[]) => {
+    if (!user) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      const productsToInsert = importedProducts.map(product => ({
+        ...product,
+        user_id: user.id,
+        is_deleted: false,
+        created_at: new Date().toISOString()
+      }));
+      
+      const { error } = await supabase
+        .from('products')
+        .insert(productsToInsert);
+      
+      if (error) throw error;
+      
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      setIsImportDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: `${importedProducts.length} product(s) imported successfully`,
+      });
+    } catch (error) {
+      console.error('Error importing products:', error);
+      toast({
+        title: "Error",
+        description: "Failed to import products. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredProducts = sortProducts(editableProducts || []);
   const hasEditedProducts = editableProducts.some(p => p.isEdited);
 
@@ -448,6 +488,14 @@ const Products = () => {
               Save All
             </Button>
           )}
+          <Button
+            onClick={() => setIsImportDialogOpen(true)}
+            variant="outline"
+            className="rounded-xl font-medium border-primary/20 text-primary hover:bg-primary/10"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Import
+          </Button>
         </div>
       </div>
 
@@ -779,6 +827,12 @@ const Products = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <ImportProductsDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+        onImport={handleImportProducts}
+      />
     </div>
   );
 };
