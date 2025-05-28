@@ -157,6 +157,70 @@ const OrderItems: React.FC<OrderItemsProps> = ({
         </Alert>
       )}
       <CardHeader className="bg-gray-50/80 border-b p-4">
+        {/* Order Type Section - Prominent Design */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Receipt className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-lg">Order Type</h3>
+                <p className="text-sm text-gray-600">Select the type of service for this order</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={orderType} onValueChange={setOrderType}>
+                <SelectTrigger className={`w-[200px] h-12 text-base font-medium shadow-md transition-all ${
+                  orderType === 'Unspecified' 
+                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100' 
+                    : 'bg-white border-blue-300 text-blue-900 hover:bg-blue-50'
+                }`}>
+                  <SelectValue placeholder="Select Order Type">
+                    <div className="flex items-center gap-2">
+                      {orderType === 'Unspecified' && (
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                      )}
+                      {orderType === 'Unspecified' ? 'Please select an order type' : orderType}
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Unspecified" className="relative">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                      Unspecified
+                    </div>
+                    {orderType === 'Unspecified' && (
+                      <span className="block text-xs text-red-600 mt-0.5">
+                        Please select an order type
+                      </span>
+                    )}
+                  </SelectItem>
+                  <SelectItem value="Montage">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Montage
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Retoyage">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      Retoyage
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Sell">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Sell
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
           <div className="flex items-center gap-4 flex-1">
             <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
@@ -166,8 +230,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               <Plus className="h-4 w-4 mr-2" /> Add Custom
             </Button>
           </div>
-
-          
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
