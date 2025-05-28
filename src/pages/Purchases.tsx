@@ -260,6 +260,7 @@ const Purchases = () => {
   };
 
   const handleRecordNewPurchase = () => {
+    resetPurchaseForm();
     setIsPurchaseDialogOpen(true);
   };
 
