@@ -76,11 +76,13 @@ interface OrderItemsProps {
   orderType: string;
   products: Product[];
   productSearchTerms: Record<string, string>;
+  filters: Record<string, string>;
   setOrderType: (value: string) => void;
   setItems: (items: ReceiptItem[]) => void;
   updateItem: (id: string, field: string, value: string | number) => void;
   removeItem: (id: string) => void;
   setProductSearchTerms: (terms: Record<string, string>) => void;
+  setFilters: (filters: Record<string, string>) => void;
   getFilteredProducts: (searchTerm: string) => Product[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
@@ -140,6 +142,13 @@ const NewReceipt = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
+    const [filters, setFilters] = useState<Record<string, string>>({
+    category: "all_categories",
+    index: "all_indexes", 
+    treatment: "all_treatments",
+    company: "all_companies",
+    stock_status: "all_stock_statuses"
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [advancePayment, setAdvancePayment] = useState(0);
@@ -241,8 +250,33 @@ const NewReceipt = () => {
   }, [searchTerm, clients]);
 
   const getFilteredProducts = (searchTerm: string) => {
+    let filteredProducts = products || [];
+
+    // Apply filter constraints
+    if (filters.category && filters.category !== "all_categories") {
+      filteredProducts = filteredProducts.filter(product => product.category === filters.category);
+    }
+    if (filters.index && filters.index !== "all_indexes") {
+      filteredProducts = filteredProducts.filter(product => product.index === filters.index);
+    }
+    if (filters.treatment && filters.treatment !== "all_treatments") {
+      filteredProducts = filteredProducts.filter(product => product.treatment === filters.treatment);
+    }
+    if (filters.company && filters.company !== "all_companies") {
+      filteredProducts = filteredProducts.filter(product => product.company === filters.company);
+    }
+    if (filters.stock_status && filters.stock_status !== "all_stock_statuses") {
+      filteredProducts = filteredProducts.filter(product => product.stock_status === filters.stock_status);
+    }
+
+    // Apply search term if provided
+    if (!searchTerm.trim()) {
+      return filteredProducts;
+    }
+
     const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
-    return products.filter(product => {
+
+    return filteredProducts.filter(product => {
       const productName = product.name.toLowerCase();
       return searchWords.every(word => productName.includes(word));
     });
@@ -488,7 +522,7 @@ const NewReceipt = () => {
           const StepIcon = step.icon;
           const isActive = currentTab === step.id;
           const isCompleted = index < currentStepIndex;
-          
+
           // Add validation checks
           const hasError = (step.id === 'client' && !selectedClient) || 
                           (step.id === 'order' && items.length === 0);
@@ -781,13 +815,15 @@ const NewReceipt = () => {
         <OrderItems
           items={items}
           orderType={orderType}
-          products={products}
+          products={products || []}
           productSearchTerms={productSearchTerms}
+          filters={filters}
           setOrderType={setOrderType}
           setItems={setItems}
           updateItem={updateItem}
           removeItem={removeItem}
           setProductSearchTerms={setProductSearchTerms}
+          setFilters={setFilters}
           getFilteredProducts={getFilteredProducts}
           getEyeValues={getEyeValues}
           calculateMarkup={calculateMarkup}
@@ -1076,7 +1112,7 @@ const NewReceipt = () => {
           if (product && product.stock_status === 'inStock' && product.stock !== null) {
             const newStock = Math.max(0, (product.stock || 0) - (item.quantity || 1));
             const newStockStatus = newStock === 0 ? 'Out Of Stock' : 'inStock';
-            
+
             const { error: stockError } = await supabase
               .from('products')
               .update({ 
@@ -1085,7 +1121,7 @@ const NewReceipt = () => {
               })
               .eq('id', item.productId)
               .eq('user_id', user.id);
-            
+
             if (stockError) {
               console.error('Error updating stock:', stockError);
               // Don't throw error here to avoid breaking the receipt save

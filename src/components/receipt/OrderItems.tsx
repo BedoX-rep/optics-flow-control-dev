@@ -13,17 +13,20 @@ import {
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Copy, Plus, Receipt, Trash } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import ProductFilters from '@/components/ProductFilters';
 
 interface OrderItemsProps {
   items: any[];
   orderType: string;
   products: any[];
   productSearchTerms: Record<string, string>;
+  filters: Record<string, string>;
   setOrderType: (value: string) => void;
   setItems: (items: any[]) => void;
   updateItem: (id: string, field: string, value: any) => void;
   removeItem: (id: string) => void;
   setProductSearchTerms: (terms: Record<string, string>) => void;
+  setFilters: (filters: Record<string, string>) => void;
   getFilteredProducts: (searchTerm: string) => any[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
@@ -34,11 +37,13 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   orderType,
   products,
   productSearchTerms,
+  filters,
   setOrderType,
   setItems,
   updateItem,
   removeItem,
   setProductSearchTerms,
+  setFilters,
   getFilteredProducts,
   getEyeValues,
   calculateMarkup
@@ -54,7 +59,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="bg-gray-50/80 border-b p-4">
-        <div className="flex flex-wrap items-center gap-4 justify-between">
+        <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
           <div className="flex items-center gap-4 flex-1">
             <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
               <Plus className="h-4 w-4 mr-2" /> Add Product
@@ -91,6 +96,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               </SelectContent>
             </Select>
           </div>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <ProductFilters filters={filters} onChange={setFilters} />
         </div>
       </CardHeader>
       <CardContent className="p-4">
