@@ -1014,8 +1014,7 @@ const Purchases = () => {
           <DialogHeader>
             <DialogTitle>Edit Purchase</DialogTitle>
           </DialogHeader>
-          {editingPurchase && (
-            <form onSubmit={handleUpdatePurchase} className="space-y-4">
+          <form onSubmit={handleUpdatePurchase} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <Label htmlFor="edit_description">Description *</Label>
@@ -1288,7 +1287,6 @@ const Purchases = () => {
                 </Button>
               </DialogFooter>
             </form>
-          )}
         </DialogContent>
       </Dialog>
 
