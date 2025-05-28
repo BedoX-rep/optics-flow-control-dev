@@ -804,37 +804,37 @@ const Purchases = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="w-full"
                   >
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
+                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 border-l-4 border-l-primary w-full">
                       <CardContent className="p-6">
-                        <div className="flex flex-col gap-3">
+                        <div className="space-y-4">
+                          {/* Header Section */}
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="text-base font-semibold truncate">
-                                      {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
-                                    </h3>
-                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
-                                      {purchase.receipt_number}
-                                    </span>
-                                  </div>
-                                  <span className="text-xs text-gray-500 mt-0.5 block">
-                                    {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
-                                  </span>
-                                </div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <Building2 className="h-4 w-4 text-primary" />
+                                <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
+                                </h3>
                               </div>
-                              {purchase.description && (
-                                <p className="text-sm text-gray-600 mb-2">{purchase.description}</p>
-                              )}
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
+                                {purchase.category && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                                      {purchase.category}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
-
                             <div className="flex gap-1 flex-shrink-0">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => handleEditPurchase(purchase)}
-                                className="h-8 w-8"
+                                className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -842,22 +842,106 @@ const Purchases = () => {
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => handleDeletePurchase(purchase.id)}
-                                className="h-8 w-8 hover:bg-red-100"
+                                className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
                               >
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="bg-gray-50 rounded-lg p-3">
-                              <p className="text-xs text-gray-500 mb-0.5">Amount HT</p>
-                              <p className="font-medium text-blue-600">{purchase.amount_ht.toFixed(2)} DH</p>
+                          {/* Description */}
+                          {purchase.description && (
+                            <div className="bg-blue-50 rounded-lg p-3 border-l-2 border-blue-200">
+                              <p className="text-sm text-gray-700 font-medium">{purchase.description}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-3">
-                              <p className="text-xs text-gray-500 mb-0.5">Amount TTC</p>
-                              <p className="font-medium text-green-600">{purchase.amount_ttc.toFixed(2)} DH</p>
+                          )}
+
+                          {/* Financial Information */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-3 w-3 text-blue-600" />
+                                <p className="text-xs font-medium text-blue-700">Amount HT</p>
+                              </div>
+                              <p className="text-lg font-bold text-blue-800">{(purchase.amount_ht || purchase.amount).toFixed(2)} DH</p>
                             </div>
+                            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-3 w-3 text-green-600" />
+                                <p className="text-xs font-medium text-green-700">Amount TTC</p>
+                              </div>
+                              <p className="text-lg font-bold text-green-800">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
+                            </div>
+                          </div>
+
+                          {/* Payment Information */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-gray-50 rounded-lg p-3 border">
+                              <p className="text-xs text-gray-500 mb-1">Advance Payment</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
+                              </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3 border">
+                              <p className="text-xs text-gray-500 mb-1">Balance</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Status and Payment Method */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                purchase.payment_status === 'Paid' 
+                                  ? 'bg-green-100 text-green-800 border border-green-200'
+                                  : purchase.payment_status === 'Partially Paid'
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : 'bg-red-100 text-red-800 border border-red-200'
+                              }`}>
+                                {purchase.payment_status || 'Unpaid'}
+                              </span>
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {purchase.payment_method}
+                              </span>
+                            </div>
+                            {purchase.payment_urgency && (
+                              <div className="flex items-center gap-1 text-xs text-orange-600">
+                                <Calendar className="h-3 w-3" />
+                                <span>Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Recurring Information */}
+                          {purchase.recurring_type && (
+                            <div className="bg-purple-50 rounded-lg p-2 border border-purple-200">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span className="text-xs font-medium text-purple-700">
+                                  Recurring: {RECURRING_TYPES.find(t => t.value === purchase.recurring_type)?.label}
+                                </span>
+                                {purchase.next_recurring_date && (
+                                  <span className="text-xs text-purple-600 ml-auto">
+                                    Next: {format(new Date(purchase.next_recurring_date), 'MMM dd, yyyy')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Notes */}
+                          {purchase.notes && (
+                            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                              <p className="text-xs font-medium text-amber-700 mb-1">Notes</p>
+                              <p className="text-sm text-amber-800">{purchase.notes}</p>
+                            </div>
+                          )}
+
+                          {/* Created Date */}
+                          <div className="text-xs text-gray-400 text-right">
+                            Created: {format(new Date(purchase.created_at), 'MMM dd, yyyy HH:mm')}
                           </div>
                         </div>
                       </CardContent>
