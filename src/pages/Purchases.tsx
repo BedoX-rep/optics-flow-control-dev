@@ -97,13 +97,7 @@ const Purchases = () => {
   // Handle URL-based navigation
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes('/record-purchase')) {
-      setActiveTab('purchases');
-      setIsPurchaseDialogOpen(true);
-    } else if (path.includes('/add-supplier')) {
-      setActiveTab('suppliers');
-      setIsSupplierDialogOpen(true);
-    } else if (path.includes('/suppliers')) {
+    if (path.includes('/suppliers')) {
       setActiveTab('suppliers');
     } else {
       setActiveTab('purchases');
@@ -260,7 +254,6 @@ const Purchases = () => {
       });
     } else {
       resetPurchaseForm();
-      navigate('/purchases/record-purchase');
     }
     setIsPurchaseDialogOpen(true);
   };
@@ -278,7 +271,6 @@ const Purchases = () => {
       });
     } else {
       resetSupplierForm();
-      navigate('/purchases/add-supplier');
     }
     setIsSupplierDialogOpen(true);
   };
@@ -322,7 +314,6 @@ const Purchases = () => {
       queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
       setIsPurchaseDialogOpen(false);
       resetPurchaseForm();
-      navigate('/purchases');
     } catch (error) {
       console.error('Error saving purchase:', error);
       toast({
@@ -372,7 +363,6 @@ const Purchases = () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers', user.id] });
       setIsSupplierDialogOpen(false);
       resetSupplierForm();
-      navigate('/purchases/suppliers');
     } catch (error) {
       console.error('Error saving supplier:', error);
       toast({
@@ -848,10 +838,7 @@ const Purchases = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => {
-                  setIsPurchaseDialogOpen(false);
-                  navigate('/purchases');
-                }}
+                onClick={() => setIsPurchaseDialogOpen(false)}
                 disabled={isSubmitting}
               >
                 Cancel
@@ -946,10 +933,7 @@ const Purchases = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => {
-                  setIsSupplierDialogOpen(false);
-                  navigate('/purchases/suppliers');
-                }}
+                onClick={() => setIsSupplierDialogOpen(false)}
                 disabled={isSubmitting}
               >
                 Cancel
