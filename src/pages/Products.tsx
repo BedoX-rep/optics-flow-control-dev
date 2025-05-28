@@ -397,6 +397,7 @@ const Products = () => {
           const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
           return { ...updated, isEdited };
         }
+
         return product;
       })
     );
