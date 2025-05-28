@@ -90,6 +90,10 @@ const Purchases = () => {
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
+  const [dateRange, setDateRange] = useState({
+    from: '',
+    to: ''
+  });
 
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
@@ -112,10 +116,10 @@ const Purchases = () => {
   const [purchaseFormData, setPurchaseFormData] = useState({
     supplier_id: '',
     description: '',
-    amount: '',
+    amount_ht: '',
+    amount_ttc: '',
     category: '',
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
-    receipt_number: '',
     payment_method: 'Cash',
     notes: '',
   });
@@ -195,8 +199,20 @@ const Purchases = () => {
       filtered = filtered.filter(purchase => purchase.supplier_id === supplierFilter);
     }
 
+    if (dateRange.from) {
+      filtered = filtered.filter(purchase => 
+        new Date(purchase.purchase_date) >= new Date(dateRange.from)
+      );
+    }
+
+    if (dateRange.to) {
+      filtered = filtered.filter(purchase => 
+        new Date(purchase.purchase_date) <= new Date(dateRange.to)
+      );
+    }
+
     return filtered;
-  }, [purchases, purchaseSearchTerm, categoryFilter, supplierFilter]);
+  }, [purchases, purchaseSearchTerm, categoryFilter, supplierFilter, dateRange]);
 
   // Filter suppliers
   const filteredSuppliers = useMemo(() => {
@@ -211,17 +227,17 @@ const Purchases = () => {
 
   // Calculate total expenses
   const totalExpenses = useMemo(() => {
-    return filteredPurchases.reduce((sum, purchase) => sum + purchase.amount, 0);
+    return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [filteredPurchases]);
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({
       supplier_id: '',
       description: '',
-      amount: '',
+      amount_ht: '',
+      amount_ttc: '',
       category: '',
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
-      receipt_number: '',
       payment_method: 'Cash',
       notes: '',
     });
@@ -246,10 +262,10 @@ const Purchases = () => {
       setPurchaseFormData({
         supplier_id: purchase.supplier_id || '',
         description: purchase.description,
-        amount: purchase.amount.toString(),
+        amount_ht: (purchase.amount_ht || purchase.amount).toString(),
+        amount_ttc: (purchase.amount_ttc || purchase.amount).toString(),
         category: purchase.category || '',
         purchase_date: format(new Date(purchase.purchase_date), 'yyyy-MM-dd'),
-        receipt_number: purchase.receipt_number || '',
         payment_method: purchase.payment_method,
         notes: purchase.notes || '',
       });
@@ -260,12 +276,8 @@ const Purchases = () => {
   };
 
   const handleRecordNewPurchase = () => {
-    console.log('handleRecordNewPurchase called');
-    console.log('Before reset - editingPurchase:', editingPurchase);
     resetPurchaseForm();
-    console.log('After reset - editingPurchase:', editingPurchase);
     setIsPurchaseDialogOpen(true);
-    console.log('Dialog should be open now');
   };
 
   const handleOpenSupplierDialog = (supplier?: Supplier) => {
@@ -288,10 +300,22 @@ const Purchases = () => {
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount) {
+    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amountHt = parseFloat(purchaseFormData.amount_ht);
+    const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
         variant: "destructive",
       });
       return;
@@ -303,10 +327,11 @@ const Purchases = () => {
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
-        amount: parseFloat(purchaseFormData.amount),
+        amount_ht: amountHt,
+        amount_ttc: amountTtc,
+        amount: amountTtc, // Keep for backward compatibility
         category: purchaseFormData.category || null,
         purchase_date: purchaseFormData.purchase_date,
-        receipt_number: purchaseFormData.receipt_number || null,
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         user_id: user.id,
@@ -495,6 +520,34 @@ const Purchases = () => {
                   />
                 </div>
 
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    placeholder="From date"
+                    className="w-40"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                  />
+                  <span className="text-sm text-gray-500">to</span>
+                  <Input
+                    type="date"
+                    placeholder="To date"
+                    className="w-40"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                  />
+                  {(dateRange.from || dateRange.to) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDateRange({ from: '', to: '' })}
+                      className="text-sm"
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by category" />
@@ -562,9 +615,16 @@ const Purchases = () => {
                           <CardTitle className="text-lg font-semibold mb-1">
                             {purchase.description}
                           </CardTitle>
-                          <p className="text-2xl font-bold text-green-600">
-                            ${purchase.amount.toFixed(2)}
-                          </p>
+                          <div className="space-y-1">
+                            <p className="text-lg font-bold text-green-600">
+                              ${(purchase.amount_ttc || purchase.amount).toFixed(2)} TTC
+                            </p>
+                            {purchase.amount_ht && (
+                              <p className="text-sm text-gray-500">
+                                ${purchase.amount_ht.toFixed(2)} HT
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div className="flex gap-1">
                           <Button
@@ -728,7 +788,6 @@ const Purchases = () => {
       </Tabs>
 
       {/* Record Purchase Dialog */}
-      {console.log('Dialog render check:', { isPurchaseDialogOpen, editingPurchase, shouldShow: isPurchaseDialogOpen && !editingPurchase })}
       <RecordPurchaseDialog
         isOpen={isPurchaseDialogOpen && !editingPurchase}
         onClose={() => setIsPurchaseDialogOpen(false)}
@@ -759,14 +818,28 @@ const Purchases = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">Amount *</Label>
+                  <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
                   <Input
-                    id="amount"
+                    id="amount_ht"
                     type="number"
                     step="0.01"
                     min="0"
-                    value={purchaseFormData.amount}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }))}
+                    value={purchaseFormData.amount_ht}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
+                  <Input
+                    id="amount_ttc"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={purchaseFormData.amount_ttc}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
                     placeholder="0.00"
                     required
                   />
@@ -839,15 +912,7 @@ const Purchases = () => {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="receipt_number">Receipt Number</Label>
-                  <Input
-                    id="receipt_number"
-                    value={purchaseFormData.receipt_number}
-                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, receipt_number: e.target.value }))}
-                    placeholder="Enter receipt number"
-                  />
-                </div>
+                
 
                 <div className="col-span-2">
                   <Label htmlFor="notes">Notes</Label>
@@ -872,7 +937,7 @@ const Purchases = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount}
+                  disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc}
                 >
                   {isSubmitting ? 'Saving...' : 'Update Purchase'}
                 </Button>

@@ -71,11 +71,11 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   const [formData, setFormData] = useState({
     description: '',
-    amount: '',
+    amount_ht: '',
+    amount_ttc: '',
     supplier_id: '',
     category: '',
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
-    receipt_number: '',
     payment_method: 'Cash',
     notes: ''
   });
@@ -83,11 +83,11 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const resetForm = () => {
     setFormData({
       description: '',
-      amount: '',
+      amount_ht: '',
+      amount_ttc: '',
       supplier_id: '',
       category: '',
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
-      receipt_number: '',
       payment_method: 'Cash',
       notes: ''
     });
@@ -105,20 +105,31 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       return;
     }
 
-    if (!formData.description.trim() || !formData.amount) {
+    if (!formData.description.trim() || !formData.amount_ht || !formData.amount_ttc) {
       toast({
         title: "Error",
-        description: "Please fill in description and amount",
+        description: "Please fill in description, HT amount, and TTC amount",
         variant: "destructive",
       });
       return;
     }
 
-    const amount = parseFloat(formData.amount);
-    if (isNaN(amount) || amount <= 0) {
+    const amountHt = parseFloat(formData.amount_ht);
+    const amountTtc = parseFloat(formData.amount_ttc);
+    
+    if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
       toast({
         title: "Error",
-        description: "Please enter a valid amount",
+        description: "Please enter valid amounts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
         variant: "destructive",
       });
       return;
@@ -130,11 +141,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       const purchaseData = {
         user_id: user.id,
         description: formData.description.trim(),
-        amount: amount,
+        amount_ht: amountHt,
+        amount_ttc: amountTtc,
+        amount: amountTtc, // Keep for backward compatibility
         supplier_id: formData.supplier_id || null,
         category: formData.category || null,
         purchase_date: formData.purchase_date,
-        receipt_number: formData.receipt_number || null,
         payment_method: formData.payment_method,
         notes: formData.notes || null,
         is_deleted: false
@@ -198,14 +210,29 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             </div>
 
             <div>
-              <Label htmlFor="amount">Amount *</Label>
+              <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
               <Input
-                id="amount"
+                id="amount_ht"
                 type="number"
                 step="0.01"
                 min="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                value={formData.amount_ht}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount_ht: e.target.value }))}
+                placeholder="0.00"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
+              <Input
+                id="amount_ttc"
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={formData.amount_ttc}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount_ttc: e.target.value }))}
                 placeholder="0.00"
                 required
                 disabled={isSubmitting}
@@ -283,17 +310,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="receipt_number">Receipt Number</Label>
-              <Input
-                id="receipt_number"
-                value={formData.receipt_number}
-                onChange={(e) => setFormData(prev => ({ ...prev, receipt_number: e.target.value }))}
-                placeholder="Enter receipt number (optional)"
-                disabled={isSubmitting}
-              />
-            </div>
-
             <div className="md:col-span-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea
@@ -318,7 +334,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.description.trim() || !formData.amount}
+              disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
             >
               {isSubmitting ? 'Recording...' : 'Record Purchase'}
             </Button>
