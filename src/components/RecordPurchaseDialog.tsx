@@ -226,15 +226,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             <div>
               <Label htmlFor="supplier">Supplier</Label>
               <Select
-                value={formData.supplier_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                value={formData.supplier_id || undefined}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select supplier (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No supplier</SelectItem>
                   {suppliers.map(supplier => (
                     <SelectItem key={supplier.id} value={supplier.id}>
                       {supplier.name}

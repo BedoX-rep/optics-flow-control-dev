@@ -785,14 +785,13 @@ const Purchases = () => {
                 <div>
                   <Label htmlFor="supplier">Supplier</Label>
                   <Select
-                    value={purchaseFormData.supplier_id}
-                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value }))}
+                    value={purchaseFormData.supplier_id || undefined}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value || '' }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select supplier (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No supplier</SelectItem>
                       {suppliers.map(supplier => (
                         <SelectItem key={supplier.id} value={supplier.id}>
                           {supplier.name}
