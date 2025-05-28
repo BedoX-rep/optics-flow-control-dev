@@ -28,11 +28,33 @@ interface Supplier {
   name: string;
 }
 
+interface Purchase {
+  id: string;
+  supplier_id?: string;
+  description: string;
+  amount: number;
+  amount_ht?: number;
+  amount_ttc?: number;
+  category?: string;
+  purchase_date: string;
+  receipt_number?: string;
+  payment_method: string;
+  notes?: string;
+  advance_payment?: number;
+  balance?: number;
+  payment_status?: string;
+  payment_urgency?: string;
+  recurring_type?: string;
+  next_recurring_date?: string;
+  created_at: string;
+}
+
 interface RecordPurchaseDialogProps {
   isOpen: boolean;
   onClose: () => void;
   suppliers: Supplier[];
   onSuccess: () => void;
+  editingPurchase?: Purchase | null;
 }
 
 const EXPENSE_CATEGORIES = [
@@ -71,7 +93,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   isOpen,
   onClose,
   suppliers,
-  onSuccess
+  onSuccess,
+  editingPurchase
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -92,6 +115,29 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_urgency: '',
     recurring_type: ''
   });
+
+  // Initialize form with editing purchase data
+  React.useEffect(() => {
+    if (editingPurchase) {
+      setFormData({
+        description: editingPurchase.description,
+        amount_ht: (editingPurchase.amount_ht || editingPurchase.amount).toString(),
+        amount_ttc: (editingPurchase.amount_ttc || editingPurchase.amount).toString(),
+        supplier_id: editingPurchase.supplier_id || '',
+        category: editingPurchase.category || '',
+        purchase_date: format(new Date(editingPurchase.purchase_date), 'yyyy-MM-dd'),
+        payment_method: editingPurchase.payment_method,
+        notes: editingPurchase.notes || '',
+        advance_payment: (editingPurchase.advance_payment || 0).toString(),
+        balance: (editingPurchase.balance || 0).toString(),
+        payment_status: editingPurchase.payment_status || 'Unpaid',
+        payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
+        recurring_type: editingPurchase.recurring_type || ''
+      });
+    } else {
+      resetForm();
+    }
+  }, [editingPurchase]);
 
   const resetForm = () => {
     setFormData({
@@ -221,18 +267,37 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         is_deleted: false
       };
 
-      const { error } = await supabase
-        .from('purchases')
-        .insert(purchaseData);
+      if (editingPurchase) {
+        // Update existing purchase
+        const { error } = await supabase
+          .from('purchases')
+          .update(purchaseData)
+          .eq('id', editingPurchase.id)
+          .eq('user_id', user.id);
 
-      if (error) {
-        throw error;
+        if (error) {
+          throw error;
+        }
+
+        toast({
+          title: "Success",
+          description: "Purchase updated successfully",
+        });
+      } else {
+        // Insert new purchase
+        const { error } = await supabase
+          .from('purchases')
+          .insert(purchaseData);
+
+        if (error) {
+          throw error;
+        }
+
+        toast({
+          title: "Success",
+          description: "Purchase recorded successfully",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: "Purchase recorded successfully",
-      });
 
       resetForm();
       onSuccess();
@@ -261,7 +326,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Record New Purchase</DialogTitle>
+          <DialogTitle>{editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -532,7 +597,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
               type="submit" 
               disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
             >
-              {isSubmitting ? 'Recording...' : 'Record Purchase'}
+              {isSubmitting ? (editingPurchase ? 'Updating...' : 'Recording...') : (editingPurchase ? 'Update Purchase' : 'Record Purchase')}
             </Button>
           </DialogFooter>
         </form>
