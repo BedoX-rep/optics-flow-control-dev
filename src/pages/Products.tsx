@@ -331,74 +331,70 @@ const Products = () => {
 
         // Handle automated name generation
         if (field === 'automated_name' && value === true) {
-
-            // Generate name automatically when toggle is turned on
-            const getCategoryAbbr = (category: string | undefined) => {
-              switch (category) {
-                case 'Single Vision Lenses': return 'SV';
-                case 'Progressive Lenses': return 'PG';
-                case 'Frames': return 'FR';
-                case 'Sunglasses': return 'SG';
-                case 'Contact Lenses': return 'CL';
-                case 'Accessories': return 'AC';
-                default: return '';
-              }
-            };
-
-            let abbr = getCategoryAbbr(updated.category);
-            let parts = [abbr];
-
-            if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
-              if (updated.index) parts.push(updated.index);
-              if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
+          // Generate name automatically when toggle is turned on
+          const getCategoryAbbr = (category: string | undefined) => {
+            switch (category) {
+              case 'Single Vision Lenses': return 'SV';
+              case 'Progressive Lenses': return 'PG';
+              case 'Frames': return 'FR';
+              case 'Sunglasses': return 'SG';
+              case 'Contact Lenses': return 'CL';
+              case 'Accessories': return 'AC';
+              default: return '';
             }
-            if (updated.company) parts.push(updated.company?.toUpperCase());
-            if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
-            if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
-              parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
-            }
+          };
 
-            const generatedName = parts.filter(Boolean).join(" ");
-            updated = { ...updated, name: generatedName };
-          } else if (updated.automated_name && (
-            field === 'category' || field === 'index' || field === 'treatment' || 
-            field === 'company' || field === 'gamma' || field === 'stock_status'
-          )) {
-            // Regenerate name when automated_name is true and relevant fields change
-            const getCategoryAbbr = (category: string | undefined) => {
-              switch (category) {
-                case 'Single Vision Lenses': return 'SV';
-                case 'Progressive Lenses': return 'PG';
-                case 'Frames': return 'FR';
-                case 'Sunglasses': return 'SG';
-                case 'Contact Lenses': return 'CL';
-                case 'Accessories': return 'AC';
-                default: return '';
-              }
-            };
+          let abbr = getCategoryAbbr(updated.category);
+          let parts = [abbr];
 
-            let abbr = getCategoryAbbr(updated.category);
-            let parts = [abbr];
-
-            if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
-              if (updated.index) parts.push(updated.index);
-              if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
-            }
-            if (updated.company) parts.push(updated.company?.toUpperCase());
-            if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
-            if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
-              parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
-            }
-
-            const generatedName = parts.filter(Boolean).join(" ");
-            updated = { ...updated, name: generatedName };
+          if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+            if (updated.index) parts.push(updated.index);
+            if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
+          }
+          if (updated.company) parts.push(updated.company?.toUpperCase());
+          if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
+          if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
+            parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
           }
 
-          const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
-          return { ...updated, isEdited };
+          const generatedName = parts.filter(Boolean).join(" ");
+          updated = { ...updated, name: generatedName };
+        } else if (updated.automated_name && (
+          field === 'category' || field === 'index' || field === 'treatment' || 
+          field === 'company' || field === 'gamma' || field === 'stock_status'
+        )) {
+          // Regenerate name when automated_name is true and relevant fields change
+          const getCategoryAbbr = (category: string | undefined) => {
+            switch (category) {
+              case 'Single Vision Lenses': return 'SV';
+              case 'Progressive Lenses': return 'PG';
+              case 'Frames': return 'FR';
+              case 'Sunglasses': return 'SG';
+              case 'Contact Lenses': return 'CL';
+              case 'Accessories': return 'AC';
+              default: return '';
+            }
+          };
+
+          let abbr = getCategoryAbbr(updated.category);
+          let parts = [abbr];
+
+          if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+            if (updated.index) parts.push(updated.index);
+            if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
+          }
+          if (updated.company) parts.push(updated.company?.toUpperCase());
+          if (updated.gamma) parts.push(updated.gamma?.toUpperCase());
+          if (updated.stock_status === 'inStock' || updated.stock_status === 'Fabrication') {
+            parts.push(updated.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
+          }
+
+          const generatedName = parts.filter(Boolean).join(" ");
+          updated = { ...updated, name: generatedName };
         }
 
-        return product;
+        const isEdited = JSON.stringify(updated) !== JSON.stringify({ ...originalProduct, isEdited: false });
+        return { ...updated, isEdited };
       })
     );
   };
