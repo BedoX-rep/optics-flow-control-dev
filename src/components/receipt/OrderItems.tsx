@@ -167,33 +167,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-gray-500" />
-            <Select value={orderType} onValueChange={setOrderType}>
-              <SelectTrigger className={`w-[160px] ${
-                orderType === 'Unspecified' 
-                  ? 'bg-red-50 border-red-200 text-red-700' 
-                  : 'bg-green-50 border-green-200 text-green-700'
-              }`}>
-                <SelectValue placeholder="Order Type">
-                  {orderType === 'Unspecified' ? 'Please select an order type' : orderType}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Unspecified" className="relative">
-                  Unspecified
-                  {orderType === 'Unspecified' && (
-                    <span className="block text-xs text-red-600 mt-0.5">
-                      Please select an order type
-                    </span>
-                  )}
-                </SelectItem>
-                <SelectItem value="Montage">Montage</SelectItem>
-                <SelectItem value="Retoyage">Retoyage</SelectItem>
-                <SelectItem value="Sell">Sell</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

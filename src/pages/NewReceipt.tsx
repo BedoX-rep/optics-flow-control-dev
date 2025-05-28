@@ -913,6 +913,14 @@ const NewReceipt = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
+          {orderType === 'Unspecified' && (
+            <Alert className="mb-6 border-red-200 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-700">
+                <strong>Order Type Required:</strong> Please select an order type in the Order Details tab before finalizing this receipt. The order type determines how services and costs are calculated.
+              </AlertDescription>
+            </Alert>
+          )}
           {outOfStockItems.length > 0 && (
             <Alert className="mb-6 border-red-200 bg-red-50">
               <AlertCircle className="h-4 w-4 text-red-600" />
@@ -1071,6 +1079,16 @@ const NewReceipt = () => {
         description: "Please add at least one item to the receipt.",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (orderType === 'Unspecified') {
+      toast({
+        title: "Order Type Required",
+        description: "Please select an order type before saving the receipt.",
+        variant: "destructive",
+      });
+      setCurrentTab('order'); // Navigate back to order tab
       return;
     }
 
