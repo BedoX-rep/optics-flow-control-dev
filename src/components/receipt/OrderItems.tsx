@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Copy, Plus, Receipt, Trash } from 'lucide-react';
+import { Copy, Plus, Receipt, Trash, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -127,8 +127,35 @@ const OrderItems: React.FC<OrderItemsProps> = ({
     }
   }, [items, products, checkOutOfStockWarning]);
 
+  const outOfStockItems = items.filter(item => {
+    if (item.productId) {
+      const product = products.find(p => p.id === item.productId);
+      return product?.stock_status === 'Out Of Stock';
+    }
+    return false;
+  });
+
   return (
     <Card className="border-0 shadow-lg">
+      {outOfStockItems.length > 0 && (
+        <Alert className="m-4 border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-700">
+            <strong>Warning:</strong> The following products are out of stock:
+            <ul className="mt-1 list-disc list-inside">
+              {outOfStockItems.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                return (
+                  <li key={item.id} className="text-sm">
+                    {product?.name || 'Unknown Product'}
+                  </li>
+                );
+              })}
+            </ul>
+            You can still save this receipt, but consider updating stock or using alternative products.
+          </AlertDescription>
+        </Alert>
+      )}
       <CardHeader className="bg-gray-50/80 border-b p-4">
         <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
           <div className="flex items-center gap-4 flex-1">

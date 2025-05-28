@@ -129,8 +129,7 @@ const NewReceipt = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const checkOutOfStockRef = useRef<(() => boolean) | null>(null);
-  const [pendingSave, setPendingSave] = useState(false);
+  
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -896,15 +895,43 @@ const NewReceipt = () => {
     );
   };
 
-  const renderFinalizeTab = () => (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gray-50 border-b">
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Receipt Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
+  const renderFinalizeTab = () => {
+    const outOfStockItems = items.filter(item => {
+      if (item.productId) {
+        const product = products.find(p => p.id === item.productId);
+        return product?.stock_status === 'Out Of Stock';
+      }
+      return false;
+    });
+
+    return (
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gray-50 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Receipt Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          {outOfStockItems.length > 0 && (
+            <Alert className="mb-6 border-red-200 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-700">
+                <strong>Warning:</strong> This receipt contains out-of-stock products:
+                <ul className="mt-1 list-disc list-inside">
+                  {outOfStockItems.map(item => {
+                    const product = products.find(p => p.id === item.productId);
+                    return (
+                      <li key={item.id} className="text-sm">
+                        {product?.name || 'Unknown Product'}
+                      </li>
+                    );
+                  })}
+                </ul>
+                You can still proceed to save this receipt.
+              </AlertDescription>
+            </Alert>
+          )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             {items.length === 0 && (
@@ -1014,9 +1041,10 @@ const NewReceipt = () => {
             </div>
           </CardContent>
         )}
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   const handleSave = async () => {
     if (!user) {
@@ -1046,17 +1074,10 @@ const NewReceipt = () => {
       return;
     }
 
-    // Check for out-of-stock items
-    if (checkOutOfStockRef.current && checkOutOfStockRef.current()) {
-      setPendingSave(true);
-      return; // Wait for user decision
-    }
-
     await performSave();
   };
 
   const performSave = async () => {
-    setPendingSave(false);
 
     try {
       setIsLoading(true);
@@ -1253,40 +1274,7 @@ const NewReceipt = () => {
         autoMontage={autoMontage}
         onAutoMontageChange={setAutoMontage}
       />
-      <AnimatePresence>
-        {pendingSave && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
-          >
-            <div className="relative p-4 w-full max-w-md h-auto">
-              <Card className="shadow-lg border-0">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-lg font-semibold">
-                    Out of Stock Warning
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <p className="mb-4 text-sm text-gray-600">
-                    You are about to save a receipt with out-of-stock products.
-                    Do you want to proceed?
-                  </p>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onClick={() => setPendingSave(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={performSave}>
-                      Proceed
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
     </div>
   );
 };
