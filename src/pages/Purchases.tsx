@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +80,8 @@ const Purchases = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('purchases');
   
   // Search and filter states
@@ -90,6 +93,22 @@ const Purchases = () => {
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
+
+  // Handle URL-based navigation
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/record-purchase')) {
+      setActiveTab('purchases');
+      setIsPurchaseDialogOpen(true);
+    } else if (path.includes('/add-supplier')) {
+      setActiveTab('suppliers');
+      setIsSupplierDialogOpen(true);
+    } else if (path.includes('/suppliers')) {
+      setActiveTab('suppliers');
+    } else {
+      setActiveTab('purchases');
+    }
+  }, [location.pathname]);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -241,6 +260,7 @@ const Purchases = () => {
       });
     } else {
       resetPurchaseForm();
+      navigate('/purchases/record-purchase');
     }
     setIsPurchaseDialogOpen(true);
   };
@@ -258,6 +278,7 @@ const Purchases = () => {
       });
     } else {
       resetSupplierForm();
+      navigate('/purchases/add-supplier');
     }
     setIsSupplierDialogOpen(true);
   };
@@ -301,6 +322,7 @@ const Purchases = () => {
       queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
       setIsPurchaseDialogOpen(false);
       resetPurchaseForm();
+      navigate('/purchases');
     } catch (error) {
       console.error('Error saving purchase:', error);
       toast({
@@ -350,6 +372,7 @@ const Purchases = () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers', user.id] });
       setIsSupplierDialogOpen(false);
       resetSupplierForm();
+      navigate('/purchases/suppliers');
     } catch (error) {
       console.error('Error saving supplier:', error);
       toast({
@@ -825,7 +848,10 @@ const Purchases = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setIsPurchaseDialogOpen(false)}
+                onClick={() => {
+                  setIsPurchaseDialogOpen(false);
+                  navigate('/purchases');
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
@@ -920,7 +946,10 @@ const Purchases = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setIsSupplierDialogOpen(false)}
+                onClick={() => {
+                  setIsSupplierDialogOpen(false);
+                  navigate('/purchases/suppliers');
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
