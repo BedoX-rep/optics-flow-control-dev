@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
 
 interface Supplier {
   id: string;
@@ -93,6 +94,9 @@ const Purchases = () => {
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
+  const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -103,9 +107,6 @@ const Purchases = () => {
       setActiveTab('purchases');
     }
   }, [location.pathname]);
-  const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [purchaseFormData, setPurchaseFormData] = useState({
@@ -255,6 +256,10 @@ const Purchases = () => {
     } else {
       resetPurchaseForm();
     }
+    setIsPurchaseDialogOpen(true);
+  };
+
+  const handleRecordNewPurchase = () => {
     setIsPurchaseDialogOpen(true);
   };
 
@@ -463,7 +468,7 @@ const Purchases = () => {
                 {filteredPurchases.length} purchases
               </div>
               <Button
-                onClick={() => handleOpenPurchaseDialog()}
+                onClick={handleRecordNewPurchase}
                 className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -537,7 +542,7 @@ const Purchases = () => {
                     ? "No purchases match your current filters"
                     : "Start by recording your first business purchase"}
                 </p>
-                <Button onClick={() => handleOpenPurchaseDialog()}>
+                <Button onClick={handleRecordNewPurchase}>
                   <Plus className="h-4 w-4 mr-2" />
                   Record Purchase
                 </Button>
@@ -717,150 +722,160 @@ const Purchases = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Purchase Dialog */}
-      <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmitPurchase} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor="description">Description *</Label>
-                <Input
-                  id="description"
-                  value={purchaseFormData.description}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter purchase description"
-                  required
-                />
+      {/* Record Purchase Dialog */}
+      <RecordPurchaseDialog
+        isOpen={isPurchaseDialogOpen && !editingPurchase}
+        onClose={() => setIsPurchaseDialogOpen(false)}
+        suppliers={suppliers}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['purchases', user?.id] });
+        }}
+      />
+
+      {/* Edit Purchase Dialog */}
+      {editingPurchase && (
+        <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Edit Purchase</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmitPurchase} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <Input
+                    id="description"
+                    value={purchaseFormData.description}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter purchase description"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="amount">Amount *</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={purchaseFormData.amount}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="purchase_date">Purchase Date</Label>
+                  <Input
+                    id="purchase_date"
+                    type="date"
+                    value={purchaseFormData.purchase_date}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="supplier">Supplier</Label>
+                  <Select
+                    value={purchaseFormData.supplier_id}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select supplier (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No supplier</SelectItem>
+                      {suppliers.map(supplier => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={purchaseFormData.category}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPENSE_CATEGORIES.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="payment_method">Payment Method</Label>
+                  <Select
+                    value={purchaseFormData.payment_method}
+                    onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map(method => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="receipt_number">Receipt Number</Label>
+                  <Input
+                    id="receipt_number"
+                    value={purchaseFormData.receipt_number}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, receipt_number: e.target.value }))}
+                    placeholder="Enter receipt number"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={purchaseFormData.notes}
+                    onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Additional notes about this purchase"
+                    rows={3}
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="amount">Amount *</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={purchaseFormData.amount}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="purchase_date">Purchase Date</Label>
-                <Input
-                  id="purchase_date"
-                  type="date"
-                  value={purchaseFormData.purchase_date}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="supplier">Supplier</Label>
-                <Select
-                  value={purchaseFormData.supplier_id}
-                  onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, supplier_id: value }))}
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsPurchaseDialogOpen(false)}
+                  disabled={isSubmitting}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select supplier (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">No supplier</SelectItem>
-                    {suppliers.map(supplier => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={purchaseFormData.category}
-                  onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, category: value }))}
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EXPENSE_CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="payment_method">Payment Method</Label>
-                <Select
-                  value={purchaseFormData.payment_method}
-                  onValueChange={(value) => setPurchaseFormData(prev => ({ ...prev, payment_method: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAYMENT_METHODS.map(method => (
-                      <SelectItem key={method} value={method}>
-                        {method}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="receipt_number">Receipt Number</Label>
-                <Input
-                  id="receipt_number"
-                  value={purchaseFormData.receipt_number}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, receipt_number: e.target.value }))}
-                  placeholder="Enter receipt number"
-                />
-              </div>
-
-              <div className="col-span-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={purchaseFormData.notes}
-                  onChange={(e) => setPurchaseFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional notes about this purchase"
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsPurchaseDialogOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || !purchaseFormData.description.trim() || !purchaseFormData.amount}
-              >
-                {isSubmitting ? 'Saving...' : editingPurchase ? 'Update Purchase' : 'Record Purchase'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+                  {isSubmitting ? 'Saving...' : 'Update Purchase'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Supplier Dialog */}
       <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
