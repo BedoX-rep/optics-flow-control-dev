@@ -26,6 +26,12 @@ CREATE TABLE IF NOT EXISTS purchases (
   receipt_number TEXT GENERATED ALWAYS AS ('PUR-' || LPAD(EXTRACT(YEAR FROM created_at)::TEXT, 4, '0') || '-' || LPAD(EXTRACT(MONTH FROM created_at)::TEXT, 2, '0') || '-' || LPAD(EXTRACT(DAY FROM created_at)::TEXT, 2, '0') || '-' || LPAD((EXTRACT(EPOCH FROM created_at) * 1000000)::BIGINT::TEXT, 10, '0')) STORED,
   payment_method TEXT DEFAULT 'Cash',
   notes TEXT,
+  advance_payment DECIMAL(10,2) DEFAULT 0,
+  balance DECIMAL(10,2),
+  payment_status TEXT DEFAULT 'Unpaid',
+  payment_urgency DATE,
+  recurring_type TEXT,
+  next_recurring_date DATE,
   is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE
