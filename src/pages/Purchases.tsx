@@ -232,29 +232,6 @@ const Purchases = () => {
     }
   }, [user, toast, queryClient]);
 
-  // Calculate purchase linking when purchases and receipts are loaded
-  useEffect(() => {
-    const updateLinkedPurchases = async () => {
-      if (!purchases?.length || !receipts?.length || !user) return;
-
-      // Find purchases with linking configurations
-      const linkedPurchases = purchases.filter(p => 
-        p.linking_category && p.link_date_from && p.link_date_to
-      );
-
-      for (const purchase of linkedPurchases) {
-        await calculatePurchaseLinking(purchase);
-      }
-
-      // Refresh purchases after updates
-      if (linkedPurchases.length > 0) {
-        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-      }
-    };
-
-    updateLinkedPurchases();
-  }, [purchases?.length, receipts?.length, user, queryClient]); // Only run when data is initially loaded
-
   const handleRecurringRenewal = async (purchase: Purchase) => {
     if (!user) return;
 
@@ -406,6 +383,31 @@ const Purchases = () => {
     },
     enabled: !!user,
   });
+
+  // Calculate purchase linking when purchases and receipts are loaded
+  useEffect(() => {
+    const updateLinkedPurchases = async () => {
+      if (!purchases || !Array.isArray(purchases) || purchases.length === 0 || !receipts || !Array.isArray(receipts) || receipts.length === 0 || !user) {
+        return;
+      }
+
+      // Find purchases with linking configurations
+      const linkedPurchases = purchases.filter(p => 
+        p.linking_category && p.link_date_from && p.link_date_to
+      );
+
+      for (const purchase of linkedPurchases) {
+        await calculatePurchaseLinking(purchase);
+      }
+
+      // Refresh purchases after updates
+      if (linkedPurchases.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      }
+    };
+
+    updateLinkedPurchases();
+  }, [purchases, receipts, user, queryClient]);
 
   // Filter purchases
   const filteredPurchases = useMemo(() => {
