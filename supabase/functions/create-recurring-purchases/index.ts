@@ -127,24 +127,7 @@ serve(async (req) => {
         // Calculate HT amount from TTC amount using tax percentage
         const newAmountHT = newTotalAmount / (1 + taxPercentage / 100)
         
-        // Record the balance change in history before updating
-        const { error: historyError } = await supabaseClient
-          .from('purchase_balance_history')
-          .insert({
-            purchase_id: purchase.id,
-            user_id: user.id,
-            old_balance: currentBalance,
-            new_balance: newBalance,
-            change_amount: newBalance - currentBalance,
-            change_reason: currentBalance === 0 
-              ? 'Recurring purchase renewed - new cycle started'
-              : 'Recurring purchase renewed - balance accumulated with new amount',
-            change_date: today.toISOString()
-          })
-
-        if (historyError) {
-          console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
-        }
+        // Balance history will be automatically recorded by the database trigger
 
         // Update the purchase record with new recurring cycle
         const updatedPurchaseData = {

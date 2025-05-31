@@ -232,24 +232,7 @@ const Purchases = () => {
         payment_status: 'Unpaid' // Reset to unpaid for new cycle
       };
 
-      // Record balance history
-      const { error: historyError } = await supabase
-        .from('purchase_balance_history')
-        .insert({
-          purchase_id: purchase.id,
-          user_id: user.id,
-          old_balance: currentBalance,
-          new_balance: newBalance,
-          change_amount: newBalance - currentBalance,
-          change_reason: currentBalance === 0 
-            ? 'Recurring purchase renewed - new cycle started'
-            : 'Recurring purchase renewed - balance accumulated with new amount',
-          change_date: currentDate.toISOString()
-        });
-
-      if (historyError) {
-        console.error('Error recording balance history:', historyError);
-      }
+      // Balance history will be automatically recorded by the database trigger
 
       const { error } = await supabase
         .from('purchases')
