@@ -21,13 +21,14 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
 import AddSupplierDialog from '@/components/AddSupplierDialog';
+import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -126,8 +127,10 @@ const Purchases = () => {
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
+  const [isBalanceHistoryDialogOpen, setIsBalanceHistoryDialogOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handle URL-based navigation
@@ -512,6 +515,11 @@ const Purchases = () => {
       resetSupplierForm();
     }
     setIsSupplierDialogOpen(true);
+  };
+
+  const handleOpenBalanceHistoryDialog = (purchase: Purchase) => {
+    setSelectedPurchaseForHistory(purchase);
+    setIsBalanceHistoryDialogOpen(true);
   };
 
   const handleSupplierAdded = (supplier: any) => {
@@ -1076,6 +1084,15 @@ const Purchases = () => {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
+                                onClick={() => handleOpenBalanceHistoryDialog(purchase)}
+                                className="h-8 w-8 hover:bg-purple-50 hover:text-purple-600"
+                                title="View Balance History"
+                              >
+                                <History className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
                                 onClick={() => handleEditPurchase(purchase)}
                                 className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
                               >
@@ -1313,6 +1330,24 @@ const Purchases = () => {
         onClose={() => setIsSupplierDialogOpen(false)}
         onSupplierAdded={handleSupplierAdded}
       />
+
+      {/* Balance History Dialog */}
+      <Dialog open={isBalanceHistoryDialogOpen} onOpenChange={setIsBalanceHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Balance History - {selectedPurchaseForHistory?.description}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedPurchaseForHistory && user && (
+            <PurchaseBalanceHistory
+              purchaseId={selectedPurchaseForHistory.id}
+              userId={user.id}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
