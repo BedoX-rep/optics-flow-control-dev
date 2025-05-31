@@ -13,6 +13,7 @@ interface BalanceHistoryRecord {
   change_amount: number;
   change_reason: string;
   change_date: string;
+  previous_balance?: number;
 }
 
 interface PurchaseBalanceHistoryProps {
@@ -84,7 +85,7 @@ const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchas
                 </div>
                 <p className="text-sm font-medium text-gray-700">{record.change_reason}</p>
                 <div className="text-xs text-gray-500">
-                  {record.old_balance.toFixed(2)} DH → {record.new_balance.toFixed(2)} DH
+                  {(record.old_balance || record.previous_balance || 0).toFixed(2)} DH → {record.new_balance.toFixed(2)} DH
                 </div>
               </div>
               <div className="flex items-center gap-1">

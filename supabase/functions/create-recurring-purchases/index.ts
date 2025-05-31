@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -47,7 +46,7 @@ serve(async (req) => {
     // RLS will automatically filter for the authenticated user
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
-    
+
     const { data: purchasesToRenew, error: fetchError } = await supabaseClient
       .from('purchases')
       .select('*')
@@ -82,7 +81,7 @@ serve(async (req) => {
     for (const purchase of purchasesToRenew || []) {
       try {
         console.log(`Processing purchase ID ${purchase.id} with recurring type ${purchase.recurring_type}`)
-        
+
         // Calculate next recurring date from the current next_recurring_date
         const currentRecurringDate = new Date(purchase.next_recurring_date)
         let nextRecurringDate = new Date(currentRecurringDate)
@@ -113,23 +112,22 @@ serve(async (req) => {
         // Record the balance change in history before updating
         const currentBalance = purchase.balance || 0
         const fullAmount = purchase.amount_ttc || purchase.amount
-        
-        if (currentBalance !== fullAmount) {
-          const { error: historyError } = await supabaseClient
-            .from('purchase_balance_history')
-            .insert({
-              purchase_id: purchase.id,
-              user_id: user.id,
-              previous_balance: currentBalance,
-              new_balance: fullAmount,
-              change_amount: fullAmount - currentBalance,
-              change_reason: 'Recurring purchase renewal - balance reset',
-              change_date: newPurchaseDate.toISOString()
-            })
 
-          if (historyError) {
-            console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
-          }
+        // Always record balance history for recurring renewals to track the progression
+        const { error: historyError } = await supabaseClient
+          .from('purchase_balance_history')
+          .insert({
+            purchase_id: purchase.id,
+            user_id: user.id,
+            old_balance: currentBalance,
+            new_balance: fullAmount,
+            change_amount: fullAmount - currentBalance,
+            change_reason: `Recurring purchase renewal - ${purchase.recurring_type} cycle`,
+            change_date: newPurchaseDate.toISOString()
+          })
+
+        if (historyError) {
+          console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
         }
 
         // Update the purchase record with new recurring cycle
