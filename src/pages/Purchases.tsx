@@ -30,7 +30,6 @@ import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
 import AddSupplierDialog from '@/components/AddSupplierDialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 
 interface Supplier {
   id: string;
@@ -109,7 +108,7 @@ const Purchases = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('purchases');
-
+  
   // Search and filter states
   const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
@@ -123,9 +122,7 @@ const Purchases = () => {
 
   const [searchTerm, setSearchTerm] = useState(''); // General search term
   const [dateFilter, setDateFilter] = useState('all');
-  const [isBalanceHistoryOpen, setIsBalanceHistoryOpen] = useState(false);
-  const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
-
+  
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -151,7 +148,7 @@ const Purchases = () => {
       try {
         // Get the current session to pass the authorization header
         const { data: { session } } = await supabase.auth.getSession();
-
+        
         if (!session) {
           console.error('No active session found');
           return;
@@ -162,7 +159,7 @@ const Purchases = () => {
             Authorization: `Bearer ${session.access_token}`,
           },
         });
-
+        
         if (error) {
           console.error('Error checking recurring purchases:', error);
           return;
@@ -175,7 +172,7 @@ const Purchases = () => {
             title: "Recurring Purchases Renewed",
             description: `${data.processed} recurring purchase(s) have been automatically renewed.`,
           });
-
+          
           // Refresh the purchases list
           queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
         }
@@ -230,7 +227,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
-
+      
       if (error) throw error;
       return data || [];
     },
@@ -257,7 +254,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
-
+      
       if (error) throw error;
       return data || [];
     },
@@ -441,9 +438,9 @@ const Purchases = () => {
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType) return null;
-
+    
     const date = new Date(purchaseDate);
-
+    
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -460,13 +457,13 @@ const Purchases = () => {
       default:
         return null;
     }
-
+    
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
@@ -490,7 +487,7 @@ const Purchases = () => {
 
     try {
       setIsSubmitting(true);
-
+      
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
@@ -537,7 +534,7 @@ const Purchases = () => {
     }
   };
 
-
+  
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -732,11 +729,6 @@ const Purchases = () => {
     }
   };
 
-  const handleOpenBalanceHistory = (purchase: Purchase) => {
-    setSelectedPurchaseForHistory(purchase);
-    setIsBalanceHistoryOpen(true);
-  };
-
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       {console.log('Dialog render check:', { isPurchaseDialogOpen, editingPurchase, shouldShow: isPurchaseDialogOpen && !editingPurchase })}
@@ -775,25 +767,6 @@ const Purchases = () => {
           </div>
 
           <div className="flex items-center gap-3">
-           {/* Date Range Filter */}
-           <div className="flex items-center gap-2">
-              <Label htmlFor="date-from" className="text-sm text-gray-500">From:</Label>
-              <Input
-                type="date"
-                id="date-from"
-                className="w-32 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary text-sm"
-                value={dateRange.from}
-                onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-              />
-              <Label htmlFor="date-to" className="text-sm text-gray-500">To:</Label>
-              <Input
-                type="date"
-                id="date-to"
-                className="w-32 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary text-sm"
-                value={dateRange.to}
-                onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-              />
-            </div>
             {/* Date Filter */}
             <Select
               value={dateFilter}
@@ -971,14 +944,6 @@ const Purchases = () => {
                                 className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
                               >
                                 <Trash2 className="h-4 w-4" />
-                              </Button>
-                               <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleOpenBalanceHistory(purchase)}
-                                className="h-8 w-8 hover:bg-green-50 hover:text-green-600"
-                              >
-                                <Receipt className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
@@ -1176,23 +1141,6 @@ const Purchases = () => {
           </div>
         </TabsContent>
       </Tabs>
-
-        {/* Balance History Dialog */}
-        <Dialog open={isBalanceHistoryOpen} onOpenChange={setIsBalanceHistoryOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Purchase Balance History</DialogTitle>
-            </DialogHeader>
-            {selectedPurchaseForHistory && (
-              <PurchaseBalanceHistory purchaseId={selectedPurchaseForHistory.id} />
-            )}
-            <DialogFooter>
-              <Button type="button" onClick={() => setIsBalanceHistoryOpen(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
       {/* Record/Edit Purchase Dialog */}
       <RecordPurchaseDialog
