@@ -1,0 +1,451 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Purchases.tsx:186 Recurring purchases check result: Object
+chunk-PYTSUKUX.js?v=9ddd2bc6:338 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-PYTSUKUX.js?v=9ddd2bc6:338
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+chunk-W6L2VRDA.js?v=9ddd2bc6:14032 The above error occurred in the <SelectItem> component:
+
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:847:7
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:223:60)
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:758:13
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:302:58
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at SelectPortal
+    at _c4 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:130:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:28:15)
+    at CollectionProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:89:13)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1905:15)
+    at Popper (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1962:11)
+    at Select (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:90:5)
+    at div
+    at div
+    at div
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:84:61)
+    at div
+    at _c (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:12:53)
+    at form
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-5TKT7FDU.js?v=9ddd2bc6:57:7
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-DXHZZWKC.js?v=9ddd2bc6:29:5
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:234:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:157:58
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:148:64
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at DialogPortal (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:111:11)
+    at _c1 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/dialog.tsx:36:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Dialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:52:5)
+    at RecordPurchaseDialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/RecordPurchaseDialog.tsx:91:33)
+    at div
+    at Purchases (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/pages/Purchases.tsx:78:23)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/Layout.tsx:20:19)
+    at ProtectedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/App.tsx:44:27)
+    at RenderedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/AuthProvider.tsx:14:32)
+    at LanguageProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=9ddd2bc6:14032
+chunk-W6L2VRDA.js?v=9ddd2bc6:14032 The above error occurred in the <SelectItem> component:
+
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:847:7
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:223:60)
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:758:13
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:302:58
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at SelectPortal
+    at _c4 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:130:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:28:15)
+    at CollectionProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:89:13)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1905:15)
+    at Popper (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1962:11)
+    at Select (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:90:5)
+    at div
+    at div
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:84:61)
+    at div
+    at _c (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:12:53)
+    at form
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-5TKT7FDU.js?v=9ddd2bc6:57:7
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-DXHZZWKC.js?v=9ddd2bc6:29:5
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:234:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:157:58
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:148:64
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at DialogPortal (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:111:11)
+    at _c1 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/dialog.tsx:36:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Dialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:52:5)
+    at RecordPurchaseDialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/RecordPurchaseDialog.tsx:91:33)
+    at div
+    at Purchases (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/pages/Purchases.tsx:78:23)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/Layout.tsx:20:19)
+    at ProtectedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/App.tsx:44:27)
+    at RenderedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/AuthProvider.tsx:14:32)
+    at LanguageProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=9ddd2bc6:14032
+chunk-W6L2VRDA.js?v=9ddd2bc6:9129 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=9ddd2bc6:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=9ddd2bc6:18879:28)
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Purchases.tsx:186 Recurring purchases check result: Object
+Purchases.tsx:186 Recurring purchases check result: Object
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/receipts?select=id%2Ccreated_at%2Cmontage_costs%2Cmontage_status%2Ccustomer_name&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13&is_deleted=eq.false&order=created_at.desc:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Purchases.tsx:186 Recurring purchases check result: Object
+chunk-PYTSUKUX.js?v=9ddd2bc6:338 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-PYTSUKUX.js?v=9ddd2bc6:338
+chunk-PYTSUKUX.js?v=9ddd2bc6:338 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-PYTSUKUX.js?v=9ddd2bc6:338
+commitHookEffectListMount @ chunk-W6L2VRDA.js?v=9ddd2bc6:16915
+commitPassiveMountOnFiber @ chunk-W6L2VRDA.js?v=9ddd2bc6:18156
+commitPassiveMountEffects_complete @ chunk-W6L2VRDA.js?v=9ddd2bc6:18129
+commitPassiveMountEffects_begin @ chunk-W6L2VRDA.js?v=9ddd2bc6:18119
+commitPassiveMountEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:18109
+flushPassiveEffectsImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19490
+flushPassiveEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:19447
+commitRootImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19416
+commitRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:19277
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18895
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:18627
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+(anonymous) @ @radix-ui_react-select.js?v=9ddd2bc6:874
+renderWithHooks @ chunk-W6L2VRDA.js?v=9ddd2bc6:11548
+updateForwardRef @ chunk-W6L2VRDA.js?v=9ddd2bc6:14325
+beginWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:15946
+callCallback2 @ chunk-W6L2VRDA.js?v=9ddd2bc6:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=9ddd2bc6:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=9ddd2bc6:3733
+beginWork$1 @ chunk-W6L2VRDA.js?v=9ddd2bc6:19765
+performUnitOfWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19116
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18874
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:18627
+@radix-ui_react-select.js?v=9ddd2bc6:874 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+(anonymous) @ @radix-ui_react-select.js?v=9ddd2bc6:874
+renderWithHooks @ chunk-W6L2VRDA.js?v=9ddd2bc6:11548
+updateForwardRef @ chunk-W6L2VRDA.js?v=9ddd2bc6:14325
+beginWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:15946
+callCallback2 @ chunk-W6L2VRDA.js?v=9ddd2bc6:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=9ddd2bc6:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=9ddd2bc6:3733
+beginWork$1 @ chunk-W6L2VRDA.js?v=9ddd2bc6:19765
+performUnitOfWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19116
+recoverFromConcurrentError @ chunk-W6L2VRDA.js?v=9ddd2bc6:18736
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18879
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:18627
+chunk-W6L2VRDA.js?v=9ddd2bc6:14032 The above error occurred in the <SelectItem> component:
+
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:847:7
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:223:60)
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:758:13
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:98:15
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:302:58
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at SelectPortal
+    at _c4 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/select.tsx:130:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:28:15)
+    at CollectionProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LP3SNE3I.js?v=9ddd2bc6:89:13)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1905:15)
+    at Popper (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-MX6Z5XVE.js?v=9ddd2bc6:1962:11)
+    at Select (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-select.js?v=9ddd2bc6:90:5)
+    at div
+    at div
+    at _c8 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:84:61)
+    at div
+    at _c (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/card.tsx:12:53)
+    at form
+    at div
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-5TKT7FDU.js?v=9ddd2bc6:57:7
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-DXHZZWKC.js?v=9ddd2bc6:29:5
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:234:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:157:58
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:148:64
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:52:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-D3CTYCI6.js?v=9ddd2bc6:33:11
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-LTXT6CEX.js?v=9ddd2bc6:41:13
+    at https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-B57KGLXB.js?v=9ddd2bc6:27:22
+    at Presence (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-F2PRPNCO.js?v=9ddd2bc6:24:11)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at DialogPortal (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:111:11)
+    at _c1 (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/ui/dialog.tsx:36:63)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at Dialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-PYTSUKUX.js?v=9ddd2bc6:52:5)
+    at RecordPurchaseDialog (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/RecordPurchaseDialog.tsx?t=1748726001582:74:33)
+    at div
+    at Purchases (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/pages/Purchases.tsx:78:23)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/Layout.tsx:20:19)
+    at ProtectedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/App.tsx:44:27)
+    at RenderedRoute (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/AuthProvider.tsx:14:32)
+    at LanguageProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://70968d42-43d8-4746-be40-8952d002c68e-00-3ppt330cgc40w.spock.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=9ddd2bc6:14032
+update.callback @ chunk-W6L2VRDA.js?v=9ddd2bc6:14052
+callCallback @ chunk-W6L2VRDA.js?v=9ddd2bc6:11248
+commitUpdateQueue @ chunk-W6L2VRDA.js?v=9ddd2bc6:11265
+commitLayoutEffectOnFiber @ chunk-W6L2VRDA.js?v=9ddd2bc6:17093
+commitLayoutMountEffects_complete @ chunk-W6L2VRDA.js?v=9ddd2bc6:17980
+commitLayoutEffects_begin @ chunk-W6L2VRDA.js?v=9ddd2bc6:17969
+commitLayoutEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:17920
+commitRootImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19353
+commitRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:19277
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18895
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:18627
+chunk-W6L2VRDA.js?v=9ddd2bc6:9129 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-select.js?v=9ddd2bc6:874:13
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateForwardRef (chunk-W6L2VRDA.js?v=9ddd2bc6:14325:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15946:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=9ddd2bc6:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=9ddd2bc6:18879:28)
+(anonymous) @ @radix-ui_react-select.js?v=9ddd2bc6:874
+renderWithHooks @ chunk-W6L2VRDA.js?v=9ddd2bc6:11548
+updateForwardRef @ chunk-W6L2VRDA.js?v=9ddd2bc6:14325
+beginWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:15946
+beginWork$1 @ chunk-W6L2VRDA.js?v=9ddd2bc6:19753
+performUnitOfWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=9ddd2bc6:19116
+recoverFromConcurrentError @ chunk-W6L2VRDA.js?v=9ddd2bc6:18736
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18879
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:18627
