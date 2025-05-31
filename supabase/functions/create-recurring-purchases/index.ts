@@ -105,9 +105,8 @@ serve(async (req) => {
             continue
         }
 
-        // Calculate payment urgency (1 month from the new purchase date)
-        const newPurchaseDate = new Date(purchase.next_recurring_date)
-        const paymentUrgencyDate = new Date(newPurchaseDate)
+        // Calculate payment urgency (1 month from today)
+        const paymentUrgencyDate = new Date(today)
         paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
 
         // Calculate values for the renewal
