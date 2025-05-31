@@ -235,7 +235,7 @@ const Purchases = () => {
   // Calculate purchase linking when purchases and receipts are loaded
   useEffect(() => {
     const updateLinkedPurchases = async () => {
-      if (!purchases.length || !receipts.length || !user) return;
+      if (!purchases?.length || !receipts?.length || !user) return;
 
       // Find purchases with linking configurations
       const linkedPurchases = purchases.filter(p => 
@@ -253,7 +253,7 @@ const Purchases = () => {
     };
 
     updateLinkedPurchases();
-  }, [purchases.length, receipts.length, user]); // Only run when data is initially loaded
+  }, [purchases?.length, receipts?.length, user, queryClient]); // Only run when data is initially loaded
 
   const handleRecurringRenewal = async (purchase: Purchase) => {
     if (!user) return;
@@ -409,6 +409,7 @@ const Purchases = () => {
 
   // Filter purchases
   const filteredPurchases = useMemo(() => {
+    if (!purchases) return [];
     let filtered = [...purchases];
 
     if (searchTerm) {
@@ -489,6 +490,7 @@ const Purchases = () => {
 
   // Calculate monthly total
   const monthlyTotal = useMemo(() => {
+    if (!purchases) return 0;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     return purchases
