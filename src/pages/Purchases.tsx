@@ -237,27 +237,18 @@ const Purchases = () => {
     const updateLinkedPurchases = async () => {
       if (!purchases.length || !receipts.length || !user) return;
 
-      try {
-        // Find purchases with linking configurations
-        const linkedPurchases = purchases.filter(p => 
-          p.linking_category && p.link_date_from && p.link_date_to
-        );
+      // Find purchases with linking configurations
+      const linkedPurchases = purchases.filter(p => 
+        p.linking_category && p.link_date_from && p.link_date_to
+      );
 
-        for (const purchase of linkedPurchases) {
-          await calculatePurchaseLinking(purchase);
-        }
+      for (const purchase of linkedPurchases) {
+        await calculatePurchaseLinking(purchase);
+      }
 
-        // Refresh purchases after updates
-        if (linkedPurchases.length > 0) {
-          queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-        }
-      } catch (error) {
-        console.error('Error updating linked purchases:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update linked purchases",
-          variant: "destructive",
-        });
+      // Refresh purchases after updates
+      if (linkedPurchases.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
       }
     };
 
@@ -1036,16 +1027,13 @@ const Purchases = () => {
     }
   };
 
-  // Show loading state if user is not loaded or if purchases are loading
-  if (!user || purchasesLoading) {
+  if (purchasesLoading) {
     return (
       <div className="container px-4 py-6 mx-auto">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">
-              {!user ? 'Loading user...' : 'Loading purchases...'}
-            </p>
+            <p className="text-gray-600">Loading purchases...</p>
           </div>
         </div>
       </div>
