@@ -5,23 +5,32 @@ RETURNS TRIGGER AS $$
 BEGIN
   -- Only track if balance actually changed
   IF (OLD.balance IS DISTINCT FROM NEW.balance) THEN
-    -- Determine if this is a recurring purchase renewal
-    -- (when next_recurring_date is updated and balance increases significantly)
     DECLARE
       change_reason TEXT;
     BEGIN
-      IF (OLD.next_recurring_date IS DISTINCT FROM NEW.next_recurring_date) 
-         AND NEW.recurring_type IS NOT NULL 
-         AND (NEW.balance - COALESCE(OLD.balance, 0)) > 0 THEN
-        -- This is a recurring purchase renewal
+      -- Check if this is a recurring purchase renewal by looking at multiple indicators
+      IF (NEW.recurring_type IS NOT NULL 
+          AND (OLD.next_recurring_date IS DISTINCT FROM NEW.next_recurring_date)
+          AND (OLD.purchase_date IS DISTINCT FROM NEW.purchase_date)
+          AND (NEW.balance - COALESCE(OLD.balance, 0)) > 0) THEN
+        -- This is definitely a recurring purchase renewal
         IF COALESCE(OLD.balance, 0) = 0 THEN
           change_reason := 'Recurring purchase renewed - new cycle started';
         ELSE
           change_reason := 'Recurring purchase renewed - balance accumulated with new amount';
         END IF;
-      ELSE
-        -- Regular balance update
+      ELSIF (TG_OP = 'INSERT') THEN
+        -- This is a new purchase being created
+        change_reason := 'Initial purchase created';
+      ELSIF (OLD.advance_payment IS DISTINCT FROM NEW.advance_payment) THEN
+        -- Advance payment was updated
+        change_reason := 'Advance payment updated';
+      ELSIF (OLD.amount_ttc IS DISTINCT FROM NEW.amount_ttc OR OLD.amount_ht IS DISTINCT FROM NEW.amount_ht) THEN
+        -- Purchase amount was updated
         change_reason := 'Purchase amount updated';
+      ELSE
+        -- Fallback for other balance changes
+        change_reason := 'Balance manually adjusted';
       END IF;
 
       INSERT INTO purchase_balance_history (
