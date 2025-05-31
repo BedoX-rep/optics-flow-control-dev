@@ -120,21 +120,18 @@ const Purchases = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('purchases');
-  
-  // Search and filter states
-  const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
-  const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
+
+  // Consolidated search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
   const [purchaseTypeFilter, setPurchaseTypeFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
   const [dateRange, setDateRange] = useState({
     from: '',
     to: ''
   });
 
-  const [searchTerm, setSearchTerm] = useState(''); // General search term
-  const [dateFilter, setDateFilter] = useState('all');
-  
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -145,7 +142,7 @@ const Purchases = () => {
   const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
   const [selectedPurchaseForLinking, setSelectedPurchaseForLinking] = useState<Purchase | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Linking states
   const [linkDateFrom, setLinkDateFrom] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [linkDateTo, setLinkDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -168,7 +165,7 @@ const Purchases = () => {
       try {
         // Get the current session to pass the authorization header
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           console.error('No active session found');
           return;
@@ -179,7 +176,7 @@ const Purchases = () => {
             Authorization: `Bearer ${session.access_token}`,
           },
         });
-        
+
         if (error) {
           console.error('Error checking recurring purchases:', error);
           return;
@@ -192,7 +189,7 @@ const Purchases = () => {
             title: "Recurring Purchases Renewed",
             description: `${data.processed} recurring purchase(s) have been automatically renewed.`,
           });
-          
+
           // Refresh the purchases list
           queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
         }
@@ -248,33 +245,29 @@ const Purchases = () => {
       const currentBalance = purchase.balance || 0;
       const currentAdvancePayment = purchase.advance_payment || 0;
       const originalAmount = purchase.amount_ttc || purchase.amount;
-      const taxPercentage = purchase.tax_percentage || 20;
-      
+
       // For recurring renewal:
       // - If balance = 0 (fully paid), reset to original amount
       // - If balance > 0 (unpaid), add remaining balance to original amount
       const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance;
-      
+
       // Reset advance payment to 0 for new cycle and calculate new balance
       const newAdvancePayment = 0;
       const newBalance = newTotalAmount - newAdvancePayment;
-      
-      // Calculate HT amount from TTC amount using tax percentage
-      const newAmountHT = newTotalAmount / (1 + taxPercentage / 100);
-      
+
+      // Calculate HT amount from TTC amount using 20% tax
+      const newAmountHT = newTotalAmount / 1.2;
+
       const renewalData = {
         purchase_date: format(currentDate, 'yyyy-MM-dd'),
         next_recurring_date: nextRecurringDate,
-        amount_ht: newAmountHT, // Update HT amount based on TTC and tax percentage
-        amount_ttc: newTotalAmount, // Update total amount
-        amount: newTotalAmount, // Keep for backward compatibility
-        tax_percentage: taxPercentage, // Keep existing tax percentage
-        balance: newBalance, // New balance after renewal
-        advance_payment: newAdvancePayment, // Reset advance payment to 0
-        payment_status: 'Unpaid' // Reset to unpaid for new cycle
+        amount_ht: newAmountHT,
+        amount_ttc: newTotalAmount,
+        amount: newTotalAmount,
+        balance: newBalance,
+        advance_payment: newAdvancePayment,
+        payment_status: 'Unpaid'
       };
-
-      // Balance history will be automatically recorded by the database trigger
 
       const { error } = await supabase
         .from('purchases')
@@ -337,7 +330,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -355,12 +348,12 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data || [];
     },
     enabled: !!user,
-    refetchInterval: 5000, // Refresh every 5 seconds to catch new receipts
+    refetchInterval: 5000,
   });
 
   // Fetch purchases
@@ -383,7 +376,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -394,8 +387,8 @@ const Purchases = () => {
   const filteredPurchases = useMemo(() => {
     let filtered = [...purchases];
 
-    if (purchaseSearchTerm) {
-      const search = purchaseSearchTerm.toLowerCase();
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
       filtered = filtered.filter(purchase => 
         purchase.description.toLowerCase().includes(search) ||
         purchase.suppliers?.name.toLowerCase().includes(search) ||
@@ -452,18 +445,18 @@ const Purchases = () => {
     }
 
     return filtered;
-  }, [purchases, purchaseSearchTerm, categoryFilter, supplierFilter, dateRange, dateFilter]);
+  }, [purchases, searchTerm, categoryFilter, supplierFilter, purchaseTypeFilter, dateRange, dateFilter]);
 
   // Filter suppliers
   const filteredSuppliers = useMemo(() => {
-    if (!supplierSearchTerm) return suppliers;
-    const search = supplierSearchTerm.toLowerCase();
+    if (!searchTerm) return suppliers;
+    const search = searchTerm.toLowerCase();
     return suppliers.filter(supplier => 
       supplier.name.toLowerCase().includes(search) ||
       supplier.contact_person?.toLowerCase().includes(search) ||
       supplier.email?.toLowerCase().includes(search)
     );
-  }, [suppliers, supplierSearchTerm]);
+  }, [suppliers, searchTerm]);
 
   // Calculate total expenses
   const totalExpenses = useMemo(() => {
@@ -958,10 +951,21 @@ const Purchases = () => {
     }
   };
 
+  if (purchasesLoading) {
+    return (
+      <div className="container px-4 py-6 mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading purchases...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      {console.log('Dialog render check:', { isPurchaseDialogOpen, editingPurchase, shouldShow: isPurchaseDialogOpen && !editingPurchase })}
-
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
           <Button
@@ -972,7 +976,7 @@ const Purchases = () => {
             Record Purchase
           </Button>
           <Button
-            onClick={handleOpenSupplierDialog}
+            onClick={() => handleOpenSupplierDialog()}
             variant="outline"
             className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
           >
@@ -1336,10 +1340,7 @@ const Purchases = () => {
                   No suppliers found
                 </div>
               ) : (
-                suppliers.filter(supplier => 
-                  supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  supplier.phone?.toLowerCase().includes(searchTerm.toLowerCase())
-                ).map((supplier) => (
+                filteredSuppliers.map((supplier) => (
                   <motion.div
                     key={supplier.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -1392,7 +1393,7 @@ const Purchases = () => {
                             <div className="flex justify-between items-baseline">
                               <div>
                                 <p className="text-xs text-gray-500 mb-0.5">Total Purchases</p>
-                                                               <p className="font-medium text-emerald-600">
+                                <p className="font-medium text-emerald-600">
                                   {purchases.filter(p => p.supplier_id === supplier.id).length}
                                 </p>
                               </div>
@@ -1401,7 +1402,7 @@ const Purchases = () => {
                                 <p className="font-medium text-orange-600">
                                   {purchases
                                     .filter(p => p.supplier_id === supplier.id)
-                                    .reduce((sum, p) => sum + p.amount_ttc, 0)
+                                    .reduce((sum, p) => sum + (p.amount_ttc || p.amount), 0)
                                     .toFixed(2)} DH
                                 </p>
                               </div>
@@ -1464,7 +1465,7 @@ const Purchases = () => {
               Link Receipts to Purchase - {selectedPurchaseForLinking?.description}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6">
             {/* Date Range Selection */}
             <Card>
