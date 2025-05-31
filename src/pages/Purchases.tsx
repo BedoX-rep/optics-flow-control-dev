@@ -45,9 +45,12 @@ interface Supplier {
 interface Receipt {
   id: string;
   created_at: string;
-  montage_costs: number;
+  montage_costs?: number;
   montage_status: string;
-  customer_name: string;
+  customer_name?: string;
+  clients?: {
+    name: string;
+  };
 }
 
 interface Purchase {
@@ -218,10 +221,17 @@ const Purchases = () => {
             table: 'receipts',
             filter: `user_id=eq.${user.id}`,
           },
-          () => {
-            // Refresh both receipts and purchases when receipts change
-            queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
-            queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+          (payload) => {
+            // Only invalidate if the change affects montage_costs or montage_status
+            if (payload.eventType === 'UPDATE' && 
+                (payload.new?.montage_costs !== payload.old?.montage_costs || 
+                 payload.new?.montage_status !== payload.old?.montage_status)) {
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+            } else if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+            }
           }
         )
         .subscribe();
@@ -345,16 +355,28 @@ const Purchases = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('receipts')
-        .select('id, created_at, montage_costs, montage_status, customer_name')
+        .select(`
+          id,
+          created_at,
+          montage_costs,
+          montage_status,
+          clients (
+            name
+          )
+        `)
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(receipt => ({
+        ...receipt,
+        customer_name: receipt.clients?.name || 'Unknown Customer'
+      }));
     },
     enabled: !!user,
-    refetchInterval: 5000,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchInterval: false, // Remove auto-refetch to reduce API calls
   });
 
   // Fetch purchases
@@ -393,7 +415,7 @@ const Purchases = () => {
 
       // Find purchases with linking configurations that need updating
       const linkedPurchases = purchases.filter(p => 
-        p.linking_category && p.link_date_from && p.link_date_to
+        p.linking_category === 'montage_costs' && p.link_date_from && p.link_date_to
       );
 
       if (linkedPurchases.length === 0) return;
@@ -407,15 +429,14 @@ const Purchases = () => {
 
       // Only refresh if there were actual updates
       if (hasUpdates) {
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-        }, 500);
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
       }
     };
 
-    // Add a small delay to ensure all data is loaded
-    const timeoutId = setTimeout(updateLinkedPurchases, 1000);
-    return () => clearTimeout(timeoutId);
+    // Only run when both purchases and receipts are loaded and user is available
+    if (purchases.length > 0 && receipts.length >= 0 && user) {
+      updateLinkedPurchases();
+    }
   }, [purchases, receipts, user, queryClient]);
 
   // Filter purchases
@@ -514,11 +535,11 @@ const Purchases = () => {
 
   // Function to calculate and update purchase linking
   const calculatePurchaseLinking = async (purchase: Purchase): Promise<boolean> => {
-    if (!purchase.linking_category || !purchase.link_date_from || !purchase.link_date_to) {
+    if (!purchase.linking_category || purchase.linking_category !== 'montage_costs' || !purchase.link_date_from || !purchase.link_date_to) {
       return false;
     }
 
-    // Get receipts in the date range
+    // Get receipts in the date range using cached data
     const linkedReceipts = receipts.filter(receipt => {
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(purchase.link_date_from!);
@@ -534,21 +555,19 @@ const Purchases = () => {
     let totalAmount = 0;
     let paidAmount = 0;
 
-    if (purchase.linking_category === 'montage_costs') {
-      linkedReceipts.forEach(receipt => {
-        const montageCost = receipt.montage_costs || 0;
+    linkedReceipts.forEach(receipt => {
+      const montageCost = receipt.montage_costs || 0;
+      
+      // Add to total if montage cost exists and is greater than 0
+      if (montageCost > 0) {
+        totalAmount += montageCost;
         
-        // Add to total if montage cost exists and status is not null/empty
-        if (montageCost > 0) {
-          totalAmount += montageCost;
-          
-          // Only count as paid if status is specifically 'Paid costs'
-          if (receipt.montage_status === 'Paid costs') {
-            paidAmount += montageCost;
-          }
+        // Only count as paid if status is specifically 'Paid costs'
+        if (receipt.montage_status === 'Paid costs') {
+          paidAmount += montageCost;
         }
-      });
-    }
+      }
+    });
 
     const balance = totalAmount - paidAmount;
     const linkedReceiptIds = linkedReceipts.map(r => r.id);
@@ -569,26 +588,31 @@ const Purchases = () => {
       return false;
     }
 
-    // Update the purchase record
-    const { error } = await supabase
-      .from('purchases')
-      .update({
-        linked_receipts: linkedReceiptIds,
-        amount_ttc: totalAmount,
-        amount_ht: totalAmount / 1.2,
-        amount: totalAmount,
-        advance_payment: paidAmount,
-        balance: balance,
-        payment_status: balance === 0 && totalAmount > 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
-      })
-      .eq('id', purchase.id);
+    try {
+      // Update the purchase record
+      const { error } = await supabase
+        .from('purchases')
+        .update({
+          linked_receipts: linkedReceiptIds,
+          amount_ttc: totalAmount,
+          amount_ht: totalAmount / 1.2,
+          amount: totalAmount,
+          advance_payment: paidAmount,
+          balance: balance,
+          payment_status: balance === 0 && totalAmount > 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
+        })
+        .eq('id', purchase.id);
 
-    if (error) {
-      console.error('Error updating purchase linking:', error);
+      if (error) {
+        console.error('Error updating purchase linking:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in calculatePurchaseLinking:', error);
       return false;
     }
-
-    return true;
   };
 
   const resetPurchaseForm = () => {
@@ -736,12 +760,13 @@ const Purchases = () => {
           linked_receipts: linkedReceiptIds,
           link_date_from: linkDateFrom,
           link_date_to: linkDateTo,
+          linking_category: 'montage_costs', // Set the linking category
           amount_ttc: montageData.totalMontage,
           amount_ht: montageData.totalMontage / 1.2, // Assuming 20% tax
           amount: montageData.totalMontage,
           advance_payment: montageData.paidMontage,
           balance: montageData.unpaidMontage,
-          payment_status: montageData.unpaidMontage === 0 ? 'Paid' : montageData.paidMontage > 0 ? 'Partially Paid' : 'Unpaid'
+          payment_status: montageData.unpaidMontage === 0 && montageData.totalMontage > 0 ? 'Paid' : montageData.paidMontage > 0 ? 'Partially Paid' : 'Unpaid'
         })
         .eq('id', selectedPurchaseForLinking.id);
 
