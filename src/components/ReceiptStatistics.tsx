@@ -57,12 +57,19 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
     const montageCost = receipt.montage_costs || 0;
     const productCost = receipt.products_cost || 0;
 
-    totalMontageCosts += montageCost;
-    totalProductsCost += productCost;
-
-    if (receipt.montage_status !== 'Paid costs') {
+    // Only count montage costs for receipts in InCutting or Ready phases
+    if (receipt.montage_status === 'InCutting' || receipt.montage_status === 'Ready') {
+      totalMontageCosts += montageCost;
       unpaidMontageCosts += montageCost;
     }
+
+    // Also count montage costs for receipts in Paid costs phase (these are already paid)
+    if (receipt.montage_status === 'Paid costs') {
+      totalMontageCosts += montageCost;
+      // Don't add to unpaidMontageCosts since these are paid
+    }
+
+    totalProductsCost += productCost;
   }
 
   const lensTypeCosts = filteredReceipts.reduce((acc, receipt) => {
