@@ -69,6 +69,7 @@ interface Purchase {
   recurring_type?: string;
   next_recurring_date?: string;
   purchase_type?: string;
+  linking_category?: string;
   linked_receipts?: string[];
   link_date_from?: string;
   link_date_to?: string;
@@ -230,6 +231,29 @@ const Purchases = () => {
       };
     }
   }, [user, toast, queryClient]);
+
+  // Calculate purchase linking when purchases and receipts are loaded
+  useEffect(() => {
+    const updateLinkedPurchases = async () => {
+      if (!purchases.length || !receipts.length || !user) return;
+
+      // Find purchases with linking configurations
+      const linkedPurchases = purchases.filter(p => 
+        p.linking_category && p.link_date_from && p.link_date_to
+      );
+
+      for (const purchase of linkedPurchases) {
+        await calculatePurchaseLinking(purchase);
+      }
+
+      // Refresh purchases after updates
+      if (linkedPurchases.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      }
+    };
+
+    updateLinkedPurchases();
+  }, [purchases.length, receipts.length, user]); // Only run when data is initially loaded
 
   const handleRecurringRenewal = async (purchase: Purchase) => {
     if (!user) return;
@@ -474,6 +498,58 @@ const Purchases = () => {
       })
       .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [purchases]);
+
+  // Function to calculate and update purchase linking
+  const calculatePurchaseLinking = async (purchase: Purchase) => {
+    if (!purchase.linking_category || !purchase.link_date_from || !purchase.link_date_to) {
+      return;
+    }
+
+    // Get receipts in the date range
+    const linkedReceipts = receipts.filter(receipt => {
+      const receiptDate = new Date(receipt.created_at);
+      const fromDate = new Date(purchase.link_date_from!);
+      const toDate = new Date(purchase.link_date_to!);
+      return receiptDate >= fromDate && receiptDate <= toDate;
+    });
+
+    let totalAmount = 0;
+    let paidAmount = 0;
+
+    if (purchase.linking_category === 'montage_costs') {
+      linkedReceipts.forEach(receipt => {
+        const montageCost = receipt.montage_costs || 0;
+        
+        // Add to total if montage status is InCutting, Ready, or Paid costs
+        if (receipt.montage_status === 'InCutting' || receipt.montage_status === 'Ready') {
+          totalAmount += montageCost;
+        } else if (receipt.montage_status === 'Paid costs') {
+          totalAmount += montageCost;
+          paidAmount += montageCost;
+        }
+      });
+    }
+
+    const balance = totalAmount - paidAmount;
+
+    // Update the purchase record
+    const { error } = await supabase
+      .from('purchases')
+      .update({
+        linked_receipts: linkedReceipts.map(r => r.id),
+        amount_ttc: totalAmount,
+        amount_ht: totalAmount / 1.2,
+        amount: totalAmount,
+        advance_payment: paidAmount,
+        balance: balance,
+        payment_status: balance === 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
+      })
+      .eq('id', purchase.id);
+
+    if (error) {
+      console.error('Error updating purchase linking:', error);
+    }
+  };
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({

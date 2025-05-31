@@ -50,6 +50,7 @@ interface Purchase {
   recurring_type?: string;
   next_recurring_date?: string;
   purchase_type?: string;
+  linking_category?: string;
   tax_percentage?: number;
   created_at: string;
 }
@@ -128,6 +129,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_urgency: '',
     recurring_type: 'none',
     purchase_type: 'Operational Expenses',
+    linking_category: '',
     link_date_from: '',
     link_date_to: ''
   });
@@ -151,6 +153,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: editingPurchase.recurring_type || 'none',
         purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
+        linking_category: editingPurchase.linking_category || '',
         link_date_from: editingPurchase.link_date_from || '',
         link_date_to: editingPurchase.link_date_to || ''
       });
@@ -176,6 +179,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       payment_urgency: '',
       recurring_type: 'none',
       purchase_type: 'Operational Expenses',
+      linking_category: '',
       link_date_from: '',
       link_date_to: ''
     });
@@ -347,6 +351,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         recurring_type: formData.recurring_type === 'none' ? null : formData.recurring_type,
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
+        linking_category: formData.linking_category || null,
         is_deleted: false
       };
 
@@ -732,6 +737,24 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="linking_category">Linking Category</Label>
+                <Select
+                  value={formData.linking_category}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, linking_category: value }))}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select linking category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Linking</SelectItem>
+                    <SelectItem value="montage_costs">Montage Costs</SelectItem>
+                    <SelectItem value="product_costs">Product Costs (Future)</SelectItem>
+                    <SelectItem value="total_costs">Total Costs (Future)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="link_date_from">Link From Date</Label>
