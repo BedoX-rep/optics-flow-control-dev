@@ -13,12 +13,33 @@ serve(async (req) => {
   }
 
   try {
+    // Get the authorization header from the request
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
+    // Create supabase client with user's token
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
     )
 
+    // Verify the user is authenticated
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    if (userError || !user) {
+      throw new Error('User not authenticated')
+    }
+
     // Get purchases that need to be renewed (where next_recurring_date <= today)
+    // RLS will automatically filter for the authenticated user
     const today = new Date().toISOString().split('T')[0]
     
     const { data: purchasesToRenew, error: fetchError } = await supabaseClient
@@ -32,7 +53,7 @@ serve(async (req) => {
       throw fetchError
     }
 
-    console.log(`Found ${purchasesToRenew?.length || 0} purchases to renew`)
+    console.log(`Found ${purchasesToRenew?.length || 0} purchases to renew for user ${user.id}`)
 
     for (const purchase of purchasesToRenew || []) {
       try {
@@ -68,7 +89,7 @@ serve(async (req) => {
             .from('purchase_balance_history')
             .insert({
               purchase_id: purchase.id,
-              user_id: purchase.user_id,
+              user_id: user.id,
               previous_balance: currentBalance,
               new_balance: purchase.amount_ttc || purchase.amount,
               change_amount: (purchase.amount_ttc || purchase.amount) - currentBalance,
