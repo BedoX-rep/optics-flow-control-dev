@@ -853,33 +853,31 @@ const Purchases = () => {
 
         {/* Compact Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Quick Date Filter */}
-          <Select
-            value={dateFilter}
-            onValueChange={(value) => setDateFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[120px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              dateFilter !== 'all'
-                ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Calendar className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {dateFilter === 'all' ? 'Period' :
-                 dateFilter === 'today' ? 'Today' :
-                 dateFilter === 'week' ? 'Week' :
-                 dateFilter === 'month' ? 'Month' : 'Year'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Periods</SelectItem>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="year">This Year</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Quick Date Filter Buttons */}
+          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
+            {[
+              { value: 'all', label: 'All' },
+              { value: 'today', label: 'Today' },
+              { value: 'week', label: 'Week' },
+              { value: 'month', label: 'Month' },
+              { value: 'year', label: 'Year' }
+            ].map((option) => (
+              <Button
+                key={option.value}
+                variant={dateFilter === option.value ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setDateFilter(option.value)}
+                className={cn(
+                  "h-7 px-2 text-xs font-medium transition-all duration-200 rounded-md",
+                  dateFilter === option.value
+                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                )}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
 
           {/* Custom Date Range */}
           <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg px-2 py-1">
