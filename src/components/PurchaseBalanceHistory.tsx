@@ -15,6 +15,12 @@ interface BalanceHistoryRecord {
   change_date: string;
 }
 
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+
 interface PurchaseBalanceHistoryProps {
   purchaseId: string;
   userId: string;
@@ -66,6 +72,40 @@ const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchas
   return (
     <Card>
       <CardHeader>
+        <CardTitle className="text-sm">Balance History</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {balanceHistory.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="text-sm font-medium">{entry.change_type}</p>
+                <p className="text-xs text-gray-500">
+                  {format(new Date(entry.change_date), 'MMM dd, yyyy HH:mm')}
+                </p>
+                {entry.notes && (
+                  <p className="text-xs text-gray-600 mt-1">{entry.notes}</p>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold">
+                  {entry.amount_change > 0 ? '+' : ''}{entry.amount_change.toFixed(2)} DH
+                </p>
+                <p className="text-xs text-gray-500">
+                  Balance: {entry.new_balance.toFixed(2)} DH
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+  return (
+    <Card>
+      <CardHeader>
         <CardTitle className="text-sm flex items-center gap-2">
           <DollarSign className="h-4 w-4" />
           Balance History
@@ -107,4 +147,4 @@ const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchas
   );
 };
 
-export default PurchaseBalanceHistory;
+export default PurchaseBalanceHistory;y;
