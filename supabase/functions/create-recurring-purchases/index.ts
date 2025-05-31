@@ -10,6 +10,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response('ok', { 
       headers: corsHeaders,
@@ -21,13 +22,19 @@ serve(async (req) => {
     // Get the authorization header from the request
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      throw new Error('No authorization header')
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        },
+      )
     }
 
     // Create supabase client with user's token
     const supabaseClient = createClient(
-     Deno.env.get('SUPABASE_URL') ?? 'https://vbcdgubnvbilavetsjlr.supabase.co',
-     Deno.env.get('SUPABASE_ANON_KEY') ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiY2RndWJudmJpbGF2ZXRzamxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTE4MDYsImV4cCI6MjA2MDY2NzgwNn0.aNeLdgw7LTsVl73gzKIjxT5w0AyT99x1bh-BSV3HeCQ',
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
           headers: {
@@ -40,11 +47,16 @@ serve(async (req) => {
     // Verify the user is authenticated
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) {
-      throw new Error('User not authenticated')
+      return new Response(
+        JSON.stringify({ error: 'User not authenticated' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        },
+      )
     }
 
     // Get purchases that need to be renewed (where next_recurring_date <= today)
-    // RLS will automatically filter for the authenticated user
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
     
@@ -57,7 +69,14 @@ serve(async (req) => {
       .eq('is_deleted', false)
 
     if (fetchError) {
-      throw fetchError
+      console.error('Error fetching purchases:', fetchError)
+      return new Response(
+        JSON.stringify({ error: fetchError.message }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        },
+      )
     }
 
     console.log(`Found ${purchasesToRenew?.length || 0} purchases to renew for user ${user.id}`)
@@ -79,13 +98,13 @@ serve(async (req) => {
     let processedCount = 0
     let errorCount = 0
 
-    for (const purchase of purchasesToRenew || []) {
+    for (const purchase of purchasesToRenew) {
       try {
         console.log(`Processing purchase ID ${purchase.id} with recurring type ${purchase.recurring_type}`)
         
-        // Calculate next recurring date from the current next_recurring_date
+        // Calculate next recurring date
         const currentRecurringDate = new Date(purchase.next_recurring_date)
-        let nextRecurringDate = new Date(currentRecurringDate)
+        const nextRecurringDate = new Date(currentRecurringDate)
 
         switch (purchase.recurring_type) {
           case '1_month':
@@ -102,6 +121,7 @@ serve(async (req) => {
             break
           default:
             console.log(`Invalid recurring type: ${purchase.recurring_type}`)
+            errorCount++
             continue
         }
 
@@ -134,12 +154,12 @@ serve(async (req) => {
 
         // Update the purchase record with new recurring cycle
         const updatedPurchaseData = {
-          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to the current recurring date
-          advance_payment: 0, // Reset advance payment to 0
-          balance: fullAmount, // Reset balance to full amount
-          payment_status: 'Unpaid', // Reset payment status
-          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
-          next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date
+          purchase_date: newPurchaseDate.toISOString().split('T')[0],
+          advance_payment: 0,
+          balance: fullAmount,
+          payment_status: 'Unpaid',
+          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0],
+          next_recurring_date: nextRecurringDate.toISOString().split('T')[0]
         }
 
         const { error: updateError } = await supabaseClient

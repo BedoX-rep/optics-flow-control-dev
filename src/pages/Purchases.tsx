@@ -147,10 +147,10 @@ const Purchases = () => {
 
       try {
         // Get the current session to pass the authorization header
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
-          console.error('No active session found');
+        if (sessionError || !session?.access_token) {
+          console.error('No active session found:', sessionError);
           return;
         }
 
@@ -162,6 +162,14 @@ const Purchases = () => {
         
         if (error) {
           console.error('Error checking recurring purchases:', error);
+          // Don't show toast for network errors to avoid spam
+          if (!error.message?.includes('Failed to send a request')) {
+            toast({
+              title: "Warning",
+              description: "Could not check for recurring purchases. Please refresh the page.",
+              variant: "destructive",
+            });
+          }
           return;
         }
 
@@ -178,15 +186,20 @@ const Purchases = () => {
         }
       } catch (error) {
         console.error('Error invoking create-recurring-purchases function:', error);
-        toast({
-          title: "Error",
-          description: "Failed to check recurring purchases",
-          variant: "destructive",
-        });
+        // Only show error toast for unexpected errors
+        if (!error.message?.includes('CORS') && !error.message?.includes('Failed to send a request')) {
+          toast({
+            title: "Error",
+            description: "Failed to check recurring purchases",
+            variant: "destructive",
+          });
+        }
       }
     };
 
-    checkRecurringPurchases();
+    // Add a small delay to ensure the component is fully mounted
+    const timer = setTimeout(checkRecurringPurchases, 1000);
+    return () => clearTimeout(timer);
   }, [user, toast, queryClient]);
 
   // Form states
