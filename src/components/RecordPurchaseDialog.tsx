@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { format } from 'date-fns';
-import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt, Link } from 'lucide-react';
+import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
+import { Link } from 'lucide-react';
 
 interface Supplier {
   id: string;
@@ -51,9 +52,6 @@ interface Purchase {
   purchase_type?: string;
   linking_category?: string;
   tax_percentage?: number;
-  link_date_from?: string;
-  link_date_to?: string;
-  linked_receipts?: string[];
   created_at: string;
 }
 
@@ -103,26 +101,19 @@ const PURCHASE_TYPES = [
   'Capital Expenditure'
 ];
 
-const LINKING_CATEGORIES = [
-  { value: '', label: 'No Linking' },
-  { value: 'montage_costs', label: 'Montage Costs' },
-  { value: 'product_costs', label: 'Product Costs (Future)' },
-  { value: 'total_costs', label: 'Total Costs (Future)' }
-];
-
 const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   isOpen,
   onClose,
-  suppliers = [],
+  suppliers,
   onSuccess,
   editingPurchase
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
-  // Initialize with default values to prevent undefined issues
-  const getInitialFormData = () => ({
+  const [formData, setFormData] = useState({
     description: '',
     amount_ht: '',
     amount_ttc: '',
@@ -132,48 +123,68 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
     payment_method: 'Cash',
     notes: '',
-    advance_payment: '0',
+    advance_payment: '',
+    balance: '',
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: 'none',
     purchase_type: 'Operational Expenses',
     linking_category: '',
-    link_date_from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
-    link_date_to: format(new Date(), 'yyyy-MM-dd')
+    link_date_from: '',
+    link_date_to: ''
   });
 
-  const [formData, setFormData] = useState(getInitialFormData());
-
-  // Reset form when dialog opens/closes or when editing purchase changes
-  useEffect(() => {
-    if (isOpen) {
-      if (editingPurchase) {
-        setFormData({
-          description: editingPurchase.description || '',
-          amount_ht: (editingPurchase.amount_ht || editingPurchase.amount || 0).toString(),
-          amount_ttc: (editingPurchase.amount_ttc || editingPurchase.amount || 0).toString(),
-          tax_percentage: (editingPurchase.tax_percentage || 20).toString(),
-          supplier_id: editingPurchase.supplier_id || '',
-          category: editingPurchase.category || '',
-          purchase_date: editingPurchase.purchase_date ? format(new Date(editingPurchase.purchase_date), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
-          payment_method: editingPurchase.payment_method || 'Cash',
-          notes: editingPurchase.notes || '',
-          advance_payment: (editingPurchase.advance_payment || 0).toString(),
-          payment_status: editingPurchase.payment_status || 'Unpaid',
-          payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
-          recurring_type: editingPurchase.recurring_type || 'none',
-          purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
-          linking_category: editingPurchase.linking_category || '',
-          link_date_from: editingPurchase.link_date_from || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
-          link_date_to: editingPurchase.link_date_to || format(new Date(), 'yyyy-MM-dd')
-        });
-      } else {
-        setFormData(getInitialFormData());
-      }
+  // Initialize form with editing purchase data
+  React.useEffect(() => {
+    if (editingPurchase) {
+      setFormData({
+        description: editingPurchase.description,
+        amount_ht: (editingPurchase.amount_ht || editingPurchase.amount).toString(),
+        amount_ttc: (editingPurchase.amount_ttc || editingPurchase.amount).toString(),
+        tax_percentage: (editingPurchase.tax_percentage || 20).toString(),
+        supplier_id: editingPurchase.supplier_id || '',
+        category: editingPurchase.category || '',
+        purchase_date: format(new Date(editingPurchase.purchase_date), 'yyyy-MM-dd'),
+        payment_method: editingPurchase.payment_method,
+        notes: editingPurchase.notes || '',
+        advance_payment: (editingPurchase.advance_payment || 0).toString(),
+        balance: (editingPurchase.balance || 0).toString(),
+        payment_status: editingPurchase.payment_status || 'Unpaid',
+        payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
+        recurring_type: editingPurchase.recurring_type || 'none',
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
+        linking_category: editingPurchase.linking_category || '',
+        link_date_from: editingPurchase.link_date_from || '',
+        link_date_to: editingPurchase.link_date_to || ''
+      });
+    } else {
+      resetForm();
     }
-  }, [isOpen, editingPurchase]);
+  }, [editingPurchase]);
 
-  // Calculation helpers
+  const resetForm = () => {
+    setFormData({
+      description: '',
+      amount_ht: '',
+      amount_ttc: '',
+      tax_percentage: '20',
+      supplier_id: '',
+      category: '',
+      purchase_date: format(new Date(), 'yyyy-MM-dd'),
+      payment_method: 'Cash',
+      notes: '',
+      advance_payment: '',
+      balance: '',
+      payment_status: 'Unpaid',
+      payment_urgency: '',
+      recurring_type: 'none',
+      purchase_type: 'Operational Expenses',
+      linking_category: '',
+      link_date_from: '',
+      link_date_to: ''
+    });
+  };
+
   const calculateAmountTTC = (amountHT: number, taxPercentage: number): number => {
     return amountHT * (1 + taxPercentage / 100);
   };
@@ -182,77 +193,52 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     return amountTTC / (1 + taxPercentage / 100);
   };
 
-  const calculateBalance = (): number => {
-    const amountTTC = parseFloat(formData.amount_ttc) || 0;
-    const advancePayment = parseFloat(formData.advance_payment) || 0;
-    return Math.max(0, amountTTC - advancePayment);
-  };
-
-  const calculatePaymentStatus = (): string => {
-    const amountTTC = parseFloat(formData.amount_ttc) || 0;
-    const advancePayment = parseFloat(formData.advance_payment) || 0;
-
-    if (amountTTC === 0) return 'Unpaid';
-    if (advancePayment >= amountTTC) return 'Paid';
-    if (advancePayment > 0) return 'Partially Paid';
-    return 'Unpaid';
-  };
-
-  // Event handlers
   const handleAmountHTChange = (value: string) => {
     const amountHT = parseFloat(value) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
 
-    setFormData(prev => {
-      const newData = { ...prev, amount_ht: value };
-      
-      if (amountHT > 0 && taxPercentage >= 0) {
-        const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
-        newData.amount_ttc = calculatedTTC.toFixed(2);
-      }
-      
-      return newData;
-    });
+    if (amountHT > 0 && taxPercentage >= 0) {
+      const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        amount_ht: value,
+        amount_ttc: calculatedTTC.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, amount_ht: value }));
+    }
   };
 
   const handleAmountTTCChange = (value: string) => {
     const amountTTC = parseFloat(value) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
 
-    setFormData(prev => {
-      const newData = { ...prev, amount_ttc: value };
-      
-      if (amountTTC > 0 && taxPercentage >= 0) {
-        const calculatedHT = calculateAmountHT(amountTTC, taxPercentage);
-        newData.amount_ht = calculatedHT.toFixed(2);
-      }
-      
-      return newData;
-    });
+    if (amountTTC > 0 && taxPercentage >= 0) {
+      const calculatedHT = calculateAmountHT(amountTTC, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        amount_ttc: value,
+        amount_ht: calculatedHT.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, amount_ttc: value }));
+    }
   };
 
   const handleTaxPercentageChange = (value: string) => {
     const taxPercentage = parseFloat(value) || 0;
     const amountHT = parseFloat(formData.amount_ht) || 0;
 
-    setFormData(prev => {
-      const newData = { ...prev, tax_percentage: value };
-      
-      if (amountHT > 0 && taxPercentage >= 0) {
-        const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
-        newData.amount_ttc = calculatedTTC.toFixed(2);
-      }
-      
-      return newData;
-    });
-  };
-
-  const handleAdvancePaymentChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      advance_payment: value,
-      payment_status: calculatePaymentStatus()
-    }));
+    if (amountHT > 0 && taxPercentage >= 0) {
+      const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        tax_percentage: value,
+        amount_ttc: calculatedTTC.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, tax_percentage: value }));
+    }
   };
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
@@ -280,69 +266,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     return format(date, 'yyyy-MM-dd');
   };
 
-  const validateForm = (): boolean => {
-    if (!formData.description.trim()) {
-      toast({
-        title: "Error",
-        description: "Description is required",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const amountHt = parseFloat(formData.amount_ht);
-    const amountTtc = parseFloat(formData.amount_ttc);
-    const advancePayment = parseFloat(formData.advance_payment) || 0;
-
-    if (!amountHt || !amountTtc || amountHt <= 0 || amountTtc <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter valid amounts for both HT and TTC",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (amountTtc < amountHt) {
-      toast({
-        title: "Error",
-        description: "TTC amount cannot be less than HT amount",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (advancePayment > amountTtc) {
-      toast({
-        title: "Error",
-        description: "Advance payment cannot exceed TTC amount",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    // Validate linking dates if linking is enabled
-    if (formData.linking_category && (!formData.link_date_from || !formData.link_date_to)) {
-      toast({
-        title: "Error",
-        description: "Please provide both start and end dates for receipt linking",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.link_date_from && formData.link_date_to && new Date(formData.link_date_from) > new Date(formData.link_date_to)) {
-      toast({
-        title: "Error",
-        description: "Link start date cannot be after end date",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -355,19 +278,58 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       return;
     }
 
-    if (!validateForm()) {
+    if (!formData.description.trim() || !formData.amount_ht || !formData.amount_ttc) {
+      toast({
+        title: "Error",
+        description: "Please fill in description, HT amount, and TTC amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amountHt = parseFloat(formData.amount_ht);
+    const amountTtc = parseFloat(formData.amount_ttc);
+    const advancePayment = parseFloat(formData.advance_payment) || 0;
+    const taxPercentage = parseFloat(formData.tax_percentage) || 0;
+
+    if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter valid amounts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
       setIsSubmitting(true);
 
-      const amountHt = parseFloat(formData.amount_ht);
-      const amountTtc = parseFloat(formData.amount_ttc);
-      const advancePayment = parseFloat(formData.advance_payment) || 0;
-      const taxPercentage = parseFloat(formData.tax_percentage) || 0;
-      const balance = calculateBalance();
-      const paymentStatus = calculatePaymentStatus();
+      const balance = amountTtc - advancePayment;
+      let paymentStatus = 'Unpaid';
+      if (advancePayment >= amountTtc && amountTtc > 0) {
+        paymentStatus = 'Paid';
+      } else if (advancePayment > 0) {
+        paymentStatus = 'Partially Paid';
+      }
+
       const nextRecurringDate = calculateNextRecurringDate(formData.purchase_date, formData.recurring_type);
 
       const purchaseData = {
@@ -390,8 +352,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
         linking_category: formData.linking_category || null,
-        link_date_from: formData.linking_category ? formData.link_date_from : null,
-        link_date_to: formData.linking_category ? formData.link_date_to : null,
         is_deleted: false
       };
 
@@ -403,7 +363,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
           .eq('id', editingPurchase.id)
           .eq('user_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         toast({
           title: "Success",
@@ -415,7 +377,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
           .from('purchases')
           .insert(purchaseData);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         toast({
           title: "Success",
@@ -423,14 +387,15 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         });
       }
 
+      resetForm();
       onSuccess();
       onClose();
 
     } catch (error) {
-      console.error('Error saving purchase:', error);
+      console.error('Error recording purchase:', error);
       toast({
         title: "Error",
-        description: "Failed to save purchase. Please try again.",
+        description: "Failed to record purchase. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -440,11 +405,10 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   const handleClose = () => {
     if (!isSubmitting) {
+      resetForm();
       onClose();
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -483,15 +447,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 <div>
                   <Label htmlFor="supplier">Supplier</Label>
                   <Select
-                    value={formData.supplier_id}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                    value={formData.supplier_id || undefined}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select supplier (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Supplier</SelectItem>
                       {suppliers.map(supplier => (
                         <SelectItem key={supplier.id} value={supplier.id}>
                           {supplier.name}
@@ -512,7 +475,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                       <SelectValue placeholder="Select category (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Category</SelectItem>
                       {EXPENSE_CATEGORIES.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -613,7 +575,26 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     step="0.01"
                     min="0"
                     value={formData.advance_payment}
-                    onChange={(e) => handleAdvancePaymentChange(e.target.value)}
+                    onChange={(e) => {
+                      const newAdvancePayment = e.target.value;
+                      setFormData(prev => {
+                        const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                        const advancePayment = parseFloat(newAdvancePayment) || 0;
+                        const balance = amountTtc - advancePayment;
+                        let paymentStatus = 'Unpaid';
+                        if (advancePayment >= amountTtc && amountTtc > 0) {
+                          paymentStatus = 'Paid';
+                        } else if (advancePayment > 0) {
+                          paymentStatus = 'Partially Paid';
+                        }
+                        return { 
+                          ...prev, 
+                          advance_payment: newAdvancePayment,
+                          balance: balance.toString(),
+                          payment_status: paymentStatus
+                        };
+                      });
+                    }}
                     placeholder="0.00"
                     disabled={isSubmitting}
                     className="mt-1"
@@ -621,12 +602,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="balance">Balance (Calculated)</Label>
+                  <Label htmlFor="balance">Balance</Label>
                   <Input
                     id="balance"
                     type="number"
                     step="0.01"
-                    value={calculateBalance().toFixed(2)}
+                    value={formData.balance}
                     placeholder="0.00"
                     disabled
                     className="mt-1 bg-gray-50"
@@ -636,7 +617,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             </CardContent>
           </Card>
 
-          {/* Payment Information */}
+          {/* Payment & Status Information */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -667,12 +648,21 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="payment_status">Payment Status (Auto-calculated)</Label>
-                  <Input
-                    value={calculatePaymentStatus()}
-                    disabled
-                    className="mt-1 bg-gray-50"
-                  />
+                  <Label htmlFor="payment_status">Payment Status</Label>
+                  <Select
+                    value={formData.payment_status}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                      <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>
@@ -758,49 +748,44 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     <SelectValue placeholder="Select linking category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {LINKING_CATEGORIES.map(category => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="">No Linking</SelectItem>
+                    <SelectItem value="montage_costs">Montage Costs</SelectItem>
+                    <SelectItem value="product_costs">Product Costs (Future)</SelectItem>
+                    <SelectItem value="total_costs">Total Costs (Future)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
-              {formData.linking_category && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="link_date_from">Link From Date</Label>
-                    <Input
-                      id="link_date_from"
-                      type="date"
-                      value={formData.link_date_from}
-                      onChange={(e) => setFormData(prev => ({ ...prev, link_date_from: e.target.value }))}
-                      disabled={isSubmitting}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="link_date_to">Link To Date</Label>
-                    <Input
-                      id="link_date_to"
-                      type="date"
-                      value={formData.link_date_to}
-                      onChange={(e) => setFormData(prev => ({ ...prev, link_date_to: e.target.value }))}
-                      disabled={isSubmitting}
-                      className="mt-1"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="link_date_from">Link From Date</Label>
+                  <Input
+                    id="link_date_from"
+                    type="date"
+                    value={formData.link_date_from}
+                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_from: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
                 </div>
-              )}
-              
+                <div>
+                  <Label htmlFor="link_date_to">Link To Date</Label>
+                  <Input
+                    id="link_date_to"
+                    type="date"
+                    value={formData.link_date_to}
+                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_to: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
               {editingPurchase?.linked_receipts && editingPurchase.linked_receipts.length > 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="text-sm font-medium text-green-800">
                     Currently linked to {editingPurchase.linked_receipts.length} receipt(s)
                   </p>
                   <p className="text-xs text-green-600 mt-1">
-                    Linking settings will be updated when you save this purchase
+                    Use the Link button in the purchases list to modify receipt linking
                   </p>
                 </div>
               )}
