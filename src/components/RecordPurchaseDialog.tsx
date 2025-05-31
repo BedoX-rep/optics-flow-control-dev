@@ -278,56 +278,45 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       return;
     }
 
-    // Skip amount validation if linking category is selected (amounts will come from linked receipts)
-    const isLinkingEnabled = formData.linking_category && formData.linking_category !== 'none';
-    
-    if (!formData.description.trim() || (!isLinkingEnabled && (!formData.amount_ht || !formData.amount_ttc))) {
+    if (!formData.description.trim() || !formData.amount_ht || !formData.amount_ttc) {
       toast({
         title: "Error",
-        description: isLinkingEnabled 
-          ? "Please fill in description" 
-          : "Please fill in description, HT amount, and TTC amount",
+        description: "Please fill in description, HT amount, and TTC amount",
         variant: "destructive",
       });
       return;
     }
 
-    const isLinkingEnabled = formData.linking_category && formData.linking_category !== 'none';
-    
-    // For linked purchases, amounts will be calculated from receipts, so use 0 as placeholder
-    const amountHt = isLinkingEnabled ? 0 : parseFloat(formData.amount_ht);
-    const amountTtc = isLinkingEnabled ? 0 : parseFloat(formData.amount_ttc);
-    const advancePayment = isLinkingEnabled ? 0 : parseFloat(formData.advance_payment) || 0;
+    const amountHt = parseFloat(formData.amount_ht);
+    const amountTtc = parseFloat(formData.amount_ttc);
+    const advancePayment = parseFloat(formData.advance_payment) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
 
-    // Only validate amounts if not linking
-    if (!isLinkingEnabled) {
-      if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
-        toast({
-          title: "Error",
-          description: "Please enter valid amounts",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter valid amounts",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (amountTtc < amountHt) {
-        toast({
-          title: "Error",
-          description: "TTC amount cannot be less than HT amount",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (advancePayment > amountTtc) {
-        toast({
-          title: "Error",
-          description: "Advance payment cannot be more than TTC amount",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
+      return;
     }
 
     try {
@@ -335,16 +324,10 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
       const balance = amountTtc - advancePayment;
       let paymentStatus = 'Unpaid';
-      
-      // For linked purchases, payment status will be calculated from receipts
-      if (isLinkingEnabled) {
-        paymentStatus = 'Unpaid'; // Will be updated when receipts are linked
-      } else {
-        if (advancePayment >= amountTtc && amountTtc > 0) {
-          paymentStatus = 'Paid';
-        } else if (advancePayment > 0) {
-          paymentStatus = 'Partially Paid';
-        }
+      if (advancePayment >= amountTtc && amountTtc > 0) {
+        paymentStatus = 'Paid';
+      } else if (advancePayment > 0) {
+        paymentStatus = 'Partially Paid';
       }
 
       const nextRecurringDate = calculateNextRecurringDate(formData.purchase_date, formData.recurring_type);
@@ -369,8 +352,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
         linking_category: formData.linking_category || null,
-        link_date_from: isLinkingEnabled ? formData.link_date_from || null : null,
-        link_date_to: isLinkingEnabled ? formData.link_date_to || null : null,
         is_deleted: false
       };
 
@@ -551,13 +532,13 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     value={formData.tax_percentage}
                     onChange={(e) => handleTaxPercentageChange(e.target.value)}
                     placeholder="20.00"
-                    disabled={isSubmitting || (formData.linking_category && formData.linking_category !== 'none')}
+                    disabled={isSubmitting}
                     className="mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="amount_ht">Amount HT (Before Tax) {formData.linking_category && formData.linking_category !== 'none' ? '' : '*'}</Label>
+                  <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
                   <Input
                     id="amount_ht"
                     type="number"
@@ -565,15 +546,15 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     min="0.01"
                     value={formData.amount_ht}
                     onChange={(e) => handleAmountHTChange(e.target.value)}
-                    placeholder={formData.linking_category && formData.linking_category !== 'none' ? "Will be calculated from linked receipts" : "0.00"}
-                    required={!formData.linking_category || formData.linking_category === 'none'}
-                    disabled={isSubmitting || (formData.linking_category && formData.linking_category !== 'none')}
-                    className={`mt-1 ${formData.linking_category && formData.linking_category !== 'none' ? 'bg-gray-50' : ''}`}
+                    placeholder="0.00"
+                    required
+                    disabled={isSubmitting}
+                    className="mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) {formData.linking_category && formData.linking_category !== 'none' ? '' : '*'}</Label>
+                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
                   <Input
                     id="amount_ttc"
                     type="number"
@@ -581,10 +562,10 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     min="0.01"
                     value={formData.amount_ttc}
                     onChange={(e) => handleAmountTTCChange(e.target.value)}
-                    placeholder={formData.linking_category && formData.linking_category !== 'none' ? "Will be calculated from linked receipts" : "0.00"}
-                    required={!formData.linking_category || formData.linking_category === 'none'}
-                    disabled={isSubmitting || (formData.linking_category && formData.linking_category !== 'none')}
-                    className={`mt-1 ${formData.linking_category && formData.linking_category !== 'none' ? 'bg-gray-50' : ''}`}
+                    placeholder="0.00"
+                    required
+                    disabled={isSubmitting}
+                    className="mt-1"
                   />
                 </div>
               </div>
@@ -618,9 +599,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                         };
                       });
                     }}
-                    placeholder={formData.linking_category && formData.linking_category !== 'none' ? "Will be calculated from linked receipts" : "0.00"}
-                    disabled={isSubmitting || (formData.linking_category && formData.linking_category !== 'none')}
-                    className={`mt-1 ${formData.linking_category && formData.linking_category !== 'none' ? 'bg-gray-50' : ''}`}
+                    placeholder="0.00"
+                    disabled={isSubmitting}
+                    className="mt-1"
                   />
                 </div>
 
@@ -631,7 +612,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     type="number"
                     step="0.01"
                     value={formData.balance}
-                    placeholder={formData.linking_category && formData.linking_category !== 'none' ? "Will be calculated from linked receipts" : "0.00"}
+                    placeholder="0.00"
                     disabled
                     className="mt-1 bg-gray-50"
                   />
@@ -836,7 +817,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.description.trim() || ((!formData.linking_category || formData.linking_category === 'none') && (!formData.amount_ht || !formData.amount_ttc))}
+              disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
               className="min-w-[150px]"
             >
               {isSubmitting ? (editingPurchase ? 'Updating...' : 'Recording...') : (editingPurchase ? 'Update Purchase' : 'Record Purchase')}
