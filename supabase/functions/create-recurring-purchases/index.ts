@@ -18,10 +18,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get purchases that need to be repeated (where next_recurring_date <= today)
+    // Get purchases that need to be renewed (where next_recurring_date <= today)
     const today = new Date().toISOString().split('T')[0]
     
-    const { data: purchasesToRepeat, error: fetchError } = await supabaseClient
+    const { data: purchasesToRenew, error: fetchError } = await supabaseClient
       .from('purchases')
       .select('*')
       .lte('next_recurring_date', today)
@@ -32,9 +32,9 @@ serve(async (req) => {
       throw fetchError
     }
 
-    console.log(`Found ${purchasesToRepeat?.length || 0} purchases to repeat`)
+    console.log(`Found ${purchasesToRenew?.length || 0} purchases to renew`)
 
-    for (const purchase of purchasesToRepeat || []) {
+    for (const purchase of purchasesToRenew || []) {
       try {
         // Calculate next recurring date
         const currentDate = new Date(purchase.next_recurring_date)
@@ -57,48 +57,51 @@ serve(async (req) => {
             continue
         }
 
-        // Create new purchase record
-        const newPurchase = {
-          user_id: purchase.user_id,
-          supplier_id: purchase.supplier_id,
-          description: purchase.description,
-          amount_ht: purchase.amount_ht,
-          amount_ttc: purchase.amount_ttc,
-          amount: purchase.amount,
-          category: purchase.category,
-          purchase_date: purchase.next_recurring_date,
-          payment_method: purchase.payment_method,
-          notes: purchase.notes ? `${purchase.notes} (Auto-generated from recurring purchase)` : 'Auto-generated from recurring purchase',
-          advance_payment: 0, // Reset advance payment for new purchase
-          balance: purchase.amount_ttc, // Full amount as balance
+        // Calculate payment urgency (1 month from the recurring date)
+        const paymentUrgencyDate = new Date(purchase.next_recurring_date)
+        paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
+
+        // Record the balance change in history before updating
+        const currentBalance = purchase.balance || 0
+        if (currentBalance !== (purchase.amount_ttc || purchase.amount)) {
+          const { error: historyError } = await supabaseClient
+            .from('purchase_balance_history')
+            .insert({
+              purchase_id: purchase.id,
+              user_id: purchase.user_id,
+              previous_balance: currentBalance,
+              new_balance: purchase.amount_ttc || purchase.amount,
+              change_amount: (purchase.amount_ttc || purchase.amount) - currentBalance,
+              change_reason: 'Recurring purchase renewal - balance reset',
+              change_date: purchase.next_recurring_date
+            })
+
+          if (historyError) {
+            console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
+          }
+        }
+
+        // Soft reset the existing purchase record
+        const updatedPurchaseData = {
+          purchase_date: purchase.next_recurring_date, // Set to the due recurring date
+          advance_payment: 0, // Reset advance payment to 0
+          balance: purchase.amount_ttc || purchase.amount, // Reset balance to full amount
           payment_status: 'Unpaid', // Reset payment status
-          payment_urgency: purchase.payment_urgency,
-          recurring_type: purchase.recurring_type,
-          next_recurring_date: nextDate.toISOString().split('T')[0],
-          purchase_type: purchase.purchase_type || 'Operational Expenses',
-          is_deleted: false
+          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency to 1 month from recurring date
+          next_recurring_date: nextDate.toISOString().split('T')[0] // Update to next recurring date
         }
 
-        const { error: insertError } = await supabaseClient
-          .from('purchases')
-          .insert(newPurchase)
-
-        if (insertError) {
-          console.error(`Error creating recurring purchase for ID ${purchase.id}:`, insertError)
-          continue
-        }
-
-        // Update the original purchase's next_recurring_date
         const { error: updateError } = await supabaseClient
           .from('purchases')
-          .update({ next_recurring_date: nextDate.toISOString().split('T')[0] })
+          .update(updatedPurchaseData)
           .eq('id', purchase.id)
 
         if (updateError) {
-          console.error(`Error updating next recurring date for ID ${purchase.id}:`, updateError)
-        } else {
-          console.log(`Successfully created recurring purchase for ID ${purchase.id}`)
+          console.error(`Error updating recurring purchase for ID ${purchase.id}:`, updateError)
+          continue
         }
+
+        console.log(`Successfully renewed recurring purchase for ID ${purchase.id}`)
 
       } catch (error) {
         console.error(`Error processing recurring purchase ID ${purchase.id}:`, error)
@@ -108,8 +111,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        processed: purchasesToRepeat?.length || 0,
-        message: `Processed ${purchasesToRepeat?.length || 0} recurring purchases`
+        processed: purchasesToRenew?.length || 0,
+        message: `Processed ${purchasesToRenew?.length || 0} recurring purchases`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
