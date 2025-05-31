@@ -116,9 +116,14 @@ serve(async (req) => {
         const originalAmount = purchase.amount_ttc || purchase.amount
         const taxPercentage = purchase.tax_percentage || 20
         
-        // Calculate new totals: original amount + remaining balance
-        const newTotalAmount = originalAmount + currentBalance
-        const newBalance = newTotalAmount - currentAdvancePayment
+        // For recurring renewal:
+        // - If balance = 0 (fully paid), reset to original amount
+        // - If balance > 0 (unpaid), add remaining balance to original amount
+        const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance
+        
+        // Reset advance payment to 0 for new cycle and calculate new balance
+        const newAdvancePayment = 0
+        const newBalance = newTotalAmount - newAdvancePayment
         
         // Calculate HT amount from TTC amount using tax percentage
         const newAmountHT = newTotalAmount / (1 + taxPercentage / 100)
@@ -131,9 +136,11 @@ serve(async (req) => {
             user_id: user.id,
             old_balance: currentBalance,
             new_balance: newBalance,
-            change_amount: originalAmount,
-            change_reason: 'Recurring purchase renewed - balance accumulated with new amount',
-            change_date: newPurchaseDate.toISOString()
+            change_amount: newBalance - currentBalance,
+            change_reason: currentBalance === 0 
+              ? 'Recurring purchase renewed - new cycle started'
+              : 'Recurring purchase renewed - balance accumulated with new amount',
+            change_date: today.toISOString()
           })
 
         if (historyError) {
@@ -142,15 +149,14 @@ serve(async (req) => {
 
         // Update the purchase record with new recurring cycle
         const updatedPurchaseData = {
-          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to current date
+          purchase_date: today.toISOString().split('T')[0], // Set to current date
           amount_ht: newAmountHT, // Update HT amount based on TTC and tax percentage
           amount_ttc: newTotalAmount, // Update total amount
           amount: newTotalAmount, // Keep for backward compatibility
           tax_percentage: taxPercentage, // Keep existing tax percentage
-          balance: newBalance, // New balance after adding original amount
-          advance_payment: currentAdvancePayment, // Keep existing advance payment
-          payment_status: newBalance === 0 ? 'Paid' : 
-                         currentAdvancePayment > 0 ? 'Partially Paid' : 'Unpaid',
+          balance: newBalance, // New balance after renewal
+          advance_payment: newAdvancePayment, // Reset advance payment to 0
+          payment_status: 'Unpaid', // Reset to unpaid for new cycle
           payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
           next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date
         }
