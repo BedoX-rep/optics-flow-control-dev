@@ -18,10 +18,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { format } from 'date-fns';
+import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt } from 'lucide-react';
 
 interface Supplier {
   id: string;
@@ -47,6 +49,7 @@ interface Purchase {
   recurring_type?: string;
   next_recurring_date?: string;
   purchase_type?: string;
+  tax_percentage?: number;
   created_at: string;
 }
 
@@ -84,6 +87,7 @@ const PAYMENT_METHODS = [
 ];
 
 const RECURRING_TYPES = [
+  { value: 'none', label: 'None' },
   { value: '1_month', label: '1 Month' },
   { value: '3_months', label: '3 Months' },
   { value: '6_months', label: '6 Months' },
@@ -105,11 +109,13 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const [formData, setFormData] = useState({
     description: '',
     amount_ht: '',
     amount_ttc: '',
+    tax_percentage: '20',
     supplier_id: '',
     category: '',
     purchase_date: format(new Date(), 'yyyy-MM-dd'),
@@ -119,7 +125,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     balance: '',
     payment_status: 'Unpaid',
     payment_urgency: '',
-    recurring_type: '',
+    recurring_type: 'none',
     purchase_type: 'Operational Expenses'
   });
 
@@ -130,6 +136,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         description: editingPurchase.description,
         amount_ht: (editingPurchase.amount_ht || editingPurchase.amount).toString(),
         amount_ttc: (editingPurchase.amount_ttc || editingPurchase.amount).toString(),
+        tax_percentage: (editingPurchase.tax_percentage || 20).toString(),
         supplier_id: editingPurchase.supplier_id || '',
         category: editingPurchase.category || '',
         purchase_date: format(new Date(editingPurchase.purchase_date), 'yyyy-MM-dd'),
@@ -139,7 +146,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         balance: (editingPurchase.balance || 0).toString(),
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
-        recurring_type: editingPurchase.recurring_type || '',
+        recurring_type: editingPurchase.recurring_type || 'none',
         purchase_type: editingPurchase.purchase_type || 'Operational Expenses'
       });
     } else {
@@ -152,6 +159,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       description: '',
       amount_ht: '',
       amount_ttc: '',
+      tax_percentage: '20',
       supplier_id: '',
       category: '',
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
@@ -161,13 +169,69 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       balance: '',
       payment_status: 'Unpaid',
       payment_urgency: '',
-      recurring_type: '',
+      recurring_type: 'none',
       purchase_type: 'Operational Expenses'
     });
   };
 
+  const calculateAmountTTC = (amountHT: number, taxPercentage: number): number => {
+    return amountHT * (1 + taxPercentage / 100);
+  };
+
+  const calculateAmountHT = (amountTTC: number, taxPercentage: number): number => {
+    return amountTTC / (1 + taxPercentage / 100);
+  };
+
+  const handleAmountHTChange = (value: string) => {
+    const amountHT = parseFloat(value) || 0;
+    const taxPercentage = parseFloat(formData.tax_percentage) || 0;
+    
+    if (amountHT > 0 && taxPercentage >= 0) {
+      const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        amount_ht: value,
+        amount_ttc: calculatedTTC.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, amount_ht: value }));
+    }
+  };
+
+  const handleAmountTTCChange = (value: string) => {
+    const amountTTC = parseFloat(value) || 0;
+    const taxPercentage = parseFloat(formData.tax_percentage) || 0;
+    
+    if (amountTTC > 0 && taxPercentage >= 0) {
+      const calculatedHT = calculateAmountHT(amountTTC, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        amount_ttc: value,
+        amount_ht: calculatedHT.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, amount_ttc: value }));
+    }
+  };
+
+  const handleTaxPercentageChange = (value: string) => {
+    const taxPercentage = parseFloat(value) || 0;
+    const amountHT = parseFloat(formData.amount_ht) || 0;
+    
+    if (amountHT > 0 && taxPercentage >= 0) {
+      const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
+      setFormData(prev => ({
+        ...prev,
+        tax_percentage: value,
+        amount_ttc: calculatedTTC.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, tax_percentage: value }));
+    }
+  };
+
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
-    if (!recurringType) return null;
+    if (!recurringType || recurringType === 'none') return null;
     
     const date = new Date(purchaseDate);
     
@@ -215,6 +279,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     const amountHt = parseFloat(formData.amount_ht);
     const amountTtc = parseFloat(formData.amount_ttc);
     const advancePayment = parseFloat(formData.advance_payment) || 0;
+    const taxPercentage = parseFloat(formData.tax_percentage) || 0;
     
     if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
       toast({
@@ -262,6 +327,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         amount_ht: amountHt,
         amount_ttc: amountTtc,
         amount: amountTtc, // Keep for backward compatibility
+        tax_percentage: taxPercentage,
         supplier_id: formData.supplier_id || null,
         category: formData.category || null,
         purchase_date: formData.purchase_date,
@@ -271,7 +337,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         balance: balance,
         payment_status: paymentStatus,
         payment_urgency: formData.payment_urgency || null,
-        recurring_type: formData.recurring_type || null,
+        recurring_type: formData.recurring_type === 'none' ? null : formData.recurring_type,
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
         is_deleted: false
@@ -334,274 +400,328 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}</DialogTitle>
+      <DialogContent className="sm:max-w-[900px] max-h-[95vh] overflow-y-auto">
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
+            <Receipt className="h-5 w-5 text-primary" />
+            {editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}
+          </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <Label htmlFor="description">Description *</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter purchase description"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <User className="h-4 w-4" />
+                Basic Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter purchase description"
+                    required
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
-              <Input
-                id="amount_ht"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={formData.amount_ht}
-                onChange={(e) => {
-                  const newAmountHt = e.target.value;
-                  setFormData(prev => {
-                    const amountHt = parseFloat(newAmountHt) || 0;
-                    const amountTtc = parseFloat(prev.amount_ttc) || 0;
-                    const advancePayment = parseFloat(prev.advance_payment) || 0;
-                    const balance = amountTtc - advancePayment;
-                    return { 
-                      ...prev, 
-                      amount_ht: newAmountHt,
-                      balance: balance.toString()
-                    };
-                  });
-                }}
-                placeholder="0.00"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="supplier">Supplier</Label>
+                  <Select
+                    value={formData.supplier_id || undefined}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select supplier (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map(supplier => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
-              <Input
-                id="amount_ttc"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={formData.amount_ttc}
-                onChange={(e) => {
-                  const newAmountTtc = e.target.value;
-                  setFormData(prev => {
-                    const amountTtc = parseFloat(newAmountTtc) || 0;
-                    const advancePayment = parseFloat(prev.advance_payment) || 0;
-                    const balance = amountTtc - advancePayment;
-                    let paymentStatus = 'Unpaid';
-                    if (advancePayment >= amountTtc && amountTtc > 0) {
-                      paymentStatus = 'Paid';
-                    } else if (advancePayment > 0) {
-                      paymentStatus = 'Partially Paid';
-                    }
-                    return { 
-                      ...prev, 
-                      amount_ttc: newAmountTtc,
-                      balance: balance.toString(),
-                      payment_status: paymentStatus
-                    };
-                  });
-                }}
-                placeholder="0.00"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select category (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPENSE_CATEGORIES.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label htmlFor="advance_payment">Advance Payment</Label>
-              <Input
-                id="advance_payment"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.advance_payment}
-                onChange={(e) => {
-                  const newAdvancePayment = e.target.value;
-                  setFormData(prev => {
-                    const amountTtc = parseFloat(prev.amount_ttc) || 0;
-                    const advancePayment = parseFloat(newAdvancePayment) || 0;
-                    const balance = amountTtc - advancePayment;
-                    let paymentStatus = 'Unpaid';
-                    if (advancePayment >= amountTtc && amountTtc > 0) {
-                      paymentStatus = 'Paid';
-                    } else if (advancePayment > 0) {
-                      paymentStatus = 'Partially Paid';
-                    }
-                    return { 
-                      ...prev, 
-                      advance_payment: newAdvancePayment,
-                      balance: balance.toString(),
-                      payment_status: paymentStatus
-                    };
-                  });
-                }}
-                placeholder="0.00"
-                disabled={isSubmitting}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="purchase_type">Purchase Type *</Label>
+                  <Select
+                    value={formData.purchase_type}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PURCHASE_TYPES.map(type => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <Label htmlFor="balance">Balance</Label>
-              <Input
-                id="balance"
-                type="number"
-                step="0.01"
-                value={formData.balance}
-                placeholder="0.00"
-                disabled
-                className="bg-gray-50"
-              />
-            </div>
+          {/* Financial Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calculator className="h-4 w-4" />
+                Financial Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="tax_percentage">Tax Percentage (%)</Label>
+                  <Input
+                    id="tax_percentage"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    value={formData.tax_percentage}
+                    onChange={(e) => handleTaxPercentageChange(e.target.value)}
+                    placeholder="20.00"
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="purchase_date">Purchase Date</Label>
-              <Input
-                id="purchase_date"
-                type="date"
-                value={formData.purchase_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                disabled={isSubmitting}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
+                  <Input
+                    id="amount_ht"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={formData.amount_ht}
+                    onChange={(e) => handleAmountHTChange(e.target.value)}
+                    placeholder="0.00"
+                    required
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="payment_urgency">Payment Urgency</Label>
-              <Input
-                id="payment_urgency"
-                type="date"
-                value={formData.payment_urgency}
-                onChange={(e) => setFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
-                disabled={isSubmitting}
-              />
-            </div>
+                <div>
+                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
+                  <Input
+                    id="amount_ttc"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={formData.amount_ttc}
+                    onChange={(e) => handleAmountTTCChange(e.target.value)}
+                    placeholder="0.00"
+                    required
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <Label htmlFor="supplier">Supplier</Label>
-              <Select
-                value={formData.supplier_id || undefined}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select supplier (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {suppliers.map(supplier => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="advance_payment">Advance Payment</Label>
+                  <Input
+                    id="advance_payment"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.advance_payment}
+                    onChange={(e) => {
+                      const newAdvancePayment = e.target.value;
+                      setFormData(prev => {
+                        const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                        const advancePayment = parseFloat(newAdvancePayment) || 0;
+                        const balance = amountTtc - advancePayment;
+                        let paymentStatus = 'Unpaid';
+                        if (advancePayment >= amountTtc && amountTtc > 0) {
+                          paymentStatus = 'Paid';
+                        } else if (advancePayment > 0) {
+                          paymentStatus = 'Partially Paid';
+                        }
+                        return { 
+                          ...prev, 
+                          advance_payment: newAdvancePayment,
+                          balance: balance.toString(),
+                          payment_status: paymentStatus
+                        };
+                      });
+                    }}
+                    placeholder="0.00"
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EXPENSE_CATEGORIES.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div>
+                  <Label htmlFor="balance">Balance</Label>
+                  <Input
+                    id="balance"
+                    type="number"
+                    step="0.01"
+                    value={formData.balance}
+                    placeholder="0.00"
+                    disabled
+                    className="mt-1 bg-gray-50"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <Label htmlFor="payment_method">Payment Method</Label>
-              <Select
-                value={formData.payment_method}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_METHODS.map(method => (
-                    <SelectItem key={method} value={method}>
-                      {method}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Payment & Status Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CreditCard className="h-4 w-4" />
+                Payment Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="payment_method">Payment Method</Label>
+                  <Select
+                    value={formData.payment_method}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map(method => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label htmlFor="payment_status">Payment Status</Label>
-              <Select
-                value={formData.payment_status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Unpaid">Unpaid</SelectItem>
-                  <SelectItem value="Partially Paid">Partially Paid</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <div>
+                  <Label htmlFor="payment_status">Payment Status</Label>
+                  <Select
+                    value={formData.payment_status}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                      <SelectItem value="Partially Paid">Partially Paid</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <Label htmlFor="recurring_type">Recurring Type</Label>
-              <Select
-                value={formData.recurring_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recurring period (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {RECURRING_TYPES.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Date & Recurring Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calendar className="h-4 w-4" />
+                Date & Recurring Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="purchase_date">Purchase Date</Label>
+                  <Input
+                    id="purchase_date"
+                    type="date"
+                    value={formData.purchase_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="purchase_type">Purchase Type *</Label>
-              <Select
-                value={formData.purchase_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PURCHASE_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div>
+                  <Label htmlFor="payment_urgency">Payment Due Date</Label>
+                  <Input
+                    id="payment_urgency"
+                    type="date"
+                    value={formData.payment_urgency}
+                    onChange={(e) => setFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
 
-            <div className="md:col-span-2">
+                <div>
+                  <Label htmlFor="recurring_type" className="flex items-center gap-2">
+                    <RotateCcw className="h-3 w-3" />
+                    Recurring Type
+                  </Label>
+                  <Select
+                    value={formData.recurring_type}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select recurring period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RECURRING_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Additional Notes */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Additional Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
@@ -610,22 +730,25 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 placeholder="Additional notes about this purchase (optional)"
                 rows={3}
                 disabled={isSubmitting}
+                className="mt-1"
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <DialogFooter>
+          <DialogFooter className="pt-6 border-t">
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleClose}
               disabled={isSubmitting}
+              className="min-w-[100px]"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
+              className="min-w-[150px]"
             >
               {isSubmitting ? (editingPurchase ? 'Updating...' : 'Recording...') : (editingPurchase ? 'Update Purchase' : 'Record Purchase')}
             </Button>
