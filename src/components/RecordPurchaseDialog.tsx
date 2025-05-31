@@ -267,10 +267,10 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       return;
     }
 
-    if (!formData.description.trim() || !formData.amount_ht || !formData.amount_ttc) {
+    if (!formData.amount_ht || !formData.amount_ttc) {
       toast({
         title: "Error",
-        description: "Please fill in description, HT amount, and TTC amount",
+        description: "Please fill in HT amount and TTC amount",
         variant: "destructive",
       });
       return;
@@ -323,7 +323,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       
       const purchaseData = {
         user_id: user.id,
-        description: formData.description.trim(),
+        description: formData.description.trim() || null,
         amount_ht: amountHt,
         amount_ttc: amountTtc,
         amount: amountTtc, // Keep for backward compatibility
@@ -420,13 +420,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Input
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter purchase description"
-                    required
+                    placeholder="Enter purchase description (optional)"
                     disabled={isSubmitting}
                     className="mt-1"
                   />
@@ -747,7 +746,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
+              disabled={isSubmitting || !formData.amount_ht || !formData.amount_ttc}
               className="min-w-[150px]"
             >
               {isSubmitting ? (editingPurchase ? 'Updating...' : 'Recording...') : (editingPurchase ? 'Update Purchase' : 'Record Purchase')}
