@@ -113,7 +113,11 @@ serve(async (req) => {
         // Calculate values for the renewal
         const currentBalance = purchase.balance || 0
         const currentAdvancePayment = purchase.advance_payment || 0
-        const fullAmount = purchase.amount_ttc || purchase.amount
+        const originalAmount = purchase.amount_ttc || purchase.amount
+        
+        // Calculate new totals: original amount + remaining balance
+        const newTotalAmount = originalAmount + currentBalance
+        const newBalance = newTotalAmount - currentAdvancePayment
         
         // Record the balance change in history before updating
         const { error: historyError } = await supabaseClient
@@ -122,9 +126,9 @@ serve(async (req) => {
             purchase_id: purchase.id,
             user_id: user.id,
             old_balance: currentBalance,
-            new_balance: currentBalance, // Keep the existing balance
-            change_amount: 0,
-            change_reason: 'Recurring purchase renewed - balance carried forward',
+            new_balance: newBalance,
+            change_amount: originalAmount,
+            change_reason: 'Recurring purchase renewed - balance accumulated with new amount',
             change_date: newPurchaseDate.toISOString()
           })
 
@@ -133,12 +137,13 @@ serve(async (req) => {
         }
 
         // Update the purchase record with new recurring cycle
-        // Keep the existing balance and advance payment structure
         const updatedPurchaseData = {
-          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to the current date
-          balance: currentBalance, // Maintain existing balance
-          advance_payment: currentAdvancePayment, // Maintain existing advance payment
-          payment_status: currentBalance === 0 ? 'Paid' : 
+          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to current date
+          amount_ttc: newTotalAmount, // Update total amount
+          amount: newTotalAmount, // Keep for backward compatibility
+          balance: newBalance, // New balance after adding original amount
+          advance_payment: currentAdvancePayment, // Keep existing advance payment
+          payment_status: newBalance === 0 ? 'Paid' : 
                          currentAdvancePayment > 0 ? 'Partially Paid' : 'Unpaid',
           payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
           next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date

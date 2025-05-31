@@ -199,37 +199,39 @@ const Purchases = () => {
         purchase.recurring_type || ''
       );
 
-      // When renewing, keep the existing balance if it's not fully paid
+      // Calculate new totals: original amount + remaining balance
       const currentBalance = purchase.balance || 0;
-      const totalAmount = purchase.amount_ttc || purchase.amount;
+      const currentAdvancePayment = purchase.advance_payment || 0;
+      const originalAmount = purchase.amount_ttc || purchase.amount;
+      const newTotalAmount = originalAmount + currentBalance;
+      const newBalance = newTotalAmount - currentAdvancePayment;
       
       const renewalData = {
         purchase_date: format(currentDate, 'yyyy-MM-dd'),
         next_recurring_date: nextRecurringDate,
-        // Keep the existing balance structure
-        balance: currentBalance,
-        advance_payment: purchase.advance_payment || 0,
-        payment_status: currentBalance === 0 ? 'Paid' : 
-                       (purchase.advance_payment || 0) > 0 ? 'Partially Paid' : 'Unpaid'
+        amount_ttc: newTotalAmount, // Update total amount
+        amount: newTotalAmount, // Keep for backward compatibility
+        balance: newBalance, // New balance after adding original amount
+        advance_payment: currentAdvancePayment, // Keep existing advance payment
+        payment_status: newBalance === 0 ? 'Paid' : 
+                       currentAdvancePayment > 0 ? 'Partially Paid' : 'Unpaid'
       };
 
-      // Record balance history if balance exists
-      if (currentBalance > 0) {
-        const { error: historyError } = await supabase
-          .from('purchase_balance_history')
-          .insert({
-            purchase_id: purchase.id,
-            user_id: user.id,
-            old_balance: currentBalance,
-            new_balance: currentBalance,
-            change_amount: 0,
-            change_reason: 'Recurring purchase renewed - balance carried forward',
-            change_date: currentDate.toISOString()
-          });
+      // Record balance history
+      const { error: historyError } = await supabase
+        .from('purchase_balance_history')
+        .insert({
+          purchase_id: purchase.id,
+          user_id: user.id,
+          old_balance: currentBalance,
+          new_balance: newBalance,
+          change_amount: originalAmount,
+          change_reason: 'Recurring purchase renewed - balance accumulated with new amount',
+          change_date: currentDate.toISOString()
+        });
 
-        if (historyError) {
-          console.error('Error recording balance history:', historyError);
-        }
+      if (historyError) {
+        console.error('Error recording balance history:', historyError);
       }
 
       const { error } = await supabase
@@ -819,41 +821,50 @@ const Purchases = () => {
         </div>
       </div>
 
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input 
-              type="text" 
-              placeholder="Search purchases or suppliers..." 
-              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      {/* Search Section */}
+      <div className="mb-4 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input 
+            type="text" 
+            placeholder="Search purchases or suppliers..." 
+            className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
-          <div className="flex items-center gap-3">
-            {/* Date Filter */}
+      {/* Date Filters Section */}
+      <div className="mb-4 backdrop-blur-sm bg-gradient-to-r from-blue-50/80 to-purple-50/80 rounded-2xl border border-blue-200/50 p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-blue-600" />
+          Date Filters
+        </h3>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Quick Date Filter */}
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-medium text-gray-700">Quick Filter:</Label>
             <Select
               value={dateFilter}
               onValueChange={(value) => setDateFilter(value)}
             >
               <SelectTrigger className={cn(
-                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+                "w-[160px] h-11 border-2 shadow-lg rounded-xl gap-2 transition-all duration-200",
                 dateFilter !== 'all'
-                  ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
-                  : "bg-white/10 hover:bg-white/20"
+                  ? "bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200"
+                  : "bg-white hover:bg-gray-50 border-gray-300"
               )}>
-                <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Date">
-                  {dateFilter === 'all' ? 'Date' :
+                <SelectValue placeholder="Select period">
+                  {dateFilter === 'all' ? 'All Dates' :
                    dateFilter === 'today' ? 'Today' :
                    dateFilter === 'week' ? 'This Week' :
                    dateFilter === 'month' ? 'This Month' : 'This Year'}
                 </SelectValue>
                 {dateFilter !== 'all' && (
                   <X
-                    className="h-3 w-3 ml-auto hover:text-blue-900 cursor-pointer"
+                    className="h-4 w-4 ml-auto hover:text-blue-900 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDateFilter('all');
@@ -869,22 +880,25 @@ const Purchases = () => {
                 <SelectItem value="year">This Year</SelectItem>
               </SelectContent>
             </Select>
+          </div>
 
-            {/* Date Range Filters */}
+          {/* Custom Date Range */}
+          <div className="flex items-center gap-3 bg-white/60 p-3 rounded-xl border border-gray-200">
+            <Label className="text-sm font-medium text-gray-700">Custom Range:</Label>
             <div className="flex items-center gap-2">
               <Input
                 type="date"
                 value={dateRange.from}
                 onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="w-[140px] bg-white/10 border-white/10 rounded-xl"
+                className="w-[150px] h-10 bg-white border-gray-300 rounded-lg shadow-sm"
                 placeholder="From date"
               />
-              <span className="text-sm text-gray-400">to</span>
+              <span className="text-sm text-gray-500 font-medium">to</span>
               <Input
                 type="date"
                 value={dateRange.to}
                 onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="w-[140px] bg-white/10 border-white/10 rounded-xl"
+                className="w-[150px] h-10 bg-white border-gray-300 rounded-lg shadow-sm"
                 placeholder="To date"
               />
               {(dateRange.from || dateRange.to) && (
@@ -892,66 +906,97 @@ const Purchases = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setDateRange({ from: '', to: '' })}
-                  className="h-8 w-8 p-0"
+                  className="h-10 w-10 p-0 hover:bg-red-100 hover:text-red-600"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
-
-            {/* Supplier Filter */}
-            <Select
-              value={supplierFilter}
-              onValueChange={(value) => setSupplierFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                supplierFilter !== 'all'
-                  ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
-                  : "bg-white/10 hover:bg-white/20"
-              )}>
-                <Building2 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Supplier">
-                  {supplierFilter === 'all' ? 'Supplier' : 
-                   suppliers.find(s => s.id === supplierFilter)?.name || 'Unknown'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-gray-600">All Suppliers</SelectItem>
-                {suppliers.map(supplier => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Purchase Type Filter */}
-            <Select
-              value={purchaseTypeFilter}
-              onValueChange={(value) => setPurchaseTypeFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[160px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                purchaseTypeFilter !== 'all'
-                  ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
-                  : "bg-white/10 hover:bg-white/20"
-              )}>
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Type">
-                  {purchaseTypeFilter === 'all' ? 'Type' : purchaseTypeFilter}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-gray-600">All Types</SelectItem>
-                {PURCHASE_TYPES.map(type => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
+        </div>
+      </div>
+
+      {/* Other Filters Section */}
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Supplier Filter */}
+          <Select
+            value={supplierFilter}
+            onValueChange={(value) => setSupplierFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[160px] h-11 border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+              supplierFilter !== 'all'
+                ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                : "bg-white/10 hover:bg-white/20"
+            )}>
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Supplier">
+                {supplierFilter === 'all' ? 'All Suppliers' : 
+                 suppliers.find(s => s.id === supplierFilter)?.name || 'Unknown'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-gray-600">All Suppliers</SelectItem>
+              {suppliers.map(supplier => (
+                <SelectItem key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Purchase Type Filter */}
+          <Select
+            value={purchaseTypeFilter}
+            onValueChange={(value) => setPurchaseTypeFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[180px] h-11 border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+              purchaseTypeFilter !== 'all'
+                ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
+                : "bg-white/10 hover:bg-white/20"
+            )}>
+              <TrendingUp className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Type">
+                {purchaseTypeFilter === 'all' ? 'All Types' : purchaseTypeFilter}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-gray-600">All Types</SelectItem>
+              {PURCHASE_TYPES.map(type => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Category Filter */}
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) => setCategoryFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[160px] h-11 border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+              categoryFilter !== 'all'
+                ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
+                : "bg-white/10 hover:bg-white/20"
+            )}>
+              <Package className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Category">
+                {categoryFilter === 'all' ? 'All Categories' : categoryFilter}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-gray-600">All Categories</SelectItem>
+              {EXPENSE_CATEGORIES.map(category => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
