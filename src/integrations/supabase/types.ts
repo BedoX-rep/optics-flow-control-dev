@@ -389,6 +389,7 @@ export type Database = {
           is_deleted: boolean | null
           created_at: string | null
           user_id: string
+          purchase_type: string | null
         }
         Insert: {
           id?: string
@@ -400,6 +401,7 @@ export type Database = {
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
+          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id: string
@@ -414,6 +416,7 @@ export type Database = {
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
+          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id?: string
@@ -450,7 +453,7 @@ export type Database = {
             | null
           trial_used: boolean | null
           user_id: string
-        }</old_str>
+        }
         Insert: {
           created_at?: string | null
           display_name?: string

@@ -59,6 +59,7 @@ interface Purchase {
   payment_urgency?: string;
   recurring_type?: string;
   next_recurring_date?: string;
+  purchase_type?: string;
   created_at: string;
   suppliers?: Supplier;
 }
@@ -95,6 +96,11 @@ const RECURRING_TYPES = [
   { value: '1_year', label: '1 Year' }
 ];
 
+const PURCHASE_TYPES = [
+  'Operational Expenses',
+  'Capital Expenditure'
+];
+
 const Purchases = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -108,6 +114,7 @@ const Purchases = () => {
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
+  const [purchaseTypeFilter, setPurchaseTypeFilter] = useState('all');
   const [dateRange, setDateRange] = useState({
     from: '',
     to: ''
@@ -178,6 +185,7 @@ const Purchases = () => {
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: '',
+    purchase_type: 'Operational Expenses',
   });
 
   const [supplierFormData, setSupplierFormData] = useState({
@@ -253,6 +261,10 @@ const Purchases = () => {
 
     if (supplierFilter !== 'all') {
       filtered = filtered.filter(purchase => purchase.supplier_id === supplierFilter);
+    }
+
+    if (purchaseTypeFilter !== 'all') {
+      filtered = filtered.filter(purchase => purchase.purchase_type === purchaseTypeFilter);
     }
 
     if (dateRange.from) {
@@ -337,6 +349,7 @@ const Purchases = () => {
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: '',
+      purchase_type: 'Operational Expenses',
     });
     setEditingPurchase(null);
   };
@@ -370,6 +383,7 @@ const Purchases = () => {
         payment_status: purchase.payment_status || 'Unpaid',
         payment_urgency: purchase.payment_urgency ? format(new Date(purchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: purchase.recurring_type || '',
+        purchase_type: purchase.purchase_type || 'Operational Expenses',
       });
     } else {
       resetPurchaseForm();
@@ -465,6 +479,7 @@ const Purchases = () => {
         purchase_date: purchaseFormData.purchase_date,
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
+        purchase_type: purchaseFormData.purchase_type,
         user_id: user.id,
       };
 
@@ -796,6 +811,32 @@ const Purchases = () => {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Purchase Type Filter */}
+            <Select
+              value={purchaseTypeFilter}
+              onValueChange={(value) => setPurchaseTypeFilter(value)}
+            >
+              <SelectTrigger className={cn(
+                "w-[160px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+                purchaseTypeFilter !== 'all'
+                  ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
+                  : "bg-white/10 hover:bg-white/20"
+              )}>
+                <TrendingUp className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Type">
+                  {purchaseTypeFilter === 'all' ? 'Type' : purchaseTypeFilter}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-gray-600">All Types</SelectItem>
+                {PURCHASE_TYPES.map(type => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -857,6 +898,15 @@ const Purchases = () => {
                                     </span>
                                   </>
                                 )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  purchase.purchase_type === 'Capital Expenditure' 
+                                    ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                }`}>
+                                  {purchase.purchase_type || 'Operational Expenses'}
+                                </span>
                               </div>
                             </div>
                             <div className="flex gap-1 flex-shrink-0">

@@ -75,6 +75,7 @@ serve(async (req) => {
           payment_urgency: purchase.payment_urgency,
           recurring_type: purchase.recurring_type,
           next_recurring_date: nextDate.toISOString().split('T')[0],
+          purchase_type: purchase.purchase_type || 'Operational Expenses',
           is_deleted: false
         }
 

@@ -46,6 +46,7 @@ interface Purchase {
   payment_urgency?: string;
   recurring_type?: string;
   next_recurring_date?: string;
+  purchase_type?: string;
   created_at: string;
 }
 
@@ -89,6 +90,11 @@ const RECURRING_TYPES = [
   { value: '1_year', label: '1 Year' }
 ];
 
+const PURCHASE_TYPES = [
+  'Operational Expenses',
+  'Capital Expenditure'
+];
+
 const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   isOpen,
   onClose,
@@ -113,7 +119,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     balance: '',
     payment_status: 'Unpaid',
     payment_urgency: '',
-    recurring_type: ''
+    recurring_type: '',
+    purchase_type: 'Operational Expenses'
   });
 
   // Initialize form with editing purchase data
@@ -132,7 +139,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         balance: (editingPurchase.balance || 0).toString(),
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
-        recurring_type: editingPurchase.recurring_type || ''
+        recurring_type: editingPurchase.recurring_type || '',
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses'
       });
     } else {
       resetForm();
@@ -153,7 +161,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       balance: '',
       payment_status: 'Unpaid',
       payment_urgency: '',
-      recurring_type: ''
+      recurring_type: '',
+      purchase_type: 'Operational Expenses'
     });
   };
 
@@ -264,6 +273,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_urgency: formData.payment_urgency || null,
         recurring_type: formData.recurring_type || null,
         next_recurring_date: nextRecurringDate,
+        purchase_type: formData.purchase_type,
         is_deleted: false
       };
 
@@ -565,6 +575,26 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                   {RECURRING_TYPES.map(type => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="purchase_type">Purchase Type *</Label>
+              <Select
+                value={formData.purchase_type}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PURCHASE_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>
+                      {type}
                     </SelectItem>
                   ))}
                 </SelectContent>
