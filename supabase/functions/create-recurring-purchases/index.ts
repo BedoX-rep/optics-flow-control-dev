@@ -21,8 +21,8 @@ serve(async (req) => {
 
     // Create supabase client with user's token
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? 'https://vbcdgubnvbilavetsjlr.supabase.co',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiY2RndWJudmJpbGF2ZXRzamxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTE4MDYsImV4cCI6MjA2MDY2NzgwNn0.aNeLdgw7LTsVl73gzKIjxT5w0AyT99x1bh-BSV3HeCQ',
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
           headers: {
@@ -55,8 +55,27 @@ serve(async (req) => {
 
     console.log(`Found ${purchasesToRenew?.length || 0} purchases to renew for user ${user.id}`)
 
+    if (!purchasesToRenew || purchasesToRenew.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          processed: 0,
+          message: 'No recurring purchases found that need renewal'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    }
+
+    let processedCount = 0
+    let errorCount = 0
+
     for (const purchase of purchasesToRenew || []) {
       try {
+        console.log(`Processing purchase ID ${purchase.id} with recurring type ${purchase.recurring_type}`)
+        
         // Calculate next recurring date
         const currentDate = new Date(purchase.next_recurring_date)
         let nextDate = new Date(currentDate)
@@ -119,21 +138,27 @@ serve(async (req) => {
 
         if (updateError) {
           console.error(`Error updating recurring purchase for ID ${purchase.id}:`, updateError)
+          errorCount++
           continue
         }
 
+        processedCount++
         console.log(`Successfully renewed recurring purchase for ID ${purchase.id}`)
 
       } catch (error) {
         console.error(`Error processing recurring purchase ID ${purchase.id}:`, error)
+        errorCount++
       }
     }
+
+    console.log(`Renewal process completed: ${processedCount} successful, ${errorCount} errors`)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        processed: purchasesToRenew?.length || 0,
-        message: `Processed ${purchasesToRenew?.length || 0} recurring purchases`
+        processed: processedCount,
+        errors: errorCount,
+        message: `Successfully processed ${processedCount} recurring purchases${errorCount > 0 ? ` (${errorCount} errors)` : ''}`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

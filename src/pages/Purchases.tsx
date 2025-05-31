@@ -146,12 +146,26 @@ const Purchases = () => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase.functions.invoke('create-recurring-purchases');
+        // Get the current session to pass the authorization header
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error('No active session found');
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('create-recurring-purchases', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
         
         if (error) {
           console.error('Error checking recurring purchases:', error);
           return;
         }
+
+        console.log('Recurring purchases check result:', data);
 
         if (data?.processed > 0) {
           toast({
@@ -164,6 +178,11 @@ const Purchases = () => {
         }
       } catch (error) {
         console.error('Error invoking create-recurring-purchases function:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check recurring purchases",
+          variant: "destructive",
+        });
       }
     };
 
