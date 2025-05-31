@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -24,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { format } from 'date-fns';
 import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
+import { Link } from 'lucide-react';
 
 interface Supplier {
   id: string;
@@ -191,7 +192,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const handleAmountHTChange = (value: string) => {
     const amountHT = parseFloat(value) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
-    
+
     if (amountHT > 0 && taxPercentage >= 0) {
       const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
       setFormData(prev => ({
@@ -207,7 +208,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const handleAmountTTCChange = (value: string) => {
     const amountTTC = parseFloat(value) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
-    
+
     if (amountTTC > 0 && taxPercentage >= 0) {
       const calculatedHT = calculateAmountHT(amountTTC, taxPercentage);
       setFormData(prev => ({
@@ -223,7 +224,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const handleTaxPercentageChange = (value: string) => {
     const taxPercentage = parseFloat(value) || 0;
     const amountHT = parseFloat(formData.amount_ht) || 0;
-    
+
     if (amountHT > 0 && taxPercentage >= 0) {
       const calculatedTTC = calculateAmountTTC(amountHT, taxPercentage);
       setFormData(prev => ({
@@ -238,9 +239,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType || recurringType === 'none') return null;
-    
+
     const date = new Date(purchaseDate);
-    
+
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -257,13 +258,13 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       default:
         return null;
     }
-    
+
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "Error",
@@ -286,7 +287,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     const amountTtc = parseFloat(formData.amount_ttc);
     const advancePayment = parseFloat(formData.advance_payment) || 0;
     const taxPercentage = parseFloat(formData.tax_percentage) || 0;
-    
+
     if (isNaN(amountHt) || amountHt <= 0 || isNaN(amountTtc) || amountTtc <= 0) {
       toast({
         title: "Error",
@@ -316,7 +317,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
     try {
       setIsSubmitting(true);
-      
+
       const balance = amountTtc - advancePayment;
       let paymentStatus = 'Unpaid';
       if (advancePayment >= amountTtc && amountTtc > 0) {
@@ -326,7 +327,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       }
 
       const nextRecurringDate = calculateNextRecurringDate(formData.purchase_date, formData.recurring_type);
-      
+
       const purchaseData = {
         user_id: user.id,
         description: formData.description.trim(),
@@ -384,7 +385,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       resetForm();
       onSuccess();
       onClose();
-      
+
     } catch (error) {
       console.error('Error recording purchase:', error);
       toast({
@@ -413,7 +414,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             {editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <Card>
