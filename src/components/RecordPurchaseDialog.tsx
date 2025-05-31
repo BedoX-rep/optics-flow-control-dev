@@ -126,7 +126,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: 'none',
-    purchase_type: 'Operational Expenses'
+    purchase_type: 'Operational Expenses',
+    link_date_from: '',
+    link_date_to: ''
   });
 
   // Initialize form with editing purchase data
@@ -147,7 +149,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: editingPurchase.recurring_type || 'none',
-        purchase_type: editingPurchase.purchase_type || 'Operational Expenses'
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
+        link_date_from: editingPurchase.link_date_from || '',
+        link_date_to: editingPurchase.link_date_to || ''
       });
     } else {
       resetForm();
@@ -170,7 +174,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: 'none',
-      purchase_type: 'Operational Expenses'
+      purchase_type: 'Operational Expenses',
+      link_date_from: '',
+      link_date_to: ''
     });
   };
 
@@ -713,6 +719,52 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                   </Select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Receipt Linking */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Link className="h-4 w-4" />
+                Receipt Linking (Optional)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="link_date_from">Link From Date</Label>
+                  <Input
+                    id="link_date_from"
+                    type="date"
+                    value={formData.link_date_from}
+                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_from: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="link_date_to">Link To Date</Label>
+                  <Input
+                    id="link_date_to"
+                    type="date"
+                    value={formData.link_date_to}
+                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_to: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              {editingPurchase?.linked_receipts && editingPurchase.linked_receipts.length > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-sm font-medium text-green-800">
+                    Currently linked to {editingPurchase.linked_receipts.length} receipt(s)
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    Use the Link button in the purchases list to modify receipt linking
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

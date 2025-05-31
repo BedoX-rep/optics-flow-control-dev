@@ -21,7 +21,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +40,14 @@ interface Supplier {
   email?: string;
   address?: string;
   notes?: string;
+}
+
+interface Receipt {
+  id: string;
+  created_at: string;
+  montage_costs: number;
+  montage_status: string;
+  customer_name: string;
 }
 
 interface Purchase {
@@ -61,6 +69,9 @@ interface Purchase {
   recurring_type?: string;
   next_recurring_date?: string;
   purchase_type?: string;
+  linked_receipts?: string[];
+  link_date_from?: string;
+  link_date_to?: string;
   created_at: string;
   suppliers?: Supplier;
 }
@@ -128,10 +139,16 @@ const Purchases = () => {
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isBalanceHistoryDialogOpen, setIsBalanceHistoryDialogOpen] = useState(false);
+  const [isLinkingDialogOpen, setIsLinkingDialogOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
+  const [selectedPurchaseForLinking, setSelectedPurchaseForLinking] = useState<Purchase | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Linking states
+  const [linkDateFrom, setLinkDateFrom] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
+  const [linkDateTo, setLinkDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -295,6 +312,24 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch receipts
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('receipts')
+        .select('id, created_at, montage_costs, montage_status, customer_name')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data || [];
@@ -503,6 +538,94 @@ const Purchases = () => {
   const handleOpenBalanceHistoryDialog = (purchase: Purchase) => {
     setSelectedPurchaseForHistory(purchase);
     setIsBalanceHistoryDialogOpen(true);
+  };
+
+  const handleOpenLinkingDialog = (purchase: Purchase) => {
+    setSelectedPurchaseForLinking(purchase);
+    setLinkDateFrom(purchase.link_date_from || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
+    setLinkDateTo(purchase.link_date_to || format(new Date(), 'yyyy-MM-dd'));
+    setIsLinkingDialogOpen(true);
+  };
+
+  const getFilteredReceipts = () => {
+    return receipts.filter(receipt => {
+      const receiptDate = new Date(receipt.created_at);
+      const fromDate = new Date(linkDateFrom);
+      const toDate = new Date(linkDateTo);
+      return receiptDate >= fromDate && receiptDate <= toDate;
+    });
+  };
+
+  const calculateMontageData = () => {
+    const filteredReceipts = getFilteredReceipts();
+    let totalMontage = 0;
+    let paidMontage = 0;
+    
+    filteredReceipts.forEach(receipt => {
+      const montageCost = receipt.montage_costs || 0;
+      totalMontage += montageCost;
+      
+      // Only count as paid if status is 'Paid costs'
+      if (receipt.montage_status === 'Paid costs') {
+        paidMontage += montageCost;
+      }
+    });
+    
+    const unpaidMontage = totalMontage - paidMontage;
+    
+    return {
+      totalMontage,
+      paidMontage,
+      unpaidMontage,
+      receiptCount: filteredReceipts.length
+    };
+  };
+
+  const handleLinkMontageToReceipt = async () => {
+    if (!selectedPurchaseForLinking || !user) return;
+    
+    try {
+      setIsSubmitting(true);
+      const filteredReceipts = getFilteredReceipts();
+      const montageData = calculateMontageData();
+      
+      const linkedReceiptIds = filteredReceipts.map(r => r.id);
+      
+      // Update purchase with linked receipts and calculated amounts
+      const { error } = await supabase
+        .from('purchases')
+        .update({
+          linked_receipts: linkedReceiptIds,
+          link_date_from: linkDateFrom,
+          link_date_to: linkDateTo,
+          amount_ttc: montageData.totalMontage,
+          amount_ht: montageData.totalMontage / 1.2, // Assuming 20% tax
+          amount: montageData.totalMontage,
+          advance_payment: montageData.paidMontage,
+          balance: montageData.unpaidMontage,
+          payment_status: montageData.unpaidMontage === 0 ? 'Paid' : montageData.paidMontage > 0 ? 'Partially Paid' : 'Unpaid'
+        })
+        .eq('id', selectedPurchaseForLinking.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Linked ${montageData.receiptCount} receipts with ${montageData.totalMontage.toFixed(2)} DH total montage costs`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      setIsLinkingDialogOpen(false);
+    } catch (error) {
+      console.error('Error linking receipts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to link receipts to purchase",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSupplierAdded = (supplier: any) => {
@@ -1066,6 +1189,15 @@ const Purchases = () => {
                             <Button 
                               variant="ghost" 
                               size="icon" 
+                              onClick={() => handleOpenLinkingDialog(purchase)}
+                              className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
+                              title="Link to Receipts"
+                            >
+                              <Link className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
                               onClick={() => handleOpenBalanceHistoryDialog(purchase)}
                               className="h-7 w-7 hover:bg-purple-50 hover:text-purple-600"
                               title="View Balance History"
@@ -1134,6 +1266,12 @@ const Purchases = () => {
                               {purchase.category && (
                                 <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
                                   {purchase.category.length > 8 ? purchase.category.slice(0, 8) + '...' : purchase.category}
+                                </span>
+                              )}
+                              {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
+                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1">
+                                  <Link className="h-3 w-3" />
+                                  {purchase.linked_receipts.length} receipts
                                 </span>
                               )}
                             </div>
@@ -1281,6 +1419,134 @@ const Purchases = () => {
               userId={user.id}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt Linking Dialog */}
+      <Dialog open={isLinkingDialogOpen} onOpenChange={setIsLinkingDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link className="h-5 w-5" />
+              Link Receipts to Purchase - {selectedPurchaseForLinking?.description}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Date Range Selection */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Select Date Range</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="link_date_from">From Date</Label>
+                    <Input
+                      id="link_date_from"
+                      type="date"
+                      value={linkDateFrom}
+                      onChange={(e) => setLinkDateFrom(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="link_date_to">To Date</Label>
+                    <Input
+                      id="link_date_to"
+                      type="date"
+                      value={linkDateTo}
+                      onChange={(e) => setLinkDateTo(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Montage Summary */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Montage Cost Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const montageData = calculateMontageData();
+                  return (
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Total Receipts</p>
+                        <p className="text-xl font-bold text-blue-600">{montageData.receiptCount}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Total Montage</p>
+                        <p className="text-xl font-bold text-primary">{montageData.totalMontage.toFixed(2)} DH</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Paid Montage</p>
+                        <p className="text-xl font-bold text-green-600">{montageData.paidMontage.toFixed(2)} DH</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Unpaid Balance</p>
+                        <p className="text-xl font-bold text-red-600">{montageData.unpaidMontage.toFixed(2)} DH</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+
+            {/* Receipt List */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Filtered Receipts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-60 overflow-y-auto">
+                  {getFilteredReceipts().length === 0 ? (
+                    <p className="text-center text-gray-500 py-4">No receipts found in selected date range</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {getFilteredReceipts().map((receipt) => (
+                        <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="font-medium">{receipt.customer_name}</p>
+                            <p className="text-sm text-gray-600">{format(new Date(receipt.created_at), 'MMM dd, yyyy')}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{receipt.montage_costs.toFixed(2)} DH</p>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              receipt.montage_status === 'Paid costs' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {receipt.montage_status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <DialogFooter className="pt-6 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsLinkingDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleLinkMontageToReceipt}
+              disabled={isSubmitting || getFilteredReceipts().length === 0}
+            >
+              {isSubmitting ? 'Linking...' : 'Link to Purchase'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
