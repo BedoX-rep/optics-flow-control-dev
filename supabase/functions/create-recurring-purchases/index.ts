@@ -40,13 +40,15 @@ serve(async (req) => {
 
     // Get purchases that need to be renewed (where next_recurring_date <= today)
     // RLS will automatically filter for the authenticated user
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date()
+    const todayString = today.toISOString().split('T')[0]
     
     const { data: purchasesToRenew, error: fetchError } = await supabaseClient
       .from('purchases')
       .select('*')
-      .lte('next_recurring_date', today)
+      .lte('next_recurring_date', todayString)
       .not('recurring_type', 'is', null)
+      .not('next_recurring_date', 'is', null)
       .eq('is_deleted', false)
 
     if (fetchError) {
@@ -76,44 +78,48 @@ serve(async (req) => {
       try {
         console.log(`Processing purchase ID ${purchase.id} with recurring type ${purchase.recurring_type}`)
         
-        // Calculate next recurring date
-        const currentDate = new Date(purchase.next_recurring_date)
-        let nextDate = new Date(currentDate)
+        // Calculate next recurring date from the current next_recurring_date
+        const currentRecurringDate = new Date(purchase.next_recurring_date)
+        let nextRecurringDate = new Date(currentRecurringDate)
 
         switch (purchase.recurring_type) {
           case '1_month':
-            nextDate.setMonth(nextDate.getMonth() + 1)
+            nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 1)
             break
           case '3_months':
-            nextDate.setMonth(nextDate.getMonth() + 3)
+            nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 3)
             break
           case '6_months':
-            nextDate.setMonth(nextDate.getMonth() + 6)
+            nextRecurringDate.setMonth(nextRecurringDate.getMonth() + 6)
             break
           case '1_year':
-            nextDate.setFullYear(nextDate.getFullYear() + 1)
+            nextRecurringDate.setFullYear(nextRecurringDate.getFullYear() + 1)
             break
           default:
+            console.log(`Invalid recurring type: ${purchase.recurring_type}`)
             continue
         }
 
-        // Calculate payment urgency (1 month from the recurring date)
-        const paymentUrgencyDate = new Date(purchase.next_recurring_date)
+        // Calculate payment urgency (1 month from the new purchase date)
+        const newPurchaseDate = new Date(purchase.next_recurring_date)
+        const paymentUrgencyDate = new Date(newPurchaseDate)
         paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
 
         // Record the balance change in history before updating
         const currentBalance = purchase.balance || 0
-        if (currentBalance !== (purchase.amount_ttc || purchase.amount)) {
+        const fullAmount = purchase.amount_ttc || purchase.amount
+        
+        if (currentBalance !== fullAmount) {
           const { error: historyError } = await supabaseClient
             .from('purchase_balance_history')
             .insert({
               purchase_id: purchase.id,
               user_id: user.id,
               previous_balance: currentBalance,
-              new_balance: purchase.amount_ttc || purchase.amount,
-              change_amount: (purchase.amount_ttc || purchase.amount) - currentBalance,
+              new_balance: fullAmount,
+              change_amount: fullAmount - currentBalance,
               change_reason: 'Recurring purchase renewal - balance reset',
-              change_date: purchase.next_recurring_date
+              change_date: newPurchaseDate.toISOString()
             })
 
           if (historyError) {
@@ -121,14 +127,14 @@ serve(async (req) => {
           }
         }
 
-        // Soft reset the existing purchase record
+        // Update the purchase record with new recurring cycle
         const updatedPurchaseData = {
-          purchase_date: purchase.next_recurring_date, // Set to the due recurring date
+          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to the current recurring date
           advance_payment: 0, // Reset advance payment to 0
-          balance: purchase.amount_ttc || purchase.amount, // Reset balance to full amount
+          balance: fullAmount, // Reset balance to full amount
           payment_status: 'Unpaid', // Reset payment status
-          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency to 1 month from recurring date
-          next_recurring_date: nextDate.toISOString().split('T')[0] // Update to next recurring date
+          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
+          next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date
         }
 
         const { error: updateError } = await supabaseClient
