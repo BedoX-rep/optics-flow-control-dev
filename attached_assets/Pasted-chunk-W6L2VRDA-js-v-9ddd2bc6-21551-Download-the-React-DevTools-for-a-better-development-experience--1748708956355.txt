@@ -1,0 +1,72 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+Purchases.tsx:734 Dialog render check: Object
+purchases:1 Access to fetch at 'https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/create-recurring-purchases' from origin 'https://cf09c302-2df6-4bd2-85f1-d18f208c5047-00-2iz24srge7f5k.worf.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+Purchases.tsx:164 Error checking recurring purchases: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=9ddd2bc6:1388:17
+checkRecurringPurchases @ Purchases.tsx:164
+vbcdgubnvbilavetsjlr.supabase.co/functions/v1/create-recurring-purchases:1 
+            
+            
+           Failed to load resource: net::ERR_FAILED
+Purchases.tsx:734 Dialog render check: Object
+Purchases.tsx:734 Dialog render check: Object
+Purchases.tsx:734 Dialog render check: {isPurchaseDialogOpen: false, editingPurchase: null, shouldShow: false}
+purchases:1 Access to fetch at 'https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/create-recurring-purchases' from origin 'https://cf09c302-2df6-4bd2-85f1-d18f208c5047-00-2iz24srge7f5k.worf.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+Purchases.tsx:157 
+            
+            
+           POST https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/create-recurring-purchases net::ERR_FAILED
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:3900
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:3921
+fulfilled @ @supabase_supabase-js.js?v=9ddd2bc6:3873
+Promise.then
+step @ @supabase_supabase-js.js?v=9ddd2bc6:3886
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:3888
+__awaiter6 @ @supabase_supabase-js.js?v=9ddd2bc6:3870
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:3911
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:1259
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:1379
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:1329
+__awaiter @ @supabase_supabase-js.js?v=9ddd2bc6:1311
+invoke @ @supabase_supabase-js.js?v=9ddd2bc6:1353
+checkRecurringPurchases @ Purchases.tsx:157
+await in checkRecurringPurchases
+(anonymous) @ Purchases.tsx:189
+commitHookEffectListMount @ chunk-W6L2VRDA.js?v=9ddd2bc6:16915
+commitPassiveMountOnFiber @ chunk-W6L2VRDA.js?v=9ddd2bc6:18156
+commitPassiveMountEffects_complete @ chunk-W6L2VRDA.js?v=9ddd2bc6:18129
+commitPassiveMountEffects_begin @ chunk-W6L2VRDA.js?v=9ddd2bc6:18119
+commitPassiveMountEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:18109
+flushPassiveEffectsImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19490
+flushPassiveEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:19447
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18868
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+commitRootImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19432
+commitRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:19277
+finishConcurrentRender @ chunk-W6L2VRDA.js?v=9ddd2bc6:18805
+performConcurrentWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18718
+workLoop @ chunk-W6L2VRDA.js?v=9ddd2bc6:197
+flushWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:176
+performWorkUntilDeadline @ chunk-W6L2VRDA.js?v=9ddd2bc6:384
+Purchases.tsx:164 Error checking recurring purchases: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=9ddd2bc6:1388:17
+checkRecurringPurchases @ Purchases.tsx:164
+await in checkRecurringPurchases
+(anonymous) @ Purchases.tsx:189
+commitHookEffectListMount @ chunk-W6L2VRDA.js?v=9ddd2bc6:16915
+commitPassiveMountOnFiber @ chunk-W6L2VRDA.js?v=9ddd2bc6:18156
+commitPassiveMountEffects_complete @ chunk-W6L2VRDA.js?v=9ddd2bc6:18129
+commitPassiveMountEffects_begin @ chunk-W6L2VRDA.js?v=9ddd2bc6:18119
+commitPassiveMountEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:18109
+flushPassiveEffectsImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19490
+flushPassiveEffects @ chunk-W6L2VRDA.js?v=9ddd2bc6:19447
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18868
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=9ddd2bc6:9119
+commitRootImpl @ chunk-W6L2VRDA.js?v=9ddd2bc6:19432
+commitRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:19277
+finishConcurrentRender @ chunk-W6L2VRDA.js?v=9ddd2bc6:18805
+performConcurrentWorkOnRoot @ chunk-W6L2VRDA.js?v=9ddd2bc6:18718
+workLoop @ chunk-W6L2VRDA.js?v=9ddd2bc6:197
+flushWork @ chunk-W6L2VRDA.js?v=9ddd2bc6:176
+performWorkUntilDeadline @ chunk-W6L2VRDA.js?v=9ddd2bc6:384
+Purchases.tsx:734 Dialog render check: {isPurchaseDialogOpen: false, editingPurchase: null, shouldShow: false}
