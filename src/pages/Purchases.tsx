@@ -21,7 +21,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, RotateCcw } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,7 +109,7 @@ const Purchases = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('purchases');
-
+  
   // Search and filter states
   const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
@@ -123,7 +123,7 @@ const Purchases = () => {
 
   const [searchTerm, setSearchTerm] = useState(''); // General search term
   const [dateFilter, setDateFilter] = useState('all');
-
+  
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -151,7 +151,7 @@ const Purchases = () => {
       try {
         // Get the current session to pass the authorization header
         const { data: { session } } = await supabase.auth.getSession();
-
+        
         if (!session) {
           console.error('No active session found');
           return;
@@ -162,7 +162,7 @@ const Purchases = () => {
             Authorization: `Bearer ${session.access_token}`,
           },
         });
-
+        
         if (error) {
           console.error('Error checking recurring purchases:', error);
           return;
@@ -175,7 +175,7 @@ const Purchases = () => {
             title: "Recurring Purchases Renewed",
             description: `${data.processed} recurring purchase(s) have been automatically renewed.`,
           });
-
+          
           // Refresh the purchases list
           queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
         }
@@ -207,19 +207,19 @@ const Purchases = () => {
       const currentAdvancePayment = purchase.advance_payment || 0;
       const originalAmount = purchase.amount_ttc || purchase.amount;
       const taxPercentage = purchase.tax_percentage || 20;
-
+      
       // For recurring renewal:
       // - If balance = 0 (fully paid), reset to original amount
       // - If balance > 0 (unpaid), add remaining balance to original amount
       const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance;
-
+      
       // Reset advance payment to 0 for new cycle and calculate new balance
       const newAdvancePayment = 0;
       const newBalance = newTotalAmount - newAdvancePayment;
-
+      
       // Calculate HT amount from TTC amount using tax percentage
       const newAmountHT = newTotalAmount / (1 + taxPercentage / 100);
-
+      
       const renewalData = {
         purchase_date: format(currentDate, 'yyyy-MM-dd'),
         next_recurring_date: nextRecurringDate,
@@ -295,7 +295,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
-
+      
       if (error) throw error;
       return data || [];
     },
@@ -322,7 +322,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
-
+      
       if (error) throw error;
       return data || [];
     },
@@ -511,9 +511,9 @@ const Purchases = () => {
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType) return null;
-
+    
     const date = new Date(purchaseDate);
-
+    
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -530,14 +530,14 @@ const Purchases = () => {
       default:
         return null;
     }
-
+    
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
+    
+    if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -560,10 +560,10 @@ const Purchases = () => {
 
     try {
       setIsSubmitting(true);
-
+      
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
-        description: purchaseFormData.description.trim() || null,
+        description: purchaseFormData.description.trim(),
         amount_ht: amountHt,
         amount_ttc: amountTtc,
         amount: amountTtc, // Keep for backward compatibility
@@ -607,7 +607,7 @@ const Purchases = () => {
     }
   };
 
-
+  
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -671,7 +671,7 @@ const Purchases = () => {
 
     if (!user || !editingPurchase) return;
 
-    if (!purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
+    if (!purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -710,7 +710,7 @@ const Purchases = () => {
 
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
-        description: purchaseFormData.description.trim() || null,
+        description: purchaseFormData.description.trim(),
         amount_ht: amountHt,
         amount_ttc: amountTtc,
         amount: amountTtc,
@@ -935,9 +935,6 @@ const Purchases = () => {
                 </SelectItem>
               ))}
             </SelectContent>
-```text
-
-            </SelectContent>
           </Select>
 
           <Select
@@ -1017,7 +1014,7 @@ const Purchases = () => {
         </TabsList>
 
         <TabsContent value="purchases" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
             <AnimatePresence>
               {filteredPurchases.length === 0 ? (
                 <div className="col-span-full text-center py-10 text-gray-500">
@@ -1032,161 +1029,172 @@ const Purchases = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="w-full"
                   >
-                    <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-100 hover:border-gray-200 w-full h-[350px]">
-                      <CardContent className="p-5 space-y-4 flex flex-col justify-between">
-                        {/* Header Section */}
-                        <div>
+                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 border-l-4 border-l-primary w-full">
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          {/* Header Section */}
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-3 h-3 rounded-full ${
-                                  purchase.purchase_type === 'Capital Expenditure' 
-                                    ? 'bg-violet-500'
-                                    : 'bg-blue-500'
-                                }`}></div>
-                                <div>
-                                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                                    {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
-                                  </h3>
-                                  {purchase.description && (
-                                    <p className="text-sm text-gray-500">{purchase.description}</p>
-                                  )}
-                                </div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <Building2 className="h-4 w-4 text-primary" />
+                                <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
+                                </h3>
                               </div>
-
-                              {/* Purchase type and category */}
-                              <div className="flex items-center gap-2">
-                                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md ${
-                                  purchase.purchase_type === 'Capital Expenditure' 
-                                    ? 'bg-violet-50 text-violet-700'
-                                    : 'bg-blue-50 text-blue-700'
-                                }`}>
-                                  {purchase.purchase_type === 'Capital Expenditure' ? 'CAPEX' : 'OPEX'}
-                                </span>
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
                                 {purchase.category && (
-                                  <span className="inline-block px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700">
-                                    {purchase.category}
-                                  </span>
+                                  <>
+                                    <span>•</span>
+                                    <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                                      {purchase.category}
+                                    </span>
+                                  </>
                                 )}
                               </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  purchase.purchase_type === 'Capital Expenditure' 
+                                    ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                }`}>
+                                  {purchase.purchase_type || 'Operational Expenses'}
+                                </span>
+                              </div>
                             </div>
-
-                            {/* Action buttons */}
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="flex gap-1 flex-shrink-0">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => handleOpenBalanceHistoryDialog(purchase)}
-                                className="h-8 w-8 hover:bg-gray-50 rounded-lg"
+                                className="h-8 w-8 hover:bg-purple-50 hover:text-purple-600"
                                 title="View Balance History"
                               >
-                                <History className="h-4 w-4 text-gray-500" />
+                                <History className="h-4 w-4" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => handleEditPurchase(purchase)}
-                                className="h-8 w-8 hover:bg-gray-50 rounded-lg"
+                                className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
                               >
-                                <Edit className="h-4 w-4 text-gray-500" />
+                                <Edit className="h-4 w-4" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => handleDeletePurchase(purchase.id)}
-                                className="h-8 w-8 hover:bg-gray-50 rounded-lg"
+                                className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
                               >
-                                <Trash2 className="h-4 w-4 text-gray-500" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Amount, Date and Payment Info */}
-                        <div>
-                          <div className="text-center py-4 bg-gray-50 rounded-lg">
-                            <p className="text-2xl font-bold text-gray-900">
-                              {(purchase.amount_ttc || purchase.amount).toFixed(2)}
-                              <span className="text-lg font-medium text-gray-600 ml-1">DH</span>
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Total Amount</p>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                              Purchase Date: {format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}
-                            </p>
-                        </div>
-
-                        <div>
-                          {/* Payment Info */}
-                          {(purchase.advance_payment || purchase.balance) && (
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div className="bg-blue-50 rounded-lg p-3">
-                                <p className="text-blue-600 font-medium">Advance</p>
-                                <p className="text-blue-900 font-semibold">
-                                  {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
-                                </p>
-                              </div>
-                              <div className="bg-orange-50 rounded-lg p-3">
-                                <p className="text-orange-600 font-medium">Balance</p>
-                                <p className="text-orange-900 font-semibold">
-                                  {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
-                                </p>
-                              </div>
+                          {/* Description */}
+                          {purchase.description && (
+                            <div className="bg-blue-50 rounded-lg p-3 border-l-2 border-blue-200">
+                              <p className="text-sm text-gray-700 font-medium">{purchase.description}</p>
                             </div>
                           )}
+
+                          {/* Financial Information */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-3 w-3 text-blue-600" />
+                                <p className="text-xs font-medium text-blue-700">Amount HT</p>
+                              </div>
+                              <p className="text-lg font-bold text-blue-800">{(purchase.amount_ht || purchase.amount).toFixed(2)} DH</p>
+                            </div>
+                            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <DollarSign className="h-3 w-3 text-green-600" />
+                                <p className="text-xs font-medium text-green-700">Amount TTC</p>
+                              </div>
+                              <p className="text-lg font-bold text-green-800">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
+                            </div>
+                          </div>
+
+                          {/* Payment Information */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-gray-50 rounded-lg p-3 border">
+                              <p className="text-xs text-gray-500 mb-1">Advance Payment</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
+                              </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3 border">
+                              <p className="text-xs text-gray-500 mb-1">Balance</p>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
+                              </p>
+                            </div>
+                          </div>
 
                           {/* Status and Payment Method */}
-                          <div className="flex items-center justify-between">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              purchase.payment_status === 'Paid' 
-                                ? 'bg-green-100 text-green-700'
-                                : purchase.payment_status === 'Partially Paid'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}>
-                              {purchase.payment_status || 'Unpaid'}
-                            </span>
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Receipt className="h-3 w-3" />
-                              <span>{purchase.payment_method}</span>
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                purchase.payment_status === 'Paid' 
+                                  ? 'bg-green-100 text-green-800 border border-green-200'
+                                  : purchase.payment_status === 'Partially Paid'
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : 'bg-red-100 text-red-800 border border-red-200'
+                              }`}>
+                                {purchase.payment_status || 'Unpaid'}
+                              </span>
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {purchase.payment_method}
+                              </span>
                             </div>
+                            {purchase.payment_urgency && (
+                              <div className="flex items-center gap-1 text-xs text-orange-600">
+                                <Calendar className="h-3 w-3" />
+                                <span>Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}</span>
+                              </div>
+                            )}
                           </div>
 
-                          {/* Due Date */}
-                          {purchase.payment_urgency && (
-                            <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg">
-                              <Calendar className="h-4 w-4" />
-                              <span>Due: {format(new Date(purchase.payment_urgency), 'MMM dd, yyyy')}</span>
-                            </div>
-                          )}
-
-                          {/* Recurring */}
+                          {/* Recurring Information */}
                           {purchase.recurring_type && (
-                            <div className="bg-purple-50 rounded-lg p-3">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <RotateCcw className="h-4 w-4 text-purple-600" />
-                                  <span className="text-sm font-medium text-purple-700">
-                                    {RECURRING_TYPES.find(t => t.value === purchase.recurring_type)?.label}
+                            <div className="bg-purple-50 rounded-lg p-2 border border-purple-200">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span className="text-xs font-medium text-purple-700">
+                                  Recurring: {RECURRING_TYPES.find(t => t.value === purchase.recurring_type)?.label}
+                                </span>
+                                {purchase.next_recurring_date && (
+                                  <span className="text-xs text-purple-600 ml-auto">
+                                    Next: {format(new Date(purchase.next_recurring_date), 'MMM dd, yyyy')}
                                   </span>
-                                </div>
-                                {purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleRecurringRenewal(purchase)}
-                                    className="h-7 px-3 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-md"
-                                  >
-                                    Renew
-                                  </Button>
                                 )}
                               </div>
-                              {purchase.next_recurring_date && (
-                                <p className="text-xs text-purple-600 mt-1">
-                                  Next: {format(new Date(purchase.next_recurring_date), 'MMM dd, yyyy')}
-                                </p>
+                              {purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecurringRenewal(purchase)}
+                                  className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-xs"
+                                >
+                                  Renew Now
+                                </Button>
                               )}
                             </div>
                           )}
+
+                          {/* Notes */}
+                          {purchase.notes && (
+                            <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                              <p className="text-xs font-medium text-amber-700 mb-1">Notes</p>
+                              <p className="text-sm text-amber-800">{purchase.notes}</p>
+                            </div>
+                          )}
+
+                          {/* Created Date */}
+                          <div className="text-xs text-gray-400 text-right">
+                            Created: {format(new Date(purchase.created_at), 'MMM dd, yyyy HH:mm')}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
