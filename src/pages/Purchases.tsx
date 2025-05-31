@@ -1029,16 +1029,30 @@ const Purchases = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="w-full"
                   >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full h-[240px] flex flex-col">
-                      <CardContent className="p-4 flex flex-col h-full">
-                        {/* Header Section - Fixed Height */}
-                        <div className="flex items-start justify-between mb-3 min-h-[60px]">
+                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
+                      <CardContent className="p-4">
+                        {/* Header Section with Supplier, Dates, and Actions */}
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
-                              <h3 className="text-sm font-semibold text-gray-800 truncate">
-                                {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
-                              </h3>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
+                                <h3 className="text-sm font-semibold text-gray-800 truncate">
+                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
+                                </h3>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs">
+                                {purchase.payment_urgency && (
+                                  <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
+                                    Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
+                                  </span>
+                                )}
+                                {purchase.next_recurring_date && (
+                                  <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
+                                    Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <p className="text-xs text-gray-600 truncate font-medium mb-1">
                               {purchase.description}
@@ -1048,7 +1062,7 @@ const Purchases = () => {
                               <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
                             </div>
                           </div>
-                          <div className="flex gap-1 flex-shrink-0">
+                          <div className="flex gap-1 flex-shrink-0 ml-2">
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -1075,34 +1089,6 @@ const Purchases = () => {
                               <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
-                        </div>
-
-                        {/* Due Date and Recurring Date Section - Fixed Height */}
-                        <div className="mb-3 min-h-[36px] flex items-center justify-between">
-                          <div className="flex items-center gap-3 text-xs">
-                            {purchase.payment_urgency && (
-                              <div className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-1 rounded-md">
-                                <Calendar className="h-3 w-3" />
-                                <span className="font-medium">
-                                  Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                                </span>
-                              </div>
-                            )}
-                            {purchase.next_recurring_date && (
-                              <div className="flex items-center gap-1 text-purple-600 bg-purple-50 px-2 py-1 rounded-md">
-                                <Calendar className="h-3 w-3" />
-                                <span className="font-medium">
-                                  Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          {purchase.recurring_type && (
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                              <span className="text-purple-600 text-xs">Recurring</span>
-                            </div>
-                          )}
                         </div>
 
                         {/* Main TTC Amount - Prominent Display */}
@@ -1132,11 +1118,11 @@ const Purchases = () => {
                           </div>
                         </div>
 
-                        {/* Status Row - Fixed Bottom */}
-                        <div className="mt-auto border-t border-gray-100 pt-2">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1">
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        {/* Status Row */}
+                        <div className="border-t border-gray-100 pt-2 mt-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                 purchase.payment_status === 'Paid' 
                                   ? 'bg-green-100 text-green-800'
                                   : purchase.payment_status === 'Partially Paid'
@@ -1146,22 +1132,21 @@ const Purchases = () => {
                                 {purchase.payment_status || 'Unpaid'}
                               </span>
                               {purchase.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
-                                  {purchase.category.slice(0, 8)}...
+                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                  {purchase.category.length > 8 ? purchase.category.slice(0, 8) + '...' : purchase.category}
                                 </span>
                               )}
                             </div>
+                            {purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleRecurringRenewal(purchase)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
+                              >
+                                Renew Now
+                              </Button>
+                            )}
                           </div>
-                          
-                          {purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleRecurringRenewal(purchase)}
-                              className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs h-6"
-                            >
-                              Renew Now
-                            </Button>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
