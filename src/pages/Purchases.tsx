@@ -148,6 +148,97 @@ const Purchases = () => {
   const [linkDateFrom, setLinkDateFrom] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [linkDateTo, setLinkDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
 
+  // Form states
+  const [purchaseFormData, setPurchaseFormData] = useState({
+    supplier_id: '',
+    description: '',
+    amount_ht: '',
+    amount_ttc: '',
+    category: '',
+    purchase_date: format(new Date(), 'yyyy-MM-dd'),
+    payment_method: 'Cash',
+    notes: '',
+    advance_payment: '',
+    balance: '',
+    payment_status: 'Unpaid',
+    payment_urgency: '',
+    recurring_type: '',
+    purchase_type: 'Operational Expenses',
+  });
+
+  const [supplierFormData, setSupplierFormData] = useState({
+    name: '',
+    contact_person: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
+  });
+
+  // Fetch suppliers
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch receipts
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('receipts')
+        .select('id, created_at, montage_costs, montage_status, customer_name')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+    refetchInterval: 5000,
+  });
+
+  // Fetch purchases
+  const { data: purchases = [], isLoading: purchasesLoading } = useQuery({
+    queryKey: ['purchases', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          suppliers (
+            id,
+            name,
+            contact_person,
+            phone,
+            email
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('purchase_date', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
   // Handle URL-based navigation
   useEffect(() => {
     const path = location.pathname;
@@ -316,189 +407,6 @@ const Purchases = () => {
     }
   };
 
-  // Form states
-  const [purchaseFormData, setPurchaseFormData] = useState({
-    supplier_id: '',
-    description: '',
-    amount_ht: '',
-    amount_ttc: '',
-    category: '',
-    purchase_date: format(new Date(), 'yyyy-MM-dd'),
-    payment_method: 'Cash',
-    notes: '',
-    advance_payment: '',
-    balance: '',
-    payment_status: 'Unpaid',
-    payment_urgency: '',
-    recurring_type: '',
-    purchase_type: 'Operational Expenses',
-  });
-
-  const [supplierFormData, setSupplierFormData] = useState({
-    name: '',
-    contact_person: '',
-    phone: '',
-    email: '',
-    address: '',
-    notes: '',
-  });
-
-  // Fetch suppliers
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ['suppliers', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('name');
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  // Fetch receipts
-  const { data: receipts = [] } = useQuery({
-    queryKey: ['receipts', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from('receipts')
-        .select('id, created_at, montage_costs, montage_status, customer_name')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-    refetchInterval: 5000,
-  });
-
-  // Fetch purchases
-  const { data: purchases = [], isLoading: purchasesLoading } = useQuery({
-    queryKey: ['purchases', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from('purchases')
-        .select(`
-          *,
-          suppliers (
-            id,
-            name,
-            contact_person,
-            phone,
-            email
-          )
-        `)
-        .eq('user_id', user.id)
-        .eq('is_deleted', false)
-        .order('purchase_date', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  // Filter purchases
-  const filteredPurchases = useMemo(() => {
-    let filtered = [...purchases];
-
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(purchase => 
-        purchase.description.toLowerCase().includes(search) ||
-        purchase.suppliers?.name.toLowerCase().includes(search) ||
-        purchase.receipt_number?.toLowerCase().includes(search)
-      );
-    }
-
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(purchase => purchase.category === categoryFilter);
-    }
-
-    if (supplierFilter !== 'all') {
-      filtered = filtered.filter(purchase => purchase.supplier_id === supplierFilter);
-    }
-
-    if (purchaseTypeFilter !== 'all') {
-      filtered = filtered.filter(purchase => purchase.purchase_type === purchaseTypeFilter);
-    }
-
-    if (dateRange.from) {
-      filtered = filtered.filter(purchase => 
-        new Date(purchase.purchase_date) >= new Date(dateRange.from)
-      );
-    }
-
-    if (dateRange.to) {
-      filtered = filtered.filter(purchase => 
-        new Date(purchase.purchase_date) <= new Date(dateRange.to)
-      );
-    }
-
-    // Date Filter Logic
-    if (dateFilter !== 'all') {
-      const now = new Date();
-      let startDate: Date | null = null;
-
-      if (dateFilter === 'today') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      } else if (dateFilter === 'week') {
-        const dayOfWeek = now.getDay();
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
-      } else if (dateFilter === 'month') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      } else if (dateFilter === 'year') {
-        startDate = new Date(now.getFullYear(), 0, 1);
-      }
-
-      if (startDate) {
-        filtered = filtered.filter(purchase => {
-          const purchaseDate = new Date(purchase.purchase_date);
-          return purchaseDate >= startDate;
-        });
-      }
-    }
-
-    return filtered;
-  }, [purchases, searchTerm, categoryFilter, supplierFilter, purchaseTypeFilter, dateRange, dateFilter]);
-
-  // Filter suppliers
-  const filteredSuppliers = useMemo(() => {
-    if (!searchTerm) return suppliers;
-    const search = searchTerm.toLowerCase();
-    return suppliers.filter(supplier => 
-      supplier.name.toLowerCase().includes(search) ||
-      supplier.contact_person?.toLowerCase().includes(search) ||
-      supplier.email?.toLowerCase().includes(search)
-    );
-  }, [suppliers, searchTerm]);
-
-  // Calculate total expenses
-  const totalExpenses = useMemo(() => {
-    return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
-  }, [filteredPurchases]);
-
-  // Calculate monthly total
-  const monthlyTotal = useMemo(() => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    return purchases
-      .filter(purchase => {
-        const purchaseDate = new Date(purchase.purchase_date);
-        return purchaseDate.getMonth() === currentMonth && purchaseDate.getFullYear() === currentYear;
-      })
-      .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
-  }, [purchases]);
-
   // Function to calculate and update purchase linking
   const calculatePurchaseLinking = async (purchase: Purchase) => {
     if (!purchase.linking_category || !purchase.link_date_from || !purchase.link_date_to) {
@@ -519,7 +427,7 @@ const Purchases = () => {
     if (purchase.linking_category === 'montage_costs') {
       linkedReceipts.forEach(receipt => {
         const montageCost = receipt.montage_costs || 0;
-        
+
         // Add to total if montage status is InCutting, Ready, or Paid costs
         if (receipt.montage_status === 'InCutting' || receipt.montage_status === 'Ready') {
           totalAmount += montageCost;
@@ -656,19 +564,19 @@ const Purchases = () => {
     const filteredReceipts = getFilteredReceipts();
     let totalMontage = 0;
     let paidMontage = 0;
-    
+
     filteredReceipts.forEach(receipt => {
       const montageCost = receipt.montage_costs || 0;
       totalMontage += montageCost;
-      
+
       // Only count as paid if status is 'Paid costs'
       if (receipt.montage_status === 'Paid costs') {
         paidMontage += montageCost;
       }
     });
-    
+
     const unpaidMontage = totalMontage - paidMontage;
-    
+
     return {
       totalMontage,
       paidMontage,
@@ -679,14 +587,14 @@ const Purchases = () => {
 
   const handleLinkMontageToReceipt = async () => {
     if (!selectedPurchaseForLinking || !user) return;
-    
+
     try {
       setIsSubmitting(true);
       const filteredReceipts = getFilteredReceipts();
       const montageData = calculateMontageData();
-      
+
       const linkedReceiptIds = filteredReceipts.map(r => r.id);
-      
+
       // Store the date range for future receipt matching
       // This will allow the system to automatically include receipts created in the future
       // that fall within this date range
@@ -736,9 +644,9 @@ const Purchases = () => {
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType) return null;
-    
+
     const date = new Date(purchaseDate);
-    
+
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -755,13 +663,13 @@ const Purchases = () => {
       default:
         return null;
     }
-    
+
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
@@ -785,7 +693,7 @@ const Purchases = () => {
 
     try {
       setIsSubmitting(true);
-      
+
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
@@ -832,7 +740,7 @@ const Purchases = () => {
     }
   };
 
-  
+
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -1026,6 +934,184 @@ const Purchases = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Filter purchases
+  const filteredPurchases = useMemo(() => {
+    let filtered = [...purchases];
+
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(purchase => 
+        purchase.description.toLowerCase().includes(search) ||
+        purchase.suppliers?.name.toLowerCase().includes(search) ||
+        purchase.receipt_number?.toLowerCase().includes(search)
+      );
+    }
+
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(purchase => purchase.category === categoryFilter);
+    }
+
+    if (supplierFilter !== 'all') {
+      filtered = filtered.filter(purchase => purchase.supplier_id === supplierFilter);
+    }
+
+    if (purchaseTypeFilter !== 'all') {
+      filtered = filtered.filter(purchase => purchase.purchase_type === purchaseTypeFilter);
+    }
+
+    if (dateRange.from) {
+      filtered = filtered.filter(purchase => 
+        new Date(purchase.purchase_date) >= new Date(dateRange.from)
+      );
+    }
+
+    if (dateRange.to) {
+      filtered = filtered.filter(purchase => 
+        new Date(purchase.purchase_date) <= new Date(dateRange.to)
+      );
+    }
+
+    // Date Filter Logic
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      let startDate: Date | null = null;
+
+      if (dateFilter === 'today') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (dateFilter === 'week') {
+        const dayOfWeek = now.getDay();
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+      } else if (dateFilter === 'month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (dateFilter === 'year') {        startDate = new Date(now.getFullYear(), 0, 1);
+      }
+
+      if (startDate) {
+        filtered = filtered.filter(purchase => {
+          const purchaseDate = new Date(purchase.purchase_date);
+          return purchaseDate >= startDate;
+        });
+      }
+    }
+
+    return filtered;
+  }, [purchases, searchTerm, categoryFilter, supplierFilter, purchaseTypeFilter, dateRange, dateFilter]);
+
+  // Filter suppliers
+  const filteredSuppliers = useMemo(() => {
+    if (!searchTerm) return suppliers;
+    const search = searchTerm.toLowerCase();
+    return suppliers.filter(supplier => 
+      supplier.name.toLowerCase().includes(search) ||
+      supplier.contact_person?.toLowerCase().includes(search) ||
+      supplier.email?.toLowerCase().includes(search)
+    );
+  }, [suppliers, searchTerm]);
+
+  // Calculate total expenses
+  const totalExpenses = useMemo(() => {
+    return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
+  }, [filteredPurchases]);
+
+  // Calculate monthly total
+  const monthlyTotal = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    return purchases
+      .filter(purchase => {
+        const purchaseDate = new Date(purchase.purchase_date);
+        return purchaseDate.getMonth() === currentMonth && purchaseDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
+  }, [purchases]);
+
+  // Fetch suppliers
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch receipts
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('receipts')
+        .select('id, created_at, montage_costs, montage_status, customer_name')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+    refetchInterval: 5000,
+  });
+
+  // Fetch purchases
+  const { data: purchases = [], isLoading: purchasesLoading } = useQuery({
+    queryKey: ['purchases', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          suppliers (
+            id,
+            name,
+            contact_person,
+            phone,
+            email
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('purchase_date', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Calculate purchase linking when purchases and receipts are loaded
+  useEffect(() => {
+    const updateLinkedPurchases = async () => {
+      if (!purchases.length || !receipts.length || !user) return;
+
+      // Find purchases with linking configurations
+      const linkedPurchases = purchases.filter(p => 
+        p.linking_category && p.link_date_from && p.link_date_to
+      );
+
+      for (const purchase of linkedPurchases) {
+        await calculatePurchaseLinking(purchase);
+      }
+
+      // Refresh purchases after updates
+      if (linkedPurchases.length > 0) {
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      }
+    };
+
+    updateLinkedPurchases();
+  }, [purchases.length, receipts.length, user]);
 
   if (purchasesLoading) {
     return (
