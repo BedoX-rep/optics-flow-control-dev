@@ -1105,9 +1105,9 @@ const Purchases = () => {
                         </div>
 
                         {/* Status Row - Fixed Bottom */}
-                        <div className="mt-auto border-t border-gray-100 pt-2">
+                        <div className="mt-auto border-t border-gray-100 pt-2 space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                 purchase.payment_status === 'Paid' 
                                   ? 'bg-green-100 text-green-800'
@@ -1119,24 +1119,38 @@ const Purchases = () => {
                               </span>
                               {purchase.category && (
                                 <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
-                                  {purchase.category}
+                                  {purchase.category.slice(0, 8)}...
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              {purchase.payment_urgency && (
-                                <span className="text-orange-600 font-medium">
+                            {purchase.recurring_type && (
+                              <div className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                <span className="text-purple-600 text-xs">Recurring</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Date Information Row */}
+                          <div className="flex items-center justify-between text-xs">
+                            {purchase.payment_urgency && (
+                              <div className="flex items-center gap-1 text-orange-600">
+                                <Calendar className="h-3 w-3" />
+                                <span className="font-medium">
                                   Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
                                 </span>
-                              )}
-                              {purchase.recurring_type && (
-                                <div className="flex items-center gap-1">
-                                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                  <span className="text-purple-600">Recurring</span>
-                                </div>
-                              )}
-                            </div>
+                              </div>
+                            )}
+                            {purchase.next_recurring_date && (
+                              <div className="flex items-center gap-1 text-purple-600">
+                                <Calendar className="h-3 w-3" />
+                                <span className="font-medium">
+                                  Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                </span>
+                              </div>
+                            )}
                           </div>
+                          
                           {purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
                             <Button
                               size="sm"
