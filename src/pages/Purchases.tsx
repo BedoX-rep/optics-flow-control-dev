@@ -140,7 +140,7 @@ const Purchases = () => {
     }
   }, [location.pathname]);
 
-  // Check and create recurring purchases on page mount
+  // Check and renew recurring purchases on page mount
   useEffect(() => {
     const checkRecurringPurchases = async () => {
       if (!user) return;
@@ -155,8 +155,8 @@ const Purchases = () => {
 
         if (data?.processed > 0) {
           toast({
-            title: "Recurring Purchases Created",
-            description: `${data.processed} recurring purchase(s) have been automatically created.`,
+            title: "Recurring Purchases Renewed",
+            description: `${data.processed} recurring purchase(s) have been automatically renewed.`,
           });
           
           // Refresh the purchases list
