@@ -203,14 +203,20 @@ const Purchases = () => {
       const currentBalance = purchase.balance || 0;
       const currentAdvancePayment = purchase.advance_payment || 0;
       const originalAmount = purchase.amount_ttc || purchase.amount;
+      const taxPercentage = purchase.tax_percentage || 20;
       const newTotalAmount = originalAmount + currentBalance;
       const newBalance = newTotalAmount - currentAdvancePayment;
+      
+      // Calculate HT amount from TTC amount using tax percentage
+      const newAmountHT = newTotalAmount / (1 + taxPercentage / 100);
       
       const renewalData = {
         purchase_date: format(currentDate, 'yyyy-MM-dd'),
         next_recurring_date: nextRecurringDate,
+        amount_ht: newAmountHT, // Update HT amount based on TTC and tax percentage
         amount_ttc: newTotalAmount, // Update total amount
         amount: newTotalAmount, // Keep for backward compatibility
+        tax_percentage: taxPercentage, // Keep existing tax percentage
         balance: newBalance, // New balance after adding original amount
         advance_payment: currentAdvancePayment, // Keep existing advance payment
         payment_status: newBalance === 0 ? 'Paid' : 
