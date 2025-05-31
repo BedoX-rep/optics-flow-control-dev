@@ -1030,58 +1030,33 @@ const Purchases = () => {
                     exit={{ opacity: 0, y: -20 }}
                     className="w-full"
                   >
-                    <Card className="group relative overflow-hidden hover:shadow-2xl transition-all duration-500 bg-white border-0 shadow-md hover:scale-[1.02] w-full">
-                      {/* Modern gradient border */}
-                      <div className={`absolute inset-0 bg-gradient-to-r ${
-                        purchase.purchase_type === 'Capital Expenditure' 
-                          ? 'from-purple-500 via-pink-500 to-red-500'
-                          : 'from-blue-500 via-cyan-500 to-emerald-500'
-                      } rounded-xl p-[2px]`}>
-                        <div className="h-full w-full bg-white rounded-xl" />
-                      </div>
-                      
-                      <CardContent className="relative p-6 space-y-4">
-                        {/* Header with supplier and actions */}
+                    <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-100 hover:border-gray-200 w-full">
+                      <CardContent className="p-5 space-y-4">
+                        {/* Header Section */}
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
-                              <div className={`p-2 rounded-xl ${
+                              <div className={`w-3 h-3 rounded-full ${
                                 purchase.purchase_type === 'Capital Expenditure' 
-                                  ? 'bg-gradient-to-br from-purple-100 to-pink-100'
-                                  : 'bg-gradient-to-br from-blue-100 to-cyan-100'
-                              }`}>
-                                <Building2 className={`h-5 w-5 ${
-                                  purchase.purchase_type === 'Capital Expenditure' 
-                                    ? 'text-purple-600'
-                                    : 'text-blue-600'
-                                }`} />
-                              </div>
+                                  ? 'bg-violet-500'
+                                  : 'bg-blue-500'
+                              }`}></div>
                               <div>
-                                <h3 className="text-xl font-bold text-gray-900 truncate">
+                                <h3 className="text-lg font-semibold text-gray-900 truncate">
                                   {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
                                 </h3>
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
-                                </div>
+                                <p className="text-sm text-gray-500">{purchase.description}</p>
                               </div>
                             </div>
                             
-                            {/* Purchase type badge */}
-                            <div className="inline-flex items-center">
-                              <span className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
-                                purchase.purchase_type === 'Capital Expenditure' 
-                                  ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-2 border-purple-200'
-                                  : 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border-2 border-blue-200'
-                              }`}>
-                                {purchase.purchase_type === 'Capital Expenditure' ? '💰 CAPEX' : '⚡ OPEX'}
-                              </span>
-                              {purchase.category && (
-                                <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
-                                  {purchase.category}
-                                </span>
-                              )}
-                            </div>
+                            {/* Purchase type */}
+                            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-md ${
+                              purchase.purchase_type === 'Capital Expenditure' 
+                                ? 'bg-violet-50 text-violet-700'
+                                : 'bg-blue-50 text-blue-700'
+                            }`}>
+                              {purchase.purchase_type === 'Capital Expenditure' ? 'CAPEX' : 'OPEX'}
+                            </span>
                           </div>
                           
                           {/* Action buttons */}
@@ -1090,142 +1065,107 @@ const Purchases = () => {
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleOpenBalanceHistoryDialog(purchase)}
-                              className="h-9 w-9 hover:bg-purple-50 hover:text-purple-600 rounded-xl"
+                              className="h-8 w-8 hover:bg-gray-50 rounded-lg"
                               title="View Balance History"
                             >
-                              <History className="h-4 w-4" />
+                              <History className="h-4 w-4 text-gray-500" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleEditPurchase(purchase)}
-                              className="h-9 w-9 hover:bg-blue-50 hover:text-blue-600 rounded-xl"
+                              className="h-8 w-8 hover:bg-gray-50 rounded-lg"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-4 w-4 text-gray-500" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleDeletePurchase(purchase.id)}
-                              className="h-9 w-9 hover:bg-red-50 hover:text-red-600 rounded-xl"
+                              className="h-8 w-8 hover:bg-gray-50 rounded-lg"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 text-gray-500" />
                             </Button>
                           </div>
                         </div>
 
-                        {/* Description */}
-                        {purchase.description && (
-                          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-indigo-400">
-                            <p className="text-gray-800 font-medium">{purchase.description}</p>
-                          </div>
-                        )}
+                        {/* Amount Display */}
+                        <div className="text-center py-4 bg-gray-50 rounded-lg">
+                          <p className="text-3xl font-bold text-gray-900">
+                            {(purchase.amount_ttc || purchase.amount).toFixed(2)}
+                            <span className="text-lg font-medium text-gray-600 ml-1">DH</span>
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">Total Amount</p>
+                        </div>
 
-                        {/* Main Amount Display - TTC Only */}
-                        <div className="text-center py-6 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-2xl border-2 border-emerald-200">
-                          <div className="flex items-center justify-center gap-3 mb-2">
-                            <div className="p-2 bg-emerald-500 rounded-full">
-                              <DollarSign className="h-6 w-6 text-white" />
+                        {/* Payment Info */}
+                        {(purchase.advance_payment || purchase.balance) && (
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="bg-blue-50 rounded-lg p-3">
+                              <p className="text-blue-600 font-medium">Advance</p>
+                              <p className="text-blue-900 font-semibold">
+                                {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
+                              </p>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-emerald-700 uppercase tracking-wide">Total Amount</p>
-                              <p className="text-4xl font-black text-emerald-800 leading-none">
-                                {(purchase.amount_ttc || purchase.amount).toFixed(2)}
-                                <span className="text-lg font-semibold ml-1">DH</span>
+                            <div className="bg-orange-50 rounded-lg p-3">
+                              <p className="text-orange-600 font-medium">Balance</p>
+                              <p className="text-orange-900 font-semibold">
+                                {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
                               </p>
                             </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* Payment Details Grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                              <p className="text-sm font-semibold text-blue-700">Advance</p>
-                            </div>
-                            <p className="text-xl font-bold text-blue-800">
-                              {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)}` : '0.00'} DH
-                            </p>
-                          </div>
-                          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                              <p className="text-sm font-semibold text-amber-700">Balance</p>
-                            </div>
-                            <p className="text-xl font-bold text-amber-800">
-                              {purchase.balance ? `${purchase.balance.toFixed(2)}` : '0.00'} DH
-                            </p>
+                        {/* Status and Payment Method */}
+                        <div className="flex items-center justify-between">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            purchase.payment_status === 'Paid' 
+                              ? 'bg-green-100 text-green-700'
+                              : purchase.payment_status === 'Partially Paid'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {purchase.payment_status || 'Unpaid'}
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Receipt className="h-3 w-3" />
+                            <span>{purchase.payment_method}</span>
                           </div>
                         </div>
 
-                        {/* Status Bar */}
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <span className={`px-4 py-2 rounded-xl text-sm font-bold shadow-sm ${
-                              purchase.payment_status === 'Paid' 
-                                ? 'bg-green-500 text-white'
-                                : purchase.payment_status === 'Partially Paid'
-                                ? 'bg-yellow-500 text-white'
-                                : 'bg-red-500 text-white'
-                            }`}>
-                              {purchase.payment_status || 'Unpaid'}
-                            </span>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Receipt className="h-4 w-4" />
-                              <span className="font-medium">{purchase.payment_method}</span>
-                            </div>
-                          </div>
-                          {purchase.payment_urgency && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg">
-                              <Calendar className="h-4 w-4" />
-                              <span className="text-sm font-medium">
-                                Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Recurring Section */}
-                        {purchase.recurring_type && (
-                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-500 rounded-lg">
-                                  <RotateCcw className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-purple-700">
-                                    Recurring: {RECURRING_TYPES.find(t => t.value === purchase.recurring_type)?.label}
-                                  </p>
-                                  {purchase.next_recurring_date && (
-                                    <p className="text-xs text-purple-600">
-                                      Next: {format(new Date(purchase.next_recurring_date), 'MMM dd, yyyy')}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            {purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleRecurringRenewal(purchase)}
-                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg"
-                              >
-                                🔄 Renew Now
-                              </Button>
-                            )}
+                        {/* Due Date */}
+                        {purchase.payment_urgency && (
+                          <div className="flex items-center gap-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg">
+                            <Calendar className="h-4 w-4" />
+                            <span>Due: {format(new Date(purchase.payment_urgency), 'MMM dd, yyyy')}</span>
                           </div>
                         )}
 
-                        {/* Notes */}
-                        {purchase.notes && (
-                          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                              <p className="text-sm font-semibold text-amber-700">Notes</p>
+                        {/* Recurring */}
+                        {purchase.recurring_type && (
+                          <div className="bg-purple-50 rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <RotateCcw className="h-4 w-4 text-purple-600" />
+                                <span className="text-sm font-medium text-purple-700">
+                                  {RECURRING_TYPES.find(t => t.value === purchase.recurring_type)?.label}
+                                </span>
+                              </div>
+                              {purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecurringRenewal(purchase)}
+                                  className="h-7 px-3 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-md"
+                                >
+                                  Renew
+                                </Button>
+                              )}
                             </div>
-                            <p className="text-amber-800 leading-relaxed">{purchase.notes}</p>
+                            {purchase.next_recurring_date && (
+                              <p className="text-xs text-purple-600 mt-1">
+                                Next: {format(new Date(purchase.next_recurring_date), 'MMM dd, yyyy')}
+                              </p>
+                            )}
                           </div>
                         )}
                       </CardContent>
