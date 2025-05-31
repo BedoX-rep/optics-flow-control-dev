@@ -189,6 +189,72 @@ const Purchases = () => {
     checkRecurringPurchases();
   }, [user, toast, queryClient]);
 
+  const handleRecurringRenewal = async (purchase: Purchase) => {
+    if (!user) return;
+
+    try {
+      const currentDate = new Date();
+      const nextRecurringDate = calculateNextRecurringDate(
+        format(currentDate, 'yyyy-MM-dd'), 
+        purchase.recurring_type || ''
+      );
+
+      // When renewing, keep the existing balance if it's not fully paid
+      const currentBalance = purchase.balance || 0;
+      const totalAmount = purchase.amount_ttc || purchase.amount;
+      
+      const renewalData = {
+        purchase_date: format(currentDate, 'yyyy-MM-dd'),
+        next_recurring_date: nextRecurringDate,
+        // Keep the existing balance structure
+        balance: currentBalance,
+        advance_payment: purchase.advance_payment || 0,
+        payment_status: currentBalance === 0 ? 'Paid' : 
+                       (purchase.advance_payment || 0) > 0 ? 'Partially Paid' : 'Unpaid'
+      };
+
+      // Record balance history if balance exists
+      if (currentBalance > 0) {
+        const { error: historyError } = await supabase
+          .from('purchase_balance_history')
+          .insert({
+            purchase_id: purchase.id,
+            user_id: user.id,
+            old_balance: currentBalance,
+            new_balance: currentBalance,
+            change_amount: 0,
+            change_reason: 'Recurring purchase renewed - balance carried forward',
+            change_date: currentDate.toISOString()
+          });
+
+        if (historyError) {
+          console.error('Error recording balance history:', historyError);
+        }
+      }
+
+      const { error } = await supabase
+        .from('purchases')
+        .update(renewalData)
+        .eq('id', purchase.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Recurring purchase renewed successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+    } catch (error) {
+      console.error('Error renewing recurring purchase:', error);
+      toast({
+        title: "Error",
+        description: "Failed to renew recurring purchase",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Form states
   const [purchaseFormData, setPurchaseFormData] = useState({
     supplier_id: '',
@@ -804,6 +870,35 @@ const Purchases = () => {
               </SelectContent>
             </Select>
 
+            {/* Date Range Filters */}
+            <div className="flex items-center gap-2">
+              <Input
+                type="date"
+                value={dateRange.from}
+                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                className="w-[140px] bg-white/10 border-white/10 rounded-xl"
+                placeholder="From date"
+              />
+              <span className="text-sm text-gray-400">to</span>
+              <Input
+                type="date"
+                value={dateRange.to}
+                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                className="w-[140px] bg-white/10 border-white/10 rounded-xl"
+                placeholder="To date"
+              />
+              {(dateRange.from || dateRange.to) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDateRange({ from: '', to: '' })}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
             {/* Supplier Filter */}
             <Select
               value={supplierFilter}
@@ -1027,6 +1122,15 @@ const Purchases = () => {
                                   </span>
                                 )}
                               </div>
+                              {purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecurringRenewal(purchase)}
+                                  className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-xs"
+                                >
+                                  Renew Now
+                                </Button>
+                              )}
                             </div>
                           )}
 

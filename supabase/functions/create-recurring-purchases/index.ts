@@ -110,34 +110,36 @@ serve(async (req) => {
         const paymentUrgencyDate = new Date(newPurchaseDate)
         paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
 
-        // Record the balance change in history before updating
+        // Calculate values for the renewal
         const currentBalance = purchase.balance || 0
+        const currentAdvancePayment = purchase.advance_payment || 0
         const fullAmount = purchase.amount_ttc || purchase.amount
         
-        if (currentBalance !== fullAmount) {
-          const { error: historyError } = await supabaseClient
-            .from('purchase_balance_history')
-            .insert({
-              purchase_id: purchase.id,
-              user_id: user.id,
-              previous_balance: currentBalance,
-              new_balance: fullAmount,
-              change_amount: fullAmount - currentBalance,
-              change_reason: 'Recurring purchase renewal - balance reset',
-              change_date: newPurchaseDate.toISOString()
-            })
+        // Record the balance change in history before updating
+        const { error: historyError } = await supabaseClient
+          .from('purchase_balance_history')
+          .insert({
+            purchase_id: purchase.id,
+            user_id: user.id,
+            old_balance: currentBalance,
+            new_balance: currentBalance, // Keep the existing balance
+            change_amount: 0,
+            change_reason: 'Recurring purchase renewed - balance carried forward',
+            change_date: newPurchaseDate.toISOString()
+          })
 
-          if (historyError) {
-            console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
-          }
+        if (historyError) {
+          console.error(`Error recording balance history for ID ${purchase.id}:`, historyError)
         }
 
         // Update the purchase record with new recurring cycle
+        // Keep the existing balance and advance payment structure
         const updatedPurchaseData = {
-          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to the current recurring date
-          advance_payment: 0, // Reset advance payment to 0
-          balance: fullAmount, // Reset balance to full amount
-          payment_status: 'Unpaid', // Reset payment status
+          purchase_date: newPurchaseDate.toISOString().split('T')[0], // Set to the current date
+          balance: currentBalance, // Maintain existing balance
+          advance_payment: currentAdvancePayment, // Maintain existing advance payment
+          payment_status: currentBalance === 0 ? 'Paid' : 
+                         currentAdvancePayment > 0 ? 'Partially Paid' : 'Unpaid',
           payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
           next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date
         }
