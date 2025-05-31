@@ -853,7 +853,7 @@ const Purchases = () => {
 
         {/* Compact Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Quick Date Filter Buttons */}
+          {/* Date Filter Buttons */}
           <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
             {[
               { value: 'all', label: 'All' },
@@ -877,49 +877,6 @@ const Purchases = () => {
                 {option.label}
               </Button>
             ))}
-          </div>
-
-          {/* Custom Date Range */}
-          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg px-2 py-1">
-            <div className="relative">
-              <Input
-                type="date"
-                value={dateRange.from}
-                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="w-[110px] h-7 text-xs border-0 bg-transparent px-1 focus-visible:ring-0"
-                placeholder="From date"
-              />
-              {!dateRange.from && (
-                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-                  From
-                </span>
-              )}
-            </div>
-            <span className="text-xs text-gray-400">→</span>
-            <div className="relative">
-              <Input
-                type="date"
-                value={dateRange.to}
-                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="w-[110px] h-7 text-xs border-0 bg-transparent px-1 focus-visible:ring-0"
-                placeholder="To date"
-              />
-              {!dateRange.to && (
-                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-                  To
-                </span>
-              )}
-            </div>
-            {(dateRange.from || dateRange.to) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDateRange({ from: '', to: '' })}
-                className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
           </div>
 
           {/* Category Filters */}
@@ -1003,7 +960,7 @@ const Purchases = () => {
       </div>
 
       {/* Active Filters Tags - Only show when filters are active */}
-      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all' || dateRange.from || dateRange.to) && (
+      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all') && (
         <div className="mb-4 flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-gray-500">Active:</span>
           {dateFilter !== 'all' && (
@@ -1028,12 +985,6 @@ const Purchases = () => {
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
               {purchaseTypeFilter}
               <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setPurchaseTypeFilter('all')} />
-            </span>
-          )}
-          {(dateRange.from || dateRange.to) && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
-              Custom Range
-              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateRange({ from: '', to: '' })} />
             </span>
           )}
         </div>
