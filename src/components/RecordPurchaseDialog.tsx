@@ -351,7 +351,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         recurring_type: formData.recurring_type === 'none' ? null : formData.recurring_type,
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
-        linking_category: formData.linking_category || null,
+        linking_category: formData.linking_category === 'none' ? null : formData.linking_category,
+        link_date_from: formData.linking_category !== 'none' && formData.link_date_from ? formData.link_date_from : null,
+        link_date_to: formData.linking_category !== 'none' && formData.link_date_to ? formData.link_date_to : null,
         is_deleted: false
       };
 

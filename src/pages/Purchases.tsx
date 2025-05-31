@@ -391,22 +391,31 @@ const Purchases = () => {
         return;
       }
 
-      // Find purchases with linking configurations
+      // Find purchases with linking configurations that need updating
       const linkedPurchases = purchases.filter(p => 
         p.linking_category && p.link_date_from && p.link_date_to
       );
 
+      if (linkedPurchases.length === 0) return;
+
+      let hasUpdates = false;
+
       for (const purchase of linkedPurchases) {
-        await calculatePurchaseLinking(purchase);
+        const shouldUpdate = await calculatePurchaseLinking(purchase);
+        if (shouldUpdate) hasUpdates = true;
       }
 
-      // Refresh purchases after updates
-      if (linkedPurchases.length > 0) {
-        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      // Only refresh if there were actual updates
+      if (hasUpdates) {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+        }, 500);
       }
     };
 
-    updateLinkedPurchases();
+    // Add a small delay to ensure all data is loaded
+    const timeoutId = setTimeout(updateLinkedPurchases, 1000);
+    return () => clearTimeout(timeoutId);
   }, [purchases, receipts, user, queryClient]);
 
   // Filter purchases
@@ -504,9 +513,9 @@ const Purchases = () => {
   }, [purchases]);
 
   // Function to calculate and update purchase linking
-  const calculatePurchaseLinking = async (purchase: Purchase) => {
+  const calculatePurchaseLinking = async (purchase: Purchase): Promise<boolean> => {
     if (!purchase.linking_category || !purchase.link_date_from || !purchase.link_date_to) {
-      return;
+      return false;
     }
 
     // Get receipts in the date range
@@ -514,6 +523,11 @@ const Purchases = () => {
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(purchase.link_date_from!);
       const toDate = new Date(purchase.link_date_to!);
+      
+      // Set time to start/end of day for accurate comparison
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(23, 59, 59, 999);
+      
       return receiptDate >= fromDate && receiptDate <= toDate;
     });
 
@@ -524,35 +538,57 @@ const Purchases = () => {
       linkedReceipts.forEach(receipt => {
         const montageCost = receipt.montage_costs || 0;
         
-        // Add to total if montage status is InCutting, Ready, or Paid costs
-        if (receipt.montage_status === 'InCutting' || receipt.montage_status === 'Ready') {
+        // Add to total if montage cost exists and status is not null/empty
+        if (montageCost > 0) {
           totalAmount += montageCost;
-        } else if (receipt.montage_status === 'Paid costs') {
-          totalAmount += montageCost;
-          paidAmount += montageCost;
+          
+          // Only count as paid if status is specifically 'Paid costs'
+          if (receipt.montage_status === 'Paid costs') {
+            paidAmount += montageCost;
+          }
         }
       });
     }
 
     const balance = totalAmount - paidAmount;
+    const linkedReceiptIds = linkedReceipts.map(r => r.id);
+
+    // Check if values have actually changed to avoid unnecessary updates
+    const currentAmountTTC = purchase.amount_ttc || purchase.amount || 0;
+    const currentAdvancePayment = purchase.advance_payment || 0;
+    const currentBalance = purchase.balance || 0;
+    const currentLinkedReceipts = purchase.linked_receipts || [];
+
+    const hasChanges = 
+      Math.abs(currentAmountTTC - totalAmount) > 0.01 ||
+      Math.abs(currentAdvancePayment - paidAmount) > 0.01 ||
+      Math.abs(currentBalance - balance) > 0.01 ||
+      JSON.stringify(currentLinkedReceipts.sort()) !== JSON.stringify(linkedReceiptIds.sort());
+
+    if (!hasChanges) {
+      return false;
+    }
 
     // Update the purchase record
     const { error } = await supabase
       .from('purchases')
       .update({
-        linked_receipts: linkedReceipts.map(r => r.id),
+        linked_receipts: linkedReceiptIds,
         amount_ttc: totalAmount,
         amount_ht: totalAmount / 1.2,
         amount: totalAmount,
         advance_payment: paidAmount,
         balance: balance,
-        payment_status: balance === 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
+        payment_status: balance === 0 && totalAmount > 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
       })
       .eq('id', purchase.id);
 
     if (error) {
       console.error('Error updating purchase linking:', error);
+      return false;
     }
+
+    return true;
   };
 
   const resetPurchaseForm = () => {
