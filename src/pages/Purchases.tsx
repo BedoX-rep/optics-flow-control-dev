@@ -835,248 +835,211 @@ const Purchases = () => {
         </div>
       </div>
 
-      {/* Integrated Filters Section */}
-      <div className="mb-6 backdrop-blur-sm bg-gradient-to-r from-white/80 to-gray-50/80 rounded-2xl border border-gray-200/50 shadow-lg">
-        {/* Header with Quick Stats */}
-        <div className="px-6 py-4 border-b border-gray-200/50">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Filter className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Filters & Overview</h3>
-                <p className="text-sm text-gray-600">
-                  {filteredPurchases.length} purchases • {totalExpenses.toFixed(2)} DH total
-                </p>
-              </div>
-            </div>
-            
-            {/* Quick stats cards */}
-            <div className="flex gap-3">
-              <div className="bg-blue-50 rounded-lg px-3 py-2 border border-blue-200">
-                <p className="text-xs font-medium text-blue-700">This Month</p>
-                <p className="text-sm font-bold text-blue-800">{monthlyTotal.toFixed(2)} DH</p>
-              </div>
-              <div className="bg-green-50 rounded-lg px-3 py-2 border border-green-200">
-                <p className="text-xs font-medium text-green-700">Filtered</p>
-                <p className="text-sm font-bold text-green-800">{filteredPurchases.length}</p>
-              </div>
-            </div>
+      {/* Compact Inline Filters */}
+      <div className="mb-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        {/* Quick Stats Row */}
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 text-gray-600">
+            <TrendingUp className="h-4 w-4 text-blue-600" />
+            <span className="font-medium">{filteredPurchases.length} purchases</span>
+            <span className="text-gray-400">•</span>
+            <span className="font-semibold text-blue-600">{totalExpenses.toFixed(2)} DH</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Calendar className="h-4 w-4 text-green-600" />
+            <span className="text-sm">This month: <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
           </div>
         </div>
 
-        {/* Compact Filters Grid */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Date Filters Column */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-700">Date Range</span>
-              </div>
-              
-              {/* Quick Date Filter */}
-              <div className="flex flex-wrap items-center gap-3">
-                <Select
-                  value={dateFilter}
-                  onValueChange={(value) => setDateFilter(value)}
-                >
-                  <SelectTrigger className={cn(
-                    "w-[140px] h-10 border-2 shadow-sm rounded-lg transition-all duration-200",
-                    dateFilter !== 'all'
-                      ? "bg-blue-100 text-blue-700 border-blue-300"
-                      : "bg-white border-gray-300 hover:border-gray-400"
-                  )}>
-                    <SelectValue>
-                      {dateFilter === 'all' ? 'All Dates' :
-                       dateFilter === 'today' ? 'Today' :
-                       dateFilter === 'week' ? 'This Week' :
-                       dateFilter === 'month' ? 'This Month' : 'This Year'}
-                    </SelectValue>
-                    {dateFilter !== 'all' && (
-                      <X
-                        className="h-3 w-3 ml-auto hover:text-blue-900 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDateFilter('all');
-                        }}
-                      />
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Dates</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
-                  </SelectContent>
-                </Select>
+        {/* Compact Filter Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Date Filter */}
+          <Select
+            value={dateFilter}
+            onValueChange={(value) => setDateFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[120px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+              dateFilter !== 'all'
+                ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
+                : "border-gray-200 hover:border-gray-300"
+            )}>
+              <Calendar className="h-4 w-4 mr-1" />
+              <SelectValue>
+                {dateFilter === 'all' ? 'Period' :
+                 dateFilter === 'today' ? 'Today' :
+                 dateFilter === 'week' ? 'Week' :
+                 dateFilter === 'month' ? 'Month' : 'Year'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Periods</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="year">This Year</SelectItem>
+            </SelectContent>
+          </Select>
 
-                <span className="text-sm text-gray-500">or</span>
-
-                {/* Custom Date Range - Compact */}
-                <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border">
-                  <Input
-                    type="date"
-                    value={dateRange.from}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                    className="w-[130px] h-8 text-xs bg-white border-gray-300 rounded"
-                    placeholder="From"
-                  />
-                  <span className="text-xs text-gray-400">to</span>
-                  <Input
-                    type="date"
-                    value={dateRange.to}
-                    onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                    className="w-[130px] h-8 text-xs bg-white border-gray-300 rounded"
-                    placeholder="To"
-                  />
-                  {(dateRange.from || dateRange.to) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDateRange({ from: '', to: '' })}
-                      className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              </div>
+          {/* Custom Date Range */}
+          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg px-2 py-1">
+            <div className="relative">
+              <Input
+                type="date"
+                value={dateRange.from}
+                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                className="w-[110px] h-7 text-xs border-0 bg-transparent px-1 focus-visible:ring-0"
+                placeholder="From date"
+              />
+              {!dateRange.from && (
+                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  From
+                </span>
+              )}
             </div>
-
-            {/* Category Filters Column */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Package className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-gray-700">Categories & Types</span>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Supplier Filter */}
-                <Select
-                  value={supplierFilter}
-                  onValueChange={(value) => setSupplierFilter(value)}
-                >
-                  <SelectTrigger className={cn(
-                    "h-10 border-2 shadow-sm rounded-lg transition-all duration-200",
-                    supplierFilter !== 'all'
-                      ? "bg-green-100 text-green-700 border-green-300"
-                      : "bg-white border-gray-300 hover:border-gray-400"
-                  )}>
-                    <Building2 className="h-4 w-4 mr-1" />
-                    <SelectValue>
-                      {supplierFilter === 'all' ? 'Suppliers' : 
-                       suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 8) + '...' || 'Unknown'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Suppliers</SelectItem>
-                    {suppliers.map(supplier => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Purchase Type Filter */}
-                <Select
-                  value={purchaseTypeFilter}
-                  onValueChange={(value) => setPurchaseTypeFilter(value)}
-                >
-                  <SelectTrigger className={cn(
-                    "h-10 border-2 shadow-sm rounded-lg transition-all duration-200",
-                    purchaseTypeFilter !== 'all'
-                      ? "bg-purple-100 text-purple-700 border-purple-300"
-                      : "bg-white border-gray-300 hover:border-gray-400"
-                  )}>
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <SelectValue>
-                      {purchaseTypeFilter === 'all' ? 'Types' : 
-                       purchaseTypeFilter === 'Operational Expenses' ? 'Operational' : 'Capital'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    {PURCHASE_TYPES.map(type => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Category Filter */}
-                <Select
-                  value={categoryFilter}
-                  onValueChange={(value) => setCategoryFilter(value)}
-                >
-                  <SelectTrigger className={cn(
-                    "h-10 border-2 shadow-sm rounded-lg transition-all duration-200",
-                    categoryFilter !== 'all'
-                      ? "bg-orange-100 text-orange-700 border-orange-300"
-                      : "bg-white border-gray-300 hover:border-gray-400"
-                  )}>
-                    <Package className="h-4 w-4 mr-1" />
-                    <SelectValue>
-                      {categoryFilter === 'all' ? 'Categories' : categoryFilter.slice(0, 8) + '...'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {EXPENSE_CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <span className="text-xs text-gray-400">→</span>
+            <div className="relative">
+              <Input
+                type="date"
+                value={dateRange.to}
+                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                className="w-[110px] h-7 text-xs border-0 bg-transparent px-1 focus-visible:ring-0"
+                placeholder="To date"
+              />
+              {!dateRange.to && (
+                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                  To
+                </span>
+              )}
             </div>
+            {(dateRange.from || dateRange.to) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDateRange({ from: '', to: '' })}
+                className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </div>
 
-          {/* Active Filters Display */}
-          {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all' || dateRange.from || dateRange.to) && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-medium text-gray-600">Active filters:</span>
-                {dateFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-                    {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : 'This Year'}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setDateFilter('all')} />
-                  </span>
-                )}
-                {supplierFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">
-                    {suppliers.find(s => s.id === supplierFilter)?.name}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setSupplierFilter('all')} />
-                  </span>
-                )}
-                {categoryFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded-md text-xs">
-                    {categoryFilter}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setCategoryFilter('all')} />
-                  </span>
-                )}
-                {purchaseTypeFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs">
-                    {purchaseTypeFilter}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setPurchaseTypeFilter('all')} />
-                  </span>
-                )}
-                {(dateRange.from || dateRange.to) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-                    Custom Range
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => setDateRange({ from: '', to: '' })} />
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Category Filters */}
+          <Select
+            value={supplierFilter}
+            onValueChange={(value) => setSupplierFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[110px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+              supplierFilter !== 'all'
+                ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
+                : "border-gray-200 hover:border-gray-300"
+            )}>
+              <Building2 className="h-4 w-4 mr-1" />
+              <SelectValue>
+                {supplierFilter === 'all' ? 'Supplier' : 
+                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || 'Unknown'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Suppliers</SelectItem>
+              {suppliers.map(supplier => (
+                <SelectItem key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={purchaseTypeFilter}
+            onValueChange={(value) => setPurchaseTypeFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+              purchaseTypeFilter !== 'all'
+                ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
+                : "border-gray-200 hover:border-gray-300"
+            )}>
+              <TrendingUp className="h-4 w-4 mr-1" />
+              <SelectValue>
+                {purchaseTypeFilter === 'all' ? 'Type' : 
+                 purchaseTypeFilter === 'Operational Expenses' ? 'Ops' : 'Cap'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {PURCHASE_TYPES.map(type => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) => setCategoryFilter(value)}
+          >
+            <SelectTrigger className={cn(
+              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+              categoryFilter !== 'all'
+                ? "bg-orange-50 text-orange-700 border-orange-200 shadow-sm"
+                : "border-gray-200 hover:border-gray-300"
+            )}>
+              <Package className="h-4 w-4 mr-1" />
+              <SelectValue>
+                {categoryFilter === 'all' ? 'Category' : categoryFilter.slice(0, 6) + '...'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {EXPENSE_CATEGORIES.map(category => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
+
+      {/* Active Filters Tags - Only show when filters are active */}
+      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all' || dateRange.from || dateRange.to) && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-gray-500">Active:</span>
+          {dateFilter !== 'all' && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
+              {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : 'This Year'}
+              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateFilter('all')} />
+            </span>
+          )}
+          {supplierFilter !== 'all' && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-md text-xs border border-green-200">
+              {suppliers.find(s => s.id === supplierFilter)?.name}
+              <X className="h-3 w-3 cursor-pointer hover:text-green-900" onClick={() => setSupplierFilter('all')} />
+            </span>
+          )}
+          {categoryFilter !== 'all' && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100/80 backdrop-blur-sm text-orange-700 rounded-md text-xs border border-orange-200">
+              {categoryFilter}
+              <X className="h-3 w-3 cursor-pointer hover:text-orange-900" onClick={() => setCategoryFilter('all')} />
+            </span>
+          )}
+          {purchaseTypeFilter !== 'all' && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
+              {purchaseTypeFilter}
+              <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setPurchaseTypeFilter('all')} />
+            </span>
+          )}
+          {(dateRange.from || dateRange.to) && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
+              Custom Range
+              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateRange({ from: '', to: '' })} />
+            </span>
+          )}
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
