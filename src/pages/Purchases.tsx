@@ -109,7 +109,7 @@ const Purchases = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('purchases');
-  
+
   // Search and filter states
   const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
@@ -123,7 +123,7 @@ const Purchases = () => {
 
   const [searchTerm, setSearchTerm] = useState(''); // General search term
   const [dateFilter, setDateFilter] = useState('all');
-  
+
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -151,7 +151,7 @@ const Purchases = () => {
       try {
         // Get the current session to pass the authorization header
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           console.error('No active session found');
           return;
@@ -162,7 +162,7 @@ const Purchases = () => {
             Authorization: `Bearer ${session.access_token}`,
           },
         });
-        
+
         if (error) {
           console.error('Error checking recurring purchases:', error);
           return;
@@ -175,7 +175,7 @@ const Purchases = () => {
             title: "Recurring Purchases Renewed",
             description: `${data.processed} recurring purchase(s) have been automatically renewed.`,
           });
-          
+
           // Refresh the purchases list
           queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
         }
@@ -207,19 +207,19 @@ const Purchases = () => {
       const currentAdvancePayment = purchase.advance_payment || 0;
       const originalAmount = purchase.amount_ttc || purchase.amount;
       const taxPercentage = purchase.tax_percentage || 20;
-      
+
       // For recurring renewal:
       // - If balance = 0 (fully paid), reset to original amount
       // - If balance > 0 (unpaid), add remaining balance to original amount
       const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance;
-      
+
       // Reset advance payment to 0 for new cycle and calculate new balance
       const newAdvancePayment = 0;
       const newBalance = newTotalAmount - newAdvancePayment;
-      
+
       // Calculate HT amount from TTC amount using tax percentage
       const newAmountHT = newTotalAmount / (1 + taxPercentage / 100);
-      
+
       const renewalData = {
         purchase_date: format(currentDate, 'yyyy-MM-dd'),
         next_recurring_date: nextRecurringDate,
@@ -295,7 +295,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -322,7 +322,7 @@ const Purchases = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -511,9 +511,9 @@ const Purchases = () => {
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType) return null;
-    
+
     const date = new Date(purchaseDate);
-    
+
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -530,13 +530,13 @@ const Purchases = () => {
       default:
         return null;
     }
-    
+
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
@@ -560,7 +560,7 @@ const Purchases = () => {
 
     try {
       setIsSubmitting(true);
-      
+
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
@@ -607,7 +607,7 @@ const Purchases = () => {
     }
   };
 
-  
+
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -933,7 +933,8 @@ const Purchases = () => {
                 <SelectItem key={type} value={type}>
                   {type}
                 </SelectItem>
-              ))}
+              ))}```text
+
             </SelectContent>
           </Select>
 
@@ -1014,7 +1015,7 @@ const Purchases = () => {
         </TabsList>
 
         <TabsContent value="purchases" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-6">
             <AnimatePresence>
               {filteredPurchases.length === 0 ? (
                 <div className="col-span-full text-center py-10 text-gray-500">
