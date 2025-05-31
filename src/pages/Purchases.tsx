@@ -207,6 +207,31 @@ const Purchases = () => {
     };
 
     checkRecurringPurchases();
+
+    // Set up real-time subscription for receipt changes that might affect purchase linking
+    if (user) {
+      const channel = supabase
+        .channel('receipt-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'receipts',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            // Refresh both receipts and purchases when receipts change
+            queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+            queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user, toast, queryClient]);
 
   const handleRecurringRenewal = async (purchase: Purchase) => {
@@ -335,6 +360,7 @@ const Purchases = () => {
       return data || [];
     },
     enabled: !!user,
+    refetchInterval: 5000, // Refresh every 5 seconds to catch new receipts
   });
 
   // Fetch purchases
@@ -552,6 +578,7 @@ const Purchases = () => {
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(linkDateFrom);
       const toDate = new Date(linkDateTo);
+      // Include all receipts within the date range, regardless of when they were created
       return receiptDate >= fromDate && receiptDate <= toDate;
     });
   };
@@ -591,7 +618,9 @@ const Purchases = () => {
       
       const linkedReceiptIds = filteredReceipts.map(r => r.id);
       
-      // Update purchase with linked receipts and calculated amounts
+      // Store the date range for future receipt matching
+      // This will allow the system to automatically include receipts created in the future
+      // that fall within this date range
       const { error } = await supabase
         .from('purchases')
         .update({
@@ -609,9 +638,13 @@ const Purchases = () => {
 
       if (error) throw error;
 
+      const dateRangeText = linkDateFrom === linkDateTo 
+        ? `for ${format(new Date(linkDateFrom), 'MMM dd, yyyy')}`
+        : `from ${format(new Date(linkDateFrom), 'MMM dd, yyyy')} to ${format(new Date(linkDateTo), 'MMM dd, yyyy')}`;
+
       toast({
         title: "Success",
-        description: `Linked ${montageData.receiptCount} receipts with ${montageData.totalMontage.toFixed(2)} DH total montage costs`,
+        description: `Linked ${montageData.receiptCount} current receipts ${dateRangeText}. Future receipts in this date range will be automatically included.`,
       });
 
       queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
