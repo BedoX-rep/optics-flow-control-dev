@@ -108,7 +108,7 @@ const Auth = () => {
       setIsLoading(true);
       
       // Create user metadata with display name and store name
-      const userData = {
+      const userData: any = {
         display_name: displayName || email.split('@')[0],
         store_name: storeName || 'Optique',
         access_code: accessCode.toUpperCase()
@@ -116,7 +116,7 @@ const Auth = () => {
       
       // Add referral code to metadata if provided
       if (referralCode) {
-        userData['referred_by'] = referralCode;
+        userData.referred_by = referralCode;
       }
       
       const { error } = await supabase.auth.signUp({
