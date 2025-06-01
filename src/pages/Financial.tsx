@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Wrench, Calculator, Wallet, AlertTriangle, PieChart } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,7 @@ interface Receipt {
   receipt_items: Array<{
     product?: {
       category?: string;
+      stock?: number;
     };
     cost: number;
     price: number;
@@ -44,6 +45,7 @@ interface Purchase {
   is_deleted: boolean;
   linking_category?: string;
   linked_receipts?: string[];
+  description: string;
   supplier?: {
     name: string;
   };
@@ -77,7 +79,8 @@ const Financial = () => {
             price,
             quantity,
             product:product_id (
-              category
+              category,
+              stock
             )
           )
         `)
@@ -136,8 +139,8 @@ const Financial = () => {
     const totalReceived = filteredReceipts.reduce((sum, receipt) => sum + (receipt.advance_payment || 0), 0);
     const totalOutstanding = filteredReceipts.reduce((sum, receipt) => sum + (receipt.balance || 0), 0);
 
-    // Product costs by category with better tracking
-    const productCostsByCategory = filteredReceipts.reduce((acc, receipt) => {
+    // Enhanced product costs analysis by category and stock status
+    const productAnalysis = filteredReceipts.reduce((acc, receipt) => {
       if (Array.isArray(receipt.receipt_items)) {
         receipt.receipt_items.forEach(item => {
           const quantity = Number(item.quantity) || 1;
@@ -146,20 +149,45 @@ const Financial = () => {
           const totalItemCost = cost * quantity;
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
-
-          if (!acc[category]) {
-            acc[category] = { cost: 0, revenue: 0, profit: 0, margin: 0 };
+          const stock = item.product?.stock || 0;
+          
+          // Determine stock status
+          let stockStatus = 'InStock';
+          if (stock <= 0) {
+            stockStatus = 'Order';
+          } else if (stock <= 5) {
+            stockStatus = 'Fabrication';
           }
-          acc[category].cost += totalItemCost;
-          acc[category].revenue += totalItemRevenue;
-          acc[category].profit = acc[category].revenue - acc[category].cost;
-          acc[category].margin = acc[category].revenue > 0 ? (acc[category].profit / acc[category].revenue) * 100 : 0;
+
+          // Category analysis
+          if (!acc.categories[category]) {
+            acc.categories[category] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0 };
+          }
+          acc.categories[category].cost += totalItemCost;
+          acc.categories[category].revenue += totalItemRevenue;
+          acc.categories[category].profit = acc.categories[category].revenue - acc.categories[category].cost;
+          acc.categories[category].margin = acc.categories[category].revenue > 0 ? (acc.categories[category].profit / acc.categories[category].revenue) * 100 : 0;
+          acc.categories[category].items += quantity;
+
+          // Stock status analysis
+          if (!acc.stockStatus[stockStatus]) {
+            acc.stockStatus[stockStatus] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0 };
+          }
+          acc.stockStatus[stockStatus].cost += totalItemCost;
+          acc.stockStatus[stockStatus].revenue += totalItemRevenue;
+          acc.stockStatus[stockStatus].profit = acc.stockStatus[stockStatus].revenue - acc.stockStatus[stockStatus].cost;
+          acc.stockStatus[stockStatus].margin = acc.stockStatus[stockStatus].revenue > 0 ? (acc.stockStatus[stockStatus].profit / acc.stockStatus[stockStatus].revenue) * 100 : 0;
+          acc.stockStatus[stockStatus].items += quantity;
+
+          acc.totalCost += totalItemCost;
         });
       }
       return acc;
-    }, {} as Record<string, { cost: number; revenue: number; profit: number; margin: number }>);
-
-    const totalProductCosts = Object.values(productCostsByCategory).reduce((sum, cat) => sum + cat.cost, 0);
+    }, { 
+      categories: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>, 
+      stockStatus: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>,
+      totalCost: 0
+    });
 
     // Enhanced montage costs tracking
     const linkedMontageReceipts = new Set();
@@ -189,30 +217,72 @@ const Financial = () => {
       return acc;
     }, { total: 0, operational: 0, paid: 0, unpaid: 0 });
 
-    // Operational expenses (actually paid)
+    // Operational expenses breakdown (paid and unpaid)
     const operationalExpenses = filteredPurchases
       .filter(purchase => purchase.purchase_type === 'Operational Expenses')
-      .reduce((sum, purchase) => sum + (purchase.advance_payment || 0), 0);
+      .reduce((acc, purchase) => {
+        const total = purchase.amount_ttc || purchase.amount;
+        const paid = purchase.advance_payment || 0;
+        const unpaid = total - paid;
+        
+        acc.total += total;
+        acc.paid += paid;
+        acc.unpaid += unpaid;
+        return acc;
+      }, { total: 0, paid: 0, unpaid: 0 });
 
-    // Capital expenditure breakdown
+    // Enhanced capital expenditure breakdown
     const capitalPurchases = filteredPurchases.filter(purchase => purchase.purchase_type === 'Capital Expenditure');
-    const capitalExpenditure = capitalPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
-    const capitalPaidOff = capitalPurchases.reduce((sum, purchase) => sum + (purchase.advance_payment || 0), 0);
-    const capitalOutstanding = capitalExpenditure - capitalPaidOff;
+    const capitalAnalysis = capitalPurchases.reduce((acc, purchase) => {
+      const total = purchase.amount_ttc || purchase.amount;
+      const paid = purchase.advance_payment || 0;
+      const outstanding = total - paid;
+      
+      acc.total += total;
+      acc.paid += paid;
+      acc.outstanding += outstanding;
+      acc.purchases.push({
+        id: purchase.id,
+        description: purchase.description,
+        supplier: purchase.supplier?.name || 'Unknown',
+        total,
+        paid,
+        outstanding,
+        date: purchase.purchase_date
+      });
+      
+      return acc;
+    }, { 
+      total: 0, 
+      paid: 0, 
+      outstanding: 0, 
+      purchases: [] as Array<{
+        id: string;
+        description: string;
+        supplier: string;
+        total: number;
+        paid: number;
+        outstanding: number;
+        date: string;
+      }>
+    });
 
-    // Cash flow calculation
+    // Enhanced cash flow and profit calculations
     const cashInflow = totalReceived; // Actually received payments
-    const cashOutflow = operationalExpenses + montageMetrics.operational; // Actually paid expenses
-    const netCashFlow = cashInflow - cashOutflow;
+    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses
+    const totalExpensesUnpaid = operationalExpenses.unpaid + montageMetrics.unpaid; // Unpaid expenses
+    const netCashFlow = cashInflow - totalExpensesPaid;
     const availableCash = netCashFlow; // Current cash position
 
-    // Profit calculations
-    const grossProfit = totalRevenue - totalProductCosts;
-    const netProfit = grossProfit - operationalExpenses - montageMetrics.operational;
+    // Comprehensive profit calculations
+    const grossProfit = totalRevenue - productAnalysis.totalCost;
+    const netProfitAfterPaidExpenses = grossProfit - totalExpensesPaid;
+    const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total;
 
     // Performance ratios
     const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
-    const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    const netMarginPaid = totalRevenue > 0 ? (netProfitAfterPaidExpenses / totalRevenue) * 100 : 0;
+    const netMarginTotal = totalRevenue > 0 ? (netProfitAfterAllExpenses / totalRevenue) * 100 : 0;
     const collectionRate = totalRevenue > 0 ? (totalReceived / totalRevenue) * 100 : 0;
 
     return {
@@ -221,30 +291,30 @@ const Financial = () => {
       totalReceived,
       totalOutstanding,
       
-      // Costs
-      totalProductCosts,
-      productCostsByCategory,
+      // Enhanced Cost Analysis
+      productAnalysis,
       montageMetrics,
       operationalExpenses,
       
-      // Capital
-      capitalExpenditure,
-      capitalPaidOff,
-      capitalOutstanding,
+      // Enhanced Capital Analysis
+      capitalAnalysis,
       
       // Cash Flow
       cashInflow,
-      cashOutflow,
+      totalExpensesPaid,
+      totalExpensesUnpaid,
       netCashFlow,
       availableCash,
       
-      // Profits
+      // Enhanced Profits
       grossProfit,
-      netProfit,
+      netProfitAfterPaidExpenses,
+      netProfitAfterAllExpenses,
       
       // Ratios
       grossMargin,
-      netMargin,
+      netMarginPaid,
+      netMarginTotal,
       collectionRate
     };
   }, [filteredReceipts, filteredPurchases]);
@@ -273,7 +343,7 @@ const Financial = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Financial Overview</h1>
-          <p className="text-gray-600 mt-1">Comprehensive business financial analytics & cash flow tracking</p>
+          <p className="text-gray-600 mt-1">Comprehensive business financial analytics & profitability tracking</p>
         </div>
       </div>
 
@@ -334,8 +404,8 @@ const Financial = () => {
         </CardContent>
       </Card>
 
-      {/* Cash Flow & Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      {/* Enhanced Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -348,7 +418,7 @@ const Financial = () => {
                   {financialMetrics.availableCash.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-green-600 mt-1">
-                  Cash Flow: {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
+                  Net Flow: {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
                 </p>
               </div>
               <Wallet className="h-8 w-8 text-green-600" />
@@ -365,7 +435,7 @@ const Financial = () => {
                   {financialMetrics.totalRevenue.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Received: {financialMetrics.totalReceived.toFixed(2)} DH
+                  Collected: {financialMetrics.collectionRate.toFixed(1)}%
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -377,18 +447,38 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Net Profit</p>
+                <p className="text-sm font-medium text-purple-600">Net Profit (Paid)</p>
                 <p className={cn(
                   "text-2xl font-bold",
-                  financialMetrics.netProfit >= 0 ? "text-green-600" : "text-red-600"
+                  financialMetrics.netProfitAfterPaidExpenses >= 0 ? "text-green-600" : "text-red-600"
                 )}>
-                  {financialMetrics.netProfit.toFixed(2)} DH
+                  {financialMetrics.netProfitAfterPaidExpenses.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-purple-600 mt-1">
-                  Margin: {financialMetrics.netMargin.toFixed(1)}%
+                  Margin: {financialMetrics.netMarginPaid.toFixed(1)}%
                 </p>
               </div>
               <Calculator className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-indigo-600">Net Profit (Total)</p>
+                <p className={cn(
+                  "text-2xl font-bold",
+                  financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
+                )}>
+                  {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
+                </p>
+                <p className="text-xs text-indigo-600 mt-1">
+                  Margin: {financialMetrics.netMarginTotal.toFixed(1)}%
+                </p>
+              </div>
+              <Target className="h-8 w-8 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
@@ -397,12 +487,12 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600">Outstanding</p>
+                <p className="text-sm font-medium text-orange-600">Unpaid Expenses</p>
                 <p className="text-2xl font-bold text-orange-900">
-                  {financialMetrics.totalOutstanding.toFixed(2)} DH
+                  {financialMetrics.totalExpensesUnpaid.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-orange-600 mt-1">
-                  Collection Rate: {financialMetrics.collectionRate.toFixed(1)}%
+                  Outstanding Liabilities
                 </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-600" />
@@ -414,12 +504,12 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">Total Expenses</p>
+                <p className="text-sm font-medium text-red-600">Paid Expenses</p>
                 <p className="text-2xl font-bold text-red-900">
-                  {(financialMetrics.operationalExpenses + financialMetrics.montageMetrics.operational).toFixed(2)} DH
+                  {financialMetrics.totalExpensesPaid.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-red-600 mt-1">
-                  Actually Paid
+                  Cash Outflow
                 </p>
               </div>
               <TrendingDown className="h-8 w-8 text-red-600" />
@@ -428,68 +518,14 @@ const Financial = () => {
         </Card>
       </div>
 
-      {/* Detailed Breakdown */}
+      {/* Enhanced Cost Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Revenue & Cash Flow Analysis */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Revenue & Cash Flow
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="font-medium">Total Revenue</span>
-                <span className="font-bold text-blue-600">
-                  {financialMetrics.totalRevenue.toFixed(2)} DH
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Cash Received</span>
-                <span className="font-bold text-green-600">
-                  {financialMetrics.totalReceived.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                <span className="font-medium">Outstanding Balance</span>
-                <span className="font-bold text-orange-600">
-                  {financialMetrics.totalOutstanding.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="mt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Collection Progress</span>
-                  <span>{financialMetrics.collectionRate.toFixed(1)}%</span>
-                </div>
-                <Progress value={financialMetrics.collectionRate} className="h-2" />
-              </div>
-
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Net Cash Flow</span>
-                  <span className={cn(
-                    "font-bold",
-                    financialMetrics.netCashFlow >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Cost Breakdown */}
+        {/* Detailed Cost Analysis by Category */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Cost Analysis
+              Cost Analysis by Category
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -497,155 +533,303 @@ const Financial = () => {
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <span className="font-medium">Total Product Costs</span>
                 <span className="font-bold text-red-600">
-                  {financialMetrics.totalProductCosts.toFixed(2)} DH
+                  {financialMetrics.productAnalysis.totalCost.toFixed(2)} DH
                 </span>
               </div>
               
-              {/* Product costs by category */}
-              <div className="ml-4 space-y-2 max-h-32 overflow-y-auto">
-                {Object.entries(financialMetrics.productCostsByCategory).map(([category, data]) => (
-                  <div key={category} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">{category}</span>
-                    <div className="text-right">
-                      <div className="font-medium">{data.cost.toFixed(2)} DH</div>
+              <div className="space-y-3 max-h-48 overflow-y-auto">
+                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
+                  <div key={category} className="border rounded-lg p-3 bg-white">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-gray-700">{category}</span>
+                      <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                      <div>Items: {data.items}</div>
+                      <div>Revenue: {data.revenue.toFixed(2)} DH</div>
                       <div className={cn(
-                        "text-xs",
+                        "font-medium",
                         data.margin >= 0 ? "text-green-600" : "text-red-600"
                       )}>
-                        {data.margin.toFixed(1)}% margin
+                        Margin: {data.margin.toFixed(1)}%
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Montage Costs (Operational)</span>
-                <span className="font-bold text-red-600">
-                  {financialMetrics.montageMetrics.operational.toFixed(2)} DH
+        {/* Cost Analysis by Stock Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Cost Analysis by Stock Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Object.entries(financialMetrics.productAnalysis.stockStatus).map(([status, data]) => (
+                <div key={status} className="border rounded-lg p-4 bg-white">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-medium text-gray-700">{status}</span>
+                    <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Items: </span>
+                      <span className="font-medium">{data.items}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Revenue: </span>
+                      <span className="font-medium">{data.revenue.toFixed(2)} DH</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Profit: </span>
+                      <span className={cn(
+                        "font-medium",
+                        data.profit >= 0 ? "text-green-600" : "text-red-600"
+                      )}>
+                        {data.profit.toFixed(2)} DH
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Margin: </span>
+                      <span className={cn(
+                        "font-medium",
+                        data.margin >= 0 ? "text-green-600" : "text-red-600"
+                      )}>
+                        {data.margin.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Profit Analysis & Operational Expenses */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Enhanced Profit Analysis */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Comprehensive Profit Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="font-medium">Gross Profit</span>
+                <span className={cn(
+                  "font-bold",
+                  financialMetrics.grossProfit >= 0 ? "text-green-600" : "text-red-600"
+                )}>
+                  {financialMetrics.grossProfit.toFixed(2)} DH
                 </span>
               </div>
 
+              <div className="border-t pt-3">
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg mb-2">
+                  <span className="font-medium">Net Profit (After Paid Expenses)</span>
+                  <span className={cn(
+                    "font-bold",
+                    financialMetrics.netProfitAfterPaidExpenses >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {financialMetrics.netProfitAfterPaidExpenses.toFixed(2)} DH
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 mb-3">
+                  This is your actual profit after all paid operational expenses and montage costs.
+                </div>
+              </div>
+
+              <div className="border-t pt-3">
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg mb-2">
+                  <span className="font-medium">Net Profit (After All Expenses)</span>
+                  <span className={cn(
+                    "font-bold",
+                    financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  This shows total profit after accounting for all expenses (paid and unpaid).
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-yellow-800">Impact of Unpaid Expenses</span>
+                  <span className="font-bold text-yellow-800">
+                    -{financialMetrics.totalExpensesUnpaid.toFixed(2)} DH
+                  </span>
+                </div>
+                <div className="text-xs text-yellow-700 mt-1">
+                  These unpaid expenses will affect future cash flow when paid.
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Operational Expenses */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Operational Expenses Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Operational Expenses (Paid)</span>
+                <span className="font-medium">Total Operational Expenses</span>
+                <span className="font-bold text-gray-900">
+                  {financialMetrics.operationalExpenses.total.toFixed(2)} DH
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <span className="font-medium">Paid Expenses</span>
+                <span className="font-bold text-green-600">
+                  {financialMetrics.operationalExpenses.paid.toFixed(2)} DH
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                <span className="font-medium">Unpaid Expenses</span>
                 <span className="font-bold text-red-600">
-                  {financialMetrics.operationalExpenses.toFixed(2)} DH
+                  {financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH
                 </span>
               </div>
 
               <div className="border-t pt-4">
-                <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium">Total Cash Outflow</span>
-                  <span className="font-bold text-red-600">
-                    {financialMetrics.cashOutflow.toFixed(2)} DH
-                  </span>
+                <h4 className="font-medium mb-3">Montage Costs</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Total Montage</span>
+                    <span className="font-medium">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Paid Montage</span>
+                    <span className="font-medium text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Unpaid Montage</span>
+                    <span className="font-medium text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Operational Impact</span>
+                    <span className="font-medium text-orange-600">{financialMetrics.montageMetrics.operational.toFixed(2)} DH</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Montage & Capital Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Montage Costs Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5" />
-              Montage Cost Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                <span className="font-medium">Total Montage Costs</span>
-                <span className="font-bold text-purple-900">
-                  {financialMetrics.montageMetrics.total.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Paid Montage</span>
-                <span className="font-bold text-green-600">
-                  {financialMetrics.montageMetrics.paid.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                <span className="font-medium">Unpaid Montage</span>
-                <span className="font-bold text-red-600">
-                  {financialMetrics.montageMetrics.unpaid.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                <span className="font-medium">Operational Impact</span>
-                <span className="font-bold text-orange-600">
-                  {financialMetrics.montageMetrics.operational.toFixed(2)} DH
-                </span>
-              </div>
-
-              {financialMetrics.montageMetrics.total > 0 && (
+              {financialMetrics.operationalExpenses.total > 0 && (
                 <div className="mt-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span>Payment Progress</span>
-                    <span>{((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%</span>
+                    <span>{((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%</span>
                   </div>
-                  <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-2" />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Capital Expenditure Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Capital Expenditure
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                <span className="font-medium">Total Capital Expenditure</span>
-                <span className="font-bold text-purple-900">
-                  {financialMetrics.capitalExpenditure.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Amount Paid</span>
-                <span className="font-bold text-green-600">
-                  {financialMetrics.capitalPaidOff.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                <span className="font-medium">Outstanding Balance</span>
-                <span className="font-bold text-red-600">
-                  {financialMetrics.capitalOutstanding.toFixed(2)} DH
-                </span>
-              </div>
-
-              {financialMetrics.capitalExpenditure > 0 && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Payment Progress</span>
-                    <span>{((financialMetrics.capitalPaidOff / financialMetrics.capitalExpenditure) * 100).toFixed(1)}%</span>
-                  </div>
-                  <Progress 
-                    value={(financialMetrics.capitalPaidOff / financialMetrics.capitalExpenditure) * 100} 
-                    className="h-2"
-                  />
+                  <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Enhanced Capital Expenditure Details */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Detailed Capital Expenditure Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
+              <span className="font-medium">Total Capital Expenditure</span>
+              <span className="font-bold text-purple-900">
+                {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+              <span className="font-medium">Amount Paid</span>
+              <span className="font-bold text-green-600">
+                {financialMetrics.capitalAnalysis.paid.toFixed(2)} DH
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+              <span className="font-medium">Outstanding Balance</span>
+              <span className="font-bold text-red-600">
+                {financialMetrics.capitalAnalysis.outstanding.toFixed(2)} DH
+              </span>
+            </div>
+          </div>
+
+          {financialMetrics.capitalAnalysis.total > 0 && (
+            <div className="mb-6">
+              <div className="flex justify-between text-sm mb-2">
+                <span>Payment Progress</span>
+                <span>{((financialMetrics.capitalAnalysis.paid / financialMetrics.capitalAnalysis.total) * 100).toFixed(1)}%</span>
+              </div>
+              <Progress 
+                value={(financialMetrics.capitalAnalysis.paid / financialMetrics.capitalAnalysis.total) * 100} 
+                className="h-3"
+              />
+            </div>
+          )}
+
+          {financialMetrics.capitalAnalysis.purchases.length > 0 && (
+            <div>
+              <h4 className="font-medium mb-4">Capital Expenditure Breakdown</h4>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {financialMetrics.capitalAnalysis.purchases.map((purchase) => (
+                  <div key={purchase.id} className="border rounded-lg p-4 bg-white">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h5 className="font-medium text-gray-900">{purchase.description}</h5>
+                        <p className="text-sm text-gray-600">Supplier: {purchase.supplier}</p>
+                        <p className="text-xs text-gray-500">Date: {format(new Date(purchase.date), 'MMM dd, yyyy')}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900">{purchase.total.toFixed(2)} DH</div>
+                        <div className="text-sm text-green-600">Paid: {purchase.paid.toFixed(2)} DH</div>
+                        {purchase.outstanding > 0 && (
+                          <div className="text-sm text-red-600">Outstanding: {purchase.outstanding.toFixed(2)} DH</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {purchase.total > 0 && (
+                      <div className="mt-3">
+                        <Progress 
+                          value={(purchase.paid / purchase.total) * 100} 
+                          className="h-2"
+                        />
+                        <div className="text-xs text-gray-500 mt-1">
+                          {((purchase.paid / purchase.total) * 100).toFixed(1)}% paid
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Performance Summary */}
       <Card>
@@ -658,13 +842,13 @@ const Financial = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Number of Orders</p>
+              <p className="text-sm text-gray-600 mb-1">Total Orders</p>
               <p className="text-2xl font-bold text-blue-600">{filteredReceipts.length}</p>
             </div>
             
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Purchases Made</p>
-              <p className="text-2xl font-bold text-orange-600">{filteredPurchases.length}</p>
+              <p className="text-sm text-gray-600 mb-1">Capital Purchases</p>
+              <p className="text-2xl font-bold text-orange-600">{financialMetrics.capitalAnalysis.purchases.length}</p>
             </div>
             
             <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -678,12 +862,12 @@ const Financial = () => {
             </div>
 
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Net Margin</p>
+              <p className="text-sm text-gray-600 mb-1">Net Margin (Paid)</p>
               <p className={cn(
                 "text-2xl font-bold",
-                financialMetrics.netMargin >= 0 ? "text-green-600" : "text-red-600"
+                financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
               )}>
-                {financialMetrics.netMargin.toFixed(1)}%
+                {financialMetrics.netMarginPaid.toFixed(1)}%
               </p>
             </div>
 
