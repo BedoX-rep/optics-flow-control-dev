@@ -86,7 +86,8 @@ const Financial = () => {
             quantity,
             product:product_id (
               category,
-              stock
+              stock,
+              stock_status
             )
           )
         `)
@@ -177,13 +178,8 @@ const Financial = () => {
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
           
-          // Determine stock status
-          let stockStatus = 'InStock';
-          if (stock <= 0) {
-            stockStatus = 'Order';
-          } else if (stock <= 5) {
-            stockStatus = 'Fabrication';
-          }
+          // Use actual stock status from product
+          const stockStatus = item.product?.stock_status || 'Order';
 
           // Category analysis
           if (!acc.categories[category]) {
