@@ -729,139 +729,326 @@ const Financial = () => {
         </CardContent>
       </Card>
 
-      {/* Profit Analysis & Operational Expenses */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Enhanced Profit Analysis */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Comprehensive Profit Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <span className="font-medium">Gross Profit</span>
-                <span className={cn(
-                  "font-bold",
-                  financialMetrics.grossProfit >= 0 ? "text-green-600" : "text-red-600"
-                )}>
-                  {financialMetrics.grossProfit.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="border-t pt-3">
-                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg mb-2">
-                  <span className="font-medium">Net Profit (After Paid Expenses)</span>
-                  <span className={cn(
-                    "font-bold",
-                    financialMetrics.netProfitAfterPaidExpenses >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.netProfitAfterPaidExpenses.toFixed(2)} DH
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600 mb-3">
-                  This is your actual profit after all paid operational expenses and montage costs.
-                </div>
-              </div>
-
-              <div className="border-t pt-3">
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg mb-2">
-                  <span className="font-medium">Net Profit (After All Expenses)</span>
-                  <span className={cn(
-                    "font-bold",
-                    financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  This shows total profit after accounting for all expenses (paid and unpaid).
+      {/* Comprehensive Financial Analysis - Integrated Profit & Expenses */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            Comprehensive Financial Analysis & Profit Breakdown
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            Complete profit analysis including all costs, expenses, and unclaimed balance scenarios
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Revenue and Cost Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Revenue Side */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Revenue Analysis</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                    <span className="font-medium">Total Revenue (Invoiced)</span>
+                    <span className="font-bold text-blue-600">
+                      {financialMetrics.totalRevenue.toFixed(2)} DH
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                    <span className="font-medium">Revenue Received</span>
+                    <span className="font-bold text-green-600">
+                      {financialMetrics.totalReceived.toFixed(2)} DH
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                    <span className="font-medium">Unclaimed Balance</span>
+                    <span className="font-bold text-orange-600">
+                      {financialMetrics.totalOutstanding.toFixed(2)} DH
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-yellow-800">Impact of Unpaid Expenses</span>
-                  <span className="font-bold text-yellow-800">
-                    -{financialMetrics.totalExpensesUnpaid.toFixed(2)} DH
-                  </span>
-                </div>
-                <div className="text-xs text-yellow-700 mt-1">
-                  These unpaid expenses will affect future cash flow when paid.
+              {/* Cost Breakdown */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Cost Breakdown</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                    <span className="font-medium">Product Costs (COGS)</span>
+                    <span className="font-bold text-red-600">
+                      {financialMetrics.totalProductCosts.toFixed(2)} DH
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                    <span className="font-medium">Operational Expenses</span>
+                    <span className="font-bold text-purple-600">
+                      {financialMetrics.operationalExpenses.total.toFixed(2)} DH
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
+                    <span className="font-medium">Montage Costs</span>
+                    <span className="font-bold text-indigo-600">
+                      {financialMetrics.montageMetrics.total.toFixed(2)} DH
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Enhanced Operational Expenses */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              Operational Expenses Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Total Operational Expenses</span>
-                <span className="font-bold text-gray-900">
-                  {financialMetrics.operationalExpenses.total.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Paid Expenses</span>
-                <span className="font-bold text-green-600">
-                  {financialMetrics.operationalExpenses.paid.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                <span className="font-medium">Unpaid Expenses</span>
-                <span className="font-bold text-red-600">
-                  {financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH
-                </span>
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Montage Costs</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Total Montage</span>
-                    <span className="font-medium">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+            {/* Detailed Expense Analysis */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">Detailed Expense Analysis</h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Operational Expenses Detail */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-800 border-b pb-1">Operational Expenses</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Total</span>
+                      <span className="font-medium">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600">Paid</span>
+                      <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-red-600">Unpaid</span>
+                      <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                    </div>
+                    {financialMetrics.operationalExpenses.total > 0 && (
+                      <div className="mt-2">
+                        <div className="text-xs text-gray-500 mb-1">
+                          Payment: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
+                        </div>
+                        <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-1.5" />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Paid Montage</span>
-                    <span className="font-medium text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                </div>
+
+                {/* Montage Costs Detail */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-800 border-b pb-1">Montage Costs</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Total</span>
+                      <span className="font-medium">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600">Paid</span>
+                      <span className="font-medium text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-red-600">Unpaid</span>
+                      <span className="font-medium text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-orange-600">Operational</span>
+                      <span className="font-medium text-orange-600">{financialMetrics.montageMetrics.operational.toFixed(2)} DH</span>
+                    </div>
+                    {financialMetrics.montageMetrics.total > 0 && (
+                      <div className="mt-2">
+                        <div className="text-xs text-gray-500 mb-1">
+                          Payment: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
+                        </div>
+                        <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-1.5" />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Unpaid Montage</span>
-                    <span className="font-medium text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Operational Impact</span>
-                    <span className="font-medium text-orange-600">{financialMetrics.montageMetrics.operational.toFixed(2)} DH</span>
+                </div>
+
+                {/* Product Costs Detail */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-800 border-b pb-1">Product Costs (COGS)</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Total Product Costs</span>
+                      <span className="font-medium">{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Direct Material Costs</span>
+                      <span className="font-medium text-gray-600">{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Cost of goods sold from receipt items
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {financialMetrics.operationalExpenses.total > 0 && (
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Payment Progress</span>
-                    <span>{((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%</span>
-                  </div>
-                  <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
-                </div>
-              )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            {/* Profit Analysis with Revenue Scenarios */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">Profit Analysis & Revenue Scenarios</h3>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Current Scenario (Based on Received Revenue) */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Current Position (Received Revenue)</h4>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">Revenue Received</span>
+                        <span className="font-bold text-blue-600">{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                      </div>
+                      <div className="text-xs text-blue-600">Actual cash received from customers</div>
+                    </div>
+
+                    <div className="p-3 bg-red-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm">Less: Product Costs</span>
+                        <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm">Less: Paid Op. Expenses</span>
+                        <span className="text-red-600">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Less: Paid Montage</span>
+                        <span className="text-red-600">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Current Net Position</span>
+                        <span className={cn(
+                          "font-bold text-lg",
+                          (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) >= 0 ? "text-green-600" : "text-red-600"
+                        )}>
+                          {(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH
+                        </span>
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">
+                        This is your current cash position after all paid costs
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-yellow-50 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-yellow-800">Pending Liabilities</span>
+                        <span className="font-bold text-yellow-800">-{financialMetrics.totalExpensesUnpaid.toFixed(2)} DH</span>
+                      </div>
+                      <div className="text-xs text-yellow-700 mt-1">
+                        Unpaid expenses that will impact future cash flow
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Full Scenario (If All Revenue Collected) */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Full Potential (If All Revenue Collected)</h4>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">Total Invoiced Revenue</span>
+                        <span className="font-bold text-blue-600">{financialMetrics.totalRevenue.toFixed(2)} DH</span>
+                      </div>
+                      <div className="text-xs text-blue-600">Including unclaimed balance: +{financialMetrics.totalOutstanding.toFixed(2)} DH</div>
+                    </div>
+
+                    <div className="p-3 bg-red-50 rounded-lg">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm">Less: Product Costs</span>
+                        <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm">Less: All Op. Expenses</span>
+                        <span className="text-red-600">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Less: All Montage</span>
+                        <span className="text-red-600">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total Net Profit</span>
+                        <span className={cn(
+                          "font-bold text-lg",
+                          financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
+                        )}>
+                          {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
+                        </span>
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">
+                        Maximum potential profit if all revenue collected
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-purple-50 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-purple-800">Collection Impact</span>
+                        <span className="font-bold text-purple-800">
+                          +{(financialMetrics.netProfitAfterAllExpenses - (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid)).toFixed(2)} DH
+                        </span>
+                      </div>
+                      <div className="text-xs text-purple-700 mt-1">
+                        Additional profit from collecting outstanding balance and paying remaining expenses
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary Metrics */}
+            <div className="border-t pt-6">
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">Financial Performance Metrics</h3>
+              
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Gross Margin</p>
+                  <p className={cn(
+                    "text-xl font-bold",
+                    financialMetrics.grossMargin >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {financialMetrics.grossMargin.toFixed(1)}%
+                  </p>
+                </div>
+
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Net Margin (Current)</p>
+                  <p className={cn(
+                    "text-xl font-bold",
+                    financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {financialMetrics.netMarginPaid.toFixed(1)}%
+                  </p>
+                </div>
+
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Net Margin (Full)</p>
+                  <p className={cn(
+                    "text-xl font-bold",
+                    financialMetrics.netMarginTotal >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {financialMetrics.netMarginTotal.toFixed(1)}%
+                  </p>
+                </div>
+
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Collection Rate</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    {financialMetrics.collectionRate.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Enhanced Capital Expenditure Details */}
       <Card className="mb-6">
