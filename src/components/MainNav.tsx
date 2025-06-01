@@ -1,7 +1,4 @@
-The primary goal is to add an "Access" page to the navigation with a link to "/access", including handling for active state styling.
-```
 
-```replit_final_file
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -15,13 +12,14 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
-  Calculator
+  Calculator,
+  Shield
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Clients', href: '/clients', icon: Users },
   { name: 'Receipts', href: '/receipts', icon: Receipt },
@@ -29,6 +27,7 @@ const navigation = [
   { name: 'Subscriptions', href: '/subscriptions', icon: Bell },
   { name: 'Purchases', href: '/purchases', icon: ShoppingCart },
   { name: 'Financial', href: '/financial', icon: Calculator },
+  { name: 'Access', href: '/access', icon: Shield },
 ];
 
 const MainNav = () => {

@@ -16,89 +16,14 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthProvider';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-// Access as Admin Dialog Component
-const AccessAsAdminDialog = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [accessCodeInput, setAccessCodeInput] = useState('');
-  const { promoteToAdmin } = useAuth();
-  const { toast } = useToast();
-
-  const handlePromoteToAdmin = async () => {
-    if (!accessCodeInput.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter an access code",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const result = await promoteToAdmin(accessCodeInput.trim().toUpperCase());
-
-    toast({
-      title: result.success ? "Success" : "Error",
-      description: result.message,
-      variant: result.success ? "default" : "destructive",
-    });
-
-    if (result.success) {
-      setAccessCodeInput('');
-      setIsOpen(false);
-    }
-  };
-
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="text-xs"
-      >
-        Access as Admin
-      </Button>
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Access as Admin</DialogTitle>
-            <DialogDescription>
-              Enter your access code to elevate your session to Admin privileges.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="admin-access-code">Access Code</Label>
-              <Input
-                id="admin-access-code"
-                placeholder="Enter 5-digit access code"
-                value={accessCodeInput}
-                onChange={(e) => setAccessCodeInput(e.target.value.toUpperCase())}
-                maxLength={5}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handlePromoteToAdmin}>
-                Elevate Access
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
-
 const Layout = ({ children }: LayoutProps) => {
-  const { user, subscription, sessionRole, promoteToAdmin } = useAuth();
+  const { user, subscription, sessionRole, promoteToAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const [referralDialogOpen, setReferralDialogOpen] = useState(false);
   const [adminAccessDialogOpen, setAdminAccessDialogOpen] = useState(false);
@@ -125,21 +50,17 @@ const Layout = ({ children }: LayoutProps) => {
       return;
     }
 
-    const result = await promoteToAdmin(accessCodeInput);
+    const result = await promoteToAdmin(accessCodeInput.trim().toUpperCase());
+
+    toast({
+      title: result.success ? "Success" : "Error",
+      description: result.message,
+      variant: result.success ? "default" : "destructive",
+    });
 
     if (result.success) {
-      toast({
-        title: "Success",
-        description: result.message,
-      });
-      setAdminAccessDialogOpen(false);
       setAccessCodeInput('');
-    } else {
-      toast({
-        title: "Error", 
-        description: result.message,
-        variant: "destructive",
-      });
+      setAdminAccessDialogOpen(false);
     }
   };
 
@@ -169,28 +90,15 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
           <div className="flex items-center space-x-3">
             {sessionRole === 'Store Staff' && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setAdminAccessDialogOpen(true)}
-                title="Access as Admin"
+                className="text-xs"
               >
-                <Shield className="h-5 w-5" />
+                Access as Admin
               </Button>
             )}
-            {/* Role indicator and Access as Admin button */}
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-gray-600">
-                Role: <span className={`font-medium ${sessionRole === 'Admin' ? 'text-green-600' : 'text-blue-600'}`}>
-                  {sessionRole}
-                </span>
-              </div>
-
-              {sessionRole !== 'Admin' && (
-                <AccessAsAdminDialog />
-              )}
-            </div>
 
             <Button
               variant="ghost"

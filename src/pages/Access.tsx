@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +27,7 @@ interface StaffMember {
 }
 
 const Access = () => {
+  const { user, subscription, sessionRole, promoteToAdmin } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -87,8 +89,6 @@ const Access = () => {
     },
   });
 
-  const { user, subscription, sessionRole, setSessionRole, promoteToAdmin } = useAuth();
-  
   const handlePromoteToAdmin = async () => {
     if (!accessCodeInput.trim()) {
       toast({
