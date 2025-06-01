@@ -563,8 +563,9 @@ const Purchases = () => {
     linkedReceipts.forEach(receipt => {
       const montageCost = receipt.montage_costs || 0;
       
-      // Add to total if montage cost exists and is greater than 0
-      if (montageCost > 0) {
+      // Only include receipts in InCutting, Ready, or Paid costs phases
+      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
+      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
         totalAmount += montageCost;
         
         // Only count as paid if status is specifically 'Paid costs'
@@ -733,11 +734,16 @@ const Purchases = () => {
     
     filteredReceipts.forEach(receipt => {
       const montageCost = receipt.montage_costs || 0;
-      totalMontage += montageCost;
       
-      // Only count as paid if status is 'Paid costs'
-      if (receipt.montage_status === 'Paid costs') {
-        paidMontage += montageCost;
+      // Only include receipts in InCutting, Ready, or Paid costs phases
+      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
+      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
+        totalMontage += montageCost;
+        
+        // Only count as paid if status is 'Paid costs'
+        if (receipt.montage_status === 'Paid costs') {
+          paidMontage += montageCost;
+        }
       }
     });
     

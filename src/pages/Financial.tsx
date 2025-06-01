@@ -253,7 +253,10 @@ const Financial = () => {
       }
       
       const montageCost = receipt.montage_costs || 0;
-      if (montageCost > 0) {
+      
+      // Only include receipts in InCutting, Ready, or Paid costs phases
+      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
+      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
         acc.total += montageCost;
         
         // Only count as operational cost if not linked to a purchase
@@ -265,6 +268,7 @@ const Financial = () => {
         if (receipt.montage_status === 'Paid costs') {
           acc.paid += montageCost;
         } else {
+          // InCutting and Ready phases are considered unpaid
           acc.unpaid += montageCost;
         }
       }
