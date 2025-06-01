@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,9 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Clients from "./pages/Clients";
 import Receipts from "./pages/Receipts";
-import Purchases from "./pages/Purchases";
+import Purchases from './pages/Purchases';
+import Financial from './pages/Financial';
+import Subscriptions from './pages/Subscriptions';
 import NewReceipt from "./pages/NewReceipt";
 import Subscriptions from "./pages/Subscriptions";
 import Auth from "./pages/Auth";
@@ -105,6 +106,12 @@ const AppRoutes = () => (
     <Route path="/purchases/*" element={
       <ProtectedRoute>
         <Layout><Purchases /></Layout>
+      </ProtectedRoute>
+    } />
+    
+     <Route path="/financial" element={
+      <ProtectedRoute>
+        <Layout><Financial /></Layout>
       </ProtectedRoute>
     } />
 

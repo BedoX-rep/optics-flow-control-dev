@@ -9,11 +9,12 @@ import {
   FileText,
   Bell,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ShoppingCart,
+  Calculator
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
-import { ShoppingCart } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'New Receipt', href: '/new-receipt', icon: FileText },
   { name: 'Subscriptions', href: '/subscriptions', icon: Bell },
   { name: 'Purchases', href: '/purchases', icon: ShoppingCart },
+  { name: 'Financial', href: '/financial', icon: Calculator },
 ];
 
 const MainNav = () => {
