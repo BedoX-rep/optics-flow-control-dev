@@ -1,169 +1,285 @@
 
-import React, { useEffect, useState } from 'react';
-import { Users, ShoppingBag, Receipt, Calendar } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Users, ShoppingBag, Receipt, Calendar, TrendingUp, Eye, Glasses } from 'lucide-react';
 import PageTitle from '@/components/PageTitle';
 import StatCard from '@/components/StatCard';
 import BarChartComponent from '@/components/BarChart';
 import AreaChartComponent from '@/components/AreaChart';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subDays } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/components/AuthProvider';
 
 interface DashboardStats {
   activeClients: number;
   totalRevenue: number;
   avgSaleValue: number;
-  upcomingExpirations: number;
+  outstandingBalance: number;
+  pendingReceipts: number;
+  completedReceipts: number;
+  montageRevenue: number;
+  productRevenue: number;
 }
 
 interface ActivityItem {
   id: string;
-  type: 'client' | 'receipt';
+  type: 'client' | 'receipt' | 'purchase';
   title: string;
   description: string;
   timestamp: string;
+  amount?: number;
 }
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     activeClients: 0,
     totalRevenue: 0,
     avgSaleValue: 0,
-    upcomingExpirations: 0
+    outstandingBalance: 0,
+    pendingReceipts: 0,
+    completedReceipts: 0,
+    montageRevenue: 0,
+    productRevenue: 0
   });
   const [revenueData, setRevenueData] = useState([]);
-  const [clientsData, setClientsData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch receipts with all necessary data
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('receipts')
+        .select(`
+          *,
+          clients (
+            id,
+            name,
+            phone
+          ),
+          receipt_items (
+            id,
+            quantity,
+            price,
+            cost,
+            product:product_id (
+              name,
+              category,
+              stock_status
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)  // Exclude deleted receipts
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch clients
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch purchases
+  const { data: purchases = [] } = useQuery({
+    queryKey: ['purchases', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          supplier:supplier_id (
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('purchase_date', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Filter receipts for current month
+  const currentMonthReceipts = useMemo(() => {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    
+    return receipts.filter(receipt => {
+      const receiptDate = new Date(receipt.created_at);
+      return receiptDate >= monthStart && receiptDate <= monthEnd;
+    });
+  }, [receipts]);
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const calculateDashboardData = async () => {
       try {
         setIsLoading(true);
 
-        // Fetch client count
-        const { count: clientCount, error: clientError } = await supabase
-          .from('clients')
-          .select('*', { count: 'exact', head: true });
+        // Calculate revenue metrics
+        const totalRevenue = currentMonthReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
+        const outstandingBalance = currentMonthReceipts.reduce((sum, receipt) => sum + (receipt.balance || 0), 0);
+        const avgSaleValue = currentMonthReceipts.length ? totalRevenue / currentMonthReceipts.length : 0;
 
-        if (clientError) throw clientError;
+        // Calculate montage vs product revenue
+        const montageRevenue = currentMonthReceipts.reduce((sum, receipt) => {
+          const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
+          const montageCost = receipt.montage_costs || 0;
+          return validMontageStatuses.includes(receipt.montage_status) ? sum + montageCost : sum;
+        }, 0);
 
-        // Fetch receipts summary
-        const { data: receipts, error: receiptsError } = await supabase
-          .from('receipts')
-          .select('total, created_at');
+        const productRevenue = currentMonthReceipts.reduce((sum, receipt) => {
+          return sum + (receipt.products_cost || 0);
+        }, 0);
 
-        if (receiptsError) throw receiptsError;
+        // Calculate receipt status counts
+        const pendingReceipts = currentMonthReceipts.filter(r => 
+          r.delivery_status !== 'Completed' || r.balance > 0
+        ).length;
+        
+        const completedReceipts = currentMonthReceipts.filter(r => 
+          r.delivery_status === 'Completed' && r.balance === 0
+        ).length;
 
-        // Calculate dashboard stats
-        const totalRevenue = receipts?.reduce((sum, receipt) => sum + Number(receipt.total), 0) || 0;
-        const avgSaleValue = receipts?.length ? totalRevenue / receipts.length : 0;
-
-        // Prepare revenue data for chart
+        // Prepare revenue data for last 7 days
         const lastSevenDays = [...Array(7)].map((_, i) => {
           const date = subDays(new Date(), 6 - i);
           const formattedDate = format(date, 'EEE');
           
-          const dayReceipts = receipts?.filter(r => {
+          const dayReceipts = receipts.filter(r => {
             const receiptDate = new Date(r.created_at);
             return receiptDate.getDate() === date.getDate() && 
                    receiptDate.getMonth() === date.getMonth() && 
                    receiptDate.getFullYear() === date.getFullYear();
-          }) || [];
+          });
           
-          const value = dayReceipts.reduce((sum, receipt) => sum + Number(receipt.total), 0);
+          const value = dayReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
           
           return { name: formattedDate, value };
         });
 
         setRevenueData(lastSevenDays);
 
-        // Fetch recent clients
-        const { data: recentClients, error: recentClientsError } = await supabase
-          .from('clients')
-          .select('id, name, created_at')
-          .order('created_at', { ascending: false })
-          .limit(5);
+        // Prepare category data for chart
+        const categoryAnalysis = currentMonthReceipts.reduce((acc, receipt) => {
+          if (Array.isArray(receipt.receipt_items)) {
+            receipt.receipt_items.forEach(item => {
+              const category = item.product?.category || 'Unknown';
+              const quantity = Number(item.quantity) || 1;
+              const price = Number(item.price) || 0;
+              const revenue = price * quantity;
+              
+              if (!acc[category]) {
+                acc[category] = 0;
+              }
+              acc[category] += revenue;
+            });
+          }
+          return acc;
+        }, {});
 
-        if (recentClientsError) throw recentClientsError;
+        const categoryChartData = Object.entries(categoryAnalysis)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 6);
 
-        // Fetch recent receipts
-        const { data: recentReceipts, error: recentReceiptsError } = await supabase
-          .from('receipts')
-          .select('id, total, created_at, clients(name)')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (recentReceiptsError) throw recentReceiptsError;
+        setCategoryData(categoryChartData);
 
         // Create activity feed
         const activity: ActivityItem[] = [
-          ...recentClients.map(client => ({
+          ...clients.slice(0, 3).map(client => ({
             id: `client-${client.id}`,
             type: 'client' as const,
             title: 'New client registered',
             description: client.name,
             timestamp: client.created_at
           })),
-          ...recentReceipts.map(receipt => ({
+          ...receipts.slice(0, 5).map(receipt => ({
             id: `receipt-${receipt.id}`,
             type: 'receipt' as const,
             title: 'New receipt created',
-            description: `DH${receipt.total.toFixed(2)} - ${receipt.clients?.name || 'Unknown client'}`,
-            timestamp: receipt.created_at
+            description: `${receipt.clients?.name || 'Unknown client'}`,
+            timestamp: receipt.created_at,
+            amount: receipt.total
+          })),
+          ...purchases.slice(0, 2).map(purchase => ({
+            id: `purchase-${purchase.id}`,
+            type: 'purchase' as const,
+            title: 'New purchase recorded',
+            description: `${purchase.supplier?.name || 'Unknown supplier'}`,
+            timestamp: purchase.purchase_date,
+            amount: purchase.total_amount
           }))
         ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 5);
+        .slice(0, 8);
 
         setRecentActivity(activity);
 
         // Update stats
         setStats({
-          activeClients: clientCount || 0,
+          activeClients: clients.length,
           totalRevenue,
           avgSaleValue,
-          upcomingExpirations: 0 // Would calculate from actual data in a real app
+          outstandingBalance,
+          pendingReceipts,
+          completedReceipts,
+          montageRevenue,
+          productRevenue
         });
 
-        // Generate some dummy client growth data
-        const lastSixMonths = [...Array(6)].map((_, i) => {
-          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const date = new Date();
-          date.setMonth(date.getMonth() - 5 + i);
-          const monthName = monthNames[date.getMonth()];
-          
-          // Random growth between 30-80
-          const value = Math.floor(Math.random() * 50) + 30;
-          
-          return { name: monthName, value };
-        });
-
-        setClientsData(lastSixMonths);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('Error calculating dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    if (receipts.length >= 0 && clients.length >= 0) {
+      calculateDashboardData();
+    }
+  }, [receipts, clients, purchases, currentMonthReceipts]);
 
   return (
     <div>
       <PageTitle 
         title="Dashboard" 
-        subtitle="Overview of your optical store performance"
+        subtitle={`Overview of your optical store performance for ${format(new Date(), 'MMMM yyyy')}`}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard 
-          title="Active Clients" 
+          title="Total Clients" 
           value={isLoading ? "Loading..." : `${stats.activeClients}`}
           change={4.65} 
           icon={<Users className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Total Revenue" 
+          title="Monthly Revenue" 
           value={isLoading ? "Loading..." : `DH${stats.totalRevenue.toFixed(2)}`}
           change={2.3} 
           icon={<ShoppingBag className="h-6 w-6" />} 
@@ -174,16 +290,39 @@ const Dashboard = () => {
           icon={<Receipt className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Upcoming Expirations" 
-          value={isLoading ? "Loading..." : `DH${stats.upcomingExpirations.toFixed(2)}`}
+          title="Outstanding Balance" 
+          value={isLoading ? "Loading..." : `DH${stats.outstandingBalance.toFixed(2)}`}
           change={-3.2}
           icon={<Calendar className="h-6 w-6" />} 
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard 
+          title="Pending Receipts" 
+          value={isLoading ? "Loading..." : `${stats.pendingReceipts}`}
+          icon={<Eye className="h-6 w-6" />} 
+        />
+        <StatCard 
+          title="Completed Receipts" 
+          value={isLoading ? "Loading..." : `${stats.completedReceipts}`}
+          icon={<Glasses className="h-6 w-6" />} 
+        />
+        <StatCard 
+          title="Montage Revenue" 
+          value={isLoading ? "Loading..." : `DH${stats.montageRevenue.toFixed(2)}`}
+          icon={<TrendingUp className="h-6 w-6" />} 
+        />
+        <StatCard 
+          title="Product Revenue" 
+          value={isLoading ? "Loading..." : `DH${stats.productRevenue.toFixed(2)}`}
+          icon={<ShoppingBag className="h-6 w-6" />} 
         />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <BarChartComponent data={revenueData} title="Revenue Trend (Last 7 Days)" />
-        <AreaChartComponent data={clientsData} title="New Clients (Last 6 Months)" />
+        <AreaChartComponent data={categoryData} title="Revenue by Category (This Month)" />
       </div>
       
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -195,17 +334,20 @@ const Dashboard = () => {
             <div className="text-center py-4 text-gray-500">No recent activity found.</div>
           ) : (
             recentActivity.map((activity, index) => (
-              <div key={activity.id} className="flex items-start border-b border-gray-100 pb-4">
+              <div key={activity.id} className="flex items-start border-b border-gray-100 pb-4 last:border-b-0">
                 <div className="flex-shrink-0 bg-optics-100 p-2 rounded-full mr-3">
-                  {activity.type === 'client' ? (
-                    <Users className="h-5 w-5 text-optics-600" />
-                  ) : (
-                    <Receipt className="h-5 w-5 text-optics-600" />
-                  )}
+                  {activity.type === 'client' && <Users className="h-5 w-5 text-optics-600" />}
+                  {activity.type === 'receipt' && <Receipt className="h-5 w-5 text-optics-600" />}
+                  {activity.type === 'purchase' && <ShoppingBag className="h-5 w-5 text-optics-600" />}
                 </div>
-                <div>
+                <div className="flex-grow">
                   <p className="text-sm font-medium">{activity.title}</p>
                   <p className="text-xs text-gray-500 mt-1">{activity.description}</p>
+                  {activity.amount && (
+                    <p className="text-xs text-green-600 font-medium mt-1">
+                      DH{activity.amount.toFixed(2)}
+                    </p>
+                  )}
                 </div>
                 <span className="ml-auto text-xs text-gray-400">
                   {formatTimeAgo(activity.timestamp)}
@@ -225,19 +367,19 @@ function formatTimeAgo(timestamp: string): string {
   const pastDate = new Date(timestamp);
   const diffInSeconds = Math.floor((now.getTime() - pastDate.getTime()) / 1000);
   
-  if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
   
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
   
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+  if (diffInHours < 24) return `${diffInHours}h ago`;
   
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+  if (diffInDays < 7) return `${diffInDays}d ago`;
   
   // For older dates, just return the formatted date
-  return format(pastDate, 'MMM d, yyyy');
+  return format(pastDate, 'MMM d');
 }
 
 export default Dashboard;
