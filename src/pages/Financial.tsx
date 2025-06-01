@@ -2,12 +2,13 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,7 @@ interface Receipt {
   id: string;
   total: number;
   cost_ttc: number;
+  products_cost: number;
   montage_costs: number;
   created_at: string;
   is_deleted: boolean;
@@ -55,6 +57,9 @@ const Financial = () => {
   const { user } = useAuth();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [costAnalysisFilter, setCostAnalysisFilter] = useState('category');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStockStatus, setSelectedStockStatus] = useState('all');
 
   // Fetch receipts with more detailed data
   const { data: receipts = [] } = useQuery({
@@ -67,6 +72,7 @@ const Financial = () => {
           id,
           total,
           cost_ttc,
+          products_cost,
           montage_costs,
           created_at,
           is_deleted,
@@ -85,7 +91,6 @@ const Financial = () => {
           )
         `)
         .eq('user_id', user.id)
-        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -117,9 +122,10 @@ const Financial = () => {
     enabled: !!user,
   });
 
-  // Filter data by date range
+  // Filter data by date range and exclude deleted receipts
   const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
+      if (receipt.is_deleted) return false; // Exclude deleted receipts
       const receiptDate = new Date(receipt.created_at);
       return receiptDate >= new Date(dateFrom) && receiptDate <= new Date(dateTo);
     });
@@ -134,10 +140,30 @@ const Financial = () => {
 
   // Enhanced financial metrics calculation
   const financialMetrics = useMemo(() => {
-    // Revenue calculations
+    // Revenue calculations - use total from receipts directly
     const totalRevenue = filteredReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
     const totalReceived = filteredReceipts.reduce((sum, receipt) => sum + (receipt.advance_payment || 0), 0);
     const totalOutstanding = filteredReceipts.reduce((sum, receipt) => sum + (receipt.balance || 0), 0);
+
+    // Product costs - use products_cost field and receipt_items as fallback
+    const totalProductCosts = filteredReceipts.reduce((sum, receipt) => {
+      // Use products_cost field if available, otherwise calculate from receipt_items
+      if (receipt.products_cost && receipt.products_cost > 0) {
+        return sum + receipt.products_cost;
+      }
+      
+      // Fallback to calculating from receipt_items
+      if (Array.isArray(receipt.receipt_items)) {
+        const itemsCost = receipt.receipt_items.reduce((itemSum, item) => {
+          const quantity = Number(item.quantity) || 1;
+          const cost = Number(item.cost) || 0;
+          return itemSum + (cost * quantity);
+        }, 0);
+        return sum + itemsCost;
+      }
+      
+      return sum;
+    }, 0);
 
     // Enhanced product costs analysis by category and stock status
     const productAnalysis = filteredReceipts.reduce((acc, receipt) => {
@@ -179,17 +205,34 @@ const Financial = () => {
           acc.stockStatus[stockStatus].margin = acc.stockStatus[stockStatus].revenue > 0 ? (acc.stockStatus[stockStatus].profit / acc.stockStatus[stockStatus].revenue) * 100 : 0;
           acc.stockStatus[stockStatus].items += quantity;
 
-          acc.totalCost += totalItemCost;
+          // Combined analysis for filtering
+          const key = `${category}|${stockStatus}`;
+          if (!acc.combined[key]) {
+            acc.combined[key] = { 
+              category, 
+              stockStatus, 
+              cost: 0, 
+              revenue: 0, 
+              profit: 0, 
+              margin: 0, 
+              items: 0 
+            };
+          }
+          acc.combined[key].cost += totalItemCost;
+          acc.combined[key].revenue += totalItemRevenue;
+          acc.combined[key].profit = acc.combined[key].revenue - acc.combined[key].cost;
+          acc.combined[key].margin = acc.combined[key].revenue > 0 ? (acc.combined[key].profit / acc.combined[key].revenue) * 100 : 0;
+          acc.combined[key].items += quantity;
         });
       }
       return acc;
     }, { 
       categories: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>, 
       stockStatus: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>,
-      totalCost: 0
+      combined: {} as Record<string, { category: string; stockStatus: string; cost: number; revenue: number; profit: number; margin: number; items: number }>
     });
 
-    // Enhanced montage costs tracking
+    // Enhanced montage costs tracking (exclude deleted receipts)
     const linkedMontageReceipts = new Set();
     filteredPurchases.forEach(purchase => {
       if (purchase.linking_category === 'montage_costs' && purchase.linked_receipts) {
@@ -274,8 +317,8 @@ const Financial = () => {
     const netCashFlow = cashInflow - totalExpensesPaid;
     const availableCash = netCashFlow; // Current cash position
 
-    // Comprehensive profit calculations
-    const grossProfit = totalRevenue - productAnalysis.totalCost;
+    // Comprehensive profit calculations using correct product costs
+    const grossProfit = totalRevenue - totalProductCosts;
     const netProfitAfterPaidExpenses = grossProfit - totalExpensesPaid;
     const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total;
 
@@ -292,6 +335,7 @@ const Financial = () => {
       totalOutstanding,
       
       // Enhanced Cost Analysis
+      totalProductCosts,
       productAnalysis,
       montageMetrics,
       operationalExpenses,
@@ -318,6 +362,29 @@ const Financial = () => {
       collectionRate
     };
   }, [filteredReceipts, filteredPurchases]);
+
+  // Filter data for comprehensive cost analysis
+  const filteredCostData = useMemo(() => {
+    const { productAnalysis } = financialMetrics;
+    
+    if (costAnalysisFilter === 'category') {
+      const filtered = Object.entries(productAnalysis.categories);
+      if (selectedCategory === 'all') return filtered;
+      return filtered.filter(([category]) => category === selectedCategory);
+    } else if (costAnalysisFilter === 'stock') {
+      const filtered = Object.entries(productAnalysis.stockStatus);
+      if (selectedStockStatus === 'all') return filtered;
+      return filtered.filter(([status]) => status === selectedStockStatus);
+    } else {
+      // Combined filter
+      const filtered = Object.values(productAnalysis.combined);
+      return filtered.filter(item => {
+        const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+        const matchesStock = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
+        return matchesCategory && matchesStock;
+      });
+    }
+  }, [financialMetrics.productAnalysis, costAnalysisFilter, selectedCategory, selectedStockStatus]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
@@ -504,113 +571,152 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">Paid Expenses</p>
+                <p className="text-sm font-medium text-red-600">Product Costs</p>
                 <p className="text-2xl font-bold text-red-900">
-                  {financialMetrics.totalExpensesPaid.toFixed(2)} DH
+                  {financialMetrics.totalProductCosts.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-red-600 mt-1">
-                  Cash Outflow
+                  Total COGS
                 </p>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-600" />
+              <Package className="h-8 w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Enhanced Cost Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Detailed Cost Analysis by Category */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Cost Analysis by Category
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Total Product Costs</span>
-                <span className="font-bold text-red-600">
-                  {financialMetrics.productAnalysis.totalCost.toFixed(2)} DH
-                </span>
-              </div>
-              
-              <div className="space-y-3 max-h-48 overflow-y-auto">
-                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
-                  <div key={category} className="border rounded-lg p-3 bg-white">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-gray-700">{category}</span>
-                      <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-                      <div>Items: {data.items}</div>
-                      <div>Revenue: {data.revenue.toFixed(2)} DH</div>
-                      <div className={cn(
-                        "font-medium",
-                        data.margin >= 0 ? "text-green-600" : "text-red-600"
-                      )}>
-                        Margin: {data.margin.toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {/* Comprehensive Cost Analysis */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Comprehensive Cost Analysis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="analysisType">Analysis Type</Label>
+              <Select value={costAnalysisFilter} onValueChange={setCostAnalysisFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="category">By Category</SelectItem>
+                  <SelectItem value="stock">By Stock Status</SelectItem>
+                  <SelectItem value="combined">Combined Analysis</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Cost Analysis by Stock Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Cost Analysis by Stock Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {Object.entries(financialMetrics.productAnalysis.stockStatus).map(([status, data]) => (
-                <div key={status} className="border rounded-lg p-4 bg-white">
+            {(costAnalysisFilter === 'category' || costAnalysisFilter === 'combined') && (
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="categoryFilter">Category Filter</Label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {Object.keys(financialMetrics.productAnalysis.categories).map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {(costAnalysisFilter === 'stock' || costAnalysisFilter === 'combined') && (
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="stockFilter">Stock Status Filter</Label>
+                <Select value={selectedStockStatus} onValueChange={setSelectedStockStatus}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stock Status</SelectItem>
+                    <SelectItem value="InStock">In Stock</SelectItem>
+                    <SelectItem value="Fabrication">Fabrication</SelectItem>
+                    <SelectItem value="Order">Order</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 max-h-64 overflow-y-auto">
+            {costAnalysisFilter === 'combined' ? (
+              filteredCostData.map((item: any, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-white">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-medium text-gray-700">{status}</span>
-                    <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
+                    <div>
+                      <span className="font-medium text-gray-700">{item.category}</span>
+                      <span className="ml-2 text-sm bg-gray-100 px-2 py-1 rounded">{item.stockStatus}</span>
+                    </div>
+                    <span className="font-bold text-gray-900">{item.cost.toFixed(2)} DH</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">Items: </span>
-                      <span className="font-medium">{data.items}</span>
+                      <span className="font-medium">{item.items}</span>
                     </div>
                     <div>
                       <span className="text-gray-600">Revenue: </span>
-                      <span className="font-medium">{data.revenue.toFixed(2)} DH</span>
+                      <span className="font-medium">{item.revenue.toFixed(2)} DH</span>
                     </div>
                     <div>
                       <span className="text-gray-600">Profit: </span>
                       <span className={cn(
                         "font-medium",
-                        data.profit >= 0 ? "text-green-600" : "text-red-600"
+                        item.profit >= 0 ? "text-green-600" : "text-red-600"
                       )}>
-                        {data.profit.toFixed(2)} DH
+                        {item.profit.toFixed(2)} DH
                       </span>
                     </div>
                     <div>
                       <span className="text-gray-600">Margin: </span>
                       <span className={cn(
                         "font-medium",
-                        data.margin >= 0 ? "text-green-600" : "text-red-600"
+                        item.margin >= 0 ? "text-green-600" : "text-red-600"
                       )}>
-                        {data.margin.toFixed(1)}%
+                        {item.margin.toFixed(1)}%
                       </span>
                     </div>
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              filteredCostData.map(([key, data]: [string, any]) => (
+                <div key={key} className="border rounded-lg p-3 bg-white">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium text-gray-700">{key}</span>
+                    <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                    <div>Items: {data.items}</div>
+                    <div>Revenue: {data.revenue.toFixed(2)} DH</div>
+                    <div className={cn(
+                      "font-medium",
+                      data.margin >= 0 ? "text-green-600" : "text-red-600"
+                    )}>
+                      Margin: {data.margin.toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Total Product Costs</span>
+              <span className="font-bold text-red-600">
+                {financialMetrics.totalProductCosts.toFixed(2)} DH
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Profit Analysis & Operational Expenses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
