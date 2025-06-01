@@ -48,7 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [permissions, setPermissions] = useState<UserPermissions | null>(null);
-  const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>('Store Staff');
+  const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>(
+    (typeof window !== 'undefined' && localStorage.getItem('sessionRole')) as 'Admin' | 'Store Staff' || 'Store Staff'
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
 
@@ -120,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('sessionRole');
     setSessionRole('Store Staff'); // Reset to default role
   };
 
@@ -134,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data && data.length > 0) {
         const result = data[0];
         if (result.valid) {
-          setSessionRole('Admin');
+          updateSessionRole('Admin');
           // Refresh permissions for the new role
           if (user) {
             await fetchSubscription(user.id);
@@ -163,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_OUT') {
           setSubscription(null);
           setPermissions(null);
+          localStorage.removeItem('sessionRole');
           setSessionRole('Store Staff');
           setIsLoading(false);
         } 
@@ -194,6 +198,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
+    setSessionRole(role);
+    localStorage.setItem('sessionRole', role);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       session, 
@@ -205,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut,
       refreshSubscription,
       promoteToAdmin,
-      setSessionRole
+      setSessionRole: updateSessionRole
     }}>
       {children}
     </AuthContext.Provider>

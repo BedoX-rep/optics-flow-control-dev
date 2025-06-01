@@ -72,8 +72,15 @@ const ProtectedRoute = ({
   }
 
     // Check permission after loading is complete
-    if (requiredPermission && (!permissions || !permissions[requiredPermission as keyof typeof permissions])) {
-      return <Navigate to="/auth" replace />;
+    if (requiredPermission) {
+      const { sessionRole } = useAuth();
+      
+      // Admin session role bypasses all permission checks
+      if (sessionRole === 'Admin') {
+        // Allow access for admin
+      } else if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+        return <Navigate to="/auth" replace />;
+      }
     }
 
   return <>{children}</>;
