@@ -35,10 +35,12 @@ interface AuthContextType {
   user: User | null;
   subscription: UserSubscription | null;
   permissions: UserPermissions | null;
+  sessionRole: 'Admin' | 'Store Staff';
   isLoading: boolean;
   signOut: () => Promise<void>;
   refreshSubscription: (force?: boolean) => Promise<void>;
   promoteToAdmin: (accessCode: string) => Promise<{ success: boolean; message: string }>;
+  setSessionRole: (role: 'Admin' | 'Store Staff') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [permissions, setPermissions] = useState<UserPermissions | null>(null);
+  const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>('Store Staff');
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   
@@ -71,17 +74,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSubscription(formattedSubscription);
       }
       
-      // Fetch permissions
-      const { data: permissionsData, error: permissionsError } = await supabase
-        .from('permissions')
-        .select('can_manage_products, can_manage_clients, can_manage_receipts, can_view_financial, can_manage_purchases, can_access_dashboard')
-        .eq('user_id', userId)
-        .single();
-      
-      if (permissionsError) {
-        console.error('Error fetching permissions:', permissionsError);
+      // Fetch permissions based on session role
+      const getPermissionsForRole = (role: 'Admin' | 'Store Staff') => {
+        if (role === 'Admin') {
+          return {
+            can_manage_products: true,
+            can_manage_clients: true,
+            can_manage_receipts: true,
+            can_view_financial: true,
+            can_manage_purchases: true,
+            can_access_dashboard: true
+          };
+        } else {
+          // For Store Staff, fetch from database
+          return supabase
+            .from('permissions')
+            .select('can_manage_products, can_manage_clients, can_manage_receipts, can_view_financial, can_manage_purchases, can_access_dashboard')
+            .eq('user_id', userId)
+            .single();
+        }
+      };
+
+      if (sessionRole === 'Admin') {
+        setPermissions(getPermissionsForRole('Admin'));
       } else {
-        setPermissions(permissionsData);
+        const { data: permissionsData, error: permissionsError } = await getPermissionsForRole('Store Staff');
+        
+        if (permissionsError) {
+          console.error('Error fetching permissions:', permissionsError);
+          // Set default Store Staff permissions
+          setPermissions({
+            can_manage_products: true,
+            can_manage_clients: true,
+            can_manage_receipts: true,
+            can_view_financial: false,
+            can_manage_purchases: false,
+            can_access_dashboard: true
+          });
+        } else {
+          setPermissions(permissionsData);
+        }
       }
       
       setLastRefreshTime(Date.now());
@@ -104,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setSessionRole('Store Staff'); // Reset to default role
   };
 
   const promoteToAdmin = async (accessCode: string) => {
@@ -117,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data && data.length > 0) {
         const result = data[0];
         if (result.success && user) {
+          setSessionRole('Admin');
           await fetchSubscription(user.id);
         }
         return result;
@@ -140,6 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_OUT') {
           setSubscription(null);
           setPermissions(null);
+          setSessionRole('Store Staff');
           setIsLoading(false);
         } 
         // Fetch subscription on sign in or token refresh
@@ -176,10 +211,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user, 
       subscription, 
       permissions,
+      sessionRole,
       isLoading, 
       signOut,
       refreshSubscription,
-      promoteToAdmin
+      promoteToAdmin,
+      setSessionRole
     }}>
       {children}
     </AuthContext.Provider>

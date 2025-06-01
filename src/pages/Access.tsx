@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Badge } from "@/components/ui/badge";
 
 interface StaffMember {
   user_id: string;
@@ -27,7 +26,7 @@ interface StaffMember {
 }
 
 const Access = () => {
-  const { user, subscription, permissions, promoteToAdmin } = useAuth();
+  const { user, subscription, sessionRole, setSessionRole } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -39,7 +38,7 @@ const Access = () => {
     queryKey: ['staff-members'],
     queryFn: async () => {
       if (!isAdmin) return [];
-      
+
       const { data, error } = await supabase
         .from('subscriptions')
         .select(`
@@ -57,7 +56,7 @@ const Access = () => {
             can_access_dashboard
           )
         `);
-      
+
       if (error) throw error;
       return data as StaffMember[];
     },
@@ -71,7 +70,7 @@ const Access = () => {
         .from('permissions')
         .update(newPermissions)
         .eq('user_id', userId);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -101,7 +100,7 @@ const Access = () => {
     }
 
     const result = await promoteToAdmin(accessCodeInput.trim().toUpperCase());
-    
+
     toast({
       title: result.success ? "Success" : "Error",
       description: result.message,
@@ -144,7 +143,7 @@ const Access = () => {
             <Label>Access Code</Label>
             <p className="text-lg font-mono">{subscription?.access_code}</p>
           </div>
-          
+
           {!isAdmin && (
             <div className="space-y-2">
               <Label htmlFor="admin-access-code">Promote to Admin</Label>
@@ -186,7 +185,7 @@ const Access = () => {
                         <p className="text-sm">Role: {staff.role} | Code: {staff.access_code}</p>
                       </div>
                     </div>
-                    
+
                     {staff.permissions && (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="flex items-center space-x-2">
