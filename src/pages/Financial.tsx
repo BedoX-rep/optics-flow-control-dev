@@ -236,11 +236,22 @@ const Financial = () => {
     const linkedMontageReceipts = new Set();
     filteredPurchases.forEach(purchase => {
       if (purchase.linking_category === 'montage_costs' && purchase.linked_receipts) {
-        purchase.linked_receipts.forEach(receiptId => linkedMontageReceipts.add(receiptId));
+        purchase.linked_receipts.forEach(receiptId => {
+          // Only add to linked set if the receipt exists and is not deleted
+          const linkedReceipt = receipts.find(r => r.id === receiptId);
+          if (linkedReceipt && !linkedReceipt.is_deleted) {
+            linkedMontageReceipts.add(receiptId);
+          }
+        });
       }
     });
 
     const montageMetrics = filteredReceipts.reduce((acc, receipt) => {
+      // Double check that receipt is not deleted (safety check)
+      if (receipt.is_deleted) {
+        return acc;
+      }
+      
       const montageCost = receipt.montage_costs || 0;
       if (montageCost > 0) {
         acc.total += montageCost;
