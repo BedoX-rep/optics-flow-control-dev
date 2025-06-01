@@ -18,7 +18,6 @@ interface UserSubscription {
   referral_code?: string;
   referred_by?: string;
   access_code?: string;
-  role?: 'Admin' | 'Store Staff';
 }
 
 interface UserPermissions {
@@ -60,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('subscriptions')
-        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used, store_name, display_name, referral_code, referred_by, access_code, role')
+        .select('subscription_status, subscription_type, start_date, end_date, is_recurring, trial_used, store_name, display_name, referral_code, referred_by, access_code')
         .eq('user_id', userId)
         .single();
       
@@ -75,30 +74,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Fetch permissions based on session role
-      const getPermissionsForRole = (role: 'Admin' | 'Store Staff') => {
-        if (role === 'Admin') {
-          return {
+      if (sessionRole === 'Admin') {
+        // For Admin session role, get admin permissions
+        const { data: adminPermissions, error: adminError } = await supabase.rpc('get_admin_permissions');
+        
+        if (adminError) {
+          console.error('Error fetching admin permissions:', adminError);
+          // Set default admin permissions
+          setPermissions({
             can_manage_products: true,
             can_manage_clients: true,
             can_manage_receipts: true,
             can_view_financial: true,
             can_manage_purchases: true,
             can_access_dashboard: true
-          };
-        } else {
-          // For Store Staff, fetch from database
-          return supabase
-            .from('permissions')
-            .select('can_manage_products, can_manage_clients, can_manage_receipts, can_view_financial, can_manage_purchases, can_access_dashboard')
-            .eq('user_id', userId)
-            .single();
+          });
+        } else if (adminPermissions && adminPermissions.length > 0) {
+          setPermissions(adminPermissions[0]);
         }
-      };
-
-      if (sessionRole === 'Admin') {
-        setPermissions(getPermissionsForRole('Admin'));
       } else {
-        const { data: permissionsData, error: permissionsError } = await getPermissionsForRole('Store Staff');
+        // For Store Staff session role, fetch from database
+        const { data: permissionsData, error: permissionsError } = await supabase
+          .from('permissions')
+          .select('can_manage_products, can_manage_clients, can_manage_receipts, can_view_financial, can_manage_purchases, can_access_dashboard')
+          .eq('user_id', userId)
+          .single();
         
         if (permissionsError) {
           console.error('Error fetching permissions:', permissionsError);
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const promoteToAdmin = async (accessCode: string) => {
     try {
-      const { data, error } = await supabase.rpc('promote_to_admin', {
+      const { data, error } = await supabase.rpc('check_access_code', {
         input_access_code: accessCode
       });
       
@@ -149,17 +149,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (data && data.length > 0) {
         const result = data[0];
-        if (result.success && user) {
+        if (result.valid) {
           setSessionRole('Admin');
-          await fetchSubscription(user.id);
+          // Refresh permissions for the new role
+          if (user) {
+            await fetchSubscription(user.id);
+          }
+          return { success: true, message: 'Successfully elevated to Admin for this session' };
+        } else {
+          return { success: false, message: result.message };
         }
-        return result;
       }
       
       return { success: false, message: 'Unknown error occurred' };
     } catch (error) {
-      console.error('Error promoting to admin:', error);
-      return { success: false, message: 'Failed to promote to admin' };
+      console.error('Error elevating to admin:', error);
+      return { success: false, message: 'Failed to elevate to admin' };
     }
   };
 

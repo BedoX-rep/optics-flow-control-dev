@@ -14,7 +14,6 @@ interface StaffMember {
   email: string;
   display_name: string;
   access_code: string;
-  role: string;
   permissions: {
     can_manage_products: boolean;
     can_manage_clients: boolean;
@@ -31,7 +30,7 @@ const Access = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const isAdmin = subscription?.role === 'Admin';
+  const isAdmin = sessionRole === 'Admin';
 
   // Fetch all staff members (admin only)
   const { data: staffMembers, isLoading } = useQuery({
@@ -46,7 +45,6 @@ const Access = () => {
           email,
           display_name,
           access_code,
-          role,
           permissions (
             can_manage_products,
             can_manage_clients,
@@ -136,8 +134,13 @@ const Access = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Role</Label>
-            <p className="text-lg font-medium">{subscription?.role || 'Store Staff'}</p>
+            <Label>Current Session Role</Label>
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-medium">{sessionRole}</p>
+              {sessionRole === 'Admin' && (
+                <Badge variant="secondary">Session Elevated</Badge>
+              )}
+            </div>
           </div>
           <div>
             <Label>Access Code</Label>
@@ -182,7 +185,7 @@ const Access = () => {
                       <div>
                         <h3 className="font-medium">{staff.display_name}</h3>
                         <p className="text-sm text-muted-foreground">{staff.email}</p>
-                        <p className="text-sm">Role: {staff.role} | Code: {staff.access_code}</p>
+                        <p className="text-sm">Access Code: {staff.access_code}</p>
                       </div>
                     </div>
 
