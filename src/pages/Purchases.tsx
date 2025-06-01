@@ -539,8 +539,13 @@ const Purchases = () => {
       return false;
     }
 
-    // Get receipts in the date range using cached data
+    // Get receipts in the date range using cached data, excluding deleted receipts
     const linkedReceipts = receipts.filter(receipt => {
+      // First check if receipt is deleted
+      if (receipt.is_deleted) {
+        return false;
+      }
+      
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(purchase.link_date_from!);
       const toDate = new Date(purchase.link_date_to!);
@@ -708,6 +713,11 @@ const Purchases = () => {
 
   const getFilteredReceipts = () => {
     return receipts.filter(receipt => {
+      // Exclude deleted receipts
+      if (receipt.is_deleted) {
+        return false;
+      }
+      
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(linkDateFrom);
       const toDate = new Date(linkDateTo);
