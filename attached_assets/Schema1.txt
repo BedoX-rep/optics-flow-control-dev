@@ -123,7 +123,9 @@ BEGIN
     end_date,
     subscription_type,
     subscription_status,
-    trial_used
+    trial_used,
+    access_code,
+    role
   )
   VALUES (
     NEW.id,
@@ -133,7 +135,9 @@ BEGIN
     NOW() + INTERVAL '7 days',
     'Trial',
     'Active',
-    TRUE
+    TRUE,
+    COALESCE(NEW.raw_user_meta_data->>'access_code', UPPER(LEFT(MD5(RANDOM()::text), 5))),
+    'Store Staff'
   );
   RETURN NEW;
 END;

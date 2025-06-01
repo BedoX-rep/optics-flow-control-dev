@@ -30,6 +30,7 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [referralCode, setReferralCode] = useState('');
+  const [accessCode, setAccessCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
@@ -85,10 +86,10 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !accessCode) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields including access code.",
         variant: "destructive",
       });
       return;
@@ -109,7 +110,8 @@ const Auth = () => {
       // Create user metadata with display name and store name
       const userData = {
         display_name: displayName || email.split('@')[0],
-        store_name: storeName || 'Optique'
+        store_name: storeName || 'Optique',
+        access_code: accessCode.toUpperCase()
       };
       
       // Add referral code to metadata if provided
@@ -237,6 +239,19 @@ const Auth = () => {
                     onChange={(e) => setStoreName(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">If left blank, will use 'Optique'</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="access-code">Access Code*</Label>
+                  <Input 
+                    id="access-code" 
+                    type="text" 
+                    placeholder="ABCDE" 
+                    maxLength={5}
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">5-character unique access code</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="referral-code">Referral Code (optional)</Label>

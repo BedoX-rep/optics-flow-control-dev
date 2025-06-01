@@ -11,6 +11,7 @@ import Receipts from "./pages/Receipts";
 import Purchases from './pages/Purchases';
 import Financial from './pages/Financial';
 import Subscriptions from './pages/Subscriptions';
+import Access from '@/pages/Access';
 import NewReceipt from "./pages/NewReceipt";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -36,12 +37,14 @@ const queryClient = new QueryClient({
 // Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
-  requiresActiveSubscription = true 
+  requiresActiveSubscription = true,
+  requiredPermission
 }: { 
   children: React.ReactNode;
   requiresActiveSubscription?: boolean;
+  requiredPermission?: string;
 }) => {
-  const { user, subscription, isLoading } = useAuth();
+  const { user, subscription, isLoading, permissions } = useAuth();
 
   // Show loading state while initial auth check is happening
   if (isLoading) {
@@ -68,6 +71,11 @@ const ProtectedRoute = ({
     }
   }
 
+    // Check permission after loading is complete
+    if (requiredPermission && (!permissions || !permissions.includes(requiredPermission))) {
+      return <Navigate to="/auth" replace />;
+    }
+
   return <>{children}</>;
 };
 
@@ -85,34 +93,35 @@ const AppRoutes = () => (
     } />
 
     <Route path="/products" element={
-      <ProtectedRoute>
-        <Layout><Products /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/clients" element={
-      <ProtectedRoute>
-        <Layout><Clients /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/receipts" element={
-      <ProtectedRoute>
-        <Layout><Receipts /></Layout>
-      </ProtectedRoute>
-    } />
-
-    <Route path="/purchases/*" element={
-      <ProtectedRoute>
-        <Layout><Purchases /></Layout>
-      </ProtectedRoute>
-    } />
-    
-     <Route path="/financial" element={
-      <ProtectedRoute>
-        <Layout><Financial /></Layout>
-      </ProtectedRoute>
-    } />
+              <ProtectedRoute requiredPermission="can_manage_products">
+                <Layout><Products /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/clients" element={
+              <ProtectedRoute requiredPermission="can_manage_clients">
+                <Layout><Clients /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/receipts" element={
+              <ProtectedRoute requiredPermission="can_manage_receipts">
+                <Layout><Receipts /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/financial" element={
+              <ProtectedRoute requiredPermission="can_view_financial">
+                <Layout><Financial /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/purchases/*" element={
+              <ProtectedRoute requiredPermission="can_manage_purchases">
+                <Layout><Purchases /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/access" element={
+              <ProtectedRoute>
+                <Layout><Access /></Layout>
+              </ProtectedRoute>
+            } />
 
     <Route path="/new-receipt" element={
       <ProtectedRoute>
