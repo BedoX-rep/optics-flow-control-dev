@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      lastRefreshTime = Date.now();
+      setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
