@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainNav from './MainNav';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { toast } = useToast();
   const [referralDialogOpen, setReferralDialogOpen] = useState(false);
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
-  
+
   const copyReferralCode = () => {
     if (subscription?.referral_code) {
       navigator.clipboard.writeText(subscription.referral_code);
@@ -56,12 +55,12 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <Users className="h-5 w-5" />
             </Button>
-            
+
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">

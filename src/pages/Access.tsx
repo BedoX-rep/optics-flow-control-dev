@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
+import { supabase } from '@/integrations/supabase/client';
 
 interface StaffMember {
   user_id: string;
@@ -25,7 +26,6 @@ interface StaffMember {
 }
 
 const Access = () => {
-  const { user, subscription, sessionRole, setSessionRole } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -87,6 +87,8 @@ const Access = () => {
     },
   });
 
+  const { user, subscription, sessionRole, setSessionRole, promoteToAdmin } = useAuth();
+  
   const handlePromoteToAdmin = async () => {
     if (!accessCodeInput.trim()) {
       toast({

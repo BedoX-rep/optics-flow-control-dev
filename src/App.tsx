@@ -72,7 +72,7 @@ const ProtectedRoute = ({
   }
 
     // Check permission after loading is complete
-    if (requiredPermission && (!permissions || !permissions.includes(requiredPermission))) {
+    if (requiredPermission && (!permissions || !permissions[requiredPermission as keyof typeof permissions])) {
       return <Navigate to="/auth" replace />;
     }
 
