@@ -1,0 +1,52 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.tsx:75 Uncaught TypeError: permissions.includes is not a function
+    at ProtectedRoute (App.tsx:75:61)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+App.tsx:75 Uncaught TypeError: permissions.includes is not a function
+    at ProtectedRoute (App.tsx:75:61)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+chunk-W6L2VRDA.js?v=9ddd2bc6:14032 The above error occurred in the <ProtectedRoute> component:
+
+    at ProtectedRoute (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/src/App.tsx:46:27)
+    at RenderedRoute (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/src/components/AuthProvider.tsx:14:32)
+    at LanguageProvider (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/chunk-XSD2Y4RK.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://c23a9d9d-94d6-4e50-9e24-02d9427e1e28-00-n1jhfpupn6tg.kirk.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=9ddd2bc6:14032
+chunk-W6L2VRDA.js?v=9ddd2bc6:9129 Uncaught TypeError: permissions.includes is not a function
+    at ProtectedRoute (App.tsx:75:61)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=9ddd2bc6:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=9ddd2bc6:18879:28)
