@@ -12,7 +12,6 @@ import Purchases from './pages/Purchases';
 import Financial from './pages/Financial';
 import Subscriptions from './pages/Subscriptions';
 import NewReceipt from "./pages/NewReceipt";
-import Subscriptions from "./pages/Subscriptions";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
