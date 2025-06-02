@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -105,19 +104,19 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      
+
       // Create user metadata with display name and store name
       const userData = {
         display_name: displayName || email.split('@')[0],
         store_name: storeName || 'Optique'
       };
-      
+
       // Add referral code to metadata if provided
       if (referralCode) {
         userData['referred_by'] = referralCode;
       }
-      
-      const { error } = await supabase.auth.signUp({
+
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -126,6 +125,48 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      console.log('Signup successful, user data:', data);
+
+      // Wait a moment for the trigger to execute
+      if (data.user) {
+        // Check if subscription was created
+        setTimeout(async () => {
+          const { data: subscription, error: subError } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', data.user.id)
+            .single();
+
+          if (subError) {
+            console.error('Subscription not found after signup:', subError);
+            // Manually create subscription if trigger failed
+            const { error: createError } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: data.user.id,
+                email: email,
+                display_name: userData.display_name,
+                store_name: userData.store_name,
+                referred_by: userData.referred_by,
+                subscription_type: 'Trial',
+                subscription_status: 'Active',
+                start_date: new Date().toISOString(),
+                end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                trial_used: true,
+                is_recurring: false
+              });
+
+            if (createError) {
+              console.error('Failed to manually create subscription:', createError);
+            } else {
+              console.log('Manually created subscription');
+            }
+          } else {
+            console.log('Subscription found:', subscription);
+          }
+        }, 2000);
+      }
 
       toast({
         title: "Success",
