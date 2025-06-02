@@ -325,7 +325,7 @@ const Financial = () => {
     const cashInflow = totalReceived; // Actually received payments
     const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses
     const totalExpensesUnpaid = operationalExpenses.unpaid + montageMetrics.unpaid; // Unpaid expenses
-    const netCashFlow = cashInflow - totalExpensesPaid;
+    const netCashFlow = cashInflow - operationalExpenses.paid - montagemetrics.paid;
     const availableCash = netCashFlow; // Current cash position
 
     // Comprehensive profit calculations using correct product costs
