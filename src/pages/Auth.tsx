@@ -128,45 +128,7 @@ const Auth = () => {
 
       console.log('Signup successful, user data:', data);
 
-      // Wait a moment for the trigger to execute
-      if (data.user) {
-        // Check if subscription was created
-        setTimeout(async () => {
-          const { data: subscription, error: subError } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', data.user.id)
-            .single();
-
-          if (subError) {
-            console.error('Subscription not found after signup:', subError);
-            // Manually create subscription if trigger failed
-            const { error: createError } = await supabase
-              .from('subscriptions')
-              .insert({
-                user_id: data.user.id,
-                email: email,
-                display_name: userData.display_name,
-                store_name: userData.store_name,
-                referred_by: userData.referred_by,
-                subscription_type: 'Trial',
-                subscription_status: 'Active',
-                start_date: new Date().toISOString(),
-                end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                trial_used: true,
-                is_recurring: false
-              });
-
-            if (createError) {
-              console.error('Failed to manually create subscription:', createError);
-            } else {
-              console.log('Manually created subscription');
-            }
-          } else {
-            console.log('Subscription found:', subscription);
-          }
-        }, 2000);
-      }
+      // The subscription will be created automatically by the database trigger
 
       toast({
         title: "Success",
