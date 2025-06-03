@@ -18,22 +18,21 @@ import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Products', href: '/products', icon: Package },
-  { name: 'Clients', href: '/clients', icon: Users },
-  { name: 'Receipts', href: '/receipts', icon: Receipt },
-  { name: 'New Receipt', href: '/new-receipt', icon: FileText },
-  { name: 'Subscriptions', href: '/subscriptions', icon: Bell },
-  { name: 'Purchases', href: '/purchases', icon: ShoppingCart },
-  { name: 'Financial', href: '/financial', icon: Calculator },
-  { name: 'Access', href: '/access', icon: Shield },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
+  { name: 'Products', href: '/products', icon: Package, permission: 'can_manage_products' },
+  { name: 'Clients', href: '/clients', icon: Users, permission: 'can_manage_clients' },
+  { name: 'Receipts', href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
+  { name: 'New Receipt', href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
+  { name: 'Subscriptions', href: '/subscriptions', icon: Bell, permission: null }, // Always visible
+  { name: 'Purchases', href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
+  { name: 'Financial', href: '/financial', icon: Calculator, permission: 'can_view_financial' },
+  { name: 'Access', href: '/access', icon: Shield, permission: 'admin_session' },
 ];
 
 const MainNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, permissions, sessionRole } = useAuth();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
-  const sessionRole = user?.role;
 
   useEffect(() => {
     const handleResize = () => {
@@ -74,9 +73,22 @@ const MainNav = () => {
 
       <nav className="p-3 space-y-1 mt-2">
         {navigation.map((item) => {
-          if (item.name === 'Access' && sessionRole !== 'Admin') {
-            return null;
+          // Check if user has permission to see this route
+          if (item.permission) {
+            if (item.permission === 'admin_session') {
+              // Special case for admin-only routes
+              if (sessionRole !== 'Admin') {
+                return null;
+              }
+            } else if (sessionRole !== 'Admin') {
+              // For staff users, check their actual permissions
+              if (!permissions || !permissions[item.permission as keyof typeof permissions]) {
+                return null;
+              }
+            }
+            // Admin users bypass all permission checks
           }
+          
           const isActive = location.pathname === item.href;
           return (
             <Link

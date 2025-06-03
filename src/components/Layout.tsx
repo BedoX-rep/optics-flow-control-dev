@@ -23,7 +23,7 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { user, subscription, sessionRole, promoteToAdmin, signOut } = useAuth();
+  const { user, subscription, sessionRole, promoteToAdmin, signOut, exitAdminSession } = useAuth();
   const { toast } = useToast();
   const [referralDialogOpen, setReferralDialogOpen] = useState(false);
   const [adminAccessDialogOpen, setAdminAccessDialogOpen] = useState(false);
@@ -97,6 +97,22 @@ const Layout = ({ children }: LayoutProps) => {
                 className="text-xs"
               >
                 Access as Admin
+              </Button>
+            )}
+            {sessionRole === 'Admin' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  exitAdminSession();
+                  toast({
+                    title: "Session Updated",
+                    description: "You are now signed out of the admin session",
+                  });
+                }}
+                className="text-xs text-red-600 border-red-300 hover:bg-red-50"
+              >
+                Exit Admin Session
               </Button>
             )}
 

@@ -39,6 +39,7 @@ interface AuthContextType {
   refreshSubscription: (force?: boolean) => Promise<void>;
   promoteToAdmin: (accessCode: string) => Promise<{ success: boolean; message: string }>;
   setSessionRole: (role: 'Admin' | 'Store Staff') => void;
+  exitAdminSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -201,6 +202,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
     localStorage.setItem('sessionRole', role);
+    
+    // Update permissions immediately based on new role
+    if (user) {
+      fetchSubscription(user.id);
+    }
+  };
+
+  const exitAdminSession = () => {
+    setSessionRole('Store Staff');
+    localStorage.removeItem('sessionRole');
+    
+    // Immediately refresh permissions for Store Staff role
+    if (user) {
+      fetchSubscription(user.id);
+    }
   };
 
   return (
@@ -214,7 +230,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut,
       refreshSubscription,
       promoteToAdmin,
-      setSessionRole: updateSessionRole
+      setSessionRole: updateSessionRole,
+      exitAdminSession
     }}>
       {children}
     </AuthContext.Provider>
