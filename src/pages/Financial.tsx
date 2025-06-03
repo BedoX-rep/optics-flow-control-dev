@@ -88,7 +88,6 @@ const Financial = () => {
             quantity,
             paid_at_delivery,
             product:product_id (
-              id,
               name,
               category,
               stock,
@@ -184,10 +183,6 @@ const Financial = () => {
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
           const company = item.product?.company || 'Unknown';
-          
-          // Debug company data
-          if (!item.product?.company) {
-            console.log('Missing company data for product:', item.product);
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -445,16 +440,6 @@ const Financial = () => {
           const company = item.product?.company || 'Unknown';
           const stockStatus = item.product?.stock_status || 'Order';
           const paidAtDelivery = Boolean(item.paid_at_delivery);
-          
-          // Debug logging for troubleshooting
-          console.log('Item data:', {
-            productName,
-            category,
-            company,
-            stockStatus,
-            paidAtDelivery,
-            rawItem: item
-          });
 
           // Filter based on includePaidAtDelivery setting
           if (!includePaidAtDelivery && paidAtDelivery) {
@@ -487,20 +472,17 @@ const Financial = () => {
             ['stockStatus', stockStatus],
             ['paidAtDelivery', paidAtDelivery ? 'Yes' : 'No']
           ].forEach(([type, key]) => {
-            // Ensure we have valid keys
-            if (key && key !== 'Unknown' && key !== '' && key !== null && key !== undefined) {
-              if (!summaryData[type][key]) {
-                summaryData[type][key] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0, count: 0 };
-              }
-              summaryData[type][key].cost += totalCost;
-              summaryData[type][key].revenue += totalRevenue;
-              summaryData[type][key].profit += profit;
-              summaryData[type][key].items += quantity;
-              summaryData[type][key].count += 1;
-              summaryData[type][key].margin = summaryData[type][key].revenue > 0 
-                ? (summaryData[type][key].profit / summaryData[type][key].revenue) * 100 
-                : 0;
+            if (!summaryData[type][key]) {
+              summaryData[type][key] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0, count: 0 };
             }
+            summaryData[type][key].cost += totalCost;
+            summaryData[type][key].revenue += totalRevenue;
+            summaryData[type][key].profit += profit;
+            summaryData[type][key].items += quantity;
+            summaryData[type][key].count += 1;
+            summaryData[type][key].margin = summaryData[type][key].revenue > 0 
+              ? (summaryData[type][key].profit / summaryData[type][key].revenue) * 100 
+              : 0;
           });
         });
       }
@@ -778,11 +760,9 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Companies</SelectItem>
-                    {Object.keys(receiptItemsAnalysis.summaryData.companies)
-                      .filter(company => company && company !== '' && company !== 'null' && company !== 'undefined')
-                      .map(company => (
-                        <SelectItem key={company} value={company}>{company}</SelectItem>
-                      ))}
+                    {Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
+                      <SelectItem key={company} value={company}>{company}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
