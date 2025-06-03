@@ -70,7 +70,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         order_type: receipt.order_type || '',
         items: (receipt.receipt_items || []).map(item => ({
           ...item,
-          paid_at_delivery: Boolean(item.paid_at_delivery)
+          paid_at_delivery: item.paid_at_delivery === true || item.paid_at_delivery === 'true'
         })),
         total: receipt.total || 0
       });
