@@ -511,6 +511,7 @@ const Receipts = () => {
           cost,
           profit,
           custom_item_name,
+          paid_at_delivery,
           product:product_id (
             name,
             category
