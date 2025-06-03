@@ -785,7 +785,8 @@ const Financial = () => {
               <div>
                 <Label htmlFor="paidAtDeliveryFilter">Paid at Delivery Filter</Label>
                 <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
-                  <SelectTrigger className="mt-1                  <SelectValue />
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Items</SelectItem>
