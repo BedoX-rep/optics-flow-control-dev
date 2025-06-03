@@ -84,12 +84,11 @@ const Financial = () => {
           montage_status,
           paid_at_delivery_cost,
           receipt_items (
-            id,
             cost,
             price,
             quantity,
             paid_at_delivery,
-            products (
+            product:product_id (
               name,
               category,
               stock,
@@ -182,12 +181,12 @@ const Financial = () => {
           const price = Number(item.price) || 0;
           const totalItemCost = cost * quantity;
           const totalItemRevenue = price * quantity;
-          const category = item.products?.category || 'Unknown';
-          const stock = item.products?.stock || 0;
-          const company = item.products?.company || 'Unknown';
+          const category = item.product?.category || 'Unknown';
+          const stock = item.product?.stock || 0;
+          const company = item.product?.company || 'Unknown';
           
           // Use actual stock status from product
-          const stockStatus = item.products?.stock_status || 'Order';
+          const stockStatus = item.product?.stock_status || 'Order';
 
           // Category analysis
           if (!acc.categories[category]) {
@@ -437,10 +436,10 @@ const Financial = () => {
           const profit = totalRevenue - totalCost;
           const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
           
-          const productName = item.products?.name || `Product ${index + 1}`;
-          const category = item.products?.category || 'Unknown';
-          const company = item.products?.company || 'Unknown';
-          const stockStatus = item.products?.stock_status || 'Order';
+          const productName = item.product?.name || `Product ${index + 1}`;
+          const category = item.product?.category || 'Unknown';
+          const company = item.product?.company || 'Unknown';
+          const stockStatus = item.product?.stock_status || 'Order';
           const paidAtDelivery = Boolean(item.paid_at_delivery);
 
           // Filter based on includePaidAtDelivery setting
