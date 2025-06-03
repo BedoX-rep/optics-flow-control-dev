@@ -1,18 +1,11 @@
 modules = ["nodejs-20", "web"]
 run = "npm run dev"
-hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
 
 [deployment]
-deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
 run = ["sh", "-c", "npm run dev"]
-
-[[ports]]
-localPort = 5000
-externalPort = 80
 
 [[ports]]
 localPort = 8080
@@ -21,3 +14,13 @@ externalPort = 80
 [[ports]]
 localPort = 8081
 externalPort = 8081
+[workflows]
+runButton = "Start"
+
+[[workflows.workflow]]
+name = "Start"
+author = "replit"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
