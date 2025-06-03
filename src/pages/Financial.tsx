@@ -93,7 +93,7 @@ const Financial = () => {
               category,
               stock,
               stock_status,
-              company
+              company,
             )
           )
         `)
