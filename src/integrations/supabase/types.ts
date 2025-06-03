@@ -88,6 +88,7 @@ export type Database = {
           position: number
           price: number
           stock: number
+          stock_status: string | null
           treatment: string | null
           user_id: string
         }
@@ -106,6 +107,7 @@ export type Database = {
           position?: number
           price: number
           stock?: number
+          stock_status?: string | null
           treatment?: string | null
           user_id: string
         }
@@ -124,6 +126,7 @@ export type Database = {
           position?: number
           price?: number
           stock?: number
+          stock_status?: string | null
           treatment?: string | null
           user_id?: string
         }
@@ -138,6 +141,7 @@ export type Database = {
           id: string
           is_deleted: boolean | null
           linked_eye: string | null
+          paid_at_delivery: boolean | null
           price: number
           product_id: string | null
           profit: number
@@ -153,6 +157,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           linked_eye?: string | null
+          paid_at_delivery?: boolean | null
           price: number
           product_id?: string | null
           profit?: number
@@ -168,6 +173,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           linked_eye?: string | null
+          paid_at_delivery?: boolean | null
           price?: number
           product_id?: string | null
           profit?: number
@@ -211,6 +217,7 @@ export type Database = {
           left_eye_sph: number | null
           montage_costs: number | null
           montage_status: string
+          paid_at_delivery_cost: number | null
           payment_status: string | null
           products_cost: number | null
           profit: number | null
@@ -242,6 +249,7 @@ export type Database = {
           left_eye_sph?: number | null
           montage_costs?: number | null
           montage_status?: string
+          paid_at_delivery_cost?: number | null
           payment_status?: string | null
           products_cost?: number | null
           profit?: number | null
@@ -275,6 +283,7 @@ export type Database = {
           left_eye_sph?: number | null
           montage_costs?: number | null
           montage_status?: string
+          paid_at_delivery_cost?: number | null
           payment_status?: string | null
           products_cost?: number | null
           profit?: number | null
