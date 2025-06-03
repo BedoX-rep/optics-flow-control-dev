@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
@@ -158,7 +157,7 @@ const Financial = () => {
       if (receipt.products_cost && receipt.products_cost > 0) {
         return sum + receipt.products_cost;
       }
-      
+
       // Fallback to calculating from receipt_items
       if (Array.isArray(receipt.receipt_items)) {
         const itemsCost = receipt.receipt_items.reduce((itemSum, item) => {
@@ -168,7 +167,7 @@ const Financial = () => {
         }, 0);
         return sum + itemsCost;
       }
-      
+
       return sum;
     }, 0);
 
@@ -184,7 +183,7 @@ const Financial = () => {
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
           const company = item.product?.company || 'Unknown';
-          
+
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
 
@@ -266,19 +265,19 @@ const Financial = () => {
       if (receipt.is_deleted) {
         return acc;
       }
-      
+
       const montageCost = receipt.montage_costs || 0;
-      
+
       // Only include receipts in InCutting, Ready, or Paid costs phases
       const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
       if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
         acc.total += montageCost;
-        
+
         // Only count as operational cost if not linked to a purchase
         if (!linkedMontageReceipts.has(receipt.id)) {
           acc.operational += montageCost;
         }
-        
+
         // Track paid/unpaid based on montage status
         if (receipt.montage_status === 'Paid costs') {
           acc.paid += montageCost;
@@ -297,7 +296,7 @@ const Financial = () => {
         const total = purchase.amount_ttc || purchase.amount;
         const paid = purchase.advance_payment || 0;
         const unpaid = total - paid;
-        
+
         acc.total += total;
         acc.paid += paid;
         acc.unpaid += unpaid;
@@ -310,7 +309,7 @@ const Financial = () => {
       const total = purchase.amount_ttc || purchase.amount;
       const paid = purchase.advance_payment || 0;
       const outstanding = total - paid;
-      
+
       acc.total += total;
       acc.paid += paid;
       acc.outstanding += outstanding;
@@ -323,7 +322,7 @@ const Financial = () => {
         outstanding,
         date: purchase.purchase_date
       });
-      
+
       return acc;
     }, { 
       total: 0, 
@@ -368,29 +367,29 @@ const Financial = () => {
       totalRevenue,
       totalReceived,
       totalOutstanding,
-      
+
       // Enhanced Cost Analysis
       totalProductCosts,
       productAnalysis,
       montageMetrics,
       operationalExpenses,
       totalPaidAtDeliveryCost,
-      
+
       // Enhanced Capital Analysis
       capitalAnalysis,
-      
+
       // Cash Flow
       cashInflow,
       totalExpensesPaid,
       totalExpensesUnpaid,
       netCashFlow,
       availableCash,
-      
+
       // Enhanced Profits
       grossProfit,
       netProfitAfterPaidExpenses,
       netProfitAfterAllExpenses,
-      
+
       // Ratios
       grossMargin,
       netMarginPaid,
@@ -435,7 +434,7 @@ const Financial = () => {
           const totalRevenue = price * quantity;
           const profit = totalRevenue - totalCost;
           const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
-          
+
           const productName = item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
           const company = item.product?.company || 'Unknown';
@@ -501,7 +500,7 @@ const Financial = () => {
       const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
         (selectedPaidAtDelivery === 'yes' && item.paidAtDelivery) ||
         (selectedPaidAtDelivery === 'no' && !item.paidAtDelivery);
-      
+
       return matchesCategory && matchesCompany && matchesStockStatus && matchesPaidAtDelivery;
     });
   }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
@@ -786,8 +785,7 @@ const Financial = () => {
               <div>
                 <Label htmlFor="paidAtDeliveryFilter">Paid at Delivery Filter</Label>
                 <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
+                  <SelectTrigger className="mt-1                  <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Items</SelectItem>
@@ -851,7 +849,7 @@ const Financial = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Unit Cost: </span>
@@ -910,7 +908,7 @@ const Financial = () => {
               {/* Revenue Side */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Revenue Analysis</h3>
-                
+
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                     <span className="font-medium">Total Revenue (Invoiced)</span>
@@ -918,14 +916,14 @@ const Financial = () => {
                       {financialMetrics.totalRevenue.toFixed(2)} DH
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                     <span className="font-medium">Revenue Received</span>
                     <span className="font-bold text-green-600">
                       {financialMetrics.totalReceived.toFixed(2)} DH
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
                     <span className="font-medium">Unclaimed Balance</span>
                     <span className="font-bold text-orange-600">
@@ -938,7 +936,7 @@ const Financial = () => {
               {/* Cost Breakdown */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Cost Breakdown</h3>
-                
+
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
                     <span className="font-medium">Product Costs (COGS)</span>
@@ -946,14 +944,14 @@ const Financial = () => {
                       {financialMetrics.totalProductCosts.toFixed(2)} DH
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
                     <span className="font-medium">Operational Expenses</span>
                     <span className="font-bold text-purple-600">
                       {financialMetrics.operationalExpenses.total.toFixed(2)} DH
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
                     <span className="font-medium">Montage Costs</span>
                     <span className="font-bold text-indigo-600">
@@ -967,7 +965,7 @@ const Financial = () => {
             {/* Detailed Expense Analysis */}
             <div className="border-t pt-6">
               <h3 className="font-semibold text-lg text-gray-900 mb-4">Detailed Expense Analysis</h3>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Operational Expenses Detail */}
                 <div className="space-y-3">
@@ -1050,12 +1048,12 @@ const Financial = () => {
             {/* Profit Analysis with Revenue Scenarios */}
             <div className="border-t pt-6">
               <h3 className="font-semibold text-lg text-gray-900 mb-4">Profit Analysis & Revenue Scenarios</h3>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Current Scenario (Based on Received Revenue) */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Current Position (Received Revenue)</h4>
-                  
+
                   <div className="space-y-3">
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
@@ -1121,7 +1119,7 @@ const Financial = () => {
                 {/* Full Scenario (If All Revenue Collected) */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Full Potential (If All Revenue Collected)</h4>
-                  
+
                   <div className="space-y-3">
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
@@ -1191,7 +1189,7 @@ const Financial = () => {
             {/* Summary Metrics */}
             <div className="border-t pt-6">
               <h3 className="font-semibold text-lg text-gray-900 mb-4">Financial Performance Metrics</h3>
-              
+
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Gross Margin</p>
@@ -1300,7 +1298,7 @@ const Financial = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     {purchase.total > 0 && (
                       <div className="mt-3">
                         <Progress 
@@ -1334,12 +1332,12 @@ const Financial = () => {
               <p className="text-sm text-gray-600 mb-1">Total Orders</p>
               <p className="text-2xl font-bold text-blue-600">{filteredReceipts.length}</p>
             </div>
-            
+
             <div className="text-center p-4 bg-orange-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-1">Capital Purchases</p>
               <p className="text-2xl font-bold text-orange-600">{financialMetrics.capitalAnalysis.purchases.length}</p>
             </div>
-            
+
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <p className="text-sm text-gray-600 mb-1">Gross Margin</p>
               <p className={cn(
