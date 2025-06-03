@@ -60,6 +60,7 @@ const Financial = () => {
   const [costAnalysisFilter, setCostAnalysisFilter] = useState('category');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState('all');
+  const [selectedCompany, setSelectedCompany] = useState('all');
 
   // Fetch receipts with more detailed data
   const { data: receipts = [] } = useQuery({
@@ -168,7 +169,7 @@ const Financial = () => {
       return sum;
     }, 0);
 
-    // Enhanced product costs analysis by category and stock status
+    // Enhanced product costs analysis by category, stock status, and company
     const productAnalysis = filteredReceipts.reduce((acc, receipt) => {
       if (Array.isArray(receipt.receipt_items)) {
         receipt.receipt_items.forEach(item => {
@@ -179,6 +180,7 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
+          const company = item.product?.company || 'Unknown';
           
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -203,12 +205,23 @@ const Financial = () => {
           acc.stockStatus[stockStatus].margin = acc.stockStatus[stockStatus].revenue > 0 ? (acc.stockStatus[stockStatus].profit / acc.stockStatus[stockStatus].revenue) * 100 : 0;
           acc.stockStatus[stockStatus].items += quantity;
 
+          // Company analysis
+          if (!acc.companies[company]) {
+            acc.companies[company] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0 };
+          }
+          acc.companies[company].cost += totalItemCost;
+          acc.companies[company].revenue += totalItemRevenue;
+          acc.companies[company].profit = acc.companies[company].revenue - acc.companies[company].cost;
+          acc.companies[company].margin = acc.companies[company].revenue > 0 ? (acc.companies[company].profit / acc.companies[company].revenue) * 100 : 0;
+          acc.companies[company].items += quantity;
+
           // Combined analysis for filtering
-          const key = `${category}|${stockStatus}`;
+          const key = `${category}|${stockStatus}|${company}`;
           if (!acc.combined[key]) {
             acc.combined[key] = { 
               category, 
-              stockStatus, 
+              stockStatus,
+              company,
               cost: 0, 
               revenue: 0, 
               profit: 0, 
@@ -227,7 +240,8 @@ const Financial = () => {
     }, { 
       categories: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>, 
       stockStatus: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>,
-      combined: {} as Record<string, { category: string; stockStatus: string; cost: number; revenue: number; profit: number; margin: number; items: number }>
+      companies: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number }>,
+      combined: {} as Record<string, { category: string; stockStatus: string; company: string; cost: number; revenue: number; profit: number; margin: number; items: number }>
     });
 
     // Enhanced montage costs tracking (exclude deleted receipts)
@@ -330,15 +344,15 @@ const Financial = () => {
 
     // Enhanced cash flow and profit calculations
     const cashInflow = totalReceived; // Actually received payments
-    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational + totalPaidAtDeliveryCost; // Actually paid expenses including paid at delivery
+    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses (paid_at_delivery already in product costs)
     const totalExpensesUnpaid = operationalExpenses.unpaid + montageMetrics.unpaid; // Unpaid expenses
-    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid - totalPaidAtDeliveryCost;
+    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid; // Exclude paid_at_delivery since it's in product costs
     const availableCash = netCashFlow; // Current cash position
 
-    // Comprehensive profit calculations using correct product costs
+    // Comprehensive profit calculations using correct product costs (which include paid_at_delivery)
     const grossProfit = totalRevenue - totalProductCosts;
     const netProfitAfterPaidExpenses = grossProfit - totalExpensesPaid;
-    const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total - totalPaidAtDeliveryCost;
+    const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total;
 
     // Performance ratios
     const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
@@ -394,16 +408,21 @@ const Financial = () => {
       const filtered = Object.entries(productAnalysis.stockStatus);
       if (selectedStockStatus === 'all') return filtered;
       return filtered.filter(([status]) => status === selectedStockStatus);
+    } else if (costAnalysisFilter === 'company') {
+      const filtered = Object.entries(productAnalysis.companies);
+      if (selectedCompany === 'all') return filtered;
+      return filtered.filter(([company]) => company === selectedCompany);
     } else {
       // Combined filter
       const filtered = Object.values(productAnalysis.combined);
       return filtered.filter(item => {
         const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
         const matchesStock = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
-        return matchesCategory && matchesStock;
+        const matchesCompany = selectedCompany === 'all' || item.company === selectedCompany;
+        return matchesCategory && matchesStock && matchesCompany;
       });
     }
-  }, [financialMetrics.productAnalysis, costAnalysisFilter, selectedCategory, selectedStockStatus]);
+  }, [financialMetrics.productAnalysis, costAnalysisFilter, selectedCategory, selectedStockStatus, selectedCompany]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
@@ -623,6 +642,7 @@ const Financial = () => {
                 <SelectContent>
                   <SelectItem value="category">By Category</SelectItem>
                   <SelectItem value="stock">By Stock Status</SelectItem>
+                  <SelectItem value="company">By Company</SelectItem>
                   <SelectItem value="combined">Combined Analysis</SelectItem>
                 </SelectContent>
               </Select>
@@ -661,6 +681,23 @@ const Financial = () => {
                 </Select>
               </div>
             )}
+
+            {(costAnalysisFilter === 'company' || costAnalysisFilter === 'combined') && (
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="companyFilter">Company Filter</Label>
+                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Companies</SelectItem>
+                    {Object.keys(financialMetrics.productAnalysis.companies).map(company => (
+                      <SelectItem key={company} value={company}>{company}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -671,6 +708,7 @@ const Financial = () => {
                     <div>
                       <span className="font-medium text-gray-700">{item.category}</span>
                       <span className="ml-2 text-sm bg-gray-100 px-2 py-1 rounded">{item.stockStatus}</span>
+                      <span className="ml-2 text-sm bg-blue-100 px-2 py-1 rounded">{item.company}</span>
                     </div>
                     <span className="font-bold text-gray-900">{item.cost.toFixed(2)} DH</span>
                   </div>
@@ -911,21 +949,28 @@ const Financial = () => {
                     </div>
 
                     <div className="p-3 bg-red-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm">Less: Product Costs</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Less: Product Costs (Including Paid at Delivery)</span>
                         <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center mb-1">
+                      <div className="text-xs text-red-500 mb-2">Product costs breakdown:</div>
+                      <div className="pl-2 space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>• Direct material costs</span>
+                          <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Paid at delivery costs</span>
+                          <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center mb-1 mt-2">
                         <span className="text-sm">Less: Paid Op. Expenses</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center mb-1">
+                      <div className="flex justify-between items-center">
                         <span className="text-sm">Less: Paid Montage</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Less: Paid at Delivery</span>
-                        <span className="text-red-600">-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                       </div>
                     </div>
 
@@ -970,21 +1015,28 @@ const Financial = () => {
                     </div>
 
                     <div className="p-3 bg-red-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm">Less: Product Costs</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">Less: Product Costs (Including Paid at Delivery)</span>
                         <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center mb-1">
+                      <div className="text-xs text-red-500 mb-2">Product costs breakdown:</div>
+                      <div className="pl-2 space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>• Direct material costs</span>
+                          <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• Paid at delivery costs</span>
+                          <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center mb-1 mt-2">
                         <span className="text-sm">Less: All Op. Expenses</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center mb-1">
+                      <div className="flex justify-between items-center">
                         <span className="text-sm">Less: All Montage</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Less: Paid at Delivery</span>
-                        <span className="text-red-600">-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                       </div>
                     </div>
 
