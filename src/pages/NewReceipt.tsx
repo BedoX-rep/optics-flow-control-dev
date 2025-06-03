@@ -71,6 +71,7 @@ interface ReceiptItem {
   linkedEye?: 'RE' | 'LE';
   appliedMarkup?: number;
   order_type?: 'Montage' | 'Retoyage' | 'Sell' | 'Unspecified';
+  paid_at_delivery?: boolean;
 }
 
 interface OrderItemsProps {
@@ -1100,6 +1101,14 @@ const NewReceipt = () => {
     try {
       setIsLoading(true);
 
+      // Calculate paid_at_delivery_cost
+      const paidAtDeliveryCost = items.reduce((sum, item) => {
+        if (item.paid_at_delivery) {
+          return sum + ((item.cost || 0) * (item.quantity || 1));
+        }
+        return sum;
+      }, 0);
+
       const { data: receipt, error: receiptError } = await supabase
         .from('receipts')
         .insert({
@@ -1131,6 +1140,7 @@ const NewReceipt = () => {
           products_cost: totalCost,
           order_type: orderType,
           call_status: 'Not Called',
+          paid_at_delivery_cost: paidAtDeliveryCost,
           created_at: new Date().toISOString(),
           is_deleted: false
         })
@@ -1168,6 +1178,7 @@ const NewReceipt = () => {
         profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
         linked_eye: item.linkedEye || null,
         applied_markup: item.appliedMarkup || 0,
+        paid_at_delivery: item.paid_at_delivery || false,
         is_deleted: false
       }));
 

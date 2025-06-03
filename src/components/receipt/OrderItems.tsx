@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Copy, Plus, Receipt, Trash, AlertCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -353,83 +354,106 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                     </Button>
                   </div>
 
-                  {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                    <div className="col-span-12 flex items-center gap-2 mt-2">
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
-                          size="sm"
-                          className={`h-8 ${item.linkedEye === 'LE' ? 'bg-black text-white' : ''}`}
-                          onClick={() => {
-                            const product = products.find(p => p.id === item.productId);
-                            if (!product) return;
+                  <div className="col-span-12 mt-2">
+                    <div className="flex items-center justify-between">
+                      {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
+                              size="sm"
+                              className={`h-8 ${item.linkedEye === 'LE' ? 'bg-black text-white' : ''}`}
+                              onClick={() => {
+                                const product = products.find(p => p.id === item.productId);
+                                if (!product) return;
 
-                            const isUnlinking = item.linkedEye === 'LE';
-                            const updatedItem = {
-                              ...item,
-                              linkedEye: isUnlinking ? undefined : 'LE',
-                              appliedMarkup: 0,
-                              price: product.price
-                            };
+                                const isUnlinking = item.linkedEye === 'LE';
+                                const updatedItem = {
+                                  ...item,
+                                  linkedEye: isUnlinking ? undefined : 'LE',
+                                  appliedMarkup: 0,
+                                  price: product.price
+                                };
 
-                            if (!isUnlinking) {
-                              const { sph, cyl } = getEyeValues('LE');
-                              if (sph !== null && cyl !== null) {
-                                const markup = calculateMarkup(sph, cyl);
-                                updatedItem.appliedMarkup = markup;
-                                updatedItem.price = product.price * (1 + markup / 100);
-                              }
-                            }
+                                if (!isUnlinking) {
+                                  const { sph, cyl } = getEyeValues('LE');
+                                  if (sph !== null && cyl !== null) {
+                                    const markup = calculateMarkup(sph, cyl);
+                                    updatedItem.appliedMarkup = markup;
+                                    updatedItem.price = product.price * (1 + markup / 100);
+                                  }
+                                }
 
-                            setItems(prevItems => 
-                              prevItems.map(i => i.id === item.id ? updatedItem : i)
-                            );
-                          }}
-                        >
-                          👁️ LE
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
-                          size="sm"
-                          className={`h-8 ${item.linkedEye === 'RE' ? 'bg-black text-white' : ''}`}
-                          onClick={() => {
-                            const product = products.find(p => p.id === item.productId);
-                            if (!product) return;
+                                setItems(prevItems => 
+                                  prevItems.map(i => i.id === item.id ? updatedItem : i)
+                                );
+                              }}
+                            >
+                              👁️ LE
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
+                              size="sm"
+                              className={`h-8 ${item.linkedEye === 'RE' ? 'bg-black text-white' : ''}`}
+                              onClick={() => {
+                                const product = products.find(p => p.id === item.productId);
+                                if (!product) return;
 
-                            const isUnlinking = item.linkedEye === 'RE';
-                            const updatedItem = {
-                              ...item,
-                              linkedEye: isUnlinking ? undefined : 'RE',
-                              appliedMarkup: 0,
-                              price: product.price
-                            };
+                                const isUnlinking = item.linkedEye === 'RE';
+                                const updatedItem = {
+                                  ...item,
+                                  linkedEye: isUnlinking ? undefined : 'RE',
+                                  appliedMarkup: 0,
+                                  price: product.price
+                                };
 
-                            if (!isUnlinking) {
-                              const { sph, cyl } = getEyeValues('RE');
-                              if (sph !== null && cyl !== null) {
-                                const markup = calculateMarkup(sph, cyl);
-                                updatedItem.appliedMarkup = markup;
-                                updatedItem.price = product.price * (1 + markup / 100);
-                              }
-                            }
+                                if (!isUnlinking) {
+                                  const { sph, cyl } = getEyeValues('RE');
+                                  if (sph !== null && cyl !== null) {
+                                    const markup = calculateMarkup(sph, cyl);
+                                    updatedItem.appliedMarkup = markup;
+                                    updatedItem.price = product.price * (1 + markup / 100);
+                                  }
+                                }
 
-                            setItems(prevItems => 
-                              prevItems.map(i => i.id === item.id ? updatedItem : i)
-                            );
-                          }}
-                        >
-                          👁️ RE
-                        </Button>
-                      </div>
-                      {item.appliedMarkup > 0 && (
-                        <span className="text-sm text-muted-foreground">
-                          (+{item.appliedMarkup}% markup)
-                        </span>
+                                setItems(prevItems => 
+                                  prevItems.map(i => i.id === item.id ? updatedItem : i)
+                                );
+                              }}
+                            >
+                              👁️ RE
+                            </Button>
+                          </div>
+                          {item.appliedMarkup > 0 && (
+                            <span className="text-sm text-muted-foreground">
+                              (+{item.appliedMarkup}% markup)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Paid at Delivery checkbox for Order/Fabrication items */}
+                      {item.productId && (() => {
+                        const product = products.find(p => p.id === item.productId);
+                        return product && (product.stock_status === 'Order' || product.stock_status === 'Fabrication');
+                      })() && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`paid-delivery-${item.id}`}
+                            checked={item.paid_at_delivery || false}
+                            onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
+                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          />
+                          <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm">
+                            Paid at Delivery
+                          </Label>
+                        </div>
                       )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

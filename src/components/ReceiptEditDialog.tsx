@@ -79,6 +79,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
       const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
+      
+      // Calculate paid_at_delivery_cost
+      const paidAtDeliveryCost = formData.items.reduce((sum, item) => {
+        if (item.paid_at_delivery) {
+          return sum + ((item.cost || 0) * (item.quantity || 1));
+        }
+        return sum;
+      }, 0);
 
       const { error: receiptError } = await supabase
         .from('receipts')
@@ -97,7 +105,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           order_type: formData.order_type,
           products_cost: totalProductsCost,
           cost_ttc: costTtc,
-          total: total
+          total: total,
+          paid_at_delivery_cost: paidAtDeliveryCost
         })
         .eq('id', receipt.id);
 
@@ -122,7 +131,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             custom_item_name: item.custom_item_name,
             price: item.price,
             cost: item.cost,
-            quantity: item.quantity
+            quantity: item.quantity,
+            paid_at_delivery: item.paid_at_delivery || false
           })
           .eq('id', item.id);
 
@@ -436,6 +446,22 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             }}
                           />
                         </div>
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`paid-delivery-edit-${item.id}`}
+                          checked={item.paid_at_delivery || false}
+                          onChange={(e) => {
+                            const newItems = [...formData.items];
+                            newItems[index] = { ...item, paid_at_delivery: e.target.checked };
+                            setFormData({ ...formData, items: newItems });
+                          }}
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <Label htmlFor={`paid-delivery-edit-${item.id}`} className="text-sm">
+                          Paid at Delivery
+                        </Label>
                       </div>
                     </CardContent>
                   </Card>
