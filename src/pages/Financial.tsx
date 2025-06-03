@@ -87,6 +87,7 @@ const Financial = () => {
             price,
             quantity,
             paid_at_delivery,
+            custom_item_name,
             product:product_id (
               name,
               category,
@@ -182,7 +183,7 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          const company = item.product?.company || 'Unknown';
+          const company = (item.product?.company && item.product.company.trim() !== '') ? item.product.company : 'Unknown';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -400,6 +401,12 @@ const Financial = () => {
 
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
+    // Debug: Log a sample of receipt items to check data structure
+    if (filteredReceipts.length > 0 && filteredReceipts[0].receipt_items?.length > 0) {
+      console.log('Sample receipt item structure:', filteredReceipts[0].receipt_items[0]);
+      console.log('Sample product data:', filteredReceipts[0].receipt_items[0]?.product);
+    }
+
     const allItems: Array<{
       id: string;
       receiptId: string;
@@ -435,9 +442,9 @@ const Financial = () => {
           const profit = totalRevenue - totalCost;
           const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
-          const productName = item.product?.name || `Product ${index + 1}`;
+          const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          const company = item.product?.company || 'Unknown';
+          const company = (item.product?.company && item.product.company.trim() !== '') ? item.product.company : 'Unknown';
           const stockStatus = item.product?.stock_status || 'Order';
           const paidAtDelivery = Boolean(item.paid_at_delivery);
 
