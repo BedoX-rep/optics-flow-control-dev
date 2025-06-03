@@ -57,10 +57,11 @@ const Financial = () => {
   const { user } = useAuth();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
-  const [costAnalysisFilter, setCostAnalysisFilter] = useState('category');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState('all');
   const [selectedCompany, setSelectedCompany] = useState('all');
+  const [selectedPaidAtDelivery, setSelectedPaidAtDelivery] = useState('all');
+  const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
 
   // Fetch receipts with more detailed data
   const { data: receipts = [] } = useQuery({
@@ -88,9 +89,11 @@ const Financial = () => {
             quantity,
             paid_at_delivery,
             product:product_id (
+              name,
               category,
               stock,
-              stock_status
+              stock_status,
+              company
             )
           )
         `)
@@ -344,9 +347,9 @@ const Financial = () => {
 
     // Enhanced cash flow and profit calculations
     const cashInflow = totalReceived; // Actually received payments
-    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses (paid_at_delivery already in product costs)
+    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses
     const totalExpensesUnpaid = operationalExpenses.unpaid + montageMetrics.unpaid; // Unpaid expenses
-    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid; // Exclude paid_at_delivery since it's in product costs
+    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid - totalPaidAtDeliveryCost; // Deduct paid_at_delivery for cash flow
     const availableCash = netCashFlow; // Current cash position
 
     // Comprehensive profit calculations using correct product costs (which include paid_at_delivery)
@@ -396,33 +399,112 @@ const Financial = () => {
     };
   }, [filteredReceipts, filteredPurchases]);
 
-  // Filter data for comprehensive cost analysis
-  const filteredCostData = useMemo(() => {
-    const { productAnalysis } = financialMetrics;
-    
-    if (costAnalysisFilter === 'category') {
-      const filtered = Object.entries(productAnalysis.categories);
-      if (selectedCategory === 'all') return filtered;
-      return filtered.filter(([category]) => category === selectedCategory);
-    } else if (costAnalysisFilter === 'stock') {
-      const filtered = Object.entries(productAnalysis.stockStatus);
-      if (selectedStockStatus === 'all') return filtered;
-      return filtered.filter(([status]) => status === selectedStockStatus);
-    } else if (costAnalysisFilter === 'company') {
-      const filtered = Object.entries(productAnalysis.companies);
-      if (selectedCompany === 'all') return filtered;
-      return filtered.filter(([company]) => company === selectedCompany);
-    } else {
-      // Combined filter
-      const filtered = Object.values(productAnalysis.combined);
-      return filtered.filter(item => {
-        const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-        const matchesStock = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
-        const matchesCompany = selectedCompany === 'all' || item.company === selectedCompany;
-        return matchesCategory && matchesStock && matchesCompany;
-      });
-    }
-  }, [financialMetrics.productAnalysis, costAnalysisFilter, selectedCategory, selectedStockStatus, selectedCompany]);
+  // Comprehensive receipt items analysis
+  const receiptItemsAnalysis = useMemo(() => {
+    const allItems: Array<{
+      id: string;
+      receiptId: string;
+      productName: string;
+      category: string;
+      company: string;
+      stockStatus: string;
+      quantity: number;
+      cost: number;
+      price: number;
+      totalCost: number;
+      totalRevenue: number;
+      profit: number;
+      margin: number;
+      paidAtDelivery: boolean;
+    }> = [];
+
+    const summaryData = {
+      categories: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>,
+      companies: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>,
+      stockStatus: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>,
+      paidAtDelivery: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>
+    };
+
+    filteredReceipts.forEach(receipt => {
+      if (Array.isArray(receipt.receipt_items)) {
+        receipt.receipt_items.forEach((item, index) => {
+          const quantity = Number(item.quantity) || 1;
+          const cost = Number(item.cost) || 0;
+          const price = Number(item.price) || 0;
+          const totalCost = cost * quantity;
+          const totalRevenue = price * quantity;
+          const profit = totalRevenue - totalCost;
+          const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+          
+          const productName = item.product?.name || `Product ${index + 1}`;
+          const category = item.product?.category || 'Unknown';
+          const company = item.product?.company || 'Unknown';
+          const stockStatus = item.product?.stock_status || 'Order';
+          const paidAtDelivery = Boolean(item.paid_at_delivery);
+
+          // Filter based on includePaidAtDelivery setting
+          if (!includePaidAtDelivery && paidAtDelivery) {
+            return; // Skip this item if we're excluding paid at delivery items
+          }
+
+          const itemData = {
+            id: `${receipt.id}-${index}`,
+            receiptId: receipt.id,
+            productName,
+            category,
+            company,
+            stockStatus,
+            quantity,
+            cost,
+            price,
+            totalCost,
+            totalRevenue,
+            profit,
+            margin,
+            paidAtDelivery
+          };
+
+          allItems.push(itemData);
+
+          // Update summary data
+          [
+            ['categories', category],
+            ['companies', company],
+            ['stockStatus', stockStatus],
+            ['paidAtDelivery', paidAtDelivery ? 'Yes' : 'No']
+          ].forEach(([type, key]) => {
+            if (!summaryData[type][key]) {
+              summaryData[type][key] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0, count: 0 };
+            }
+            summaryData[type][key].cost += totalCost;
+            summaryData[type][key].revenue += totalRevenue;
+            summaryData[type][key].profit += profit;
+            summaryData[type][key].items += quantity;
+            summaryData[type][key].count += 1;
+            summaryData[type][key].margin = summaryData[type][key].revenue > 0 
+              ? (summaryData[type][key].profit / summaryData[type][key].revenue) * 100 
+              : 0;
+          });
+        });
+      }
+    });
+
+    return { allItems, summaryData };
+  }, [filteredReceipts, includePaidAtDelivery]);
+
+  // Filter receipt items based on selected filters
+  const filteredReceiptItems = useMemo(() => {
+    return receiptItemsAnalysis.allItems.filter(item => {
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchesCompany = selectedCompany === 'all' || item.company === selectedCompany;
+      const matchesStockStatus = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
+      const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
+        (selectedPaidAtDelivery === 'yes' && item.paidAtDelivery) ||
+        (selectedPaidAtDelivery === 'no' && !item.paidAtDelivery);
+      
+      return matchesCategory && matchesCompany && matchesStockStatus && matchesPaidAtDelivery;
+    });
+  }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
@@ -623,33 +705,40 @@ const Financial = () => {
         </Card>
       </div>
 
-      {/* Comprehensive Cost Analysis */}
+      {/* Comprehensive Receipt Items Analysis */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Comprehensive Cost Analysis
+            <ShoppingCart className="h-5 w-5" />
+            Comprehensive Receipt Items Analysis
           </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            Detailed analysis of all sold items with advanced filtering capabilities
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="analysisType">Analysis Type</Label>
-              <Select value={costAnalysisFilter} onValueChange={setCostAnalysisFilter}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="category">By Category</SelectItem>
-                  <SelectItem value="stock">By Stock Status</SelectItem>
-                  <SelectItem value="company">By Company</SelectItem>
-                  <SelectItem value="combined">Combined Analysis</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Filter Controls */}
+          <div className="space-y-4 mb-6">
+            {/* Include/Exclude Paid at Delivery Checkbox */}
+            <div className="flex items-center space-x-2 p-3 bg-yellow-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="includePaidAtDelivery"
+                checked={includePaidAtDelivery}
+                onChange={(e) => setIncludePaidAtDelivery(e.target.checked)}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <Label htmlFor="includePaidAtDelivery" className="text-sm font-medium">
+                Include Paid at Delivery Items
+              </Label>
+              <span className="text-xs text-gray-500 ml-2">
+                ({includePaidAtDelivery ? 'Currently including' : 'Currently excluding'} paid at delivery items)
+              </span>
             </div>
 
-            {(costAnalysisFilter === 'category' || costAnalysisFilter === 'combined') && (
-              <div className="flex-1 min-w-[200px]">
+            {/* Filter Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
                 <Label htmlFor="categoryFilter">Category Filter</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="mt-1">
@@ -657,16 +746,29 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {Object.keys(financialMetrics.productAnalysis.categories).map(category => (
+                    {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
 
-            {(costAnalysisFilter === 'stock' || costAnalysisFilter === 'combined') && (
-              <div className="flex-1 min-w-[200px]">
+              <div>
+                <Label htmlFor="companyFilter">Company Filter</Label>
+                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Companies</SelectItem>
+                    {Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
+                      <SelectItem key={company} value={company}>{company}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label htmlFor="stockFilter">Stock Status Filter</Label>
                 <Select value={selectedStockStatus} onValueChange={setSelectedStockStatus}>
                   <SelectTrigger className="mt-1">
@@ -680,98 +782,113 @@ const Financial = () => {
                   </SelectContent>
                 </Select>
               </div>
-            )}
 
-            {(costAnalysisFilter === 'company' || costAnalysisFilter === 'combined') && (
-              <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="companyFilter">Company Filter</Label>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <div>
+                <Label htmlFor="paidAtDeliveryFilter">Paid at Delivery Filter</Label>
+                <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Companies</SelectItem>
-                    {Object.keys(financialMetrics.productAnalysis.companies).map(company => (
-                      <SelectItem key={company} value={company}>{company}</SelectItem>
-                    ))}
+                    <SelectItem value="all">All Items</SelectItem>
+                    <SelectItem value="yes">Paid at Delivery</SelectItem>
+                    <SelectItem value="no">Not Paid at Delivery</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
-          </div>
-
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {costAnalysisFilter === 'combined' ? (
-              filteredCostData.map((item: any, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-white">
-                  <div className="flex justify-between items-center mb-3">
-                    <div>
-                      <span className="font-medium text-gray-700">{item.category}</span>
-                      <span className="ml-2 text-sm bg-gray-100 px-2 py-1 rounded">{item.stockStatus}</span>
-                      <span className="ml-2 text-sm bg-blue-100 px-2 py-1 rounded">{item.company}</span>
-                    </div>
-                    <span className="font-bold text-gray-900">{item.cost.toFixed(2)} DH</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600">Items: </span>
-                      <span className="font-medium">{item.items}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Revenue: </span>
-                      <span className="font-medium">{item.revenue.toFixed(2)} DH</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Profit: </span>
-                      <span className={cn(
-                        "font-medium",
-                        item.profit >= 0 ? "text-green-600" : "text-red-600"
-                      )}>
-                        {item.profit.toFixed(2)} DH
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Margin: </span>
-                      <span className={cn(
-                        "font-medium",
-                        item.margin >= 0 ? "text-green-600" : "text-red-600"
-                      )}>
-                        {item.margin.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              filteredCostData.map(([key, data]: [string, any]) => (
-                <div key={key} className="border rounded-lg p-3 bg-white">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium text-gray-700">{key}</span>
-                    <span className="font-bold text-gray-900">{data.cost.toFixed(2)} DH</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-                    <div>Items: {data.items}</div>
-                    <div>Revenue: {data.revenue.toFixed(2)} DH</div>
-                    <div className={cn(
-                      "font-medium",
-                      data.margin >= 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      Margin: {data.margin.toFixed(1)}%
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Total Product Costs</span>
-              <span className="font-bold text-red-600">
-                {financialMetrics.totalProductCosts.toFixed(2)} DH
-              </span>
             </div>
           </div>
+
+          {/* Summary Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-blue-50 rounded-lg p-3">
+              <p className="text-sm text-blue-600 mb-1">Total Items</p>
+              <p className="text-xl font-bold text-blue-900">{filteredReceiptItems.length}</p>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3">
+              <p className="text-sm text-green-600 mb-1">Total Revenue</p>
+              <p className="text-xl font-bold text-green-900">
+                {filteredReceiptItems.reduce((sum, item) => sum + item.totalRevenue, 0).toFixed(2)} DH
+              </p>
+            </div>
+            <div className="bg-red-50 rounded-lg p-3">
+              <p className="text-sm text-red-600 mb-1">Total Cost</p>
+              <p className="text-xl font-bold text-red-900">
+                {filteredReceiptItems.reduce((sum, item) => sum + item.totalCost, 0).toFixed(2)} DH
+              </p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-3">
+              <p className="text-sm text-purple-600 mb-1">Total Profit</p>
+              <p className={cn(
+                "text-xl font-bold",
+                filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0) >= 0 ? "text-green-600" : "text-red-600"
+              )}>
+                {filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0).toFixed(2)} DH
+              </p>
+            </div>
+          </div>
+
+          {/* Detailed Items List */}
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {filteredReceiptItems.map((item) => (
+              <div key={item.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h5 className="font-medium text-gray-900">{item.productName}</h5>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
+                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.company}</span>
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
+                      {item.paidAtDelivery && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Paid at Delivery</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-bold text-gray-900">Qty: {item.quantity}</div>
+                    <div className="text-sm text-gray-600">
+                      {item.price.toFixed(2)} DH × {item.quantity} = {item.totalRevenue.toFixed(2)} DH
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Unit Cost: </span>
+                    <span className="font-medium">{item.cost.toFixed(2)} DH</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Total Cost: </span>
+                    <span className="font-medium text-red-600">{item.totalCost.toFixed(2)} DH</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Profit: </span>
+                    <span className={cn(
+                      "font-medium",
+                      item.profit >= 0 ? "text-green-600" : "text-red-600"
+                    )}>
+                      {item.profit.toFixed(2)} DH
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Margin: </span>
+                    <span className={cn(
+                      "font-medium",
+                      item.margin >= 0 ? "text-green-600" : "text-red-600"
+                    )}>
+                      {item.margin.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredReceiptItems.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No items found matching the selected filters.
+            </div>
+          )}
         </CardContent>
       </Card>
 
