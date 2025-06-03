@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -452,19 +452,24 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                       </div>
-                      <div className="mt-4 flex items-center gap-2">
-                        <Checkbox
-                          id={`paid-delivery-edit-${item.id}`}
-                          checked={Boolean(item.paid_at_delivery)}
-                          onCheckedChange={(checked) => {
+                      <div className="mt-4">
+                        <Label className="text-sm font-medium">Payment Status</Label>
+                        <Select
+                          value={item.paid_at_delivery ? "paid" : "unpaid"}
+                          onValueChange={(value) => {
                             const newItems = [...formData.items];
-                            newItems[index] = { ...item, paid_at_delivery: Boolean(checked) };
+                            newItems[index] = { ...item, paid_at_delivery: value === "paid" };
                             setFormData({ ...formData, items: newItems });
                           }}
-                        />
-                        <Label htmlFor={`paid-delivery-edit-${item.id}`} className="text-sm">
-                          Paid at Delivery
-                        </Label>
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unpaid">Not Paid at Delivery</SelectItem>
+                            <SelectItem value="paid">Paid at Delivery</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </CardContent>
                   </Card>
