@@ -389,7 +389,7 @@ const Receipts = () => {
           time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
         } : r);
       });
-
+      
       const { error } = await supabase
         .from('receipts')
         .update({ 
@@ -579,40 +579,6 @@ const Receipts = () => {
       return format(date, 'yy/MM/dd HH:mm');
     }
   };
-  
-  const handleEditReceipt = async (receipt: Receipt) => {
-      // Fetch complete receipt data including all fields
-      const { data: completeReceipt, error } = await supabase
-        .from('receipts')
-        .select(`
-          *,
-          clients(id, name, phone),
-          receipt_items(
-            id,
-            custom_item_name,
-            quantity,
-            price,
-            cost,
-            profit,
-            linked_eye,
-            applied_markup,
-            paid_at_delivery,
-            product_id,
-            products(*)
-          )
-        `)
-        .eq('id', receipt.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching complete receipt:', error);
-        setEditingReceipt(receipt);
-        return;
-      }
-
-      console.log('Complete receipt data:', completeReceipt);
-      setEditingReceipt(completeReceipt);
-    };
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
@@ -764,10 +730,10 @@ const Receipts = () => {
                   key={receipt.id}
                   receipt={receipt}
                   onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
-                  onDelivered={()> handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
+                  onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
                   onDelete={() => handleDelete(receipt.id)}
                   onView={() => setSelectedReceipt(receipt)}
-                  onEdit={() => handleEditReceipt(receipt)}
+                  onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
                   onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
                 />
@@ -780,7 +746,7 @@ const Receipts = () => {
         isOpen={!!selectedReceipt}
         onClose={() => setSelectedReceipt(null)}
         receipt={selectedReceipt}
-        onEdit={handleEditReceipt}
+        onEdit={setEditingReceipt}
         onDelete={handleDelete}
       />
 
