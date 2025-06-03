@@ -80,10 +80,12 @@ const Financial = () => {
           advance_payment,
           delivery_status,
           montage_status,
+          paid_at_delivery_cost,
           receipt_items (
             cost,
             price,
             quantity,
+            paid_at_delivery,
             product:product_id (
               category,
               stock,
@@ -321,17 +323,22 @@ const Financial = () => {
       }>
     });
 
+    // Calculate total paid_at_delivery_cost
+    const totalPaidAtDeliveryCost = filteredReceipts.reduce((sum, receipt) => {
+      return sum + (receipt.paid_at_delivery_cost || 0);
+    }, 0);
+
     // Enhanced cash flow and profit calculations
     const cashInflow = totalReceived; // Actually received payments
-    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational; // Actually paid expenses
+    const totalExpensesPaid = operationalExpenses.paid + montageMetrics.operational + totalPaidAtDeliveryCost; // Actually paid expenses including paid at delivery
     const totalExpensesUnpaid = operationalExpenses.unpaid + montageMetrics.unpaid; // Unpaid expenses
-    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid;
+    const netCashFlow = cashInflow - operationalExpenses.paid - montageMetrics.paid - totalPaidAtDeliveryCost;
     const availableCash = netCashFlow; // Current cash position
 
     // Comprehensive profit calculations using correct product costs
     const grossProfit = totalRevenue - totalProductCosts;
     const netProfitAfterPaidExpenses = grossProfit - totalExpensesPaid;
-    const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total;
+    const netProfitAfterAllExpenses = grossProfit - operationalExpenses.total - montageMetrics.total - totalPaidAtDeliveryCost;
 
     // Performance ratios
     const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
@@ -350,6 +357,7 @@ const Financial = () => {
       productAnalysis,
       montageMetrics,
       operationalExpenses,
+      totalPaidAtDeliveryCost,
       
       // Enhanced Capital Analysis
       capitalAnalysis,
@@ -911,9 +919,13 @@ const Financial = () => {
                         <span className="text-sm">Less: Paid Op. Expenses</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-1">
                         <span className="text-sm">Less: Paid Montage</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Less: Paid at Delivery</span>
+                        <span className="text-red-600">-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                       </div>
                     </div>
 
@@ -922,9 +934,9 @@ const Financial = () => {
                         <span className="font-medium">Current Net Position</span>
                         <span className={cn(
                           "font-bold text-lg",
-                          (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) >= 0 ? "text-green-600" : "text-red-600"
+                          financialMetrics.availableCash >= 0 ? "text-green-600" : "text-red-600"
                         )}>
-                          {(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH
+                          {financialMetrics.availableCash.toFixed(2)} DH
                         </span>
                       </div>
                       <div className="text-xs text-green-600 mt-1">
@@ -966,9 +978,13 @@ const Financial = () => {
                         <span className="text-sm">Less: All Op. Expenses</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mb-1">
                         <span className="text-sm">Less: All Montage</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Less: Paid at Delivery</span>
+                        <span className="text-red-600">-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                       </div>
                     </div>
 
@@ -991,7 +1007,7 @@ const Financial = () => {
                       <div className="flex justify-between items-center">
                         <span className="font-medium text-purple-800">Collection Impact</span>
                         <span className="font-bold text-purple-800">
-                          +{(financialMetrics.netProfitAfterAllExpenses - (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid)).toFixed(2)} DH
+                          +{(financialMetrics.netProfitAfterAllExpenses - financialMetrics.availableCash).toFixed(2)} DH
                         </span>
                       </div>
                       <div className="text-xs text-purple-700 mt-1">

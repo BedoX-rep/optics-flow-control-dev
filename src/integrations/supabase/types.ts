@@ -672,3 +672,101 @@ export const Constants = {
     },
   },
 } as const
+
+export interface Product {
+  id: string;
+  user_id: string;
+  name: string;
+  price: number;
+  cost_ttc: number;
+  stock: number;
+  position: number;
+  category?: string;
+  company?: string;
+  treatment?: string;
+  stock_status?: string;
+  index?: string;
+  image?: string;
+  gamma?: string;
+  created_at: string;
+  updated_at: string;
+  automated_name?: boolean;
+  is_deleted?: boolean;
+}
+
+export interface Client {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  gender?: string;
+  assurance?: string;
+  notes?: string;
+  left_eye_sph: number;
+  left_eye_cyl: number;
+  left_eye_axe: number;
+  right_eye_sph: number;
+  right_eye_cyl: number;
+  right_eye_axe: number;
+  add?: number;
+  favorite: boolean;
+  created_at: string;
+  updated_at: string;
+  last_prescription_update?: string;
+  is_deleted?: boolean;
+}
+
+export interface Receipt {
+  id: string;
+  user_id: string;
+  client_id?: string;
+  client_name?: string;
+  client_phone?: string;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  add?: number;
+  montage_costs?: number;
+  total_discount?: number;
+  tax?: number;
+  advance_payment?: number;
+  balance?: number;
+  total?: number;
+  products_cost?: number;
+  cost_ttc?: number;
+  paid_at_delivery_cost?: number;
+  delivery_status?: string;
+  montage_status?: string;
+  order_type?: string;
+  created_at: string;
+  updated_at: string;
+  is_deleted?: boolean;
+  receipt_items?: ReceiptItem[];
+  client?: {
+    id: string;
+    name: string;
+    phone?: string;
+  };
+}
+
+export interface ReceiptItem {
+  id: string;
+  user_id: string;
+  receipt_id: string;
+  product_id?: string;
+  custom_item_name?: string;
+  quantity: number;
+  price: number;
+  cost?: number;
+  profit?: number;
+  linked_eye?: string;
+  applied_markup?: number;
+  paid_at_delivery?: boolean;
+  created_at: string;
+  updated_at: string;
+  is_deleted?: boolean;
+  product?: Product;
+}

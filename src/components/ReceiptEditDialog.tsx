@@ -39,6 +39,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     add: '',
     montage_costs: 0,
     total_discount: 0,
+    tax: 0,
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
