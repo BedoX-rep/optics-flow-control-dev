@@ -67,7 +67,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
         order_type: receipt.order_type || '',
-        items: receipt.receipt_items || [],
+        items: (receipt.receipt_items || []).map(item => ({
+          ...item,
+          paid_at_delivery: item.paid_at_delivery || false
+        })),
         total: receipt.total || 0
       });
     }
