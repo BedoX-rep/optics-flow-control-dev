@@ -74,7 +74,7 @@ const ProtectedRoute = ({
     // Check permission after loading is complete
     if (requiredPermission) {
       const { sessionRole } = useAuth();
-      
+
       // Special case for admin session requirement
       if (requiredPermission === 'admin_session') {
         if (sessionRole !== 'Admin') {
@@ -85,7 +85,7 @@ const ProtectedRoute = ({
       else if (sessionRole === 'Admin') {
         // Allow access for admin
       } else if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
-        return <Navigate to="/auth" replace />;
+        return <Navigate to="/dashboard" replace />;
       }
     }
 

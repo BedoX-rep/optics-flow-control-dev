@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -274,94 +273,6 @@ const Access = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Admin Panel for Staff Management */}
-      {isAdmin && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Staff Management</CardTitle>
-            <CardDescription>Manage permissions for all staff members (Admin only)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p>Loading staff members...</p>
-            ) : (
-              <div className="space-y-4">
-                {staffMembers?.map((staff) => (
-                  <div key={staff.user_id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="font-medium">{staff.display_name}</h3>
-                        <p className="text-sm text-muted-foreground">{staff.email}</p>
-                        <p className="text-sm">Access Code: {staff.access_code}</p>
-                      </div>
-                    </div>
-
-                    {staff.permissions && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_manage_products}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_manage_products', checked)
-                            }
-                          />
-                          <Label>Manage Products</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_manage_clients}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_manage_clients', checked)
-                            }
-                          />
-                          <Label>Manage Clients</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_manage_receipts}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_manage_receipts', checked)
-                            }
-                          />
-                          <Label>Manage Receipts</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_view_financial}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_view_financial', checked)
-                            }
-                          />
-                          <Label>View Financial</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_manage_purchases}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_manage_purchases', checked)
-                            }
-                          />
-                          <Label>Manage Purchases</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={staff.permissions.can_access_dashboard}
-                            onCheckedChange={(checked) => 
-                              handleStaffPermissionChange(staff.user_id, 'can_access_dashboard', checked)
-                            }
-                          />
-                          <Label>Access Dashboard</Label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
