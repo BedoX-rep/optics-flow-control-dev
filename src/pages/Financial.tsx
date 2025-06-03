@@ -101,7 +101,20 @@ const Financial = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Process the data to handle NULL company values
+      const processedData = data?.map(receipt => ({
+        ...receipt,
+        receipt_items: receipt.receipt_items?.map(item => ({
+          ...item,
+          product: item.product ? {
+            ...item.product,
+            company: item.product.company || 'None'
+          } : null
+        }))
+      })) || [];
+      
+      return processedData;
     },
     enabled: !!user,
   });
@@ -183,7 +196,7 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          const company = (item.product?.company && item.product.company.trim() !== '') ? item.product.company : 'Unknown';
+          const company = item.product?.company || 'None';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -444,7 +457,7 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          const company = (item.product?.company && item.product.company.trim() !== '') ? item.product.company : 'Unknown';
+          const company = item.product?.company || 'None';
           const stockStatus = item.product?.stock_status || 'Order';
           const paidAtDelivery = Boolean(item.paid_at_delivery);
 
