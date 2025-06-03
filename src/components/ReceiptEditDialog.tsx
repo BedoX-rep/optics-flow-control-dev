@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -69,7 +70,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         order_type: receipt.order_type || '',
         items: (receipt.receipt_items || []).map(item => ({
           ...item,
-          paid_at_delivery: item.paid_at_delivery || false
+          paid_at_delivery: Boolean(item.paid_at_delivery)
         })),
         total: receipt.total || 0
       });
@@ -136,7 +137,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             price: item.price,
             cost: item.cost,
             quantity: item.quantity,
-            paid_at_delivery: item.paid_at_delivery || false
+            paid_at_delivery: Boolean(item.paid_at_delivery)
           })
           .eq('id', item.id);
 
@@ -452,16 +453,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                         </div>
                       </div>
                       <div className="mt-4 flex items-center gap-2">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           id={`paid-delivery-edit-${item.id}`}
-                          checked={item.paid_at_delivery || false}
-                          onChange={(e) => {
+                          checked={Boolean(item.paid_at_delivery)}
+                          onCheckedChange={(checked) => {
                             const newItems = [...formData.items];
-                            newItems[index] = { ...item, paid_at_delivery: e.target.checked };
+                            newItems[index] = { ...item, paid_at_delivery: Boolean(checked) };
                             setFormData({ ...formData, items: newItems });
                           }}
-                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                         />
                         <Label htmlFor={`paid-delivery-edit-${item.id}`} className="text-sm">
                           Paid at Delivery
