@@ -75,8 +75,14 @@ const ProtectedRoute = ({
     if (requiredPermission) {
       const { sessionRole } = useAuth();
       
-      // Admin session role bypasses all permission checks
-      if (sessionRole === 'Admin') {
+      // Special case for admin session requirement
+      if (requiredPermission === 'admin_session') {
+        if (sessionRole !== 'Admin') {
+          return <Navigate to="/dashboard" replace />;
+        }
+      }
+      // Admin session role bypasses all other permission checks
+      else if (sessionRole === 'Admin') {
         // Allow access for admin
       } else if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
         return <Navigate to="/auth" replace />;
@@ -125,7 +131,7 @@ const AppRoutes = () => (
               </ProtectedRoute>
             } />
             <Route path="/access" element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPermission="admin_session">
                 <Layout><Access /></Layout>
               </ProtectedRoute>
             } />

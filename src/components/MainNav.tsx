@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -34,6 +33,7 @@ const MainNav = () => {
   const location = useLocation();
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+  const sessionRole = user?.role;
 
   useEffect(() => {
     const handleResize = () => {
@@ -74,6 +74,9 @@ const MainNav = () => {
 
       <nav className="p-3 space-y-1 mt-2">
         {navigation.map((item) => {
+          if (item.name === 'Access' && sessionRole !== 'Admin') {
+            return null;
+          }
           const isActive = location.pathname === item.href;
           return (
             <Link

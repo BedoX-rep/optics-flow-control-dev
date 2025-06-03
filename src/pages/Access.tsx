@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
+import { Navigate } from 'react-router-dom';
 
 interface StaffMember {
   user_id: string;
@@ -27,12 +28,37 @@ interface StaffMember {
 }
 
 const Access = () => {
-  const { user, subscription, sessionRole, promoteToAdmin } = useAuth();
+  const { user, subscription, sessionRole, promoteToAdmin, permissions } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const isAdmin = sessionRole === 'Admin';
+
+  // Redirect staff users who haven't elevated to admin
+  if (!user) {
+    return <div>Please log in to access this page.</div>;
+  }
+
+  if (sessionRole === 'Store Staff') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Fetch user's own permissions
+  const { data: userPermissions, isLoading: userPermissionsLoading } = useQuery({
+    queryKey: ['user-permissions', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('permissions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
   // Fetch all staff members (admin only)
   const { data: staffMembers, isLoading } = useQuery({
@@ -63,8 +89,34 @@ const Access = () => {
     enabled: isAdmin,
   });
 
-  // Update permissions mutation
-  const updatePermissionsMutation = useMutation({
+  // Update own permissions mutation
+  const updateOwnPermissionsMutation = useMutation({
+    mutationFn: async (newPermissions: Partial<typeof userPermissions>) => {
+      const { error } = await supabase
+        .from('permissions')
+        .update(newPermissions)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-permissions', user?.id] });
+      toast({
+        title: "Success",
+        description: "Your permissions updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update permissions",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update staff permissions mutation (admin only)
+  const updateStaffPermissionsMutation = useMutation({
     mutationFn: async ({ userId, newPermissions }: { userId: string; newPermissions: Partial<StaffMember['permissions']> }) => {
       const { error } = await supabase
         .from('permissions')
@@ -77,13 +129,13 @@ const Access = () => {
       queryClient.invalidateQueries({ queryKey: ['staff-members'] });
       toast({
         title: "Success",
-        description: "Permissions updated successfully",
+        description: "Staff permissions updated successfully",
       });
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to update permissions",
+        description: "Failed to update staff permissions",
         variant: "destructive",
       });
     },
@@ -112,16 +164,16 @@ const Access = () => {
     }
   };
 
-  const handlePermissionChange = (userId: string, permission: keyof StaffMember['permissions'], value: boolean) => {
-    updatePermissionsMutation.mutate({
+  const handleOwnPermissionChange = (permission: string, value: boolean) => {
+    updateOwnPermissionsMutation.mutate({ [permission]: value });
+  };
+
+  const handleStaffPermissionChange = (userId: string, permission: keyof StaffMember['permissions'], value: boolean) => {
+    updateStaffPermissionsMutation.mutate({
       userId,
       newPermissions: { [permission]: value }
     });
   };
-
-  if (!user) {
-    return <div>Please log in to access this page.</div>;
-  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -148,33 +200,87 @@ const Access = () => {
             <Label>Access Code</Label>
             <p className="text-lg font-mono">{subscription?.access_code}</p>
           </div>
+        </CardContent>
+      </Card>
 
-          {!isAdmin && (
-            <div className="space-y-2">
-              <Label htmlFor="admin-access-code">Promote to Admin</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="admin-access-code"
-                  placeholder="Enter access code"
-                  value={accessCodeInput}
-                  onChange={(e) => setAccessCodeInput(e.target.value.toUpperCase())}
-                  maxLength={5}
+      {/* User's Own Permissions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Permissions</CardTitle>
+          <CardDescription>Manage your own access permissions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userPermissionsLoading ? (
+            <p>Loading your permissions...</p>
+          ) : userPermissions ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_manage_products}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_manage_products', checked)
+                  }
                 />
-                <Button onClick={handlePromoteToAdmin}>
-                  Promote
-                </Button>
+                <Label>Manage Products</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_manage_clients}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_manage_clients', checked)
+                  }
+                />
+                <Label>Manage Clients</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_manage_receipts}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_manage_receipts', checked)
+                  }
+                />
+                <Label>Manage Receipts</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_view_financial}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_view_financial', checked)
+                  }
+                />
+                <Label>View Financial</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_manage_purchases}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_manage_purchases', checked)
+                  }
+                />
+                <Label>Manage Purchases</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_access_dashboard}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_access_dashboard', checked)
+                  }
+                />
+                <Label>Access Dashboard</Label>
               </div>
             </div>
+          ) : (
+            <p>No permissions found</p>
           )}
         </CardContent>
       </Card>
 
-      {/* Admin Panel */}
+      {/* Admin Panel for Staff Management */}
       {isAdmin && (
         <Card>
           <CardHeader>
             <CardTitle>Staff Management</CardTitle>
-            <CardDescription>Manage permissions for all staff members</CardDescription>
+            <CardDescription>Manage permissions for all staff members (Admin only)</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -197,7 +303,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_manage_products}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_manage_products', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_manage_products', checked)
                             }
                           />
                           <Label>Manage Products</Label>
@@ -206,7 +312,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_manage_clients}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_manage_clients', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_manage_clients', checked)
                             }
                           />
                           <Label>Manage Clients</Label>
@@ -215,7 +321,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_manage_receipts}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_manage_receipts', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_manage_receipts', checked)
                             }
                           />
                           <Label>Manage Receipts</Label>
@@ -224,7 +330,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_view_financial}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_view_financial', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_view_financial', checked)
                             }
                           />
                           <Label>View Financial</Label>
@@ -233,7 +339,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_manage_purchases}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_manage_purchases', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_manage_purchases', checked)
                             }
                           />
                           <Label>Manage Purchases</Label>
@@ -242,7 +348,7 @@ const Access = () => {
                           <Switch
                             checked={staff.permissions.can_access_dashboard}
                             onCheckedChange={(checked) => 
-                              handlePermissionChange(staff.user_id, 'can_access_dashboard', checked)
+                              handleStaffPermissionChange(staff.user_id, 'can_access_dashboard', checked)
                             }
                           />
                           <Label>Access Dashboard</Label>
