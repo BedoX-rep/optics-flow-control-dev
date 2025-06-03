@@ -50,6 +50,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
   useEffect(() => {
     if (receipt) {
+      console.log('Receipt data:', receipt);
+      console.log('Receipt items:', receipt.receipt_items);
+      
       setFormData({
         client_name: receipt.client_name || '',
         client_phone: receipt.client_phone || '',
@@ -67,10 +70,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         delivery_status: receipt.delivery_status || '',
         montage_status: receipt.montage_status || '',
         order_type: receipt.order_type || '',
-        items: (receipt.receipt_items || []).map(item => ({
-          ...item,
-          paid_at_delivery: item.paid_at_delivery || false
-        })),
+        items: (receipt.receipt_items || []).map(item => {
+          console.log('Processing item:', item);
+          console.log('paid_at_delivery value:', item.paid_at_delivery);
+          return {
+            ...item,
+            paid_at_delivery: Boolean(item.paid_at_delivery)
+          };
+        }),
         total: receipt.total || 0
       });
     }
