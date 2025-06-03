@@ -93,7 +93,7 @@ const Financial = () => {
               category,
               stock,
               stock_status,
-              company,
+              company
             )
           )
         `)
@@ -101,7 +101,7 @@ const Financial = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Process the data to handle NULL company values
       const processedData = data?.map(receipt => ({
         ...receipt,
@@ -113,7 +113,7 @@ const Financial = () => {
           } : null
         }))
       })) || [];
-      
+
       return processedData;
     },
     enabled: !!user,
@@ -196,7 +196,10 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          const company = item.product?.company || 'None';
+          // Properly handle company values - only use 'None' for truly missing companies
+          const company = (item.product?.company && item.product.company.trim() !== '') 
+            ? item.product.company.trim() 
+            : 'None';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -457,7 +460,10 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          const company = item.product?.company || 'None';
+          // Properly handle company values - only use 'None' for truly missing companies
+          const company = (item.product?.company && item.product.company.trim() !== '') 
+            ? item.product.company.trim() 
+            : 'None';
           const stockStatus = item.product?.stock_status || 'Order';
           const paidAtDelivery = Boolean(item.paid_at_delivery);
 
@@ -775,8 +781,7 @@ const Financial = () => {
               <div>
                 <Label htmlFor="companyFilter">Company Filter</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
+                  <SelectTrigger className="mt-1">                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Companies</SelectItem>
