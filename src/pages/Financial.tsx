@@ -142,6 +142,23 @@ const Financial = () => {
     enabled: !!user,
   });
 
+  // Fetch all products for dropdown options
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ['all-products', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, category, company, stock_status')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
   // Filter data by date range and exclude deleted receipts
   const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
@@ -415,26 +432,38 @@ const Financial = () => {
     };
   }, [filteredReceipts, filteredPurchases]);
 
-  // Get unique values from all products for dropdown options
+  // Static dropdown options from ProductForm constants
   const dropdownOptions = useMemo(() => {
-    const categories = new Set<string>();
-    const companies = new Set<string>();
-    const stockStatuses = new Set<string>();
+    const categories = [
+      "Single Vision Lenses",
+      "Progressive Lenses", 
+      "Frames",
+      "Sunglasses",
+      "Contact Lenses",
+      "Accessories"
+    ];
 
-    allProducts.forEach(product => {
-      if (product.category) categories.add(product.category);
-      if (product.company && product.company.trim() !== '') {
-        companies.add(product.company.trim());
-      }
-      if (product.stock_status) stockStatuses.add(product.stock_status);
-    });
+    const companies = [
+      "Indo",
+      "ABlens", 
+      "Essilor",
+      "GLASSANDLENS",
+      "Optifak"
+    ];
+
+    const stockStatuses = [
+      "Order",
+      "inStock",
+      "Fabrication", 
+      "Out Of Stock"
+    ];
 
     return {
-      categories: Array.from(categories).sort(),
-      companies: Array.from(companies).sort(),
-      stockStatuses: Array.from(stockStatuses).sort()
+      categories: categories.sort(),
+      companies: companies.sort(), 
+      stockStatuses: stockStatuses.sort()
     };
-  }, [allProducts]);
+  }, []);
 
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
