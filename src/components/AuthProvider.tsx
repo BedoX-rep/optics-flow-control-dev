@@ -2,6 +2,17 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+// Permissions cache
+interface PermissionsCache {
+  [userId: string]: {
+    permissions: UserPermissions;
+    timestamp: number;
+  };
+}
+
+const permissionsCache: PermissionsCache = {};
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
                          'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
@@ -40,6 +51,7 @@ interface AuthContextType {
   promoteToAdmin: (accessCode: string) => Promise<{ success: boolean; message: string }>;
   setSessionRole: (role: 'Admin' | 'Store Staff') => void;
   exitAdminSession: () => void;
+  invalidatePermissionsCache: (userId?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,6 +68,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
 
   const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+  // Cache helper functions
+  const getCachedPermissions = (userId: string): UserPermissions | null => {
+    const cached = permissionsCache[userId];
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      return cached.permissions;
+    }
+    return null;
+  };
+
+  const setCachedPermissions = (userId: string, permissions: UserPermissions) => {
+    permissionsCache[userId] = {
+      permissions,
+      timestamp: Date.now()
+    };
+  };
+
+  const invalidatePermissionsCache = (userId?: string) => {
+    if (userId) {
+      delete permissionsCache[userId];
+    } else {
+      // Clear entire cache
+      Object.keys(permissionsCache).forEach(key => {
+        delete permissionsCache[key];
+      });
+    }
+  };
 
   const fetchSubscription = async (userId: string) => {
     try {
@@ -78,15 +117,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updatePermissionsForRole = (userId: string, role: 'Admin' | 'Store Staff') => {
     if (role === 'Admin') {
       // Admin gets all permissions immediately
-      setPermissions({
+      const adminPermissions = {
         can_manage_products: true,
         can_manage_clients: true,
         can_manage_receipts: true,
         can_view_financial: true,
         can_manage_purchases: true,
         can_access_dashboard: true,
-      });
+      };
+      setPermissions(adminPermissions);
+      setCachedPermissions(userId, adminPermissions);
     } else {
+      // Check cache first for Store Staff
+      const cachedPermissions = getCachedPermissions(userId);
+      if (cachedPermissions) {
+        setPermissions(cachedPermissions);
+        return;
+      }
+
       // Fetch actual permissions for Store Staff
       supabase
         .from('permissions')
@@ -97,16 +145,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (permError) {
             console.error('Error fetching permissions:', permError);
             // Set default Store Staff permissions if none exist
-            setPermissions({
+            const defaultPermissions = {
               can_manage_products: true,
               can_manage_clients: true,
               can_manage_receipts: true,
               can_view_financial: false,
               can_manage_purchases: false,
               can_access_dashboard: true,
-            });
+            };
+            setPermissions(defaultPermissions);
+            setCachedPermissions(userId, defaultPermissions);
           } else {
             setPermissions(permissionsData);
+            setCachedPermissions(userId, permissionsData);
           }
         });
     }
@@ -126,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     localStorage.removeItem('sessionRole');
     setSessionRole('Store Staff'); // Reset to default role
+    invalidatePermissionsCache(); // Clear entire cache on sign out
   };
 
   const promoteToAdmin = async (accessCode: string) => {
@@ -224,7 +276,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       refreshSubscription,
       promoteToAdmin,
       setSessionRole: updateSessionRole,
-      exitAdminSession
+      exitAdminSession,
+      invalidatePermissionsCache
     }}>
       {children}
     </AuthContext.Provider>

@@ -27,7 +27,7 @@ interface StaffMember {
 }
 
 const Access = () => {
-  const { user, subscription, sessionRole, promoteToAdmin, permissions } = useAuth();
+  const { user, subscription, sessionRole, promoteToAdmin, permissions, invalidatePermissionsCache } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -100,6 +100,10 @@ const Access = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-permissions', user?.id] });
+      // Invalidate permissions cache for current user
+      if (user?.id) {
+        invalidatePermissionsCache(user.id);
+      }
       toast({
         title: "Success",
         description: "Your permissions updated successfully",
@@ -123,9 +127,12 @@ const Access = () => {
         .eq('user_id', userId);
 
       if (error) throw error;
+      return userId;
     },
-    onSuccess: () => {
+    onSuccess: (userId) => {
       queryClient.invalidateQueries({ queryKey: ['staff-members'] });
+      // Invalidate permissions cache for the updated user
+      invalidatePermissionsCache(userId);
       toast({
         title: "Success",
         description: "Staff permissions updated successfully",
