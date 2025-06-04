@@ -62,11 +62,38 @@ const Financial = () => {
   const [selectedPaidAtDelivery, setSelectedPaidAtDelivery] = useState('all');
   const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
 
+  // Debug query to check products table structure
+  const { data: debugProducts } = useQuery({
+    queryKey: ['debug-products', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      console.log('🔍 CHECKING PRODUCTS TABLE STRUCTURE...');
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', user.id)
+        .limit(3);
+
+      if (error) {
+        console.error('❌ Products query error:', error);
+        return [];
+      }
+      
+      console.log('🔍 SAMPLE PRODUCTS DATA:', data);
+      console.log('🔍 PRODUCTS TABLE COLUMNS:', data?.[0] ? Object.keys(data[0]) : 'No products found');
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
   // Fetch receipts with more detailed data
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      
+      console.log('🔍 FETCHING RECEIPTS WITH COMPANY DATA...');
+      
       const { data, error } = await supabase
         .from('receipts')
         .select(`
@@ -89,6 +116,7 @@ const Financial = () => {
             paid_at_delivery,
             custom_item_name,
             product:product_id (
+              id,
               name,
               category,
               stock,
@@ -100,7 +128,13 @@ const Financial = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Receipts query error:', error);
+        throw error;
+      }
+
+      console.log('🔍 FIRST RECEIPT WITH ITEMS:', data?.[0]);
+      console.log('🔍 FIRST RECEIPT ITEM PRODUCT:', data?.[0]?.receipt_items?.[0]?.product);
 
       return data || [];
     },
