@@ -226,19 +226,6 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
       if (receiptError) throw receiptError;
 
-      // Update both receipt fields and client table for consistency
-      const receiptClientUpdates = {
-        client_name: formData.client_name,
-        client_phone: formData.client_phone
-      };
-
-      const { error: receiptClientError } = await supabase
-        .from('receipts')
-        .update(receiptClientUpdates)
-        .eq('id', receipt.id);
-
-      if (receiptClientError) throw receiptClientError;
-
       // Update client table if client_id exists
       if (receipt.client_id) {
         const { error: clientError } = await supabase
