@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart, Filter } from 'lucide-react';
@@ -63,8 +63,8 @@ const Financial = () => {
   const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
 
   // Fetch receipts with more detailed data
-  const { data: receipts = [], refetch: refetchReceipts } = useQuery({
-    queryKey: ['receipts', user?.id, dateFrom, dateTo],
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
@@ -117,13 +117,11 @@ const Financial = () => {
       return processedData;
     },
     enabled: !!user,
-    staleTime: 0, // Always refetch to ensure fresh data
-    cacheTime: 0, // Don't cache to prevent stale data
   });
 
   // Fetch purchases with supplier info
-  const { data: purchases = [], refetch: refetchPurchases } = useQuery({
-    queryKey: ['purchases', user?.id, dateFrom, dateTo],
+  const { data: purchases = [] } = useQuery({
+    queryKey: ['purchases', user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
@@ -142,8 +140,6 @@ const Financial = () => {
       return data || [];
     },
     enabled: !!user,
-    staleTime: 0, // Always refetch to ensure fresh data
-    cacheTime: 0, // Don't cache to prevent stale data
   });
 
   // Filter data by date range and exclude deleted receipts
@@ -519,7 +515,7 @@ const Financial = () => {
     });
 
     return { allItems, summaryData };
-  }, [filteredReceipts, includePaidAtDelivery, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
+  }, [filteredReceipts, includePaidAtDelivery]);
 
   // Filter receipt items based on selected filters
   const filteredReceiptItems = useMemo(() => {
@@ -534,14 +530,6 @@ const Financial = () => {
       return matchesCategory && matchesCompany && matchesStockStatus && matchesPaidAtDelivery;
     });
   }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
-
-  // Add useEffect to handle data refresh when date range changes
-  React.useEffect(() => {
-    if (user) {
-      refetchReceipts();
-      refetchPurchases();
-    }
-  }, [dateFrom, dateTo, user, refetchReceipts, refetchPurchases]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
