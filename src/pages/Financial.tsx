@@ -102,19 +102,7 @@ const Financial = () => {
 
       if (error) throw error;
 
-      // Process the data to handle NULL company values
-      const processedData = data?.map(receipt => ({
-        ...receipt,
-        receipt_items: receipt.receipt_items?.map(item => ({
-          ...item,
-          product: item.product ? {
-            ...item.product,
-            company: item.product.company || 'None'
-          } : null
-        }))
-      })) || [];
-
-      return processedData;
+      return data || [];
     },
     enabled: !!user,
   });
@@ -213,13 +201,13 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          // Properly handle company values - only use 'None' for truly missing companies
-          const company = (item.product?.company && item.product.company.trim() !== '') 
-            ? item.product.company.trim() 
-            : 'None';
+          // Handle company values using simple pattern like category/stock_status
+          const company = item.product?.company || 'NULL';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
+          // Handle paid_at_delivery using simple pattern like other fields
+          const paidAtDelivery = item.paid_at_delivery || false;
 
           // Category analysis
           if (!acc.categories[category]) {
@@ -504,13 +492,11 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          // Handle company values - use 'NULL' for empty/missing companies
-          const company = (item.product?.company && item.product.company.trim() !== '') 
-            ? item.product.company.trim() 
-            : 'NULL';
+          // Handle company values using simple pattern like category/stock_status
+          const company = item.product?.company || 'NULL';
           const stockStatus = item.product?.stock_status || 'Order';
-          // Properly fetch paid_at_delivery value from the receipt item
-          const paidAtDelivery = Boolean(item.paid_at_delivery);
+          // Handle paid_at_delivery using simple pattern like other fields
+          const paidAtDelivery = item.paid_at_delivery || false;
 
           // Filter based on includePaidAtDelivery setting
           if (!includePaidAtDelivery && paidAtDelivery) {
