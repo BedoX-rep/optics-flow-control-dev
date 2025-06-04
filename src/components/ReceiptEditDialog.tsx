@@ -121,11 +121,16 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   useEffect(() => {
     const loadReceiptData = async () => {
       if (receipt) {
-        // Fetch full receipt data with product information
+        // Fetch full receipt data with product information and client data
         const { data: fullReceipt, error } = await supabase
           .from('receipts')
           .select(`
             *,
+            clients!client_id (
+              id,
+              name,
+              phone
+            ),
             receipt_items (
               *,
               product:product_id (
@@ -147,9 +152,13 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           return;
         }
 
+        // Use client data from clients table if available, otherwise fallback to receipt fields
+        const clientName = fullReceipt.clients?.name || fullReceipt.client_name || '';
+        const clientPhone = fullReceipt.clients?.phone || fullReceipt.client_phone || '';
+
         setFormData({
-          client_name: fullReceipt.client_name || '',
-          client_phone: fullReceipt.client_phone || '',
+          client_name: clientName,
+          client_phone: clientPhone,
           right_eye_sph: fullReceipt.right_eye_sph !== null ? String(fullReceipt.right_eye_sph) : '',
           right_eye_cyl: fullReceipt.right_eye_cyl !== null ? String(fullReceipt.right_eye_cyl) : '',
           right_eye_axe: fullReceipt.right_eye_axe !== null ? String(fullReceipt.right_eye_axe) : '',
@@ -217,6 +226,20 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
       if (receiptError) throw receiptError;
 
+      // Update both receipt fields and client table for consistency
+      const receiptClientUpdates = {
+        client_name: formData.client_name,
+        client_phone: formData.client_phone
+      };
+
+      const { error: receiptClientError } = await supabase
+        .from('receipts')
+        .update(receiptClientUpdates)
+        .eq('id', receipt.id);
+
+      if (receiptClientError) throw receiptClientError;
+
+      // Update client table if client_id exists
       if (receipt.client_id) {
         const { error: clientError } = await supabase
           .from('clients')
