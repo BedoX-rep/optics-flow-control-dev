@@ -78,7 +78,7 @@ const Financial = () => {
         console.error('❌ Products query error:', error);
         return [];
       }
-      
+
       console.log('🔍 SAMPLE PRODUCTS DATA:', data);
       console.log('🔍 PRODUCTS TABLE COLUMNS:', data?.[0] ? Object.keys(data[0]) : 'No products found');
       return data || [];
@@ -91,9 +91,9 @@ const Financial = () => {
     queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
+
       console.log('🔍 FETCHING RECEIPTS WITH COMPANY DATA...');
-      
+
       const { data, error } = await supabase
         .from('receipts')
         .select(`
@@ -535,7 +535,7 @@ const Financial = () => {
           // 🏢 COMPANY FIELD ANALYSIS
           const rawCompany = item.product?.company;
           companyAnalysis.rawCompanyValues.push(rawCompany);
-          
+
           if (rawCompany === null) companyAnalysis.nullValues++;
           else if (rawCompany === undefined) companyAnalysis.undefinedValues++;
           else if (rawCompany === '') companyAnalysis.emptyStrings++;
@@ -549,11 +549,11 @@ const Financial = () => {
           const profit = totalRevenue - totalCost;
           const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
-          const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
-          const category = item.product?.category || 'Unknown';
+          const productName = item.custom_item_name || item.products?.name || `Product ${index + 1}`;
+          const category = item.products?.category || 'Unknown';
           // Handle company values properly - convert null/undefined to 'NULL' string
-          const company = item.product?.company ?? 'NULL';
-          const stockStatus = item.product?.stock_status || 'Order';
+          const company = item.products?.company ?? 'NULL';
+          const stockStatus = item.products?.stock_status || 'Order';
           // Handle paid_at_delivery using simple pattern like other fields
           const paidAtDelivery = item.paid_at_delivery || false;
 
