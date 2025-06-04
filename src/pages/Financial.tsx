@@ -544,7 +544,7 @@ const Financial = () => {
 
       return matchesCategory && matchesCompany && matchesStockStatus && matchesPaidAtDelivery;
     });
-  }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery, filteredReceipts.length]);
+  }, [receiptItemsAnalysis, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
