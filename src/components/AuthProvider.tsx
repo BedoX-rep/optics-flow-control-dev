@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  const [authStateInitialized, setAuthStateInitialized] = useState(false); // Add this state
 
   const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -157,41 +158,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // First set up auth state listener to catch changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+    const handleAuthStateChange = async (event: any, newSession: Session | null) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
 
-        // Clear subscription data on sign out
-        if (event === 'SIGNED_OUT') {
-          setSubscription(null);
-          setPermissions(null);
-          localStorage.removeItem('sessionRole');
-          setSessionRole('Store Staff');
+      if (event === 'SIGNED_OUT') {
+        setSubscription(null);
+        setPermissions(null);
+        localStorage.removeItem('sessionRole');
+        setSessionRole('Store Staff');
+        setIsLoading(false);
+      } else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
+        try {
+          await fetchSubscription(newSession.user.id);
+        } catch (error) {
+          console.error("Error fetching subscription after auth event:", error);
+        } finally {
           setIsLoading(false);
-        } 
-        // Fetch subscription on sign in or token refresh
-        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase auth
-          setTimeout(() => {
-            fetchSubscription(newSession.user!.id);
-            setIsLoading(false);
-          }, 0);
         }
       }
-    );
+    };
 
-    // Then check for existing session
+
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
       if (currentSession?.user) {
-        fetchSubscription(currentSession.user.id);
+         fetchSubscription(currentSession.user.id).then(() => setIsLoading(false)).catch(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
       }
-
+      setAuthStateInitialized(true);
+    }).catch(() => {
       setIsLoading(false);
+      setAuthStateInitialized(true);
     });
 
     return () => {
@@ -202,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
     localStorage.setItem('sessionRole', role);
-    
+
     // Update permissions immediately based on new role
     if (user) {
       fetchSubscription(user.id);
@@ -212,7 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const exitAdminSession = () => {
     setSessionRole('Store Staff');
     localStorage.removeItem('sessionRole');
-    
+
     // Immediately refresh permissions for Store Staff role
     if (user) {
       fetchSubscription(user.id);
@@ -238,10 +241,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
