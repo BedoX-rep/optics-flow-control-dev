@@ -44,7 +44,7 @@ const ProtectedRoute = ({
   requiresActiveSubscription?: boolean;
   requiredPermission?: string;
 }) => {
-  const { user, subscription, isLoading, permissions } = useAuth();
+  const { user, subscription, isLoading, permissions, sessionRole } = useAuth();
 
   // Show loading state while initial auth check is happening
   if (isLoading) {
@@ -71,23 +71,21 @@ const ProtectedRoute = ({
     }
   }
 
-    // Check permission after loading is complete
-    if (requiredPermission) {
-      const { sessionRole } = useAuth();
-
-      // Special case for admin session requirement
-      if (requiredPermission === 'admin_session') {
-        if (sessionRole !== 'Admin') {
-          return <Navigate to="/dashboard" replace />;
-        }
-      }
-      // Admin session role bypasses all other permission checks
-      else if (sessionRole === 'Admin') {
-        // Allow access for admin
-      } else if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+  // Check permission after loading is complete
+  if (requiredPermission) {
+    // Special case for admin session requirement
+    if (requiredPermission === 'admin_session') {
+      if (sessionRole !== 'Admin') {
         return <Navigate to="/dashboard" replace />;
       }
     }
+    // Admin session role bypasses all other permission checks
+    else if (sessionRole === 'Admin') {
+      // Allow access for admin
+    } else if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
 
   return <>{children}</>;
 };
