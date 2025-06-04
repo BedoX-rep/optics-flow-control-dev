@@ -17,4 +17,4 @@ name = "Start"
 author = "replit"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "echo 'Click Start to run the project'"
