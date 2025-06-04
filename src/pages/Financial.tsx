@@ -63,7 +63,7 @@ const Financial = () => {
   const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
 
   // Fetch receipts with more detailed data
-  const { data: receipts = [] } = useQuery({
+  const { data: receipts = [], isLoading: receiptsLoading } = useQuery({
     queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -121,9 +121,13 @@ const Financial = () => {
         }))
       })) || [];
 
+      console.log('Processed receipts data:', processedData);
+      
       return processedData;
     },
     enabled: !!user,
+    staleTime: 0, // Force refresh to ensure fresh data
+    refetchOnMount: true,
   });
 
   // Fetch purchases with supplier info
@@ -428,6 +432,19 @@ const Financial = () => {
 
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
+    // Don't process if data is still loading
+    if (receiptsLoading || !receipts.length) {
+      return { 
+        allItems: [], 
+        summaryData: {
+          categories: {},
+          companies: {},
+          stockStatus: {},
+          paidAtDelivery: {}
+        }
+      };
+    }
+
     // Debug: Log a sample of receipt items to check data structure
     if (filteredReceipts.length > 0 && filteredReceipts[0].receipt_items?.length > 0) {
       console.log('Sample receipt item structure:', filteredReceipts[0].receipt_items[0]);
@@ -530,7 +547,7 @@ const Financial = () => {
     });
 
     return { allItems, summaryData };
-  }, [filteredReceipts, includePaidAtDelivery]);
+  }, [filteredReceipts, includePaidAtDelivery, receiptsLoading, receipts.length]);
 
   // Filter receipt items based on selected filters
   const filteredReceiptItems = useMemo(() => {
@@ -796,11 +813,12 @@ const Financial = () => {
               <div>
                 <Label htmlFor="companyFilter">Company Filter</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="mt-1">                    <SelectValue />
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Companies</SelectItem>
-                    {Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
+                    {!receiptsLoading && Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
                   </SelectContent>
