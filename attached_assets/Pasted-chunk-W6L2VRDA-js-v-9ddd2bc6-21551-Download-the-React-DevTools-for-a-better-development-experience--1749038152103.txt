@@ -1,0 +1,62 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/subscriptions?select=user_id%2Cemail%2Cdisplay_name%2Caccess_code%2Cpermissions%28can_manage_products%2Ccan_manage_clients%2Ccan_manage_receipts%2Ccan_view_financial%2Ccan_manage_purchases%2Ccan_access_dashboard%29:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+chunk-W6L2VRDA.js?v=9ddd2bc6:11595 Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11595:19)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+chunk-W6L2VRDA.js?v=9ddd2bc6:11595 Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11595:19)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=9ddd2bc6:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=9ddd2bc6:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=9ddd2bc6:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+chunk-W6L2VRDA.js?v=9ddd2bc6:14032 The above error occurred in the <Access> component:
+
+    at Access (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/src/pages/Access.tsx:23:106)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/src/components/Layout.tsx:23:19)
+    at ProtectedRoute (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/src/App.tsx:47:27)
+    at RenderedRoute (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/src/components/AuthProvider.tsx:16:32)
+    at LanguageProvider (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/chunk-ICA7ZJMY.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://ce0cb9a0-c076-4bbe-b68a-976c1ee9bd74-00-82jmshwa1dqw.riker.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=9ddd2bc6:14032
+chunk-W6L2VRDA.js?v=9ddd2bc6:9129 Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    at renderWithHooks (chunk-W6L2VRDA.js?v=9ddd2bc6:11595:19)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=9ddd2bc6:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=9ddd2bc6:15924:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=9ddd2bc6:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=9ddd2bc6:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=9ddd2bc6:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=9ddd2bc6:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=9ddd2bc6:18879:28)
+    at flushSyncCallbacks (chunk-W6L2VRDA.js?v=9ddd2bc6:9119:30)
