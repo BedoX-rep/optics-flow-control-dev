@@ -415,14 +415,29 @@ const Financial = () => {
     };
   }, [filteredReceipts, filteredPurchases]);
 
+  // Get unique values from all products for dropdown options
+  const dropdownOptions = useMemo(() => {
+    const categories = new Set<string>();
+    const companies = new Set<string>();
+    const stockStatuses = new Set<string>();
+
+    allProducts.forEach(product => {
+      if (product.category) categories.add(product.category);
+      if (product.company && product.company.trim() !== '') {
+        companies.add(product.company.trim());
+      }
+      if (product.stock_status) stockStatuses.add(product.stock_status);
+    });
+
+    return {
+      categories: Array.from(categories).sort(),
+      companies: Array.from(companies).sort(),
+      stockStatuses: Array.from(stockStatuses).sort()
+    };
+  }, [allProducts]);
+
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
-    // Debug: Log a sample of receipt items to check data structure
-    if (filteredReceipts.length > 0 && filteredReceipts[0].receipt_items?.length > 0) {
-      console.log('Sample receipt item structure:', filteredReceipts[0].receipt_items[0]);
-      console.log('Sample product data:', filteredReceipts[0].receipt_items[0]?.product);
-    }
-
     const allItems: Array<{
       id: string;
       receiptId: string;
@@ -460,11 +475,12 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          // Properly handle company values - only use 'None' for truly missing companies
+          // Handle company values - use 'NULL' for empty/missing companies
           const company = (item.product?.company && item.product.company.trim() !== '') 
             ? item.product.company.trim() 
-            : 'None';
+            : 'NULL';
           const stockStatus = item.product?.stock_status || 'Order';
+          // Properly fetch paid_at_delivery value from the receipt item
           const paidAtDelivery = Boolean(item.paid_at_delivery);
 
           // Filter based on includePaidAtDelivery setting
@@ -521,7 +537,9 @@ const Financial = () => {
   const filteredReceiptItems = useMemo(() => {
     return receiptItemsAnalysis.allItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesCompany = selectedCompany === 'all' || item.company === selectedCompany;
+      const matchesCompany = selectedCompany === 'all' || 
+        (selectedCompany === 'NULL' && item.company === 'NULL') ||
+        (selectedCompany !== 'NULL' && item.company === selectedCompany);
       const matchesStockStatus = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
       const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
         (selectedPaidAtDelivery === 'yes' && item.paidAtDelivery) ||
@@ -771,9 +789,10 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
+                    {dropdownOptions.categories.map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
+                    <SelectItem value="Unknown">Unknown</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -781,13 +800,15 @@ const Financial = () => {
               <div>
                 <Label htmlFor="companyFilter">Company Filter</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="mt-1">                    <SelectValue />
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Companies</SelectItem>
-                    {Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
+                    {dropdownOptions.companies.map(company => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
+                    <SelectItem value="NULL">NULL</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -800,9 +821,9 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Stock Status</SelectItem>
-                    <SelectItem value="InStock">In Stock</SelectItem>
-                    <SelectItem value="Fabrication">Fabrication</SelectItem>
-                    <SelectItem value="Order">Order</SelectItem>
+                    {dropdownOptions.stockStatuses.map(status => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -861,7 +882,9 @@ const Financial = () => {
                     <h5 className="font-medium text-gray-900">{item.productName}</h5>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.company}</span>
+                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                        {item.company === 'NULL' ? 'No Company' : item.company}
+                      </span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
                       {item.paidAtDelivery && (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Paid at Delivery</span>
