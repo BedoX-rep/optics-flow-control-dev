@@ -102,14 +102,21 @@ const Financial = () => {
 
       if (error) throw error;
 
-      // Process the data to handle NULL company values
+      // Process the data to handle NULL company values consistently
       const processedData = data?.map(receipt => ({
         ...receipt,
         receipt_items: receipt.receipt_items?.map(item => ({
           ...item,
           product: item.product ? {
             ...item.product,
-            company: item.product.company || 'None'
+            // Consistent company handling - normalize empty/null values to 'None'
+            company: (item.product.company && 
+                     typeof item.product.company === 'string' && 
+                     item.product.company.trim() !== '' &&
+                     item.product.company.trim().toLowerCase() !== 'null' &&
+                     item.product.company.trim().toLowerCase() !== 'undefined') 
+              ? item.product.company.trim() 
+              : 'None'
           } : null
         }))
       })) || [];
@@ -196,8 +203,12 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          // Properly handle company values - only use 'None' for truly missing companies
-          const company = (item.product?.company && item.product.company.trim() !== '') 
+          // Consistent company handling - normalize empty/null values to 'None'
+          const company = (item.product?.company && 
+                          typeof item.product.company === 'string' && 
+                          item.product.company.trim() !== '' &&
+                          item.product.company.trim().toLowerCase() !== 'null' &&
+                          item.product.company.trim().toLowerCase() !== 'undefined') 
             ? item.product.company.trim() 
             : 'None';
 
@@ -413,7 +424,7 @@ const Financial = () => {
       netMarginTotal,
       collectionRate
     };
-  }, [filteredReceipts, filteredPurchases]);
+  }, [filteredReceipts, filteredPurchases, receipts.length, purchases.length]);
 
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
@@ -460,8 +471,12 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          // Properly handle company values - only use 'None' for truly missing companies
-          const company = (item.product?.company && item.product.company.trim() !== '') 
+          // Consistent company handling - normalize empty/null values to 'None'
+          const company = (item.product?.company && 
+                          typeof item.product.company === 'string' && 
+                          item.product.company.trim() !== '' &&
+                          item.product.company.trim().toLowerCase() !== 'null' &&
+                          item.product.company.trim().toLowerCase() !== 'undefined') 
             ? item.product.company.trim() 
             : 'None';
           const stockStatus = item.product?.stock_status || 'Order';
@@ -529,7 +544,7 @@ const Financial = () => {
 
       return matchesCategory && matchesCompany && matchesStockStatus && matchesPaidAtDelivery;
     });
-  }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery]);
+  }, [receiptItemsAnalysis.allItems, selectedCategory, selectedCompany, selectedStockStatus, selectedPaidAtDelivery, filteredReceipts.length]);
 
   const handleQuickDateRange = (range: string) => {
     const now = new Date();
