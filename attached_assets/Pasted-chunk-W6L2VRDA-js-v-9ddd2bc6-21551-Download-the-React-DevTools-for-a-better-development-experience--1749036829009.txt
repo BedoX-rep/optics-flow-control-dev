@@ -1,0 +1,22 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-W6L2VRDA.js?v=9ddd2bc6:521 Warning: React has detected a change in the order of Hooks called by ProtectedRoute. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. undefined                  useContext
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    at ProtectedRoute (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/src/App.tsx:46:27)
+    at RenderedRoute (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4069:5)
+    at Routes (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4508:5)
+    at AppRoutes
+    at Router (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:4451:15)
+    at BrowserRouter (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=9ddd2bc6:5196:5)
+    at AuthProvider (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/src/components/AuthProvider.tsx:14:32)
+    at LanguageProvider (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/src/components/LanguageProvider.tsx:256:36)
+    at Provider (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/chunk-ICA7ZJMY.js?v=9ddd2bc6:38:15)
+    at TooltipProvider (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=9ddd2bc6:63:5)
+    at QueryClientProvider (https://6085dab6-866d-472f-abc5-ac4806136785-00-2mp0hdsxlard9.riker.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=9ddd2bc6:2875:3)
+    at App
+printWarning @ chunk-W6L2VRDA.js?v=9ddd2bc6:521
