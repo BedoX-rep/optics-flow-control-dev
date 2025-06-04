@@ -119,31 +119,62 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   });
 
   useEffect(() => {
-    if (receipt) {
-      setFormData({
-        client_name: receipt.client_name || '',
-        client_phone: receipt.client_phone || '',
-        right_eye_sph: receipt.right_eye_sph !== null ? String(receipt.right_eye_sph) : '',
-        right_eye_cyl: receipt.right_eye_cyl !== null ? String(receipt.right_eye_cyl) : '',
-        right_eye_axe: receipt.right_eye_axe !== null ? String(receipt.right_eye_axe) : '',
-        left_eye_sph: receipt.left_eye_sph !== null ? String(receipt.left_eye_sph) : '',
-        left_eye_cyl: receipt.left_eye_cyl !== null ? String(receipt.left_eye_cyl) : '',
-        left_eye_axe: receipt.left_eye_axe !== null ? String(receipt.left_eye_axe) : '',
-        add: receipt.add !== null ? String(receipt.add) : '',
-        montage_costs: receipt.montage_costs || 0,
-        total_discount: receipt.total_discount || 0,
-        tax: receipt.tax || 0,
-        advance_payment: receipt.advance_payment || 0,
-        delivery_status: receipt.delivery_status || '',
-        montage_status: receipt.montage_status || '',
-        order_type: receipt.order_type || '',
-        items: (receipt.receipt_items || []).map(item => ({
-          ...item,
-          paid_at_delivery: Boolean(item.paid_at_delivery)
-        })),
-        total: receipt.total || 0
-      });
-    }
+    const loadReceiptData = async () => {
+      if (receipt) {
+        // Fetch full receipt data with product information
+        const { data: fullReceipt, error } = await supabase
+          .from('receipts')
+          .select(`
+            *,
+            receipt_items (
+              *,
+              product:product_id (
+                id,
+                name,
+                category,
+                company,
+                price,
+                cost_ttc,
+                stock_status
+              )
+            )
+          `)
+          .eq('id', receipt.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching receipt details:', error);
+          return;
+        }
+
+        setFormData({
+          client_name: fullReceipt.client_name || '',
+          client_phone: fullReceipt.client_phone || '',
+          right_eye_sph: fullReceipt.right_eye_sph !== null ? String(fullReceipt.right_eye_sph) : '',
+          right_eye_cyl: fullReceipt.right_eye_cyl !== null ? String(fullReceipt.right_eye_cyl) : '',
+          right_eye_axe: fullReceipt.right_eye_axe !== null ? String(fullReceipt.right_eye_axe) : '',
+          left_eye_sph: fullReceipt.left_eye_sph !== null ? String(fullReceipt.left_eye_sph) : '',
+          left_eye_cyl: fullReceipt.left_eye_cyl !== null ? String(fullReceipt.left_eye_cyl) : '',
+          left_eye_axe: fullReceipt.left_eye_axe !== null ? String(fullReceipt.left_eye_axe) : '',
+          add: fullReceipt.add !== null ? String(fullReceipt.add) : '',
+          montage_costs: fullReceipt.montage_costs || 0,
+          total_discount: fullReceipt.total_discount || 0,
+          tax: fullReceipt.tax || 0,
+          advance_payment: fullReceipt.advance_payment || 0,
+          delivery_status: fullReceipt.delivery_status || '',
+          montage_status: fullReceipt.montage_status || '',
+          order_type: fullReceipt.order_type || '',
+          items: (fullReceipt.receipt_items || []).map(item => ({
+            ...item,
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            product: item.product // This will now contain the full product data
+          })),
+          total: fullReceipt.total || 0
+        });
+      }
+    };
+
+    loadReceiptData();
   }, [receipt]);
 
   const handleSubmit = async () => {
