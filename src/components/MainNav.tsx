@@ -12,7 +12,8 @@ import {
   ChevronRight,
   ShoppingCart,
   Calculator,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Purchases', href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
   { name: 'Financial', href: '/financial', icon: Calculator, permission: 'can_view_financial' },
   { name: 'Access', href: '/access', icon: Shield, permission: 'admin_session' },
+  { name: 'Settings', href: '/optician-settings', icon: Settings, permission: 'admin_session' },
 ];
 
 const MainNav = () => {
