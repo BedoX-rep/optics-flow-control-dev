@@ -115,8 +115,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     montage_status: '',
     order_type: '',
     items: [] as any[],
-    total: 0,
-    client_id: null as string | null
+    total: 0
   });
 
   useEffect(() => {
@@ -179,8 +178,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             paid_at_delivery: Boolean(item.paid_at_delivery),
             product: item.product // This will now contain the full product data
           })),
-          total: fullReceipt.total || 0,
-          client_id: fullReceipt.client_id // Store the client_id for later use
+          total: fullReceipt.total || 0
         });
       }
     };
@@ -241,25 +239,17 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
       if (receiptClientError) throw receiptClientError;
 
-      // Update client table if client_id exists (use formData.client_id which is properly loaded)
-      if (formData.client_id) {
+      // Update client table if client_id exists
+      if (receipt.client_id) {
         const { error: clientError } = await supabase
           .from('clients')
           .update({
             name: formData.client_name,
             phone: formData.client_phone
           })
-          .eq('id', formData.client_id);
+          .eq('id', receipt.client_id);
 
-        if (clientError) {
-          console.error('Error updating client:', clientError);
-          // Don't throw error here to avoid breaking receipt update
-          toast({
-            title: "Warning",
-            description: "Receipt updated but client data update failed",
-            variant: "destructive",
-          });
-        }
+        if (clientError) throw clientError;
       }
 
       for (const item of formData.items) {
