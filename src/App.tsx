@@ -11,8 +11,9 @@ import Clients from "./pages/Clients";
 import Receipts from "./pages/Receipts";
 import Purchases from './pages/Purchases';
 import Financial from './pages/Financial';
+import Access from './pages/Access';
+import OpticianSettings from './pages/OpticianSettings';
 import Subscriptions from './pages/Subscriptions';
-import Access from '@/pages/Access';
 import NewReceipt from "./pages/NewReceipt";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -157,6 +158,12 @@ const AppRoutes = () => (
         <Layout><NewReceipt /></Layout>
       </ProtectedRoute>
     } />
+
+    <Route path="/optician-settings" element={
+              <ProtectedRoute>
+                <Layout><OpticianSettings /></Layout>
+              </ProtectedRoute>
+            } />
 
     <Route path="/subscriptions" element={
       <ProtectedRoute requiresActiveSubscription={false}>

@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthProvider';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { Home, Package, Receipt, DollarSign, ShoppingCart, CreditCard, Menu, Search, Settings } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -79,11 +80,6 @@ const Layout = ({ children }: LayoutProps) => {
                 variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
                 className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
               >
-                {sessionRole === 'Admin' ? (
-                  <Shield className="h-3 w-3 mr-1" />
-                ) : (
-                  <User className="h-3 w-3 mr-1" />
-                )}
                 {sessionRole}
               </Badge>
             </div>

@@ -770,3 +770,33 @@ export interface ReceiptItem {
   is_deleted?: boolean;
   product?: Product;
 }
+export interface UserInformation {
+  id: string;
+  user_id: string;
+  store_name?: string;
+  display_name?: string;
+  address?: string;
+  vat_number?: string;
+  ice?: string;
+  inpe?: string;
+  company_legal_status?: string;
+  logo_url?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Database {
+  public: {
+    Tables: {
+      user_information: {
+        Row: UserInformation;
+        Insert: Omit<UserInformation, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserInformation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      // ... other existing tables
+    };
+  };
+}
