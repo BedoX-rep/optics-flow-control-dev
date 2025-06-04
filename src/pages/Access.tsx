@@ -34,15 +34,6 @@ const Access = () => {
 
   const isAdmin = sessionRole === 'Admin';
 
-  // Redirect staff users who haven't elevated to admin
-  if (!user) {
-    return <div>Please log in to access this page.</div>;
-  }
-
-  if (sessionRole === 'Store Staff') {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   // Fetch user's own permissions
   const { data: userPermissions, isLoading: userPermissionsLoading } = useQuery({
     queryKey: ['user-permissions', user?.id],
@@ -71,19 +62,35 @@ const Access = () => {
           user_id,
           email,
           display_name,
-          access_code,
-          permissions (
-            can_manage_products,
-            can_manage_clients,
-            can_manage_receipts,
-            can_view_financial,
-            can_manage_purchases,
-            can_access_dashboard
-          )
+          access_code
         `);
 
       if (error) throw error;
-      return data as StaffMember[];
+      
+      // Fetch permissions separately for each user
+      const staffWithPermissions = await Promise.all(
+        data.map(async (staff) => {
+          const { data: permData } = await supabase
+            .from('permissions')
+            .select('*')
+            .eq('user_id', staff.user_id)
+            .single();
+          
+          return {
+            ...staff,
+            permissions: permData || {
+              can_manage_products: true,
+              can_manage_clients: true,
+              can_manage_receipts: true,
+              can_view_financial: false,
+              can_manage_purchases: false,
+              can_access_dashboard: true,
+            }
+          };
+        })
+      );
+      
+      return staffWithPermissions as StaffMember[];
     },
     enabled: isAdmin,
   });
@@ -146,6 +153,15 @@ const Access = () => {
       });
     },
   });
+
+  // Redirect staff users who haven't elevated to admin (after hooks)
+  if (!user) {
+    return <div>Please log in to access this page.</div>;
+  }
+
+  if (sessionRole === 'Store Staff') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handlePromoteToAdmin = async () => {
     if (!accessCodeInput.trim()) {
