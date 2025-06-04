@@ -30,7 +30,7 @@ const navigation = [
 ];
 
 const MainNav = () => {
-  const { subscription, permissions, sessionRole } = useAuth();
+  const { user, subscription, permissions, sessionRole } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
 

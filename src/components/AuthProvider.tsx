@@ -68,46 +68,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (subError) throw subError;
 
       setSubscription(subscriptionData);
-
-      // Fetch permissions
-      const { data: permissionsData, error: permError } = await supabase
-        .from('permissions')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (permError) {
-        console.error('Error fetching permissions:', permError);
-        // Set default Store Staff permissions if none exist
-        setPermissions({
-          can_manage_products: true,
-          can_manage_clients: true,
-          can_manage_receipts: true,
-          can_view_financial: false,
-          can_manage_purchases: false,
-          can_access_dashboard: true,
-        });
-      } else {
-        // If session role is Admin, override with admin permissions
-        if (sessionRole === 'Admin') {
-          setPermissions({
-            can_manage_products: true,
-            can_manage_clients: true,
-            can_manage_receipts: true,
-            can_view_financial: true,
-            can_manage_purchases: true,
-            can_access_dashboard: true,
-          });
-        } else {
-          setPermissions(permissionsData);
-        }
-      }
-
       setLastRefreshTime(Date.now());
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
-      setPermissions(null);
+    }
+  };
+
+  const updatePermissionsForRole = (userId: string, role: 'Admin' | 'Store Staff') => {
+    if (role === 'Admin') {
+      // Admin gets all permissions immediately
+      setPermissions({
+        can_manage_products: true,
+        can_manage_clients: true,
+        can_manage_receipts: true,
+        can_view_financial: true,
+        can_manage_purchases: true,
+        can_access_dashboard: true,
+      });
+    } else {
+      // Fetch actual permissions for Store Staff
+      supabase
+        .from('permissions')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+        .then(({ data: permissionsData, error: permError }) => {
+          if (permError) {
+            console.error('Error fetching permissions:', permError);
+            // Set default Store Staff permissions if none exist
+            setPermissions({
+              can_manage_products: true,
+              can_manage_clients: true,
+              can_manage_receipts: true,
+              can_view_financial: false,
+              can_manage_purchases: false,
+              can_access_dashboard: true,
+            });
+          } else {
+            setPermissions(permissionsData);
+          }
+        });
     }
   };
 
@@ -139,10 +140,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = data[0];
         if (result.valid) {
           updateSessionRole('Admin');
-          // Refresh permissions for the new role
-          if (user) {
-            await fetchSubscription(user.id);
-          }
           return { success: true, message: 'Successfully elevated to Admin for this session' };
         } else {
           return { success: false, message: result.message };
@@ -173,11 +170,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } 
         // Fetch subscription on sign in or token refresh
         else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
-          // Use setTimeout to avoid potential deadlock with Supabase auth
-          setTimeout(() => {
-            fetchSubscription(newSession.user!.id);
-            setIsLoading(false);
-          }, 0);
+          fetchSubscription(newSession.user!.id);
+          updatePermissionsForRole(newSession.user!.id, sessionRole);
+          setIsLoading(false);
         }
       }
     );
@@ -189,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (currentSession?.user) {
         fetchSubscription(currentSession.user.id);
+        updatePermissionsForRole(currentSession.user.id, sessionRole);
       }
 
       setIsLoading(false);
@@ -199,30 +195,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Handle instant permission updates when sessionRole changes
+  useEffect(() => {
+    if (user && !isLoading) {
+      updatePermissionsForRole(user.id, sessionRole);
+    }
+  }, [sessionRole, user, isLoading]);
+
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
     localStorage.setItem('sessionRole', role);
-    
-    // Update permissions immediately based on new role
-    if (user) {
-      // Force immediate permission update
-      setTimeout(() => {
-        fetchSubscription(user.id);
-      }, 0);
-    }
   };
 
   const exitAdminSession = () => {
     setSessionRole('Store Staff');
     localStorage.removeItem('sessionRole');
-    
-    // Immediately refresh permissions for Store Staff role
-    if (user) {
-      // Force immediate permission update
-      setTimeout(() => {
-        fetchSubscription(user.id);
-      }, 0);
-    }
   };
 
   return (
