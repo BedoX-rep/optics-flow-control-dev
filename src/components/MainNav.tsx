@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
@@ -30,8 +30,8 @@ const navigation = [
 ];
 
 const MainNav = () => {
+  const { subscription, permissions, sessionRole } = useAuth();
   const location = useLocation();
-  const { user, permissions, sessionRole } = useAuth();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -46,6 +46,25 @@ const MainNav = () => {
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
+  // Memoize filtered navigation to react to permission and role changes instantly
+  const filteredNavigation = useMemo(() => {
+    return navigation.filter(item => {
+      if (item.permission === null) return true; // Always show items without permission requirements
+
+      // Special case for admin session requirement
+      if (item.permission === 'admin_session') {
+        return sessionRole === 'Admin';
+      }
+
+      // Admin session role bypasses all other permission checks
+      if (sessionRole === 'Admin') return true;
+
+      if (!permissions) return false; // Hide if permissions are not loaded
+
+      return permissions[item.permission as keyof typeof permissions];
+    });
+  }, [permissions, sessionRole]);
 
   return (
     <div 
@@ -72,23 +91,7 @@ const MainNav = () => {
       </div>
 
       <nav className="p-3 space-y-1 mt-2">
-        {navigation.map((item) => {
-          // Check if user has permission to see this route
-          if (item.permission) {
-            if (item.permission === 'admin_session') {
-              // Special case for admin-only routes
-              if (sessionRole !== 'Admin') {
-                return null;
-              }
-            } else if (sessionRole !== 'Admin') {
-              // For staff users, check their actual permissions
-              if (!permissions || !permissions[item.permission as keyof typeof permissions]) {
-                return null;
-              }
-            }
-            // Admin users bypass all permission checks
-          }
-          
+        {filteredNavigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <Link

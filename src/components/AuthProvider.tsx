@@ -205,7 +205,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Update permissions immediately based on new role
     if (user) {
-      fetchSubscription(user.id);
+      // Force immediate permission update
+      setTimeout(() => {
+        fetchSubscription(user.id);
+      }, 0);
     }
   };
 
@@ -215,7 +218,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Immediately refresh permissions for Store Staff role
     if (user) {
-      fetchSubscription(user.id);
+      // Force immediate permission update
+      setTimeout(() => {
+        fetchSubscription(user.id);
+      }, 0);
     }
   };
 
