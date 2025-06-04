@@ -23,7 +23,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children }: LayoutProps }) => {
   const { user, subscription, sessionRole, promoteToAdmin, signOut, exitAdminSession } = useAuth();
   const { toast } = useToast();
   const [referralDialogOpen, setReferralDialogOpen] = useState(false);

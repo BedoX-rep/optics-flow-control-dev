@@ -160,7 +160,7 @@ const AppRoutes = () => (
     } />
 
     <Route path="/optician-settings" element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPermission="admin_session">
                 <Layout><OpticianSettings /></Layout>
               </ProtectedRoute>
             } />
