@@ -201,8 +201,8 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          // Handle company values using simple pattern like category/stock_status
-          const company = item.product?.company || 'NULL';
+          // Handle company values properly for null/undefined
+          const company = item.product?.company || null;
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -229,23 +229,24 @@ const Financial = () => {
           acc.stockStatus[stockStatus].margin = acc.stockStatus[stockStatus].revenue > 0 ? (acc.stockStatus[stockStatus].profit / acc.stockStatus[stockStatus].revenue) * 100 : 0;
           acc.stockStatus[stockStatus].items += quantity;
 
-          // Company analysis
-          if (!acc.companies[company]) {
-            acc.companies[company] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0 };
+          // Company analysis - use proper key for null companies
+          const companyKey = company || 'No Company';
+          if (!acc.companies[companyKey]) {
+            acc.companies[companyKey] = { cost: 0, revenue: 0, profit: 0, margin: 0, items: 0 };
           }
-          acc.companies[company].cost += totalItemCost;
-          acc.companies[company].revenue += totalItemRevenue;
-          acc.companies[company].profit = acc.companies[company].revenue - acc.companies[company].cost;
-          acc.companies[company].margin = acc.companies[company].revenue > 0 ? (acc.companies[company].profit / acc.companies[company].revenue) * 100 : 0;
-          acc.companies[company].items += quantity;
+          acc.companies[companyKey].cost += totalItemCost;
+          acc.companies[companyKey].revenue += totalItemRevenue;
+          acc.companies[companyKey].profit = acc.companies[companyKey].revenue - acc.companies[companyKey].cost;
+          acc.companies[companyKey].margin = acc.companies[companyKey].revenue > 0 ? (acc.companies[companyKey].profit / acc.companies[companyKey].revenue) * 100 : 0;
+          acc.companies[companyKey].items += quantity;
 
           // Combined analysis for filtering
-          const key = `${category}|${stockStatus}|${company}`;
+          const key = `${category}|${stockStatus}|${companyKey}`;
           if (!acc.combined[key]) {
             acc.combined[key] = { 
               category, 
               stockStatus,
-              company,
+              company: companyKey,
               cost: 0, 
               revenue: 0, 
               profit: 0, 
@@ -492,8 +493,8 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          // Handle company values using simple pattern like category/stock_status
-          const company = item.product?.company || 'NULL';
+          // Handle company values properly for null/undefined
+          const company = item.product?.company || null;
           const stockStatus = item.product?.stock_status || 'Order';
           // Handle paid_at_delivery using simple pattern like other fields
           const paidAtDelivery = item.paid_at_delivery || false;
@@ -525,7 +526,7 @@ const Financial = () => {
           // Update summary data
           [
             ['categories', category],
-            ['companies', company],
+            ['companies', company || 'No Company'],
             ['stockStatus', stockStatus],
             ['paidAtDelivery', paidAtDelivery ? 'Yes' : 'No']
           ].forEach(([type, key]) => {
@@ -553,8 +554,8 @@ const Financial = () => {
     return receiptItemsAnalysis.allItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
       const matchesCompany = selectedCompany === 'all' || 
-        (selectedCompany === 'NULL' && item.company === 'NULL') ||
-        (selectedCompany !== 'NULL' && item.company === selectedCompany);
+        (selectedCompany === 'No Company' && !item.company) ||
+        (selectedCompany !== 'No Company' && item.company === selectedCompany);
       const matchesStockStatus = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
       const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
         (selectedPaidAtDelivery === 'yes' && item.paidAtDelivery) ||
@@ -823,7 +824,7 @@ const Financial = () => {
                     {dropdownOptions.companies.map(company => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
-                    <SelectItem value="NULL">NULL</SelectItem>
+                    <SelectItem value="No Company">No Company</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -898,7 +899,7 @@ const Financial = () => {
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
                       <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {item.company === 'NULL' ? 'No Company' : item.company}
+                        {item.company || 'No Company'}
                       </span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
                       {item.paidAtDelivery && (
