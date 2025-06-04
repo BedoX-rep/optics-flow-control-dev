@@ -455,6 +455,13 @@ const Financial = () => {
 
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
+    // 🔍 RAW DATABASE DATA
+    console.log('🔍 RAW DATABASE DATA:', { 
+      totalReceipts: filteredReceipts.length,
+      firstReceipt: filteredReceipts[0],
+      firstReceiptItems: filteredReceipts[0]?.receipt_items
+    });
+
     const allItems: Array<{
       id: string;
       receiptId: string;
@@ -479,9 +486,27 @@ const Financial = () => {
       paidAtDelivery: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>
     };
 
+    // 🏢 COMPANY FIELD ANALYSIS
+    const companyAnalysis = {
+      nullValues: 0,
+      undefinedValues: 0,
+      emptyStrings: 0,
+      validCompanies: [] as string[],
+      rawCompanyValues: [] as any[]
+    };
+
     filteredReceipts.forEach(receipt => {
       if (Array.isArray(receipt.receipt_items)) {
         receipt.receipt_items.forEach((item, index) => {
+          // 🏢 COMPANY FIELD ANALYSIS
+          const rawCompany = item.product?.company;
+          companyAnalysis.rawCompanyValues.push(rawCompany);
+          
+          if (rawCompany === null) companyAnalysis.nullValues++;
+          else if (rawCompany === undefined) companyAnalysis.undefinedValues++;
+          else if (rawCompany === '') companyAnalysis.emptyStrings++;
+          else if (rawCompany) companyAnalysis.validCompanies.push(rawCompany);
+
           const quantity = Number(item.quantity) || 1;
           const cost = Number(item.cost) || 0;
           const price = Number(item.price) || 0;
@@ -543,6 +568,17 @@ const Financial = () => {
           });
         });
       }
+    });
+
+    // 🏢 COMPANY FIELD ANALYSIS RESULTS
+    console.log('🏢 COMPANY FIELD ANALYSIS:', {
+      totalItems: companyAnalysis.rawCompanyValues.length,
+      nullValues: companyAnalysis.nullValues,
+      undefinedValues: companyAnalysis.undefinedValues,
+      emptyStrings: companyAnalysis.emptyStrings,
+      validCompanies: [...new Set(companyAnalysis.validCompanies)],
+      rawValues: companyAnalysis.rawCompanyValues.slice(0, 10), // First 10 raw values
+      uniqueCompanies: Object.keys(summaryData.companies)
     });
 
     return { allItems, summaryData };
@@ -775,6 +811,23 @@ const Financial = () => {
           </p>
         </CardHeader>
         <CardContent>
+          {/* Debug Button */}
+          <div className="mb-4">
+            <Button 
+              onClick={() => {
+                console.log('🔍 MANUAL DEBUG DATA:', {
+                  receipts: filteredReceipts,
+                  receiptItems: receiptItemsAnalysis,
+                  financialMetrics: financialMetrics
+                });
+              }}
+              variant="outline"
+              size="sm"
+            >
+              🔍 Debug Data
+            </Button>
+          </div>
+
           {/* Filter Controls */}
           <div className="space-y-4 mb-6">
             {/* Include/Exclude Paid at Delivery Checkbox */}
