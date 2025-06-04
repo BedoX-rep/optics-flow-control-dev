@@ -764,9 +764,9 @@ export interface ReceiptItem {
   profit?: number;
   linked_eye?: string;
   applied_markup?: number;
-  paid_at_delivery?: boolean;
+  paid_at_delivery?: boolean | null;
   created_at: string;
   updated_at: string;
   is_deleted?: boolean;
-  product?: Product;
+  product?: Product | null;
 }
