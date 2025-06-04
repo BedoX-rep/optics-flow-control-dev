@@ -201,8 +201,8 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          // Handle company values using simple pattern like category/stock_status
-          const company = item.product?.company || 'NULL';
+          // Handle company values properly - convert null/undefined to 'NULL' string
+          const company = item.product?.company ?? 'NULL';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
@@ -492,8 +492,8 @@ const Financial = () => {
 
           const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
           const category = item.product?.category || 'Unknown';
-          // Handle company values using simple pattern like category/stock_status
-          const company = item.product?.company || 'NULL';
+          // Handle company values properly - convert null/undefined to 'NULL' string
+          const company = item.product?.company ?? 'NULL';
           const stockStatus = item.product?.stock_status || 'Order';
           // Handle paid_at_delivery using simple pattern like other fields
           const paidAtDelivery = item.paid_at_delivery || false;
@@ -553,7 +553,7 @@ const Financial = () => {
     return receiptItemsAnalysis.allItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
       const matchesCompany = selectedCompany === 'all' || 
-        (selectedCompany === 'NULL' && item.company === 'NULL') ||
+        (selectedCompany === 'NULL' && (item.company === 'NULL' || item.company === null || item.company === undefined)) ||
         (selectedCompany !== 'NULL' && item.company === selectedCompany);
       const matchesStockStatus = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
       const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
@@ -898,7 +898,7 @@ const Financial = () => {
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
                       <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {item.company === 'NULL' ? 'No Company' : item.company}
+                        {item.company === 'NULL' || item.company === null || item.company === undefined ? 'No Company' : item.company}
                       </span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
                       {item.paidAtDelivery && (
