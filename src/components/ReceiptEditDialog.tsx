@@ -15,14 +15,83 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { User, Eye, Package2, Receipt, Banknote, FileText } from "lucide-react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { User, Eye, Package2, Receipt, Banknote, FileText, Search } from "lucide-react";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   receipt: Receipt | null;
 }
+
+const ProductSelector = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const { data: products = [] } = useQuery({
+    queryKey: ['products-for-linking', searchTerm],
+    queryFn: async () => {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .eq('is_deleted', false)
+        .order('name');
+
+      if (searchTerm) {
+        query = query.ilike('name', `%${searchTerm}%`);
+      }
+
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: true
+  });
+
+  return (
+    <>
+      <div className="p-2 border-b">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+      {products.map(product => (
+        <SelectItem key={product.id} value={product.id}>
+          <div className="flex justify-between items-center w-full gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium truncate">{product.name}</div>
+              <div className="text-xs text-gray-500 truncate">
+                {product.category} • {product.company || 'No Company'}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className={`text-xs px-2 py-1 rounded ${
+                product.stock_status === 'inStock' ? 'bg-green-100 text-green-700' :
+                product.stock_status === 'Out Of Stock' ? 'bg-red-100 text-red-700' :
+                'bg-orange-100 text-orange-700'
+              }`}>
+                {product.stock_status}
+              </span>
+              <span className="text-sm font-medium text-blue-600">
+                {product.price?.toFixed(2)} DH
+              </span>
+            </div>
+          </div>
+        </SelectItem>
+      ))}
+      {products.length === 0 && (
+        <div className="p-4 text-center text-gray-500 text-sm">
+          No products found
+        </div>
+      )}
+    </>
+  );
+};
 
 const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps) => {
   const { toast } = useToast();
@@ -133,11 +202,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         const { error: itemError } = await supabase
           .from('receipt_items')
           .update({
+            product_id: item.product_id || null,
             custom_item_name: item.custom_item_name,
             price: item.price,
             cost: item.cost,
             quantity: item.quantity,
-            paid_at_delivery: Boolean(item.paid_at_delivery)
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            linked_eye: item.linked_eye || null,
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
           })
           .eq('id', item.id);
 
@@ -401,9 +473,88 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                 {formData.items.map((item, index) => (
                   <Card key={index} className="border-dashed">
                     <CardContent className="pt-4">
-                      <div className="grid grid-cols-4 gap-4">
+                      {/* Product Linking Section */}
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package2 className="h-4 w-4 text-blue-600" />
+                          <Label className="text-sm font-semibold">Product Link</Label>
+                        </div>
+                        {item.product_id ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 p-2 bg-white rounded border">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium">{item.product?.name || 'Unknown Product'}</span>
+                                  <div className="text-sm text-gray-500">
+                                    {item.product?.category} • {item.product?.company || 'No Company'} • Stock: {item.product?.stock_status}
+                                  </div>
+                                </div>
+                                <div className="text-sm text-blue-600">
+                                  {item.product?.price?.toFixed(2)} DH
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                // Unlink product
+                                const newItems = [...formData.items];
+                                newItems[index] = { 
+                                  ...item, 
+                                  product_id: null, 
+                                  product: null,
+                                  custom_item_name: item.product?.name || item.custom_item_name || ''
+                                };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            >
+                              Unlink
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value=""
+                              onValueChange={async (productId) => {
+                                // Fetch product details
+                                const { data: product } = await supabase
+                                  .from('products')
+                                  .select('*')
+                                  .eq('id', productId)
+                                  .single();
+                                
+                                if (product) {
+                                  const newItems = [...formData.items];
+                                  newItems[index] = { 
+                                    ...item, 
+                                    product_id: productId,
+                                    product: product,
+                                    price: product.price,
+                                    cost: product.cost_ttc || 0,
+                                    custom_item_name: null
+                                  };
+                                  setFormData({ ...formData, items: newItems });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Link to a product..." />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-60">
+                                {/* We'll fetch products dynamically */}
+                                <ProductSelector />
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Item Details Section */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <Label>Name</Label>
+                          <Label>Item Name</Label>
                           <Input
                             value={item.custom_item_name || item.product?.name || ''}
                             onChange={(e) => {
@@ -411,12 +562,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                               newItems[index] = { ...item, custom_item_name: e.target.value };
                               setFormData({ ...formData, items: newItems });
                             }}
+                            placeholder="Enter item name"
                           />
                         </div>
                         <div>
                           <Label>Quantity</Label>
                           <Input
                             type="number"
+                            min="1"
                             value={item.quantity}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -426,10 +579,16 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             }}
                           />
                         </div>
+                      </div>
+
+                      {/* Financial Details Section */}
+                      <div className="grid grid-cols-3 gap-4 mb-4">
                         <div>
-                          <Label>Price</Label>
+                          <Label>Price (DH)</Label>
                           <Input
                             type="number"
+                            min="0"
+                            step="0.01"
                             value={item.price}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -440,9 +599,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                         <div>
-                          <Label>Cost</Label>
+                          <Label>Cost (DH)</Label>
                           <Input
                             type="number"
+                            min="0"
+                            step="0.01"
                             value={item.cost}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -451,25 +612,70 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             }}
                           />
                         </div>
+                        <div>
+                          <Label>Total</Label>
+                          <div className="h-10 px-3 py-2 rounded-md bg-gray-50 font-medium flex items-center">
+                            {(item.price * item.quantity).toFixed(2)} DH
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-4">
-                        <Label className="text-sm font-medium">Payment Status</Label>
-                        <Select
-                          value={item.paid_at_delivery ? "paid" : "unpaid"}
-                          onValueChange={(value) => {
-                            const newItems = [...formData.items];
-                            newItems[index] = { ...item, paid_at_delivery: value === "paid" };
-                            setFormData({ ...formData, items: newItems });
-                          }}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unpaid">Not Paid at Delivery</SelectItem>
-                            <SelectItem value="paid">Paid at Delivery</SelectItem>
-                          </SelectContent>
-                        </Select>
+
+                      {/* Additional Options */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {/* Payment Status */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`paid-delivery-${index}`}
+                              checked={item.paid_at_delivery || false}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[index] = { ...item, paid_at_delivery: e.target.checked };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            />
+                            <Label htmlFor={`paid-delivery-${index}`} className="text-sm">
+                              Paid at Delivery
+                            </Label>
+                          </div>
+
+                          {/* Eye Linking for Lens Products */}
+                          {item.product?.category?.includes('Lenses') && (
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm">Eye:</Label>
+                              <Select
+                                value={item.linked_eye || 'none'}
+                                onValueChange={(value) => {
+                                  const newItems = [...formData.items];
+                                  newItems[index] = { 
+                                    ...item, 
+                                    linked_eye: value === 'none' ? null : value 
+                                  };
+                                  setFormData({ ...formData, items: newItems });
+                                }}
+                              >
+                                <SelectTrigger className="w-20">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">None</SelectItem>
+                                  <SelectItem value="RE">RE</SelectItem>
+                                  <SelectItem value="LE">LE</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Profit Display */}
+                        <div className="text-sm">
+                          <span className="text-gray-500">Profit: </span>
+                          <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
