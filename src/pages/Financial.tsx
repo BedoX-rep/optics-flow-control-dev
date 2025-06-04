@@ -62,38 +62,11 @@ const Financial = () => {
   const [selectedPaidAtDelivery, setSelectedPaidAtDelivery] = useState('all');
   const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
 
-  // Debug query to check products table structure
-  const { data: debugProducts } = useQuery({
-    queryKey: ['debug-products', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      console.log('🔍 CHECKING PRODUCTS TABLE STRUCTURE...');
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('user_id', user.id)
-        .limit(3);
-
-      if (error) {
-        console.error('❌ Products query error:', error);
-        return [];
-      }
-
-      console.log('🔍 SAMPLE PRODUCTS DATA:', data);
-      console.log('🔍 PRODUCTS TABLE COLUMNS:', data?.[0] ? Object.keys(data[0]) : 'No products found');
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
   // Fetch receipts with more detailed data
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
-
-      console.log('🔍 FETCHING RECEIPTS WITH COMPANY DATA...');
-
       const { data, error } = await supabase
         .from('receipts')
         .select(`
@@ -116,7 +89,6 @@ const Financial = () => {
             paid_at_delivery,
             custom_item_name,
             product:product_id (
-              id,
               name,
               category,
               stock,
@@ -128,15 +100,21 @@ const Financial = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Receipts query error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('🔍 FIRST RECEIPT WITH ITEMS:', data?.[0]);
-      console.log('🔍 FIRST RECEIPT ITEM PRODUCT:', data?.[0]?.receipt_items?.[0]?.product);
+      // Process the data to handle NULL company values
+      const processedData = data?.map(receipt => ({
+        ...receipt,
+        receipt_items: receipt.receipt_items?.map(item => ({
+          ...item,
+          product: item.product ? {
+            ...item.product,
+            company: item.product.company || 'None'
+          } : null
+        }))
+      })) || [];
 
-      return data || [];
+      return processedData;
     },
     enabled: !!user,
   });
@@ -157,23 +135,6 @@ const Financial = () => {
         .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  // Fetch all products for dropdown options
-  const { data: allProducts = [] } = useQuery({
-    queryKey: ['all-products', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, category, company, stock_status')
-        .eq('user_id', user.id)
-        .eq('is_deleted', false);
 
       if (error) throw error;
       return data || [];
@@ -235,13 +196,13 @@ const Financial = () => {
           const totalItemRevenue = price * quantity;
           const category = item.product?.category || 'Unknown';
           const stock = item.product?.stock || 0;
-          // Handle company values properly - convert null/undefined to 'NULL' string
-          const company = item.product?.company ?? 'NULL';
+          // Properly handle company values - only use 'None' for truly missing companies
+          const company = (item.product?.company && item.product.company.trim() !== '') 
+            ? item.product.company.trim() 
+            : 'None';
 
           // Use actual stock status from product
           const stockStatus = item.product?.stock_status || 'Order';
-          // Handle paid_at_delivery using simple pattern like other fields
-          const paidAtDelivery = item.paid_at_delivery || false;
 
           // Category analysis
           if (!acc.categories[category]) {
@@ -454,47 +415,13 @@ const Financial = () => {
     };
   }, [filteredReceipts, filteredPurchases]);
 
-  // Static dropdown options from ProductForm constants
-  const dropdownOptions = useMemo(() => {
-    const categories = [
-      "Single Vision Lenses",
-      "Progressive Lenses", 
-      "Frames",
-      "Sunglasses",
-      "Contact Lenses",
-      "Accessories"
-    ];
-
-    const companies = [
-      "Indo",
-      "ABlens", 
-      "Essilor",
-      "GLASSANDLENS",
-      "Optifak"
-    ];
-
-    const stockStatuses = [
-      "Order",
-      "inStock",
-      "Fabrication", 
-      "Out Of Stock"
-    ];
-
-    return {
-      categories: categories.sort(),
-      companies: companies.sort(), 
-      stockStatuses: stockStatuses.sort()
-    };
-  }, []);
-
   // Comprehensive receipt items analysis
   const receiptItemsAnalysis = useMemo(() => {
-    // 🔍 RAW DATABASE DATA
-    console.log('🔍 RAW DATABASE DATA:', { 
-      totalReceipts: filteredReceipts.length,
-      firstReceipt: filteredReceipts[0],
-      firstReceiptItems: filteredReceipts[0]?.receipt_items
-    });
+    // Debug: Log a sample of receipt items to check data structure
+    if (filteredReceipts.length > 0 && filteredReceipts[0].receipt_items?.length > 0) {
+      console.log('Sample receipt item structure:', filteredReceipts[0].receipt_items[0]);
+      console.log('Sample product data:', filteredReceipts[0].receipt_items[0]?.product);
+    }
 
     const allItems: Array<{
       id: string;
@@ -520,27 +447,9 @@ const Financial = () => {
       paidAtDelivery: {} as Record<string, { cost: number; revenue: number; profit: number; margin: number; items: number; count: number }>
     };
 
-    // 🏢 COMPANY FIELD ANALYSIS
-    const companyAnalysis = {
-      nullValues: 0,
-      undefinedValues: 0,
-      emptyStrings: 0,
-      validCompanies: [] as string[],
-      rawCompanyValues: [] as any[]
-    };
-
     filteredReceipts.forEach(receipt => {
       if (Array.isArray(receipt.receipt_items)) {
         receipt.receipt_items.forEach((item, index) => {
-          // 🏢 COMPANY FIELD ANALYSIS
-          const rawCompany = item.product?.company;
-          companyAnalysis.rawCompanyValues.push(rawCompany);
-
-          if (rawCompany === null) companyAnalysis.nullValues++;
-          else if (rawCompany === undefined) companyAnalysis.undefinedValues++;
-          else if (rawCompany === '') companyAnalysis.emptyStrings++;
-          else if (rawCompany) companyAnalysis.validCompanies.push(rawCompany);
-
           const quantity = Number(item.quantity) || 1;
           const cost = Number(item.cost) || 0;
           const price = Number(item.price) || 0;
@@ -549,13 +458,14 @@ const Financial = () => {
           const profit = totalRevenue - totalCost;
           const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 
-          const productName = item.custom_item_name || item.products?.name || `Product ${index + 1}`;
-          const category = item.products?.category || 'Unknown';
-          // Handle company values properly - convert null/undefined to 'NULL' string
-          const company = item.products?.company ?? 'NULL';
-          const stockStatus = item.products?.stock_status || 'Order';
-          // Handle paid_at_delivery using simple pattern like other fields
-          const paidAtDelivery = item.paid_at_delivery || false;
+          const productName = item.custom_item_name || item.product?.name || `Product ${index + 1}`;
+          const category = item.product?.category || 'Unknown';
+          // Properly handle company values - only use 'None' for truly missing companies
+          const company = (item.product?.company && item.product.company.trim() !== '') 
+            ? item.product.company.trim() 
+            : 'None';
+          const stockStatus = item.product?.stock_status || 'Order';
+          const paidAtDelivery = Boolean(item.paid_at_delivery);
 
           // Filter based on includePaidAtDelivery setting
           if (!includePaidAtDelivery && paidAtDelivery) {
@@ -604,17 +514,6 @@ const Financial = () => {
       }
     });
 
-    // 🏢 COMPANY FIELD ANALYSIS RESULTS
-    console.log('🏢 COMPANY FIELD ANALYSIS:', {
-      totalItems: companyAnalysis.rawCompanyValues.length,
-      nullValues: companyAnalysis.nullValues,
-      undefinedValues: companyAnalysis.undefinedValues,
-      emptyStrings: companyAnalysis.emptyStrings,
-      validCompanies: [...new Set(companyAnalysis.validCompanies)],
-      rawValues: companyAnalysis.rawCompanyValues.slice(0, 10), // First 10 raw values
-      uniqueCompanies: Object.keys(summaryData.companies)
-    });
-
     return { allItems, summaryData };
   }, [filteredReceipts, includePaidAtDelivery]);
 
@@ -622,9 +521,7 @@ const Financial = () => {
   const filteredReceiptItems = useMemo(() => {
     return receiptItemsAnalysis.allItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesCompany = selectedCompany === 'all' || 
-        (selectedCompany === 'NULL' && (item.company === 'NULL' || item.company === null || item.company === undefined)) ||
-        (selectedCompany !== 'NULL' && item.company === selectedCompany);
+      const matchesCompany = selectedCompany === 'all' || item.company === selectedCompany;
       const matchesStockStatus = selectedStockStatus === 'all' || item.stockStatus === selectedStockStatus;
       const matchesPaidAtDelivery = selectedPaidAtDelivery === 'all' || 
         (selectedPaidAtDelivery === 'yes' && item.paidAtDelivery) ||
@@ -845,23 +742,6 @@ const Financial = () => {
           </p>
         </CardHeader>
         <CardContent>
-          {/* Debug Button */}
-          <div className="mb-4">
-            <Button 
-              onClick={() => {
-                console.log('🔍 MANUAL DEBUG DATA:', {
-                  receipts: filteredReceipts,
-                  receiptItems: receiptItemsAnalysis,
-                  financialMetrics: financialMetrics
-                });
-              }}
-              variant="outline"
-              size="sm"
-            >
-              🔍 Debug Data
-            </Button>
-          </div>
-
           {/* Filter Controls */}
           <div className="space-y-4 mb-6">
             {/* Include/Exclude Paid at Delivery Checkbox */}
@@ -891,10 +771,9 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {dropdownOptions.categories.map(category => (
+                    {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
-                    <SelectItem value="Unknown">Unknown</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -902,15 +781,13 @@ const Financial = () => {
               <div>
                 <Label htmlFor="companyFilter">Company Filter</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
+                  <SelectTrigger className="mt-1">                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Companies</SelectItem>
-                    {dropdownOptions.companies.map(company => (
+                    {Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
-                    <SelectItem value="NULL">NULL</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -923,9 +800,9 @@ const Financial = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Stock Status</SelectItem>
-                    {dropdownOptions.stockStatuses.map(status => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                    ))}
+                    <SelectItem value="InStock">In Stock</SelectItem>
+                    <SelectItem value="Fabrication">Fabrication</SelectItem>
+                    <SelectItem value="Order">Order</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -984,9 +861,7 @@ const Financial = () => {
                     <h5 className="font-medium text-gray-900">{item.productName}</h5>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {item.company === 'NULL' || item.company === null || item.company === undefined ? 'No Company' : item.company}
-                      </span>
+                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.company}</span>
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
                       {item.paidAtDelivery && (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Paid at Delivery</span>
