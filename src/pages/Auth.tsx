@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Glasses, Sparkles, Shield, Users } from 'lucide-react';
+import { Eye, EyeOff, Glasses } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -151,42 +151,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-teal-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-200/30 to-teal-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-teal-100/20 to-blue-100/20 rounded-full blur-3xl"></div>
-      </div>
-
-      {/* Floating elements */}
-      <div className="absolute top-20 left-20 animate-pulse">
-        <Glasses className="w-8 h-8 text-teal-300/60" />
-      </div>
-      <div className="absolute top-32 right-32 animate-pulse delay-1000">
-        <Sparkles className="w-6 h-6 text-blue-300/60" />
-      </div>
-      <div className="absolute bottom-32 left-32 animate-pulse delay-2000">
-        <Shield className="w-7 h-7 text-teal-300/60" />
-      </div>
-      <div className="absolute bottom-20 right-20 animate-pulse delay-500">
-        <Users className="w-6 h-6 text-blue-300/60" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-2xl shadow-teal-500/10 overflow-hidden">
-          {/* Header with gradient */}
-          <div className="bg-gradient-to-r from-teal-600 to-blue-600 p-6 text-center relative">
-            <div className="absolute inset-0 bg-black/5"></div>
-            <div className="relative z-10">
-              <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-                <Glasses className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-3xl font-bold text-white mb-2">Lensly</CardTitle>
-              <CardDescription className="text-white/90 text-base">
-                Optical Store Management System
-              </CardDescription>
+    <div className="min-h-screen bg-gradient-to-b from-teal-600 to-teal-700 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="bg-white border-0 shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-teal-600 to-teal-700 p-6 text-center">
+            <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
+              <Glasses className="w-8 h-8 text-white" />
             </div>
+            <CardTitle className="text-3xl font-bold text-white mb-2">Lensly</CardTitle>
+            <CardDescription className="text-white/90 text-base">
+              Optical Store Management System
+            </CardDescription>
           </div>
 
           <div className="p-6">
@@ -196,16 +172,16 @@ const Auth = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100/80 p-1 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 p-1 rounded-lg">
                 <TabsTrigger 
                   value="login" 
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup" 
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
                 >
                   Sign Up
                 </TabsTrigger>
@@ -221,7 +197,7 @@ const Auth = () => {
                       placeholder="email@example.com" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                      className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg"
                       required
                     />
                   </div>
@@ -233,13 +209,13 @@ const Auth = () => {
                         type={showPassword ? "text" : "password"} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -247,7 +223,7 @@ const Auth = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-teal-500/25 mt-6"
+                    className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-lg shadow-teal-500/25 mt-6"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -271,7 +247,7 @@ const Auth = () => {
                         placeholder="email@example.com" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg"
                         required
                       />
                     </div>
@@ -283,7 +259,7 @@ const Auth = () => {
                         placeholder="John Doe" 
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg"
                       />
                     </div>
                   </div>
@@ -296,7 +272,7 @@ const Auth = () => {
                       placeholder="My Optical Store" 
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
-                      className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                      className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg"
                     />
                     <p className="text-xs text-gray-500">If left blank, will use 'Optique'</p>
                   </div>
@@ -311,7 +287,7 @@ const Auth = () => {
                         maxLength={5}
                         value={accessCode}
                         onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200 font-mono"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg font-mono"
                         required
                       />
                     </div>
@@ -324,7 +300,7 @@ const Auth = () => {
                         maxLength={4}
                         value={referralCode}
                         onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200 font-mono"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg font-mono"
                       />
                     </div>
                   </div>
@@ -337,13 +313,13 @@ const Auth = () => {
                         type={showPassword ? "text" : "password"} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -358,13 +334,13 @@ const Auth = () => {
                         type={showConfirmPassword ? "text" : "password"} 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -373,7 +349,7 @@ const Auth = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-teal-500/25 mt-6"
+                    className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg shadow-lg shadow-teal-500/25 mt-6"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -400,8 +376,8 @@ const Auth = () => {
 
         {/* Additional info */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Need help? <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">Contact Support</span>
+          <p className="text-sm text-white/90">
+            Need help? <span className="text-white hover:text-white/80 cursor-pointer font-medium underline">Contact Support</span>
           </p>
         </div>
       </div>
