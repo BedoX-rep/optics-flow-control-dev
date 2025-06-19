@@ -1136,6 +1136,842 @@ const pricingTranslations: Translations = {
 };
 
 // Combine all translations
+const purchasesTranslations: Translations = {
+  // Purchases page UI
+  purchases: {
+    en: 'Purchases',
+    fr: 'Achats'
+  },
+  recordPurchase: {
+    en: 'Record Purchase',
+    fr: 'Enregistrer un Achat'
+  },
+  addSupplier: {
+    en: 'Add Supplier',
+    fr: 'Ajouter un Fournisseur'
+  },
+  searchPurchasesSuppliers: {
+    en: 'Search purchases or suppliers...',
+    fr: 'Rechercher des achats ou fournisseurs...'
+  },
+  supplier: {
+    en: 'Supplier',
+    fr: 'Fournisseur'
+  },
+  allSuppliers: {
+    en: 'All Suppliers',
+    fr: 'Tous les Fournisseurs'
+  },
+  type: {
+    en: 'Type',
+    fr: 'Type'
+  },
+  allTypes: {
+    en: 'All Types',
+    fr: 'Tous les Types'
+  },
+  allCategories: {
+    en: 'All Categories',
+    fr: 'Toutes les Catégories'
+  },
+  today: {
+    en: 'Today',
+    fr: 'Aujourd\'hui'
+  },
+  week: {
+    en: 'Week',
+    fr: 'Semaine'
+  },
+  month: {
+    en: 'Month',
+    fr: 'Mois'
+  },
+  year: {
+    en: 'Year',
+    fr: 'Année'
+  },
+  all: {
+    en: 'All',
+    fr: 'Tout'
+  },
+  purchasesCount: {
+    en: 'purchases',
+    fr: 'achats'
+  },
+  thisMonth: {
+    en: 'This month:',
+    fr: 'Ce mois:'
+  },
+  suppliers: {
+    en: 'Suppliers',
+    fr: 'Fournisseurs'
+  },
+  totalAmount: {
+    en: 'Total Amount',
+    fr: 'Montant Total'
+  },
+  totalAmountTTC: {
+    en: 'Total Amount (TTC)',
+    fr: 'Montant Total (TTC)'
+  },
+  advance: {
+    en: 'Advance',
+    fr: 'Avance'
+  },
+  linkToReceipts: {
+    en: 'Link to Receipts',
+    fr: 'Lier aux Reçus'
+  },
+  viewBalanceHistory: {
+    en: 'View Balance History',
+    fr: 'Voir l\'Historique du Solde'
+  },
+  noSupplier: {
+    en: 'No Supplier',
+    fr: 'Aucun Fournisseur'
+  },
+  due: {
+    en: 'Due:',
+    fr: 'Échéance:'
+  },
+  next: {
+    en: 'Next:',
+    fr: 'Suivant:'
+  },
+  renewNow: {
+    en: 'Renew Now',
+    fr: 'Renouveler Maintenant'
+  },
+  receipts: {
+    en: 'receipts',
+    fr: 'reçus'
+  },
+  totalPurchases: {
+    en: 'Total Purchases',
+    fr: 'Total des Achats'
+  },
+  contactPerson: {
+    en: 'Contact Person',
+    fr: 'Personne de Contact'
+  },
+  supplierName: {
+    en: 'Supplier Name',
+    fr: 'Nom du Fournisseur'
+  },
+  description: {
+    en: 'Description',
+    fr: 'Description'
+  },
+  amountHT: {
+    en: 'Amount HT',
+    fr: 'Montant HT'
+  },
+  amountTTC: {
+    en: 'Amount TTC',
+    fr: 'Montant TTC'
+  },
+  purchaseDate: {
+    en: 'Purchase Date',
+    fr: 'Date d\'Achat'
+  },
+  paymentMethod: {
+    en: 'Payment Method',
+    fr: 'Méthode de Paiement'
+  },
+  paymentStatus: {
+    en: 'Payment Status',
+    fr: 'Statut de Paiement'
+  },
+  paymentUrgency: {
+    en: 'Payment Urgency',
+    fr: 'Urgence de Paiement'
+  },
+  recurringType: {
+    en: 'Recurring Type',
+    fr: 'Type de Récurrence'
+  },
+  purchaseType: {
+    en: 'Purchase Type',
+    fr: 'Type d\'Achat'
+  },
+  operationalExpenses: {
+    en: 'Operational Expenses',
+    fr: 'Dépenses Opérationnelles'
+  },
+  capitalExpenditure: {
+    en: 'Capital Expenditure',
+    fr: 'Dépenses d\'Investissement'
+  },
+  selectSupplier: {
+    en: 'Select Supplier',
+    fr: 'Sélectionner un Fournisseur'
+  },
+  selectCategory: {
+    en: 'Select Category',
+    fr: 'Sélectionner une Catégorie'
+  },
+  selectPaymentMethod: {
+    en: 'Select Payment Method',
+    fr: 'Sélectionner une Méthode de Paiement'
+  },
+  selectPaymentStatus: {
+    en: 'Select Payment Status',
+    fr: 'Sélectionner un Statut de Paiement'
+  },
+  selectRecurringType: {
+    en: 'Select Recurring Type',
+    fr: 'Sélectionner un Type de Récurrence'
+  },
+  selectPurchaseType: {
+    en: 'Select Purchase Type',
+    fr: 'Sélectionner un Type d\'Achat'
+  },
+  cash: {
+    en: 'Cash',
+    fr: 'Espèces'
+  },
+  creditCard: {
+    en: 'Credit Card',
+    fr: 'Carte de Crédit'
+  },
+  debitCard: {
+    en: 'Debit Card',
+    fr: 'Carte de Débit'
+  },
+  bankTransfer: {
+    en: 'Bank Transfer',
+    fr: 'Virement Bancaire'
+  },
+  check: {
+    en: 'Check',
+    fr: 'Chèque'
+  },
+  digitalWallet: {
+    en: 'Digital Wallet',
+    fr: 'Portefeuille Numérique'
+  },
+  partiallyPaid: {
+    en: 'Partially Paid',
+    fr: 'Partiellement Payé'
+  },
+  oneMonth: {
+    en: '1 Month',
+    fr: '1 Mois'
+  },
+  threeMonths: {
+    en: '3 Months',
+    fr: '3 Mois'
+  },
+  sixMonths: {
+    en: '6 Months',
+    fr: '6 Mois'
+  },
+  oneYear: {
+    en: '1 Year',
+    fr: '1 An'
+  },
+  officeSupplies: {
+    en: 'Office Supplies',
+    fr: 'Fournitures de Bureau'
+  },
+  equipment: {
+    en: 'Equipment',
+    fr: 'Équipement'
+  },
+  software: {
+    en: 'Software',
+    fr: 'Logiciel'
+  },
+  marketing: {
+    en: 'Marketing',
+    fr: 'Marketing'
+  },
+  travel: {
+    en: 'Travel',
+    fr: 'Voyage'
+  },
+  utilities: {
+    en: 'Utilities',
+    fr: 'Services Publics'
+  },
+  rent: {
+    en: 'Rent',
+    fr: 'Loyer'
+  },
+  professionalServices: {
+    en: 'Professional Services',
+    fr: 'Services Professionnels'
+  },
+  inventory: {
+    en: 'Inventory',
+    fr: 'Inventaire'
+  },
+  maintenance: {
+    en: 'Maintenance',
+    fr: 'Maintenance'
+  },
+  insurance: {
+    en: 'Insurance',
+    fr: 'Assurance'
+  },
+  loan: {
+    en: 'Loan',
+    fr: 'Prêt'
+  },
+  other: {
+    en: 'Other',
+    fr: 'Autre'
+  },
+  balanceHistory: {
+    en: 'Balance History',
+    fr: 'Historique du Solde'
+  },
+  linkReceiptsToPurchase: {
+    en: 'Link Receipts to Purchase',
+    fr: 'Lier les Reçus à l\'Achat'
+  },
+  selectDateRange: {
+    en: 'Select Date Range',
+    fr: 'Sélectionner une Plage de Dates'
+  },
+  fromDate: {
+    en: 'From Date',
+    fr: 'Date de Début'
+  },
+  toDate: {
+    en: 'To Date',
+    fr: 'Date de Fin'
+  },
+  montageCostSummary: {
+    en: 'Montage Cost Summary',
+    fr: 'Résumé des Coûts de Montage'
+  },
+  totalReceipts: {
+    en: 'Total Receipts',
+    fr: 'Total des Reçus'
+  },
+  totalMontage: {
+    en: 'Total Montage',
+    fr: 'Montage Total'
+  },
+  paidMontage: {
+    en: 'Paid Montage',
+    fr: 'Montage Payé'
+  },
+  unpaidBalance: {
+    en: 'Unpaid Balance',
+    fr: 'Solde Impayé'
+  },
+  filteredReceipts: {
+    en: 'Filtered Receipts',
+    fr: 'Reçus Filtrés'
+  },
+  noReceiptsInDateRange: {
+    en: 'No receipts found in selected date range',
+    fr: 'Aucun reçu trouvé dans la plage de dates sélectionnée'
+  },
+  linkToPurchase: {
+    en: 'Link to Purchase',
+    fr: 'Lier à l\'Achat'
+  },
+  linking: {
+    en: 'Linking...',
+    fr: 'Liaison en cours...'
+  },
+  noPurchasesFound: {
+    en: 'No purchases found',
+    fr: 'Aucun achat trouvé'
+  },
+  noSuppliersFound: {
+    en: 'No suppliers found',
+    fr: 'Aucun fournisseur trouvé'
+  },
+  loadingPurchases: {
+    en: 'Loading purchases...',
+    fr: 'Chargement des achats...'
+  },
+  recurringPurchasesRenewed: {
+    en: 'Recurring Purchases Renewed',
+    fr: 'Achats Récurrents Renouvelés'
+  },
+  recurringPurchasesRenewedDesc: {
+    en: 'recurring purchase(s) have been automatically renewed.',
+    fr: 'achat(s) récurrent(s) ont été automatiquement renouvelés.'
+  },
+  recurringPurchaseRenewed: {
+    en: 'Recurring purchase renewed successfully',
+    fr: 'Achat récurrent renouvelé avec succès'
+  },
+  failedToRenew: {
+    en: 'Failed to renew recurring purchase',
+    fr: 'Échec du renouvellement de l\'achat récurrent'
+  },
+  purchaseRecorded: {
+    en: 'Purchase recorded successfully',
+    fr: 'Achat enregistré avec succès'
+  },
+  purchaseUpdated: {
+    en: 'Purchase updated successfully',
+    fr: 'Achat mis à jour avec succès'
+  },
+  purchaseDeleted: {
+    en: 'Purchase deleted successfully',
+    fr: 'Achat supprimé avec succès'
+  },
+  supplierAdded: {
+    en: 'Supplier added successfully',
+    fr: 'Fournisseur ajouté avec succès'
+  },
+  supplierUpdated: {
+    en: 'Supplier updated successfully',
+    fr: 'Fournisseur mis à jour avec succès'
+  },
+  supplierDeleted: {
+    en: 'Supplier deleted successfully',
+    fr: 'Fournisseur supprimé avec succès'
+  },
+  failedToSavePurchase: {
+    en: 'Failed to save purchase',
+    fr: 'Échec de l\'enregistrement de l\'achat'
+  },
+  failedToUpdatePurchase: {
+    en: 'Failed to update purchase',
+    fr: 'Échec de la mise à jour de l\'achat'
+  },
+  failedToDeletePurchase: {
+    en: 'Failed to delete purchase',
+    fr: 'Échec de la suppression de l\'achat'
+  },
+  failedToSaveSupplier: {
+    en: 'Failed to save supplier',
+    fr: 'Échec de l\'enregistrement du fournisseur'
+  },
+  failedToDeleteSupplier: {
+    en: 'Failed to delete supplier',
+    fr: 'Échec de la suppression du fournisseur'
+  },
+  fillAllRequiredFields: {
+    en: 'Please fill in all required fields',
+    fr: 'Veuillez remplir tous les champs obligatoires'
+  },
+  ttcCannotBeLessHt: {
+    en: 'TTC amount cannot be less than HT amount',
+    fr: 'Le montant TTC ne peut pas être inférieur au montant HT'
+  },
+  advanceCannotExceedTtc: {
+    en: 'Advance payment cannot be more than TTC amount',
+    fr: 'Le paiement d\'avance ne peut pas dépasser le montant TTC'
+  },
+  confirmDeletePurchase: {
+    en: 'Are you sure you want to delete this purchase?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet achat?'
+  },
+  confirmDeleteSupplier: {
+    en: 'Are you sure you want to delete this supplier?',
+    fr: 'Êtes-vous sûr de vouloir supprimer ce fournisseur?'
+  },
+  linkedReceiptsSuccess: {
+    en: 'current receipts',
+    fr: 'reçus actuels'
+  },
+  linkedReceiptsSuccessDesc: {
+    en: 'Future receipts in this date range will be automatically included.',
+    fr: 'Les futurs reçus dans cette plage de dates seront automatiquement inclus.'
+  },
+  failedToLinkReceipts: {
+    en: 'Failed to link receipts to purchase',
+    fr: 'Échec de la liaison des reçus à l\'achat'
+  },
+  enterDescription: {
+    en: 'Enter description',
+    fr: 'Entrer la description'
+  },
+  enterAmount: {
+    en: 'Enter amount',
+    fr: 'Entrer le montant'
+  },
+  enterSupplierName: {
+    en: 'Enter supplier name',
+    fr: 'Entrer le nom du fournisseur'
+  },
+  enterContactPerson: {
+    en: 'Enter contact person',
+    fr: 'Entrer la personne de contact'
+  },
+  enterAddress: {
+    en: 'Enter address',
+    fr: 'Entrer l\'adresse'
+  },
+  enterNotes: {
+    en: 'Enter notes',
+    fr: 'Entrer des notes'
+  },
+  saveAndClose: {
+    en: 'Save and Close',
+    fr: 'Enregistrer et Fermer'
+  },
+  saving: {
+    en: 'Saving...',
+    fr: 'Enregistrement...'
+  },
+  updating: {
+    en: 'Updating...',
+    fr: 'Mise à jour...'
+  }
+};
+
+const subscriptionsTranslations: Translations = {
+  // Subscriptions page UI
+  currentPlan: {
+    en: 'Current Plan',
+    fr: 'Plan Actuel'
+  },
+  startDate: {
+    en: 'Start Date',
+    fr: 'Date de Début'
+  },
+  expirationDate: {
+    en: 'Expiration Date',
+    fr: 'Date d\'Expiration'
+  },
+  notStarted: {
+    en: 'Not Started',
+    fr: 'Non Commencé'
+  },
+  notSet: {
+    en: 'Not Set',
+    fr: 'Non Défini'
+  },
+  never: {
+    en: 'Never',
+    fr: 'Jamais'
+  },
+  oneTimePayment: {
+    en: 'One-time payment',
+    fr: 'Paiement unique'
+  },
+  billedMonthly: {
+    en: 'Billed monthly',
+    fr: 'Facturé mensuellement'
+  },
+  billedQuarterly: {
+    en: 'Billed quarterly',
+    fr: 'Facturé trimestriellement'
+  },
+  popular: {
+    en: 'Popular',
+    fr: 'Populaire'
+  },
+  clientManagementSystem: {
+    en: 'Client Management System',
+    fr: 'Système de Gestion des Clients'
+  },
+  receiptGeneration: {
+    en: 'Receipt Generation',
+    fr: 'Génération de Reçus'
+  },
+  productInventory: {
+    en: 'Product Inventory',
+    fr: 'Inventaire des Produits'
+  },
+  salesAnalytics: {
+    en: 'Sales Analytics',
+    fr: 'Analyses des Ventes'
+  },
+  prescriptionManagement: {
+    en: 'Prescription Management',
+    fr: 'Gestion des Prescriptions'
+  },
+  prioritySupport: {
+    en: 'Priority support',
+    fr: 'Support prioritaire'
+  },
+  lifetimeUpdates: {
+    en: 'Lifetime updates',
+    fr: 'Mises à jour à vie'
+  },
+  noRecurringPayments: {
+    en: 'No recurring payments',
+    fr: 'Pas de paiements récurrents'
+  },
+  payViaBankTransfer: {
+    en: 'Pay via Bank Transfer',
+    fr: 'Payer par Virement Bancaire'
+  },
+  payWithCardPayPal: {
+    en: 'Pay with Card/PayPal',
+    fr: 'Payer par Carte/PayPal'
+  },
+  contactRequestSent: {
+    en: 'Contact Request Sent',
+    fr: 'Demande de Contact Envoyée'
+  },
+  adminWillContact: {
+    en: 'An administrator will contact you shortly about your subscription.',
+    fr: 'Un administrateur vous contactera bientôt au sujet de votre abonnement.'
+  },
+  subscriptionUpdated: {
+    en: 'Subscription Updated',
+    fr: 'Abonnement Mis à Jour'
+  },
+  nowSubscribedTo: {
+    en: 'You are now subscribed to the',
+    fr: 'Vous êtes maintenant abonné au plan'
+  },
+  plan: {
+    en: 'plan.',
+    fr: '.'
+  },
+  failedToUpdateSubscription: {
+    en: 'Failed to update subscription. Please try again.',
+    fr: 'Échec de la mise à jour de l\'abonnement. Veuillez réessayer.'
+  },
+  failedToLoadSubscription: {
+    en: 'Failed to load subscription data. Please try again.',
+    fr: 'Échec du chargement des données d\'abonnement. Veuillez réessayer.'
+  }
+};
+
+const settingsTranslations: Translations = {
+  // Settings page UI
+  opticianSettings: {
+    en: 'Optician Settings',
+    fr: 'Paramètres de l\'Opticien'
+  },
+  manageBusinessInfo: {
+    en: 'Manage your business information and settings',
+    fr: 'Gérez vos informations d\'entreprise et paramètres'
+  },
+  businessInformation: {
+    en: 'Business Information',
+    fr: 'Informations de l\'Entreprise'
+  },
+  storeName: {
+    en: 'Store Name',
+    fr: 'Nom du Magasin'
+  },
+  displayName: {
+    en: 'Display Name',
+    fr: 'Nom d\'Affichage'
+  },
+  businessAddress: {
+    en: 'Business Address',
+    fr: 'Adresse de l\'Entreprise'
+  },
+  companyLegalStatus: {
+    en: 'Company Legal Status',
+    fr: 'Statut Juridique de l\'Entreprise'
+  },
+  selectLegalStatus: {
+    en: 'Select legal status',
+    fr: 'Sélectionner le statut juridique'
+  },
+  taxLegalInformation: {
+    en: 'Tax & Legal Information',
+    fr: 'Informations Fiscales et Juridiques'
+  },
+  vatNumber: {
+    en: 'VAT Number',
+    fr: 'Numéro de TVA'
+  },
+  iceNumber: {
+    en: 'ICE Number',
+    fr: 'Numéro ICE'
+  },
+  inpeNumber: {
+    en: 'INPE Number',
+    fr: 'Numéro INPE'
+  },
+  contactInformation: {
+    en: 'Contact Information',
+    fr: 'Informations de Contact'
+  },
+  phoneNumber: {
+    en: 'Phone Number',
+    fr: 'Numéro de Téléphone'
+  },
+  emailAddress: {
+    en: 'Email Address',
+    fr: 'Adresse Email'
+  },
+  website: {
+    en: 'Website',
+    fr: 'Site Web'
+  },
+  businessLogo: {
+    en: 'Business Logo',
+    fr: 'Logo de l\'Entreprise'
+  },
+  uploadLogo: {
+    en: 'Upload Logo',
+    fr: 'Télécharger le Logo'
+  },
+  logoRecommendation: {
+    en: 'Recommended: PNG or JPG format, max 2MB',
+    fr: 'Recommandé: format PNG ou JPG, max 2MB'
+  },
+  saveChanges: {
+    en: 'Save Changes',
+    fr: 'Enregistrer les Modifications'
+  },
+  settingsSaved: {
+    en: 'Settings Saved',
+    fr: 'Paramètres Enregistrés'
+  },
+  opticianInfoUpdated: {
+    en: 'Your optician information has been successfully updated.',
+    fr: 'Vos informations d\'opticien ont été mises à jour avec succès.'
+  },
+  failedToSaveInfo: {
+    en: 'Failed to save your information. Please try again.',
+    fr: 'Échec de l\'enregistrement de vos informations. Veuillez réessayer.'
+  },
+  logoUploaded: {
+    en: 'Logo Uploaded',
+    fr: 'Logo Téléchargé'
+  },
+  logoUploadedSuccess: {
+    en: 'Your logo has been uploaded successfully.',
+    fr: 'Votre logo a été téléchargé avec succès.'
+  },
+  uploadError: {
+    en: 'Upload Error',
+    fr: 'Erreur de Téléchargement'
+  },
+  failedToUploadLogo: {
+    en: 'Failed to upload logo. Please try again.',
+    fr: 'Échec du téléchargement du logo. Veuillez réessayer.'
+  },
+  enterStoreName: {
+    en: 'Enter your store name',
+    fr: 'Entrer le nom de votre magasin'
+  },
+  enterDisplayName: {
+    en: 'Enter your display name',
+    fr: 'Entrer votre nom d\'affichage'
+  },
+  enterCompleteAddress: {
+    en: 'Enter your complete business address',
+    fr: 'Entrer votre adresse d\'entreprise complète'
+  },
+  enterVatNumber: {
+    en: 'Enter VAT number',
+    fr: 'Entrer le numéro de TVA'
+  },
+  enterIceNumber: {
+    en: 'Enter ICE number',
+    fr: 'Entrer le numéro ICE'
+  },
+  enterInpeNumber: {
+    en: 'Enter INPE number',
+    fr: 'Entrer le numéro INPE'
+  },
+  enterPhoneNumber: {
+    en: 'Enter phone number',
+    fr: 'Entrer le numéro de téléphone'
+  },
+  enterEmailAddress: {
+    en: 'Enter email address',
+    fr: 'Entrer l\'adresse email'
+  },
+  enterWebsiteUrl: {
+    en: 'Enter website URL',
+    fr: 'Entrer l\'URL du site web'
+  }
+};
+
+const accessTranslations: Translations = {
+  // Access page UI
+  accessManagement: {
+    en: 'Access Management',
+    fr: 'Gestion des Accès'
+  },
+  yourAccessInformation: {
+    en: 'Your Access Information',
+    fr: 'Vos Informations d\'Accès'
+  },
+  currentSessionRole: {
+    en: 'Current Session Role',
+    fr: 'Rôle de Session Actuel'
+  },
+  sessionElevated: {
+    en: 'Session Elevated',
+    fr: 'Session Élevée'
+  },
+  accessCode: {
+    en: 'Access Code',
+    fr: 'Code d\'Accès'
+  },
+  yourPermissions: {
+    en: 'Your Permissions',
+    fr: 'Vos Autorisations'
+  },
+  manageOwnPermissions: {
+    en: 'Manage your own access permissions',
+    fr: 'Gérez vos propres autorisations d\'accès'
+  },
+  manageProducts: {
+    en: 'Manage Products',
+    fr: 'Gérer les Produits'
+  },
+  manageClients: {
+    en: 'Manage Clients',
+    fr: 'Gérer les Clients'
+  },
+  manageReceipts: {
+    en: 'Manage Receipts',
+    fr: 'Gérer les Reçus'
+  },
+  viewFinancial: {
+    en: 'View Financial',
+    fr: 'Voir les Finances'
+  },
+  managePurchases: {
+    en: 'Manage Purchases',
+    fr: 'Gérer les Achats'
+  },
+  accessDashboard: {
+    en: 'Access Dashboard',
+    fr: 'Accéder au Tableau de Bord'
+  },
+  loadingPermissions: {
+    en: 'Loading your permissions...',
+    fr: 'Chargement de vos autorisations...'
+  },
+  noPermissionsFound: {
+    en: 'No permissions found',
+    fr: 'Aucune autorisation trouvée'
+  },
+  yourPermissionsUpdated: {
+    en: 'Your permissions updated successfully',
+    fr: 'Vos autorisations ont été mises à jour avec succès'
+  },
+  staffPermissionsUpdated: {
+    en: 'Staff permissions updated successfully',
+    fr: 'Les autorisations du personnel ont été mises à jour avec succès'
+  },
+  failedToUpdatePermissions: {
+    en: 'Failed to update permissions',
+    fr: 'Échec de la mise à jour des autorisations'
+  },
+  pleaseEnterAccessCode: {
+    en: 'Please enter an access code',
+    fr: 'Veuillez entrer un code d\'accès'
+  },
+  pleaseLoginToAccess: {
+    en: 'Please log in to access this page.',
+    fr: 'Veuillez vous connecter pour accéder à cette page.'
+  },
+  admin: {
+    en: 'Admin',
+    fr: 'Administrateur'
+  },
+  storeStaff: {
+    en: 'Store Staff',
+    fr: 'Personnel du Magasin'
+  }
+};
+
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
@@ -1143,6 +1979,10 @@ const allTranslations: Translations = {
   ...pricingTranslations,
   ...receiptTranslations,
   ...clientsTranslations,
+  ...purchasesTranslations,
+  ...subscriptionsTranslations,
+  ...settingsTranslations,
+  ...accessTranslations,
   navigation: {
     en: {
       home: 'Home',

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ const Access = () => {
   const { user, subscription, sessionRole, promoteToAdmin, permissions, invalidatePermissionsCache } = useAuth();
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   const isAdmin = sessionRole === 'Admin';
@@ -112,14 +114,14 @@ const Access = () => {
         invalidatePermissionsCache(user.id);
       }
       toast({
-        title: "Success",
-        description: "Your permissions updated successfully",
+        title: t('success'),
+        description: t('yourPermissionsUpdated'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update permissions",
+        title: t('error'),
+        description: t('failedToUpdatePermissions'),
         variant: "destructive",
       });
     },
@@ -141,14 +143,14 @@ const Access = () => {
       // Invalidate permissions cache for the updated user
       invalidatePermissionsCache(userId);
       toast({
-        title: "Success",
-        description: "Staff permissions updated successfully",
+        title: t('success'),
+        description: t('staffPermissionsUpdated'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update staff permissions",
+        title: t('error'),
+        description: t('failedToUpdatePermissions'),
         variant: "destructive",
       });
     },
@@ -156,7 +158,7 @@ const Access = () => {
 
   // Redirect staff users who haven't elevated to admin (after hooks)
   if (!user) {
-    return <div>Please log in to access this page.</div>;
+    return <div>{t('pleaseLoginToAccess')}</div>;
   }
 
   if (sessionRole === 'Store Staff') {
@@ -166,8 +168,8 @@ const Access = () => {
   const handlePromoteToAdmin = async () => {
     if (!accessCodeInput.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter an access code",
+        title: t('error'),
+        description: t('pleaseEnterAccessCode'),
         variant: "destructive",
       });
       return;
@@ -200,26 +202,26 @@ const Access = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Access Management</h1>
+        <h1 className="text-3xl font-bold">{t('accessManagement')}</h1>
       </div>
 
       {/* Current User Info */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Access Information</CardTitle>
+          <CardTitle>{t('yourAccessInformation')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Current Session Role</Label>
+            <Label>{t('currentSessionRole')}</Label>
             <div className="flex items-center gap-2">
-              <p className="text-lg font-medium">{sessionRole}</p>
+              <p className="text-lg font-medium">{sessionRole === 'Admin' ? t('admin') : t('storeStaff')}</p>
               {sessionRole === 'Admin' && (
-                <Badge variant="secondary">Session Elevated</Badge>
+                <Badge variant="secondary">{t('sessionElevated')}</Badge>
               )}
             </div>
           </div>
           <div>
-            <Label>Access Code</Label>
+            <Label>{t('accessCode')}</Label>
             <p className="text-lg font-mono">{subscription?.access_code}</p>
           </div>
         </CardContent>
@@ -228,12 +230,12 @@ const Access = () => {
       {/* User's Own Permissions */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Permissions</CardTitle>
-          <CardDescription>Manage your own access permissions</CardDescription>
+          <CardTitle>{t('yourPermissions')}</CardTitle>
+          <CardDescription>{t('manageOwnPermissions')}</CardDescription>
         </CardHeader>
         <CardContent>
           {userPermissionsLoading ? (
-            <p>Loading your permissions...</p>
+            <p>{t('loadingPermissions')}</p>
           ) : userPermissions ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="flex items-center space-x-2">
@@ -243,7 +245,7 @@ const Access = () => {
                     handleOwnPermissionChange('can_manage_products', checked)
                   }
                 />
-                <Label>Manage Products</Label>
+                <Label>{t('manageProducts')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -252,7 +254,7 @@ const Access = () => {
                     handleOwnPermissionChange('can_manage_clients', checked)
                   }
                 />
-                <Label>Manage Clients</Label>
+                <Label>{t('manageClients')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -261,7 +263,7 @@ const Access = () => {
                     handleOwnPermissionChange('can_manage_receipts', checked)
                   }
                 />
-                <Label>Manage Receipts</Label>
+                <Label>{t('manageReceipts')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -270,7 +272,7 @@ const Access = () => {
                     handleOwnPermissionChange('can_view_financial', checked)
                   }
                 />
-                <Label>View Financial</Label>
+                <Label>{t('viewFinancial')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -279,7 +281,7 @@ const Access = () => {
                     handleOwnPermissionChange('can_manage_purchases', checked)
                   }
                 />
-                <Label>Manage Purchases</Label>
+                <Label>{t('managePurchases')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -288,11 +290,11 @@ const Access = () => {
                     handleOwnPermissionChange('can_access_dashboard', checked)
                   }
                 />
-                <Label>Access Dashboard</Label>
+                <Label>{t('accessDashboard')}</Label>
               </div>
             </div>
           ) : (
-            <p>No permissions found</p>
+            <p>{t('noPermissionsFound')}</p>
           )}
         </CardContent>
       </Card>

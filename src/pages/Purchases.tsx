@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import RecordPurchaseDialog from '@/components/RecordPurchaseDialog';
@@ -80,46 +81,56 @@ interface Purchase {
   suppliers?: Supplier;
 }
 
-const EXPENSE_CATEGORIES = [
-  'Office Supplies',
-  'Equipment',
-  'Software',
-  'Marketing',
-  'Travel',
-  'Utilities',
-  'Rent',
-  'Professional Services',
-  'Inventory',
-  'Maintenance',
-  'Insurance',
-  'Loan',
-  'Other'
-];
+const Purchases = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { t } = useLanguage();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState('purchases');
+
+  const EXPENSE_CATEGORIES = [
+    t('officeSupplies'),
+    t('equipment'),
+    t('software'),
+    t('marketing'),
+    t('travel'),
+    t('utilities'),
+    t('rent'),
+    t('professionalServices'),
+    t('inventory'),
+    t('maintenance'),
+    t('insurance'),
+    t('loan'),
+    t('other')
+  ];
 
 const PAYMENT_METHODS = [
-  'Cash',
-  'Credit Card',
-  'Debit Card',
-  'Bank Transfer',
-  'Check',
-  'Digital Wallet'
+  t('cash'),
+  t('creditCard'),
+  t('debitCard'),
+  t('bankTransfer'),
+  t('check'),
+  t('digitalWallet')
 ];
 
 const RECURRING_TYPES = [
-  { value: '1_month', label: '1 Month' },
-  { value: '3_months', label: '3 Months' },
-  { value: '6_months', label: '6 Months' },
-  { value: '1_year', label: '1 Year' }
+  { value: '1_month', label: t('oneMonth') },
+  { value: '3_months', label: t('threeMonths') },
+  { value: '6_months', label: t('sixMonths') },
+  { value: '1_year', label: t('oneYear') }
 ];
 
 const PURCHASE_TYPES = [
-  'Operational Expenses',
-  'Capital Expenditure'
+  t('operationalExpenses'),
+  t('capitalExpenditure')
 ];
 
 const Purchases = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
@@ -1114,7 +1125,7 @@ const Purchases = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading purchases...</p>
+            <p className="text-gray-600">{t('loadingPurchases')}</p>
           </div>
         </div>
       </div>
@@ -1130,7 +1141,7 @@ const Purchases = () => {
             className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Record Purchase
+            {t('recordPurchase')}
           </Button>
           <Button
             onClick={() => handleOpenSupplierDialog()}
@@ -1138,7 +1149,7 @@ const Purchases = () => {
             className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Supplier
+            {t('addSupplier')}
           </Button>
         </div>
       </div>
@@ -1149,7 +1160,7 @@ const Purchases = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
             type="text" 
-            placeholder="Search purchases or suppliers..." 
+            placeholder={t('searchPurchasesSuppliers')} 
             className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -1163,13 +1174,13 @@ const Purchases = () => {
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2 text-gray-600">
             <TrendingUp className="h-4 w-4 text-blue-600" />
-            <span className="font-medium">{filteredPurchases.length} purchases</span>
+            <span className="font-medium">{filteredPurchases.length} {t('purchasesCount')}</span>
             <span className="text-gray-400">•</span>
             <span className="font-semibold text-blue-600">{totalExpenses.toFixed(2)} DH</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Calendar className="h-4 w-4 text-green-600" />
-            <span className="text-sm">This month: <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
+            <span className="text-sm">{t('thisMonth')} <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
           </div>
         </div>
 
@@ -1178,11 +1189,11 @@ const Purchases = () => {
           {/* Date Filter Buttons */}
           <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
             {[
-              { value: 'all', label: 'All' },
-              { value: 'today', label: 'Today' },
-              { value: 'week', label: 'Week' },
-              { value: 'month', label: 'Month' },
-              { value: 'year', label: 'Year' }
+              { value: 'all', label: t('all') },
+              { value: 'today', label: t('today') },
+              { value: 'week', label: t('week') },
+              { value: 'month', label: t('month') },
+              { value: 'year', label: t('year') }
             ].map((option) => (
               <Button
                 key={option.value}
@@ -1214,12 +1225,12 @@ const Purchases = () => {
             )}>
               <Building2 className="h-4 w-4 mr-1" />
               <SelectValue>
-                {supplierFilter === 'all' ? 'Supplier' : 
-                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || 'Unknown'}
+                {supplierFilter === 'all' ? t('supplier') : 
+                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || t('unknownSupplier')}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Suppliers</SelectItem>
+              <SelectItem value="all">{t('allSuppliers')}</SelectItem>
               {suppliers.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}
@@ -1240,12 +1251,12 @@ const Purchases = () => {
             )}>
               <TrendingUp className="h-4 w-4 mr-1" />
               <SelectValue>
-                {purchaseTypeFilter === 'all' ? 'Type' : 
-                 purchaseTypeFilter === 'Operational Expenses' ? 'Ops' : 'Cap'}
+                {purchaseTypeFilter === 'all' ? t('type') : 
+                 purchaseTypeFilter === t('operationalExpenses') ? 'Ops' : 'Cap'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="all">{t('allTypes')}</SelectItem>
               {PURCHASE_TYPES.map(type => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -1266,11 +1277,11 @@ const Purchases = () => {
             )}>
               <Package className="h-4 w-4 mr-1" />
               <SelectValue>
-                {categoryFilter === 'all' ? 'Category' : categoryFilter.slice(0, 6) + '...'}
+                {categoryFilter === 'all' ? t('category') : categoryFilter.slice(0, 6) + '...'}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t('allCategories')}</SelectItem>
               {EXPENSE_CATEGORIES.map(category => (
                 <SelectItem key={category} value={category}>
                   {category}
@@ -1319,14 +1330,14 @@ const Purchases = () => {
             className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
           >
             <Package className="h-4 w-4 mr-2" />
-            Purchases ({filteredPurchases.length})
+            {t('purchases')} ({filteredPurchases.length})
           </TabsTrigger>
           <TabsTrigger 
             value="suppliers" 
             className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
           >
             <Building2 className="h-4 w-4 mr-2" />
-            Suppliers ({suppliers.length})
+            {t('suppliers')} ({suppliers.length})
           </TabsTrigger>
         </TabsList>
 
@@ -1335,7 +1346,7 @@ const Purchases = () => {
             <AnimatePresence>
               {filteredPurchases.length === 0 ? (
                 <div className="col-span-full text-center py-10 text-gray-500">
-                  No purchases found
+                  {t('noPurchasesFound')}
                 </div>
               ) : (
                 filteredPurchases.map((purchase) => (
@@ -1355,7 +1366,7 @@ const Purchases = () => {
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
                                 <h3 className="text-sm font-semibold text-gray-800 truncate">
-                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || 'No Supplier'}
+                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
                                 </h3>
                               </div>
                               <div className="flex items-center gap-2 text-xs">
@@ -1421,7 +1432,7 @@ const Purchases = () => {
                         <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-3 mb-3 border-l-4 border-primary">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-xs font-medium text-gray-600">Total Amount (TTC)</p>
+                              <p className="text-xs font-medium text-gray-600">{t('totalAmountTTC')}</p>
                               <p className="text-xl font-bold text-primary">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
                             </div>
                             <DollarSign className="h-5 w-5 text-primary/60" />
@@ -1431,13 +1442,13 @@ const Purchases = () => {
                         {/* Compact Financial Details */}
                         <div className="grid grid-cols-2 gap-2 mb-3 flex-1">
                           <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">Advance</p>
+                            <p className="text-xs text-gray-500">{t('advance')}</p>
                             <p className="text-sm font-semibold text-gray-800">
                               {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
                             </p>
                           </div>
                           <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">Balance</p>
+                            <p className="text-xs text-gray-500">{t('balance')}</p>
                             <p className="text-sm font-semibold text-red-600">
                               {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
                             </p>
@@ -1449,13 +1460,13 @@ const Purchases = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                purchase.payment_status === 'Paid' 
+                                purchase.payment_status === t('paid') 
                                   ? 'bg-green-100 text-green-800'
-                                  : purchase.payment_status === 'Partially Paid'
+                                  : purchase.payment_status === t('partiallyPaid')
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-red-100 text-red-800'
                               }`}>
-                                {purchase.payment_status || 'Unpaid'}
+                                {purchase.payment_status || t('unpaid')}
                               </span>
                               {purchase.category && (
                                 <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
@@ -1465,7 +1476,7 @@ const Purchases = () => {
                               {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
                                 <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1">
                                   <Link className="h-3 w-3" />
-                                  {purchase.linked_receipts.length} receipts
+                                  {purchase.linked_receipts.length} {t('receipts')}
                                 </span>
                               )}
                             </div>
@@ -1475,7 +1486,7 @@ const Purchases = () => {
                                 onClick={() => handleRecurringRenewal(purchase)}
                                 className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
                               >
-                                Renew Now
+                                {t('renewNow')}
                               </Button>
                             )}
                           </div>
@@ -1494,7 +1505,7 @@ const Purchases = () => {
             <AnimatePresence>
               {suppliers.length === 0 ? (
                 <div className="col-span-full text-center py-10 text-gray-500">
-                  No suppliers found
+                  {t('noSuppliersFound')}
                 </div>
               ) : (
                 filteredSuppliers.map((supplier) => (
@@ -1549,13 +1560,13 @@ const Purchases = () => {
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="flex justify-between items-baseline">
                               <div>
-                                <p className="text-xs text-gray-500 mb-0.5">Total Purchases</p>
+                                <p className="text-xs text-gray-500 mb-0.5">{t('totalPurchases')}</p>
                                 <p className="font-medium text-emerald-600">
                                   {purchases.filter(p => p.supplier_id === supplier.id).length}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-xs text-gray-500 mb-0.5">Total Amount</p>
+                                <p className="text-xs text-gray-500 mb-0.5">{t('totalAmount')}</p>
                                 <p className="font-medium text-orange-600">
                                   {purchases
                                     .filter(p => p.supplier_id === supplier.id)

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, Save, Building2, User, MapPin, FileText, Globe, Phone, Mail } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const LEGAL_STATUS_OPTIONS = [
 const OpticianSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<UserInformation>({
     user_id: user?.id || '',
@@ -136,8 +138,8 @@ const OpticianSettings = () => {
     },
     onSuccess: () => {
       toast({
-        title: "Settings Saved",
-        description: "Your optician information has been successfully updated.",
+        title: t('settingsSaved'),
+        description: t('opticianInfoUpdated'),
       });
       setHasChanges(false);
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
@@ -145,8 +147,8 @@ const OpticianSettings = () => {
     onError: (error) => {
       console.error('Error saving user information:', error);
       toast({
-        title: "Error",
-        description: "Failed to save your information. Please try again.",
+        title: t('error'),
+        description: t('failedToSaveInfo'),
         variant: "destructive",
       });
     }
@@ -185,14 +187,14 @@ const OpticianSettings = () => {
       handleInputChange('logo_url', data.publicUrl);
 
       toast({
-        title: "Logo Uploaded",
-        description: "Your logo has been uploaded successfully.",
+        title: t('logoUploaded'),
+        description: t('logoUploadedSuccess'),
       });
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast({
-        title: "Upload Error",
-        description: "Failed to upload logo. Please try again.",
+        title: t('uploadError'),
+        description: t('failedToUploadLogo'),
         variant: "destructive",
       });
     } finally {
@@ -208,7 +210,7 @@ const OpticianSettings = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">Loading...</div>
+          <div className="text-center">{t('loading')}</div>
         </div>
       </div>
     );
@@ -218,8 +220,8 @@ const OpticianSettings = () => {
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <PageTitle 
-          title="Optician Settings" 
-          subtitle="Manage your business information and settings"
+          title={t('opticianSettings')} 
+          subtitle={t('manageBusinessInfo')}
         />
 
         <div className="space-y-6">
@@ -228,50 +230,50 @@ const OpticianSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                Business Information
+                {t('businessInformation')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="store_name">Store Name</Label>
+                  <Label htmlFor="store_name">{t('storeName')}</Label>
                   <Input
                     id="store_name"
                     value={formData.store_name}
                     onChange={(e) => handleInputChange('store_name', e.target.value)}
-                    placeholder="Enter your store name"
+                    placeholder={t('enterStoreName')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="display_name">Display Name</Label>
+                  <Label htmlFor="display_name">{t('displayName')}</Label>
                   <Input
                     id="display_name"
                     value={formData.display_name}
                     onChange={(e) => handleInputChange('display_name', e.target.value)}
-                    placeholder="Enter your display name"
+                    placeholder={t('enterDisplayName')}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Business Address</Label>
+                <Label htmlFor="address">{t('businessAddress')}</Label>
                 <Textarea
                   id="address"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your complete business address"
+                  placeholder={t('enterCompleteAddress')}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company_legal_status">Company Legal Status</Label>
+                <Label htmlFor="company_legal_status">{t('companyLegalStatus')}</Label>
                 <Select
                   value={formData.company_legal_status}
                   onValueChange={(value) => handleInputChange('company_legal_status', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select legal status" />
+                    <SelectValue placeholder={t('selectLegalStatus')} />
                   </SelectTrigger>
                   <SelectContent>
                     {LEGAL_STATUS_OPTIONS.map((status) => (
