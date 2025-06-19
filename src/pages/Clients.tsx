@@ -183,13 +183,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Update the cache
-      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
-        if (!oldData) return oldData;
-        return oldData.map(client => 
-          client.id === id ? { ...client, name, phone } : client
-        );
-      });
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
@@ -214,11 +209,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Update the cache by removing the client
-      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
-        if (!oldData) return oldData;
-        return oldData.filter(client => client.id !== clientToDelete.id);
-      });
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
 
       toast.success('Client deleted successfully!');
       setIsDeleteDialogOpen(false);
@@ -349,7 +341,7 @@ export default function Clients() {
       });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      await queryClient.invalidateQueries(['all-clients']);
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
@@ -388,11 +380,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Update the cache by removing deleted clients
-      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
-        if (!oldData) return oldData;
-        return oldData.filter(client => !clientsToDelete.includes(client.id));
-      });
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
 
       toast.success(`${clientsToDelete.length} duplicate clients removed`);
       setIsDuplicateDialogOpen(false);
