@@ -476,35 +476,19 @@ export default function Clients() {
           ))}
         </div>
       ) : filteredClients?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
-          {filteredClients.map((client) => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onEdit={handleEditClient}
-              onDelete={openDeleteDialog}
-              onRefresh={fetchClients}
-            />
-          ))}
-          {hasMore && (
-            <div className="col-span-full flex justify-center p-4">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => !isLoading && setPage(prev => prev + 1)}
-                className="w-full max-w-xs gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"/>
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-                Load More Clients
-              </Button>
-            </div>
-          )}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+            {filteredClients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onDelete={openDeleteDialog}
+                onRefresh={() => queryClient.invalidateQueries(['all-clients'])}
+              />
+            ))}
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
           <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
