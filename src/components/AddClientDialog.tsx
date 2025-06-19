@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useQueryClient } from '@tanstack/react-query'
+import { useLanguage } from './LanguageProvider'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -46,6 +47,7 @@ interface AddClientDialogProps {
 const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
+  const { t } = useLanguage()
   const queryClient = useQueryClient()
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -124,7 +126,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Client</DialogTitle>
+          <DialogTitle>{t('addClient')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -134,9 +136,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{t('clientName')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter client name" />
+                      <Input {...field} placeholder={t('enterClientName')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,9 +149,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('phoneNumber')}</FormLabel>
                     <FormControl>
-                      <Input {...field} type="tel" placeholder="Enter phone number" />
+                      <Input {...field} type="tel" placeholder={t('enterPhoneNumber')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -159,14 +161,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
 
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Right Eye</h3>
+                <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
                     name="right_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">SPH</FormLabel>
+                        <FormLabel className="text-xs">{t('sphere')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -179,7 +181,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="right_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">CYL</FormLabel>
+                        <FormLabel className="text-xs">{t('cylinder')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -192,7 +194,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="right_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">AXE</FormLabel>
+                        <FormLabel className="text-xs">{t('axis')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -204,14 +206,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Left Eye</h3>
+                <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
                     name="left_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">SPH</FormLabel>
+                        <FormLabel className="text-xs">{t('sphere')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -224,7 +226,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="left_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">CYL</FormLabel>
+                        <FormLabel className="text-xs">{t('cylinder')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -237,7 +239,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="left_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">AXE</FormLabel>
+                        <FormLabel className="text-xs">{t('axis')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -268,7 +270,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               name="assurance"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assurance</FormLabel>
+                  <FormLabel>{t('assurance')}</FormLabel>
                   <FormControl>
                     <Input {...field} type="text" />
                   </FormControl>
@@ -282,7 +284,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
+                  <FormLabel>{t('notes')}</FormLabel>
                   <FormControl>
                     <Input {...field} type="text" />
                   </FormControl>
@@ -296,9 +298,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 form.reset()
                 onClose()
               }}>
-                Cancel
+                {t('cancel')}
               </Button>
-              <Button type="submit">Add Client</Button>
+              <Button type="submit">{t('addClient')}</Button>
             </div>
           </form>
         </Form>

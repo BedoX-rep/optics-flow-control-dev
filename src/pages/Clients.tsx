@@ -488,7 +488,7 @@ export default function Clients() {
           <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noClientsFound')}</h3>
           <p className="text-gray-500 max-w-md mb-4">
             {searchTerm
-              ? t('noClientsMatchSearch', { searchTerm })
+              ? t('noClientsMatchSearch')
               : t('noClientsYet')
             }
           </p>
@@ -573,11 +573,7 @@ export default function Clients() {
 
           {filteredClients.length > 0 && (
             <div className="text-center text-sm text-gray-500 mt-4">
-              {t('showingClients', {
-                start: page * ITEMS_PER_PAGE + 1,
-                end: Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length),
-                total: filteredClients.length
-              })}
+              Showing {page * ITEMS_PER_PAGE + 1}-{Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
             </div>
           )}
         </>

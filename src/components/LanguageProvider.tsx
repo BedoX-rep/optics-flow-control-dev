@@ -459,6 +459,132 @@ const productTranslations: Translations = {
     en: 'Uploading...',
     fr: 'Téléchargement...',
     ar: 'جاري الرفع...'
+  },
+  // Additional client page translations
+  saveAllChanges: {
+    en: 'Save All Changes',
+    fr: 'Enregistrer Toutes les Modifications',
+    ar: 'حفظ جميع التغييرات'
+  },
+  sortBy: {
+    en: 'Sort By',
+    fr: 'Trier Par',
+    ar: 'ترتيب حسب'
+  },
+  nameAZ: {
+    en: 'Name (A-Z)',
+    fr: 'Nom (A-Z)',
+    ar: 'الاسم (أ-ي)'
+  },
+  recentlyAdded: {
+    en: 'Recently Added',
+    fr: 'Ajouté Récemment',
+    ar: 'المضاف حديثاً'
+  },
+  findDuplicates: {
+    en: 'Find Duplicates',
+    fr: 'Trouver les Doublons',
+    ar: 'العثور على التكرارات'
+  },
+  noClientsMatchSearch: {
+    en: 'No clients match your search',
+    fr: 'Aucun client ne correspond à votre recherche',
+    ar: 'لا يوجد عملاء يطابقون بحثك'
+  },
+  noClientsYet: {
+    en: 'You haven\'t added any clients yet',
+    fr: 'Vous n\'avez pas encore ajouté de clients',
+    ar: 'لم تقم بإضافة أي عملاء بعد'
+  },
+  addFirstClient: {
+    en: 'Add Your First Client',
+    fr: 'Ajouter Votre Premier Client',
+    ar: 'أضف عميلك الأول'
+  },
+  previous: {
+    en: 'Previous',
+    fr: 'Précédent',
+    ar: 'السابق'
+  },
+  next: {
+    en: 'Next',
+    fr: 'Suivant',
+    ar: 'التالي'
+  },
+  showingClients: {
+    en: 'Showing {start}-{end} of {total} clients',
+    fr: 'Affichage de {start}-{end} sur {total} clients',
+    ar: 'عرض {start}-{end} من {total} عملاء'
+  },
+  deleteClient: {
+    en: 'Delete Client',
+    fr: 'Supprimer le Client',
+    ar: 'حذف العميل'
+  },
+  deleteConfirmation: {
+    en: 'Are you sure you want to delete {clientName}? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer {clientName}? Cette action ne peut pas être annulée.',
+    ar: 'هل أنت متأكد من أنك تريد حذف {clientName}؟ لا يمكن التراجع عن هذا الإجراء.'
+  },
+  duplicateClientsFound: {
+    en: 'Duplicate Clients Found',
+    fr: 'Clients en Double Trouvés',
+    ar: 'تم العثور على عملاء مكررين'
+  },
+  duplicateExplanation: {
+    en: 'Found {count} duplicate clients with the same phone number. Would you like to remove the duplicates?',
+    fr: 'Trouvé {count} clients en double avec le même numéro de téléphone. Voulez-vous supprimer les doublons?',
+    ar: 'تم العثور على {count} عملاء مكررين بنفس رقم الهاتف. هل تريد إزالة التكرارات؟'
+  },
+  deleteDuplicates: {
+    en: 'Delete Duplicates',
+    fr: 'Supprimer les Doublons',
+    ar: 'حذف التكرارات'
+  },
+  enterClientName: {
+    en: 'Enter client name',
+    fr: 'Entrer le nom du client',
+    ar: 'أدخل اسم العميل'
+  },
+  enterPhoneNumber: {
+    en: 'Enter phone number',
+    fr: 'Entrer le numéro de téléphone',
+    ar: 'أدخل رقم الهاتف'
+  },
+  assurance: {
+    en: 'Assurance',
+    fr: 'Assurance',
+    ar: 'التأمين'
+  },
+  notes: {
+    en: 'Notes',
+    fr: 'Notes',
+    ar: 'ملاحظات'
+  },
+  rightEyeShort: {
+    en: 'Right Eye',
+    fr: 'Œil Droit',
+    ar: 'العين اليمنى'
+  },
+  leftEyeShort: {
+    en: 'Left Eye',
+    fr: 'Œil Gauche',
+    ar: 'العين اليسرى'
+  },
+  addedOn: {
+    en: 'Added on',
+    fr: 'Ajouté le',
+    ar: 'أضيف في'
+  },
+  purchaseHistory: {
+    en: 'Purchase History',
+    fr: 'Historique d\'Achat',
+    ar: 'تاريخ الشراء'
+  },
+  noPurchaseHistory: {
+    en: 'No purchase history available',
+    fr: 'Aucun historique d\'achat disponible',
+    ar: 'لا يوجد تاريخ شراء متاح'
   }
 };
 
