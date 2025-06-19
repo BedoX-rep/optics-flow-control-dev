@@ -168,7 +168,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="right_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('sphere')}</FormLabel>
+                        <FormLabel className="text-xs">{t('sph')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -181,7 +181,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="right_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('cylinder')}</FormLabel>
+                        <FormLabel className="text-xs">{t('cyl')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -194,7 +194,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="right_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('axis')}</FormLabel>
+                        <FormLabel className="text-xs">{t('axe')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -213,7 +213,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="left_eye_sph"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('sphere')}</FormLabel>
+                        <FormLabel className="text-xs">{t('sph')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -226,7 +226,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="left_eye_cyl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('cylinder')}</FormLabel>
+                        <FormLabel className="text-xs">{t('cyl')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>
@@ -239,7 +239,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     name="left_eye_axe"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">{t('axis')}</FormLabel>
+                        <FormLabel className="text-xs">{t('axe')}</FormLabel>
                         <FormControl>
                           <Input {...field} type="text" className="h-8" />
                         </FormControl>

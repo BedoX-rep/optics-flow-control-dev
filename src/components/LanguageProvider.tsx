@@ -705,6 +705,21 @@ const clientsTranslations: Translations = {
     fr: 'Axe',
     ar: 'المحور'
   },
+  sph: {
+    en: 'Sph',
+    fr: 'Sph',
+    ar: 'كرة'
+  },
+  cyl: {
+    en: 'Cyl',
+    fr: 'Cyl',
+    ar: 'أسطوانة'
+  },
+  axe: {
+    en: 'Axe',
+    fr: 'Axe',
+    ar: 'محور'
+  },
   pupillaryDistance: {
     en: 'Pupillary Distance (PD)',
     fr: 'Distance Pupillaire (PD)',

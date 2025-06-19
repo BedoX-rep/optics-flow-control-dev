@@ -6,6 +6,7 @@ import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from './LanguageProvider';
 
 interface Receipt {
   id: string;
@@ -49,6 +50,7 @@ interface ClientCardProps {
 
 export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardProps) => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
@@ -326,14 +328,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         {/* Editable prescription data */}
         <div className="mt-4 grid grid-cols-2 gap-6">
           <div className="space-y-3">
-            <h3 className="text-sm font-medium">Right Eye</h3>
+            <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
             <div className="grid grid-cols-3 gap-2">
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">SPH</span>
+                <span className="text-xs text-gray-500">{t('sph')}</span>
                 <input 
                   type="text"
-                  name="right_eye_sph" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="right_eye_sph"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseFloat(e.target.value);
@@ -344,11 +346,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">CYL</span>
+                <span className="text-xs text-gray-500">{t('cyl')}</span>
                 <input 
                   type="text"
-                  name="right_eye_cyl" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="right_eye_cyl"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseFloat(e.target.value);
@@ -359,11 +361,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">AXE</span>
+                <span className="text-xs text-gray-500">{t('axe')}</span>
                 <input 
                   type="text"
-                  name="right_eye_axe" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="right_eye_axe"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseInt(e.target.value);
@@ -376,14 +378,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
           <div className="space-y-3">
-            <h3 className="text-sm font-medium">Left Eye</h3>
+            <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
             <div className="grid grid-cols-3 gap-2">
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">SPH</span>
+                <span className="text-xs text-gray-500">{t('sph')}</span>
                 <input 
                   type="text"
-                  name="left_eye_sph" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="left_eye_sph"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseFloat(e.target.value);
@@ -394,11 +396,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">CYL</span>
+                <span className="text-xs text-gray-500">{t('cyl')}</span>
                 <input 
                   type="text"
-                  name="left_eye_cyl" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="left_eye_cyl"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseFloat(e.target.value);
@@ -409,11 +411,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500">AXE</span>
+                <span className="text-xs text-gray-500">{t('axe')}</span>
                 <input 
                   type="text"
-                  name="left_eye_axe" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
+                  name="left_eye_axe"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
                   onChange={(e) => {
                     const value = e.target.value === "" ? null : parseInt(e.target.value);
@@ -431,7 +433,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       <div className="bg-white bg-opacity-30 px-4 py-2 flex justify-between items-center">
         <div className="flex items-center text-xs text-gray-500">
           <Calendar size={14} className="mr-1" />
-          <span>Added on {formattedDate}</span>
+          <span>{t('addedOn')} {formattedDate}</span>
         </div>
         <Button 
           variant="ghost" 
