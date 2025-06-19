@@ -151,58 +151,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 flex">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 p-12 items-center justify-center relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-32 h-32 border border-white rounded-full"></div>
-          <div className="absolute bottom-40 right-20 w-48 h-48 border border-white rounded-full"></div>
-          <div className="absolute top-1/2 right-40 w-24 h-24 border border-white rounded-full"></div>
-        </div>
-        
-        <div className="relative z-10 text-center text-white">
-          <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
-            <Glasses className="w-10 h-10" />
-          </div>
-          <h1 className="text-5xl font-bold mb-6">Lensly</h1>
-          <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-md">
-            Modern optical store management system designed for efficiency and growth
-          </p>
-          
-          {/* Feature highlights */}
-          <div className="space-y-6 text-left">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <Zap className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Lightning Fast</h3>
-                <p className="text-white/80 text-sm">Optimized for speed and performance</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Secure & Reliable</h3>
-                <p className="text-white/80 text-sm">Enterprise-grade security</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Multi-User Ready</h3>
-                <p className="text-white/80 text-sm">Perfect for teams of any size</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Auth Form */}
+      {/* Left Side - Auth Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
@@ -463,6 +412,57 @@ const Auth = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+
+      {/* Right Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 p-12 items-center justify-center relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-32 h-32 border border-white rounded-full"></div>
+          <div className="absolute bottom-40 right-20 w-48 h-48 border border-white rounded-full"></div>
+          <div className="absolute top-1/2 right-40 w-24 h-24 border border-white rounded-full"></div>
+        </div>
+        
+        <div className="relative z-10 text-center text-white">
+          <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
+            <Glasses className="w-10 h-10" />
+          </div>
+          <h1 className="text-5xl font-bold mb-6">Lensly</h1>
+          <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-md">
+            Modern optical store management system designed for efficiency and growth
+          </p>
+          
+          {/* Feature highlights */}
+          <div className="space-y-6 text-left">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Lightning Fast</h3>
+                <p className="text-white/80 text-sm">Optimized for speed and performance</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Secure & Reliable</h3>
+                <p className="text-white/80 text-sm">Enterprise-grade security</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Multi-User Ready</h3>
+                <p className="text-white/80 text-sm">Perfect for teams of any size</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
