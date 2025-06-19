@@ -185,6 +185,7 @@ const NewReceipt = () => {
   const [clientSkipped, setClientSkipped] = useState(false);
   const [currentTab, setCurrentTab] = useState('client');
   const [checkOutOfStock, setCheckOutOfStock] = useState<() => boolean>(() => () => false);
+  const checkOutOfStockRef = useRef<() => boolean>(() => false);
 
   const steps = [
     { id: 'client', label: t('clientSelection'), icon: User },
@@ -1015,52 +1016,7 @@ const NewReceipt = () => {
             </div>
           </div>
         </div>
-        {!selectedClient && (
-          <CardContent className="p-6">
-            <div className="flex gap-3 mb-6">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search by name or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-12"
-                />
-              </div>
-              <Button
-                onClick={() => setIsAddClientOpen(true)}
-                className="h-12 px-6"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                New Client
-              </Button>
-            </div>
-
-            <div className="grid gap-4 max-h-[400px] overflow-y-auto">
-              {filteredClients.slice(0, 8).map(client => (
-                <div
-                  key={client.id}
-                  className={`p-4 rounded-lg border-2 transition-all cursor-pointer
-                    ${selectedClient === client.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-transparent bg-gray-50 hover:border-primary/20'}`}
-                  onClick={() => handleClientSelect(client.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{client.name}</h3>
-                      <p className="text-sm text-muted-foreground">{client.phone}</p>
-                    </div>
-                    {selectedClient === client.id && (
-                      <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        )}
+        
         </CardContent>
       </Card>
     );

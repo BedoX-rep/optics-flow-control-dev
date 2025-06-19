@@ -595,6 +595,41 @@ const receiptTranslations: Translations = {
     fr: 'Nouveau Reçu',
     ar: 'إيصال جديد'
   },
+  step: {
+    en: 'Step',
+    fr: 'Étape',
+    ar: 'خطوة'
+  },
+  of: {
+    en: 'of',
+    fr: 'de',
+    ar: 'من'
+  },
+  continue: {
+    en: 'Continue',
+    fr: 'Continuer',
+    ar: 'متابعة'
+  },
+  back: {
+    en: 'Back',
+    fr: 'Retour',
+    ar: 'رجوع'
+  },
+  finish: {
+    en: 'Finish',
+    fr: 'Terminer',
+    ar: 'إنهاء'
+  },
+  createReceipt: {
+    en: 'Create Receipt',
+    fr: 'Créer le Reçu',
+    ar: 'إنشاء إيصال'
+  },
+  saveReceipt: {
+    en: 'Save Receipt',
+    fr: 'Enregistrer le Reçu',
+    ar: 'حفظ الإيصال'
+  },
   clientSelection: {
     en: 'Client Selection',
     fr: 'Sélection du Client',
@@ -999,6 +1034,141 @@ const receiptTranslations: Translations = {
     en: 'Total Profit',
     fr: 'Profit Total',
     ar: 'الربح الإجمالي'
+  },
+  both: {
+    en: 'Both',
+    fr: 'Les Deux',
+    ar: 'كلاهما'
+  },
+  selectEye: {
+    en: 'Select Eye',
+    fr: 'Sélectionner l\'Œil',
+    ar: 'اختر العين'
+  },
+  noProductSelected: {
+    en: 'No Product Selected',
+    fr: 'Aucun Produit Sélectionné',
+    ar: 'لم يتم اختيار منتج'
+  },
+  selectProduct: {
+    en: 'Select Product',
+    fr: 'Sélectionner un Produit',
+    ar: 'اختر منتج'
+  },
+  searchProducts: {
+    en: 'Search products...',
+    fr: 'Rechercher des produits...',
+    ar: 'البحث عن المنتجات...'
+  },
+  removeItem: {
+    en: 'Remove Item',
+    fr: 'Supprimer l\'Article',
+    ar: 'إزالة العنصر'
+  },
+  noItemsInOrder: {
+    en: 'No items in order',
+    fr: 'Aucun article dans la commande',
+    ar: 'لا توجد عناصر في الطلب'
+  },
+  addFirstItem: {
+    en: 'Add your first item to get started',
+    fr: 'Ajoutez votre premier article pour commencer',
+    ar: 'أضف عنصرك الأول للبدء'
+  },
+  markup: {
+    en: 'Markup',
+    fr: 'Majoration',
+    ar: 'الهامش'
+  },
+  applied: {
+    en: 'Applied',
+    fr: 'Appliqué',
+    ar: 'مطبق'
+  },
+  percentageDiscountOptional: {
+    en: 'Percentage discount (optional)',
+    fr: 'Remise en pourcentage (optionnel)',
+    ar: 'خصم بالنسبة المئوية (اختياري)'
+  },
+  fixedDiscountOptional: {
+    en: 'Fixed discount (optional)',
+    fr: 'Remise fixe (optionnel)',
+    ar: 'خصم ثابت (اختياري)'
+  },
+  taxBaseOptional: {
+    en: 'Tax base (optional)',
+    fr: 'Base de taxe (optionnel)',
+    ar: 'أساس الضريبة (اختياري)'
+  },
+  advancePaymentOptional: {
+    en: 'Advance payment (optional)',
+    fr: 'Paiement d\'avance (optionnel)',
+    ar: 'دفعة مقدمة (اختياري)'
+  },
+  all: {
+    en: 'All',
+    fr: 'Tous',
+    ar: 'الكل'
+  },
+  categories: {
+    en: 'Categories',
+    fr: 'Catégories',
+    ar: 'الفئات'
+  },
+  treatments: {
+    en: 'Treatments',
+    fr: 'Traitements',
+    ar: 'المعالجات'
+  },
+  companies: {
+    en: 'Companies',
+    fr: 'Entreprises',
+    ar: 'الشركات'
+  },
+  indexes: {
+    en: 'Indexes',
+    fr: 'Indices',
+    ar: 'المؤشرات'
+  },
+  stockStatuses: {
+    en: 'Stock Statuses',
+    fr: 'États du Stock',
+    ar: 'حالات المخزون'
+  },
+  clearFilters: {
+    en: 'Clear Filters',
+    fr: 'Effacer les Filtres',
+    ar: 'مسح المرشحات'
+  },
+  filter: {
+    en: 'Filter',
+    fr: 'Filtrer',
+    ar: 'تصفية'
+  },
+  allCategories: {
+    en: 'All Categories',
+    fr: 'Toutes les Catégories',
+    ar: 'جميع الفئات'
+  },
+  allIndexes: {
+    en: 'All Indexes',
+    fr: 'Tous les Indices',
+    ar: 'جميع المؤشرات'
+  },
+  allTreatments: {
+    en: 'All Treatments',
+    fr: 'Tous les Traitements',
+    ar: 'جميع المعالجات'
+  },
+  allCompanies: {
+    en: 'All Companies',
+    fr: 'Toutes les Entreprises',
+    ar: 'جميع الشركات'
+  },
+  allStockStatuses: {
+    en: 'All Stock Statuses',
+    fr: 'Tous les États du Stock',
+    ar: 'جميع حالات المخزون'
   }
 };
 
