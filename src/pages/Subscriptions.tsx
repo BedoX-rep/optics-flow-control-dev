@@ -2,9 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Check, Phone, CreditCard, RefreshCw, Copy } from 'lucide-react';
+import { Calendar, Check, Phone, CreditCard, Copy } from 'lucide-react';
 import BankTransferDialog from '@/components/BankTransferDialog';
-import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
@@ -132,24 +131,7 @@ const Subscriptions = () => {
   };
 
 
-const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; onToggle: () => void }) => (
-  <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur rounded-lg shadow-sm mb-6">
-    <div className="flex items-center space-x-3">
-      <div className={`p-2 rounded-full ${isRecurring ? 'bg-teal-100' : 'bg-gray-100'}`}>
-        <RefreshCw className={`h-5 w-5 ${isRecurring ? 'text-teal-600' : 'text-gray-500'}`} />
-      </div>
-      <div>
-        <h3 className="font-medium">Auto-Renewal</h3>
-        <p className="text-sm text-gray-500">{isRecurring ? 'Your subscription will renew automatically' : 'Manual renewal required'}</p>
-      </div>
-    </div>
-    <Switch
-      checked={isRecurring}
-      onCheckedChange={onToggle}
-      className={`${isRecurring ? 'bg-teal-600' : 'bg-gray-200'}`}
-    />
-  </div>
-);
+
 
 const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
 
@@ -161,15 +143,7 @@ const renderSubscriptionPlans = () => {
         onClose={() => setBankTransferDialogOpen(false)}
       />
       
-      {currentSubscription && (
-        <AutoRenewalToggle 
-          isRecurring={currentSubscription.is_recurring || false}
-          onToggle={() => updateSubscription(
-            currentSubscription.subscription_type as any,
-            !currentSubscription.is_recurring
-          )}
-        />
-      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {['Monthly', 'Quarterly', 'Lifetime'].map((type) => (
           <motion.div
