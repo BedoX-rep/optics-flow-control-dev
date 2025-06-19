@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import ProductFilters from '@/components/ProductFilters';
+import { useLanguage } from '@/components/LanguageProvider';
 
 interface OrderItemsProps {
   items: any[];
@@ -62,6 +63,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   checkOutOfStockWarning,
   onProceedWithOutOfStock
 }) => {
+  const { t } = useLanguage();
   const [showOutOfStockWarning, setShowOutOfStockWarning] = useState(false);
   const [outOfStockProducts, setOutOfStockProducts] = useState<string[]>([]);
 
@@ -142,18 +144,18 @@ const OrderItems: React.FC<OrderItemsProps> = ({
         <Alert className="m-4 border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-700">
-            <strong>Warning:</strong> The following products are out of stock:
+            <strong>{t('outOfStockWarning')}:</strong> {t('outOfStockDesc')}
             <ul className="mt-1 list-disc list-inside">
               {outOfStockItems.map(item => {
                 const product = products.find(p => p.id === item.productId);
                 return (
                   <li key={item.id} className="text-sm">
-                    {product?.name || 'Unknown Product'}
+                    {product?.name || t('unknownProduct')}
                   </li>
                 );
               })}
             </ul>
-            You can still save this receipt, but consider updating stock or using alternative products.
+            {t('canStillProceed')}
           </AlertDescription>
         </Alert>
       )}
@@ -161,25 +163,25 @@ const OrderItems: React.FC<OrderItemsProps> = ({
         <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
           <div className="flex items-center gap-4 flex-1">
             <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-              <Plus className="h-4 w-4 mr-2" /> Add Product
+              <Plus className="h-4 w-4 mr-2" /> {t('addProduct')}
             </Button>
             <Button onClick={() => addItem('custom')} variant="outline" size="default">
-              <Plus className="h-4 w-4 mr-2" /> Add Custom
+              <Plus className="h-4 w-4 mr-2" /> {t('addCustomItem')}
             </Button>
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">Order Type:</Label>
+              <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('orderType')}:</Label>
               <Select value={orderType} onValueChange={setOrderType}>
                 <SelectTrigger className={`w-[140px] ${
                   orderType === 'Unspecified' 
                     ? 'bg-red-50 border-red-300 text-red-700' 
                     : 'bg-white border-gray-300'
                 }`}>
-                  <SelectValue placeholder="Select Type">
+                  <SelectValue placeholder={t('selectOrderType')}>
                     <div className="flex items-center gap-1">
                       {orderType === 'Unspecified' && (
                         <AlertCircle className="w-3 h-3 text-red-500" />
                       )}
-                      <span className="truncate">{orderType}</span>
+                      <span className="truncate">{t(orderType.toLowerCase())}</span>
                     </div>
                   </SelectValue>
                 </SelectTrigger>
@@ -187,25 +189,25 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   <SelectItem value="Unspecified">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 text-red-500" />
-                      Unspecified
+                      {t('unspecified')}
                     </div>
                   </SelectItem>
                   <SelectItem value="Montage">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      Montage
+                      {t('montage')}
                     </div>
                   </SelectItem>
                   <SelectItem value="Retoyage">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      Retoyage
+                      {t('retoyage')}
                     </div>
                   </SelectItem>
                   <SelectItem value="Sell">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      Sell
+                      {t('sell')}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -226,7 +228,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                 <div className="grid grid-cols-12 gap-4 items-start">
                   {item.customName !== undefined ? (
                     <div className="col-span-5">
-                      <Label htmlFor={`custom-${item.id}`} className="text-xs">Custom Item</Label>
+                      <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
                       <Input
                         id={`custom-${item.id}`}
                         value={item.customName || ''}
@@ -236,14 +238,14 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                     </div>
                   ) : (
                     <div className="col-span-5">
-                      <Label htmlFor={`product-${item.id}`} className="text-xs">Product</Label>
+                      <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
                       <div className="flex gap-2 mt-1">
                         <Select
                           value={item.productId}
                           onValueChange={(value) => updateItem(item.id, 'productId', value)}
                         >
                           <SelectTrigger id={`product-${item.id}`} className="flex-1">
-                            <SelectValue placeholder="Select" />
+                            <SelectValue placeholder={t('selectProduct')} />
                           </SelectTrigger>
                           <SelectContent className="min-w-[400px]">
                             {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
@@ -253,7 +255,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                   <div className="flex items-center gap-3">
                                     {product.stock_status === 'inStock' ? (
                                       <span className="text-xs text-green-600 whitespace-nowrap">
-                                        Stock: {product.stock || 0}
+                                        {t('stock')}: {product.stock || 0}
                                       </span>
                                     ) : (
                                       <span className={`text-xs whitespace-nowrap ${
@@ -261,7 +263,11 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                         product.stock_status === 'Order' ? 'text-orange-600' : 
                                         'text-blue-600'
                                       }`}>
-                                        {product.stock_status === 'inStock' ? 'In Stock' : product.stock_status}
+                                        {product.stock_status === 'inStock' ? t('inStock') : 
+                                         product.stock_status === 'Out Of Stock' ? t('outOfStock') :
+                                         product.stock_status === 'Order' ? t('order') :
+                                         product.stock_status === 'Fabrication' ? t('fabrication') :
+                                         product.stock_status}
                                       </span>
                                     )}
                                     <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
@@ -272,7 +278,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                           </SelectContent>
                         </Select>
                         <Input
-                          placeholder="Search"
+                          placeholder={t('searchProducts')}
                           value={productSearchTerms[item.id] || ''}
                           onChange={(e) => {
                             setProductSearchTerms(prev => ({
@@ -287,7 +293,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   )}
 
                   <div className="col-span-1">
-                    <Label className="text-xs">Qty</Label>
+                    <Label className="text-xs">{t('quantity')}</Label>
                     <Input
                       type="number"
                       min="1"
@@ -298,7 +304,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   </div>
 
                   <div className="col-span-2">
-                    <Label className="text-xs">Price (DH)</Label>
+                    <Label className="text-xs">{t('unitPrice')}</Label>
                     <Input
                       type="number"
                       min="0"
@@ -310,7 +316,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   </div>
 
                   <div className="col-span-2">
-                    <Label className="text-xs">Cost (DH)</Label>
+                    <Label className="text-xs">{t('unitCost')}</Label>
                     <Input
                       type="number"
                       min="0"
@@ -322,9 +328,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   </div>
 
                   <div className="col-span-1">
-                    <Label className="text-xs">Total</Label>
+                    <Label className="text-xs">{t('total')}</Label>
                     <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-right">
-                      {(item.price * item.quantity).toFixed(2)} DH
+                      {(item.price * item.quantity).toFixed(2)} {t('dh')}
                     </div>
                   </div>
 
@@ -428,7 +434,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                           </div>
                           {item.appliedMarkup > 0 && (
                             <span className="text-sm text-muted-foreground">
-                              (+{item.appliedMarkup}% markup)
+                              (+{item.appliedMarkup}% {t('markup')})
                             </span>
                           )}
                         </div>
@@ -448,7 +454,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                           />
                           <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm">
-                            Paid at Delivery
+                            {t('paidAtDelivery')}
                           </Label>
                         </div>
                       )}
@@ -461,7 +467,8 @@ const OrderItems: React.FC<OrderItemsProps> = ({
 
           {items.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              <p>No items added yet. Click the buttons above to add items.</p>
+              <p>{t('noItemsInOrder')}</p>
+              <p className="text-sm mt-1">{t('addFirstItem')}</p>
             </div>
           )}
         </div>
@@ -470,20 +477,20 @@ const OrderItems: React.FC<OrderItemsProps> = ({
       <AlertDialog open={showOutOfStockWarning} onOpenChange={setShowOutOfStockWarning}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Out of Stock Products Detected</AlertDialogTitle>
+            <AlertDialogTitle>{t('outOfStockWarning')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The following products in your order are currently out of stock:
+              {t('outOfStockDesc')}
               <ul className="mt-2 list-disc list-inside">
                 {outOfStockProducts.map((productName, index) => (
                   <li key={index} className="text-red-600">{productName}</li>
                 ))}
               </ul>
-              Do you want to proceed with creating this receipt?
+              {t('canStillProceed')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowOutOfStockWarning(false)}>
-              Cancel
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => {
@@ -492,7 +499,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               }}
               className="bg-red-600 hover:bg-red-700"
             >
-              Proceed Anyway
+              {t('continue')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
