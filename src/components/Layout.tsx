@@ -70,31 +70,33 @@ const Layout = ({ children }: LayoutProps) => {
       <MainNav />
       <div className="flex-1 flex flex-col">
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-medium text-gray-800">
-              Welcome back, {user?.email?.split('@')[0] || 'User'}
-            </h2>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-gray-500">{currentDate}</p>
-              <Badge 
-                variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
-                className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
-              >
-                {sessionRole}
-              </Badge>
+          <div className="flex items-center gap-4">
+            <div>
+              <h2 className="text-lg font-medium text-gray-800">
+                Welcome back, {user?.email?.split('@')[0] || 'User'}
+              </h2>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-gray-500">{currentDate}</p>
+                <Badge 
+                  variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
+                  className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+                >
+                  {sessionRole}
+                </Badge>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
             {sessionRole === 'Store Staff' && (
               <Button
                 variant="outline"
-                size="sm"
+                size="default"
                 onClick={() => setAdminAccessDialogOpen(true)}
-                className="text-xs"
+                className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-4 py-2"
               >
                 Access as Admin
               </Button>
             )}
+          </div>
+          <div className="flex items-center space-x-3">
             {sessionRole === 'Admin' && (
               <Button
                 variant="outline"
