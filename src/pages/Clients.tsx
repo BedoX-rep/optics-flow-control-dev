@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Client {
   id: string;
@@ -45,12 +47,14 @@ interface Client {
   }>;
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export default function Clients() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -59,11 +63,16 @@ export default function Clients() {
   const [sortBy, setSortBy] = useState<string>('recent');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
 
-  const fetchClients = async () => {
+  useEffect(() => {
+    setPage(0); // Reset to first page when search changes
+  }, [debouncedSearchTerm]);
+
+  const fetchAllClients = async () => {
     if (!user) return [];
 
-    let query = supabase
+    const { data: allClients, error } = await supabase
       .from('clients')
       .select(`
         *,
@@ -77,60 +86,35 @@ export default function Clients() {
           is_deleted,
           receipt_items(*)
         )
-      `, { count: 'exact' })
+      `)
       .eq('user_id', user.id)
       .eq('is_deleted', false)
-      .order(sortBy === 'name' ? 'name' : sortBy === 'phone' ? 'phone' : 'created_at', { ascending: sortBy === 'recent' ? false : true })
-      .range(page * 30, (page * 30) + (page === 0 ? 29 : 69)); // Get 30 initially, then 70 more
-
-    // Apply search filter if exists
-    if (searchTerm) {
-      query = query.or(`name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
-    }
-
-    const { data: clientsData, error, count } = await query;
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { clients: clientsData || [], hasMore: count ? count > ((page + 1) * 30) : false };
+    return allClients || [];
   };
 
-  const [page, setPage] = useState(0);
-  const { data, isLoading } = useQuery({
-    queryKey: ['clients', user?.id, page, searchTerm, sortBy],
-    queryFn: fetchClients,
+  const { data: allClients = [], isLoading } = useQuery({
+    queryKey: ['all-clients', user?.id],
+    queryFn: fetchAllClients,
     enabled: !!user,
-    keepPreviousData: true,
+    staleTime: Infinity,
+    cacheTime: Infinity,
   });
 
-  const [allClients, setAllClients] = useState<Client[]>([]);
-
-  useEffect(() => {
-    if (data?.clients) {
-      if (page === 0) {
-        setAllClients(data.clients);
-      } else {
-        setAllClients(prev => [...prev, ...data.clients]);
-      }
-    }
-  }, [data?.clients, page]);
-
-  const hasMore = data?.hasMore || false;
-
-  useEffect(() => {
-    setFilteredClients(allClients);
-  }, [allClients]);
-
-  // Filter and sort clients based on search term and sort option
-  useEffect(() => {
-    let filtered = allClients || [];
+  // Client-side filtering and pagination
+  const filteredClients = useMemo(() => {
+    let filtered = [...allClients];
 
     // Apply search filter
-    if (searchTerm && filtered.length > 0) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(client =>
-        client.name.toLowerCase().includes(term) ||
-        client.phone.includes(term)
-      );
+    if (debouncedSearchTerm) {
+      const searchWords = debouncedSearchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+      filtered = filtered.filter(client => {
+        const name = client.name?.toLowerCase() || '';
+        const phone = client.phone?.toLowerCase() || '';
+        return searchWords.every(word => name.includes(word) || phone.includes(word));
+      });
     }
 
     // Sort clients
@@ -145,8 +129,17 @@ export default function Clients() {
       return 0;
     });
 
-    setFilteredClients(filtered);
-  }, [allClients, searchTerm, sortBy]);
+    return filtered;
+  }, [allClients, debouncedSearchTerm, sortBy]);
+
+  // Client-side pagination
+  const paginatedClients = useMemo(() => {
+    const startIndex = page * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredClients.slice(startIndex, endIndex);
+  }, [filteredClients, page]);
+
+  const totalPages = Math.ceil(filteredClients.length / ITEMS_PER_PAGE);
 
   const handleAddClient = async (name: string, phone: string) => {
     try {
@@ -164,8 +157,12 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Update the cache with the new client
+      queryClient.setQueryData(['all-clients', user.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return [data];
+        return [data, ...oldData];
+      });
+
       toast.success('Client added successfully!');
       setIsAddClientOpen(false);
     } catch (error: any) {
@@ -186,8 +183,13 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Update the cache
+      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(client => 
+          client.id === id ? { ...client, name, phone } : client
+        );
+      });
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
@@ -212,8 +214,12 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Update the cache by removing the client
+      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.filter(client => client.id !== clientToDelete.id);
+      });
+
       toast.success('Client deleted successfully!');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
@@ -227,7 +233,7 @@ export default function Clients() {
       if (!user) return;
 
       // Check for duplicates
-      const phoneNumbers = new Set(clients.map(client => client.phone));
+      const phoneNumbers = new Set(allClients.map(client => client.phone));
       const newClients = importedClients.filter(client => !phoneNumbers.has(client.phone));
 
       if (newClients.length === 0) {
@@ -249,8 +255,13 @@ export default function Clients() {
 
       if (error) throw error;
 
+      // Update the cache with imported clients
+      queryClient.setQueryData(['all-clients', user.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return data;
+        return [...data, ...oldData];
+      });
+
       toast.success(`${data?.length} clients imported successfully!`);
-      fetchClients(); // Refresh clients list
       setIsImportDialogOpen(false);
     } catch (error: any) {
       toast.error(`Error importing clients: ${error.message}`);
@@ -259,7 +270,7 @@ export default function Clients() {
 
   const findDuplicateClients = () => {
     // Group clients by phone number
-    const phoneGroups = clients.reduce((groups: any, client) => {
+    const phoneGroups = allClients.reduce((groups: any, client) => {
       const phone = client.phone;
       if (!groups[phone]) {
         groups[phone] = [];
@@ -285,7 +296,6 @@ export default function Clients() {
     setIsDuplicateDialogOpen(true);
   };
 
-  // Function to save all changes
   const handleSaveAllChanges = async () => {
     try {
       // Get all edited clients that need saving
@@ -339,7 +349,7 @@ export default function Clients() {
       });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
+      await queryClient.invalidateQueries(['all-clients']);
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
@@ -378,8 +388,13 @@ export default function Clients() {
 
       if (error) throw error;
 
+      // Update the cache by removing deleted clients
+      queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.filter(client => !clientsToDelete.includes(client.id));
+      });
+
       toast.success(`${clientsToDelete.length} duplicate clients removed`);
-      fetchClients(); // Refresh client list
       setIsDuplicateDialogOpen(false);
     } catch (error: any) {
       toast.error(`Error deleting duplicates: ${error.message}`);
@@ -451,7 +466,7 @@ export default function Clients() {
       </div>
 
       {/* Client cards */}
-      {isLoading || !filteredClients ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm space-y-4">
@@ -475,21 +490,7 @@ export default function Clients() {
             </div>
           ))}
         </div>
-      ) : filteredClients?.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
-            {filteredClients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                onEdit={handleEditClient}
-                onDelete={openDeleteDialog}
-                onRefresh={() => queryClient.invalidateQueries(['all-clients'])}
-              />
-            ))}
-          </div>
-        </>
-      ) : (
+      ) : filteredClients.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
           <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
             <UserPlus size={24} className="text-teal-600" />
@@ -511,6 +512,81 @@ export default function Clients() {
             </Button>
           )}
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+            {paginatedClients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onDelete={openDeleteDialog}
+                onRefresh={() => queryClient.invalidateQueries(['all-clients'])}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0 || isLoading}
+                className="flex items-center gap-1"
+              >
+                <ChevronDown className="h-4 w-4 rotate-90" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i;
+                  } else if (page < 3) {
+                    pageNum = i;
+                  } else if (page > totalPages - 4) {
+                    pageNum = totalPages - 5 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      disabled={isLoading}
+                      className="w-10 h-8"
+                    >
+                      {pageNum + 1}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || isLoading}
+                className="flex items-center gap-1"
+              >
+                Next
+                <ChevronDown className="h-4 w-4 -rotate-90" />
+              </Button>
+            </div>
+          )}
+
+          {filteredClients.length > 0 && (
+            <div className="text-center text-sm text-gray-500 mt-4">
+              Showing {page * ITEMS_PER_PAGE + 1} to {Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
+            </div>
+          )}
+        </>
       )}
 
       {/* Floating action button */}
