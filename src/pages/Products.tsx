@@ -13,6 +13,7 @@ import { Plus, Edit, Trash2, Search, Package, ChevronDown, Save, SaveAll, Upload
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import ProductForm, { ProductFormValues } from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
 import ProductStatsSummary from "@/components/ProductStatsSummary";
@@ -62,6 +63,7 @@ const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"]
 const GAMMA_OPTIONS = ["Standard", "Premium", "High-End", "Budget"];
 
 const Products = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -567,7 +569,7 @@ const Products = () => {
             className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Product
+            {t('newProduct')}
           </Button>
           <ProductStatsSummary products={allProducts || []} />
           {hasEditedProducts && (
@@ -577,7 +579,7 @@ const Products = () => {
               className="rounded-xl font-medium bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/20 transition-all duration-200"
             >
               <SaveAll className="h-4 w-4 mr-2" />
-              Save All
+              {t('saveAll')}
             </Button>
           )}
           <Button
@@ -586,7 +588,7 @@ const Products = () => {
             className="rounded-xl font-medium border-primary/20 text-primary hover:bg-primary/10"
           >
             <Upload className="h-4 w-4 mr-2" />
-            Import
+            {t('import')}
           </Button>
         </div>
       </div>
@@ -597,7 +599,7 @@ const Products = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
               type="text" 
-              placeholder="Search products..." 
+              placeholder={t('searchProducts')} 
               className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
               onChange={(e) => {
@@ -632,7 +634,7 @@ const Products = () => {
           <div className="w-16 h-16 mb-4 rounded-full bg-neutral-100 flex items-center justify-center">
             <Package size={24} className="text-neutral-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No products found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noProductsFound')}</h3>
           <p className="text-gray-500 max-w-md mb-4">
             {searchTerm
               ? `No products match your search "${searchTerm}"`
@@ -723,7 +725,7 @@ const Products = () => {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
+              {editingProduct ? t('editProduct') : t('addProduct')}
             </DialogTitle>
           </DialogHeader>
           <ProductForm

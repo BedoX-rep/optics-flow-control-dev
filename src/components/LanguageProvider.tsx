@@ -219,6 +219,244 @@ const dashboardTranslations: Translations = {
   }
 };
 
+const productTranslations: Translations = {
+  // Product page UI
+  newProduct: {
+    en: 'New Product',
+    fr: 'Nouveau Produit',
+    ar: 'منتج جديد'
+  },
+  editProduct: {
+    en: 'Edit Product',
+    fr: 'Modifier le Produit',
+    ar: 'تعديل المنتج'
+  },
+  addProduct: {
+    en: 'Add New Product',
+    fr: 'Ajouter un Nouveau Produit',
+    ar: 'إضافة منتج جديد'
+  },
+  searchProducts: {
+    en: 'Search products...',
+    fr: 'Rechercher des produits...',
+    ar: 'البحث عن المنتجات...'
+  },
+  noProductsFound: {
+    en: 'No products found',
+    fr: 'Aucun produit trouvé',
+    ar: 'لا توجد منتجات'
+  },
+  productName: {
+    en: 'Product Name',
+    fr: 'Nom du Produit',
+    ar: 'اسم المنتج'
+  },
+  price: {
+    en: 'Price',
+    fr: 'Prix',
+    ar: 'السعر'
+  },
+  costTTC: {
+    en: 'Cost TTC',
+    fr: 'Coût TTC',
+    ar: 'التكلفة شاملة الضريبة'
+  },
+  stock: {
+    en: 'Stock',
+    fr: 'Stock',
+    ar: 'المخزون'
+  },
+  stockStatus: {
+    en: 'Stock Status',
+    fr: 'État du Stock',
+    ar: 'حالة المخزون'
+  },
+  category: {
+    en: 'Category',
+    fr: 'Catégorie',
+    ar: 'الفئة'
+  },
+  index: {
+    en: 'Index',
+    fr: 'Indice',
+    ar: 'المؤشر'
+  },
+  treatment: {
+    en: 'Treatment',
+    fr: 'Traitement',
+    ar: 'المعالجة'
+  },
+  company: {
+    en: 'Company',
+    fr: 'Entreprise',
+    ar: 'الشركة'
+  },
+  gamma: {
+    en: 'Gamma',
+    fr: 'Gamme',
+    ar: 'النطاق'
+  },
+  image: {
+    en: 'Image',
+    fr: 'Image',
+    ar: 'الصورة'
+  },
+  generateNameAuto: {
+    en: 'Generate Name Automatically',
+    fr: 'Générer le Nom Automatiquement',
+    ar: 'إنشاء الاسم تلقائياً'
+  },
+  save: {
+    en: 'Save',
+    fr: 'Enregistrer',
+    ar: 'حفظ'
+  },
+  cancel: {
+    en: 'Cancel',
+    fr: 'Annuler',
+    ar: 'إلغاء'
+  },
+  edit: {
+    en: 'Edit',
+    fr: 'Modifier',
+    ar: 'تعديل'
+  },
+  delete: {
+    en: 'Delete',
+    fr: 'Supprimer',
+    ar: 'حذف'
+  },
+  import: {
+    en: 'Import',
+    fr: 'Importer',
+    ar: 'استيراد'
+  },
+  saveAll: {
+    en: 'Save All',
+    fr: 'Tout Enregistrer',
+    ar: 'حفظ الكل'
+  },
+  auto: {
+    en: 'Auto',
+    fr: 'Auto',
+    ar: 'تلقائي'
+  },
+  // Category options
+  singleVisionLenses: {
+    en: 'Single Vision Lenses',
+    fr: 'Verres de Vision Simple',
+    ar: 'عدسات الرؤية المفردة'
+  },
+  progressiveLenses: {
+    en: 'Progressive Lenses',
+    fr: 'Verres Progressifs',
+    ar: 'العدسات المتقدمة'
+  },
+  frames: {
+    en: 'Frames',
+    fr: 'Montures',
+    ar: 'الإطارات'
+  },
+  sunglasses: {
+    en: 'Sunglasses',
+    fr: 'Lunettes de Soleil',
+    ar: 'النظارات الشمسية'
+  },
+  contactLenses: {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact',
+    ar: 'العدسات اللاصقة'
+  },
+  accessories: {
+    en: 'Accessories',
+    fr: 'Accessoires',
+    ar: 'الإكسسوارات'
+  },
+  // Treatment options
+  white: {
+    en: 'White',
+    fr: 'Blanc',
+    ar: 'أبيض'
+  },
+  ar: {
+    en: 'AR',
+    fr: 'AR',
+    ar: 'AR'
+  },
+  blue: {
+    en: 'Blue',
+    fr: 'Bleu',
+    ar: 'أزرق'
+  },
+  photochromic: {
+    en: 'Photochromic',
+    fr: 'Photochromique',
+    ar: 'فوتوكروميك'
+  },
+  // Stock status options
+  order: {
+    en: 'Order',
+    fr: 'Commande',
+    ar: 'طلب'
+  },
+  inStock: {
+    en: 'In Stock',
+    fr: 'En Stock',
+    ar: 'متوفر'
+  },
+  fabrication: {
+    en: 'Fabrication',
+    fr: 'Fabrication',
+    ar: 'تصنيع'
+  },
+  outOfStock: {
+    en: 'Out Of Stock',
+    fr: 'Rupture de Stock',
+    ar: 'نفد المخزون'
+  },
+  // Common options
+  none: {
+    en: 'None',
+    fr: 'Aucun',
+    ar: 'لا شيء'
+  },
+  selectCategory: {
+    en: 'Select Category',
+    fr: 'Sélectionner une Catégorie',
+    ar: 'اختر الفئة'
+  },
+  selectIndex: {
+    en: 'Select Index',
+    fr: 'Sélectionner un Indice',
+    ar: 'اختر المؤشر'
+  },
+  selectTreatment: {
+    en: 'Select Treatment',
+    fr: 'Sélectionner un Traitement',
+    ar: 'اختر المعالجة'
+  },
+  selectCompany: {
+    en: 'Select Company',
+    fr: 'Sélectionner une Entreprise',
+    ar: 'اختر الشركة'
+  },
+  selectStockStatus: {
+    en: 'Select Stock Status',
+    fr: 'Sélectionner l\'État du Stock',
+    ar: 'اختر حالة المخزون'
+  },
+  enterGamma: {
+    en: 'Enter gamma value',
+    fr: 'Entrer la valeur de gamme',
+    ar: 'أدخل قيمة النطاق'
+  },
+  uploading: {
+    en: 'Uploading...',
+    fr: 'Téléchargement...',
+    ar: 'جاري الرفع...'
+  }
+};
+
 const pricingTranslations: Translations = {
   pricingTitle: {
     en: 'Pricing Plans',
@@ -321,6 +559,7 @@ const pricingTranslations: Translations = {
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
+  ...productTranslations,
   ...pricingTranslations,
   navigation: {
     en: {

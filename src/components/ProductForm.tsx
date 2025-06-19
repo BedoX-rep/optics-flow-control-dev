@@ -7,14 +7,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UploadIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/components/LanguageProvider";
 
 const CATEGORY_OPTIONS = [
-  { value: "Single Vision Lenses", abbr: "SV" },
-  { value: "Progressive Lenses", abbr: "PG" },
-  { value: "Frames", abbr: "FR" },
-  { value: "Sunglasses", abbr: "SG" },
-  { value: "Contact Lenses", abbr: "CL" },
-  { value: "Accessories", abbr: "AC" }
+  { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses" },
+  { value: "Progressive Lenses", abbr: "PG", labelKey: "progressiveLenses" },
+  { value: "Frames", abbr: "FR", labelKey: "frames" },
+  { value: "Sunglasses", abbr: "SG", labelKey: "sunglasses" },
+  { value: "Contact Lenses", abbr: "CL", labelKey: "contactLenses" },
+  { value: "Accessories", abbr: "AC", labelKey: "accessories" }
 ];
 
 const INDEX_OPTIONS = [
@@ -25,10 +26,10 @@ const INDEX_OPTIONS = [
 ];
 
 const TREATMENT_OPTIONS = [
-  "White",
-  "AR",
-  "Blue",
-  "Photochromic"
+  { value: "White", labelKey: "white" },
+  { value: "AR", labelKey: "ar" },
+  { value: "Blue", labelKey: "blue" },
+  { value: "Photochromic", labelKey: "photochromic" }
 ];
 
 const COMPANY_OPTIONS = [
@@ -75,6 +76,7 @@ const getCategoryAbbr = (category: string | undefined) => {
 };
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
+  const { t } = useLanguage();
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
@@ -194,22 +196,22 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           onCheckedChange={handleAutoNameToggle}
           id="auto-name"
         />
-        <Label htmlFor="auto-name" className="cursor-pointer">Generate Name Automatically</Label>
+        <Label htmlFor="auto-name" className="cursor-pointer">{t('generateNameAuto')}</Label>
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category">{t('category')}</Label>
         <Select
           value={form.category ?? ""}
           onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
         >
           <SelectTrigger className="col-span-3" id="category">
-            <SelectValue placeholder="Select Category" />
+            <SelectValue placeholder={t('selectCategory')} />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="none_selected">None</SelectItem>
+            <SelectItem value="none_selected">{t('none')}</SelectItem>
             {CATEGORY_OPTIONS.map(opt => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.value}</SelectItem>
+              <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -218,16 +220,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       {showIndexTreatment && (
         <>
           <div className="grid grid-cols-4 items-center gap-3">
-            <Label htmlFor="index">Index</Label>
+            <Label htmlFor="index">{t('index')}</Label>
             <Select
               value={form.index ?? ""}
               onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
             >
               <SelectTrigger className="col-span-3" id="index">
-                <SelectValue placeholder="Select Index" />
+                <SelectValue placeholder={t('selectIndex')} />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
-                <SelectItem value="none_selected">None</SelectItem>
+                <SelectItem value="none_selected">{t('none')}</SelectItem>
                 {INDEX_OPTIONS.map(opt => (
                   <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                 ))}
@@ -235,18 +237,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-3">
-            <Label htmlFor="treatment">Treatment</Label>
+            <Label htmlFor="treatment">{t('treatment')}</Label>
             <Select
               value={form.treatment ?? ""}
               onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
             >
               <SelectTrigger className="col-span-3" id="treatment">
-                <SelectValue placeholder="Select Treatment" />
+                <SelectValue placeholder={t('selectTreatment')} />
               </SelectTrigger>
               <SelectContent className="z-50 bg-white">
-                <SelectItem value="none_selected">None</SelectItem>
+                <SelectItem value="none_selected">{t('none')}</SelectItem>
                 {TREATMENT_OPTIONS.map(opt => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -255,16 +257,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       )}
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="company">Company</Label>
+        <Label htmlFor="company">{t('company')}</Label>
         <Select
           value={form.company ?? ""}
           onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
         >
           <SelectTrigger className="col-span-3" id="company">
-            <SelectValue placeholder="Select Company" />
+            <SelectValue placeholder={t('selectCompany')} />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="none_selected">None</SelectItem>
+            <SelectItem value="none_selected">{t('none')}</SelectItem>
             {COMPANY_OPTIONS.map(opt => (
               <SelectItem key={opt} value={opt}>{opt}</SelectItem>
             ))}
@@ -273,18 +275,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="gamma">Gamma</Label>
+        <Label htmlFor="gamma">{t('gamma')}</Label>
         <Input
           id="gamma"
           className="col-span-3"
           value={form.gamma ?? ""}
           onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
-          placeholder="Enter gamma value"
+          placeholder={t('enterGamma')}
         />
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="price">Price</Label>
+        <Label htmlFor="price">{t('price')}</Label>
         <Input
           id="price"
           type="number"
@@ -297,7 +299,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="cost_ttc">Cost TTC</Label>
+        <Label htmlFor="cost_ttc">{t('costTTC')}</Label>
         <Input
           id="cost_ttc"
           type="number"
@@ -309,26 +311,26 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="stock_status">Stock Status</Label>
+        <Label htmlFor="stock_status">{t('stockStatus')}</Label>
         <Select
           value={form.stock_status}
           onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
         >
           <SelectTrigger className="col-span-3" id="stock_status">
-            <SelectValue placeholder="Select Stock Status" />
+            <SelectValue placeholder={t('selectStockStatus')} />
           </SelectTrigger>
           <SelectContent className="z-50 bg-white">
-            <SelectItem value="Order">Order</SelectItem>
-            <SelectItem value="inStock">In Stock</SelectItem>
-            <SelectItem value="Fabrication">Fabrication</SelectItem>
-            <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
+            <SelectItem value="Order">{t('order')}</SelectItem>
+            <SelectItem value="inStock">{t('inStock')}</SelectItem>
+            <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+            <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {form.stock_status === 'inStock' && (
         <div className="grid grid-cols-4 items-center gap-3">
-          <Label htmlFor="stock">Stock</Label>
+          <Label htmlFor="stock">{t('stock')}</Label>
           <Input
             id="stock"
             type="number"
@@ -341,7 +343,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       )}
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="image">Image</Label>
+        <Label htmlFor="image">{t('image')}</Label>
         <input
           id="image"
           type="file"
@@ -359,7 +361,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       </div>
 
       <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="name">Product Name</Label>
+        <Label htmlFor="name">{t('productName')}</Label>
         <Input
           id="name"
           className="col-span-3"
@@ -377,10 +379,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           onClick={onCancel}
           disabled={disabled || uploading}
         >
-          Cancel
+          {t('cancel')}
         </Button>
         <Button type="submit" className="bg-teal-600 hover:bg-teal-700" disabled={disabled || uploading}>
-          {uploading ? "Uploading..." : "Save"}
+          {uploading ? t('uploading') : t('save')}
         </Button>
       </DialogFooter>
     </form>
