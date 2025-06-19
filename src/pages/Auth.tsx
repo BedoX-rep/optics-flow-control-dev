@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Eye, EyeOff, Glasses, Sparkles, Shield, Users } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const Auth = () => {
   const [accessCode, setAccessCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -148,156 +151,260 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Lensly</CardTitle>
-          <CardDescription className="text-center">
-            Optical Store Management System
-          </CardDescription>
-        </CardHeader>
-        <Tabs 
-          defaultValue="login" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login">
-            <form onSubmit={handleLogin}>
-              <CardContent className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="email@example.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-teal-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-200/30 to-teal-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-teal-100/20 to-blue-100/20 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Floating elements */}
+      <div className="absolute top-20 left-20 animate-pulse">
+        <Glasses className="w-8 h-8 text-teal-300/60" />
+      </div>
+      <div className="absolute top-32 right-32 animate-pulse delay-1000">
+        <Sparkles className="w-6 h-6 text-blue-300/60" />
+      </div>
+      <div className="absolute bottom-32 left-32 animate-pulse delay-2000">
+        <Shield className="w-7 h-7 text-teal-300/60" />
+      </div>
+      <div className="absolute bottom-20 right-20 animate-pulse delay-500">
+        <Users className="w-6 h-6 text-blue-300/60" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-2xl shadow-teal-500/10 overflow-hidden">
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-r from-teal-600 to-blue-600 p-6 text-center relative">
+            <div className="absolute inset-0 bg-black/5"></div>
+            <div className="relative z-10">
+              <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                <Glasses className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-white mb-2">Lensly</CardTitle>
+              <CardDescription className="text-white/90 text-base">
+                Optical Store Management System
+              </CardDescription>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <Tabs 
+              defaultValue="login" 
+              value={activeTab} 
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100/80 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="login" 
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                >
+                  Login
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup" 
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+                >
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login" className="space-y-0 mt-0">
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="email@example.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                      required
+                    />
                   </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary text-white hover:bg-primary/80"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Logging in..." : "Login"}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-          <TabsContent value="signup">
-            <form onSubmit={handleSignup}>
-              <CardContent className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email*</Label>
-                  <Input 
-                    id="email-signup" 
-                    type="email" 
-                    placeholder="email@example.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="display-name">Display Name</Label>
-                  <Input 
-                    id="display-name" 
-                    type="text" 
-                    placeholder="John Doe" 
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">If left blank, will use part of your email</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="store-name">Store Name</Label>
-                  <Input 
-                    id="store-name" 
-                    type="text" 
-                    placeholder="My Optical Store" 
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">If left blank, will use 'Optique'</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="access-code">Access Code*</Label>
-                  <Input 
-                    id="access-code" 
-                    type="text" 
-                    placeholder="ABCDE" 
-                    maxLength={5}
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">5-character unique access code</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="referral-code">Referral Code (optional)</Label>
-                  <Input 
-                    id="referral-code" 
-                    type="text" 
-                    placeholder="ABCD" 
-                    maxLength={4}
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password*</Label>
-                  <Input 
-                    id="password-signup" 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password*</Label>
-                  <Input 
-                    id="confirm-password" 
-                    type="password" 
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-optics-600 hover:bg-optics-700"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                    <div className="relative">
+                      <Input 
+                        id="password" 
+                        type={showPassword ? "text" : "password"} 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-12 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-teal-500/25 mt-6"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Logging in...</span>
+                      </div>
+                    ) : "Login"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup" className="space-y-0 mt-0">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email-signup" className="text-gray-700 font-medium">Email*</Label>
+                      <Input 
+                        id="email-signup" 
+                        type="email" 
+                        placeholder="email@example.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="display-name" className="text-gray-700 font-medium">Display Name</Label>
+                      <Input 
+                        id="display-name" 
+                        type="text" 
+                        placeholder="John Doe" 
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="store-name" className="text-gray-700 font-medium">Store Name</Label>
+                    <Input 
+                      id="store-name" 
+                      type="text" 
+                      placeholder="My Optical Store" 
+                      value={storeName}
+                      onChange={(e) => setStoreName(e.target.value)}
+                      className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200"
+                    />
+                    <p className="text-xs text-gray-500">If left blank, will use 'Optique'</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="access-code" className="text-gray-700 font-medium">Access Code*</Label>
+                      <Input 
+                        id="access-code" 
+                        type="text" 
+                        placeholder="ABCDE" 
+                        maxLength={5}
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200 font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="referral-code" className="text-gray-700 font-medium">Referral Code</Label>
+                      <Input 
+                        id="referral-code" 
+                        type="text" 
+                        placeholder="ABCD" 
+                        maxLength={4}
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg transition-all duration-200 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password-signup" className="text-gray-700 font-medium">Password*</Label>
+                    <div className="relative">
+                      <Input 
+                        id="password-signup" 
+                        type={showPassword ? "text" : "password"} 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-gray-700 font-medium">Confirm Password*</Label>
+                    <div className="relative">
+                      <Input 
+                        id="confirm-password" 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-lg pr-12 transition-all duration-200"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-teal-500/25 mt-6"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Creating Account...</span>
+                      </div>
+                    ) : "Create Account"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 pb-6">
+            <div className="text-center">
+              <p className="text-xs text-gray-500">
+                By continuing, you agree to our Terms of Service and Privacy Policy
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Additional info */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Need help? <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">Contact Support</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
