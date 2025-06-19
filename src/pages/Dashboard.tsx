@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
+import LanguageToggle from '@/components/LanguageToggle';
 
 interface DashboardStats {
   activeClients: number;
@@ -32,6 +34,7 @@ interface ActivityItem {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState<DashboardStats>({
     activeClients: 0,
     totalRevenue: 0,
@@ -215,23 +218,23 @@ const Dashboard = () => {
           ...clients.slice(0, 3).map(client => ({
             id: `client-${client.id}`,
             type: 'client' as const,
-            title: 'New client registered',
+            title: t('newClientRegistered'),
             description: client.name,
             timestamp: client.created_at
           })),
           ...receipts.slice(0, 5).map(receipt => ({
             id: `receipt-${receipt.id}`,
             type: 'receipt' as const,
-            title: 'New receipt created',
-            description: `${receipt.clients?.name || 'Unknown client'}`,
+            title: t('newReceiptCreated'),
+            description: `${receipt.clients?.name || t('unknownClient')}`,
             timestamp: receipt.created_at,
             amount: receipt.total
           })),
           ...purchases.slice(0, 2).map(purchase => ({
             id: `purchase-${purchase.id}`,
             type: 'purchase' as const,
-            title: 'New purchase recorded',
-            description: `${purchase.supplier?.name || 'Unknown supplier'}`,
+            title: t('newPurchaseRecorded'),
+            description: `${purchase.supplier?.name || t('unknownSupplier')}`,
             timestamp: purchase.purchase_date,
             amount: purchase.total_amount
           }))
@@ -266,32 +269,37 @@ const Dashboard = () => {
 
   return (
     <div>
-      <PageTitle 
-        title="Dashboard" 
-        subtitle={`Overview of your optical store performance for ${format(new Date(), 'MMMM yyyy')}`}
-      />
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <PageTitle 
+            title={t('dashboard')} 
+            subtitle={`${t('dashboardSubtitle')} ${format(new Date(), 'MMMM yyyy')}`}
+          />
+        </div>
+        <LanguageToggle />
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard 
-          title="Total Clients" 
-          value={isLoading ? "Loading..." : `${stats.activeClients}`}
+          title={t('totalClients')} 
+          value={isLoading ? t('loading') : `${stats.activeClients}`}
           change={4.65} 
           icon={<Users className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Monthly Revenue" 
-          value={isLoading ? "Loading..." : `DH${stats.totalRevenue.toFixed(2)}`}
+          title={t('monthlyRevenue')} 
+          value={isLoading ? t('loading') : `DH${stats.totalRevenue.toFixed(2)}`}
           change={2.3} 
           icon={<ShoppingBag className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Avg. Sale Value" 
-          value={isLoading ? "Loading..." : `DH${stats.avgSaleValue.toFixed(2)}`}
+          title={t('avgSaleValue')} 
+          value={isLoading ? t('loading') : `DH${stats.avgSaleValue.toFixed(2)}`}
           icon={<Receipt className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Outstanding Balance" 
-          value={isLoading ? "Loading..." : `DH${stats.outstandingBalance.toFixed(2)}`}
+          title={t('outstandingBalance')} 
+          value={isLoading ? t('loading') : `DH${stats.outstandingBalance.toFixed(2)}`}
           change={-3.2}
           icon={<Calendar className="h-6 w-6" />} 
         />
@@ -299,39 +307,39 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard 
-          title="Pending Receipts" 
-          value={isLoading ? "Loading..." : `${stats.pendingReceipts}`}
+          title={t('pendingReceipts')} 
+          value={isLoading ? t('loading') : `${stats.pendingReceipts}`}
           icon={<Eye className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Completed Receipts" 
-          value={isLoading ? "Loading..." : `${stats.completedReceipts}`}
+          title={t('completedReceipts')} 
+          value={isLoading ? t('loading') : `${stats.completedReceipts}`}
           icon={<Glasses className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Montage Revenue" 
-          value={isLoading ? "Loading..." : `DH${stats.montageRevenue.toFixed(2)}`}
+          title={t('montageRevenue')} 
+          value={isLoading ? t('loading') : `DH${stats.montageRevenue.toFixed(2)}`}
           icon={<TrendingUp className="h-6 w-6" />} 
         />
         <StatCard 
-          title="Product Revenue" 
-          value={isLoading ? "Loading..." : `DH${stats.productRevenue.toFixed(2)}`}
+          title={t('productRevenue')} 
+          value={isLoading ? t('loading') : `DH${stats.productRevenue.toFixed(2)}`}
           icon={<ShoppingBag className="h-6 w-6" />} 
         />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <BarChartComponent data={revenueData} title="Revenue Trend (Last 7 Days)" />
-        <AreaChartComponent data={categoryData} title="Revenue by Category (This Month)" />
+        <BarChartComponent data={revenueData} title={t('revenueTrend')} />
+        <AreaChartComponent data={categoryData} title={t('revenueByCategory')} />
       </div>
       
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-medium text-gray-700 mb-4">Recent Activity</h3>
+        <h3 className="text-lg font-medium text-gray-700 mb-4">{t('recentActivity')}</h3>
         <div className="space-y-4">
           {isLoading ? (
-            <div className="text-center py-4">Loading recent activity...</div>
+            <div className="text-center py-4">{t('loadingRecentActivity')}</div>
           ) : recentActivity.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">No recent activity found.</div>
+            <div className="text-center py-4 text-gray-500">{t('noRecentActivity')}</div>
           ) : (
             recentActivity.map((activity, index) => (
               <div key={activity.id} className="flex items-start border-b border-gray-100 pb-4 last:border-b-0">

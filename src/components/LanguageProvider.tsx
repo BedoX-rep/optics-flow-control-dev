@@ -111,6 +111,114 @@ const homeTranslations: Translations = {
   },
 };
 
+const dashboardTranslations: Translations = {
+  dashboard: {
+    en: 'Dashboard',
+    fr: 'Tableau de bord',
+    ar: 'لوحة التحكم'
+  },
+  dashboardSubtitle: {
+    en: 'Overview of your optical store performance for',
+    fr: 'Aperçu des performances de votre magasin d\'optique pour',
+    ar: 'نظرة عامة على أداء متجر البصريات الخاص بك لشهر'
+  },
+  totalClients: {
+    en: 'Total Clients',
+    fr: 'Total des Clients',
+    ar: 'إجمالي العملاء'
+  },
+  monthlyRevenue: {
+    en: 'Monthly Revenue',
+    fr: 'Revenus Mensuels',
+    ar: 'الإيرادات الشهرية'
+  },
+  avgSaleValue: {
+    en: 'Avg. Sale Value',
+    fr: 'Valeur Moyenne de Vente',
+    ar: 'متوسط قيمة البيع'
+  },
+  outstandingBalance: {
+    en: 'Outstanding Balance',
+    fr: 'Solde Impayé',
+    ar: 'الرصيد المستحق'
+  },
+  pendingReceipts: {
+    en: 'Pending Receipts',
+    fr: 'Reçus en Attente',
+    ar: 'الإيصالات المعلقة'
+  },
+  completedReceipts: {
+    en: 'Completed Receipts',
+    fr: 'Reçus Terminés',
+    ar: 'الإيصالات المكتملة'
+  },
+  montageRevenue: {
+    en: 'Montage Revenue',
+    fr: 'Revenus de Montage',
+    ar: 'إيرادات التركيب'
+  },
+  productRevenue: {
+    en: 'Product Revenue',
+    fr: 'Revenus des Produits',
+    ar: 'إيرادات المنتجات'
+  },
+  revenueTrend: {
+    en: 'Revenue Trend (Last 7 Days)',
+    fr: 'Tendance des Revenus (7 Derniers Jours)',
+    ar: 'اتجاه الإيرادات (آخر 7 أيام)'
+  },
+  revenueByCategory: {
+    en: 'Revenue by Category (This Month)',
+    fr: 'Revenus par Catégorie (Ce Mois)',
+    ar: 'الإيرادات حسب الفئة (هذا الشهر)'
+  },
+  recentActivity: {
+    en: 'Recent Activity',
+    fr: 'Activité Récente',
+    ar: 'النشاط الأخير'
+  },
+  loading: {
+    en: 'Loading...',
+    fr: 'Chargement...',
+    ar: 'جاري التحميل...'
+  },
+  loadingRecentActivity: {
+    en: 'Loading recent activity...',
+    fr: 'Chargement de l\'activité récente...',
+    ar: 'جاري تحميل النشاط الأخير...'
+  },
+  noRecentActivity: {
+    en: 'No recent activity found.',
+    fr: 'Aucune activité récente trouvée.',
+    ar: 'لم يتم العثور على نشاط حديث.'
+  },
+  newClientRegistered: {
+    en: 'New client registered',
+    fr: 'Nouveau client enregistré',
+    ar: 'عميل جديد مسجل'
+  },
+  newReceiptCreated: {
+    en: 'New receipt created',
+    fr: 'Nouveau reçu créé',
+    ar: 'إيصال جديد تم إنشاؤه'
+  },
+  newPurchaseRecorded: {
+    en: 'New purchase recorded',
+    fr: 'Nouvel achat enregistré',
+    ar: 'مشتريات جديدة مسجلة'
+  },
+  unknownClient: {
+    en: 'Unknown client',
+    fr: 'Client inconnu',
+    ar: 'عميل غير معروف'
+  },
+  unknownSupplier: {
+    en: 'Unknown supplier',
+    fr: 'Fournisseur inconnu',
+    ar: 'مورد غير معروف'
+  }
+};
+
 const pricingTranslations: Translations = {
   pricingTitle: {
     en: 'Pricing Plans',
@@ -212,6 +320,7 @@ const pricingTranslations: Translations = {
 // Combine all translations
 const allTranslations: Translations = {
   ...homeTranslations,
+  ...dashboardTranslations,
   ...pricingTranslations,
   navigation: {
     en: {
