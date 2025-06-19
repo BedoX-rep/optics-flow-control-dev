@@ -379,7 +379,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         >
           Cancel
         </Button>
-        <Button type="submit" className="bg-optics-600 hover:bg-optics-700" disabled={disabled || uploading}>
+        <Button type="submit" className="bg-teal-600 hover:bg-teal-700" disabled={disabled || uploading}>
           {uploading ? "Uploading..." : "Save"}
         </Button>
       </DialogFooter>
