@@ -33,6 +33,7 @@ import PageTitle from '@/components/PageTitle';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import AddClientDialog from '@/components/AddClientDialog';
 import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 import OrderItems from '@/components/receipt/OrderItems';
@@ -130,6 +131,7 @@ const NewReceipt = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
@@ -185,9 +187,9 @@ const NewReceipt = () => {
   const [checkOutOfStock, setCheckOutOfStock] = useState<() => boolean>(() => () => false);
 
   const steps = [
-    { id: 'client', label: 'Client Selection', icon: User },
-    { id: 'order', label: 'Order Details', icon: Receipt },
-    { id: 'finalize', label: 'Finalize', icon: CreditCard }
+    { id: 'client', label: t('clientSelection'), icon: User },
+    { id: 'order', label: t('orderDetails'), icon: Receipt },
+    { id: 'finalize', label: t('finalize'), icon: CreditCard }
   ];
 
   const currentStepIndex = steps.findIndex(step => step.id === currentTab);
@@ -585,15 +587,15 @@ const NewReceipt = () => {
         <CardHeader className="bg-gray-50 border-b">
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            Select Client
+            {t('selectClient')}
           </CardTitle>
-          <CardDescription>Choose an existing client or create a new one</CardDescription>
+          <CardDescription>{t('chooseExistingClient')}</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex gap-3 mb-6">
             <div className="flex-1">
               <Input
-                placeholder="Search by name or phone..."
+                placeholder={t('searchByNameOrPhone')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-12"
@@ -604,7 +606,7 @@ const NewReceipt = () => {
               className="h-12 px-6"
             >
               <Plus className="h-5 w-5 mr-2" />
-              New Client
+              {t('newClient')}
             </Button>
           </div>
 
@@ -639,17 +641,17 @@ const NewReceipt = () => {
         <CardHeader className="bg-gray-50 border-b">
           <CardTitle className="flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            Prescription Details
+            {t('prescriptionDetails')}
           </CardTitle>
-          <CardDescription>Enter or update client's prescription</CardDescription>
+          <CardDescription>{t('enterUpdatePrescription')}</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-6">
             <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
-              <h3 className="text-lg font-medium mb-3 text-blue-900">Right Eye</h3>
+              <h3 className="text-lg font-medium mb-3 text-blue-900">{t('rightEye')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="rightSph">SPH</Label>
+                  <Label htmlFor="rightSph">{t('sph')}</Label>
                   <Input
                     id="rightSph"
                     type="text"
@@ -680,7 +682,7 @@ const NewReceipt = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="rightCyl">CYL</Label>
+                  <Label htmlFor="rightCyl">{t('cyl')}</Label>
                   <Input
                     id="rightCyl"
                     type="text"
@@ -711,7 +713,7 @@ const NewReceipt = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="rightAxe">AXE</Label>
+                  <Label htmlFor="rightAxe">{t('axe')}</Label>
                   <Input
                     id="rightAxe"
                     type="text"
@@ -725,10 +727,10 @@ const NewReceipt = () => {
             </div>
 
             <div className="bg-purple-50/50 rounded-lg p-4 border border-purple-100">
-              <h3 className="text-lg font-medium mb-3 text-purple-900">Left Eye</h3>
+              <h3 className="text-lg font-medium mb-3 text-purple-900">{t('leftEye')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="leftSph">SPH</Label>
+                  <Label htmlFor="leftSph">{t('sph')}</Label>
                   <Input
                     id="leftSph"
                     type="text"
@@ -759,7 +761,7 @@ const NewReceipt = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="leftCyl">CYL</Label>
+                  <Label htmlFor="leftCyl">{t('cyl')}</Label>
                   <Input
                     id="leftCyl"
                     type="text"
@@ -790,7 +792,7 @@ const NewReceipt = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="leftAxe">AXE</Label>
+                  <Label htmlFor="leftAxe">{t('axe')}</Label>
                   <Input
                     id="leftAxe"
                     type="text"
@@ -804,13 +806,13 @@ const NewReceipt = () => {
             </div>
 
             <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
-              <Label htmlFor="add">ADD</Label>
+              <Label htmlFor="add">{t('add')}</Label>
               <Input
                 id="add"
                 type="text"
                 value={add}
                 onChange={(e) => setAdd(e.target.value)}
-                placeholder="Enter ADD value"
+                placeholder={t('enterAddValue')}
                 className="bg-white"
               />
             </div>
@@ -858,7 +860,7 @@ const NewReceipt = () => {
           <CardHeader className="bg-gray-50 border-b">
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5" />
-              Payment Details
+              {t('paymentDetails')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -914,7 +916,7 @@ const NewReceipt = () => {
         <CardHeader className="bg-gray-50 border-b">
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Receipt Summary
+            {t('receiptSummary')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -922,7 +924,7 @@ const NewReceipt = () => {
             <Alert className="mb-6 border-red-200 bg-red-50">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-700">
-                <strong>Order Type Required:</strong> Please select an order type in the Order Details tab before finalizing this receipt. The order type determines how services and costs are calculated.
+                <strong>{t('orderTypeRequired')}:</strong> {t('orderTypeRequiredDesc')}
               </AlertDescription>
             </Alert>
           )}
@@ -930,18 +932,18 @@ const NewReceipt = () => {
             <Alert className="mb-6 border-red-200 bg-red-50">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-700">
-                <strong>Warning:</strong> This receipt contains out-of-stock products:
+                <strong>{t('outOfStockWarning')}:</strong> {t('outOfStockDesc')}
                 <ul className="mt-1 list-disc list-inside">
                   {outOfStockItems.map(item => {
                     const product = products.find(p => p.id === item.productId);
                     return (
                       <li key={item.id} className="text-sm">
-                        {product?.name || 'Unknown Product'}
+                        {product?.name || t('unknownProduct')}
                       </li>
                     );
                   })}
                 </ul>
-                You can still proceed to save this receipt.
+                {t('canStillProceed')}
               </AlertDescription>
             </Alert>
           )}
@@ -950,61 +952,66 @@ const NewReceipt = () => {
             {items.length === 0 && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>No Items Added</AlertTitle>
-                <AlertDescription>Please add at least one item to the receipt.</AlertDescription>
+                <AlertTitle>{t('noItems')}</AlertTitle>
+                <AlertDescription>{t('pleaseAddItems')}</AlertDescription>
               </Alert>
             )}
             {selectedClient ? (
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium mb-2">Client Information</h3>
-                <p className="text-sm">Name: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-                <p className="text-sm">Phone: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
+                <h3 className="font-medium mb-2">{t('clientInformation')}</h3>
+                <p className="text-sm">{t('name')}: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
+                <p className="text-sm">{t('phone')}: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
               </div>
             ) : (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>No Client Selected</AlertTitle>
-                <AlertDescription>Please select a client to continue.</AlertDescription>
+                <AlertTitle>{t('noClient')}</AlertTitle>
+                <AlertDescription>{t('pleaseSelectClient')}</AlertDescription>
               </Alert>
             )}
 
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Prescription</h3>
+              <h3 className="font-medium mb-2">{t('prescription')}</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500">Right Eye</p>
-                  <p>SPH: {rightEye.sph || 'N/A'}</p>
-                  <p>CYL: {rightEye.cyl || 'N/A'}</p>                  <p>AXE: {rightEye.axe || 'N/A'}</p>
-</div>
+                  <p className="text-gray-500">{t('rightEye')}</p>
+                  <p>{t('sph')}: {rightEye.sph || 'N/A'}</p>
+                  <p>{t('cyl')}: {rightEye.cyl || 'N/A'}</p>
+                  <p>{t('axe')}: {rightEye.axe || 'N/A'}</p>
+                </div>
                 <div>
-                  <p className="text-gray-500">Left Eye</p>
-                  <p>SPH: {leftEye.sph || 'N/A'}</p>
-                  <p>CYL: {leftEye.cyl || 'N/A'}</p>
-                  <p>AXE: {leftEye.axe || 'N/A'}</p>
+                  <p className="text-gray-500">{t('leftEye')}</p>
+                  <p>{t('sph')}: {leftEye.sph || 'N/A'}</p>
+                  <p>{t('cyl')}: {leftEye.cyl || 'N/A'}</p>
+                  <p>{t('axe')}: {leftEye.axe || 'N/A'}</p>
                 </div>
               </div>
-              <p className="mt-2">ADD: {add || 'N/A'}</p>
+              <p className="mt-2">{t('add')}: {add || 'N/A'}</p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Order Summary</h3>
-              <p className="text-sm">Order Type: <span className="font-medium">{orderType}</span></p>
-              <p className="text-sm">Total Items: <span className="font-medium">{items.length}</span></p>
-              <p className="text-sm">Subtotal: <span className="font-medium">{subtotal.toFixed(2)} DH</span></p>
-              <p className="text-sm">Total: <span className="font-medium text-primary">{total.toFixed(2)} DH</span></p>
+              <h3 className="font-medium mb-2">{t('orderSummary')}</h3>
+              <p className="text-sm">{t('orderType')}: <span className="font-medium">{t(orderType.toLowerCase())}</span></p>
+              <p className="text-sm">{t('totalItems')}: <span className="font-medium">{items.length}</span></p>
+              <p className="text-sm">{t('subtotal')}: <span className="font-medium">{subtotal.toFixed(2)} {t('dh')}</span></p>
+              <p className="text-sm">{t('total')}: <span className="font-medium text-primary">{total.toFixed(2)} {t('dh')}</span></p>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">Payment Status</h3>
-              <p className="text-sm">Advance Payment: <span className="font-medium">{advancePayment.toFixed(2)} DH</span></p>
-              <p className="text-sm">Balance Due: <span className="font-medium">{balance.toFixed(2)} DH</span></p>
-              <p className="text-sm">Status: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+              <h3 className="font-medium mb-2">{t('paymentStatus')}</h3>
+              <p className="text-sm">{t('advancePayment')}: <span className="font-medium">{advancePayment.toFixed(2)} {t('dh')}</span></p>
+              <p className="text-sm">{t('balanceDue')}: <span className="font-medium">{balance.toFixed(2)} {t('dh')}</span></p>
+              <p className="text-sm">{t('status')}: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                 paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
                 paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
                 'bg-red-100 text-red-800'
-              }`}>{paymentStatus}</span></p>
+              }`}>
+                {paymentStatus === 'Paid' ? t('paid') : 
+                 paymentStatus === 'Partially Paid' ? t('partiallyPaid') : 
+                 t('unpaid')}
+              </span></p>
             </div>
           </div>
         </div>
@@ -1062,8 +1069,8 @@ const NewReceipt = () => {
   const handleSave = async () => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "You must be logged in to save receipts.",
+        title: t('authenticationRequired'),
+        description: t('mustBeLoggedIn'),
         variant: "destructive",
       });
       return;
@@ -1071,8 +1078,8 @@ const NewReceipt = () => {
 
     if (!selectedClient) {
       toast({
-        title: "Missing Information",
-        description: "Please select a client before saving.",
+        title: t('missingInformation'),
+        description: t('selectClientBeforeSaving'),
         variant: "destructive",
       });
       return;
@@ -1080,8 +1087,8 @@ const NewReceipt = () => {
 
     if (items.length === 0) {
       toast({
-        title: "Missing Items",
-        description: "Please add at least one item to the receipt.",
+        title: t('missingItems'),
+        description: t('addItemsBeforeSaving'),
         variant: "destructive",
       });
       return;
@@ -1089,8 +1096,8 @@ const NewReceipt = () => {
 
     if (orderType === 'Unspecified') {
       toast({
-        title: "Order Type Required",
-        description: "Please select an order type before saving the receipt.",
+        title: t('orderTypeRequired'),
+        description: t('selectOrderTypeBeforeSaving'),
         variant: "destructive",
       });
       setCurrentTab('order'); // Navigate back to order tab
@@ -1219,15 +1226,15 @@ const NewReceipt = () => {
 
       queryClient.invalidateQueries(['receipts', user.id]);
       toast({
-        title: "Success",
-        description: "Receipt saved successfully",
+        title: t('success'),
+        description: t('receiptSavedSuccessfully'),
       });
       navigate('/receipts');
     } catch (error) {
       console.error('Error saving receipt:', error);
       toast({
-        title: "Error",
-        description: "Failed to save receipt. Please try again.",
+        title: t('error'),
+        description: t('failedToSaveReceipt'),
         variant: "destructive",
       });
     } finally {
@@ -1261,8 +1268,8 @@ const NewReceipt = () => {
               // Check if currently on order tab and no items added
               if (currentTab === 'order' && items.length === 0) {
                 toast({
-                  title: "Items Required",
-                  description: "Please add at least one item before proceeding.",
+                  title: t('itemsRequired'),
+                  description: t('addItemsBeforeProceeding'),
                   variant: "destructive",
                 });
                 return;

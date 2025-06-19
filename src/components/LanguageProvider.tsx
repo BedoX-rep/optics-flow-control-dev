@@ -588,6 +588,420 @@ const productTranslations: Translations = {
   }
 };
 
+const receiptTranslations: Translations = {
+  // New Receipt page UI
+  newReceipt: {
+    en: 'New Receipt',
+    fr: 'Nouveau Reçu',
+    ar: 'إيصال جديد'
+  },
+  clientSelection: {
+    en: 'Client Selection',
+    fr: 'Sélection du Client',
+    ar: 'اختيار العميل'
+  },
+  orderDetails: {
+    en: 'Order Details',
+    fr: 'Détails de la Commande',
+    ar: 'تفاصيل الطلب'
+  },
+  finalize: {
+    en: 'Finalize',
+    fr: 'Finaliser',
+    ar: 'إنهاء'
+  },
+  selectClient: {
+    en: 'Select Client',
+    fr: 'Sélectionner un Client',
+    ar: 'اختر عميل'
+  },
+  chooseExistingClient: {
+    en: 'Choose an existing client or create a new one',
+    fr: 'Choisissez un client existant ou créez-en un nouveau',
+    ar: 'اختر عميلاً موجوداً أو أنشئ عميلاً جديداً'
+  },
+  searchByNameOrPhone: {
+    en: 'Search by name or phone...',
+    fr: 'Rechercher par nom ou téléphone...',
+    ar: 'البحث بالاسم أو الهاتف...'
+  },
+  prescriptionDetails: {
+    en: 'Prescription Details',
+    fr: 'Détails de la Prescription',
+    ar: 'تفاصيل الوصفة'
+  },
+  enterUpdatePrescription: {
+    en: 'Enter or update client\'s prescription',
+    fr: 'Saisir ou mettre à jour la prescription du client',
+    ar: 'أدخل أو حدث وصفة العميل'
+  },
+  rightEye: {
+    en: 'Right Eye',
+    fr: 'Œil Droit',
+    ar: 'العين اليمنى'
+  },
+  leftEye: {
+    en: 'Left Eye',
+    fr: 'Œil Gauche',
+    ar: 'العين اليسرى'
+  },
+  sph: {
+    en: 'SPH',
+    fr: 'SPH',
+    ar: 'كرة'
+  },
+  cyl: {
+    en: 'CYL',
+    fr: 'CYL',
+    ar: 'أسطوانة'
+  },
+  axe: {
+    en: 'AXE',
+    fr: 'AXE',
+    ar: 'محور'
+  },
+  add: {
+    en: 'ADD',
+    fr: 'ADD',
+    ar: 'إضافة'
+  },
+  enterAddValue: {
+    en: 'Enter ADD value',
+    fr: 'Entrer la valeur ADD',
+    ar: 'أدخل قيمة الإضافة'
+  },
+  orderType: {
+    en: 'Order Type',
+    fr: 'Type de Commande',
+    ar: 'نوع الطلب'
+  },
+  selectOrderType: {
+    en: 'Select Order Type',
+    fr: 'Sélectionner le Type de Commande',
+    ar: 'اختر نوع الطلب'
+  },
+  montage: {
+    en: 'Montage',
+    fr: 'Montage',
+    ar: 'تركيب'
+  },
+  retoyage: {
+    en: 'Retoyage',
+    fr: 'Retoyage',
+    ar: 'إعادة تنظيف'
+  },
+  sell: {
+    en: 'Sell',
+    fr: 'Vendre',
+    ar: 'بيع'
+  },
+  unspecified: {
+    en: 'Unspecified',
+    fr: 'Non spécifié',
+    ar: 'غير محدد'
+  },
+  addProduct: {
+    en: 'Add Product',
+    fr: 'Ajouter un Produit',
+    ar: 'إضافة منتج'
+  },
+  addCustomItem: {
+    en: 'Add Custom Item',
+    fr: 'Ajouter un Article Personnalisé',
+    ar: 'إضافة عنصر مخصص'
+  },
+  productName: {
+    en: 'Product Name',
+    fr: 'Nom du Produit',
+    ar: 'اسم المنتج'
+  },
+  customItemName: {
+    en: 'Custom Item Name',
+    fr: 'Nom de l\'Article Personnalisé',
+    ar: 'اسم العنصر المخصص'
+  },
+  quantity: {
+    en: 'Quantity',
+    fr: 'Quantité',
+    ar: 'الكمية'
+  },
+  unitPrice: {
+    en: 'Unit Price',
+    fr: 'Prix Unitaire',
+    ar: 'سعر الوحدة'
+  },
+  unitCost: {
+    en: 'Unit Cost',
+    fr: 'Coût Unitaire',
+    ar: 'تكلفة الوحدة'
+  },
+  linkedEye: {
+    en: 'Linked Eye',
+    fr: 'Œil Lié',
+    ar: 'العين المرتبطة'
+  },
+  paidAtDelivery: {
+    en: 'Paid at Delivery',
+    fr: 'Payé à la Livraison',
+    ar: 'دفع عند التسليم'
+  },
+  paymentDetails: {
+    en: 'Payment Details',
+    fr: 'Détails du Paiement',
+    ar: 'تفاصيل الدفع'
+  },
+  subtotal: {
+    en: 'Subtotal',
+    fr: 'Sous-total',
+    ar: 'المجموع الفرعي'
+  },
+  tax: {
+    en: 'Tax',
+    fr: 'Taxe',
+    ar: 'الضريبة'
+  },
+  discount: {
+    en: 'Discount',
+    fr: 'Remise',
+    ar: 'خصم'
+  },
+  total: {
+    en: 'Total',
+    fr: 'Total',
+    ar: 'المجموع'
+  },
+  advancePayment: {
+    en: 'Advance Payment',
+    fr: 'Paiement d\'Avance',
+    ar: 'دفعة مقدمة'
+  },
+  balance: {
+    en: 'Balance',
+    fr: 'Solde',
+    ar: 'الرصيد'
+  },
+  percentageDiscount: {
+    en: 'Percentage Discount (%)',
+    fr: 'Remise en Pourcentage (%)',
+    ar: 'خصم بالنسبة المئوية (%)'
+  },
+  fixedDiscount: {
+    en: 'Fixed Discount (DH)',
+    fr: 'Remise Fixe (DH)',
+    ar: 'خصم ثابت (درهم)'
+  },
+  taxBase: {
+    en: 'Tax Base (DH)',
+    fr: 'Base de Taxe (DH)',
+    ar: 'أساس الضريبة (درهم)'
+  },
+  receiptSummary: {
+    en: 'Receipt Summary',
+    fr: 'Résumé du Reçu',
+    ar: 'ملخص الإيصال'
+  },
+  clientInformation: {
+    en: 'Client Information',
+    fr: 'Informations du Client',
+    ar: 'معلومات العميل'
+  },
+  name: {
+    en: 'Name',
+    fr: 'Nom',
+    ar: 'الاسم'
+  },
+  phone: {
+    en: 'Phone',
+    fr: 'Téléphone',
+    ar: 'الهاتف'
+  },
+  prescription: {
+    en: 'Prescription',
+    fr: 'Prescription',
+    ar: 'الوصفة'
+  },
+  orderSummary: {
+    en: 'Order Summary',
+    fr: 'Résumé de la Commande',
+    ar: 'ملخص الطلب'
+  },
+  totalItems: {
+    en: 'Total Items',
+    fr: 'Total des Articles',
+    ar: 'إجمالي العناصر'
+  },
+  paymentStatus: {
+    en: 'Payment Status',
+    fr: 'État du Paiement',
+    ar: 'حالة الدفع'
+  },
+  balanceDue: {
+    en: 'Balance Due',
+    fr: 'Solde Dû',
+    ar: 'الرصيد المستحق'
+  },
+  paid: {
+    en: 'Paid',
+    fr: 'Payé',
+    ar: 'مدفوع'
+  },
+  partiallyPaid: {
+    en: 'Partially Paid',
+    fr: 'Partiellement Payé',
+    ar: 'مدفوع جزئياً'
+  },
+  unpaid: {
+    en: 'Unpaid',
+    fr: 'Non Payé',
+    ar: 'غير مدفوع'
+  },
+  noClient: {
+    en: 'No Client Selected',
+    fr: 'Aucun Client Sélectionné',
+    ar: 'لم يتم اختيار عميل'
+  },
+  pleaseSelectClient: {
+    en: 'Please select a client to continue.',
+    fr: 'Veuillez sélectionner un client pour continuer.',
+    ar: 'يرجى اختيار عميل للمتابعة.'
+  },
+  noItems: {
+    en: 'No Items Added',
+    fr: 'Aucun Article Ajouté',
+    ar: 'لم يتم إضافة عناصر'
+  },
+  pleaseAddItems: {
+    en: 'Please add at least one item to the receipt.',
+    fr: 'Veuillez ajouter au moins un article au reçu.',
+    ar: 'يرجى إضافة عنصر واحد على الأقل إلى الإيصال.'
+  },
+  orderTypeRequired: {
+    en: 'Order Type Required',
+    fr: 'Type de Commande Requis',
+    ar: 'نوع الطلب مطلوب'
+  },
+  orderTypeRequiredDesc: {
+    en: 'Please select an order type in the Order Details tab before finalizing this receipt. The order type determines how services and costs are calculated.',
+    fr: 'Veuillez sélectionner un type de commande dans l\'onglet Détails de la Commande avant de finaliser ce reçu. Le type de commande détermine comment les services et les coûts sont calculés.',
+    ar: 'يرجى اختيار نوع الطلب في علامة تبويب تفاصيل الطلب قبل إنهاء هذا الإيصال. يحدد نوع الطلب كيفية حساب الخدمات والتكاليف.'
+  },
+  outOfStockWarning: {
+    en: 'Warning',
+    fr: 'Avertissement',
+    ar: 'تحذير'
+  },
+  outOfStockDesc: {
+    en: 'This receipt contains out-of-stock products:',
+    fr: 'Ce reçu contient des produits en rupture de stock :',
+    ar: 'يحتوي هذا الإيصال على منتجات غير متوفرة:'
+  },
+  canStillProceed: {
+    en: 'You can still proceed to save this receipt.',
+    fr: 'Vous pouvez toujours procéder à l\'enregistrement de ce reçu.',
+    ar: 'لا يزال بإمكانك المتابعة لحفظ هذا الإيصال.'
+  },
+  unknownProduct: {
+    en: 'Unknown Product',
+    fr: 'Produit Inconnu',
+    ar: 'منتج غير معروف'
+  },
+  authenticationRequired: {
+    en: 'Authentication Required',
+    fr: 'Authentification Requise',
+    ar: 'المصادقة مطلوبة'
+  },
+  mustBeLoggedIn: {
+    en: 'You must be logged in to save receipts.',
+    fr: 'Vous devez être connecté pour enregistrer les reçus.',
+    ar: 'يجب أن تكون مسجل الدخول لحفظ الإيصالات.'
+  },
+  missingInformation: {
+    en: 'Missing Information',
+    fr: 'Informations Manquantes',
+    ar: 'معلومات مفقودة'
+  },
+  selectClientBeforeSaving: {
+    en: 'Please select a client before saving.',
+    fr: 'Veuillez sélectionner un client avant d\'enregistrer.',
+    ar: 'يرجى اختيار عميل قبل الحفظ.'
+  },
+  missingItems: {
+    en: 'Missing Items',
+    fr: 'Articles Manquants',
+    ar: 'عناصر مفقودة'
+  },
+  addItemsBeforeSaving: {
+    en: 'Please add at least one item to the receipt.',
+    fr: 'Veuillez ajouter au moins un article au reçu.',
+    ar: 'يرجى إضافة عنصر واحد على الأقل إلى الإيصال.'
+  },
+  selectOrderTypeBeforeSaving: {
+    en: 'Please select an order type before saving the receipt.',
+    fr: 'Veuillez sélectionner un type de commande avant d\'enregistrer le reçu.',
+    ar: 'يرجى اختيار نوع الطلب قبل حفظ الإيصال.'
+  },
+  success: {
+    en: 'Success',
+    fr: 'Succès',
+    ar: 'نجح'
+  },
+  receiptSavedSuccessfully: {
+    en: 'Receipt saved successfully',
+    fr: 'Reçu enregistré avec succès',
+    ar: 'تم حفظ الإيصال بنجاح'
+  },
+  error: {
+    en: 'Error',
+    fr: 'Erreur',
+    ar: 'خطأ'
+  },
+  failedToSaveReceipt: {
+    en: 'Failed to save receipt. Please try again.',
+    fr: 'Échec de l\'enregistrement du reçu. Veuillez réessayer.',
+    ar: 'فشل في حفظ الإيصال. يرجى المحاولة مرة أخرى.'
+  },
+  itemsRequired: {
+    en: 'Items Required',
+    fr: 'Articles Requis',
+    ar: 'عناصر مطلوبة'
+  },
+  addItemsBeforeProceeding: {
+    en: 'Please add at least one item before proceeding.',
+    fr: 'Veuillez ajouter au moins un article avant de continuer.',
+    ar: 'يرجى إضافة عنصر واحد على الأقل قبل المتابعة.'
+  },
+  cost: {
+    en: 'Cost',
+    fr: 'Coût',
+    ar: 'التكلفة'
+  },
+  profit: {
+    en: 'Profit',
+    fr: 'Profit',
+    ar: 'الربح'
+  },
+  montageCosts: {
+    en: 'Montage Costs',
+    fr: 'Coûts de Montage',
+    ar: 'تكاليف التركيب'
+  },
+  productsRevenue: {
+    en: 'Products Revenue',
+    fr: 'Revenus des Produits',
+    ar: 'إيرادات المنتجات'
+  },
+  totalCost: {
+    en: 'Total Cost',
+    fr: 'Coût Total',
+    ar: 'التكلفة الإجمالية'
+  },
+  totalProfit: {
+    en: 'Total Profit',
+    fr: 'Profit Total',
+    ar: 'الربح الإجمالي'
+  }
+};
+
 const clientsTranslations: Translations = {
   // Clients page UI
   clients: {
@@ -926,6 +1340,7 @@ const allTranslations: Translations = {
   ...dashboardTranslations,
   ...productTranslations,
   ...pricingTranslations,
+  ...receiptTranslations,
   ...clientsTranslations,
   navigation: {
     en: {
