@@ -1430,6 +1430,10 @@ const purchasesTranslations: Translations = {
     en: 'Link Receipts to Purchase',
     fr: 'Lier les Reçus à l\'Achat'
   },
+  editPurchase: {
+    en: 'Edit Purchase',
+    fr: 'Modifier l\'Achat'
+  },
   selectDateRange: {
     en: 'Select Date Range',
     fr: 'Sélectionner une Plage de Dates'

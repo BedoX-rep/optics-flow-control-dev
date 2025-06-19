@@ -127,15 +127,6 @@ const PURCHASE_TYPES = [
   t('capitalExpenditure')
 ];
 
-const Purchases = () => {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { t } = useLanguage();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState('purchases');
-
   // Consolidated search and filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -556,15 +547,15 @@ const Purchases = () => {
       if (receipt.is_deleted) {
         return false;
       }
-      
+
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(purchase.link_date_from!);
       const toDate = new Date(purchase.link_date_to!);
-      
+
       // Set time to start/end of day for accurate comparison
       fromDate.setHours(0, 0, 0, 0);
       toDate.setHours(23, 59, 59, 999);
-      
+
       return receiptDate >= fromDate && receiptDate <= toDate;
     });
 
@@ -573,12 +564,12 @@ const Purchases = () => {
 
     linkedReceipts.forEach(receipt => {
       const montageCost = receipt.montage_costs || 0;
-      
+
       // Only include receipts in InCutting, Ready, or Paid costs phases
       const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
       if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
         totalAmount += montageCost;
-        
+
         // Only count as paid if status is specifically 'Paid costs'
         if (receipt.montage_status === 'Paid costs') {
           paidAmount += montageCost;
@@ -729,7 +720,7 @@ const Purchases = () => {
       if (receipt.is_deleted) {
         return false;
       }
-      
+
       const receiptDate = new Date(receipt.created_at);
       const fromDate = new Date(linkDateFrom);
       const toDate = new Date(linkDateTo);
@@ -742,24 +733,24 @@ const Purchases = () => {
     const filteredReceipts = getFilteredReceipts();
     let totalMontage = 0;
     let paidMontage = 0;
-    
+
     filteredReceipts.forEach(receipt => {
       const montageCost = receipt.montage_costs || 0;
-      
+
       // Only include receipts in InCutting, Ready, or Paid costs phases
       const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
       if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
         totalMontage += montageCost;
-        
+
         // Only count as paid if status is 'Paid costs'
         if (receipt.montage_status === 'Paid costs') {
           paidMontage += montageCost;
         }
       }
     });
-    
+
     const unpaidMontage = totalMontage - paidMontage;
-    
+
     return {
       totalMontage,
       paidMontage,
@@ -770,14 +761,14 @@ const Purchases = () => {
 
   const handleLinkMontageToReceipt = async () => {
     if (!selectedPurchaseForLinking || !user) return;
-    
+
     try {
       setIsSubmitting(true);
       const filteredReceipts = getFilteredReceipts();
       const montageData = calculateMontageData();
-      
+
       const linkedReceiptIds = filteredReceipts.map(r => r.id);
-      
+
       // Store the date range for future receipt matching
       // This will allow the system to automatically include receipts created in the future
       // that fall within this date range
@@ -828,9 +819,9 @@ const Purchases = () => {
 
   const calculateNextRecurringDate = (purchaseDate: string, recurringType: string): string | null => {
     if (!recurringType) return null;
-    
+
     const date = new Date(purchaseDate);
-    
+
     switch (recurringType) {
       case '1_month':
         date.setMonth(date.getMonth() + 1);
@@ -847,13 +838,13 @@ const Purchases = () => {
       default:
         return null;
     }
-    
+
     return format(date, 'yyyy-MM-dd');
   };
 
   const handleSubmitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
       toast({
         title: "Error",
@@ -877,7 +868,7 @@ const Purchases = () => {
 
     try {
       setIsSubmitting(true);
-      
+
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
         description: purchaseFormData.description.trim(),
@@ -924,7 +915,7 @@ const Purchases = () => {
     }
   };
 
-  
+
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;

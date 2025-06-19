@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt } from 'lucide-react';
 import { Plus, Building2 } from 'lucide-react';
 import { Link } from 'lucide-react';
+import { useLanguage } from './LanguageProvider';
 
 interface Supplier {
   id: string;
@@ -63,44 +64,6 @@ interface RecordPurchaseDialogProps {
   editingPurchase?: Purchase | null;
 }
 
-const EXPENSE_CATEGORIES = [
-  'Office Supplies',
-  'Equipment',
-  'Software',
-  'Marketing',
-  'Travel',
-  'Utilities',
-  'Rent',
-  'Professional Services',
-  'Inventory',
-  'Maintenance',
-  'Insurance',
-  'Loan',
-  'Other'
-];
-
-const PAYMENT_METHODS = [
-  'Cash',
-  'Credit Card',
-  'Debit Card',
-  'Bank Transfer',
-  'Check',
-  'Digital Wallet'
-];
-
-const RECURRING_TYPES = [
-  { value: 'none', label: 'None' },
-  { value: '1_month', label: '1 Month' },
-  { value: '3_months', label: '3 Months' },
-  { value: '6_months', label: '6 Months' },
-  { value: '1_year', label: '1 Year' }
-];
-
-const PURCHASE_TYPES = [
-  'Operational Expenses',
-  'Capital Expenditure'
-];
-
 const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   isOpen,
   onClose,
@@ -110,8 +73,47 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  const EXPENSE_CATEGORIES = [
+    t('officeSupplies'),
+    t('equipment'),
+    t('software'),
+    t('marketing'),
+    t('travel'),
+    t('utilities'),
+    t('rent'),
+    t('professionalServices'),
+    t('inventory'),
+    t('maintenance'),
+    t('insurance'),
+    t('loan'),
+    t('other')
+  ];
+
+  const PAYMENT_METHODS = [
+    t('cash'),
+    t('creditCard'),
+    t('debitCard'),
+    t('bankTransfer'),
+    t('check'),
+    t('digitalWallet')
+  ];
+
+  const RECURRING_TYPES = [
+    { value: 'none', label: t('none') },
+    { value: '1_month', label: t('oneMonth') },
+    { value: '3_months', label: t('threeMonths') },
+    { value: '6_months', label: t('sixMonths') },
+    { value: '1_year', label: t('oneYear') }
+  ];
+
+  const PURCHASE_TYPES = [
+    t('operationalExpenses'),
+    t('capitalExpenditure')
+  ];
 
   const [formData, setFormData] = useState({
     description: '',
@@ -418,12 +420,12 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
             <Receipt className="h-5 w-5 text-primary" />
-            {editingPurchase ? 'Edit Purchase' : 'Record New Purchase'}
+            {editingPurchase ? t('editPurchase') : t('recordPurchase')}
           </DialogTitle>
         </DialogHeader>
 
         <div id="record-purchase-description" className="sr-only">
-          {editingPurchase ? 'Edit an existing purchase' : 'Record a new purchase transaction'}
+          {editingPurchase ? t('editPurchase') : t('recordPurchase')}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -432,18 +434,18 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <User className="h-4 w-4" />
-                Basic Information
+                {t('businessInformation')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description">{t('description')} *</Label>
                   <Input
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter purchase description"
+                    placeholder={t('enterDescription')}
                     required
                     disabled={isSubmitting}
                     className="mt-1"
@@ -451,14 +453,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="supplier">Supplier</Label>
+                  <Label htmlFor="supplier">{t('supplier')}</Label>
                   <Select
                     value={formData.supplier_id || undefined}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select supplier (optional)" />
+                      <SelectValue placeholder={t('selectSupplier')} />
                     </SelectTrigger>
                     <SelectContent>
                       {suppliers.map(supplier => (
@@ -471,14 +473,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">{t('category')}</Label>
                   <Select
                     value={formData.category || undefined}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select category (optional)" />
+                      <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
                       {EXPENSE_CATEGORIES.map(category => (
@@ -491,14 +493,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="purchase_type">Purchase Type *</Label>
+                  <Label htmlFor="purchase_type">{t('purchaseType')} *</Label>
                   <Select
                     value={formData.purchase_type}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue />
+                      <SelectValue placeholder={t('selectPurchaseType')} />
                     </SelectTrigger>
                     <SelectContent>
                       {PURCHASE_TYPES.map(type => (
@@ -518,13 +520,13 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calculator className="h-4 w-4" />
-                Financial Details
+                {t('paymentDetails')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="tax_percentage">Tax Percentage (%)</Label>
+                  <Label htmlFor="tax_percentage">{t('taxIndicator')} (%)</Label>
                   <Input
                     id="tax_percentage"
                     type="number"
@@ -540,7 +542,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="amount_ht">Amount HT (Before Tax) *</Label>
+                  <Label htmlFor="amount_ht">{t('amountHT')} *</Label>
                   <Input
                     id="amount_ht"
                     type="number"
@@ -548,7 +550,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     min="0.01"
                     value={formData.amount_ht}
                     onChange={(e) => handleAmountHTChange(e.target.value)}
-                    placeholder="0.00"
+                    placeholder={t('enterAmount')}
                     required
                     disabled={isSubmitting}
                     className="mt-1"
@@ -556,7 +558,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="amount_ttc">Amount TTC (After Tax) *</Label>
+                  <Label htmlFor="amount_ttc">{t('amountTTC')} *</Label>
                   <Input
                     id="amount_ttc"
                     type="number"
@@ -564,7 +566,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     min="0.01"
                     value={formData.amount_ttc}
                     onChange={(e) => handleAmountTTCChange(e.target.value)}
-                    placeholder="0.00"
+                    placeholder={t('enterAmount')}
                     required
                     disabled={isSubmitting}
                     className="mt-1"
@@ -574,7 +576,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="advance_payment">Advance Payment</Label>
+                  <Label htmlFor="advance_payment">{t('advancePayment')}</Label>
                   <Input
                     id="advance_payment"
                     type="number"
@@ -587,11 +589,11 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                         const amountTtc = parseFloat(prev.amount_ttc) || 0;
                         const advancePayment = parseFloat(newAdvancePayment) || 0;
                         const balance = amountTtc - advancePayment;
-                        let paymentStatus = 'Unpaid';
+                        let paymentStatus = t('unpaid');
                         if (advancePayment >= amountTtc && amountTtc > 0) {
-                          paymentStatus = 'Paid';
+                          paymentStatus = t('paid');
                         } else if (advancePayment > 0) {
-                          paymentStatus = 'Partially Paid';
+                          paymentStatus = t('partiallyPaid');
                         }
                         return { 
                           ...prev, 
@@ -601,20 +603,20 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                         };
                       });
                     }}
-                    placeholder="0.00"
+                    placeholder={t('enterAmount')}
                     disabled={isSubmitting}
                     className="mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="balance">Balance</Label>
+                  <Label htmlFor="balance">{t('balance')}</Label>
                   <Input
                     id="balance"
                     type="number"
                     step="0.01"
                     value={formData.balance}
-                    placeholder="0.00"
+                    placeholder={t('enterAmount')}
                     disabled
                     className="mt-1 bg-gray-50"
                   />
@@ -628,20 +630,20 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CreditCard className="h-4 w-4" />
-                Payment Information
+                {t('paymentDetails')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="payment_method">Payment Method</Label>
+                  <Label htmlFor="payment_method">{t('paymentMethod')}</Label>
                   <Select
                     value={formData.payment_method}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue />
+                      <SelectValue placeholder={t('selectPaymentMethod')} />
                     </SelectTrigger>
                     <SelectContent>
                       {PAYMENT_METHODS.map(method => (
@@ -654,19 +656,19 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="payment_status">Payment Status</Label>
+                  <Label htmlFor="payment_status">{t('paymentStatus')}</Label>
                   <Select
                     value={formData.payment_status}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="mt-1">
-                      <SelectValue />
+                      <SelectValue placeholder={t('selectPaymentStatus')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Unpaid">Unpaid</SelectItem>
-                      <SelectItem value="Partially Paid">Partially Paid</SelectItem>
-                      <SelectItem value="Paid">Paid</SelectItem>
+                      <SelectItem value={t('unpaid')}>{t('unpaid')}</SelectItem>
+                      <SelectItem value={t('partiallyPaid')}>{t('partiallyPaid')}</SelectItem>
+                      <SelectItem value={t('paid')}>{t('paid')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -815,14 +817,14 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
               disabled={isSubmitting}
               className="min-w-[100px]"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
               className="min-w-[150px]"
             >
-              {isSubmitting ? (editingPurchase ? 'Updating...' : 'Recording...') : (editingPurchase ? 'Update Purchase' : 'Record Purchase')}
+              {isSubmitting ? (editingPurchase ? t('updating') : t('saving')) : (editingPurchase ? t('editPurchase') : t('recordPurchase'))}
             </Button>
           </DialogFooter>
         </form>
