@@ -10,7 +10,6 @@ import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
-import LanguageToggle from '@/components/LanguageToggle';
 
 interface DashboardStats {
   activeClients: number;
@@ -269,14 +268,11 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <PageTitle 
-            title={t('dashboard')} 
-            subtitle={`${t('dashboardSubtitle')} ${format(new Date(), 'MMMM yyyy')}`}
-          />
-        </div>
-        <LanguageToggle />
+      <div className="mb-6">
+        <PageTitle 
+          title={t('dashboard')} 
+          subtitle={`${t('dashboardSubtitle')} ${format(new Date(), 'MMMM yyyy')}`}
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

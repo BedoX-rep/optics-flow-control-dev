@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const LanguageToggle = () => {
-  const { language, changeLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -37,7 +37,7 @@ const LanguageToggle = () => {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => changeLanguage(lang.code as 'en' | 'fr')}
+            onClick={() => setLanguage(lang.code as 'en' | 'fr')}
             className={`cursor-pointer flex items-center gap-2 ${
               language === lang.code ? 'bg-teal-50 text-teal-700' : ''
             }`}
