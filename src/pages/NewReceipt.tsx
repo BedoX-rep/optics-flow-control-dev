@@ -131,7 +131,7 @@ const NewReceipt = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { translate: t } = useLanguage();
   
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
