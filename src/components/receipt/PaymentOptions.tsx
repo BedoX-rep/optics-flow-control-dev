@@ -36,12 +36,14 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
   setBalance,
   updatePaymentStatus
 }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="flex-1 p-6 space-y-4 border rounded-lg">
-      <h3 className="font-semibold text-xl text-gray-900">Payment Options</h3>
+      <h3 className="font-semibold text-xl text-gray-900">{t('paymentDetails')}</h3>
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[200px]">
-          <Label htmlFor="discount">Percentage Discount</Label>
+          <Label htmlFor="discount">{t('percentageDiscount')}</Label>
           <div className="relative">
             <Input
               id="discount"
@@ -61,7 +63,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <Label htmlFor="numericDiscount">Fixed Discount</Label>
+          <Label htmlFor="numericDiscount">{t('fixedDiscount')}</Label>
           <div className="relative">
             <Input
               id="numericDiscount"
@@ -75,12 +77,12 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
               }}
               className="pr-12"
             />
-            <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+            <span className="absolute right-3 top-2.5 text-gray-500">{t('dh')}</span>
           </div>
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <Label htmlFor="tax">Tax Base Amount</Label>
+          <Label htmlFor="tax">{t('taxBase')}</Label>
           <div className="relative">
             <Input
               id="tax"
@@ -90,12 +92,12 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
               onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
               className="pr-12"
             />
-            <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+            <span className="absolute right-3 top-2.5 text-gray-500">{t('dh')}</span>
           </div>
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <Label htmlFor="taxIndicator">Tax Rate</Label>
+          <Label htmlFor="taxIndicator">{t('taxIndicator')}</Label>
           <div className="relative">
             <Input
               id="taxIndicator"
@@ -112,7 +114,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <Label htmlFor="advancePayment">Advance Payment</Label>
+          <Label htmlFor="advancePayment">{t('advancePayment')}</Label>
           <div className="relative">
             <Input
               id="advancePayment"
@@ -127,7 +129,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
               }}
               className="pr-12"
             />
-            <span className="absolute right-3 top-2.5 text-gray-500">DH</span>
+            <span className="absolute right-3 top-2.5 text-gray-500">{t('dh')}</span>
           </div>
         </div>
 
@@ -137,7 +139,9 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
             paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
             'bg-red-100 text-red-800'
           }`}>
-            {paymentStatus}
+            {paymentStatus === 'Paid' ? t('paid') : 
+             paymentStatus === 'Partially Paid' ? t('partiallyPaid') : 
+             t('unpaid')}
           </div>
         </div>
       </div>
