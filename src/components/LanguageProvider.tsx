@@ -311,6 +311,11 @@ const productTranslations: Translations = {
     fr: 'Enregistrer',
     ar: 'حفظ'
   },
+  saveButton: {
+    en: 'Save',
+    fr: 'Enregistrer',
+    ar: 'حفظ'
+  },
   cancel: {
     en: 'Cancel',
     fr: 'Annuler',
@@ -457,6 +462,225 @@ const productTranslations: Translations = {
   }
 };
 
+const clientsTranslations: Translations = {
+  // Clients page UI
+  clients: {
+    en: 'Clients',
+    fr: 'Clients',
+    ar: 'العملاء'
+  },
+  newClient: {
+    en: 'New Client',
+    fr: 'Nouveau Client',
+    ar: 'عميل جديد'
+  },
+  addClient: {
+    en: 'Add Client',
+    fr: 'Ajouter un Client',
+    ar: 'إضافة عميل'
+  },
+  editClient: {
+    en: 'Edit Client',
+    fr: 'Modifier le Client',
+    ar: 'تعديل العميل'
+  },
+  searchClients: {
+    en: 'Search clients...',
+    fr: 'Rechercher des clients...',
+    ar: 'البحث عن العملاء...'
+  },
+  noClientsFound: {
+    en: 'No clients found',
+    fr: 'Aucun client trouvé',
+    ar: 'لا يوجد عملاء'
+  },
+  clientName: {
+    en: 'Client Name',
+    fr: 'Nom du Client',
+    ar: 'اسم العميل'
+  },
+  firstName: {
+    en: 'First Name',
+    fr: 'Prénom',
+    ar: 'الاسم الأول'
+  },
+  lastName: {
+    en: 'Last Name',
+    fr: 'Nom de Famille',
+    ar: 'اسم العائلة'
+  },
+  phoneNumber: {
+    en: 'Phone Number',
+    fr: 'Numéro de Téléphone',
+    ar: 'رقم الهاتف'
+  },
+  email: {
+    en: 'Email',
+    fr: 'Email',
+    ar: 'البريد الإلكتروني'
+  },
+  address: {
+    en: 'Address',
+    fr: 'Adresse',
+    ar: 'العنوان'
+  },
+  dateOfBirth: {
+    en: 'Date of Birth',
+    fr: 'Date de Naissance',
+    ar: 'تاريخ الميلاد'
+  },
+  gender: {
+    en: 'Gender',
+    fr: 'Sexe',
+    ar: 'الجنس'
+  },
+  male: {
+    en: 'Male',
+    fr: 'Masculin',
+    ar: 'ذكر'
+  },
+  female: {
+    en: 'Female',
+    fr: 'Féminin',
+    ar: 'أنثى'
+  },
+  selectGender: {
+    en: 'Select Gender',
+    fr: 'Sélectionner le Sexe',
+    ar: 'اختر الجنس'
+  },
+  eyePrescription: {
+    en: 'Eye Prescription',
+    fr: 'Prescription Oculaire',
+    ar: 'وصفة العيون'
+  },
+  rightEye: {
+    en: 'Right Eye (OD)',
+    fr: 'Œil Droit (OD)',
+    ar: 'العين اليمنى'
+  },
+  leftEye: {
+    en: 'Left Eye (OS)',
+    fr: 'Œil Gauche (OS)',
+    ar: 'العين اليسرى'
+  },
+  sphere: {
+    en: 'Sphere (SPH)',
+    fr: 'Sphère (SPH)',
+    ar: 'الكرة'
+  },
+  cylinder: {
+    en: 'Cylinder (CYL)',
+    fr: 'Cylindre (CYL)',
+    ar: 'الأسطوانة'
+  },
+  axis: {
+    en: 'Axis',
+    fr: 'Axe',
+    ar: 'المحور'
+  },
+  pupillaryDistance: {
+    en: 'Pupillary Distance (PD)',
+    fr: 'Distance Pupillaire (PD)',
+    ar: 'المسافة بين الحدقتين'
+  },
+  totalBalance: {
+    en: 'Total Balance',
+    fr: 'Solde Total',
+    ar: 'الرصيد الإجمالي'
+  },
+  lastVisit: {
+    en: 'Last Visit',
+    fr: 'Dernière Visite',
+    ar: 'آخر زيارة'
+  },
+  viewDetails: {
+    en: 'View Details',
+    fr: 'Voir les Détails',
+    ar: 'عرض التفاصيل'
+  },
+  callClient: {
+    en: 'Call Client',
+    fr: 'Appeler le Client',
+    ar: 'اتصال بالعميل'
+  },
+  whatsappClient: {
+    en: 'WhatsApp Client',
+    fr: 'WhatsApp Client',
+    ar: 'واتساب العميل'
+  },
+  clientDetails: {
+    en: 'Client Details',
+    fr: 'Détails du Client',
+    ar: 'تفاصيل العميل'
+  },
+  receiptHistory: {
+    en: 'Receipt History',
+    fr: 'Historique des Reçus',
+    ar: 'تاريخ الإيصالات'
+  },
+  noReceiptsFound: {
+    en: 'No receipts found for this client',
+    fr: 'Aucun reçu trouvé pour ce client',
+    ar: 'لا توجد إيصالات لهذا العميل'
+  },
+  receiptNumber: {
+    en: 'Receipt #',
+    fr: 'Reçu #',
+    ar: 'إيصال #'
+  },
+  date: {
+    en: 'Date',
+    fr: 'Date',
+    ar: 'التاريخ'
+  },
+  amount: {
+    en: 'Amount',
+    fr: 'Montant',
+    ar: 'المبلغ'
+  },
+  status: {
+    en: 'Status',
+    fr: 'Statut',
+    ar: 'الحالة'
+  },
+  balance: {
+    en: 'Balance',
+    fr: 'Solde',
+    ar: 'الرصيد'
+  },
+  paid: {
+    en: 'Paid',
+    fr: 'Payé',
+    ar: 'مدفوع'
+  },
+  pending: {
+    en: 'Pending',
+    fr: 'En Attente',
+    ar: 'في الانتظار'
+  },
+  partial: {
+    en: 'Partial',
+    fr: 'Partiel',
+    ar: 'جزئي'
+  },
+  dh: {
+    en: 'DH',
+    fr: 'DH',
+    ar: 'درهم'
+  },
+  noRecentActivity: {
+    en: 'No recent activity',
+    fr: 'Aucune activité récente',
+    ar: 'لا يوجد نشاط حديث'
+  },
+  never: {
+    en: 'Never',
+    fr: 'Jamais',
+    ar: 'أبداً'
+  }
+};
+
 const pricingTranslations: Translations = {
   pricingTitle: {
     en: 'Pricing Plans',
@@ -533,7 +757,7 @@ const pricingTranslations: Translations = {
     fr: 'Accès à vie',
     ar: 'وصول مدى الحياة'
   },
-  save: {
+  saveVsMonthly: {
     en: 'Save 11% vs monthly',
     fr: 'Économisez 11% par rapport au mensuel',
     ar: 'وفر 11٪ مقارنة بالاشتراك الشهري'
@@ -561,6 +785,7 @@ const allTranslations: Translations = {
   ...dashboardTranslations,
   ...productTranslations,
   ...pricingTranslations,
+  ...clientsTranslations,
   navigation: {
     en: {
       home: 'Home',

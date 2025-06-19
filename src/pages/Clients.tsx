@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
@@ -17,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from "@/hooks/useDebounce";
+import { useLanguage } from '@/components/LanguageProvider';
 
 interface Client {
   id: string;
@@ -50,9 +50,10 @@ interface Client {
 const ITEMS_PER_PAGE = 20;
 
 export default function Clients() {
+  const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
@@ -399,7 +400,7 @@ export default function Clients() {
             className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            New Client
+            {t('newClient')}
           </Button>
           <Button
             variant="outline"
@@ -407,7 +408,7 @@ export default function Clients() {
             className="rounded-xl border-neutral-200 shadow-sm"
           >
             <Save className="h-4 w-4 mr-2" />
-            Save All Changes
+            {t('saveAllChanges')}
           </Button>
         </div>
       </div>
@@ -418,7 +419,7 @@ export default function Clients() {
             <SearchInput
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search clients..."
+              placeholder={t('searchClients')}
               className="w-full"
             />
           </div>
@@ -426,12 +427,12 @@ export default function Clients() {
           <div className="flex items-center gap-3">
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
-                <SelectItem value="recent">Recently Added</SelectItem>
-                <SelectItem value="phone">Phone Number</SelectItem>
+                <SelectItem value="name">{t('nameAZ')}</SelectItem>
+                <SelectItem value="recent">{t('recentlyAdded')}</SelectItem>
+                <SelectItem value="phone">{t('phoneNumber')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -440,7 +441,7 @@ export default function Clients() {
               onClick={findDuplicateClients}
               className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
-              Find Duplicates
+              {t('findDuplicates')}
             </Button>
             <Button
               variant="ghost"
@@ -448,7 +449,7 @@ export default function Clients() {
               className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Import
+              {t('import')}
             </Button>
           </div>
         </div>
@@ -484,11 +485,11 @@ export default function Clients() {
           <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
             <UserPlus size={24} className="text-teal-600" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No clients found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noClientsFound')}</h3>
           <p className="text-gray-500 max-w-md mb-4">
             {searchTerm
-              ? `No clients match your search "${searchTerm}"`
-              : "You haven't added any clients yet. Get started by adding your first client."
+              ? t('noClientsMatchSearch', { searchTerm })
+              : t('noClientsYet')
             }
           </p>
           {!searchTerm && (
@@ -497,7 +498,7 @@ export default function Clients() {
               className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
             >
               <UserPlus size={16} className="mr-2" />
-              Add Your First Client
+              {t('addFirstClient')}
             </Button>
           )}
         </div>
@@ -526,7 +527,7 @@ export default function Clients() {
                 className="flex items-center gap-1"
               >
                 <ChevronDown className="h-4 w-4 rotate-90" />
-                Previous
+                {t('previous')}
               </Button>
 
               <div className="flex items-center gap-1">
@@ -564,7 +565,7 @@ export default function Clients() {
                 disabled={page >= totalPages - 1 || isLoading}
                 className="flex items-center gap-1"
               >
-                Next
+                {t('next')}
                 <ChevronDown className="h-4 w-4 -rotate-90" />
               </Button>
             </div>
@@ -572,7 +573,11 @@ export default function Clients() {
 
           {filteredClients.length > 0 && (
             <div className="text-center text-sm text-gray-500 mt-4">
-              Showing {page * ITEMS_PER_PAGE + 1} to {Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
+              {t('showingClients', {
+                start: page * ITEMS_PER_PAGE + 1,
+                end: Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length),
+                total: filteredClients.length
+              })}
             </div>
           )}
         </>
@@ -608,15 +613,15 @@ export default function Clients() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Client</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteClient')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {clientToDelete?.name}? This action cannot be undone.
+              {t('deleteConfirmation', { clientName: clientToDelete?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -626,13 +631,12 @@ export default function Clients() {
       <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Duplicate Clients Found</AlertDialogTitle>
+            <AlertDialogTitle>{t('duplicateClientsFound')}</AlertDialogTitle>
             <AlertDialogDescription>
               {duplicateClients.length > 0 && (
                 <>
                   <p className="mb-2">
-                    {duplicateClients.length} duplicate clients found with the same phone numbers.
-                    For each duplicate set, the first client will be kept and others marked as deleted.
+                    {t('duplicateExplanation', { count: duplicateClients.length })}
                   </p>
                   <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
                     {duplicateClients.map(client => (
@@ -646,9 +650,9 @@ export default function Clients() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteDuplicates} className="bg-red-500 hover:bg-red-600">
-              Delete Duplicates
+              {t('deleteDuplicates')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

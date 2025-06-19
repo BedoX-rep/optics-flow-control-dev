@@ -241,7 +241,7 @@ const ProductCard = React.memo<ProductCardProps>(({
                 className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
               >
                 <Save size={12} className="mr-1" />
-                {t('save')}
+                {t('saveButton')}
               </Button>
             )}
             <Button
