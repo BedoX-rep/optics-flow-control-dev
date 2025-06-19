@@ -215,7 +215,7 @@ const NewReceipt = () => {
   });
 
   const { data: clientsData } = useQuery({
-    queryKey: ['clients', user?.id],
+    queryKey: ['all-clients', user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
@@ -496,10 +496,14 @@ const NewReceipt = () => {
   const handleClientAdded = async (client: Client) => {
     if (!user) return;
     try {
+      // Invalidate and refetch the clients query
+      await queryClient.invalidateQueries(['all-clients', user.id]);
+      
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_deleted', false)
         .order('name', { ascending: true });
 
       if (clientsError) throw clientsError;
