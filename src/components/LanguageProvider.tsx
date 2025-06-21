@@ -898,7 +898,55 @@ const productTranslations: Translations = {
   optional: {
     en: 'Optional',
     fr: 'Optionnel'
-  }
+  },
+  invoiceDeletedSuccessfully: {
+    en: 'Invoice deleted successfully',
+    fr: 'Facture supprimée avec succès'
+  },
+  confirmDeleteInvoice: {
+    en: 'Are you sure you want to delete this invoice?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cette facture?'
+  },
+  failedToDeleteInvoice: {
+    en: 'Failed to delete invoice',
+    fr: 'Échec de la suppression de la facture'
+  },
+  loadingInvoices: {
+    en: 'Loading invoices...',
+    fr: 'Chargement des factures...'
+  },
+  invoicesCount: {
+    en: 'invoices',
+    fr: 'factures'
+  },
+  created: {
+    en: 'Created',
+    fr: 'Créé'
+  },
+  active: {
+    en: 'Active',
+    fr: 'Actif'
+  },
+  thisWeek: {
+    en: 'This Week',
+    fr: 'Cette Semaine'
+  },
+  thisMonth: {
+    en: 'This Month',
+    fr: 'Ce Mois'
+  },
+  thisYear: {
+    en: 'This Year',
+    fr: 'Cette Année'
+  },
+  totalRevenue: {
+    en: 'Total Revenue',
+    fr: 'Revenus Totaux'
+  },
+  tax: {
+    en: 'Tax',
+    fr: 'Taxe'
+  },
 };
 
 const receiptTranslations: Translations = {
@@ -2232,7 +2280,8 @@ const purchasesTranslations: Translations = {
     fr: 'Les futurs reçus dans cette plage de dates seront automatiquement inclus.'
   },
   failedToLinkReceipts: {
-    en: 'Failed to link receipts to purchase',
+    en:```python
+ 'Failed to link receipts to purchase',
     fr: 'Échec de la liaison des reçus à l\'achat'
   },
   enterDescription: {
