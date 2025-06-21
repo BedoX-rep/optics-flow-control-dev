@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS public.permissions (
   can_manage_products BOOLEAN DEFAULT true,
   can_manage_clients BOOLEAN DEFAULT true,
   can_manage_receipts BOOLEAN DEFAULT true,
-  can_manage_invoices BOOLEAN DEFAULT true,
   can_view_financial BOOLEAN DEFAULT false,
   can_manage_purchases BOOLEAN DEFAULT false,
   can_access_dashboard BOOLEAN DEFAULT true,
@@ -44,8 +43,8 @@ CREATE POLICY "Admins can manage all permissions" ON permissions
   );
 
 -- Create default permissions for existing users
-INSERT INTO public.permissions (user_id, can_view_financial, can_manage_purchases, can_manage_invoices)
-SELECT user_id, true, true, true
+INSERT INTO public.permissions (user_id, can_view_financial, can_manage_purchases)
+SELECT user_id, true, true
 FROM public.subscriptions
 WHERE NOT EXISTS (
   SELECT 1 FROM public.permissions WHERE permissions.user_id = subscriptions.user_id
@@ -60,14 +59,12 @@ BEGIN
     can_manage_products,
     can_manage_clients, 
     can_manage_receipts,
-    can_manage_invoices,
     can_view_financial,
     can_manage_purchases,
     can_access_dashboard
   )
   VALUES (
     NEW.user_id,
-    true,
     true,
     true,
     true,

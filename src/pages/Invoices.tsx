@@ -127,7 +127,7 @@ const InvoiceCard = ({
                 </div>
               </div>
             </div>
-
+            
             {/* Date Information */}
             <div className="flex items-center gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-1">
@@ -169,7 +169,7 @@ const InvoiceCard = ({
                   {invoice.tax_amount?.toFixed(2) || '0.00'} DH
                 </p>
               </div>
-
+              
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200/50">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -226,7 +226,7 @@ const InvoiceCard = ({
 
 const Invoices = () => {
   const { t } = useLanguage();
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -356,32 +356,6 @@ const Invoices = () => {
       });
     }
   };
-
-  // Check permissions
-  if (!permissions?.can_manage_invoices) {
-    return (
-      <div className="container px-4 py-6 mx-auto">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="mb-4">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                {t('accessDenied') || 'Access Denied'}
-              </h2>
-              <p className="text-gray-500">
-                {t('noInvoicePermission') || 'You do not have permission to manage invoices.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Check user authentication
-  if (!user) {
-    return <div>{t('pleaseLoginToAccess')}</div>;
-  }
 
   if (isLoading) {
     return (
