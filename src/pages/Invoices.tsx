@@ -226,7 +226,7 @@ const InvoiceCard = ({
 
 const Invoices = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, permissions } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -356,6 +356,27 @@ const Invoices = () => {
       });
     }
   };
+
+  // Check permissions
+  if (!permissions?.can_manage_invoices) {
+    return (
+      <div className="container px-4 py-6 mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="mb-4">
+              <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                {t('accessDenied') || 'Access Denied'}
+              </h2>
+              <p className="text-gray-500">
+                {t('noInvoicePermission') || 'You do not have permission to manage invoices.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
