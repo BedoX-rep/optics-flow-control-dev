@@ -886,6 +886,18 @@ const receiptTranslations: Translations = {
     en: 'Unresponsive',
     fr: 'Sans Réponse'
   },
+  date: {
+    en: 'Date',
+    fr: 'Date'
+  },
+  payment: {
+    en: 'Payment',
+    fr: 'Paiement'
+  },
+  delivered: {
+    en: 'Delivered',
+    fr: 'Livré'
+  },
   total: {
     en: 'Total',
     fr: 'Total'
@@ -913,6 +925,14 @@ const receiptTranslations: Translations = {
   hoursAgo: {
     en: 'hours ago',
     fr: 'il y a quelques heures'
+  },
+  minutesAgoShort: {
+    en: 'minutes ago',
+    fr: 'min'
+  },
+  hoursAgoShort: {
+    en: 'hours ago',
+    fr: 'h'
   },
   unOrdered: {
     en: 'UnOrdered',
