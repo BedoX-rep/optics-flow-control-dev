@@ -24,6 +24,7 @@ interface StaffMember {
     can_view_financial: boolean;
     can_manage_purchases: boolean;
     can_access_dashboard: boolean;
+    can_manage_invoices: boolean;
   };
 }
 
@@ -87,6 +88,7 @@ const Access = () => {
               can_view_financial: false,
               can_manage_purchases: false,
               can_access_dashboard: true,
+              can_manage_invoices: true,
             }
           };
         })
@@ -291,6 +293,15 @@ const Access = () => {
                   }
                 />
                 <Label>{t('accessDashboard')}</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={userPermissions.can_manage_invoices}
+                  onCheckedChange={(checked) => 
+                    handleOwnPermissionChange('can_manage_invoices', checked)
+                  }
+                />
+                <Label>{t('manageInvoices')}</Label>
               </div>
             </div>
           ) : (

@@ -2691,6 +2691,10 @@ const accessTranslations: Translations = {
     en: 'Access Dashboard',
     fr: 'Accéder au Tableau de Bord'
   },
+  manageInvoices: {
+    en: 'Manage Invoices',
+    fr: 'Gérer les Factures'
+  },
   loadingPermissions: {
     en: 'Loading your permissions...',
     fr: 'Chargement de vos autorisations...'

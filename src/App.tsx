@@ -173,10 +173,10 @@ const AppRoutes = () => (
     } />
 
     <Route path="/invoices" element={
-      <ProtectedRoute requiredPermission="can_manage_invoices">
-        <Layout><Invoices /></Layout>
-      </ProtectedRoute>
-    } />
+              <ProtectedRoute requiredPermission="can_manage_invoices">
+                <Layout><Invoices /></Layout>
+              </ProtectedRoute>
+            } />
 
     <Route path="*" element={<NotFound />} />
   </Routes>

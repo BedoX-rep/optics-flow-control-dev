@@ -37,6 +37,7 @@ interface UserPermissions {
   can_view_financial: boolean;
   can_manage_purchases: boolean;
   can_access_dashboard: boolean;
+  can_manage_invoices: boolean;
 }
 
 interface AuthContextType {
@@ -124,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         can_view_financial: true,
         can_manage_purchases: true,
         can_access_dashboard: true,
+        can_manage_invoices: true,
       };
       setPermissions(adminPermissions);
       setCachedPermissions(userId, adminPermissions);
@@ -152,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               can_view_financial: false,
               can_manage_purchases: false,
               can_access_dashboard: true,
+              can_manage_invoices: true,
             };
             setPermissions(defaultPermissions);
             setCachedPermissions(userId, defaultPermissions);
