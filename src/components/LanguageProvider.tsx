@@ -805,6 +805,99 @@ const productTranslations: Translations = {
   noPurchaseHistory: {
     en: 'No purchase history available',
     fr: 'Aucun historique d\'achat disponible'
+  },
+  // Invoice translations
+  invoices: {
+    en: 'Invoices',
+    fr: 'Factures'
+  },
+  addInvoice: {
+    en: 'Add Invoice',
+    fr: 'Ajouter Facture'
+  },
+  searchInvoices: {
+    en: 'Search invoices...',
+    fr: 'Rechercher factures...'
+  },
+  noInvoicesFound: {
+    en: 'No invoices found',
+    fr: 'Aucune facture trouvée'
+  },
+  invoiceNumber: {
+    en: 'Invoice Number',
+    fr: 'Numéro de Facture'
+  },
+  invoiceDate: {
+    en: 'Invoice Date',
+    fr: 'Date de Facture'
+  },
+  dueDate: {
+    en: 'Due Date',
+    fr: 'Date d\'Échéance'
+  },
+  clientInformation: {
+    en: 'Client Information',
+    fr: 'Informations Client'
+  },
+  clientAddress: {
+    en: 'Client Address',
+    fr: 'Adresse Client'
+  },
+  invoiceInformation: {
+    en: 'Invoice Information',
+    fr: 'Informations Facture'
+  },
+  linkToReceipt: {
+    en: 'Link to Receipt',
+    fr: 'Lier au Reçu'
+  },
+  selectReceipt: {
+    en: 'Select Receipt',
+    fr: 'Sélectionner Reçu'
+  },
+  noReceipt: {
+    en: 'No Receipt',
+    fr: 'Aucun Reçu'
+  },
+  linkedReceipt: {
+    en: 'Linked Receipt',
+    fr: 'Reçu Lié'
+  },
+  taxPercentage: {
+    en: 'Tax Percentage',
+    fr: 'Pourcentage Taxe'
+  },
+  unitPrice: {
+    en: 'Unit Price',
+    fr: 'Prix Unitaire'
+  },
+  createInvoice: {
+    en: 'Create Invoice',
+    fr: 'Créer Facture'
+  },
+  allStatuses: {
+    en: 'All Statuses',
+    fr: 'Tous les Statuts'
+  },
+  draft: {
+    en: 'Draft',
+    fr: 'Brouillon'
+  },
+  pending: {
+    en: 'Pending',
+    fr: 'En Attente'
+  },
+  overdue: {
+    en: 'Overdue',
+    fr: 'En Retard'
+  },
+  saving: {
+    en: 'Saving...',
+    fr: 'Enregistrement...'
+  },
+  optional: {
+    en: 'Optional',
+    fr: 'Optionnel'
   }
 };
 

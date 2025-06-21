@@ -21,6 +21,7 @@ import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
+import Invoices from './pages/Invoices';
 
 // Create a client with caching options
 const queryClient = new QueryClient({
@@ -168,6 +169,12 @@ const AppRoutes = () => (
     <Route path="/subscriptions" element={
       <ProtectedRoute requiresActiveSubscription={false}>
         <Layout><Subscriptions /></Layout>
+      </ProtectedRoute>
+    } />
+
+    <Route path="/invoices" element={
+      <ProtectedRoute requiredPermission="can_manage_invoices">
+        <Layout><Invoices /></Layout>
       </ProtectedRoute>
     } />
 

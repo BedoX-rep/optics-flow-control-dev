@@ -43,7 +43,7 @@ const MainNav = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const [administrationOpen, setAdministrationOpen] = useState(false);
-  
+
   // Regenerate navigation items when language changes
   const navigation = useMemo(() => getNavigation(t), [t, language]);
   const administrationNavigation = useMemo(() => getAdministrationNavigation(t), [t, language]);
@@ -186,7 +186,7 @@ const MainNav = () => {
                 </>
               )}
             </button>
-            
+
             {!collapsed && administrationOpen && (
               <div className="ml-8 space-y-1">
                 {filteredAdministrationNavigation.map((item) => {

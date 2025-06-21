@@ -788,6 +788,47 @@ export interface UserInformation {
   updated_at: string;
 }
 
+export interface Invoice {
+  id: string;
+  user_id: string;
+  receipt_id?: string;
+  invoice_number: string;
+  client_name: string;
+  client_phone?: string;
+  client_address?: string;
+  subtotal: number;
+  tax_percentage: number;
+  tax_amount: number;
+  total: number;
+  invoice_date: string;
+  due_date?: string;
+  status: string;
+  notes?: string;
+  is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+  invoice_items?: InvoiceItem[];
+  receipt?: {
+    id: string;
+    client_name?: string;
+    client_phone?: string;
+  };
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoice_id: string;
+  product_name: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  user_id: string;
+  is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -795,6 +836,16 @@ export interface Database {
         Row: UserInformation;
         Insert: Omit<UserInformation, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<UserInformation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      invoices: {
+        Row: Invoice;
+        Insert: Omit<Invoice, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      invoice_items: {
+        Row: InvoiceItem;
+        Insert: Omit<InvoiceItem, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<InvoiceItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
       };
       // ... other existing tables
     };
