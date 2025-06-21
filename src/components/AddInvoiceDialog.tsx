@@ -241,93 +241,288 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setShowAssuranceAlert(isAssuranceMismatch && subtotal > 0);
   }, [isAssuranceMismatch, subtotal]);
 
-  // Auto-adjust item prices to match assurance total without decimals
+  // Smart auto-adjust item prices to match assurance total without decimals
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
     const currentTotal = subtotal;
     const targetTotal = invoiceData.assurance_total;
-    const difference = targetTotal - currentTotal;
+    const difference = Math.round(targetTotal - currentTotal);
     
-    if (Math.abs(difference) < 0.01) return; // Already matches
+    if (Math.abs(difference) < 1) return; // Already matches or difference is less than 1
 
-    // Create a copy of items to modify
-    const updatedItems = [...invoiceItems];
-    let remainingDifference = Math.round(difference);
+    // Helper function to calculate total from items
+    const calculateTotal = (items: Partial<InvoiceItem>[]) => {
+      return items.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
+    };
 
-    // Distribute the difference across ALL items without creating decimals
-    if (remainingDifference > 0) {
-      // Need to add to total - distribute positive amounts across all items
-      const baseIncrease = Math.floor(remainingDifference / updatedItems.length);
-      let extraAmount = remainingDifference - (baseIncrease * updatedItems.length);
-      
-      // First, distribute the base increase to all items
-      updatedItems.forEach((item, index) => {
-        const currentUnitPrice = item.unit_price || 0;
-        updatedItems[index] = {
-          ...item,
-          unit_price: currentUnitPrice + baseIncrease,
-          total_price: (currentUnitPrice + baseIncrease) * (item.quantity || 1)
-        };
-      });
-      
-      // Then distribute the remaining amount one by one
-      let itemIndex = 0;
-      while (extraAmount > 0 && itemIndex < updatedItems.length) {
-        const item = updatedItems[itemIndex];
-        const currentUnitPrice = item.unit_price || 0;
-        
-        updatedItems[itemIndex] = {
-          ...item,
-          unit_price: currentUnitPrice + 1,
-          total_price: (currentUnitPrice + 1) * (item.quantity || 1)
-        };
-        
-        extraAmount -= 1;
-        itemIndex++;
-      }
-    } else {
-      // Need to reduce total - distribute negative amounts across all items
-      remainingDifference = Math.abs(remainingDifference);
-      const baseDecrease = Math.floor(remainingDifference / updatedItems.length);
-      let extraAmount = remainingDifference - (baseDecrease * updatedItems.length);
-      
-      // First, distribute the base decrease to all items
-      updatedItems.forEach((item, index) => {
-        const currentUnitPrice = item.unit_price || 0;
-        const newUnitPrice = Math.max(0, currentUnitPrice - baseDecrease);
-        updatedItems[index] = {
-          ...item,
-          unit_price: newUnitPrice,
-          total_price: newUnitPrice * (item.quantity || 1)
-        };
-      });
-      
-      // Then distribute the remaining reduction one by one
-      let itemIndex = 0;
-      while (extraAmount > 0 && itemIndex < updatedItems.length) {
-        const item = updatedItems[itemIndex];
-        const currentUnitPrice = item.unit_price || 0;
-        
-        if (currentUnitPrice > 0) {
-          updatedItems[itemIndex] = {
-            ...item,
-            unit_price: currentUnitPrice - 1,
-            total_price: (currentUnitPrice - 1) * (item.quantity || 1)
-          };
-          extraAmount -= 1;
+    // Helper function to check if prices end in 0
+    const hasNiceEndings = (items: Partial<InvoiceItem>[]) => {
+      return items.filter(item => (item.unit_price || 0) % 10 === 0).length;
+    };
+
+    // Strategy 1: Try to adjust items to end in multiples of 10
+    const tryNiceDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      const testItems = items.map(item => ({ ...item }));
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        // Increase prices - try to round up to nearest 10
+        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+          const currentPrice = testItems[i].unit_price || 0;
+          const quantity = testItems[i].quantity || 1;
+          const nextTen = Math.ceil(currentPrice / 10) * 10;
+          const increase = Math.max(1, nextTen - currentPrice);
+          
+          if (increase * quantity <= remainingDiff) {
+            testItems[i].unit_price = currentPrice + increase;
+            testItems[i].total_price = testItems[i].unit_price * quantity;
+            remainingDiff -= increase * quantity;
+          }
         }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          const maxIncrease = Math.floor(remainingDiff / quantity);
+          
+          if (maxIncrease > 0) {
+            const currentPrice = item.unit_price || 0;
+            item.unit_price = currentPrice + maxIncrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= maxIncrease * quantity;
+          }
+          itemIndex++;
+        }
+      } else {
+        // Decrease prices - try to round down to nearest 10
+        remainingDiff = Math.abs(remainingDiff);
         
-        itemIndex++;
+        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+          const currentPrice = testItems[i].unit_price || 0;
+          const quantity = testItems[i].quantity || 1;
+          const prevTen = Math.floor(currentPrice / 10) * 10;
+          const decrease = Math.min(currentPrice, currentPrice - prevTen);
+          
+          if (decrease > 0 && decrease * quantity <= remainingDiff) {
+            testItems[i].unit_price = Math.max(0, currentPrice - decrease);
+            testItems[i].total_price = testItems[i].unit_price * quantity;
+            remainingDiff -= decrease * quantity;
+          }
+        }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          const maxDecrease = Math.min(currentPrice, Math.floor(remainingDiff / quantity));
+          
+          if (maxDecrease > 0) {
+            item.unit_price = currentPrice - maxDecrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= maxDecrease * quantity;
+          }
+          itemIndex++;
+        }
+      }
+
+      // Check if we achieved the target
+      const newTotal = calculateTotal(testItems);
+      if (Math.abs(newTotal - targetTotal) < 1) {
+        return testItems;
+      }
+      return null;
+    };
+
+    // Strategy 2: Equal distribution across all items
+    const tryEqualDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      const testItems = items.map(item => ({ ...item }));
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        const baseIncrease = Math.floor(remainingDiff / testItems.length);
+        let extraAmount = remainingDiff - (baseIncrease * testItems.length);
+        
+        // Distribute base increase to all items
+        testItems.forEach((item, index) => {
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          testItems[index].unit_price = currentPrice + baseIncrease;
+          testItems[index].total_price = testItems[index].unit_price * quantity;
+        });
+        
+        // Distribute remaining amount
+        let itemIndex = 0;
+        while (extraAmount > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          item.unit_price = (item.unit_price || 0) + 1;
+          item.total_price = item.unit_price * quantity;
+          extraAmount -= 1;
+          itemIndex++;
+        }
+      } else {
+        remainingDiff = Math.abs(remainingDiff);
+        const baseDecrease = Math.floor(remainingDiff / testItems.length);
+        let extraAmount = remainingDiff - (baseDecrease * testItems.length);
+        
+        // Distribute base decrease to all items
+        testItems.forEach((item, index) => {
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
+          testItems[index].total_price = testItems[index].unit_price * quantity;
+        });
+        
+        // Distribute remaining reduction
+        let itemIndex = 0;
+        while (extraAmount > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          
+          if (currentPrice > 0) {
+            item.unit_price = currentPrice - 1;
+            item.total_price = item.unit_price * quantity;
+            extraAmount -= 1;
+          }
+          itemIndex++;
+        }
+      }
+
+      const newTotal = calculateTotal(testItems);
+      if (Math.abs(newTotal - targetTotal) < 1) {
+        return testItems;
+      }
+      return null;
+    };
+
+    // Strategy 3: Weighted distribution based on current prices
+    const tryWeightedDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      const testItems = items.map(item => ({ ...item }));
+      const totalCurrentValue = calculateTotal(testItems);
+      
+      if (totalCurrentValue === 0) return null;
+
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        // Distribute based on proportion of current value
+        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+          const item = testItems[i];
+          const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
+          const proportion = currentItemTotal / totalCurrentValue;
+          const allocation = Math.round(remainingDiff * proportion);
+          const quantity = item.quantity || 1;
+          const priceIncrease = Math.floor(allocation / quantity);
+          
+          if (priceIncrease > 0) {
+            item.unit_price = (item.unit_price || 0) + priceIncrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= priceIncrease * quantity;
+          }
+        }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          item.unit_price = (item.unit_price || 0) + 1;
+          item.total_price = item.unit_price * quantity;
+          remainingDiff -= 1;
+          itemIndex++;
+        }
+      } else {
+        remainingDiff = Math.abs(remainingDiff);
+        
+        // Similar logic for reduction
+        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+          const item = testItems[i];
+          const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
+          const proportion = currentItemTotal / totalCurrentValue;
+          const allocation = Math.round(remainingDiff * proportion);
+          const quantity = item.quantity || 1;
+          const priceDecrease = Math.min(item.unit_price || 0, Math.floor(allocation / quantity));
+          
+          if (priceDecrease > 0) {
+            item.unit_price = (item.unit_price || 0) - priceDecrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= priceDecrease * quantity;
+          }
+        }
+
+        // Distribute any remaining reduction
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+          
+          if (currentPrice > 0) {
+            item.unit_price = currentPrice - 1;
+            item.total_price = item.unit_price * (item.quantity || 1);
+            remainingDiff -= 1;
+          }
+          itemIndex++;
+        }
+      }
+
+      const newTotal = calculateTotal(testItems);
+      if (Math.abs(newTotal - targetTotal) < 1) {
+        return testItems;
+      }
+      return null;
+    };
+
+    // Try strategies in order of preference
+    let bestResult = null;
+    let bestNiceEndings = 0;
+
+    // Try nice distribution first (prefer ending in 0)
+    const niceResult = tryNiceDistribution([...invoiceItems], difference);
+    if (niceResult) {
+      const niceEndings = hasNiceEndings(niceResult);
+      if (niceEndings > bestNiceEndings) {
+        bestResult = niceResult;
+        bestNiceEndings = niceEndings;
       }
     }
 
-    setInvoiceItems(updatedItems);
-    
-    toast({
-      title: "Prices Adjusted",
-      description: `Item prices have been adjusted by ${difference.toFixed(2)} DH to match the assurance total.`,
-    });
+    // Try equal distribution
+    const equalResult = tryEqualDistribution([...invoiceItems], difference);
+    if (equalResult) {
+      const niceEndings = hasNiceEndings(equalResult);
+      if (!bestResult || niceEndings > bestNiceEndings) {
+        bestResult = equalResult;
+        bestNiceEndings = niceEndings;
+      }
+    }
+
+    // Try weighted distribution as fallback
+    if (!bestResult) {
+      bestResult = tryWeightedDistribution([...invoiceItems], difference);
+    }
+
+    if (bestResult) {
+      setInvoiceItems(bestResult);
+      const finalTotal = calculateTotal(bestResult);
+      const niceEndingsCount = hasNiceEndings(bestResult);
+      
+      toast({
+        title: "Prices Adjusted",
+        description: `Item prices adjusted to match assurance total (${finalTotal.toFixed(0)} DH)${niceEndingsCount > 0 ? ` with ${niceEndingsCount} items ending in 0` : ''}.`,
+      });
+    } else {
+      toast({
+        title: "Adjustment Failed",
+        description: "Could not adjust prices to match assurance total while maintaining whole numbers.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Auto-calculate status based on balance
