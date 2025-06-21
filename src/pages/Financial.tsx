@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,7 @@ interface Purchase {
 
 const Financial = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -586,8 +588,8 @@ const Financial = () => {
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Financial Overview</h1>
-          <p className="text-gray-600 mt-1">Comprehensive business financial analytics & profitability tracking</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('financialOverview')}</h1>
+          <p className="text-gray-600 mt-1">{t('comprehensiveBusinessAnalytics')}</p>
         </div>
       </div>
 
@@ -596,13 +598,13 @@ const Financial = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Date Range Filter
+            {t('dateRangeFilter')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateFrom">From Date</Label>
+              <Label htmlFor="dateFrom">{t('fromDate')}</Label>
               <Input
                 id="dateFrom"
                 type="date"
@@ -612,7 +614,7 @@ const Financial = () => {
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateTo">To Date</Label>
+              <Label htmlFor="dateTo">{t('toDate')}</Label>
               <Input
                 id="dateTo"
                 type="date"
@@ -627,21 +629,21 @@ const Financial = () => {
                 onClick={() => handleQuickDateRange('thisMonth')}
                 className="text-xs"
               >
-                This Month
+                {t('thisMonth')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleQuickDateRange('lastMonth')}
                 className="text-xs"
               >
-                Last Month
+                {t('lastMonth')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleQuickDateRange('thisYear')}
                 className="text-xs"
               >
-                This Year
+                {t('thisYear')}
               </Button>
             </div>
           </div>
@@ -654,7 +656,7 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Available Cash</p>
+                <p className="text-sm font-medium text-green-600">{t('availableCash')}</p>
                 <p className={cn(
                   "text-2xl font-bold",
                   financialMetrics.availableCash >= 0 ? "text-green-900" : "text-red-600"
@@ -662,7 +664,7 @@ const Financial = () => {
                   {financialMetrics.availableCash.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-green-600 mt-1">
-                  Net Flow: {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
+                  {t('netFlow')}: {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
                 </p>
               </div>
               <Wallet className="h-8 w-8 text-green-600" />
@@ -674,12 +676,12 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Revenue</p>
+                <p className="text-sm font-medium text-blue-600">{t('totalRevenue')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {financialMetrics.totalRevenue.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Collected: {financialMetrics.collectionRate.toFixed(1)}%
+                  {t('collected')}: {financialMetrics.collectionRate.toFixed(1)}%
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -691,7 +693,7 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Net Profit (Paid)</p>
+                <p className="text-sm font-medium text-purple-600">{t('netProfitPaid')}</p>
                 <p className={cn(
                   "text-2xl font-bold",
                   financialMetrics.netProfitAfterPaidExpenses >= 0 ? "text-green-600" : "text-red-600"
@@ -699,7 +701,7 @@ const Financial = () => {
                   {financialMetrics.netProfitAfterPaidExpenses.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-purple-600 mt-1">
-                  Margin: {financialMetrics.netMarginPaid.toFixed(1)}%
+                  {t('margin')}: {financialMetrics.netMarginPaid.toFixed(1)}%
                 </p>
               </div>
               <Calculator className="h-8 w-8 text-purple-600" />
@@ -711,7 +713,7 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-indigo-600">Net Profit (Total)</p>
+                <p className="text-sm font-medium text-indigo-600">{t('netProfitTotal')}</p>
                 <p className={cn(
                   "text-2xl font-bold",
                   financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
@@ -719,7 +721,7 @@ const Financial = () => {
                   {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-indigo-600 mt-1">
-                  Margin: {financialMetrics.netMarginTotal.toFixed(1)}%
+                  {t('margin')}: {financialMetrics.netMarginTotal.toFixed(1)}%
                 </p>
               </div>
               <Target className="h-8 w-8 text-indigo-600" />
@@ -731,12 +733,12 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600">Unpaid Expenses</p>
+                <p className="text-sm font-medium text-orange-600">{t('unpaidExpenses')}</p>
                 <p className="text-2xl font-bold text-orange-900">
                   {financialMetrics.totalExpensesUnpaid.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-orange-600 mt-1">
-                  Outstanding Liabilities
+                  {t('outstandingLiabilities')}
                 </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-600" />
@@ -748,12 +750,12 @@ const Financial = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">Product Costs</p>
+                <p className="text-sm font-medium text-red-600">{t('productCosts')}</p>
                 <p className="text-2xl font-bold text-red-900">
                   {financialMetrics.totalProductCosts.toFixed(2)} DH
                 </p>
                 <p className="text-xs text-red-600 mt-1">
-                  Total COGS
+                  {t('totalCOGS')}
                 </p>
               </div>
               <Package className="h-8 w-8 text-red-600" />
@@ -767,10 +769,10 @@ const Financial = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Comprehensive Receipt Items Analysis
+            {t('comprehensiveReceiptItemsAnalysis')}
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">
-            Detailed analysis of all sold items with advanced filtering capabilities
+            {t('detailedAnalysisAllSoldItems')}
           </p>
         </CardHeader>
         <CardContent>
