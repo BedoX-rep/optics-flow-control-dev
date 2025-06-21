@@ -14,6 +14,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import AddInvoiceDialog from '@/components/AddInvoiceDialog';
+import EditInvoiceDialog from '@/components/EditInvoiceDialog';
 import InvoiceDetailsDialog from '@/components/InvoiceDetailsDialog';
 import { Invoice } from '@/integrations/supabase/types';
 
@@ -288,6 +289,12 @@ const Invoices = () => {
       <AddInvoiceDialog
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
+      />
+
+      <EditInvoiceDialog
+        isOpen={!!editingInvoice}
+        onClose={() => setEditingInvoice(null)}
+        invoice={editingInvoice}
       />
 
       <InvoiceDetailsDialog
