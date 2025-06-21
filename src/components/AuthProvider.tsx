@@ -263,8 +263,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const exitAdminSession = () => {
-    setSessionRole('Store Staff');
-    localStorage.removeItem('sessionRole');
+    updateSessionRole('Store Staff');
   };
 
   return (

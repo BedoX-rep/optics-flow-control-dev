@@ -83,7 +83,7 @@ const MainNav = () => {
 
       return permissions[item.permission as keyof typeof permissions];
     });
-  }, [navigation, permissions, sessionRole]);
+  }, [navigation, permissions, sessionRole, language]); // Add language to force re-render
 
   // Filter administration navigation
   const filteredAdministrationNavigation = useMemo(() => {
@@ -102,7 +102,7 @@ const MainNav = () => {
 
       return permissions[item.permission as keyof typeof permissions];
     });
-  }, [administrationNavigation, permissions, sessionRole]);
+  }, [administrationNavigation, permissions, sessionRole, language]); // Add language to force re-render
 
   // Check if any administration page is currently active
   const isAdministrationActive = useMemo(() => {
