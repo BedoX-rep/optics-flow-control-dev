@@ -456,7 +456,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Invoice & Client Details</CardTitle>
+              <CardTitle>{t('invoiceAndClientDetails') || 'Détails Facture & Client'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Invoice Details */}
@@ -732,7 +732,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
-                Payment & Assurance Details
+                {t('paymentAndAssuranceDetails') || 'Détails Paiement & Assurance'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -776,24 +776,24 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
 
               {/* Payment Summary */}
               <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold mb-3">Payment Summary</h4>
+                <h4 className="font-semibold mb-3">{t('paymentSummary') || 'Résumé de Paiement'}</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Items Total:</span>
+                    <span>{t('itemsTotal') || 'Total Articles'}:</span>
                     <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Assurance Total:</span>
+                    <span>{t('assuranceTotal') || 'Total Assurance'}:</span>
                     <span className={`font-medium ${isAssuranceMismatch ? 'text-red-600' : 'text-green-600'}`}>
                       {invoiceData.assurance_total.toFixed(2)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Advance Payment:</span>
+                    <span>{t('advancePayment') || 'Paiement d\'Avance'}:</span>
                     <span className="font-medium">{invoiceData.advance_payment.toFixed(2)} DH</span>
                   </div>
                   <div className="border-t pt-2 flex justify-between text-lg">
-                    <span className="font-bold">Balance Due:</span>
+                    <span className="font-bold">{t('balanceDue') || 'Solde Dû'}:</span>
                     <span className="font-bold text-blue-600">{invoiceData.balance.toFixed(2)} DH</span>
                   </div>
                 </div>

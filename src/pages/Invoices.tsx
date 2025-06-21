@@ -213,26 +213,21 @@ const Invoices = () => {
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">{t('invoices') || 'Invoices'}</h1>
-        </div>
         <Button
           onClick={() => setIsAddDialogOpen(true)}
-          className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
+          className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200 px-6 py-3 text-lg"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          {t('addInvoice') || 'Add Invoice'}
+          <Plus className="h-5 w-5 mr-2" />
+          {t('addInvoice') || 'Ajouter Facture'}
         </Button>
-      </div>
-
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative min-w-[280px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
               type="text" 
-              placeholder={t('searchInvoices') || 'Search invoices...'} 
-              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+              placeholder={t('searchInvoices') || 'Rechercher factures...'} 
+              className="pl-9 bg-white border-gray-200 rounded-xl focus-visible:ring-primary shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -242,18 +237,69 @@ const Invoices = () => {
             value={statusFilter}
             onValueChange={(value) => setStatusFilter(value)}
           >
-            <SelectTrigger className="w-[140px] border-2 shadow-md rounded-xl">
-              <SelectValue placeholder={t('status') || 'Status'} />
+            <SelectTrigger className="w-[160px] border-2 shadow-md rounded-xl bg-white">
+              <SelectValue placeholder={t('status') || 'Statut'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('allStatuses') || 'All Statuses'}</SelectItem>
-              <SelectItem value="Draft">{t('draft') || 'Draft'}</SelectItem>
-              <SelectItem value="Pending">{t('pending') || 'Pending'}</SelectItem>
-              <SelectItem value="Paid">{t('paid') || 'Paid'}</SelectItem>
-              <SelectItem value="Overdue">{t('overdue') || 'Overdue'}</SelectItem>
+              <SelectItem value="all">{t('allStatuses') || 'Tous les Statuts'}</SelectItem>
+              <SelectItem value="Draft">{t('draft') || 'Brouillon'}</SelectItem>
+              <SelectItem value="Pending">{t('pending') || 'En Attente'}</SelectItem>
+              <SelectItem value="Paid">{t('paid') || 'Payé'}</SelectItem>
+              <SelectItem value="Overdue">{t('overdue') || 'En Retard'}</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">{t('totalInvoices') || 'Total Factures'}</p>
+                <p className="text-2xl font-bold">{invoices.length}</p>
+              </div>
+              <FileText className="h-8 w-8 text-blue-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">{t('paidInvoices') || 'Factures Payées'}</p>
+                <p className="text-2xl font-bold">{invoices.filter(i => i.status === 'Paid').length}</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100 text-sm">{t('pendingInvoices') || 'Factures En Attente'}</p>
+                <p className="text-2xl font-bold">{invoices.filter(i => i.status === 'Pending').length}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-yellow-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">{t('totalAmount') || 'Montant Total'}</p>
+                <p className="text-2xl font-bold">{invoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(0)} DH</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-purple-200" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">

@@ -3480,6 +3480,74 @@ const allTranslations: Translations = {
     en: 'Overdue',
     fr: 'En Retard',
     ar: 'متأخر'
+  },
+  totalInvoices: {
+    en: 'Total Invoices',
+    fr: 'Total Factures'
+  },
+  paidInvoices: {
+    en: 'Paid Invoices',
+    fr: 'Factures Payées'
+  },
+  pendingInvoices: {
+    en: 'Pending Invoices',
+    fr: 'Factures En Attente'
+  },
+  totalAmount: {
+    en: 'Total Amount',
+    fr: 'Montant Total'
+  },
+  invoiceDetails: {
+    en: 'Invoice Details',
+    fr: 'Détails de la Facture'
+  },
+  invoiceAndClientDetails: {
+    en: 'Invoice & Client Details',
+    fr: 'Détails Facture & Client'
+  },
+  paymentAndAssuranceDetails: {
+    en: 'Payment & Assurance Details',
+    fr: 'Détails Paiement & Assurance'
+  },
+  paymentSummary: {
+    en: 'Payment Summary',
+    fr: 'Résumé de Paiement'
+  },
+  itemsTotal: {
+    en: 'Items Total',
+    fr: 'Total Articles'
+  },
+  assuranceTotal: {
+    en: 'Assurance Total',
+    fr: 'Total Assurance'
+  },
+  balanceDue: {
+    en: 'Balance Due',
+    fr: 'Solde Dû'
+  },
+  editInvoice: {
+    en: 'Edit Invoice',
+    fr: 'Modifier Facture'
+  },
+  updateInvoice: {
+    en: 'Update Invoice',
+    fr: 'Mettre à Jour Facture'
+  },
+  clientAssurance: {
+    en: 'Client Assurance',
+    fr: 'Assurance Client'
+  },
+  prescription: {
+    en: 'Prescription',
+    fr: 'Prescription'
+  },
+  add: {
+    en: 'ADD',
+    fr: 'ADD'
+  },
+  noItemsAdded: {
+    en: 'No items added yet',
+    fr: 'Aucun article ajouté'
   }
 };
 
