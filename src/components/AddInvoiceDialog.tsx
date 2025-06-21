@@ -55,6 +55,16 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const [isLoading, setIsLoading] = useState(false);
   const [showAssuranceAlert, setShowAssuranceAlert] = useState(false);
 
+  // Category options for items
+  const CATEGORY_OPTIONS = [
+    'Single Vision Lenses',
+    'Progressive Lenses', 
+    'Frames',
+    'Sunglasses',
+    'Contact Lenses',
+    'Accessories'
+  ];
+
   // Fetch receipts with full details for data copying
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
@@ -182,7 +192,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         description: '',
         quantity: item.quantity || 1,
         unit_price: item.price || 0,
-        total_price: (item.quantity || 1) * (item.price || 0)
+        total_price: (item.quantity || 1) * (item.price || 0),
+        item_category: item.product?.category || 'Single Vision Lenses'
       })) || [];
 
       setInvoiceItems(items);
@@ -198,7 +209,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       description: '',
       quantity: 1,
       unit_price: 0,
-      total_price: 0
+      total_price: 0,
+      item_category: 'Single Vision Lenses'
     }]);
     // Reset original prices when items change
     setOriginalPrices({});
@@ -231,6 +243,12 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Calculate totals
   const subtotal = invoiceItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
   const total = subtotal;
+
+  // Calculate purchase type from unique categories
+  const getPurchaseType = () => {
+    const uniqueCategories = [...new Set(invoiceItems.map(item => item.item_category).filter(Boolean))];
+    return uniqueCategories.join(' + ');
+  };
 
   // Check if assurance total matches items total
   const isAssuranceMismatch = Math.abs(invoiceData.assurance_total - subtotal) > 0.01;
@@ -750,6 +768,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           due_date: invoiceData.due_date || null,
           status: finalStatus,
           notes: invoiceData.notes,
+          purchase_type: getPurchaseType(),
           right_eye_sph: prescriptionData.right_eye_sph ? parseFloat(prescriptionData.right_eye_sph) : null,
           right_eye_cyl: prescriptionData.right_eye_cyl ? parseFloat(prescriptionData.right_eye_cyl) : null,
           right_eye_axe: prescriptionData.right_eye_axe ? parseInt(prescriptionData.right_eye_axe) : null,
@@ -771,7 +790,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         description: item.description || '',
         quantity: item.quantity || 1,
         unit_price: item.unit_price || 0,
-        total_price: item.total_price || 0
+        total_price: item.total_price || 0,
+        item_category: item.item_category || 'Single Vision Lenses'
       }));
 
       const { error: itemsError } = await supabase
@@ -1077,7 +1097,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   <Card key={index} className="border-l-4 border-l-blue-500">
                     <CardContent className="p-4">
                       <div className="grid grid-cols-12 gap-3 items-end">
-                        <div className="col-span-4">
+                        <div className="col-span-3">
                           <Label className="text-sm">{t('productName') || 'Product Name'}</Label>
                           <Input
                             value={item.product_name || ''}
@@ -1085,7 +1105,25 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                             placeholder={t('productName') || 'Product Name'}
                           />
                         </div>
-                        <div className="col-span-3">
+                        <div className="col-span-2">
+                          <Label className="text-sm">{t('category') || 'Category'}</Label>
+                          <Select
+                            value={item.item_category || 'Single Vision Lenses'}
+                            onValueChange={(value) => updateItem(index, 'item_category', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORY_OPTIONS.map(category => (
+                                <SelectItem key={category} value={category}>
+                                  {t(category.toLowerCase().replace(/\s+/g, '')) || category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-2">
                           <Label className="text-sm">{t('description') || 'Description'}</Label>
                           <Input
                             value={item.description || ''}

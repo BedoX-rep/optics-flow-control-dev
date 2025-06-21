@@ -283,11 +283,11 @@ const productTranslations: Translations = {
     fr: 'Auto'
   },
   // Category options
-  singleVisionLenses: {
+  singlevisionlenses: {
     en: 'Single Vision Lenses',
     fr: 'Verres de Vision Simple'
   },
-  progressiveLenses: {
+  progressivelenses: {
     en: 'Progressive Lenses',
     fr: 'Verres Progressifs'
   },
@@ -299,13 +299,21 @@ const productTranslations: Translations = {
     en: 'Sunglasses',
     fr: 'Lunettes de Soleil'
   },
-  contactLenses: {
+  contactlenses: {
     en: 'Contact Lenses',
     fr: 'Lentilles de Contact'
   },
   accessories: {
     en: 'Accessories',
     fr: 'Accessoires'
+  },
+  category: {
+    en: 'Category',
+    fr: 'Catégorie'
+  },
+  purchaseType: {
+    en: 'Purchase Type',
+    fr: 'Type d\'Achat'
   },
   // Treatment options
   white: {
@@ -1132,7 +1140,7 @@ const receiptTranslations: Translations = {
     fr: 'Le statut d\'appel a été mis à jour vers'
   },
   receiptDeleted: {
-    en: 'Receipt Deleted',
+    en: 'ReceiptDeleted',
     fr: 'Reçu Supprimé'
   },
   receiptDeletedSuccessfully: {

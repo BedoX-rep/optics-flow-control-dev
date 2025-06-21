@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Printer, AlertTriangle, Building2, Phone, MapPin, FileText, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PrintInvoiceDialogProps {
   isOpen: boolean;
@@ -34,10 +35,11 @@ interface InvoiceItem {
   name: string;
   quantity: number;
   price: number;
+  category: string;
 }
 
 const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose, invoice }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -49,6 +51,17 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     notes: ''
   });
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  
+  // Category options for items
+  const CATEGORY_OPTIONS = [
+    'Single Vision Lenses',
+    'Progressive Lenses', 
+    'Frames',
+    'Sunglasses',
+    'Contact Lenses',
+    'Accessories'
+  ];
+
   const [prescriptionData, setPrescriptionData] = useState({
     right_eye_sph: '',
     right_eye_cyl: '',
@@ -112,7 +125,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
         id: item.id,
         name: item.product_name || '',
         quantity: item.quantity || 0,
-        price: item.unit_price || 0
+        price: item.unit_price || 0,
+        category: item.item_category || 'Single Vision Lenses'
       })) || [];
       setInvoiceItems(items);
     }
@@ -150,6 +164,11 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const calculateTotal = () => {
     return invoiceItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  };
+
+  const getPurchaseType = () => {
+    const uniqueCategories = [...new Set(invoiceItems.map(item => item.category).filter(Boolean))];
+    return uniqueCategories.join(' + ');
   };
 
   const updateInvoiceItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
@@ -260,6 +279,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     const total = calculateTotal();
     const currentDate = format(new Date(), 'dd/MM/yyyy');
     const logoUrl = userInfo?.business_logo || '/placeholder.svg';
+    const purchaseType = getPurchaseType();
+    const isFrench = language === 'fr';
 
     return `
       <!DOCTYPE html>
@@ -315,24 +336,25 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
           <div class="invoice-info">
             <div class="invoice-details">
-              <h3>Invoice Details</h3>
-              <p><strong>Invoice #:</strong> ${invoiceData.invoice_number}</p>
-              <p><strong>Date:</strong> ${currentDate}</p>
+              <h3>${isFrench ? 'Détails de la Facture' : 'Invoice Details'}</h3>
+              <p><strong>${isFrench ? 'Facture #:' : 'Invoice #:'}</strong> ${invoiceData.invoice_number}</p>
+              <p><strong>${isFrench ? 'Date:' : 'Date:'}</strong> ${currentDate}</p>
+              ${purchaseType ? `<p><strong>${isFrench ? 'Type d\'Achat:' : 'Purchase Type:'}</strong> ${purchaseType}</p>` : ''}
             </div>
             <div class="client-details">
-              <h3>Client Details</h3>
-              <p><strong>Name:</strong> ${invoiceData.client_name}</p>
-              ${invoiceData.client_phone ? `<p><strong>Phone:</strong> ${invoiceData.client_phone}</p>` : ''}
+              <h3>${isFrench ? 'Détails du Client' : 'Client Details'}</h3>
+              <p><strong>${isFrench ? 'Nom:' : 'Name:'}</strong> ${invoiceData.client_name}</p>
+              ${invoiceData.client_phone ? `<p><strong>${isFrench ? 'Téléphone:' : 'Phone:'}</strong> ${invoiceData.client_phone}</p>` : ''}
             </div>
           </div>
 
           ${Object.values(prescriptionData).some(val => val) ? `
             <div class="prescription">
-              <h3>Prescription Details</h3>
+              <h3>${isFrench ? 'Détails de la Prescription' : 'Prescription Details'}</h3>
               <table class="prescription-table">
                 <thead>
                   <tr>
-                    <th>Eye</th>
+                    <th>${isFrench ? 'Œil' : 'Eye'}</th>
                     <th>SPH</th>
                     <th>CYL</th>
                     <th>AXE</th>
@@ -340,20 +362,20 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 </thead>
                 <tbody>
                   <tr>
-                    <td><strong>Right Eye</strong></td>
+                    <td><strong>${isFrench ? 'Œil Droit' : 'Right Eye'}</strong></td>
                     <td>${prescriptionData.right_eye_sph || '-'}</td>
                     <td>${prescriptionData.right_eye_cyl || '-'}</td>
                     <td>${prescriptionData.right_eye_axe || '-'}</td>
                   </tr>
                   <tr>
-                    <td><strong>Left Eye</strong></td>
+                    <td><strong>${isFrench ? 'Œil Gauche' : 'Left Eye'}</strong></td>
                     <td>${prescriptionData.left_eye_sph || '-'}</td>
                     <td>${prescriptionData.left_eye_cyl || '-'}</td>
                     <td>${prescriptionData.left_eye_axe || '-'}</td>
                   </tr>
                   ${prescriptionData.add_value ? `
                     <tr>
-                      <td colspan="4"><strong>ADD Value:</strong> ${prescriptionData.add_value}</td>
+                      <td colspan="4"><strong>${isFrench ? 'Valeur ADD:' : 'ADD Value:'}</strong> ${prescriptionData.add_value}</td>
                     </tr>
                   ` : ''}
                 </tbody>
@@ -365,9 +387,10 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <thead>
               <tr>
                 <th>#</th>
-                <th>Item Name</th>
-                <th class="number">Quantity</th>
-                <th class="price">Unit Price</th>
+                <th>${isFrench ? 'Nom de l\'Article' : 'Item Name'}</th>
+                <th>${isFrench ? 'Catégorie' : 'Category'}</th>
+                <th class="number">${isFrench ? 'Quantité' : 'Quantity'}</th>
+                <th class="price">${isFrench ? 'Prix Unitaire' : 'Unit Price'}</th>
                 <th class="price">Total</th>
               </tr>
             </thead>
@@ -376,6 +399,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 <tr>
                   <td class="number">${index + 1}</td>
                   <td>${item.name}</td>
+                  <td>${item.category}</td>
                   <td class="number">${item.quantity}</td>
                   <td class="price">${item.price.toFixed(2)} DH</td>
                   <td class="price">${(item.quantity * item.price).toFixed(2)} DH</td>
@@ -386,13 +410,13 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
           <div class="total-section">
             <div class="total-final">
-              <strong>Total Amount: ${total.toFixed(2)} DH</strong>
+              <strong>${isFrench ? 'Montant Total:' : 'Total Amount:'} ${total.toFixed(2)} DH</strong>
             </div>
           </div>
 
           ${invoiceData.notes ? `
             <div class="notes">
-              <h3>Notes</h3>
+              <h3>${isFrench ? 'Notes' : 'Notes'}</h3>
               <p>${invoiceData.notes}</p>
             </div>
           ` : ''}
@@ -562,9 +586,9 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <CardContent>
               <div className="space-y-3">
                 {invoiceItems.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-4 gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div key={item.id} className="grid grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
                     <div>
-                      <Label className="text-xs text-gray-600">Item Name</Label>
+                      <Label className="text-xs text-gray-600">{t('productName') || 'Item Name'}</Label>
                       <Input
                         value={item.name}
                         onChange={(e) => updateInvoiceItem(index, 'name', e.target.value)}
@@ -572,7 +596,25 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-600">Quantity</Label>
+                      <Label className="text-xs text-gray-600">{t('category') || 'Category'}</Label>
+                      <Select
+                        value={item.category}
+                        onValueChange={(value) => updateInvoiceItem(index, 'category', value)}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORY_OPTIONS.map(category => (
+                            <SelectItem key={category} value={category}>
+                              {t(category.toLowerCase().replace(/\s+/g, '')) || category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-600">{t('quantity') || 'Quantity'}</Label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -581,7 +623,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-600">Unit Price (DH)</Label>
+                      <Label className="text-xs text-gray-600">{t('unitPrice') || 'Unit Price'} (DH)</Label>
                       <Input
                         type="number"
                         step="0.01"
