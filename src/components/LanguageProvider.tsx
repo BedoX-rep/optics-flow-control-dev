@@ -2271,8 +2271,7 @@ const subscriptionsTranslations: Translations = {
     fr: 'Un administrateur vous contactera bientôt au sujet de votre abonnement.'
   },
   subscriptionUpdated: {
-    en:```text
-'Subscription Updated',
+    en: 'Subscription Updated',
     fr: 'Abonnement Mis à Jour'
   },
   nowSubscribedTo: {
