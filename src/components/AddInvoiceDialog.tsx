@@ -264,28 +264,35 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       return items.filter(item => (item.unit_price || 0) % 10 === 0).length;
     };
 
+    // Helper function to check if prices end in double 0s (100, 200, etc.)
+    const hasDoubleZeroEndings = (items: Partial<InvoiceItem>[]) => {
+      return items.filter(item => (item.unit_price || 0) % 100 === 0 && (item.unit_price || 0) > 0).length;
+    };
+
     // Helper function to check if we've exceeded time limit
     const isTimeUp = () => Date.now() - startTime > TIME_LIMIT;
 
     // Helper function to evaluate solution quality
     const evaluateSolution = (items: Partial<InvoiceItem>[] | null) => {
-      if (!items) return { isValid: false, score: -1, niceEndings: 0, exactMatch: false };
+      if (!items) return { isValid: false, score: -1, niceEndings: 0, doubleZeroEndings: 0, exactMatch: false };
       
       const total = calculateTotal(items);
       const exactMatch = Math.abs(total - targetTotal) < 0.01;
       const niceEndings = hasNiceEndings(items);
+      const doubleZeroEndings = hasDoubleZeroEndings(items);
       const hasDecimals = items.some(item => (item.unit_price || 0) % 1 !== 0);
       
       return {
         isValid: exactMatch && !hasDecimals,
         exactMatch,
         niceEndings,
-        score: exactMatch ? (niceEndings * 10 + (hasDecimals ? 0 : 5)) : 0,
+        doubleZeroEndings,
+        score: exactMatch ? (doubleZeroEndings * 50 + niceEndings * 10 + (hasDecimals ? 0 : 5)) : 0,
         items
       };
     };
 
-    // Strategy 1: Try to adjust items to end in multiples of 10
+    // Strategy 1: Try to adjust items to end in multiples of 100, then 10
     const tryNiceDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
       
@@ -293,17 +300,29 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       let remainingDiff = diff;
 
       if (diff > 0) {
-        // Increase prices - try to round up to nearest 10
+        // Increase prices - try to round up to nearest 100 first, then 10
         for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const currentPrice = testItems[i].unit_price || 0;
           const quantity = testItems[i].quantity || 1;
-          const nextTen = Math.ceil(currentPrice / 10) * 10;
-          const increase = Math.max(1, nextTen - currentPrice);
           
-          if (increase * quantity <= remainingDiff) {
-            testItems[i].unit_price = currentPrice + increase;
+          // Try rounding to nearest 100 first
+          const nextHundred = Math.ceil(currentPrice / 100) * 100;
+          const hundredIncrease = Math.max(1, nextHundred - currentPrice);
+          
+          if (hundredIncrease * quantity <= remainingDiff) {
+            testItems[i].unit_price = currentPrice + hundredIncrease;
             testItems[i].total_price = testItems[i].unit_price * quantity;
-            remainingDiff -= increase * quantity;
+            remainingDiff -= hundredIncrease * quantity;
+          } else {
+            // Fall back to rounding to nearest 10
+            const nextTen = Math.ceil(currentPrice / 10) * 10;
+            const tenIncrease = Math.max(1, nextTen - currentPrice);
+            
+            if (tenIncrease * quantity <= remainingDiff) {
+              testItems[i].unit_price = currentPrice + tenIncrease;
+              testItems[i].total_price = testItems[i].unit_price * quantity;
+              remainingDiff -= tenIncrease * quantity;
+            }
           }
         }
 
@@ -323,19 +342,31 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           itemIndex++;
         }
       } else {
-        // Decrease prices - try to round down to nearest 10
+        // Decrease prices - try to round down to nearest 100 first, then 10
         remainingDiff = Math.abs(remainingDiff);
         
         for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const currentPrice = testItems[i].unit_price || 0;
           const quantity = testItems[i].quantity || 1;
-          const prevTen = Math.floor(currentPrice / 10) * 10;
-          const decrease = Math.min(currentPrice, currentPrice - prevTen);
           
-          if (decrease > 0 && decrease * quantity <= remainingDiff) {
-            testItems[i].unit_price = Math.max(0, currentPrice - decrease);
+          // Try rounding down to nearest 100 first
+          const prevHundred = Math.floor(currentPrice / 100) * 100;
+          const hundredDecrease = Math.min(currentPrice, currentPrice - prevHundred);
+          
+          if (hundredDecrease > 0 && hundredDecrease * quantity <= remainingDiff) {
+            testItems[i].unit_price = Math.max(0, currentPrice - hundredDecrease);
             testItems[i].total_price = testItems[i].unit_price * quantity;
-            remainingDiff -= decrease * quantity;
+            remainingDiff -= hundredDecrease * quantity;
+          } else {
+            // Fall back to rounding down to nearest 10
+            const prevTen = Math.floor(currentPrice / 10) * 10;
+            const tenDecrease = Math.min(currentPrice, currentPrice - prevTen);
+            
+            if (tenDecrease > 0 && tenDecrease * quantity <= remainingDiff) {
+              testItems[i].unit_price = Math.max(0, currentPrice - tenDecrease);
+              testItems[i].total_price = testItems[i].unit_price * quantity;
+              remainingDiff -= tenDecrease * quantity;
+            }
           }
         }
 
@@ -580,7 +611,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       
       toast({
         title: "Prices Adjusted Successfully",
-        description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH)${bestSolution.niceEndings > 0 ? ` with ${bestSolution.niceEndings} items ending in 0` : ''}.`,
+        description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH)${bestSolution.doubleZeroEndings > 0 ? ` with ${bestSolution.doubleZeroEndings} items ending in 00` : ''}${bestSolution.niceEndings > 0 ? ` and ${bestSolution.niceEndings} items ending in 0` : ''}.`,
       });
     } else if (solutions.length > 0) {
       // Use the best available solution even if not perfect
