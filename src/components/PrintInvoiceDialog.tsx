@@ -276,6 +276,21 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     }
   };
 
+  const translateCategory = (category: string) => {
+    if (!isFrench) return category;
+    
+    const translations: { [key: string]: string } = {
+      'Single Vision Lenses': 'Verres Unifocaux',
+      'Progressive Lenses': 'Verres Progressifs',
+      'Frames': 'Montures',
+      'Sunglasses': 'Lunettes de Soleil',
+      'Contact Lenses': 'Lentilles de Contact',
+      'Accessories': 'Accessoires'
+    };
+    
+    return translations[category] || category;
+  };
+
   const generatePrintContent = () => {
     const total = calculateTotal();
     const currentDate = format(new Date(), 'dd/MM/yyyy');
@@ -347,7 +362,6 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <div class="client-details">
               <h3>${isFrench ? 'Détails du Client' : 'Client Details'}</h3>
               <p><strong>${isFrench ? 'Nom:' : 'Name:'}</strong> ${invoiceData.client_name}</p>
-              ${invoiceData.client_phone ? `<p><strong>${isFrench ? 'Téléphone:' : 'Phone:'}</strong> ${invoiceData.client_phone}</p>` : ''}
             </div>
           </div>
 
@@ -402,7 +416,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 <tr>
                   <td class="number">${index + 1}</td>
                   <td>${item.name}</td>
-                  <td>${item.category}</td>
+                  <td>${translateCategory(item.category)}</td>
                   <td class="number">${item.quantity}</td>
                   <td class="price">${item.price.toFixed(2)} DH</td>
                   <td class="price">${(item.quantity * item.price).toFixed(2)} DH</td>
