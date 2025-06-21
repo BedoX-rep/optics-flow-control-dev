@@ -16,25 +16,29 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
+import { useLanguage } from './LanguageProvider';
 import { Avatar } from '@/components/ui/avatar';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
-  { name: 'Products', href: '/products', icon: Package, permission: 'can_manage_products' },
-  { name: 'Clients', href: '/clients', icon: Users, permission: 'can_manage_clients' },
-  { name: 'Receipts', href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
-  { name: 'New Receipt', href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
-  { name: 'Subscriptions', href: '/subscriptions', icon: Bell, permission: null }, // Always visible
-  { name: 'Purchases', href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
-  { name: 'Financial', href: '/financial', icon: Calculator, permission: 'can_view_financial' },
-  { name: 'Access', href: '/access', icon: Shield, permission: 'admin_session' },
-  { name: 'Settings', href: '/optician-settings', icon: Settings, permission: 'admin_session' },
+const getNavigation = (t: any) => [
+  { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
+  { name: t('products'), href: '/products', icon: Package, permission: 'can_manage_products' },
+  { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
+  { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
+  { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
+  { name: t('subscriptions'), href: '/subscriptions', icon: Bell, permission: null }, // Always visible
+  { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
+  { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
+  { name: t('access'), href: '/access', icon: Shield, permission: 'admin_session' },
+  { name: t('settings'), href: '/optician-settings', icon: Settings, permission: 'admin_session' },
 ];
 
 const MainNav = () => {
   const { user, subscription, permissions, sessionRole } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+  
+  const navigation = getNavigation(t);
 
   useEffect(() => {
     const handleResize = () => {

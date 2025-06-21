@@ -2440,6 +2440,50 @@ const settingsTranslations: Translations = {
   }
 };
 
+const navigationTranslations: Translations = {
+  // Navigation menu items
+  dashboard: {
+    en: 'Dashboard',
+    fr: 'Tableau de Bord'
+  },
+  products: {
+    en: 'Products',
+    fr: 'Produits'
+  },
+  clients: {
+    en: 'Clients',
+    fr: 'Clients'
+  },
+  receipts: {
+    en: 'Receipts',
+    fr: 'Reçus'
+  },
+  newReceipt: {
+    en: 'New Receipt',
+    fr: 'Nouveau Reçu'
+  },
+  subscriptions: {
+    en: 'Subscriptions',
+    fr: 'Abonnements'
+  },
+  purchases: {
+    en: 'Purchases',
+    fr: 'Achats'
+  },
+  financial: {
+    en: 'Financial',
+    fr: 'Financier'
+  },
+  access: {
+    en: 'Access',
+    fr: 'Accès'
+  },
+  settings: {
+    en: 'Settings',
+    fr: 'Paramètres'
+  }
+};
+
 const accessTranslations: Translations = {
   // Access page UI
   accessManagement: {
@@ -3164,6 +3208,7 @@ const allTranslations: Translations = {
   ...receiptTranslations,
   ...clientsTranslations,
   ...purchasesTranslations,
+  ...navigationTranslations,
   ...subscriptionsTranslations,
   ...settingsTranslations,
   ...accessTranslations,
