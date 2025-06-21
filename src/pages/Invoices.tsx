@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2 } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import AddInvoiceDialog from '@/components/AddInvoiceDialog';
 import EditInvoiceDialog from '@/components/EditInvoiceDialog';
 import InvoiceDetailsDialog from '@/components/InvoiceDetailsDialog';
+import PrintInvoiceDialog from '@/components/PrintInvoiceDialog';
 import { Invoice } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
 
@@ -22,12 +23,14 @@ const InvoiceCard = ({
   invoice, 
   onView, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onPrint 
 }: {
   invoice: Invoice;
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onPrint: () => void;
 }) => {
   const { t } = useLanguage();
 
@@ -104,6 +107,14 @@ const InvoiceCard = ({
                     className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
                   >
                     <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onPrint}
+                    className="h-7 w-7 hover:bg-green-100 hover:text-green-600"
+                  >
+                    <Printer className="h-3 w-3" />
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -223,6 +234,7 @@ const Invoices = () => {
   const [dateFilter, setDateFilter] = useState('all');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [printingInvoice, setPrintingInvoice] = useState<Invoice | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const fetchInvoices = async () => {
@@ -478,6 +490,7 @@ const Invoices = () => {
                 invoice={invoice}
                 onView={() => setSelectedInvoice(invoice)}
                 onEdit={() => setEditingInvoice(invoice)}
+                onPrint={() => setPrintingInvoice(invoice)}
                 onDelete={() => handleDelete(invoice.id)}
               />
             ))
@@ -502,6 +515,12 @@ const Invoices = () => {
         invoice={selectedInvoice}
         onEdit={setEditingInvoice}
         onDelete={handleDelete}
+      />
+
+      <PrintInvoiceDialog
+        isOpen={!!printingInvoice}
+        onClose={() => setPrintingInvoice(null)}
+        invoice={printingInvoice}
       />
     </div>
   );
