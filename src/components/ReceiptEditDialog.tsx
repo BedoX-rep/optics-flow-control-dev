@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { User, Eye, Package2, Receipt, Banknote, FileText, Search } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface ReceiptEditDialogProps {
 }
 
 const ProductSelector = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   
   const { data: products = [] } = useQuery({
@@ -53,7 +55,7 @@ const ProductSelector = () => {
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search products..."
+            placeholder={t('searchProducts')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -86,7 +88,7 @@ const ProductSelector = () => {
       ))}
       {products.length === 0 && (
         <div className="p-4 text-center text-gray-500 text-sm">
-          No products found
+          {t('noProductsFound')}
         </div>
       )}
     </>
@@ -95,6 +97,7 @@ const ProductSelector = () => {
 
 const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
@@ -258,8 +261,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       }
 
       toast({
-        title: "Success",
-        description: "Receipt updated successfully",
+        title: t('success'),
+        description: t('receiptUpdatedSuccessfully'),
       });
 
       queryClient.invalidateQueries(['receipts']);
@@ -267,8 +270,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     } catch (error) {
       console.error('Error updating receipt:', error);
       toast({
-        title: "Error",
-        description: "Failed to update receipt",
+        title: t('error'),
+        description: t('failedToUpdateReceipt'),
         variant: "destructive",
       });
     } finally {
@@ -288,7 +291,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
             <FileText className="h-5 w-5 text-primary" />
-            Edit Receipt
+            {t('editReceipt')}
           </DialogTitle>
         </DialogHeader>
 
@@ -298,18 +301,18 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <User className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Client Information</h3>
+                <h3 className="font-semibold">{t('clientInformation')}</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Name</Label>
+                  <Label>{t('name')}</Label>
                   <Input
                     value={formData.client_name}
                     onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>Phone</Label>
+                  <Label>{t('phone')}</Label>
                   <Input
                     value={formData.client_phone}
                     onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
@@ -324,11 +327,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Prescription Details</h3>
+                <h3 className="font-semibold">{t('prescriptionDetails')}</h3>
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-medium">Right Eye</h4>
+                  <h4 className="font-medium">{t('rightEye')}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label>SPH</Label>
@@ -354,7 +357,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <h4 className="font-medium">Left Eye</h4>
+                  <h4 className="font-medium">{t('leftEye')}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label>SPH</Label>
@@ -396,57 +399,57 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Receipt className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Order Status</h3>
+                  <h3 className="font-semibold">{t('orderStatus')}</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <Label>Delivery Status</Label>
+                    <Label>{t('deliveryStatus')}</Label>
                     <Select
                       value={formData.delivery_status}
                       onValueChange={(value) => setFormData({ ...formData, delivery_status: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder={t('selectStatus')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Undelivered">Undelivered</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Undelivered">{t('undelivered')}</SelectItem>
+                        <SelectItem value="Completed">{t('completed')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Order Type</Label>
+                    <Label>{t('orderType')}</Label>
                     <Select
                       value={formData.order_type || 'Unspecified'}
                       onValueChange={(value) => setFormData({ ...formData, order_type: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select order type" />
+                        <SelectValue placeholder={t('selectOrderType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Unspecified">Unspecified</SelectItem>
-                        <SelectItem value="Montage">Montage</SelectItem>
-                        <SelectItem value="Retoyage">Retoyage</SelectItem>
-                        <SelectItem value="Sell">Sell</SelectItem>
+                        <SelectItem value="Unspecified">{t('unspecified')}</SelectItem>
+                        <SelectItem value="Montage">{t('montage')}</SelectItem>
+                        <SelectItem value="Retoyage">{t('retoyage')}</SelectItem>
+                        <SelectItem value="Sell">{t('sell')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Montage Status</Label>
+                    <Label>{t('montageStatus')}</Label>
                     <Select
                       value={formData.montage_status}
                       onValueChange={(value) => setFormData({ ...formData, montage_status: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder={t('selectStatus')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UnOrdered">UnOrdered</SelectItem>
-                        <SelectItem value="Ordered">Ordered</SelectItem>
-                        <SelectItem value="InStore">InStore</SelectItem>
-                        <SelectItem value="InCutting">InCutting</SelectItem>
-                        <SelectItem value="Ready">Ready</SelectItem>
-                        <SelectItem value="Paid costs">Paid costs</SelectItem>
+                        <SelectItem value="UnOrdered">{t('unOrdered')}</SelectItem>
+                        <SelectItem value="Ordered">{t('ordered')}</SelectItem>
+                        <SelectItem value="InStore">{t('inStore')}</SelectItem>
+                        <SelectItem value="InCutting">{t('inCutting')}</SelectItem>
+                        <SelectItem value="Ready">{t('ready')}</SelectItem>
+                        <SelectItem value="Paid costs">{t('paidCosts')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -458,11 +461,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Banknote className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Financial Details</h3>
+                  <h3 className="font-semibold">{t('financialDetails')}</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <Label>Montage Costs</Label>
+                    <Label>{t('montageCosts')}</Label>
                     <Input
                       type="number"
                       value={formData.montage_costs}
@@ -470,7 +473,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Total Discount</Label>
+                    <Label>{t('totalDiscount')}</Label>
                     <Input
                       type="number"
                       value={formData.total_discount}
@@ -478,7 +481,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Tax</Label>
+                    <Label>{t('tax')}</Label>
                     <Input
                       type="number"
                       value={formData.tax}
@@ -486,7 +489,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Advance Payment</Label>
+                    <Label>{t('advancePayment')}</Label>
                     <Input
                       type="number"
                       value={formData.advance_payment}
@@ -504,10 +507,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Package2 className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Items</h3>
+                  <h3 className="font-semibold">{t('items')}</h3>
                 </div>
                 <div className="text-lg font-semibold">
-                  Total: {calculateItemsTotal().toFixed(2)} DH
+                  {t('total')}: {calculateItemsTotal().toFixed(2)} DH
                 </div>
               </div>
               <div className="space-y-4">
@@ -518,14 +521,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Package2 className="h-4 w-4 text-blue-600" />
-                          <Label className="text-sm font-semibold">Product Link</Label>
+                          <Label className="text-sm font-semibold">{t('productLink')}</Label>
                         </div>
                         {item.product_id ? (
                           <div className="flex items-center gap-2">
                             <div className="flex-1 p-2 bg-white rounded border">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <span className="font-medium">{item.product?.name || 'Unknown Product'}</span>
+                                  <span className="font-medium">{item.product?.name || t('unknownProduct')}</span>
                                   <div className="text-sm text-gray-500">
                                     {item.product?.category} • {item.product?.company || 'No Company'} • Stock: {item.product?.stock_status}
                                   </div>
@@ -551,7 +554,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                                 setFormData({ ...formData, items: newItems });
                               }}
                             >
-                              Unlink
+                              {t('unlink')}
                             </Button>
                           </div>
                         ) : (
@@ -581,7 +584,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                               }}
                             >
                               <SelectTrigger className="flex-1">
-                                <SelectValue placeholder="Link to a product..." />
+                                <SelectValue placeholder={t('linkToProduct')} />
                               </SelectTrigger>
                               <SelectContent className="max-h-60">
                                 {/* We'll fetch products dynamically */}
@@ -595,7 +598,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       {/* Item Details Section */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <Label>Item Name</Label>
+                          <Label>{t('itemName')}</Label>
                           <Input
                             value={item.custom_item_name || item.product?.name || ''}
                             onChange={(e) => {
@@ -603,11 +606,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                               newItems[index] = { ...item, custom_item_name: e.target.value };
                               setFormData({ ...formData, items: newItems });
                             }}
-                            placeholder="Enter item name"
+                            placeholder={t('enterItemName')}
                           />
                         </div>
                         <div>
-                          <Label>Quantity</Label>
+                          <Label>{t('quantity')}</Label>
                           <Input
                             type="number"
                             min="1"
@@ -625,7 +628,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       {/* Financial Details Section */}
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div>
-                          <Label>Price (DH)</Label>
+                          <Label>{t('price')}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -640,7 +643,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                         <div>
-                          <Label>Cost (DH)</Label>
+                          <Label>{t('cost')}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -654,7 +657,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                         <div>
-                          <Label>Total</Label>
+                          <Label>{t('total')}</Label>
                           <div className="h-10 px-3 py-2 rounded-md bg-gray-50 font-medium flex items-center">
                             {(item.price * item.quantity).toFixed(2)} DH
                           </div>
@@ -678,14 +681,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                             />
                             <Label htmlFor={`paid-delivery-${index}`} className="text-sm">
-                              Paid at Delivery
+                              {t('paidAtDelivery')}
                             </Label>
                           </div>
 
                           {/* Eye Linking for Lens Products */}
                           {item.product?.category?.includes('Lenses') && (
                             <div className="flex items-center gap-2">
-                              <Label className="text-sm">Eye:</Label>
+                              <Label className="text-sm">{t('eye')}</Label>
                               <Select
                                 value={item.linked_eye || 'none'}
                                 onValueChange={(value) => {
@@ -701,7 +704,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="none">None</SelectItem>
+                                  <SelectItem value="none">{t('none')}</SelectItem>
                                   <SelectItem value="RE">RE</SelectItem>
                                   <SelectItem value="LE">LE</SelectItem>
                                 </SelectContent>
@@ -712,7 +715,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
 
                         {/* Profit Display */}
                         <div className="text-sm">
-                          <span className="text-gray-500">Profit: </span>
+                          <span className="text-gray-500">{t('profit')} </span>
                           <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
                           </span>
@@ -727,13 +730,13 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         </div>
 
         <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('cancel')}</Button>
           <Button 
             onClick={handleSubmit} 
             disabled={loading}
             className="bg-primary hover:bg-primary/90"
           >
-            {loading ? "Updating..." : "Update Receipt"}
+            {loading ? t('updating') : t('updateReceipt')}
           </Button>
         </DialogFooter>
       </DialogContent>

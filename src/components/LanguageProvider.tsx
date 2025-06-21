@@ -374,6 +374,337 @@ const productTranslations: Translations = {
     en: 'Uploading...',
     fr: 'Téléchargement...'
   },
+  // Receipt Edit Dialog translations
+  editReceipt: {
+    en: 'Edit Receipt',
+    fr: 'Modifier le Reçu'
+  },
+  clientInformation: {
+    en: 'Client Information',
+    fr: 'Informations du Client'
+  },
+  prescriptionDetails: {
+    en: 'Prescription Details',
+    fr: 'Détails de la Prescription'
+  },
+  rightEye: {
+    en: 'Right Eye',
+    fr: 'Œil Droit'
+  },
+  leftEye: {
+    en: 'Left Eye',
+    fr: 'Œil Gauche'
+  },
+  orderStatus: {
+    en: 'Order Status',
+    fr: 'Statut de la Commande'
+  },
+  deliveryStatus: {
+    en: 'Delivery Status',
+    fr: 'Statut de Livraison'
+  },
+  orderType: {
+    en: 'Order Type',
+    fr: 'Type de Commande'
+  },
+  montageStatus: {
+    en: 'Montage Status',
+    fr: 'Statut de Montage'
+  },
+  financialDetails: {
+    en: 'Financial Details',
+    fr: 'Détails Financiers'
+  },
+  montageCosts: {
+    en: 'Montage Costs',
+    fr: 'Coûts de Montage'
+  },
+  totalDiscount: {
+    en: 'Total Discount',
+    fr: 'Remise Totale'
+  },
+  tax: {
+    en: 'Tax',
+    fr: 'Taxe'
+  },
+  advancePayment: {
+    en: 'Advance Payment',
+    fr: 'Paiement d\'Avance'
+  },
+  items: {
+    en: 'Items',
+    fr: 'Articles'
+  },
+  productLink: {
+    en: 'Product Link',
+    fr: 'Lien Produit'
+  },
+  unknownProduct: {
+    en: 'Unknown Product',
+    fr: 'Produit Inconnu'
+  },
+  unlink: {
+    en: 'Unlink',
+    fr: 'Délier'
+  },
+  linkToProduct: {
+    en: 'Link to a product...',
+    fr: 'Lier à un produit...'
+  },
+  searchProducts: {
+    en: 'Search products...',
+    fr: 'Rechercher des produits...'
+  },
+  noProductsFound: {
+    en: 'No products found',
+    fr: 'Aucun produit trouvé'
+  },
+  itemName: {
+    en: 'Item Name',
+    fr: 'Nom de l\'Article'
+  },
+  enterItemName: {
+    en: 'Enter item name',
+    fr: 'Entrer le nom de l\'article'
+  },
+  quantity: {
+    en: 'Quantity',
+    fr: 'Quantité'
+  },
+  price: {
+    en: 'Price (DH)',
+    fr: 'Prix (DH)'
+  },
+  cost: {
+    en: 'Cost (DH)',
+    fr: 'Coût (DH)'
+  },
+  total: {
+    en: 'Total',
+    fr: 'Total'
+  },
+  paidAtDelivery: {
+    en: 'Paid at Delivery',
+    fr: 'Payé à la Livraison'
+  },
+  eye: {
+    en: 'Eye:',
+    fr: 'Œil:'
+  },
+  none: {
+    en: 'None',
+    fr: 'Aucun'
+  },
+  profit: {
+    en: 'Profit:',
+    fr: 'Bénéfice:'
+  },
+  cancel: {
+    en: 'Cancel',
+    fr: 'Annuler'
+  },
+  updating: {
+    en: 'Updating...',
+    fr: 'Mise à jour...'
+  },
+  updateReceipt: {
+    en: 'Update Receipt',
+    fr: 'Mettre à Jour le Reçu'
+  },
+  receiptUpdatedSuccessfully: {
+    en: 'Receipt updated successfully',
+    fr: 'Reçu mis à jour avec succès'
+  },
+  failedToUpdateReceipt: {
+    en: 'Failed to update receipt',
+    fr: 'Échec de la mise à jour du reçu'
+  },
+  selectStatus: {
+    en: 'Select status',
+    fr: 'Sélectionner le statut'
+  },
+  selectOrderType: {
+    en: 'Select order type',
+    fr: 'Sélectionner le type de commande'
+  },
+  // Receipt Details Mini Dialog translations
+  paymentStatus: {
+    en: 'Payment:',
+    fr: 'Paiement:'
+  },
+  deliveryLabel: {
+    en: 'Delivery:',
+    fr: 'Livraison:'
+  },
+  montageLabel: {
+    en: 'Montage:',
+    fr: 'Montage:'
+  },
+  prescription: {
+    en: 'Prescription',
+    fr: 'Prescription'
+  },
+  rightEyeLabel: {
+    en: 'Right Eye',
+    fr: 'Œil Droit'
+  },
+  leftEyeLabel: {
+    en: 'Left Eye',
+    fr: 'Œil Gauche'
+  },
+  sph: {
+    en: 'SPH:',
+    fr: 'SPH:'
+  },
+  cyl: {
+    en: 'CYL:',
+    fr: 'CYL:'
+  },
+  axe: {
+    en: 'AXE:',
+    fr: 'AXE:'
+  },
+  subtotal: {
+    en: 'Subtotal:',
+    fr: 'Sous-total:'
+  },
+  taxBaseAmount: {
+    en: 'Tax Base Amount:',
+    fr: 'Montant de Base Taxable:'
+  },
+  totalDiscountLabel: {
+    en: 'Total Discount',
+    fr: 'Remise Totale'
+  },
+  productsCost: {
+    en: 'Products Cost:',
+    fr: 'Coût des Produits:'
+  },
+  totalCostTTC: {
+    en: 'Total Cost (TTC):',
+    fr: 'Coût Total (TTC):'
+  },
+  profitLabel: {
+    en: 'Profit:',
+    fr: 'Bénéfice:'
+  },
+  balanceLabel: {
+    en: 'Balance:',
+    fr: 'Solde:'
+  },
+  item: {
+    en: 'Item',
+    fr: 'Article'
+  },
+  qty: {
+    en: 'Qty',
+    fr: 'Qté'
+  },
+  // Receipt Statistics translations
+  businessAnalytics: {
+    en: 'Business Analytics',
+    fr: 'Analyses Commerciales'
+  },
+  startDate: {
+    en: 'Start Date',
+    fr: 'Date de Début'
+  },
+  endDate: {
+    en: 'End Date',
+    fr: 'Date de Fin'
+  },
+  financialOverview: {
+    en: 'Financial Overview',
+    fr: 'Aperçu Financier'
+  },
+  totalRevenue: {
+    en: 'Total Revenue',
+    fr: 'Chiffre d\'Affaires Total'
+  },
+  totalProductsCost: {
+    en: 'Total Products Cost',
+    fr: 'Coût Total des Produits'
+  },
+  totalMontageCosts: {
+    en: 'Total Montage Costs',
+    fr: 'Coûts Totaux de Montage'
+  },
+  totalCosts: {
+    en: 'Total Costs',
+    fr: 'Coûts Totaux'
+  },
+  totalProfit: {
+    en: 'Total Profit',
+    fr: 'Bénéfice Total'
+  },
+  averageMetrics: {
+    en: 'Average Metrics',
+    fr: 'Métriques Moyennes'
+  },
+  averageTicket: {
+    en: 'Average Ticket',
+    fr: 'Ticket Moyen'
+  },
+  averageProfit: {
+    en: 'Average Profit',
+    fr: 'Bénéfice Moyen'
+  },
+  collectionRate: {
+    en: 'Collection Rate',
+    fr: 'Taux de Collecte'
+  },
+  operationalMetrics: {
+    en: 'Operational Metrics',
+    fr: 'Métriques Opérationnelles'
+  },
+  totalOrders: {
+    en: 'Total Orders',
+    fr: 'Total des Commandes'
+  },
+  deliveryRate: {
+    en: 'Delivery Rate',
+    fr: 'Taux de Livraison'
+  },
+  outstandingBalance: {
+    en: 'Outstanding Balance',
+    fr: 'Solde Impayé'
+  },
+  unpaidMontageCosts: {
+    en: 'Unpaid Montage Costs',
+    fr: 'Coûts de Montage Impayés'
+  },
+  productCategories: {
+    en: 'Product Categories',
+    fr: 'Catégories de Produits'
+  },
+  singleVision: {
+    en: 'Single Vision',
+    fr: 'Vision Simple'
+  },
+  progressive: {
+    en: 'Progressive',
+    fr: 'Progressif'
+  },
+  frames: {
+    en: 'Frames',
+    fr: 'Montures'
+  },
+  sunglasses: {
+    en: 'Sunglasses',
+    fr: 'Lunettes de Soleil'
+  },
+  accessories: {
+    en: 'Accessories',
+    fr: 'Accessoires'
+  },
+  units: {
+    en: 'units',
+    fr: 'unités'
+  },
+  revenue: {
+    en: 'Revenue',
+    fr: 'Revenus'
+  },
   // Additional client page translations
   saveAllChanges: {
     en: 'Save All Changes',
@@ -478,6 +809,211 @@ const productTranslations: Translations = {
 };
 
 const receiptTranslations: Translations = {
+  // Receipts page UI
+  receipts: {
+    en: 'Receipts',
+    fr: 'Reçus'
+  },
+  searchReceipts: {
+    en: 'Search receipts...',
+    fr: 'Rechercher des reçus...'
+  },
+  statistics: {
+    en: 'Statistics',
+    fr: 'Statistiques'
+  },
+  allDates: {
+    en: 'All Dates',
+    fr: 'Toutes les Dates'
+  },
+  today: {
+    en: 'Today',
+    fr: 'Aujourd\'hui'
+  },
+  thisWeek: {
+    en: 'This Week',
+    fr: 'Cette Semaine'
+  },
+  thisMonth: {
+    en: 'This Month',
+    fr: 'Ce Mois'
+  },
+  thisYear: {
+    en: 'This Year',
+    fr: 'Cette Année'
+  },
+  allPayments: {
+    en: 'All Payments',
+    fr: 'Tous les Paiements'
+  },
+  paid: {
+    en: 'Paid',
+    fr: 'Payé'
+  },
+  partial: {
+    en: 'Partial',
+    fr: 'Partiel'
+  },
+  unpaid: {
+    en: 'Unpaid',
+    fr: 'Impayé'
+  },
+  allDeliveries: {
+    en: 'All Deliveries',
+    fr: 'Toutes les Livraisons'
+  },
+  delivered: {
+    en: 'Delivered',
+    fr: 'Livré'
+  },
+  undelivered: {
+    en: 'Undelivered',
+    fr: 'Non Livré'
+  },
+  completed: {
+    en: 'Completed',
+    fr: 'Terminé'
+  },
+  notCalled: {
+    en: 'Not Called',
+    fr: 'Non Appelé'
+  },
+  called: {
+    en: 'Called',
+    fr: 'Appelé'
+  },
+  unresponsive: {
+    en: 'Unresponsive',
+    fr: 'Sans Réponse'
+  },
+  total: {
+    en: 'Total',
+    fr: 'Total'
+  },
+  advance: {
+    en: 'Advance',
+    fr: 'Avance'
+  },
+  balance: {
+    en: 'Balance',
+    fr: 'Solde'
+  },
+  cost: {
+    en: 'Cost',
+    fr: 'Coût'
+  },
+  profit: {
+    en: 'Profit',
+    fr: 'Bénéfice'
+  },
+  minutesAgo: {
+    en: 'minutes ago',
+    fr: 'il y a quelques minutes'
+  },
+  hoursAgo: {
+    en: 'hours ago',
+    fr: 'il y a quelques heures'
+  },
+  unOrdered: {
+    en: 'UnOrdered',
+    fr: 'Non Commandé'
+  },
+  ordered: {
+    en: 'Ordered',
+    fr: 'Commandé'
+  },
+  inStore: {
+    en: 'InStore',
+    fr: 'En Magasin'
+  },
+  inCutting: {
+    en: 'InCutting',
+    fr: 'En Taille'
+  },
+  ready: {
+    en: 'Ready',
+    fr: 'Prêt'
+  },
+  paidCosts: {
+    en: 'Paid costs',
+    fr: 'Coûts payés'
+  },
+  noReceiptsFound: {
+    en: 'No receipts found',
+    fr: 'Aucun reçu trouvé'
+  },
+  receiptUpdated: {
+    en: 'Receipt Updated',
+    fr: 'Reçu Mis à Jour'
+  },
+  receiptMarkedAsPaid: {
+    en: 'Receipt has been marked as paid.',
+    fr: 'Le reçu a été marqué comme payé.'
+  },
+  receiptMarkedAsDelivered: {
+    en: 'Receipt has been marked as delivered.',
+    fr: 'Le reçu a été marqué comme livré.'
+  },
+  receiptMarkedAsUndelivered: {
+    en: 'Receipt has been marked as undelivered.',
+    fr: 'Le reçu a été marqué comme non livré.'
+  },
+  montageStatusUpdated: {
+    en: 'Montage status has been updated to',
+    fr: 'Le statut de montage a été mis à jour vers'
+  },
+  callStatusUpdated: {
+    en: 'Call Status Updated',
+    fr: 'Statut d\'Appel Mis à Jour'
+  },
+  callStatusUpdatedTo: {
+    en: 'Call status has been updated to',
+    fr: 'Le statut d\'appel a été mis à jour vers'
+  },
+  receiptDeleted: {
+    en: 'Receipt Deleted',
+    fr: 'Reçu Supprimé'
+  },
+  receiptDeletedSuccessfully: {
+    en: 'Receipt has been successfully deleted.',
+    fr: 'Le reçu a été supprimé avec succès.'
+  },
+  errorUpdatingReceipt: {
+    en: 'Failed to update receipt. Please try again.',
+    fr: 'Échec de la mise à jour du reçu. Veuillez réessayer.'
+  },
+  errorDeletingReceipt: {
+    en: 'Failed to delete receipt. Please try again.',
+    fr: 'Échec de la suppression du reçu. Veuillez réessayer.'
+  },
+  errorUpdatingCallStatus: {
+    en: 'Failed to update call status. Please try again.',
+    fr: 'Échec de la mise à jour du statut d\'appel. Veuillez réessayer.'
+  },
+  errorUpdatingMontageStatus: {
+    en: 'Failed to update montage status. Please try again.',
+    fr: 'Échec de la mise à jour du statut de montage. Veuillez réessayer.'
+  },
+  pending: {
+    en: 'Pending',
+    fr: 'En Attente'
+  },
+  receiptsLabel: {
+    en: 'receipts',
+    fr: 'reçus'
+  },
+  edit: {
+    en: 'Edit',
+    fr: 'Modifier'
+  },
+  delete: {
+    en: 'Delete',
+    fr: 'Supprimer'
+  },
+  print: {
+    en: 'Print',
+    fr: 'Imprimer'
+  },
   // New Receipt page UI
   newReceipt: {
     en: 'New Receipt',

@@ -389,7 +389,7 @@ const Receipts = () => {
           time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
         } : r);
       });
-      
+
       const { error } = await supabase
         .from('receipts')
         .update({ 
@@ -487,7 +487,7 @@ const Receipts = () => {
       console.error('Error deleting receipt:', error);
       toast({
         title: "Error",
-        description: "Failed to delete receipt. Please try again.",
+        description: "Failed to update receipt. Please try again.",
         variant: "destructive",
       });
     }
