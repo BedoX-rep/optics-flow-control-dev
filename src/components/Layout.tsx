@@ -116,6 +116,10 @@ const Layout = ({ children }: LayoutProps) => {
                       title: "Session Updated",
                       description: "You are now signed out of the admin session",
                     });
+                    // Small delay to ensure state updates, then refresh
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
                   }}
                   className="text-xs text-red-600 border-red-300 hover:bg-red-50"
                 >
