@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,7 +41,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
   const [invoiceData, setInvoiceData] = useState({
     invoice_number: '',
@@ -51,7 +50,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     notes: ''
   });
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
-  
+
   // Category options for items
   const CATEGORY_OPTIONS = [
     'Single Vision Lenses',
@@ -77,14 +76,14 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('user_information')
           .select('*')
           .eq('user_id', user.id)
           .single();
-        
+
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching user info:', error);
         } else {
@@ -181,7 +180,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const downloadPDF = async () => {
     const validationErrors = validateForPrint();
-    
+
     if (validationErrors.length > 0) {
       toast({
         title: "Validation Error",
@@ -192,16 +191,16 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     }
 
     setIsLoading(true);
-    
+
     try {
       const printContent = generatePrintContent();
-      
+
       // Create a new window for PDF generation
       const pdfWindow = window.open('', '_blank');
       if (pdfWindow) {
         pdfWindow.document.write(printContent);
         pdfWindow.document.close();
-        
+
         // Wait for content to load
         pdfWindow.onload = () => {
           // Focus the window and trigger print dialog (user can save as PDF)
@@ -228,7 +227,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const handlePrint = async () => {
     const validationErrors = validateForPrint();
-    
+
     if (validationErrors.length > 0) {
       toast({
         title: "Validation Error",
@@ -239,17 +238,17 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     }
 
     setIsLoading(true);
-    
+
     try {
       // Generate the print content
       const printContent = generatePrintContent();
-      
+
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(printContent);
         printWindow.document.close();
-        
+
         // Wait for content to load before printing
         printWindow.onload = () => {
           printWindow.print();
@@ -261,7 +260,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
         title: "Success",
         description: "Invoice sent to printer successfully",
       });
-      
+
       onClose();
     } catch (error) {
       console.error('Error printing invoice:', error);
@@ -641,9 +640,9 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   </div>
                 ))}
               </div>
-              
+
               <Separator className="my-4" />
-              
+
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">
                   Total: {total.toFixed(2)} DH
