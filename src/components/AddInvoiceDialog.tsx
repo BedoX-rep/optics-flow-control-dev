@@ -55,12 +55,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         .select(`
           id,
           client_id,
-          client_name,
-          client_phone,
           total,
           tax,
           created_at,
-          clients (
+          clients!receipts_client_id_fkey (
             name,
             phone,
             assurance
@@ -79,11 +77,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching receipts:', error);
+        throw error;
+      }
+      
+      console.log('Fetched receipts data:', data);
+      
       return data?.map(receipt => ({
         ...receipt,
-        client_name: receipt.clients?.name || receipt.client_name || 'No Client',
-        client_phone: receipt.clients?.phone || receipt.client_phone || 'N/A',
+        client_name: receipt.clients?.name || 'No Client',
+        client_phone: receipt.clients?.phone || 'N/A',
         client_assurance: receipt.clients?.assurance || ''
       })) || [];
     },
@@ -313,11 +317,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="no-receipt">{t('noReceipt') || 'No Receipt'}</SelectItem>
-                {receipts.map(receipt => (
-                  <SelectItem key={receipt.id} value={receipt.id}>
-                    {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
-                  </SelectItem>
-                ))}
+                {receipts.length === 0 ? (
+                  <SelectItem value="no-data" disabled>No receipts available</SelectItem>
+                ) : (
+                  receipts.map(receipt => (
+                    <SelectItem key={receipt.id} value={receipt.id}>
+                      {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
