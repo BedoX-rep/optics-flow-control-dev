@@ -296,9 +296,11 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             .company-info { text-align: right; }
             .company-info h1 { font-size: 24px; color: #333; margin-bottom: 5px; }
             .company-info p { margin-bottom: 3px; }
-            .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-            .invoice-details, .client-details { width: 48%; }
-            .invoice-details h3, .client-details h3 { color: #333; margin-bottom: 10px; font-size: 16px; }
+            .invoice-info { display: flex; justify-content: space-between; margin-bottom: 40px; }
+            .invoice-details, .client-details { width: 48%; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+            .invoice-details h3, .client-details h3 { color: #333; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
+            .invoice-details p, .client-details p { font-size: 15px; margin-bottom: 8px; line-height: 1.6; }
+            .invoice-details strong, .client-details strong { font-weight: bold; }
             .prescription { margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; }
             .prescription h3 { margin-bottom: 10px; }
             .prescription-table { width: 100%; border-collapse: collapse; }
