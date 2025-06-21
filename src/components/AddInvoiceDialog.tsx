@@ -32,7 +32,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     client_name: '',
     client_phone: '',
     client_address: '',
-    tax_percentage: 20,
+    assurance_total: 0,
+    advance_payment: 0,
+    balance: 0,
     invoice_date: new Date().toISOString().split('T')[0],
     due_date: '',
     status: 'Draft',
@@ -42,7 +44,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch receipts for data copying
+  // Fetch receipts with full details for data copying
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
     queryFn: async () => {
@@ -55,14 +57,21 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           client_name,
           client_phone,
           total,
+          tax,
           created_at,
-          clients (name, phone),
+          clients (
+            name,
+            phone,
+            address
+          ),
           receipt_items (
             id,
             quantity,
             price,
             custom_item_name,
-            product:product_id (name)
+            product:product_id (
+              name
+            )
           )
         `)
         .eq('user_id', user.id)
@@ -73,7 +82,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       return data?.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || receipt.client_name || 'No Client',
-        client_phone: receipt.clients?.phone || receipt.client_phone || 'N/A'
+        client_phone: receipt.clients?.phone || receipt.client_phone || 'N/A',
+        client_address: receipt.clients?.address || ''
       })) || [];
     },
     enabled: !!user && isOpen,
@@ -94,6 +104,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     
     if (receiptId === "no-receipt") {
       setInvoiceItems([]);
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: '',
+        client_phone: '',
+        client_address: '',
+        assurance_total: 0
+      }));
       return;
     }
     
@@ -103,16 +120,18 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       setInvoiceData(prev => ({
         ...prev,
         client_name: selectedReceipt.client_name || '',
-        client_phone: selectedReceipt.client_phone || ''
+        client_phone: selectedReceipt.client_phone || '',
+        client_address: selectedReceipt.client_address || '',
+        assurance_total: selectedReceipt.tax || 0
       }));
 
-      // Convert receipt items to invoice items
+      // Convert receipt items to invoice items with manual price and quantity
       const items = selectedReceipt.receipt_items?.map(item => ({
         product_name: item.product?.name || item.custom_item_name || 'Unknown Product',
         description: '',
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.quantity * item.price
+        quantity: item.quantity || 1,
+        unit_price: item.price || 0,
+        total_price: (item.quantity || 1) * (item.price || 0)
       })) || [];
       
       setInvoiceItems(items);
@@ -152,10 +171,23 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setInvoiceItems(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Calculate totals
+  // Calculate totals (excluding assurance/tax)
   const subtotal = invoiceItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
-  const taxAmount = (subtotal * invoiceData.tax_percentage) / 100;
-  const total = subtotal + taxAmount;
+  const total = subtotal; // Total is just subtotal, assurance is separate
+
+  // Update balance when advance payment or total changes
+  useEffect(() => {
+    const newBalance = total - invoiceData.advance_payment;
+    setInvoiceData(prev => ({ ...prev, balance: newBalance }));
+  }, [total, invoiceData.advance_payment]);
+
+  // Auto-calculate status based on balance
+  const getInvoiceStatus = () => {
+    if (invoiceData.balance <= 0 && total > 0) return 'Paid';
+    if (invoiceData.advance_payment > 0 && invoiceData.balance > 0) return 'Pending';
+    if (invoiceData.advance_payment === 0 && total > 0) return 'Draft';
+    return 'Draft';
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -181,6 +213,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setIsLoading(true);
     
     try {
+      const finalStatus = getInvoiceStatus();
+      
       // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
@@ -191,12 +225,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           client_phone: invoiceData.client_phone,
           client_address: invoiceData.client_address,
           subtotal,
-          tax_percentage: invoiceData.tax_percentage,
-          tax_amount: taxAmount,
+          tax_percentage: 0, // Not used anymore
+          tax_amount: invoiceData.assurance_total,
           total,
+          advance_payment: invoiceData.advance_payment,
+          balance: invoiceData.balance,
           invoice_date: invoiceData.invoice_date,
           due_date: invoiceData.due_date || null,
-          status: invoiceData.status,
+          status: finalStatus,
           notes: invoiceData.notes
         })
         .select()
@@ -248,7 +284,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       client_name: '',
       client_phone: '',
       client_address: '',
-      tax_percentage: 20,
+      assurance_total: 0,
+      advance_payment: 0,
+      balance: 0,
       invoice_date: new Date().toISOString().split('T')[0],
       due_date: '',
       status: 'Draft',
@@ -294,21 +332,12 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('status') || 'Status'}</Label>
-              <Select
-                value={invoiceData.status}
-                onValueChange={(value) => setInvoiceData(prev => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Draft">{t('draft') || 'Draft'}</SelectItem>
-                  <SelectItem value="Pending">{t('pending') || 'Pending'}</SelectItem>
-                  <SelectItem value="Paid">{t('paid') || 'Paid'}</SelectItem>
-                  <SelectItem value="Overdue">{t('overdue') || 'Overdue'}</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>{t('status') || 'Status'} (Auto-calculated)</Label>
+              <Input
+                value={getInvoiceStatus()}
+                disabled
+                className="bg-gray-100"
+              />
             </div>
           </div>
 
@@ -433,32 +462,52 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             </div>
           </div>
 
-          {/* Tax and Total */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Payment and Assurance Section */}
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>{t('taxPercentage') || 'Tax Percentage'}</Label>
+              <Label>Assurance Total</Label>
               <Input
                 type="number"
                 step="0.01"
-                value={invoiceData.tax_percentage}
-                onChange={(e) => setInvoiceData(prev => ({ ...prev, tax_percentage: Number(e.target.value) }))}
+                value={invoiceData.assurance_total}
+                onChange={(e) => setInvoiceData(prev => ({ ...prev, assurance_total: Number(e.target.value) }))}
                 min="0"
-                max="100"
               />
             </div>
-            <div className="space-y-4 text-right">
-              <div>
-                <span className="text-sm text-gray-600">{t('subtotal') || 'Subtotal'}: </span>
-                <span className="font-medium">{subtotal.toFixed(2)} DH</span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">{t('tax') || 'Tax'} ({invoiceData.tax_percentage}%): </span>
-                <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
-              </div>
-              <div>
-                <span className="text-lg font-bold">{t('total') || 'Total'}: </span>
-                <span className="text-lg font-bold text-blue-600">{total.toFixed(2)} DH</span>
-              </div>
+            <div className="space-y-2">
+              <Label>{t('advancePayment') || 'Advance Payment'}</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={invoiceData.advance_payment}
+                onChange={(e) => setInvoiceData(prev => ({ ...prev, advance_payment: Number(e.target.value) }))}
+                min="0"
+                max={total}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('balance') || 'Balance'} (Auto-calculated)</Label>
+              <Input
+                value={invoiceData.balance.toFixed(2)}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+          </div>
+
+          {/* Totals Summary */}
+          <div className="space-y-4 text-right">
+            <div>
+              <span className="text-sm text-gray-600">{t('subtotal') || 'Subtotal'}: </span>
+              <span className="font-medium">{subtotal.toFixed(2)} DH</span>
+            </div>
+            <div>
+              <span className="text-sm text-gray-600">Assurance Total: </span>
+              <span className="font-medium">{invoiceData.assurance_total.toFixed(2)} DH</span>
+            </div>
+            <div>
+              <span className="text-lg font-bold">{t('total') || 'Total'}: </span>
+              <span className="text-lg font-bold text-blue-600">{total.toFixed(2)} DH</span>
             </div>
           </div>
 

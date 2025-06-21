@@ -3340,6 +3340,147 @@ const allTranslations: Translations = {
       register: 'S\'inscrire',
     },
   },
+  // Invoice translations
+  addInvoice: {
+    en: 'Add Invoice',
+    fr: 'Ajouter Facture',
+    ar: 'إضافة فاتورة'
+  },
+  invoices: {
+    en: 'Invoices',
+    fr: 'Factures',
+    ar: 'الفواتير'
+  },
+  copyFromReceipt: {
+    en: 'Copy from Receipt',
+    fr: 'Copier du Reçu',
+    ar: 'نسخ من الوصل'
+  },
+  optional: {
+    en: 'Optional',
+    fr: 'Optionnel',
+    ar: 'اختياري'
+  },
+  selectReceipt: {
+    en: 'Select Receipt',
+    fr: 'Sélectionner Reçu',
+    ar: 'اختر وصل'
+  },
+  noReceipt: {
+    en: 'No Receipt',
+    fr: 'Aucun Reçu',
+    ar: 'لا يوجد وصل'
+  },
+  invoiceNumber: {
+    en: 'Invoice Number',
+    fr: 'Numéro de Facture',
+    ar: 'رقم الفاتورة'
+  },
+  clientPhone: {
+    en: 'Client Phone',
+    fr: 'Téléphone Client',
+    ar: 'هاتف العميل'
+  },
+  clientAddress: {
+    en: 'Client Address',
+    fr: 'Adresse Client',
+    ar: 'عنوان العميل'
+  },
+  invoiceDate: {
+    en: 'Invoice Date',
+    fr: 'Date de Facture',
+    ar: 'تاريخ الفاتورة'
+  },
+  dueDate: {
+    en: 'Due Date',
+    fr: 'Date d\'Échéance',
+    ar: 'تاريخ الاستحقاق'
+  },
+  items: {
+    en: 'Items',
+    fr: 'Articles',
+    ar: 'العناصر'
+  },
+  addItem: {
+    en: 'Add Item',
+    fr: 'Ajouter Article',
+    ar: 'إضافة عنصر'
+  },
+  productName: {
+    en: 'Product Name',
+    fr: 'Nom du Produit',
+    ar: 'اسم المنتج'
+  },
+  description: {
+    en: 'Description',
+    fr: 'Description',
+    ar: 'الوصف'
+  },
+  quantity: {
+    en: 'Quantity',
+    fr: 'Quantité',
+    ar: 'الكمية'
+  },
+  unitPrice: {
+    en: 'Unit Price',
+    fr: 'Prix Unitaire',
+    ar: 'السعر للوحدة'
+  },
+  subtotal: {
+    en: 'Subtotal',
+    fr: 'Sous-total',
+    ar: 'المجموع الفرعي'
+  },
+  tax: {
+    en: 'Tax',
+    fr: 'TVA',
+    ar: 'الضريبة'
+  },
+  notes: {
+    en: 'Notes',
+    fr: 'Notes',
+    ar: 'ملاحظات'
+  },
+  createInvoice: {
+    en: 'Create Invoice',
+    fr: 'Créer Facture',
+    ar: 'إنشاء فاتورة'
+  },
+  saving: {
+    en: 'Saving',
+    fr: 'Sauvegarde...',
+    ar: 'جاري الحفظ'
+  },
+  advancePayment: {
+    en: 'Advance Payment',
+    fr: 'Acompte',
+    ar: 'دفعة مقدمة'
+  },
+  balance: {
+    en: 'Balance',
+    fr: 'Solde',
+    ar: 'الرصيد'
+  },
+  draft: {
+    en: 'Draft',
+    fr: 'Brouillon',
+    ar: 'مسودة'
+  },
+  pending: {
+    en: 'Pending',
+    fr: 'En Attente',
+    ar: 'في الانتظار'
+  },
+  paid: {
+    en: 'Paid',
+    fr: 'Payé',
+    ar: 'مدفوع'
+  },
+  overdue: {
+    en: 'Overdue',
+    fr: 'En Retard',
+    ar: 'متأخر'
+  }
 };
 
 const LanguageContext = createContext<LanguageContextType>({

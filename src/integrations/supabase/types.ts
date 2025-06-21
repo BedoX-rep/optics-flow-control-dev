@@ -807,6 +807,8 @@ export interface Invoice {
   created_at: string;
   updated_at: string;
   invoice_items?: InvoiceItem[];
+  advance_payment?: number;
+  balance?: number;
 }
 
 export interface InvoiceItem {
@@ -832,9 +834,69 @@ export interface Database {
         Update: Partial<Omit<UserInformation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
       };
       invoices: {
-        Row: Invoice;
-        Insert: Omit<Invoice, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+        Row: {
+          advance_payment: number | null
+          balance: number | null
+          client_address: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted: boolean | null
+          notes: string | null
+          status: string | null
+          subtotal: number
+          tax_amount: number | null
+          tax_percentage: number | null
+          total: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total?: number
+          updated_at?: string | null
+          user_id?: string
+        }
       };
       invoice_items: {
         Row: InvoiceItem;

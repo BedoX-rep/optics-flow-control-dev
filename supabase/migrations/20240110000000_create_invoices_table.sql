@@ -1,4 +1,3 @@
-
 -- Create invoices table
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -9,8 +8,10 @@ CREATE TABLE IF NOT EXISTS invoices (
   client_address TEXT,
   subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
   tax_percentage DECIMAL(5,2) DEFAULT 20,
-  tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-  total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  tax_amount DECIMAL(10,2) DEFAULT 0,
+  total DECIMAL(10,2) NOT NULL,
+  advance_payment DECIMAL(10,2) DEFAULT 0,
+  balance DECIMAL(10,2) DEFAULT 0,
   invoice_date DATE DEFAULT CURRENT_DATE,
   due_date DATE,
   status VARCHAR(50) DEFAULT 'Draft',
