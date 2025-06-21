@@ -788,23 +788,23 @@ const Financial = () => {
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <Label htmlFor="includePaidAtDelivery" className="text-sm font-medium">
-                Include Paid at Delivery Items
+                {t('includePaidAtDeliveryItems')}
               </Label>
               <span className="text-xs text-gray-500 ml-2">
-                ({includePaidAtDelivery ? 'Currently including' : 'Currently excluding'} paid at delivery items)
+                ({includePaidAtDelivery ? t('currentlyIncluding') : t('currentlyExcluding')} {t('paidAtDeliveryItems')})
               </span>
             </div>
 
             {/* Filter Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="categoryFilter">Category Filter</Label>
+                <Label htmlFor="categoryFilter">{t('categoryFilter')}</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="all">{t('allCategories')}</SelectItem>
                     {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
@@ -813,13 +813,13 @@ const Financial = () => {
               </div>
 
               <div>
-                <Label htmlFor="companyFilter">Company Filter</Label>
+                <Label htmlFor="companyFilter">{t('companyFilter')}</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Companies</SelectItem>
+                    <SelectItem value="all">{t('allCompanies')}</SelectItem>
                     {!receiptsLoading && Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
                       <SelectItem key={company} value={company}>{company}</SelectItem>
                     ))}
@@ -828,30 +828,30 @@ const Financial = () => {
               </div>
 
               <div>
-                <Label htmlFor="stockFilter">Stock Status Filter</Label>
+                <Label htmlFor="stockFilter">{t('stockStatusFilter')}</Label>
                 <Select value={selectedStockStatus} onValueChange={setSelectedStockStatus}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Stock Status</SelectItem>
-                    <SelectItem value="InStock">In Stock</SelectItem>
-                    <SelectItem value="Fabrication">Fabrication</SelectItem>
-                    <SelectItem value="Order">Order</SelectItem>
+                    <SelectItem value="all">{t('allStockStatus')}</SelectItem>
+                    <SelectItem value="InStock">{t('inStock')}</SelectItem>
+                    <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                    <SelectItem value="Order">{t('order')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="paidAtDeliveryFilter">Paid at Delivery Filter</Label>
+                <Label htmlFor="paidAtDeliveryFilter">{t('paidAtDeliveryFilter')}</Label>
                 <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Items</SelectItem>
-                    <SelectItem value="yes">Paid at Delivery</SelectItem>
-                    <SelectItem value="no">Not Paid at Delivery</SelectItem>
+                    <SelectItem value="all">{t('allItems')}</SelectItem>
+                    <SelectItem value="yes">{t('paidAtDelivery')}</SelectItem>
+                    <SelectItem value="no">{t('notPaidAtDelivery')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -861,23 +861,23 @@ const Financial = () => {
           {/* Summary Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 rounded-lg p-3">
-              <p className="text-sm text-blue-600 mb-1">Total Items</p>
+              <p className="text-sm text-blue-600 mb-1">{t('totalItems')}</p>
               <p className="text-xl font-bold text-blue-900">{filteredReceiptItems.length}</p>
             </div>
             <div className="bg-green-50 rounded-lg p-3">
-              <p className="text-sm text-green-600 mb-1">Total Revenue</p>
+              <p className="text-sm text-green-600 mb-1">{t('totalRevenue')}</p>
               <p className="text-xl font-bold text-green-900">
                 {filteredReceiptItems.reduce((sum, item) => sum + item.totalRevenue, 0).toFixed(2)} DH
               </p>
             </div>
             <div className="bg-red-50 rounded-lg p-3">
-              <p className="text-sm text-red-600 mb-1">Total Cost</p>
+              <p className="text-sm text-red-600 mb-1">{t('totalCost')}</p>
               <p className="text-xl font-bold text-red-900">
                 {filteredReceiptItems.reduce((sum, item) => sum + item.totalCost, 0).toFixed(2)} DH
               </p>
             </div>
             <div className="bg-purple-50 rounded-lg p-3">
-              <p className="text-sm text-purple-600 mb-1">Total Profit</p>
+              <p className="text-sm text-purple-600 mb-1">{t('totalProfit')}</p>
               <p className={cn(
                 "text-xl font-bold",
                 filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0) >= 0 ? "text-green-600" : "text-red-600"
@@ -945,7 +945,7 @@ const Financial = () => {
 
           {filteredReceiptItems.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No items found matching the selected filters.
+              {t('noItemsFoundMatchingFilters')}
             </div>
           )}
         </CardContent>
@@ -956,10 +956,10 @@ const Financial = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            Comprehensive Financial Analysis & Profit Breakdown
+            {t('comprehensiveFinancialAnalysisProfit')}
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">
-            Complete profit analysis including all costs, expenses, and unclaimed balance scenarios
+            {t('completeProfitAnalysisDescription')}
           </p>
         </CardHeader>
         <CardContent>
@@ -968,25 +968,25 @@ const Financial = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Revenue Side */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Revenue Analysis</h3>
+                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">{t('revenueAnalysis')}</h3>
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <span className="font-medium">Total Revenue (Invoiced)</span>
+                    <span className="font-medium">{t('totalRevenueInvoiced')}</span>
                     <span className="font-bold text-blue-600">
                       {financialMetrics.totalRevenue.toFixed(2)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                    <span className="font-medium">Revenue Received</span>
+                    <span className="font-medium">{t('revenueReceived')}</span>
                     <span className="font-bold text-green-600">
                       {financialMetrics.totalReceived.toFixed(2)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                    <span className="font-medium">Unclaimed Balance</span>
+                    <span className="font-medium">{t('unclaimedBalance')}</span>
                     <span className="font-bold text-orange-600">
                       {financialMetrics.totalOutstanding.toFixed(2)} DH
                     </span>
@@ -996,25 +996,25 @@ const Financial = () => {
 
               {/* Cost Breakdown */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">Cost Breakdown</h3>
+                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">{t('costBreakdown')}</h3>
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                    <span className="font-medium">Product Costs (COGS)</span>
+                    <span className="font-medium">{t('productCostsCOGS')}</span>
                     <span className="font-bold text-red-600">
                       {financialMetrics.totalProductCosts.toFixed(2)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                    <span className="font-medium">Operational Expenses</span>
+                    <span className="font-medium">{t('operationalExpenses')}</span>
                     <span className="font-bold text-purple-600">
                       {financialMetrics.operationalExpenses.total.toFixed(2)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
-                    <span className="font-medium">Montage Costs</span>
+                    <span className="font-medium">{t('montageCosts')}</span>
                     <span className="font-bold text-indigo-600">
                       {financialMetrics.montageMetrics.total.toFixed(2)} DH
                     </span>
@@ -1025,29 +1025,29 @@ const Financial = () => {
 
             {/* Detailed Expense Analysis */}
             <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">Detailed Expense Analysis</h3>
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('detailedExpenseAnalysis')}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Operational Expenses Detail */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">Operational Expenses</h4>
+                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('operationalExpenses')}</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Total</span>
+                      <span>{t('total')}</span>
                       <span className="font-medium">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Paid</span>
+                      <span className="text-green-600">{t('paid')}</span>
                       <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-red-600">Unpaid</span>
+                      <span className="text-red-600">{t('unpaid')}</span>
                       <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
                     </div>
                     {financialMetrics.operationalExpenses.total > 0 && (
                       <div className="mt-2">
                         <div className="text-xs text-gray-500 mb-1">
-                          Payment: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
+                          {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
                         </div>
                         <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-1.5" />
                       </div>
@@ -1057,28 +1057,28 @@ const Financial = () => {
 
                 {/* Montage Costs Detail */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">Montage Costs</h4>
+                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('montageCosts')}</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Total</span>
+                      <span>{t('total')}</span>
                       <span className="font-medium">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">Paid</span>
+                      <span className="text-green-600">{t('paid')}</span>
                       <span className="font-medium text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-red-600">Unpaid</span>
+                      <span className="text-red-600">{t('unpaid')}</span>
                       <span className="font-medium text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-orange-600">Operational</span>
+                      <span className="text-orange-600">{t('operational')}</span>
                       <span className="font-medium text-orange-600">{financialMetrics.montageMetrics.operational.toFixed(2)} DH</span>
                     </div>
                     {financialMetrics.montageMetrics.total > 0 && (
                       <div className="mt-2">
                         <div className="text-xs text-gray-500 mb-1">
-                          Payment: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
+                          {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
                         </div>
                         <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-1.5" />
                       </div>
@@ -1088,18 +1088,18 @@ const Financial = () => {
 
                 {/* Product Costs Detail */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">Product Costs (COGS)</h4>
+                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('productCostsCOGS')}</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Total Product Costs</span>
+                      <span>{t('totalProductCosts')}</span>
                       <span className="font-medium">{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Direct Material Costs</span>
+                      <span className="text-gray-600">{t('directMaterialCosts')}</span>
                       <span className="font-medium text-gray-600">{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                     </div>
                     <div className="text-xs text-gray-500 mt-2">
-                      Cost of goods sold from receipt items
+                      {t('costOfGoodsSoldFromReceiptItems')}
                     </div>
                   </div>
                 </div>
@@ -1108,51 +1108,51 @@ const Financial = () => {
 
             {/* Profit Analysis with Revenue Scenarios */}
             <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">Profit Analysis & Revenue Scenarios</h3>
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('profitAnalysisRevenueScenarios')}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Current Scenario (Based on Received Revenue) */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Current Position (Received Revenue)</h4>
+                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">{t('currentPositionReceivedRevenue')}</h4>
 
                   <div className="space-y-3">
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">Revenue Received</span>
+                        <span className="font-medium">{t('revenueReceived')}</span>
                         <span className="font-bold text-blue-600">{financialMetrics.totalReceived.toFixed(2)} DH</span>
                       </div>
-                      <div className="text-xs text-blue-600">Actual cash received from customers</div>
+                      <div className="text-xs text-blue-600">{t('actualCashReceivedFromCustomers')}</div>
                     </div>
 
                     <div className="p-3 bg-red-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Less: Product Costs (Including Paid at Delivery)</span>
+                        <span className="text-sm font-medium">{t('lessProductCostsIncludingPaidAtDelivery')}</span>
                         <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                       </div>
-                      <div className="text-xs text-red-500 mb-2">Product costs breakdown:</div>
+                      <div className="text-xs text-red-500 mb-2">{t('productCostsBreakdown')}</div>
                       <div className="pl-2 space-y-1 text-xs">
                         <div className="flex justify-between">
-                          <span>• Direct material costs</span>
+                          <span>{t('directMaterialCostsBreakdown')}</span>
                           <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>• Paid at delivery costs</span>
+                          <span>{t('paidAtDeliveryCostsBreakdown')}</span>
                           <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center mb-1 mt-2">
-                        <span className="text-sm">Less: Paid Op. Expenses</span>
+                        <span className="text-sm">{t('lessPaidOpExpenses')}</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Less: Paid Montage</span>
+                        <span className="text-sm">{t('lessPaidMontage')}</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
                       </div>
                     </div>
 
                     <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">Current Net Position</span>
+                        <span className="font-medium">{t('currentNetPosition')}</span>
                         <span className={cn(
                           "font-bold text-lg",
                           financialMetrics.availableCash >= 0 ? "text-green-600" : "text-red-600"
@@ -1161,17 +1161,17 @@ const Financial = () => {
                         </span>
                       </div>
                       <div className="text-xs text-green-600 mt-1">
-                        This is your current cash position after all paid costs
+                        {t('currentCashPositionAfterAllPaidCosts')}
                       </div>
                     </div>
 
                     <div className="p-3 bg-yellow-50 rounded-lg">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-yellow-800">Pending Liabilities</span>
+                        <span className="font-medium text-yellow-800">{t('pendingLiabilities')}</span>
                         <span className="font-bold text-yellow-800">-{financialMetrics.totalExpensesUnpaid.toFixed(2)} DH</span>
                       </div>
                       <div className="text-xs text-yellow-700 mt-1">
-                        Unpaid expenses that will impact future cash flow
+                        {t('unpaidExpensesFutureCashFlow')}
                       </div>
                     </div>
                   </div>
@@ -1179,46 +1179,46 @@ const Financial = () => {
 
                 {/* Full Scenario (If All Revenue Collected) */}
                 <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">Full Potential (If All Revenue Collected)</h4>
+                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">{t('fullPotentialIfAllRevenueCollected')}</h4>
 
                   <div className="space-y-3">
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">Total Invoiced Revenue</span>
+                        <span className="font-medium">{t('totalInvoicedRevenue')}</span>
                         <span className="font-bold text-blue-600">{financialMetrics.totalRevenue.toFixed(2)} DH</span>
                       </div>
-                      <div className="text-xs text-blue-600">Including unclaimed balance: +{financialMetrics.totalOutstanding.toFixed(2)} DH</div>
+                      <div className="text-xs text-blue-600">{t('includingUnclaimedBalance')} +{financialMetrics.totalOutstanding.toFixed(2)} DH</div>
                     </div>
 
                     <div className="p-3 bg-red-50 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Less: Product Costs (Including Paid at Delivery)</span>
+                        <span className="text-sm font-medium">{t('lessProductCostsIncludingPaidAtDelivery')}</span>
                         <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                       </div>
-                      <div className="text-xs text-red-500 mb-2">Product costs breakdown:</div>
+                      <div className="text-xs text-red-500 mb-2">{t('productCostsBreakdown')}</div>
                       <div className="pl-2 space-y-1 text-xs">
                         <div className="flex justify-between">
-                          <span>• Direct material costs</span>
+                          <span>{t('directMaterialCostsBreakdown')}</span>
                           <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>• Paid at delivery costs</span>
+                          <span>{t('paidAtDeliveryCostsBreakdown')}</span>
                           <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center mb-1 mt-2">
-                        <span className="text-sm">Less: All Op. Expenses</span>
+                        <span className="text-sm">{t('lessAllOpExpenses')}</span>
                         <span className="text-red-600">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm">Less: All Montage</span>
+                        <span className="text-sm">{t('lessAllMontage')}</span>
                         <span className="text-red-600">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
                       </div>
                     </div>
 
                     <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Net Profit</span>
+                        <span className="font-medium">{t('totalNetProfit')}</span>
                         <span className={cn(
                           "font-bold text-lg",
                           financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
@@ -1227,19 +1227,19 @@ const Financial = () => {
                         </span>
                       </div>
                       <div className="text-xs text-green-600 mt-1">
-                        Maximum potential profit if all revenue collected
+                        {t('maximumPotentialProfitIfAllRevenueCollected')}
                       </div>
                     </div>
 
                     <div className="p-3 bg-purple-50 rounded-lg">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-purple-800">Collection Impact</span>
+                        <span className="font-medium text-purple-800">{t('collectionImpact')}</span>
                         <span className="font-bold text-purple-800">
                           +{(financialMetrics.netProfitAfterAllExpenses - financialMetrics.availableCash).toFixed(2)} DH
                         </span>
                       </div>
                       <div className="text-xs text-purple-700 mt-1">
-                        Additional profit from collecting outstanding balance and paying remaining expenses
+                        {t('additionalProfitFromCollectingBalance')}
                       </div>
                     </div>
                   </div>
@@ -1249,11 +1249,11 @@ const Financial = () => {
 
             {/* Summary Metrics */}
             <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">Financial Performance Metrics</h3>
+              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('financialPerformanceMetrics')}</h3>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Gross Margin</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('grossMargin')}</p>
                   <p className={cn(
                     "text-xl font-bold",
                     financialMetrics.grossMargin >= 0 ? "text-green-600" : "text-red-600"
@@ -1263,7 +1263,7 @@ const Financial = () => {
                 </div>
 
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Net Margin (Current)</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('netMarginCurrent')}</p>
                   <p className={cn(
                     "text-xl font-bold",
                     financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
@@ -1273,7 +1273,7 @@ const Financial = () => {
                 </div>
 
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Net Margin (Full)</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('netMarginFull')}</p>
                   <p className={cn(
                     "text-xl font-bold",
                     financialMetrics.netMarginTotal >= 0 ? "text-green-600" : "text-red-600"
@@ -1283,7 +1283,7 @@ const Financial = () => {
                 </div>
 
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Collection Rate</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('collectionRate')}</p>
                   <p className="text-xl font-bold text-blue-600">
                     {financialMetrics.collectionRate.toFixed(1)}%
                   </p>
@@ -1299,27 +1299,27 @@ const Financial = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Detailed Capital Expenditure Analysis
+            {t('detailedCapitalExpenditureAnalysis')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div className="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
-              <span className="font-medium">Total Capital Expenditure</span>
+              <span className="font-medium">{t('totalCapitalExpenditure')}</span>
               <span className="font-bold text-purple-900">
                 {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
               </span>
             </div>
 
             <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-              <span className="font-medium">Amount Paid</span>
+              <span className="font-medium">{t('amountPaid')}</span>
               <span className="font-bold text-green-600">
                 {financialMetrics.capitalAnalysis.paid.toFixed(2)} DH
               </span>
             </div>
 
             <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-              <span className="font-medium">Outstanding Balance</span>
+              <span className="font-medium">{t('outstandingBalance')}</span>
               <span className="font-bold text-red-600">
                 {financialMetrics.capitalAnalysis.outstanding.toFixed(2)} DH
               </span>
@@ -1329,7 +1329,7 @@ const Financial = () => {
           {financialMetrics.capitalAnalysis.total > 0 && (
             <div className="mb-6">
               <div className="flex justify-between text-sm mb-2">
-                <span>Payment Progress</span>
+                <span>{t('paymentProgress')}</span>
                 <span>{((financialMetrics.capitalAnalysis.paid / financialMetrics.capitalAnalysis.total) * 100).toFixed(1)}%</span>
               </div>
               <Progress 
@@ -1341,21 +1341,21 @@ const Financial = () => {
 
           {financialMetrics.capitalAnalysis.purchases.length > 0 && (
             <div>
-              <h4 className="font-medium mb-4">Capital Expenditure Breakdown</h4>
+              <h4 className="font-medium mb-4">{t('capitalExpenditureBreakdown')}</h4>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {financialMetrics.capitalAnalysis.purchases.map((purchase) => (
                   <div key={purchase.id} className="border rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <h5 className="font-medium text-gray-900">{purchase.description}</h5>
-                        <p className="text-sm text-gray-600">Supplier: {purchase.supplier}</p>
-                        <p className="text-xs text-gray-500">Date: {format(new Date(purchase.date), 'MMM dd, yyyy')}</p>
+                        <p className="text-sm text-gray-600">{t('supplier')}: {purchase.supplier}</p>
+                        <p className="text-xs text-gray-500">{t('date')}: {format(new Date(purchase.date), 'MMM dd, yyyy')}</p>
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-gray-900">{purchase.total.toFixed(2)} DH</div>
-                        <div className="text-sm text-green-600">Paid: {purchase.paid.toFixed(2)} DH</div>
+                        <div className="text-sm text-green-600">{t('paid')}: {purchase.paid.toFixed(2)} DH</div>
                         {purchase.outstanding > 0 && (
-                          <div className="text-sm text-red-600">Outstanding: {purchase.outstanding.toFixed(2)} DH</div>
+                          <div className="text-sm text-red-600">{t('outstanding')}: {purchase.outstanding.toFixed(2)} DH</div>
                         )}
                       </div>
                     </div>
@@ -1367,7 +1367,7 @@ const Financial = () => {
                           className="h-2"
                         />
                         <div className="text-xs text-gray-500 mt-1">
-                          {((purchase.paid / purchase.total) * 100).toFixed(1)}% paid
+                          {((purchase.paid / purchase.total) * 100).toFixed(1)}% {t('paidPercentage')}
                         </div>
                       </div>
                     )}
@@ -1384,23 +1384,23 @@ const Financial = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PieChart className="h-5 w-5" />
-            Performance Summary
+            {t('performanceSummary')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Total Orders</p>
+              <p className="text-sm text-gray-600 mb-1">{t('totalOrders')}</p>
               <p className="text-2xl font-bold text-blue-600">{filteredReceipts.length}</p>
             </div>
 
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Capital Purchases</p>
+              <p className="text-sm text-gray-600 mb-1">{t('capitalPurchases')}</p>
               <p className="text-2xl font-bold text-orange-600">{financialMetrics.capitalAnalysis.purchases.length}</p>
             </div>
 
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Gross Margin</p>
+              <p className="text-sm text-gray-600 mb-1">{t('grossMargin')}</p>
               <p className={cn(
                 "text-2xl font-bold",
                 financialMetrics.grossMargin >= 0 ? "text-green-600" : "text-red-600"
@@ -1410,7 +1410,7 @@ const Financial = () => {
             </div>
 
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Net Margin (Paid)</p>
+              <p className="text-sm text-gray-600 mb-1">{t('netMarginPaid')}</p>
               <p className={cn(
                 "text-2xl font-bold",
                 financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
@@ -1420,7 +1420,7 @@ const Financial = () => {
             </div>
 
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">Average Order Value</p>
+              <p className="text-sm text-gray-600 mb-1">{t('averageOrderValue')}</p>
               <p className="text-2xl font-bold text-gray-600">
                 {filteredReceipts.length > 0 
                   ? (financialMetrics.totalRevenue / filteredReceipts.length).toFixed(2)

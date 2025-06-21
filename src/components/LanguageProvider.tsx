@@ -2338,6 +2338,166 @@ const financialTranslations: Translations = {
     en: 'Collection Rate',
     fr: 'Taux de Collecte'
   },
+  comprehensiveFinancialAnalysisProfit: {
+    en: 'Comprehensive Financial Analysis & Profit Breakdown',
+    fr: 'Analyse Financière Complète et Répartition des Bénéfices'
+  },
+  completeProfitAnalysisDescription: {
+    en: 'Complete profit analysis including all costs, expenses, and unclaimed balance scenarios',
+    fr: 'Analyse complète des bénéfices incluant tous les coûts, dépenses et scénarios de soldes non réclamés'
+  },
+  revenueAnalysis: {
+    en: 'Revenue Analysis',
+    fr: 'Analyse des Revenus'
+  },
+  totalRevenueInvoiced: {
+    en: 'Total Revenue (Invoiced)',
+    fr: 'Chiffre d\'Affaires Total (Facturé)'
+  },
+  revenueReceived: {
+    en: 'Revenue Received',
+    fr: 'Revenus Reçus'
+  },
+  unclaimedBalance: {
+    en: 'Unclaimed Balance',
+    fr: 'Solde Non Réclamé'
+  },
+  costBreakdown: {
+    en: 'Cost Breakdown',
+    fr: 'Répartition des Coûts'
+  },
+  productCostsCOGS: {
+    en: 'Product Costs (COGS)',
+    fr: 'Coûts des Produits (COGS)'
+  },
+  detailedExpenseAnalysis: {
+    en: 'Detailed Expense Analysis',
+    fr: 'Analyse Détaillée des Dépenses'
+  },
+  operational: {
+    en: 'Operational',
+    fr: 'Opérationnel'
+  },
+  payment: {
+    en: 'Payment',
+    fr: 'Paiement'
+  },
+  directMaterialCosts: {
+    en: 'Direct Material Costs',
+    fr: 'Coûts Directs des Matériaux'
+  },
+  costOfGoodsSoldFromReceiptItems: {
+    en: 'Cost of goods sold from receipt items',
+    fr: 'Coût des marchandises vendues à partir des articles de reçus'
+  },
+  profitAnalysisRevenueScenarios: {
+    en: 'Profit Analysis & Revenue Scenarios',
+    fr: 'Analyse des Bénéfices et Scénarios de Revenus'
+  },
+  currentPositionReceivedRevenue: {
+    en: 'Current Position (Received Revenue)',
+    fr: 'Position Actuelle (Revenus Reçus)'
+  },
+  actualCashReceivedFromCustomers: {
+    en: 'Actual cash received from customers',
+    fr: 'Liquidités réellement reçues des clients'
+  },
+  lessProductCostsIncludingPaidAtDelivery: {
+    en: 'Less: Product Costs (Including Paid at Delivery)',
+    fr: 'Moins: Coûts des Produits (Y compris Payé à la Livraison)'
+  },
+  productCostsBreakdown: {
+    en: 'Product costs breakdown:',
+    fr: 'Répartition des coûts des produits:'
+  },
+  directMaterialCostsBreakdown: {
+    en: '• Direct material costs',
+    fr: '• Coûts directs des matériaux'
+  },
+  paidAtDeliveryCostsBreakdown: {
+    en: '• Paid at delivery costs',
+    fr: '• Coûts payés à la livraison'
+  },
+  lessPaidOpExpenses: {
+    en: 'Less: Paid Op. Expenses',
+    fr: 'Moins: Dépenses Op. Payées'
+  },
+  lessPaidMontage: {
+    en: 'Less: Paid Montage',
+    fr: 'Moins: Montage Payé'
+  },
+  currentNetPosition: {
+    en: 'Current Net Position',
+    fr: 'Position Nette Actuelle'
+  },
+  currentCashPositionAfterAllPaidCosts: {
+    en: 'This is your current cash position after all paid costs',
+    fr: 'Ceci est votre position de liquidités actuelle après tous les coûts payés'
+  },
+  pendingLiabilities: {
+    en: 'Pending Liabilities',
+    fr: 'Passifs en Attente'
+  },
+  unpaidExpensesFutureCashFlow: {
+    en: 'Unpaid expenses that will impact future cash flow',
+    fr: 'Dépenses impayées qui impacteront les flux de trésorerie futurs'
+  },
+  fullPotentialIfAllRevenueCollected: {
+    en: 'Full Potential (If All Revenue Collected)',
+    fr: 'Potentiel Complet (Si Tous les Revenus Sont Collectés)'
+  },
+  totalInvoicedRevenue: {
+    en: 'Total Invoiced Revenue',
+    fr: 'Chiffre d\'Affaires Total Facturé'
+  },
+  includingUnclaimedBalance: {
+    en: 'Including unclaimed balance:',
+    fr: 'Y compris le solde non réclamé:'
+  },
+  lessAllOpExpenses: {
+    en: 'Less: All Op. Expenses',
+    fr: 'Moins: Toutes les Dépenses Op.'
+  },
+  lessAllMontage: {
+    en: 'Less: All Montage',
+    fr: 'Moins: Tout le Montage'
+  },
+  totalNetProfit: {
+    en: 'Total Net Profit',
+    fr: 'Bénéfice Net Total'
+  },
+  maximumPotentialProfitIfAllRevenueCollected: {
+    en: 'Maximum potential profit if all revenue collected',
+    fr: 'Bénéfice potentiel maximum si tous les revenus sont collectés'
+  },
+  collectionImpact: {
+    en: 'Collection Impact',
+    fr: 'Impact de la Collecte'
+  },
+  additionalProfitFromCollectingBalance: {
+    en: 'Additional profit from collecting outstanding balance and paying remaining expenses',
+    fr: 'Bénéfice supplémentaire en collectant le solde impayé et en payant les dépenses restantes'
+  },
+  financialPerformanceMetrics: {
+    en: 'Financial Performance Metrics',
+    fr: 'Indicateurs de Performance Financière'
+  },
+  grossMargin: {
+    en: 'Gross Margin',
+    fr: 'Marge Brute'
+  },
+  netMarginCurrent: {
+    en: 'Net Margin (Current)',
+    fr: 'Marge Nette (Actuelle)'
+  },
+  netMarginFull: {
+    en: 'Net Margin (Full)',
+    fr: 'Marge Nette (Complète)'
+  },
+  collectionRate: {
+    en: 'Collection Rate',
+    fr: 'Taux de Collecte'
+  },
   detailedCapitalExpenditureAnalysis: {
     en: 'Detailed Capital Expenditure Analysis',
     fr: 'Analyse Détaillée des Dépenses d\'Investissement'
@@ -2393,6 +2553,50 @@ const financialTranslations: Translations = {
   averageOrderValue: {
     en: 'Average Order Value',
     fr: 'Valeur Moyenne de Commande'
+  },
+  currentlyIncluding: {
+    en: 'Currently including',
+    fr: 'Inclut actuellement'
+  },
+  currentlyExcluding: {
+    en: 'Currently excluding',
+    fr: 'Exclut actuellement'
+  },
+  paidAtDeliveryItems: {
+    en: 'paid at delivery items',
+    fr: 'les articles payés à la livraison'
+  },
+  categoryFilter: {
+    en: 'Category Filter',
+    fr: 'Filtre par Catégorie'
+  },
+  companyFilter: {
+    en: 'Company Filter',
+    fr: 'Filtre par Entreprise'
+  },
+  stockStatusFilter: {
+    en: 'Stock Status Filter',
+    fr: 'Filtre par État du Stock'
+  },
+  allStockStatus: {
+    en: 'All Stock Status',
+    fr: 'Tous les États de Stock'
+  },
+  paidAtDeliveryFilter: {
+    en: 'Paid at Delivery Filter',
+    fr: 'Filtre Payé à la Livraison'
+  },
+  totalItems: {
+    en: 'Total Items',
+    fr: 'Total des Articles'
+  },
+  totalRevenue: {
+    en: 'Total Revenue',
+    fr: 'Chiffre d\'Affaires Total'
+  },
+  noItemsFoundMatchingFilters: {
+    en: 'No items found matching the selected filters.',
+    fr: 'Aucun article trouvé correspondant aux filtres sélectionnés.'
   }
 };
 
