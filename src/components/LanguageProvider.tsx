@@ -307,6 +307,132 @@ const productTranslations: Translations = {
     en: 'Accessories',
     fr: 'Accessoires'
   },
+  // Category filter options
+  allCategories: {
+    en: 'All Categories',
+    fr: 'Toutes les Catégories'
+  },
+  singleVisionLenses: {
+    en: 'Single Vision Lenses',
+    fr: 'Verres de Vision Simple'
+  },
+  progressiveLenses: {
+    en: 'Progressive Lenses',
+    fr: 'Verres Progressifs'
+  },
+  // Additional category variations
+  'Single Vision Lenses': {
+    en: 'Single Vision Lenses',
+    fr: 'Verres de Vision Simple'
+  },
+  'Progressive Lenses': {
+    en: 'Progressive Lenses',
+    fr: 'Verres Progressifs'
+  },
+  'Frames': {
+    en: 'Frames',
+    fr: 'Montures'
+  },
+  'Sunglasses': {
+    en: 'Sunglasses',
+    fr: 'Lunettes de Soleil'
+  },
+  'Contact Lenses': {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact'
+  },
+  'Accessories': {
+    en: 'Accessories',
+    fr: 'Accessoires'
+  },
+  // Index filter options
+  allIndexes: {
+    en: 'All Indexes',
+    fr: 'Tous les Indices'
+  },
+  '1.56': {
+    en: '1.56',
+    fr: '1.56'
+  },
+  '1.6': {
+    en: '1.6',
+    fr: '1.6'
+  },
+  '1.67': {
+    en: '1.67',
+    fr: '1.67'
+  },
+  '1.74': {
+    en: '1.74',
+    fr: '1.74'
+  },
+  // Treatment filter options
+  allTreatments: {
+    en: 'All Treatments',
+    fr: 'Tous les Traitements'
+  },
+  'White': {
+    en: 'White',
+    fr: 'Blanc'
+  },
+  'AR': {
+    en: 'AR',
+    fr: 'AR'
+  },
+  'Blue': {
+    en: 'Blue',
+    fr: 'Bleu'
+  },
+  'Photochromic': {
+    en: 'Photochromic',
+    fr: 'Photochromique'
+  },
+  // Company filter options
+  allCompanies: {
+    en: 'All Companies',
+    fr: 'Toutes les Entreprises'
+  },
+  'Indo': {
+    en: 'Indo',
+    fr: 'Indo'
+  },
+  'ABlens': {
+    en: 'ABlens',
+    fr: 'ABlens'
+  },
+  'Essilor': {
+    en: 'Essilor',
+    fr: 'Essilor'
+  },
+  'GLASSANDLENS': {
+    en: 'GLASSANDLENS',
+    fr: 'GLASSANDLENS'
+  },
+  'Optifak': {
+    en: 'Optifak',
+    fr: 'Optifak'
+  },
+  // Stock status filter options
+  allStockStatuses: {
+    en: 'All Stock Statuses',
+    fr: 'Tous les États de Stock'
+  },
+  'Order': {
+    en: 'Order',
+    fr: 'Commande'
+  },
+  'inStock': {
+    en: 'In Stock',
+    fr: 'En Stock'
+  },
+  'Fabrication': {
+    en: 'Fabrication',
+    fr: 'Fabrication'
+  },
+  'Out Of Stock': {
+    en: 'Out Of Stock',
+    fr: 'Rupture de Stock'
+  },
   category: {
     en: 'Category',
     fr: 'Catégorie'
