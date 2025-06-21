@@ -2280,8 +2280,7 @@ const purchasesTranslations: Translations = {
     fr: 'Les futurs reçus dans cette plage de dates seront automatiquement inclus.'
   },
   failedToLinkReceipts: {
-    en:```python
- 'Failed to link receipts to purchase',
+    en: 'Failed to link receipts to purchase',
     fr: 'Échec de la liaison des reçus à l\'achat'
   },
   enterDescription: {

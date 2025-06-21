@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
@@ -414,7 +413,7 @@ const Invoices = () => {
         </div>
       </div>
 
-      {/* Active Filters Tags */}
+      {/* Active Filters Tags - Only show when filters are active */}
       {(dateFilter !== 'all' || statusFilter !== 'all') && (
         <div className="mb-4 flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-gray-500">{t('active') || 'Active'}:</span>
@@ -432,57 +431,6 @@ const Invoices = () => {
           )}
         </div>
       )}
-
-      {/* Stats Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm">{t('totalInvoices') || 'Total Invoices'}</p>
-                <p className="text-2xl font-bold">{invoices.length}</p>
-              </div>
-              <FileText className="h-8 w-8 text-blue-200" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm">{t('paidInvoices') || 'Paid Invoices'}</p>
-                <p className="text-2xl font-bold">{invoices.filter(i => i.status === 'Paid').length}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-200" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-100 text-sm">{t('pendingInvoices') || 'Pending Invoices'}</p>
-                <p className="text-2xl font-bold">{invoices.filter(i => i.status === 'Pending').length}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-yellow-200" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100 text-sm">{t('totalRevenue') || 'Total Revenue'}</p>
-                <p className="text-2xl font-bold">{invoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(0)} DH</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-purple-200" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Invoice Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
