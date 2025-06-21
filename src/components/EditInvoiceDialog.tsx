@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [invoiceData, setInvoiceData] = useState({
     invoice_number: '',
     client_name: '',
@@ -40,7 +39,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     status: 'Draft',
     notes: ''
   });
-  
+
   const [prescriptionData, setPrescriptionData] = useState({
     right_eye_sph: '',
     right_eye_cyl: '',
@@ -50,7 +49,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     left_eye_axe: '',
     add_value: ''
   });
-  
+
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAssuranceAlert, setShowAssuranceAlert] = useState(false);
@@ -91,7 +90,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
         unit_price: item.unit_price || 0,
         total_price: item.total_price || 0
       })) || [];
-      
+
       setInvoiceItems(items);
       setOriginalPrices({});
     }
@@ -114,13 +113,13 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     setInvoiceItems(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      
+
       if (field === 'quantity' || field === 'unit_price') {
         const quantity = field === 'quantity' ? value : updated[index].quantity || 0;
         const unitPrice = field === 'unit_price' ? value : updated[index].unit_price || 0;
         updated[index].total_price = quantity * unitPrice;
       }
-      
+
       return updated;
     });
   };
@@ -156,7 +155,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     let baselinePrices = { ...originalPrices };
     let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
                           Object.keys(baselinePrices).length !== invoiceItems.length;
-    
+
     if (needsNewBaseline) {
       baselinePrices = {};
       invoiceItems.forEach((item, index) => {
@@ -170,15 +169,15 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
       const quantity = invoiceItems[itemIndex]?.quantity || 1;
       return sum + (baselinePrices[itemIndex] * quantity);
     }, 0);
-    
+
     const targetTotal = invoiceData.assurance_total;
     const difference = Math.round(targetTotal - baselineTotal);
-    
+
     if (Math.abs(difference) < 1) return;
 
     const startTime = Date.now();
     const TIME_LIMIT = 2000;
-    
+
     const calculateTotal = (items: Partial<InvoiceItem>[]) => {
       return items.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
     };
@@ -191,12 +190,12 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
 
     const evaluateSolution = (items: Partial<InvoiceItem>[] | null) => {
       if (!items) return { isValid: false, score: -1, niceEndings: 0, doubleZeroEndings: 0, exactMatch: false };
-      
+
       const total = calculateTotal(items);
       const exactMatch = Math.abs(total - targetTotal) < 0.01;
       const doubleZeroEndings = hasDoubleZeroEndings(items);
       const hasDecimals = items.some(item => (item.unit_price || 0) % 1 !== 0);
-      
+
       return {
         isValid: exactMatch && !hasDecimals,
         exactMatch,
@@ -209,19 +208,19 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     // Simple equal distribution strategy
     const tryEqualDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
-      
+
       const testItems = originalItems.map((item, index) => ({
         ...item,
         unit_price: baselinePrices[index] || 0,
         total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
       }));
-      
+
       let remainingDiff = diff;
 
       if (diff > 0) {
         const baseIncrease = Math.floor(remainingDiff / testItems.length);
         let extraAmount = remainingDiff - (baseIncrease * testItems.length);
-        
+
         testItems.forEach((item, index) => {
           if (isTimeUp()) return;
           const currentPrice = item.unit_price || 0;
@@ -229,7 +228,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
           testItems[index].unit_price = currentPrice + baseIncrease;
           testItems[index].total_price = testItems[index].unit_price * quantity;
         });
-        
+
         let itemIndex = 0;
         while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
@@ -243,7 +242,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
         remainingDiff = Math.abs(remainingDiff);
         const baseDecrease = Math.floor(remainingDiff / testItems.length);
         let extraAmount = remainingDiff - (baseDecrease * testItems.length);
-        
+
         testItems.forEach((item, index) => {
           if (isTimeUp()) return;
           const currentPrice = item.unit_price || 0;
@@ -251,13 +250,13 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
           testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
           testItems[index].total_price = testItems[index].unit_price * quantity;
         });
-        
+
         let itemIndex = 0;
         while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
-          
+
           if (currentPrice > 0) {
             item.unit_price = currentPrice - 1;
             item.total_price = item.unit_price * quantity;
@@ -271,7 +270,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     };
 
     const solutions = [];
-    
+
     if (!isTimeUp()) {
       const equalResult = tryEqualDistribution([...invoiceItems], difference);
       const equalEvaluation = evaluateSolution(equalResult);
@@ -288,7 +287,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     if (bestSolution && bestSolution.items) {
       setInvoiceItems(bestSolution.items);
       const finalTotal = calculateTotal(bestSolution.items);
-      
+
       toast({
         title: "Prices Adjusted Successfully",
         description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH).`,
@@ -312,7 +311,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
 
   const handleSave = async () => {
     if (!user || !invoice) return;
-    
+
     if (!invoiceData.client_name.trim()) {
       toast({
         title: "Error",
@@ -321,7 +320,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
       });
       return;
     }
-    
+
     if (invoiceItems.length === 0) {
       toast({
         title: "Error",
@@ -341,10 +340,10 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
     }
 
     setIsLoading(true);
-    
+
     try {
       const finalStatus = getInvoiceStatus();
-      
+
       // Update invoice
       const { error: invoiceError } = await supabase
         .from('invoices')
@@ -400,12 +399,12 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
 
       if (itemsError) throw itemsError;
 
-      queryClient.invalidateQueries(['invoices']);
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
       toast({
         title: "Success",
         description: "Invoice updated successfully!",
       });
-      
+
       onClose();
     } catch (error) {
       console.error('Error updating invoice:', error);
@@ -427,7 +426,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{t('editInvoice') || 'Edit Invoice'}</DialogTitle>
         </DialogHeader>
-        
+
         {/* Assurance Mismatch Alert */}
         {showAssuranceAlert && (
           <Alert className="border-orange-200 bg-orange-50">
@@ -703,7 +702,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
                     </CardContent>
                   </Card>
                 ))}
-                
+
                 {invoiceItems.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <p>{t('noItemsAdded') || 'No items added yet'}</p>

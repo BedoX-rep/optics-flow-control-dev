@@ -107,12 +107,12 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
         add_value: invoice.add_value?.toString() || ''
       });
 
-      // Set invoice items
+      // Set invoice items - fix the data structure mapping
       const items = invoice.invoice_items?.map(item => ({
         id: item.id,
-        name: item.name || '',
+        name: item.product_name || '',
         quantity: item.quantity || 0,
-        price: item.price || 0
+        price: item.unit_price || 0
       })) || [];
       setInvoiceItems(items);
     }

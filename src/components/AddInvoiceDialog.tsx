@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [selectedReceiptId, setSelectedReceiptId] = useState<string>('');
   const [invoiceData, setInvoiceData] = useState({
     invoice_number: '',
@@ -41,7 +40,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     status: 'Draft',
     notes: ''
   });
-  
+
   const [prescriptionData, setPrescriptionData] = useState({
     right_eye_sph: '',
     right_eye_cyl: '',
@@ -51,7 +50,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     left_eye_axe: '',
     add_value: ''
   });
-  
+
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAssuranceAlert, setShowAssuranceAlert] = useState(false);
@@ -61,7 +60,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     queryKey: ['receipts-for-invoice', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
+
       const { data, error } = await supabase
         .from('receipts')
         .select(`
@@ -100,7 +99,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         console.error('Error fetching receipts:', error);
         throw error;
       }
-      
+
       return data?.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || 'No Client',
@@ -123,7 +122,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
     setSelectedReceiptId(receiptId);
-    
+
     if (receiptId === "no-receipt") {
       setInvoiceItems([]);
       setInvoiceData(prev => ({
@@ -144,13 +143,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       });
       return;
     }
-    
+
     const selectedReceipt = receipts.find(r => r.id === receiptId);
-    
+
     if (selectedReceipt) {
       const itemsTotal = selectedReceipt.receipt_items?.reduce((sum, item) => 
         sum + ((item.quantity || 1) * (item.price || 0)), 0) || 0;
-      
+
       // Set assurance total from receipt tax, or use items total if tax is 0
       const assuranceTotal = (selectedReceipt.tax && selectedReceipt.tax > 0) 
         ? selectedReceipt.tax 
@@ -185,7 +184,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         unit_price: item.price || 0,
         total_price: (item.quantity || 1) * (item.price || 0)
       })) || [];
-      
+
       setInvoiceItems(items);
       // Reset original prices when receipt selection changes
       setOriginalPrices({});
@@ -210,14 +209,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setInvoiceItems(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      
+
       // Recalculate total price for quantity and unit_price changes
       if (field === 'quantity' || field === 'unit_price') {
         const quantity = field === 'quantity' ? value : updated[index].quantity || 0;
         const unitPrice = field === 'unit_price' ? value : updated[index].unit_price || 0;
         updated[index].total_price = quantity * unitPrice;
       }
-      
+
       return updated;
     });
   };
@@ -258,7 +257,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     let baselinePrices = { ...originalPrices };
     let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
                           Object.keys(baselinePrices).length !== invoiceItems.length;
-    
+
     if (needsNewBaseline) {
       baselinePrices = {};
       invoiceItems.forEach((item, index) => {
@@ -273,15 +272,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       const quantity = invoiceItems[itemIndex]?.quantity || 1;
       return sum + (baselinePrices[itemIndex] * quantity);
     }, 0);
-    
+
     const targetTotal = invoiceData.assurance_total;
     const difference = Math.round(targetTotal - baselineTotal);
-    
+
     if (Math.abs(difference) < 1) return; // Already matches or difference is less than 1
 
     const startTime = Date.now();
     const TIME_LIMIT = 2000; // 2 seconds in milliseconds
-    
+
     // Helper function to calculate total from items
     const calculateTotal = (items: Partial<InvoiceItem>[]) => {
       return items.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
@@ -303,13 +302,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // Helper function to evaluate solution quality
     const evaluateSolution = (items: Partial<InvoiceItem>[] | null) => {
       if (!items) return { isValid: false, score: -1, niceEndings: 0, doubleZeroEndings: 0, exactMatch: false };
-      
+
       const total = calculateTotal(items);
       const exactMatch = Math.abs(total - targetTotal) < 0.01;
       const niceEndings = hasNiceEndings(items);
       const doubleZeroEndings = hasDoubleZeroEndings(items);
       const hasDecimals = items.some(item => (item.unit_price || 0) % 1 !== 0);
-      
+
       return {
         isValid: exactMatch && !hasDecimals,
         exactMatch,
@@ -323,14 +322,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // Strategy 1: Try to adjust items to end in multiples of 100, then 10
     const tryNiceDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
-      
+
       // Start from original baseline prices, not current prices
       const testItems = originalItems.map((item, index) => ({
         ...item,
         unit_price: baselinePrices[index] || 0,
         total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
       }));
-      
+
       let remainingDiff = diff;
 
       if (diff > 0) {
@@ -339,11 +338,11 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           const originalPrice = baselinePrices[i] || 0;
           const currentPrice = originalPrice;
           const quantity = testItems[i].quantity || 1;
-          
+
           // Try rounding to nearest 100 first
           const nextHundred = Math.ceil(currentPrice / 100) * 100;
           const hundredIncrease = Math.max(1, nextHundred - currentPrice);
-          
+
           if (hundredIncrease * quantity <= remainingDiff) {
             testItems[i].unit_price = currentPrice + hundredIncrease;
             testItems[i].total_price = testItems[i].unit_price * quantity;
@@ -352,7 +351,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             // Fall back to rounding to nearest 10
             const nextTen = Math.ceil(currentPrice / 10) * 10;
             const tenIncrease = Math.max(1, nextTen - currentPrice);
-            
+
             if (tenIncrease * quantity <= remainingDiff) {
               testItems[i].unit_price = currentPrice + tenIncrease;
               testItems[i].total_price = testItems[i].unit_price * quantity;
@@ -367,7 +366,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           const item = testItems[itemIndex];
           const quantity = item.quantity || 1;
           const maxIncrease = Math.floor(remainingDiff / quantity);
-          
+
           if (maxIncrease > 0) {
             const currentPrice = item.unit_price || 0;
             item.unit_price = currentPrice + maxIncrease;
@@ -379,15 +378,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       } else {
         // Decrease prices - try to round down to nearest 100 first, then 10
         remainingDiff = Math.abs(remainingDiff);
-        
+
         for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const currentPrice = testItems[i].unit_price || 0;
           const quantity = testItems[i].quantity || 1;
-          
+
           // Try rounding down to nearest 100 first
           const prevHundred = Math.floor(currentPrice / 100) * 100;
           const hundredDecrease = Math.min(currentPrice, currentPrice - prevHundred);
-          
+
           if (hundredDecrease > 0 && hundredDecrease * quantity <= remainingDiff) {
             testItems[i].unit_price = Math.max(0, currentPrice - hundredDecrease);
             testItems[i].total_price = testItems[i].unit_price * quantity;
@@ -396,7 +395,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             // Fall back to rounding down to nearest 10
             const prevTen = Math.floor(currentPrice / 10) * 10;
             const tenDecrease = Math.min(currentPrice, currentPrice - prevTen);
-            
+
             if (tenDecrease > 0 && tenDecrease * quantity <= remainingDiff) {
               testItems[i].unit_price = Math.max(0, currentPrice - tenDecrease);
               testItems[i].total_price = testItems[i].unit_price * quantity;
@@ -412,7 +411,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
           const maxDecrease = Math.min(currentPrice, Math.floor(remainingDiff / quantity));
-          
+
           if (maxDecrease > 0) {
             item.unit_price = currentPrice - maxDecrease;
             item.total_price = item.unit_price * quantity;
@@ -428,20 +427,20 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // Strategy 2: Equal distribution across all items
     const tryEqualDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
-      
+
       // Start from original baseline prices
       const testItems = originalItems.map((item, index) => ({
         ...item,
         unit_price: baselinePrices[index] || 0,
         total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
       }));
-      
+
       let remainingDiff = diff;
 
       if (diff > 0) {
         const baseIncrease = Math.floor(remainingDiff / testItems.length);
         let extraAmount = remainingDiff - (baseIncrease * testItems.length);
-        
+
         // Distribute base increase to all items
         testItems.forEach((item, index) => {
           if (isTimeUp()) return;
@@ -450,7 +449,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           testItems[index].unit_price = currentPrice + baseIncrease;
           testItems[index].total_price = testItems[index].unit_price * quantity;
         });
-        
+
         // Distribute remaining amount
         let itemIndex = 0;
         while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
@@ -465,7 +464,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         remainingDiff = Math.abs(remainingDiff);
         const baseDecrease = Math.floor(remainingDiff / testItems.length);
         let extraAmount = remainingDiff - (baseDecrease * testItems.length);
-        
+
         // Distribute base decrease to all items
         testItems.forEach((item, index) => {
           if (isTimeUp()) return;
@@ -474,14 +473,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
           testItems[index].total_price = testItems[index].unit_price * quantity;
         });
-        
+
         // Distribute remaining reduction
         let itemIndex = 0;
         while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
-          
+
           if (currentPrice > 0) {
             item.unit_price = currentPrice - 1;
             item.total_price = item.unit_price * quantity;
@@ -497,16 +496,16 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // Strategy 3: Weighted distribution based on original prices
     const tryWeightedDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
-      
+
       // Start from original baseline prices
       const testItems = originalItems.map((item, index) => ({
         ...item,
         unit_price: baselinePrices[index] || 0,
         total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
       }));
-      
+
       const totalCurrentValue = calculateTotal(testItems);
-      
+
       if (totalCurrentValue === 0) return null;
 
       let remainingDiff = diff;
@@ -520,7 +519,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           const allocation = Math.round(remainingDiff * proportion);
           const quantity = item.quantity || 1;
           const priceIncrease = Math.floor(allocation / quantity);
-          
+
           if (priceIncrease > 0) {
             item.unit_price = (item.unit_price || 0) + priceIncrease;
             item.total_price = item.unit_price * quantity;
@@ -540,7 +539,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         }
       } else {
         remainingDiff = Math.abs(remainingDiff);
-        
+
         // Similar logic for reduction
         for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const item = testItems[i];
@@ -549,7 +548,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           const allocation = Math.round(remainingDiff * proportion);
           const quantity = item.quantity || 1;
           const priceDecrease = Math.min(item.unit_price || 0, Math.floor(allocation / quantity));
-          
+
           if (priceDecrease > 0) {
             item.unit_price = (item.unit_price || 0) - priceDecrease;
             item.total_price = item.unit_price * quantity;
@@ -562,7 +561,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
-          
+
           if (currentPrice > 0) {
             item.unit_price = currentPrice - 1;
             item.total_price = item.unit_price * (item.quantity || 1);
@@ -578,7 +577,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // Strategy 4: Random variations for edge cases
     const tryRandomVariations = (originalItems: Partial<InvoiceItem>[], diff: number, attempts: number = 50): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
-      
+
       for (let attempt = 0; attempt < attempts && !isTimeUp(); attempt++) {
         // Start from original baseline prices
         const testItems = originalItems.map((item, index) => ({
@@ -586,16 +585,16 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           unit_price: baselinePrices[index] || 0,
           total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
         }));
-        
+
         let remainingDiff = diff;
-        
+
         // Randomly distribute the difference
         while (Math.abs(remainingDiff) > 0 && !isTimeUp()) {
           const randomIndex = Math.floor(Math.random() * testItems.length);
           const item = testItems[randomIndex];
           const quantity = item.quantity || 1;
           const currentPrice = item.unit_price || 0;
-          
+
           if (remainingDiff > 0) {
             const increase = Math.min(remainingDiff, Math.floor(Math.random() * 5) + 1);
             item.unit_price = currentPrice + increase;
@@ -610,38 +609,38 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             break;
           }
         }
-        
+
         const evaluation = evaluateSolution(testItems);
         if (evaluation.isValid) {
           return testItems;
         }
       }
-      
+
       return null;
     };
 
     // Collect all possible solutions with their evaluations
     const solutions = [];
-    
+
     // Try all strategies with time limits
     if (!isTimeUp()) {
       const niceResult = tryNiceDistribution([...invoiceItems], difference);
       const niceEvaluation = evaluateSolution(niceResult);
       if (niceEvaluation.items) solutions.push(niceEvaluation);
     }
-    
+
     if (!isTimeUp()) {
       const equalResult = tryEqualDistribution([...invoiceItems], difference);
       const equalEvaluation = evaluateSolution(equalResult);
       if (equalEvaluation.items) solutions.push(equalEvaluation);
     }
-    
+
     if (!isTimeUp()) {
       const weightedResult = tryWeightedDistribution([...invoiceItems], difference);
       const weightedEvaluation = evaluateSolution(weightedResult);
       if (weightedEvaluation.items) solutions.push(weightedEvaluation);
     }
-    
+
     if (!isTimeUp()) {
       const randomResult = tryRandomVariations([...invoiceItems], difference);
       const randomEvaluation = evaluateSolution(randomResult);
@@ -661,7 +660,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     if (bestSolution && bestSolution.items) {
       setInvoiceItems(bestSolution.items);
       const finalTotal = calculateTotal(bestSolution.items);
-      
+
       toast({
         title: "Prices Adjusted Successfully",
         description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH)${bestSolution.doubleZeroEndings > 0 ? ` with ${bestSolution.doubleZeroEndings} items ending in 00` : ''}${bestSolution.niceEndings > 0 ? ` and ${bestSolution.niceEndings} items ending in 0` : ''}.`,
@@ -672,7 +671,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       if (fallbackSolution.items) {
         setInvoiceItems(fallbackSolution.items);
         const finalTotal = calculateTotal(fallbackSolution.items);
-        
+
         toast({
           title: "Partial Adjustment",
           description: `Best available solution found in ${executionTime}ms (${finalTotal.toFixed(2)} DH). May need manual adjustment.`,
@@ -698,7 +697,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
   const handleSave = async () => {
     if (!user) return;
-    
+
     if (!invoiceData.client_name.trim()) {
       toast({
         title: "Error",
@@ -707,7 +706,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       });
       return;
     }
-    
+
     if (invoiceItems.length === 0) {
       toast({
         title: "Error",
@@ -728,10 +727,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     }
 
     setIsLoading(true);
-    
+
     try {
       const finalStatus = getInvoiceStatus();
-      
+
       // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
@@ -781,12 +780,11 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
       if (itemsError) throw itemsError;
 
-      queryClient.invalidateQueries(['invoices']);
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
       toast({
         title: "Success",
-        description: "Invoice created successfully!",
+        description: "Invoice created successfully.",
       });
-      
       onClose();
       resetForm();
     } catch (error) {
@@ -796,6 +794,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         description: "Failed to create invoice. Please try again.",
         variant: "destructive",
       });
+```python
+
     } finally {
       setIsLoading(false);
     }
@@ -835,7 +835,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{t('addInvoice') || 'Add Invoice'}</DialogTitle>
         </DialogHeader>
-        
+
         {/* Assurance Mismatch Alert */}
         {showAssuranceAlert && (
           <Alert className="border-orange-200 bg-orange-50">
@@ -1133,7 +1133,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                     </CardContent>
                   </Card>
                 ))}
-                
+
                 {invoiceItems.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <p>{t('noItemsAdded') || 'No items added yet'}</p>

@@ -258,6 +258,10 @@ const Invoices = () => {
     queryKey: ['invoices', user?.id],
     queryFn: fetchInvoices,
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   const filteredInvoices = useMemo(() => {
@@ -330,13 +334,21 @@ const Invoices = () => {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries(['invoices']);
+      // Optimistically update cache
+      queryClient.setQueryData(['invoices', user?.id], (oldData: Invoice[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.filter(invoice => invoice.id !== id);
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
       toast({
         title: t('success') || "Success",
         description: t('invoiceDeletedSuccessfully') || "Invoice deleted successfully.",
       });
     } catch (error) {
       console.error('Error deleting invoice:', error);
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['invoices', user?.id] });
       toast({
         title: t('error') || "Error",
         description: t('failedToDeleteInvoice') || "Failed to delete invoice. Please try again.",
