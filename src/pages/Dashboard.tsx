@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Users, ShoppingBag, Receipt, Calendar, TrendingUp, Eye, Glasses } from 'lucide-react';
-import PageTitle from '@/components/PageTitle';
+
 import StatCard from '@/components/StatCard';
 import BarChartComponent from '@/components/BarChart';
 import AreaChartComponent from '@/components/AreaChart';
@@ -297,12 +297,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
-      <div className="mb-6">
-        <PageTitle 
-          title={t('dashboard')} 
-          subtitle={t('dashboardSubtitle')}
-        />
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard')}</h1>
+          <p className="text-gray-600 mt-1">{t('dashboardSubtitle')}</p>
+        </div>
       </div>
 
       {/* Date Range Filter */}
@@ -423,38 +423,45 @@ const Dashboard = () => {
         <AreaChartComponent data={categoryData} title={t('revenueByCategory')} />
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-medium text-gray-700 mb-4">{t('recentActivity')}</h3>
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-4">{t('loadingRecentActivity')}</div>
-          ) : recentActivity.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">{t('noRecentActivity')}</div>
-          ) : (
-            recentActivity.map((activity, index) => (
-              <div key={activity.id} className="flex items-start border-b border-gray-100 pb-4 last:border-b-0">
-                <div className="flex-shrink-0 bg-optics-100 p-2 rounded-full mr-3">
-                  {activity.type === 'client' && <Users className="h-5 w-5 text-optics-600" />}
-                  {activity.type === 'receipt' && <Receipt className="h-5 w-5 text-optics-600" />}
-                  {activity.type === 'purchase' && <ShoppingBag className="h-5 w-5 text-optics-600" />}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            {t('recentActivity')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="text-center py-4">{t('loadingRecentActivity')}</div>
+            ) : recentActivity.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">{t('noRecentActivity')}</div>
+            ) : (
+              recentActivity.map((activity, index) => (
+                <div key={activity.id} className="flex items-start border-b border-gray-100 pb-4 last:border-b-0">
+                  <div className="flex-shrink-0 bg-blue-100 p-2 rounded-full mr-3">
+                    {activity.type === 'client' && <Users className="h-5 w-5 text-blue-600" />}
+                    {activity.type === 'receipt' && <Receipt className="h-5 w-5 text-blue-600" />}
+                    {activity.type === 'purchase' && <ShoppingBag className="h-5 w-5 text-blue-600" />}
+                  </div>
+                  <div className="flex-grow">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.description}</p>
+                    {activity.amount && (
+                      <p className="text-xs text-green-600 font-medium mt-1">
+                        DH{activity.amount.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  <span className="ml-auto text-xs text-gray-400">
+                    {formatTimeAgo(activity.timestamp)}
+                  </span>
                 </div>
-                <div className="flex-grow">
-                  <p className="text-sm font-medium">{activity.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.description}</p>
-                  {activity.amount && (
-                    <p className="text-xs text-green-600 font-medium mt-1">
-                      DH{activity.amount.toFixed(2)}
-                    </p>
-                  )}
-                </div>
-                <span className="ml-auto text-xs text-gray-400">
-                  {formatTimeAgo(activity.timestamp)}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
