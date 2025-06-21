@@ -838,6 +838,7 @@ export interface Database {
           advance_payment: number | null
           balance: number | null
           client_address: string | null
+          client_assurance: string | null
           client_name: string
           client_phone: string | null
           created_at: string | null
@@ -854,11 +855,19 @@ export interface Database {
           total: number
           updated_at: string | null
           user_id: string
+          right_eye_sph: number | null
+          right_eye_cyl: number | null
+          right_eye_axe: number | null
+          left_eye_sph: number | null
+          left_eye_cyl: number | null
+          left_eye_axe: number | null
+          add_value: number | null
         }
         Insert: {
           advance_payment?: number | null
           balance?: number | null
           client_address?: string | null
+          client_assurance?: string | null
           client_name: string
           client_phone?: string | null
           created_at?: string | null
@@ -875,11 +884,19 @@ export interface Database {
           total: number
           updated_at?: string | null
           user_id: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
         }
         Update: {
           advance_payment?: number | null
           balance?: number | null
           client_address?: string | null
+          client_assurance?: string | null
           client_name?: string
           client_phone?: string | null
           created_at?: string | null
@@ -896,6 +913,13 @@ export interface Database {
           total?: number
           updated_at?: string | null
           user_id?: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
         }
       };
       invoice_items: {

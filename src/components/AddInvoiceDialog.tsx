@@ -41,6 +41,16 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     notes: ''
   });
   
+  const [prescriptionData, setPrescriptionData] = useState({
+    right_eye_sph: '',
+    right_eye_cyl: '',
+    right_eye_axe: '',
+    left_eye_sph: '',
+    left_eye_cyl: '',
+    left_eye_axe: '',
+    add_value: ''
+  });
+  
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -116,6 +126,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         client_assurance: '',
         assurance_total: 0
       }));
+      setPrescriptionData({
+        right_eye_sph: '',
+        right_eye_cyl: '',
+        right_eye_axe: '',
+        left_eye_sph: '',
+        left_eye_cyl: '',
+        left_eye_axe: '',
+        add_value: ''
+      });
       return;
     }
     
@@ -129,6 +148,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         client_assurance: selectedReceipt.client_assurance || '',
         assurance_total: selectedReceipt.tax || 0
       }));
+
+      // Populate prescription data from receipt
+      setPrescriptionData({
+        right_eye_sph: selectedReceipt.right_eye_sph?.toString() || '',
+        right_eye_cyl: selectedReceipt.right_eye_cyl?.toString() || '',
+        right_eye_axe: selectedReceipt.right_eye_axe?.toString() || '',
+        left_eye_sph: selectedReceipt.left_eye_sph?.toString() || '',
+        left_eye_cyl: selectedReceipt.left_eye_cyl?.toString() || '',
+        left_eye_axe: selectedReceipt.left_eye_axe?.toString() || '',
+        add_value: selectedReceipt.Add?.toString() || ''
+      });
 
       // Convert receipt items to invoice items with manual price and quantity
       const items = selectedReceipt.receipt_items?.map(item => ({
@@ -228,7 +258,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           invoice_number: invoiceData.invoice_number,
           client_name: invoiceData.client_name,
           client_phone: invoiceData.client_phone,
-          client_address: invoiceData.client_assurance,
+          client_assurance: invoiceData.client_assurance,
           subtotal,
           tax_percentage: 0, // Not used anymore
           tax_amount: invoiceData.assurance_total,
@@ -238,7 +268,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           invoice_date: invoiceData.invoice_date,
           due_date: invoiceData.due_date || null,
           status: finalStatus,
-          notes: invoiceData.notes
+          notes: invoiceData.notes,
+          right_eye_sph: prescriptionData.right_eye_sph ? parseFloat(prescriptionData.right_eye_sph) : null,
+          right_eye_cyl: prescriptionData.right_eye_cyl ? parseFloat(prescriptionData.right_eye_cyl) : null,
+          right_eye_axe: prescriptionData.right_eye_axe ? parseInt(prescriptionData.right_eye_axe) : null,
+          left_eye_sph: prescriptionData.left_eye_sph ? parseFloat(prescriptionData.left_eye_sph) : null,
+          left_eye_cyl: prescriptionData.left_eye_cyl ? parseFloat(prescriptionData.left_eye_cyl) : null,
+          left_eye_axe: prescriptionData.left_eye_axe ? parseInt(prescriptionData.left_eye_axe) : null,
+          add_value: prescriptionData.add_value ? parseFloat(prescriptionData.add_value) : null
         })
         .select()
         .single();
@@ -296,6 +333,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       due_date: '',
       status: 'Draft',
       notes: ''
+    });
+    setPrescriptionData({
+      right_eye_sph: '',
+      right_eye_cyl: '',
+      right_eye_axe: '',
+      left_eye_sph: '',
+      left_eye_cyl: '',
+      left_eye_axe: '',
+      add_value: ''
     });
     setInvoiceItems([]);
   };
@@ -395,6 +441,95 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                 type="date"
                 value={invoiceData.due_date}
                 onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          {/* Prescription Section */}
+          <div className="space-y-4">
+            <Label className="text-lg font-semibold">{t('prescription') || 'Prescription'}</Label>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="font-medium">{t('rightEye') || 'Right Eye'}</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">SPH</Label>
+                    <Input
+                      type="number"
+                      step="0.25"
+                      value={prescriptionData.right_eye_sph}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">CYL</Label>
+                    <Input
+                      type="number"
+                      step="0.25"
+                      value={prescriptionData.right_eye_cyl}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">AXE</Label>
+                    <Input
+                      type="number"
+                      value={prescriptionData.right_eye_axe}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
+                      placeholder="0"
+                      min="0"
+                      max="180"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-medium">{t('leftEye') || 'Left Eye'}</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">SPH</Label>
+                    <Input
+                      type="number"
+                      step="0.25"
+                      value={prescriptionData.left_eye_sph}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">CYL</Label>
+                    <Input
+                      type="number"
+                      step="0.25"
+                      value={prescriptionData.left_eye_cyl}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">AXE</Label>
+                    <Input
+                      type="number"
+                      value={prescriptionData.left_eye_axe}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
+                      placeholder="0"
+                      min="0"
+                      max="180"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="w-1/3">
+              <Label className="text-xs">{t('add') || 'ADD'}</Label>
+              <Input
+                type="number"
+                step="0.25"
+                value={prescriptionData.add_value}
+                onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
+                placeholder="0.00"
               />
             </div>
           </div>

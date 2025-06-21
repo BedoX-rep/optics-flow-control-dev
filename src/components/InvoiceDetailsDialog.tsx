@@ -97,6 +97,12 @@ const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
                     </div>
                   </div>
                 )}
+                {invoice.client_assurance && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">{t('clientAssurance')}</p>
+                    <p className="font-medium">{invoice.client_assurance}</p>
+                  </div>
+                )}
                 {invoice.client_address && (
                   <div className="col-span-2">
                     <p className="text-sm text-gray-600 mb-1">{t('address')}</p>
@@ -109,6 +115,59 @@ const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
               </div>
             </CardContent>
           </Card>
+
+          {/* Prescription Information */}
+          {(invoice.right_eye_sph || invoice.right_eye_cyl || invoice.right_eye_axe || 
+            invoice.left_eye_sph || invoice.left_eye_cyl || invoice.left_eye_axe || 
+            invoice.add_value) && (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">{t('prescription')}</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium mb-3">{t('rightEye')}</h4>
+                    <div className="grid grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-600">SPH</p>
+                        <p className="font-medium">{invoice.right_eye_sph || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">CYL</p>
+                        <p className="font-medium">{invoice.right_eye_cyl || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">AXE</p>
+                        <p className="font-medium">{invoice.right_eye_axe || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium mb-3">{t('leftEye')}</h4>
+                    <div className="grid grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-600">SPH</p>
+                        <p className="font-medium">{invoice.left_eye_sph || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">CYL</p>
+                        <p className="font-medium">{invoice.left_eye_cyl || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">AXE</p>
+                        <p className="font-medium">{invoice.left_eye_axe || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {invoice.add_value && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600">ADD</p>
+                    <p className="font-medium">{invoice.add_value}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Invoice Information */}
           <Card>
