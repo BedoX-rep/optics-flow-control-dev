@@ -1131,7 +1131,7 @@ const receiptTranslations: Translations = {
     en: 'Order Type',
     fr: 'Type de Commande'
   },
-  selectOrderType:Adding the missing translation for last7Days and integrating a date filter for the dashboard page.```text
+  selectOrderType: {
     en: 'Select Order Type',
     fr: 'Sélectionner le Type de Commande'
   },
