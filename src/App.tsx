@@ -54,7 +54,7 @@ const ProtectedRoute = ({
   useEffect(() => {
     if (isLoading || !user) return;
 
-    // Check permission requirements
+    // Check permission requirements immediately
     if (requiredPermission) {
       // Special case for admin session requirement
       if (requiredPermission === 'admin_session') {
