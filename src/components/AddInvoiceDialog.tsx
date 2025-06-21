@@ -187,6 +187,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       })) || [];
       
       setInvoiceItems(items);
+      // Reset original prices when receipt selection changes
+      setOriginalPrices({});
     }
   };
 
@@ -199,6 +201,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       unit_price: 0,
       total_price: 0
     }]);
+    // Reset original prices when items change
+    setOriginalPrices({});
   };
 
   // Update item
@@ -221,6 +225,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Remove item
   const removeItem = (index: number) => {
     setInvoiceItems(prev => prev.filter((_, i) => i !== index));
+    // Reset original prices when items change
+    setOriginalPrices({});
   };
 
   // Calculate totals
@@ -241,13 +247,35 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setShowAssuranceAlert(isAssuranceMismatch && subtotal > 0);
   }, [isAssuranceMismatch, subtotal]);
 
+  // Store original prices for consistent calculations across multiple runs
+  const [originalPrices, setOriginalPrices] = useState<{ [key: number]: number }>({});
+
   // Time-limited smart auto-adjust item prices to match assurance total without decimals
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
-    const currentTotal = subtotal;
+    // Store original prices if not already stored or if items have changed
+    let baselinePrices = { ...originalPrices };
+    let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
+                          Object.keys(baselinePrices).length !== invoiceItems.length;
+    
+    if (needsNewBaseline) {
+      baselinePrices = {};
+      invoiceItems.forEach((item, index) => {
+        baselinePrices[index] = item.unit_price || 0;
+      });
+      setOriginalPrices(baselinePrices);
+    }
+
+    // Calculate difference from original baseline prices
+    const baselineTotal = Object.keys(baselinePrices).reduce((sum, index) => {
+      const itemIndex = parseInt(index);
+      const quantity = invoiceItems[itemIndex]?.quantity || 1;
+      return sum + (baselinePrices[itemIndex] * quantity);
+    }, 0);
+    
     const targetTotal = invoiceData.assurance_total;
-    const difference = Math.round(targetTotal - currentTotal);
+    const difference = Math.round(targetTotal - baselineTotal);
     
     if (Math.abs(difference) < 1) return; // Already matches or difference is less than 1
 
@@ -293,16 +321,23 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     };
 
     // Strategy 1: Try to adjust items to end in multiples of 100, then 10
-    const tryNiceDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+    const tryNiceDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
       
-      const testItems = items.map(item => ({ ...item }));
+      // Start from original baseline prices, not current prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+      
       let remainingDiff = diff;
 
       if (diff > 0) {
         // Increase prices - try to round up to nearest 100 first, then 10
         for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
-          const currentPrice = testItems[i].unit_price || 0;
+          const originalPrice = baselinePrices[i] || 0;
+          const currentPrice = originalPrice;
           const quantity = testItems[i].quantity || 1;
           
           // Try rounding to nearest 100 first
@@ -391,10 +426,16 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     };
 
     // Strategy 2: Equal distribution across all items
-    const tryEqualDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+    const tryEqualDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
       
-      const testItems = items.map(item => ({ ...item }));
+      // Start from original baseline prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+      
       let remainingDiff = diff;
 
       if (diff > 0) {
@@ -453,11 +494,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       return testItems;
     };
 
-    // Strategy 3: Weighted distribution based on current prices
-    const tryWeightedDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+    // Strategy 3: Weighted distribution based on original prices
+    const tryWeightedDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
       
-      const testItems = items.map(item => ({ ...item }));
+      // Start from original baseline prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+      
       const totalCurrentValue = calculateTotal(testItems);
       
       if (totalCurrentValue === 0) return null;
@@ -529,11 +576,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     };
 
     // Strategy 4: Random variations for edge cases
-    const tryRandomVariations = (items: Partial<InvoiceItem>[], diff: number, attempts: number = 50): Partial<InvoiceItem>[] | null => {
+    const tryRandomVariations = (originalItems: Partial<InvoiceItem>[], diff: number, attempts: number = 50): Partial<InvoiceItem>[] | null => {
       if (isTimeUp()) return null;
       
       for (let attempt = 0; attempt < attempts && !isTimeUp(); attempt++) {
-        const testItems = items.map(item => ({ ...item }));
+        // Start from original baseline prices
+        const testItems = originalItems.map((item, index) => ({
+          ...item,
+          unit_price: baselinePrices[index] || 0,
+          total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+        }));
+        
         let remainingDiff = diff;
         
         // Randomly distribute the difference
