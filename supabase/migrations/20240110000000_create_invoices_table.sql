@@ -3,7 +3,6 @@
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
-  receipt_id UUID REFERENCES receipts(id) ON DELETE CASCADE,
   invoice_number VARCHAR(255) NOT NULL,
   client_name VARCHAR(255) NOT NULL,
   client_phone VARCHAR(255),
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_invoices_user_id ON invoices(user_id);
-CREATE INDEX IF NOT EXISTS idx_invoices_receipt_id ON invoices(receipt_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_created_at ON invoices(created_at);
 CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice_id ON invoice_items(invoice_id);
 CREATE INDEX IF NOT EXISTS idx_invoice_items_user_id ON invoice_items(user_id);

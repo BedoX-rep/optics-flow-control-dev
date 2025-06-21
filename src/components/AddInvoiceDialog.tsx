@@ -42,7 +42,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch receipts for selection
+  // Fetch receipts for data copying
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
     queryFn: async () => {
@@ -70,11 +70,11 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data.map(receipt => ({
+      return data?.map(receipt => ({
         ...receipt,
         client_name: receipt.clients?.name || receipt.client_name || 'No Client',
         client_phone: receipt.clients?.phone || receipt.client_phone || 'N/A'
-      }));
+      })) || [];
     },
     enabled: !!user && isOpen,
   });
@@ -86,9 +86,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       const invoiceNumber = `INV-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
       setInvoiceData(prev => ({ ...prev, invoice_number: invoiceNumber }));
     }
-  }, [isOpen]);
+  }, [isOpen, invoiceData.invoice_number]);
 
-  // Handle receipt selection
+  // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
     setSelectedReceiptId(receiptId);
     const selectedReceipt = receipts.find(r => r.id === receiptId);
@@ -180,7 +180,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         .from('invoices')
         .insert({
           user_id: user.id,
-          receipt_id: selectedReceiptId || null,
           invoice_number: invoiceData.invoice_number,
           client_name: invoiceData.client_name,
           client_phone: invoiceData.client_phone,
@@ -256,22 +255,22 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t('addInvoice')}</DialogTitle>
+          <DialogTitle>{t('addInvoice') || 'Add Invoice'}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Receipt Selection */}
+          {/* Receipt Selection for Data Copying */}
           <div className="space-y-2">
-            <Label>{t('linkToReceipt')} ({t('optional')})</Label>
+            <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
             <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
               <SelectTrigger>
-                <SelectValue placeholder={t('selectReceipt')} />
+                <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('noReceipt')}</SelectItem>
+                <SelectItem value="">{t('noReceipt') || 'No Receipt'}</SelectItem>
                 {receipts.map(receipt => (
                   <SelectItem key={receipt.id} value={receipt.id}>
-                    {receipt.client_name} - {receipt.total.toFixed(2)} DH - {new Date(receipt.created_at).toLocaleDateString()}
+                    {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -281,15 +280,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           {/* Invoice Details */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('invoiceNumber')}</Label>
+              <Label>{t('invoiceNumber') || 'Invoice Number'}</Label>
               <Input
                 value={invoiceData.invoice_number}
                 onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
-                placeholder={t('invoiceNumber')}
+                placeholder={t('invoiceNumber') || 'Invoice Number'}
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('status')}</Label>
+              <Label>{t('status') || 'Status'}</Label>
               <Select
                 value={invoiceData.status}
                 onValueChange={(value) => setInvoiceData(prev => ({ ...prev, status: value }))}
@@ -298,10 +297,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Draft">{t('draft')}</SelectItem>
-                  <SelectItem value="Pending">{t('pending')}</SelectItem>
-                  <SelectItem value="Paid">{t('paid')}</SelectItem>
-                  <SelectItem value="Overdue">{t('overdue')}</SelectItem>
+                  <SelectItem value="Draft">{t('draft') || 'Draft'}</SelectItem>
+                  <SelectItem value="Pending">{t('pending') || 'Pending'}</SelectItem>
+                  <SelectItem value="Paid">{t('paid') || 'Paid'}</SelectItem>
+                  <SelectItem value="Overdue">{t('overdue') || 'Overdue'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -310,36 +309,36 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           {/* Client Information */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('clientName')}</Label>
+              <Label>{t('clientName') || 'Client Name'}</Label>
               <Input
                 value={invoiceData.client_name}
                 onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
-                placeholder={t('clientName')}
+                placeholder={t('clientName') || 'Client Name'}
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('clientPhone')}</Label>
+              <Label>{t('clientPhone') || 'Client Phone'}</Label>
               <Input
                 value={invoiceData.client_phone}
                 onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
-                placeholder={t('clientPhone')}
+                placeholder={t('clientPhone') || 'Client Phone'}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>{t('clientAddress')}</Label>
+            <Label>{t('clientAddress') || 'Client Address'}</Label>
             <Textarea
               value={invoiceData.client_address}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, client_address: e.target.value }))}
-              placeholder={t('clientAddress')}
+              placeholder={t('clientAddress') || 'Client Address'}
             />
           </div>
 
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('invoiceDate')}</Label>
+              <Label>{t('invoiceDate') || 'Invoice Date'}</Label>
               <Input
                 type="date"
                 value={invoiceData.invoice_date}
@@ -347,7 +346,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('dueDate')}</Label>
+              <Label>{t('dueDate') || 'Due Date'}</Label>
               <Input
                 type="date"
                 value={invoiceData.due_date}
@@ -359,10 +358,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           {/* Items */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-lg font-semibold">{t('items')}</Label>
+              <Label className="text-lg font-semibold">{t('items') || 'Items'}</Label>
               <Button onClick={addItem} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
-                {t('addItem')}
+                {t('addItem') || 'Add Item'}
               </Button>
             </div>
             
@@ -372,23 +371,23 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   <CardContent className="p-4">
                     <div className="grid grid-cols-12 gap-3 items-end">
                       <div className="col-span-4">
-                        <Label className="text-xs">{t('productName')}</Label>
+                        <Label className="text-xs">{t('productName') || 'Product Name'}</Label>
                         <Input
                           value={item.product_name || ''}
                           onChange={(e) => updateItem(index, 'product_name', e.target.value)}
-                          placeholder={t('productName')}
+                          placeholder={t('productName') || 'Product Name'}
                         />
                       </div>
                       <div className="col-span-3">
-                        <Label className="text-xs">{t('description')}</Label>
+                        <Label className="text-xs">{t('description') || 'Description'}</Label>
                         <Input
                           value={item.description || ''}
                           onChange={(e) => updateItem(index, 'description', e.target.value)}
-                          placeholder={t('description')}
+                          placeholder={t('description') || 'Description'}
                         />
                       </div>
                       <div className="col-span-2">
-                        <Label className="text-xs">{t('quantity')}</Label>
+                        <Label className="text-xs">{t('quantity') || 'Quantity'}</Label>
                         <Input
                           type="number"
                           value={item.quantity || ''}
@@ -397,7 +396,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                         />
                       </div>
                       <div className="col-span-2">
-                        <Label className="text-xs">{t('unitPrice')}</Label>
+                        <Label className="text-xs">{t('unitPrice') || 'Unit Price'}</Label>
                         <Input
                           type="number"
                           step="0.01"
@@ -419,7 +418,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                     </div>
                     <div className="mt-2 text-right">
                       <span className="text-sm font-medium">
-                        {t('total')}: {(item.total_price || 0).toFixed(2)} DH
+                        {t('total') || 'Total'}: {(item.total_price || 0).toFixed(2)} DH
                       </span>
                     </div>
                   </CardContent>
@@ -431,7 +430,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           {/* Tax and Total */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('taxPercentage')}</Label>
+              <Label>{t('taxPercentage') || 'Tax Percentage'}</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -443,15 +442,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             </div>
             <div className="space-y-4 text-right">
               <div>
-                <span className="text-sm text-gray-600">{t('subtotal')}: </span>
+                <span className="text-sm text-gray-600">{t('subtotal') || 'Subtotal'}: </span>
                 <span className="font-medium">{subtotal.toFixed(2)} DH</span>
               </div>
               <div>
-                <span className="text-sm text-gray-600">{t('tax')} ({invoiceData.tax_percentage}%): </span>
+                <span className="text-sm text-gray-600">{t('tax') || 'Tax'} ({invoiceData.tax_percentage}%): </span>
                 <span className="font-medium">{taxAmount.toFixed(2)} DH</span>
               </div>
               <div>
-                <span className="text-lg font-bold">{t('total')}: </span>
+                <span className="text-lg font-bold">{t('total') || 'Total'}: </span>
                 <span className="text-lg font-bold text-blue-600">{total.toFixed(2)} DH</span>
               </div>
             </div>
@@ -459,21 +458,21 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label>{t('notes')}</Label>
+            <Label>{t('notes') || 'Notes'}</Label>
             <Textarea
               value={invoiceData.notes}
               onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder={t('notes')}
+              placeholder={t('notes') || 'Notes'}
             />
           </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={onClose}>
-              {t('cancel')}
+              {t('cancel') || 'Cancel'}
             </Button>
             <Button onClick={handleSave} disabled={isLoading}>
-              {isLoading ? t('saving') : t('createInvoice')}
+              {isLoading ? (t('saving') || 'Saving') : (t('createInvoice') || 'Create Invoice')}
             </Button>
           </div>
         </div>

@@ -100,13 +100,13 @@ const InvoiceCard = ({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-500">{t('invoiceDate')}:</span>
+                  <span className="text-gray-500">{t('invoiceDate') || 'Invoice Date'}:</span>
                   <span>{format(new Date(invoice.invoice_date), 'MMM dd, yyyy')}</span>
                 </div>
                 {invoice.due_date && (
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-500">{t('dueDate')}:</span>
+                    <span className="text-gray-500">{t('dueDate') || 'Due Date'}:</span>
                     <span>{format(new Date(invoice.due_date), 'MMM dd, yyyy')}</span>
                   </div>
                 )}
@@ -115,12 +115,12 @@ const InvoiceCard = ({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <DollarSign className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-500">{t('subtotal')}:</span>
+                  <span className="text-gray-500">{t('subtotal') || 'Subtotal'}:</span>
                   <span className="font-medium">{invoice.subtotal.toFixed(2)} DH</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <DollarSign className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-500">{t('total')}:</span>
+                  <span className="text-gray-500">{t('total') || 'Total'}:</span>
                   <span className="font-bold text-blue-600">{invoice.total.toFixed(2)} DH</span>
                 </div>
               </div>
@@ -156,12 +156,7 @@ const Invoices = () => {
       .from('invoices')
       .select(`
         *,
-        invoice_items (*),
-        receipts (
-          id,
-          client_name,
-          client_phone
-        )
+        invoice_items (*)
       `)
       .eq('user_id', user.id)
       .eq('is_deleted', false)
@@ -218,14 +213,14 @@ const Invoices = () => {
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">{t('invoices')}</h1>
+          <h1 className="text-2xl font-bold">{t('invoices') || 'Invoices'}</h1>
         </div>
         <Button
           onClick={() => setIsAddDialogOpen(true)}
           className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
         >
           <Plus className="h-4 w-4 mr-2" />
-          {t('addInvoice')}
+          {t('addInvoice') || 'Add Invoice'}
         </Button>
       </div>
 
@@ -235,7 +230,7 @@ const Invoices = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
               type="text" 
-              placeholder={t('searchInvoices')} 
+              placeholder={t('searchInvoices') || 'Search invoices...'} 
               className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -247,14 +242,14 @@ const Invoices = () => {
             onValueChange={(value) => setStatusFilter(value)}
           >
             <SelectTrigger className="w-[140px] border-2 shadow-md rounded-xl">
-              <SelectValue placeholder={t('status')} />
+              <SelectValue placeholder={t('status') || 'Status'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('allStatuses')}</SelectItem>
-              <SelectItem value="Draft">{t('draft')}</SelectItem>
-              <SelectItem value="Pending">{t('pending')}</SelectItem>
-              <SelectItem value="Paid">{t('paid')}</SelectItem>
-              <SelectItem value="Overdue">{t('overdue')}</SelectItem>
+              <SelectItem value="all">{t('allStatuses') || 'All Statuses'}</SelectItem>
+              <SelectItem value="Draft">{t('draft') || 'Draft'}</SelectItem>
+              <SelectItem value="Pending">{t('pending') || 'Pending'}</SelectItem>
+              <SelectItem value="Paid">{t('paid') || 'Paid'}</SelectItem>
+              <SelectItem value="Overdue">{t('overdue') || 'Overdue'}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -274,7 +269,7 @@ const Invoices = () => {
             ))
           ) : filteredInvoices.length === 0 ? (
             <div className="col-span-full text-center py-10 text-gray-500">
-              {t('noInvoicesFound')}
+              {t('noInvoicesFound') || 'No invoices found'}
             </div>
           ) : (
             filteredInvoices.map((invoice) => (

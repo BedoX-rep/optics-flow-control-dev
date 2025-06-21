@@ -791,7 +791,6 @@ export interface UserInformation {
 export interface Invoice {
   id: string;
   user_id: string;
-  receipt_id?: string;
   invoice_number: string;
   client_name: string;
   client_phone?: string;
@@ -808,11 +807,6 @@ export interface Invoice {
   created_at: string;
   updated_at: string;
   invoice_items?: InvoiceItem[];
-  receipt?: {
-    id: string;
-    client_name?: string;
-    client_phone?: string;
-  };
 }
 
 export interface InvoiceItem {
