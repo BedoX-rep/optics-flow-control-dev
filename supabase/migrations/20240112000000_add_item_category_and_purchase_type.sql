@@ -21,3 +21,19 @@ SET purchase_type = (
   GROUP BY invoice_id
 )
 WHERE purchase_type IS NULL;
+
+-- Add invoice management permission to existing permissions table
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'permissions' AND column_name = 'can_manage_invoices'
+  ) THEN
+    ALTER TABLE permissions ADD COLUMN can_manage_invoices BOOLEAN DEFAULT true;
+  END IF;
+END $$;
+
+-- Update existing users to have invoice permissions
+UPDATE permissions 
+SET can_manage_invoices = true 
+WHERE can_manage_invoices IS NULL;
