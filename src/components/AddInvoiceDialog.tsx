@@ -71,7 +71,14 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           clients!receipts_client_id_fkey (
             name,
             phone,
-            assurance
+            assurance,
+            right_eye_sph,
+            right_eye_cyl,
+            right_eye_axe,
+            left_eye_sph,
+            left_eye_cyl,
+            left_eye_axe,
+            Add
           ),
           receipt_items (
             id,
@@ -149,16 +156,18 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         assurance_total: selectedReceipt.tax || 0
       }));
 
-      // Populate prescription data from receipt
-      setPrescriptionData({
-        right_eye_sph: selectedReceipt.right_eye_sph?.toString() || '',
-        right_eye_cyl: selectedReceipt.right_eye_cyl?.toString() || '',
-        right_eye_axe: selectedReceipt.right_eye_axe?.toString() || '',
-        left_eye_sph: selectedReceipt.left_eye_sph?.toString() || '',
-        left_eye_cyl: selectedReceipt.left_eye_cyl?.toString() || '',
-        left_eye_axe: selectedReceipt.left_eye_axe?.toString() || '',
-        add_value: selectedReceipt.Add?.toString() || ''
-      });
+      // Populate prescription data from the client linked to the receipt
+      if (selectedReceipt.clients) {
+        setPrescriptionData({
+          right_eye_sph: selectedReceipt.clients.right_eye_sph?.toString() || '',
+          right_eye_cyl: selectedReceipt.clients.right_eye_cyl?.toString() || '',
+          right_eye_axe: selectedReceipt.clients.right_eye_axe?.toString() || '',
+          left_eye_sph: selectedReceipt.clients.left_eye_sph?.toString() || '',
+          left_eye_cyl: selectedReceipt.clients.left_eye_cyl?.toString() || '',
+          left_eye_axe: selectedReceipt.clients.left_eye_axe?.toString() || '',
+          add_value: selectedReceipt.clients.Add?.toString() || ''
+        });
+      }
 
       // Convert receipt items to invoice items with manual price and quantity
       const items = selectedReceipt.receipt_items?.map(item => ({
