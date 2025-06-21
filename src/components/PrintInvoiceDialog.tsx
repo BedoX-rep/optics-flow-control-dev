@@ -169,7 +169,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const getPurchaseType = () => {
     const uniqueCategories = [...new Set(invoiceItems.map(item => item.category).filter(Boolean))];
-    return uniqueCategories.join(' + ');
+    const translatedCategories = uniqueCategories.map(category => translateCategory(category));
+    return translatedCategories.join(' + ');
   };
 
   const updateInvoiceItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
