@@ -245,43 +245,69 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
-    const targetTotal = Math.round(invoiceData.assurance_total);
-    let remainingTotal = targetTotal;
+    const currentTotal = subtotal;
+    const targetTotal = invoiceData.assurance_total;
+    const difference = targetTotal - currentTotal;
     
-    // First pass: distribute base prices (whole numbers)
-    const updatedItems = invoiceItems.map((item, index) => {
-      const basePrice = Math.floor(targetTotal / invoiceItems.length);
-      remainingTotal -= basePrice * (item.quantity || 1);
-      return {
-        ...item,
-        unit_price: basePrice,
-        total_price: basePrice * (item.quantity || 1)
-      };
-    });
+    if (Math.abs(difference) < 0.01) return; // Already matches
 
-    // Second pass: distribute the remainder to make total exact
-    let itemIndex = 0;
-    while (remainingTotal > 0 && itemIndex < updatedItems.length) {
-      const item = updatedItems[itemIndex];
-      const quantity = item.quantity || 1;
-      const additionalPerUnit = Math.ceil(remainingTotal / quantity);
-      const addToThisItem = Math.min(additionalPerUnit * quantity, remainingTotal);
+    // Create a copy of items to modify
+    const updatedItems = [...invoiceItems];
+    let remainingDifference = Math.round(difference);
+
+    // Distribute the difference across items without creating decimals
+    if (remainingDifference > 0) {
+      // Need to add to total - distribute positive amounts
+      let itemIndex = 0;
+      while (remainingDifference > 0 && itemIndex < updatedItems.length) {
+        const item = updatedItems[itemIndex];
+        const quantity = item.quantity || 1;
+        
+        // Add whole numbers to unit price
+        const additionalUnitPrice = Math.ceil(Math.min(remainingDifference / quantity, remainingDifference));
+        
+        updatedItems[itemIndex] = {
+          ...item,
+          unit_price: (item.unit_price || 0) + additionalUnitPrice,
+          total_price: ((item.unit_price || 0) + additionalUnitPrice) * quantity
+        };
+        
+        remainingDifference -= additionalUnitPrice * quantity;
+        itemIndex++;
+      }
+    } else {
+      // Need to reduce total - distribute negative amounts
+      let itemIndex = 0;
+      remainingDifference = Math.abs(remainingDifference);
       
-      updatedItems[itemIndex] = {
-        ...item,
-        unit_price: item.unit_price + Math.floor(addToThisItem / quantity),
-        total_price: item.total_price + addToThisItem
-      };
-      
-      remainingTotal -= addToThisItem;
-      itemIndex++;
+      while (remainingDifference > 0 && itemIndex < updatedItems.length) {
+        const item = updatedItems[itemIndex];
+        const quantity = item.quantity || 1;
+        const currentUnitPrice = item.unit_price || 0;
+        
+        // Reduce unit price but don't go below 0
+        const maxReduction = Math.floor(Math.min(currentUnitPrice, remainingDifference / quantity));
+        const reductionUnitPrice = Math.min(maxReduction, remainingDifference);
+        
+        if (reductionUnitPrice > 0) {
+          updatedItems[itemIndex] = {
+            ...item,
+            unit_price: currentUnitPrice - reductionUnitPrice,
+            total_price: (currentUnitPrice - reductionUnitPrice) * quantity
+          };
+          
+          remainingDifference -= reductionUnitPrice * quantity;
+        }
+        
+        itemIndex++;
+      }
     }
 
     setInvoiceItems(updatedItems);
     
     toast({
       title: "Prices Adjusted",
-      description: "Item prices have been adjusted to match the assurance total without decimals.",
+      description: `Item prices have been adjusted by ${difference.toFixed(2)} DH to match the assurance total.`,
     });
   };
 
