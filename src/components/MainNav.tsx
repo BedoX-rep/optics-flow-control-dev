@@ -13,7 +13,9 @@ import {
   ShoppingCart,
   Calculator,
   Shield,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
@@ -25,20 +27,26 @@ const getNavigation = (t: any) => [
   { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
   { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
   { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
-  { name: t('subscriptions'), href: '/subscriptions', icon: Bell, permission: null }, // Always visible
   { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
   { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
+];
+
+const getAdministrationNavigation = (t: any) => [
+  { name: t('subscriptions'), href: '/subscriptions', icon: Bell, permission: null }, // Always visible
   { name: t('access'), href: '/access', icon: Shield, permission: 'admin_session' },
   { name: t('settings'), href: '/optician-settings', icon: Settings, permission: 'admin_session' },
 ];
 
 const MainNav = () => {
   const { user, subscription, permissions, sessionRole } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+  const [administrationOpen, setAdministrationOpen] = useState(false);
   
-  const navigation = getNavigation(t);
+  // Regenerate navigation items when language changes
+  const navigation = useMemo(() => getNavigation(t), [t, language]);
+  const administrationNavigation = useMemo(() => getAdministrationNavigation(t), [t, language]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -51,6 +59,10 @@ const MainNav = () => {
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+
+  const toggleAdministration = () => {
+    setAdministrationOpen(!administrationOpen);
   };
 
   // Memoize filtered navigation to react to permission and role changes instantly
@@ -70,7 +82,31 @@ const MainNav = () => {
 
       return permissions[item.permission as keyof typeof permissions];
     });
-  }, [permissions, sessionRole]);
+  }, [navigation, permissions, sessionRole]);
+
+  // Filter administration navigation
+  const filteredAdministrationNavigation = useMemo(() => {
+    return administrationNavigation.filter(item => {
+      if (item.permission === null) return true; // Always show items without permission requirements
+
+      // Special case for admin session requirement
+      if (item.permission === 'admin_session') {
+        return sessionRole === 'Admin';
+      }
+
+      // Admin session role bypasses all other permission checks
+      if (sessionRole === 'Admin') return true;
+
+      if (!permissions) return false; // Hide if permissions are not loaded
+
+      return permissions[item.permission as keyof typeof permissions];
+    });
+  }, [administrationNavigation, permissions, sessionRole]);
+
+  // Check if any administration page is currently active
+  const isAdministrationActive = useMemo(() => {
+    return filteredAdministrationNavigation.some(item => location.pathname === item.href);
+  }, [filteredAdministrationNavigation, location.pathname]);
 
   return (
     <div 
@@ -120,6 +156,66 @@ const MainNav = () => {
             </Link>
           );
         })}
+
+        {/* Administration Dropdown */}
+        {filteredAdministrationNavigation.length > 0 && (
+          <div className="space-y-1">
+            <button
+              onClick={toggleAdministration}
+              className={cn(
+                "w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
+                isAdministrationActive
+                  ? "bg-white/10 text-white"
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
+              )}
+            >
+              <Settings
+                className={cn(
+                  "flex-shrink-0 h-5 w-5",
+                  isAdministrationActive ? "text-white" : "text-white/70 group-hover:text-white"
+                )}
+              />
+              {!collapsed && (
+                <>
+                  <span className="ml-3 flex-1 text-left">{t('administration')}</span>
+                  {administrationOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </>
+              )}
+            </button>
+            
+            {!collapsed && administrationOpen && (
+              <div className="ml-8 space-y-1">
+                {filteredAdministrationNavigation.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all group",
+                        isActive
+                          ? "bg-white/10 text-white"
+                          : "text-white/70 hover:bg-white/5 hover:text-white"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "flex-shrink-0 h-4 w-4",
+                          isActive ? "text-white" : "text-white/70 group-hover:text-white"
+                        )}
+                      />
+                      <span className="ml-3">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       {!collapsed && (

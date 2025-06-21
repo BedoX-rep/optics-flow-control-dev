@@ -2481,6 +2481,10 @@ const navigationTranslations: Translations = {
   settings: {
     en: 'Settings',
     fr: 'Paramètres'
+  },
+  administration: {
+    en: 'Administration',
+    fr: 'Administration'
   }
 };
 
