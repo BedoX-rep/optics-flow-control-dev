@@ -1137,6 +1137,7 @@ const receiptTranslations: Translations = {
     fr: 'Étape'
   },
   of: {
+```python
     en: 'of',
     fr: 'de'
   },
@@ -3318,6 +3319,7 @@ const allTranslations: Translations = {
     en: {
       home: 'Home',
       products: 'Products',
+```python
       receipts: 'Receipts',
       purchases: 'Purchases',
       dashboard: 'Dashboard',
@@ -3340,6 +3342,41 @@ const allTranslations: Translations = {
       register: 'S\'inscrire',
     },
   },
+   // Receipt translations
+    'newReceipt': language === 'ar' ? 'وصل جديد' : language === 'fr' ? 'Nouveau Reçu' : 'New Receipt',
+    'receipt': language === 'ar' ? 'وصل' : language === 'fr' ? 'Reçu' : 'Receipt',
+
+    // Invoice translations
+    'addInvoice': language === 'ar' ? 'إضافة فاتورة' : language === 'fr' ? 'Ajouter Facture' : 'Add Invoice',
+    'invoices': language === 'ar' ? 'الفواتير' : language === 'fr' ? 'Factures' : 'Invoices',
+    'copyFromReceipt': language === 'ar' ? 'نسخ من الوصل' : language === 'fr' ? 'Copier du Reçu' : 'Copy from Receipt',
+    'optional': language === 'ar' ? 'اختياري' : language === 'fr' ? 'Optionnel' : 'Optional',
+    'selectReceipt': language === 'ar' ? 'اختر وصل' : language === 'fr' ? 'Sélectionner Reçu' : 'Select Receipt',
+    'noReceipt': language === 'ar' ? 'لا يوجد وصل' : language === 'fr' ? 'Aucun Reçu' : 'No Receipt',
+    'invoiceNumber': language === 'ar' ? 'رقم الفاتورة' : language === 'fr' ? 'Numéro de Facture' : 'Invoice Number',
+    'clientPhone': language === 'ar' ? 'هاتف العميل' : language === 'fr' ? 'Téléphone Client' : 'Client Phone',
+    'clientAddress': language === 'ar' ? 'عنوان العميل' : language === 'fr' ? 'Adresse Client' : 'Client Address',
+    'invoiceDate': language === 'ar' ? 'تاريخ الفاتورة' : language === 'fr' ? 'Date de Facture' : 'Invoice Date',
+    'dueDate': language === 'ar' ? 'تاريخ الاستحقاق' : language === 'fr' ? 'Date d\'Échéance' : 'Due Date',
+    'items': language === 'ar' ? 'العناصر' : language === 'fr' ? 'Articles' : 'Items',
+    'addItem': language === 'ar' ? 'إضافة عنصر' : language === 'fr' ? 'Ajouter Article' : 'Add Item',
+    'productName': language === 'ar' ? 'اسم المنتج' : language === 'fr' ? 'Nom du Produit' : 'Product Name',
+    'description': language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description',
+    'quantity': language === 'ar' ? 'الكمية' : language === 'fr' ? 'Quantité' : 'Quantity',
+    'unitPrice': language === 'ar' ? 'السعر للوحدة' : language === 'fr' ? 'Prix Unitaire' : 'Unit Price',
+    'taxPercentage': language === 'ar' ? 'نسبة الضريبة' : language === 'fr' ? 'Pourcentage TVA' : 'Tax Percentage',
+    'subtotal': language === 'ar' ? 'المجموع الفرعي' : language === 'fr' ? 'Sous-total' : 'Subtotal',
+    'tax': language === 'ar' ? 'الضريبة' : language === 'fr' ? 'TVA' : 'Tax',
+    'notes': language === 'ar' ? 'ملاحظات' : language === 'fr' ? 'Notes' : 'Notes',
+    'createInvoice': language === 'ar' ? 'إنشاء فاتورة' : language === 'fr' ? 'Créer Facture' : 'Create Invoice',
+    'saving': language === 'ar' ? 'جاري الحفظ' : language === 'fr' ? 'Sauvegarde...' : 'Saving',
+    'searchInvoices': language === 'ar' ? 'البحث في الفواتير' : language === 'fr' ? 'Rechercher Factures' : 'Search invoices',
+    'allStatuses': language === 'ar' ? 'جميع الحالات' : language === 'fr' ? 'Tous les Statuts' : 'All Statuses',
+    'draft': language === 'ar' ? 'مسودة' : language === 'fr' ? 'Brouillon' : 'Draft',
+    'pending': language === 'ar' ? 'في الانتظار' : language === 'fr' ? 'En Attente' : 'Pending',
+    'paid': language === 'ar' ? 'مدفوع' : language === 'fr' ? 'Payé' : 'Paid',
+    'overdue': language === 'ar' ? 'متأخر' : language === 'fr' ? 'En Retard' : 'Overdue',
+    'noInvoicesFound': language === 'ar' ? 'لم يتم العثور على فواتير' : language === 'fr' ? 'Aucune facture trouvée' : 'No invoices found',
 };
 
 const LanguageContext = createContext<LanguageContextType>({

@@ -91,6 +91,12 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
     setSelectedReceiptId(receiptId);
+    
+    if (receiptId === "no-receipt") {
+      setInvoiceItems([]);
+      return;
+    }
+    
     const selectedReceipt = receipts.find(r => r.id === receiptId);
     
     if (selectedReceipt) {
@@ -267,7 +273,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                 <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('noReceipt') || 'No Receipt'}</SelectItem>
+                <SelectItem value="no-receipt">{t('noReceipt') || 'No Receipt'}</SelectItem>
                 {receipts.map(receipt => (
                   <SelectItem key={receipt.id} value={receipt.id}>
                     {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
