@@ -262,19 +262,22 @@ export default function Clients() {
   };
 
   const findDuplicateClients = () => {
-    // Group clients by phone number
-    const phoneGroups = allClients.reduce((groups: any, client) => {
-      const phone = client.phone;
-      if (!groups[phone]) {
-        groups[phone] = [];
+    // Group clients by both phone number and name (case-insensitive)
+    const clientGroups = allClients.reduce((groups: any, client) => {
+      const phone = client.phone?.trim() || '';
+      const name = client.name?.trim().toLowerCase() || '';
+      const key = `${phone}_${name}`;
+      
+      if (!groups[key]) {
+        groups[key] = [];
       }
-      groups[phone].push(client);
+      groups[key].push(client);
       return groups;
     }, {});
 
     // Find groups with more than one client (duplicates)
     const duplicates: any[] = [];
-    Object.values(phoneGroups).forEach((group: any) => {
+    Object.values(clientGroups).forEach((group: any) => {
       if (group.length > 1) {
         duplicates.push(...group);
       }
@@ -350,19 +353,23 @@ export default function Clients() {
 
   const handleDeleteDuplicates = async () => {
     try {
-      // Group by phone number and take the first client from each group
-      const phoneGroups: any = {};
+      // Group by both phone number and name (case-insensitive) and take the first client from each group
+      const clientGroups: any = {};
       duplicateClients.forEach(client => {
-        if (!phoneGroups[client.phone]) {
-          phoneGroups[client.phone] = [client];
+        const phone = client.phone?.trim() || '';
+        const name = client.name?.trim().toLowerCase() || '';
+        const key = `${phone}_${name}`;
+        
+        if (!clientGroups[key]) {
+          clientGroups[key] = [client];
         } else {
-          phoneGroups[client.phone].push(client);
+          clientGroups[key].push(client);
         }
       });
 
       // For each group, keep the first client and mark others as deleted
       const clientsToDelete: string[] = [];
-      Object.values(phoneGroups).forEach((group: any) => {
+      Object.values(clientGroups).forEach((group: any) => {
         for (let i = 1; i < group.length; i++) {
           clientsToDelete.push(group[i].id);
         }
@@ -632,7 +639,7 @@ export default function Clients() {
               {duplicateClients.length > 0 && (
                 <>
                   <p className="mb-2">
-                    {t('duplicateExplanation', { count: duplicateClients.length })}
+                    Found {duplicateClients.length} duplicate clients with matching names and phone numbers. Would you like to remove the duplicates? (One client from each duplicate group will be kept.)
                   </p>
                   <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
                     {duplicateClients.map(client => (
