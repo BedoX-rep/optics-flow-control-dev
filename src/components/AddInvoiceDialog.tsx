@@ -97,14 +97,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             price,
             custom_item_name,
             product:product_id (
-              name,
-              category
+              name
             )
           )
         `)
         .eq('user_id', user.id)
         .eq('is_deleted', false)
-        .order('created_at', { ascending: false });</old_str>
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching receipts:', error);
@@ -195,7 +194,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         unit_price: item.price || 0,
         total_price: (item.quantity || 1) * (item.price || 0),
         item_category: item.product?.category || 'Single Vision Lenses'
-      })) || [];</old_str>
+      })) || [];
 
       setInvoiceItems(items);
       // Reset original prices when receipt selection changes
