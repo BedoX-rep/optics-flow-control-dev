@@ -31,7 +31,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     invoice_number: '',
     client_name: '',
     client_phone: '',
-    client_address: '',
+    client_assurance: '',
     assurance_total: 0,
     advance_payment: 0,
     balance: 0,
@@ -54,6 +54,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         .from('receipts')
         .select(`
           id,
+          client_id,
           client_name,
           client_phone,
           total,
@@ -62,7 +63,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           clients (
             name,
             phone,
-            address
+            assurance
           ),
           receipt_items (
             id,
@@ -83,7 +84,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         ...receipt,
         client_name: receipt.clients?.name || receipt.client_name || 'No Client',
         client_phone: receipt.clients?.phone || receipt.client_phone || 'N/A',
-        client_address: receipt.clients?.address || ''
+        client_assurance: receipt.clients?.assurance || ''
       })) || [];
     },
     enabled: !!user && isOpen,
@@ -108,7 +109,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         ...prev,
         client_name: '',
         client_phone: '',
-        client_address: '',
+        client_assurance: '',
         assurance_total: 0
       }));
       return;
@@ -121,7 +122,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         ...prev,
         client_name: selectedReceipt.client_name || '',
         client_phone: selectedReceipt.client_phone || '',
-        client_address: selectedReceipt.client_address || '',
+        client_assurance: selectedReceipt.client_assurance || '',
         assurance_total: selectedReceipt.tax || 0
       }));
 
@@ -223,7 +224,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           invoice_number: invoiceData.invoice_number,
           client_name: invoiceData.client_name,
           client_phone: invoiceData.client_phone,
-          client_address: invoiceData.client_address,
+          client_address: invoiceData.client_assurance,
           subtotal,
           tax_percentage: 0, // Not used anymore
           tax_amount: invoiceData.assurance_total,
@@ -283,7 +284,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       invoice_number: '',
       client_name: '',
       client_phone: '',
-      client_address: '',
+      client_assurance: '',
       assurance_total: 0,
       advance_payment: 0,
       balance: 0,
@@ -362,11 +363,11 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           </div>
 
           <div className="space-y-2">
-            <Label>{t('clientAddress') || 'Client Address'}</Label>
-            <Textarea
-              value={invoiceData.client_address}
-              onChange={(e) => setInvoiceData(prev => ({ ...prev, client_address: e.target.value }))}
-              placeholder={t('clientAddress') || 'Client Address'}
+            <Label>{t('clientAssurance') || 'Client Assurance'}</Label>
+            <Input
+              value={invoiceData.client_assurance}
+              onChange={(e) => setInvoiceData(prev => ({ ...prev, client_assurance: e.target.value }))}
+              placeholder={t('clientAssurance') || 'Client Assurance'}
             />
           </div>
 
