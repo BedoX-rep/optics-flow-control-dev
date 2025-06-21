@@ -97,7 +97,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             price,
             custom_item_name,
             product:product_id (
-              name
+              name,
+              category
             )
           )
         `)

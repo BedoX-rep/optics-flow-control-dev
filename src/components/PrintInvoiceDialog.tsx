@@ -42,6 +42,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
+  const isFrench = language === 'fr';
   
   const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
   const [invoiceData, setInvoiceData] = useState({
@@ -435,7 +436,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
             <Printer className="h-5 w-5 text-blue-600" />
-            Print Invoice - {invoiceData.invoice_number}
+            {isFrench ? `Imprimer la Facture - ${invoiceData.invoice_number}` : `Print Invoice - ${invoiceData.invoice_number}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -445,25 +446,25 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Building2 className="h-4 w-4" />
-                Business Information
+                {isFrench ? 'Informations Entreprise' : 'Business Information'}
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <Label className="text-xs text-gray-600">Store Name</Label>
-                <p className="font-medium">{userInfo?.store_name || 'Not set'}</p>
+                <Label className="text-xs text-gray-600">{isFrench ? 'Nom du Magasin' : 'Store Name'}</Label>
+                <p className="font-medium">{userInfo?.store_name || (isFrench ? 'Non défini' : 'Not set')}</p>
               </div>
               <div>
-                <Label className="text-xs text-gray-600">Phone</Label>
-                <p className="font-medium">{userInfo?.phone || 'Not set'}</p>
+                <Label className="text-xs text-gray-600">{isFrench ? 'Téléphone' : 'Phone'}</Label>
+                <p className="font-medium">{userInfo?.phone || (isFrench ? 'Non défini' : 'Not set')}</p>
               </div>
               <div>
-                <Label className="text-xs text-gray-600">Address</Label>
-                <p className="font-medium">{userInfo?.address || 'Not set'}</p>
+                <Label className="text-xs text-gray-600">{isFrench ? 'Adresse' : 'Address'}</Label>
+                <p className="font-medium">{userInfo?.address || (isFrench ? 'Non définie' : 'Not set')}</p>
               </div>
               <div>
                 <Label className="text-xs text-gray-600">ICE</Label>
-                <p className="font-medium">{userInfo?.ice || 'Not set'}</p>
+                <p className="font-medium">{userInfo?.ice || (isFrench ? 'Non défini' : 'Not set')}</p>
               </div>
             </CardContent>
           </Card>
@@ -473,12 +474,12 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <FileText className="h-4 w-4" />
-                Invoice Information
+                {isFrench ? 'Informations Facture' : 'Invoice Information'}
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="invoice_number" className="text-sm font-medium">Invoice Number</Label>
+                <Label htmlFor="invoice_number" className="text-sm font-medium">{isFrench ? 'Numéro de Facture' : 'Invoice Number'}</Label>
                 <Input
                   id="invoice_number"
                   value={invoiceData.invoice_number}
@@ -487,7 +488,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 />
               </div>
               <div>
-                <Label htmlFor="client_name" className="text-sm font-medium">Client Name</Label>
+                <Label htmlFor="client_name" className="text-sm font-medium">{isFrench ? 'Nom du Client' : 'Client Name'}</Label>
                 <Input
                   id="client_name"
                   value={invoiceData.client_name}
@@ -496,7 +497,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 />
               </div>
               <div>
-                <Label htmlFor="client_phone" className="text-sm font-medium">Client Phone</Label>
+                <Label htmlFor="client_phone" className="text-sm font-medium">{isFrench ? 'Téléphone du Client' : 'Client Phone'}</Label>
                 <Input
                   id="client_phone"
                   value={invoiceData.client_phone}
@@ -505,7 +506,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 />
               </div>
               <div>
-                <Label className="text-sm font-medium">Current Date</Label>
+                <Label className="text-sm font-medium">{isFrench ? 'Date Actuelle' : 'Current Date'}</Label>
                 <p className="mt-1 p-2 bg-gray-50 rounded text-sm">{format(new Date(), 'dd/MM/yyyy')}</p>
               </div>
             </CardContent>
@@ -515,11 +516,11 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           {Object.values(prescriptionData).some(val => val) && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Prescription Details</CardTitle>
+                <CardTitle className="text-lg">{isFrench ? 'Détails de la Prescription' : 'Prescription Details'}</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm font-medium">Right Eye SPH</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit SPH' : 'Right Eye SPH'}</Label>
                   <Input
                     value={prescriptionData.right_eye_sph}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
@@ -527,7 +528,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Right Eye CYL</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit CYL' : 'Right Eye CYL'}</Label>
                   <Input
                     value={prescriptionData.right_eye_cyl}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
@@ -535,7 +536,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Right Eye AXE</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit AXE' : 'Right Eye AXE'}</Label>
                   <Input
                     value={prescriptionData.right_eye_axe}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
@@ -543,7 +544,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">ADD Value</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Valeur ADD' : 'ADD Value'}</Label>
                   <Input
                     value={prescriptionData.add_value}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
@@ -551,7 +552,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Left Eye SPH</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche SPH' : 'Left Eye SPH'}</Label>
                   <Input
                     value={prescriptionData.left_eye_sph}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
@@ -559,7 +560,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Left Eye CYL</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche CYL' : 'Left Eye CYL'}</Label>
                   <Input
                     value={prescriptionData.left_eye_cyl}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
@@ -567,7 +568,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Left Eye AXE</Label>
+                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche AXE' : 'Left Eye AXE'}</Label>
                   <Input
                     value={prescriptionData.left_eye_axe}
                     onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
@@ -581,7 +582,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           {/* Invoice Items */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Invoice Items</CardTitle>
+              <CardTitle className="text-lg">{isFrench ? 'Articles de la Facture' : 'Invoice Items'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -655,13 +656,13 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           {/* Notes */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Notes</CardTitle>
+              <CardTitle className="text-lg">{isFrench ? 'Notes' : 'Notes'}</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={invoiceData.notes}
                 onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Additional notes for the invoice..."
+                placeholder={isFrench ? "Notes supplémentaires pour la facture..." : "Additional notes for the invoice..."}
                 rows={3}
               />
             </CardContent>
@@ -670,7 +671,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-6 border-t">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {isFrench ? 'Annuler' : 'Cancel'}
             </Button>
             <Button 
               onClick={downloadPDF} 
@@ -679,7 +680,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
               className="border-green-600 text-green-600 hover:bg-green-50"
             >
               <Download className="h-4 w-4 mr-2" />
-              {isLoading ? 'Generating...' : 'Download PDF'}
+              {isLoading ? (isFrench ? 'Génération...' : 'Generating...') : (isFrench ? 'Télécharger PDF' : 'Download PDF')}
             </Button>
             <Button 
               onClick={handlePrint} 
@@ -687,7 +688,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Printer className="h-4 w-4 mr-2" />
-              {isLoading ? 'Printing...' : 'Print Invoice'}
+              {isLoading ? (isFrench ? 'Impression...' : 'Printing...') : (isFrench ? 'Imprimer la Facture' : 'Print Invoice')}
             </Button>
           </div>
         </div>
