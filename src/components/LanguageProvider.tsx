@@ -370,6 +370,59 @@ const productTranslations: Translations = {
     en: 'Select Company',
     fr: 'Sélectionner une Entreprise'
   },
+  selectGamma: {
+    en: 'Select Gamma',
+    fr: 'Sélectionner une Gamme'
+  },
+  selectStockStatus: {
+    en: 'Select Stock Status',
+    fr: 'Sélectionner l\'État du Stock'
+  },
+  allCategories: {
+    en: 'All Categories',
+    fr: 'Toutes les Catégories'
+  },
+  allIndexes: {
+    en: 'All Indexes',
+    fr: 'Tous les Indices'
+  },
+  allTreatments: {
+    en: 'All Treatments',
+    fr: 'Tous les Traitements'
+  },
+  allCompanies: {
+    en: 'All Companies',
+    fr: 'Toutes les Entreprises'
+  },
+  allStockStatuses: {
+    en: 'All Stock Statuses',
+    fr: 'Tous les États de Stock'
+  },
+  // Gamma options
+  standard: {
+    en: 'Standard',
+    fr: 'Standard'
+  },
+  premium: {
+    en: 'Premium',
+    fr: 'Premium'
+  },
+  highEnd: {
+    en: 'High-End',
+    fr: 'Haut de Gamme'
+  },
+  budget: {
+    en: 'Budget',
+    fr: 'Budget'
+  },
+  selectTreatment: {
+    en: 'Select Treatment',
+    fr: 'Sélectionner un Traitement'
+  },
+  selectCompany: {
+    en: 'Select Company',
+    fr: 'Sélectionner une Entreprise'
+  },
   selectStockStatus: {
     en: 'Select Stock Status',
     fr: 'Sélectionner l\'État du Stock'

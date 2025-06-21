@@ -154,8 +154,16 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
 
       if (error) throw error;
 
-      // Invalidate and refetch queries
-      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      // Update the query cache directly and invalidate
+      queryClient.setQueryData(['clients', user.id], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((existingClient: any) => 
+          existingClient.id === client.id ? { ...existingClient, ...data } : existingClient
+        );
+      });
+      
+      // Also invalidate to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ['clients', user.id] });
       
       toast({
         title: "Success",
