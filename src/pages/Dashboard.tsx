@@ -5,6 +5,10 @@ import PageTitle from '@/components/PageTitle';
 import StatCard from '@/components/StatCard';
 import BarChartComponent from '@/components/BarChart';
 import AreaChartComponent from '@/components/AreaChart';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
@@ -34,6 +38,8 @@ interface ActivityItem {
 const Dashboard = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [stats, setStats] = useState<DashboardStats>({
     activeClients: 0,
     totalRevenue: 0,
@@ -126,17 +132,13 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  // Filter receipts for current month
-  const currentMonthReceipts = useMemo(() => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-    
+  // Filter receipts by date range
+  const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
       const receiptDate = new Date(receipt.created_at);
-      return receiptDate >= monthStart && receiptDate <= monthEnd;
+      return receiptDate >= new Date(dateFrom) && receiptDate <= new Date(dateTo);
     });
-  }, [receipts]);
+  }, [receipts, dateFrom, dateTo]);
 
   useEffect(() => {
     const calculateDashboardData = async () => {
@@ -144,36 +146,41 @@ const Dashboard = () => {
         setIsLoading(true);
 
         // Calculate revenue metrics
-        const totalRevenue = currentMonthReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
-        const outstandingBalance = currentMonthReceipts.reduce((sum, receipt) => sum + (receipt.balance || 0), 0);
-        const avgSaleValue = currentMonthReceipts.length ? totalRevenue / currentMonthReceipts.length : 0;
+        const totalRevenue = filteredReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
+        const outstandingBalance = filteredReceipts.reduce((sum, receipt) => sum + (receipt.balance || 0), 0);
+        const avgSaleValue = filteredReceipts.length ? totalRevenue / filteredReceipts.length : 0;
 
         // Calculate montage vs product revenue
-        const montageRevenue = currentMonthReceipts.reduce((sum, receipt) => {
+        const montageRevenue = filteredReceipts.reduce((sum, receipt) => {
           const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
           const montageCost = receipt.montage_costs || 0;
           return validMontageStatuses.includes(receipt.montage_status) ? sum + montageCost : sum;
         }, 0);
 
-        const productRevenue = currentMonthReceipts.reduce((sum, receipt) => {
+        const productRevenue = filteredReceipts.reduce((sum, receipt) => {
           return sum + (receipt.products_cost || 0);
         }, 0);
 
         // Calculate receipt status counts
-        const pendingReceipts = currentMonthReceipts.filter(r => 
+        const pendingReceipts = filteredReceipts.filter(r => 
           r.delivery_status !== 'Completed' || r.balance > 0
         ).length;
         
-        const completedReceipts = currentMonthReceipts.filter(r => 
+        const completedReceipts = filteredReceipts.filter(r => 
           r.delivery_status === 'Completed' && r.balance === 0
         ).length;
 
-        // Prepare revenue data for last 7 days
-        const lastSevenDays = [...Array(7)].map((_, i) => {
-          const date = subDays(new Date(), 6 - i);
-          const formattedDate = format(date, 'EEE');
+        // Prepare revenue data for the selected date range (daily breakdown)
+        const startDate = new Date(dateFrom);
+        const endDate = new Date(dateTo);
+        const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        
+        const dailyRevenue = [...Array(Math.min(daysDiff, 30))].map((_, i) => {
+          const date = new Date(startDate);
+          date.setDate(startDate.getDate() + i);
+          const formattedDate = format(date, daysDiff <= 7 ? 'EEE' : 'MMM dd');
           
-          const dayReceipts = receipts.filter(r => {
+          const dayReceipts = filteredReceipts.filter(r => {
             const receiptDate = new Date(r.created_at);
             return receiptDate.getDate() === date.getDate() && 
                    receiptDate.getMonth() === date.getMonth() && 
@@ -185,10 +192,10 @@ const Dashboard = () => {
           return { name: formattedDate, value };
         });
 
-        setRevenueData(lastSevenDays);
+        setRevenueData(dailyRevenue);
 
         // Prepare category data for chart
-        const categoryAnalysis = currentMonthReceipts.reduce((acc, receipt) => {
+        const categoryAnalysis = filteredReceipts.reduce((acc, receipt) => {
           if (Array.isArray(receipt.receipt_items)) {
             receipt.receipt_items.forEach(item => {
               const category = item.product?.category || 'Unknown';
@@ -264,16 +271,103 @@ const Dashboard = () => {
     if (receipts.length >= 0 && clients.length >= 0) {
       calculateDashboardData();
     }
-  }, [receipts, clients, purchases, currentMonthReceipts]);
+  }, [receipts, clients, purchases, filteredReceipts, dateFrom, dateTo]);
+
+  const handleQuickDateRange = (range: string) => {
+    const now = new Date();
+    switch (range) {
+      case 'thisMonth':
+        setDateFrom(format(startOfMonth(now), 'yyyy-MM-dd'));
+        setDateTo(format(endOfMonth(now), 'yyyy-MM-dd'));
+        break;
+      case 'lastMonth':
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        setDateFrom(format(startOfMonth(lastMonth), 'yyyy-MM-dd'));
+        setDateTo(format(endOfMonth(lastMonth), 'yyyy-MM-dd'));
+        break;
+      case 'thisYear':
+        setDateFrom(format(new Date(now.getFullYear(), 0, 1), 'yyyy-MM-dd'));
+        setDateTo(format(new Date(now.getFullYear(), 11, 31), 'yyyy-MM-dd'));
+        break;
+      case 'last7Days':
+        setDateFrom(format(subDays(now, 6), 'yyyy-MM-dd'));
+        setDateTo(format(now, 'yyyy-MM-dd'));
+        break;
+    }
+  };
 
   return (
     <div>
       <div className="mb-6">
         <PageTitle 
           title={t('dashboard')} 
-          subtitle={`${t('dashboardSubtitle')} ${format(new Date(), 'MMMM yyyy')}`}
+          subtitle={t('dashboardSubtitle')}
         />
       </div>
+
+      {/* Date Range Filter */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            {t('dateRangeFilter')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="dateFrom">{t('fromDate')}</Label>
+              <Input
+                id="dateFrom"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="dateTo">{t('toDate')}</Label>
+              <Input
+                id="dateTo"
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleQuickDateRange('last7Days')}
+                className="text-xs"
+              >
+                {t('last7Days')}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleQuickDateRange('thisMonth')}
+                className="text-xs"
+              >
+                {t('thisMonth')}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleQuickDateRange('lastMonth')}
+                className="text-xs"
+              >
+                {t('lastMonth')}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleQuickDateRange('thisYear')}
+                className="text-xs"
+              >
+                {t('thisYear')}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard 

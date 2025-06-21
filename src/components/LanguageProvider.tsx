@@ -1131,7 +1131,7 @@ const receiptTranslations: Translations = {
     en: 'Order Type',
     fr: 'Type de Commande'
   },
-  selectOrderType: {
+  selectOrderType:Adding the missing translation for last7Days and integrating a date filter for the dashboard page.```text
     en: 'Select Order Type',
     fr: 'Sélectionner le Type de Commande'
   },
@@ -2271,7 +2271,8 @@ const subscriptionsTranslations: Translations = {
     fr: 'Un administrateur vous contactera bientôt au sujet de votre abonnement.'
   },
   subscriptionUpdated: {
-    en: 'Subscription Updated',
+    en:```text
+'Subscription Updated',
     fr: 'Abonnement Mis à Jour'
   },
   nowSubscribedTo: {
@@ -2609,6 +2610,10 @@ const financialTranslations: Translations = {
   thisYear: {
     en: 'This Year',
     fr: 'Cette Année'
+  },
+  last7Days: {
+    en: 'Last 7 Days',
+    fr: '7 Derniers Jours'
   },
   availableCash: {
     en: 'Available Cash',
