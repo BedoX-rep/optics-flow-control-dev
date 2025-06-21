@@ -241,7 +241,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setShowAssuranceAlert(isAssuranceMismatch && subtotal > 0);
   }, [isAssuranceMismatch, subtotal]);
 
-  // Smart auto-adjust item prices to match assurance total without decimals
+  // Time-limited smart auto-adjust item prices to match assurance total without decimals
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
@@ -251,6 +251,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     
     if (Math.abs(difference) < 1) return; // Already matches or difference is less than 1
 
+    const startTime = Date.now();
+    const TIME_LIMIT = 2000; // 2 seconds in milliseconds
+    
     // Helper function to calculate total from items
     const calculateTotal = (items: Partial<InvoiceItem>[]) => {
       return items.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
@@ -261,14 +264,37 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       return items.filter(item => (item.unit_price || 0) % 10 === 0).length;
     };
 
+    // Helper function to check if we've exceeded time limit
+    const isTimeUp = () => Date.now() - startTime > TIME_LIMIT;
+
+    // Helper function to evaluate solution quality
+    const evaluateSolution = (items: Partial<InvoiceItem>[] | null) => {
+      if (!items) return { isValid: false, score: -1, niceEndings: 0, exactMatch: false };
+      
+      const total = calculateTotal(items);
+      const exactMatch = Math.abs(total - targetTotal) < 0.01;
+      const niceEndings = hasNiceEndings(items);
+      const hasDecimals = items.some(item => (item.unit_price || 0) % 1 !== 0);
+      
+      return {
+        isValid: exactMatch && !hasDecimals,
+        exactMatch,
+        niceEndings,
+        score: exactMatch ? (niceEndings * 10 + (hasDecimals ? 0 : 5)) : 0,
+        items
+      };
+    };
+
     // Strategy 1: Try to adjust items to end in multiples of 10
     const tryNiceDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+      
       const testItems = items.map(item => ({ ...item }));
       let remainingDiff = diff;
 
       if (diff > 0) {
         // Increase prices - try to round up to nearest 10
-        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const currentPrice = testItems[i].unit_price || 0;
           const quantity = testItems[i].quantity || 1;
           const nextTen = Math.ceil(currentPrice / 10) * 10;
@@ -283,7 +309,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
         // Distribute any remaining difference
         let itemIndex = 0;
-        while (remainingDiff > 0 && itemIndex < testItems.length) {
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const quantity = item.quantity || 1;
           const maxIncrease = Math.floor(remainingDiff / quantity);
@@ -300,7 +326,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         // Decrease prices - try to round down to nearest 10
         remainingDiff = Math.abs(remainingDiff);
         
-        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const currentPrice = testItems[i].unit_price || 0;
           const quantity = testItems[i].quantity || 1;
           const prevTen = Math.floor(currentPrice / 10) * 10;
@@ -315,7 +341,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
         // Distribute any remaining difference
         let itemIndex = 0;
-        while (remainingDiff > 0 && itemIndex < testItems.length) {
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
@@ -330,16 +356,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         }
       }
 
-      // Check if we achieved the target
-      const newTotal = calculateTotal(testItems);
-      if (Math.abs(newTotal - targetTotal) < 1) {
-        return testItems;
-      }
-      return null;
+      return testItems;
     };
 
     // Strategy 2: Equal distribution across all items
     const tryEqualDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+      
       const testItems = items.map(item => ({ ...item }));
       let remainingDiff = diff;
 
@@ -349,6 +372,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         
         // Distribute base increase to all items
         testItems.forEach((item, index) => {
+          if (isTimeUp()) return;
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
           testItems[index].unit_price = currentPrice + baseIncrease;
@@ -357,7 +381,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         
         // Distribute remaining amount
         let itemIndex = 0;
-        while (extraAmount > 0 && itemIndex < testItems.length) {
+        while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const quantity = item.quantity || 1;
           item.unit_price = (item.unit_price || 0) + 1;
@@ -372,6 +396,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         
         // Distribute base decrease to all items
         testItems.forEach((item, index) => {
+          if (isTimeUp()) return;
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
           testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
@@ -380,7 +405,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         
         // Distribute remaining reduction
         let itemIndex = 0;
-        while (extraAmount > 0 && itemIndex < testItems.length) {
+        while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
           const quantity = item.quantity || 1;
@@ -394,15 +419,13 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         }
       }
 
-      const newTotal = calculateTotal(testItems);
-      if (Math.abs(newTotal - targetTotal) < 1) {
-        return testItems;
-      }
-      return null;
+      return testItems;
     };
 
     // Strategy 3: Weighted distribution based on current prices
     const tryWeightedDistribution = (items: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+      
       const testItems = items.map(item => ({ ...item }));
       const totalCurrentValue = calculateTotal(testItems);
       
@@ -412,7 +435,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
       if (diff > 0) {
         // Distribute based on proportion of current value
-        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const item = testItems[i];
           const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
           const proportion = currentItemTotal / totalCurrentValue;
@@ -429,7 +452,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
         // Distribute any remaining difference
         let itemIndex = 0;
-        while (remainingDiff > 0 && itemIndex < testItems.length) {
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const quantity = item.quantity || 1;
           item.unit_price = (item.unit_price || 0) + 1;
@@ -441,7 +464,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         remainingDiff = Math.abs(remainingDiff);
         
         // Similar logic for reduction
-        for (let i = 0; i < testItems.length && remainingDiff > 0; i++) {
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
           const item = testItems[i];
           const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
           const proportion = currentItemTotal / totalCurrentValue;
@@ -458,7 +481,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
         // Distribute any remaining reduction
         let itemIndex = 0;
-        while (remainingDiff > 0 && itemIndex < testItems.length) {
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
           const item = testItems[itemIndex];
           const currentPrice = item.unit_price || 0;
           
@@ -471,55 +494,111 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         }
       }
 
-      const newTotal = calculateTotal(testItems);
-      if (Math.abs(newTotal - targetTotal) < 1) {
-        return testItems;
+      return testItems;
+    };
+
+    // Strategy 4: Random variations for edge cases
+    const tryRandomVariations = (items: Partial<InvoiceItem>[], diff: number, attempts: number = 50): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+      
+      for (let attempt = 0; attempt < attempts && !isTimeUp(); attempt++) {
+        const testItems = items.map(item => ({ ...item }));
+        let remainingDiff = diff;
+        
+        // Randomly distribute the difference
+        while (Math.abs(remainingDiff) > 0 && !isTimeUp()) {
+          const randomIndex = Math.floor(Math.random() * testItems.length);
+          const item = testItems[randomIndex];
+          const quantity = item.quantity || 1;
+          const currentPrice = item.unit_price || 0;
+          
+          if (remainingDiff > 0) {
+            const increase = Math.min(remainingDiff, Math.floor(Math.random() * 5) + 1);
+            item.unit_price = currentPrice + increase;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= increase;
+          } else if (remainingDiff < 0 && currentPrice > 0) {
+            const decrease = Math.min(Math.abs(remainingDiff), Math.min(currentPrice, Math.floor(Math.random() * 3) + 1));
+            item.unit_price = currentPrice - decrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff += decrease;
+          } else {
+            break;
+          }
+        }
+        
+        const evaluation = evaluateSolution(testItems);
+        if (evaluation.isValid) {
+          return testItems;
+        }
       }
+      
       return null;
     };
 
-    // Try strategies in order of preference
-    let bestResult = null;
-    let bestNiceEndings = 0;
-
-    // Try nice distribution first (prefer ending in 0)
-    const niceResult = tryNiceDistribution([...invoiceItems], difference);
-    if (niceResult) {
-      const niceEndings = hasNiceEndings(niceResult);
-      if (niceEndings > bestNiceEndings) {
-        bestResult = niceResult;
-        bestNiceEndings = niceEndings;
-      }
+    // Collect all possible solutions with their evaluations
+    const solutions = [];
+    
+    // Try all strategies with time limits
+    if (!isTimeUp()) {
+      const niceResult = tryNiceDistribution([...invoiceItems], difference);
+      const niceEvaluation = evaluateSolution(niceResult);
+      if (niceEvaluation.items) solutions.push(niceEvaluation);
+    }
+    
+    if (!isTimeUp()) {
+      const equalResult = tryEqualDistribution([...invoiceItems], difference);
+      const equalEvaluation = evaluateSolution(equalResult);
+      if (equalEvaluation.items) solutions.push(equalEvaluation);
+    }
+    
+    if (!isTimeUp()) {
+      const weightedResult = tryWeightedDistribution([...invoiceItems], difference);
+      const weightedEvaluation = evaluateSolution(weightedResult);
+      if (weightedEvaluation.items) solutions.push(weightedEvaluation);
+    }
+    
+    if (!isTimeUp()) {
+      const randomResult = tryRandomVariations([...invoiceItems], difference);
+      const randomEvaluation = evaluateSolution(randomResult);
+      if (randomEvaluation.items) solutions.push(randomEvaluation);
     }
 
-    // Try equal distribution
-    const equalResult = tryEqualDistribution([...invoiceItems], difference);
-    if (equalResult) {
-      const niceEndings = hasNiceEndings(equalResult);
-      if (!bestResult || niceEndings > bestNiceEndings) {
-        bestResult = equalResult;
-        bestNiceEndings = niceEndings;
-      }
-    }
+    // Find the best solution based on priority:
+    // 1. Must have exact assurance total match
+    // 2. Higher score (more items ending in 0, no decimals)
+    const validSolutions = solutions.filter(s => s.isValid && s.exactMatch);
+    const bestSolution = validSolutions.length > 0 
+      ? validSolutions.reduce((best, current) => current.score > best.score ? current : best)
+      : solutions.find(s => s.exactMatch); // Fallback to any exact match even if has decimals
 
-    // Try weighted distribution as fallback
-    if (!bestResult) {
-      bestResult = tryWeightedDistribution([...invoiceItems], difference);
-    }
+    const executionTime = Date.now() - startTime;
 
-    if (bestResult) {
-      setInvoiceItems(bestResult);
-      const finalTotal = calculateTotal(bestResult);
-      const niceEndingsCount = hasNiceEndings(bestResult);
+    if (bestSolution && bestSolution.items) {
+      setInvoiceItems(bestSolution.items);
+      const finalTotal = calculateTotal(bestSolution.items);
       
       toast({
-        title: "Prices Adjusted",
-        description: `Item prices adjusted to match assurance total (${finalTotal.toFixed(0)} DH)${niceEndingsCount > 0 ? ` with ${niceEndingsCount} items ending in 0` : ''}.`,
+        title: "Prices Adjusted Successfully",
+        description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH)${bestSolution.niceEndings > 0 ? ` with ${bestSolution.niceEndings} items ending in 0` : ''}.`,
       });
+    } else if (solutions.length > 0) {
+      // Use the best available solution even if not perfect
+      const fallbackSolution = solutions.reduce((best, current) => current.score > best.score ? current : best);
+      if (fallbackSolution.items) {
+        setInvoiceItems(fallbackSolution.items);
+        const finalTotal = calculateTotal(fallbackSolution.items);
+        
+        toast({
+          title: "Partial Adjustment",
+          description: `Best available solution found in ${executionTime}ms (${finalTotal.toFixed(2)} DH). May need manual adjustment.`,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Adjustment Failed",
-        description: "Could not adjust prices to match assurance total while maintaining whole numbers.",
+        description: `No valid solution found within ${executionTime}ms time limit. Please adjust manually.`,
         variant: "destructive",
       });
     }
