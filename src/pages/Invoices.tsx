@@ -34,15 +34,30 @@ const InvoiceCard = ({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'paid':
-        return 'bg-green-100 text-green-800';
+        return 'bg-emerald-500 text-white';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-500 text-white';
       case 'overdue':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500 text-white';
       case 'draft':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-500 text-white';
       default:
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500 text-white';
+    }
+  };
+
+  const getStatusBorder = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'paid':
+        return 'border-l-emerald-500';
+      case 'pending':
+        return 'border-l-amber-500';
+      case 'overdue':
+        return 'border-l-red-500';
+      case 'draft':
+        return 'border-l-slate-500';
+      default:
+        return 'border-l-blue-500';
     }
   };
 
@@ -53,126 +68,143 @@ const InvoiceCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
-        <CardContent className="p-4">
-          {/* Header Section with Invoice Number, Client, and Actions */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary flex-shrink-0" />
-                  <h3 className="text-sm font-semibold text-gray-800 truncate">
+      <Card className={`group overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border-0 shadow-md hover:scale-[1.02] ${getStatusBorder(invoice.status)} border-l-4`}>
+        <CardContent className="p-0">
+          {/* Header Section */}
+          <div className="bg-gradient-to-r from-slate-50 to-white p-4 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm">
                     {invoice.invoice_number}
                   </h3>
-                  <Badge className={getStatusColor(invoice.status)}>
-                    {invoice.status}
-                  </Badge>
+                  <p className="text-xs text-slate-600">{invoice.client_name}</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-600 truncate font-medium mb-1">
-                {invoice.client_name}
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2">
+                <Badge className={`${getStatusColor(invoice.status)} px-3 py-1 text-xs font-medium`}>
+                  {invoice.status}
+                </Badge>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onView}
+                    className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onEdit}
+                    className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onDelete}
+                    className="h-7 w-7 hover:bg-red-100 hover:text-red-600"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Date Information */}
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 <span>{format(new Date(invoice.invoice_date), 'MMM dd, yyyy')}</span>
-                {invoice.due_date && (
-                  <>
-                    <span className="text-gray-400">•</span>
-                    <span className="text-orange-600">
-                      {t('due')}: {format(new Date(invoice.due_date), 'MMM dd')}
-                    </span>
-                  </>
+              </div>
+              {invoice.due_date && (
+                <div className="flex items-center gap-1 text-amber-600">
+                  <span className="font-medium">Due:</span>
+                  <span>{format(new Date(invoice.due_date), 'MMM dd')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Financial Information */}
+          <div className="p-4 space-y-4">
+            {/* Total Amount - Prominent */}
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-primary/70 uppercase tracking-wide">Total Amount</p>
+                  <p className="text-2xl font-bold text-primary">{invoice.total.toFixed(2)} DH</p>
+                </div>
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+            </div>
+
+            {/* Assurance and Balance Information */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg p-3 border border-emerald-200/50">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <p className="text-xs font-medium text-emerald-700">Assurance Total</p>
+                </div>
+                <p className="text-lg font-bold text-emerald-800">
+                  {invoice.tax_amount?.toFixed(2) || '0.00'} DH
+                </p>
+              </div>
+              
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200/50">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <p className="text-xs font-medium text-blue-700">Balance Due</p>
+                </div>
+                <p className="text-lg font-bold text-blue-800">
+                  {invoice.balance?.toFixed(2) || invoice.total.toFixed(2)} DH
+                </p>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            {(invoice.client_phone || invoice.client_assurance) && (
+              <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                {invoice.client_phone && (
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Phone className="h-3 w-3 text-blue-500" />
+                    <span className="font-medium">{invoice.client_phone}</span>
+                  </div>
+                )}
+                {invoice.client_assurance && (
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Building2 className="h-3 w-3 text-emerald-500" />
+                    <span className="font-medium">{invoice.client_assurance}</span>
+                  </div>
                 )}
               </div>
-            </div>
-            <div className="flex gap-1 flex-shrink-0 ml-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onView}
-                className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600"
-              >
-                <Eye className="h-3 w-3" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onEdit}
-                className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onDelete}
-                className="h-7 w-7 hover:bg-red-50 hover:text-red-600"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
+            )}
 
-          {/* Main Total Amount - Prominent Display */}
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-3 mb-3 border-l-4 border-primary">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">{t('totalAmount') || 'Total Amount'}</p>
-                <p className="text-xl font-bold text-primary">{invoice.total.toFixed(2)} DH</p>
+            {/* Notes Section */}
+            {invoice.notes && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-800 font-medium mb-1">Notes</p>
+                <p className="text-xs text-amber-700 line-clamp-2">{invoice.notes}</p>
               </div>
-              <DollarSign className="h-5 w-5 text-primary/60" />
-            </div>
+            )}
           </div>
 
-          {/* Compact Financial Details */}
-          <div className="grid grid-cols-2 gap-2 mb-3 flex-1">
-            <div className="bg-gray-50 rounded p-2">
-              <p className="text-xs text-gray-500">{t('subtotal') || 'Subtotal'}</p>
-              <p className="text-sm font-semibold text-gray-800">
-                {invoice.subtotal.toFixed(2)} DH
-              </p>
-            </div>
-            <div className="bg-gray-50 rounded p-2">
-              <p className="text-xs text-gray-500">{t('tax') || 'Tax'}</p>
-              <p className="text-sm font-semibold text-green-600">
-                {(invoice.total - invoice.subtotal).toFixed(2)} DH
-              </p>
-            </div>
-          </div>
-
-          {/* Contact Information */}
-          {(invoice.client_phone || invoice.client_address) && (
-            <div className="space-y-1 mb-3">
-              {invoice.client_phone && (
-                <div className="flex items-center gap-1 text-xs text-blue-600">
-                  <Phone className="h-3 w-3" />
-                  <span>{invoice.client_phone}</span>
-                </div>
-              )}
-              {invoice.client_address && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{invoice.client_address}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Notes Section */}
-          {invoice.notes && (
-            <div className="bg-gray-50 rounded-lg p-2 mb-3">
-              <p className="text-xs text-gray-600 truncate">{invoice.notes}</p>
-            </div>
-          )}
-
-          {/* Status Footer */}
-          <div className="border-t border-gray-100 pt-2 mt-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {t('created')}: {format(new Date(invoice.created_at), 'MMM dd')}
-                </span>
-              </div>
+          {/* Footer */}
+          <div className="px-4 pb-4">
+            <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-100 pt-3">
+              <span>Created {format(new Date(invoice.created_at), 'MMM dd, yyyy')}</span>
+              <span className="flex items-center gap-1">
+                <Package className="h-3 w-3" />
+                {invoice.invoice_items?.length || 0} items
+              </span>
             </div>
           </div>
         </CardContent>
