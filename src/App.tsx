@@ -148,6 +148,11 @@ const AppRoutes = () => (
                 <Layout><Purchases /></Layout>
               </ProtectedRoute>
             } />
+            <Route path="/invoices" element={
+              <ProtectedRoute requiredPermission="can_manage_invoices">
+                <Layout><Invoices /></Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/access" element={
               <ProtectedRoute requiredPermission="admin_session">
                 <Layout><Access /></Layout>
