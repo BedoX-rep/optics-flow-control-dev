@@ -11,7 +11,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
-import { Printer, AlertTriangle, Building2, Phone, MapPin, FileText } from 'lucide-react';
+import { Printer, AlertTriangle, Building2, Phone, MapPin, FileText, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
@@ -160,6 +160,53 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     });
   };
 
+  const downloadPDF = async () => {
+    const validationErrors = validateForPrint();
+    
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: validationErrors.join(', '),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const printContent = generatePrintContent();
+      
+      // Create a new window for PDF generation
+      const pdfWindow = window.open('', '_blank');
+      if (pdfWindow) {
+        pdfWindow.document.write(printContent);
+        pdfWindow.document.close();
+        
+        // Wait for content to load
+        pdfWindow.onload = () => {
+          // Focus the window and trigger print dialog (user can save as PDF)
+          pdfWindow.focus();
+          pdfWindow.print();
+        };
+      }
+
+      toast({
+        title: "Success",
+        description: "PDF download initiated. Use your browser's print dialog to save as PDF.",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handlePrint = async () => {
     const validationErrors = validateForPrint();
     
@@ -183,8 +230,12 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
       if (printWindow) {
         printWindow.document.write(printContent);
         printWindow.document.close();
-        printWindow.print();
-        printWindow.close();
+        
+        // Wait for content to load before printing
+        printWindow.onload = () => {
+          printWindow.print();
+          printWindow.close();
+        };
       }
 
       toast({
@@ -217,8 +268,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           <title>Invoice ${invoiceData.invoice_number}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; padding: 20px; }
-            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; padding: 20px; background: white; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid; }
             .logo { max-width: 120px; max-height: 80px; }
             .company-info { text-align: right; }
             .company-info h1 { font-size: 24px; color: #333; margin-bottom: 5px; }
@@ -241,7 +292,14 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             .total-final { font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; margin-top: 10px; }
             .notes { margin-top: 30px; }
             .notes h3 { margin-bottom: 10px; }
-            @media print { body { padding: 0; } }
+            @media print { 
+              body { padding: 0; margin: 0; background: white !important; }
+              .header { page-break-inside: avoid; }
+              .prescription { page-break-inside: avoid; }
+              .items-table { page-break-inside: avoid; }
+              .total-section { page-break-inside: avoid; }
+              @page { margin: 0.5in; size: A4; }
+            }
           </style>
         </head>
         <body>
@@ -571,6 +629,15 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           <div className="flex justify-end gap-3 pt-6 border-t">
             <Button variant="outline" onClick={onClose}>
               Cancel
+            </Button>
+            <Button 
+              onClick={downloadPDF} 
+              disabled={isLoading}
+              variant="outline"
+              className="border-green-600 text-green-600 hover:bg-green-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isLoading ? 'Generating...' : 'Download PDF'}
             </Button>
             <Button 
               onClick={handlePrint} 

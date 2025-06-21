@@ -792,10 +792,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       toast({
         title: "Error",
         description: "Failed to create invoice. Please try again.",
-        variant: "destructive",
+        variant: "```python
+destructive",
       });
-```python
-
     } finally {
       setIsLoading(false);
     }
