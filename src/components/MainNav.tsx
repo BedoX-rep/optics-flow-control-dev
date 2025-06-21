@@ -45,9 +45,6 @@ const MainNav = () => {
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const [administrationOpen, setAdministrationOpen] = useState(false);
 
-  // Force component re-render when sessionRole changes
-  const navigationKey = `${sessionRole}-${language}`;
-
   // Regenerate navigation items when language changes
   const navigation = useMemo(() => getNavigation(t), [t, language]);
   const administrationNavigation = useMemo(() => getAdministrationNavigation(t), [t, language]);
@@ -114,7 +111,6 @@ const MainNav = () => {
 
   return (
     <div 
-      key={navigationKey}
       className={cn(
         "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 relative",
         collapsed ? "w-20" : "w-64"
