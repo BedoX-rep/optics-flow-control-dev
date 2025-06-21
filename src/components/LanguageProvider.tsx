@@ -936,7 +936,7 @@ const receiptTranslations: Translations = {
   },
   unOrdered: {
     en: 'UnOrdered',
-    fr: 'Non Commandé'
+    fr: 'N-Commandé'
   },
   ordered: {
     en: 'Ordered',
