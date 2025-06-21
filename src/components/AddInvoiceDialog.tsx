@@ -255,48 +255,67 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     const updatedItems = [...invoiceItems];
     let remainingDifference = Math.round(difference);
 
-    // Distribute the difference across items without creating decimals
+    // Distribute the difference across ALL items without creating decimals
     if (remainingDifference > 0) {
-      // Need to add to total - distribute positive amounts
+      // Need to add to total - distribute positive amounts across all items
+      const baseIncrease = Math.floor(remainingDifference / updatedItems.length);
+      let extraAmount = remainingDifference - (baseIncrease * updatedItems.length);
+      
+      // First, distribute the base increase to all items
+      updatedItems.forEach((item, index) => {
+        const currentUnitPrice = item.unit_price || 0;
+        updatedItems[index] = {
+          ...item,
+          unit_price: currentUnitPrice + baseIncrease,
+          total_price: (currentUnitPrice + baseIncrease) * (item.quantity || 1)
+        };
+      });
+      
+      // Then distribute the remaining amount one by one
       let itemIndex = 0;
-      while (remainingDifference > 0 && itemIndex < updatedItems.length) {
+      while (extraAmount > 0 && itemIndex < updatedItems.length) {
         const item = updatedItems[itemIndex];
-        const quantity = item.quantity || 1;
-        
-        // Add whole numbers to unit price
-        const additionalUnitPrice = Math.ceil(Math.min(remainingDifference / quantity, remainingDifference));
+        const currentUnitPrice = item.unit_price || 0;
         
         updatedItems[itemIndex] = {
           ...item,
-          unit_price: (item.unit_price || 0) + additionalUnitPrice,
-          total_price: ((item.unit_price || 0) + additionalUnitPrice) * quantity
+          unit_price: currentUnitPrice + 1,
+          total_price: (currentUnitPrice + 1) * (item.quantity || 1)
         };
         
-        remainingDifference -= additionalUnitPrice * quantity;
+        extraAmount -= 1;
         itemIndex++;
       }
     } else {
-      // Need to reduce total - distribute negative amounts
-      let itemIndex = 0;
+      // Need to reduce total - distribute negative amounts across all items
       remainingDifference = Math.abs(remainingDifference);
+      const baseDecrease = Math.floor(remainingDifference / updatedItems.length);
+      let extraAmount = remainingDifference - (baseDecrease * updatedItems.length);
       
-      while (remainingDifference > 0 && itemIndex < updatedItems.length) {
+      // First, distribute the base decrease to all items
+      updatedItems.forEach((item, index) => {
+        const currentUnitPrice = item.unit_price || 0;
+        const newUnitPrice = Math.max(0, currentUnitPrice - baseDecrease);
+        updatedItems[index] = {
+          ...item,
+          unit_price: newUnitPrice,
+          total_price: newUnitPrice * (item.quantity || 1)
+        };
+      });
+      
+      // Then distribute the remaining reduction one by one
+      let itemIndex = 0;
+      while (extraAmount > 0 && itemIndex < updatedItems.length) {
         const item = updatedItems[itemIndex];
-        const quantity = item.quantity || 1;
         const currentUnitPrice = item.unit_price || 0;
         
-        // Reduce unit price but don't go below 0
-        const maxReduction = Math.floor(Math.min(currentUnitPrice, remainingDifference / quantity));
-        const reductionUnitPrice = Math.min(maxReduction, remainingDifference);
-        
-        if (reductionUnitPrice > 0) {
+        if (currentUnitPrice > 0) {
           updatedItems[itemIndex] = {
             ...item,
-            unit_price: currentUnitPrice - reductionUnitPrice,
-            total_price: (currentUnitPrice - reductionUnitPrice) * quantity
+            unit_price: currentUnitPrice - 1,
+            total_price: (currentUnitPrice - 1) * (item.quantity || 1)
           };
-          
-          remainingDifference -= reductionUnitPrice * quantity;
+          extraAmount -= 1;
         }
         
         itemIndex++;
