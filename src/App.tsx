@@ -54,40 +54,35 @@ const ProtectedRoute = ({
   useEffect(() => {
     if (isLoading || !user) return;
 
-    // Add a small delay to ensure state has updated
-    const timeoutId = setTimeout(() => {
-      // Check permission requirements
-      if (requiredPermission) {
-        // Special case for admin session requirement
-        if (requiredPermission === 'admin_session') {
-          if (sessionRole !== 'Admin') {
-            setShouldRedirect('/dashboard');
-            return;
-          }
-        }
-        // Check regular permissions for non-admin sessions
-        else if (sessionRole !== 'Admin') {
-          if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
-            setShouldRedirect('/dashboard');
-            return;
-          }
-        }
-      }
-
-    // Check subscription requirements
-      if (requiresActiveSubscription && subscription) {
-        const subStatus = subscription.subscription_status.toLowerCase();
-        if (subStatus !== 'active') {
-          setShouldRedirect('/subscriptions');
+    // Check permission requirements
+    if (requiredPermission) {
+      // Special case for admin session requirement
+      if (requiredPermission === 'admin_session') {
+        if (sessionRole !== 'Admin') {
+          setShouldRedirect('/dashboard');
           return;
         }
       }
+      // Check regular permissions for non-admin sessions
+      else if (sessionRole !== 'Admin') {
+        if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+          setShouldRedirect('/dashboard');
+          return;
+        }
+      }
+    }
 
-      // Clear redirect if all checks pass
-      setShouldRedirect(null);
-    }, 100); // Small delay to ensure state synchronization
+    // Check subscription requirements
+    if (requiresActiveSubscription && subscription) {
+      const subStatus = subscription.subscription_status.toLowerCase();
+      if (subStatus !== 'active') {
+        setShouldRedirect('/subscriptions');
+        return;
+      }
+    }
 
-    return () => clearTimeout(timeoutId);
+    // Clear redirect if all checks pass
+    setShouldRedirect(null);
   }, [sessionRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
 
   // Show loading state while initial auth check is happening
