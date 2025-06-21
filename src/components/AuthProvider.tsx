@@ -34,7 +34,6 @@ interface UserPermissions {
   can_manage_products: boolean;
   can_manage_clients: boolean;
   can_manage_receipts: boolean;
-  can_manage_invoices: boolean;
   can_view_financial: boolean;
   can_manage_purchases: boolean;
   can_access_dashboard: boolean;
