@@ -252,9 +252,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           .update({
             product_id: item.product_id || null,
             custom_item_name: item.custom_item_name,
-            price: item.price,
-            cost: item.cost,
-            quantity: item.quantity,
+            price: item.price || 0,
+            cost: item.cost || 0,
+            quantity: item.quantity || 1,
             paid_at_delivery: Boolean(item.paid_at_delivery),
             linked_eye: item.linked_eye || null,
             profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
@@ -269,18 +269,23 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         const { error: itemError } = await supabase
           .from('receipt_items')
           .insert({
-            receipt_id: receipt.id, // Associate with the current receipt
+            receipt_id: receipt.id,
+            user_id: receipt.user_id, // Add user_id which is required
             product_id: item.product_id || null,
-            custom_item_name: item.custom_item_name,
-            price: item.price,
-            cost: item.cost,
-            quantity: item.quantity,
+            custom_item_name: item.custom_item_name || null,
+            price: item.price || 0,
+            cost: item.cost || 0,
+            quantity: item.quantity || 1,
             paid_at_delivery: Boolean(item.paid_at_delivery),
             linked_eye: item.linked_eye || null,
-            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+            is_deleted: false
           });
 
-        if (itemError) throw itemError;
+        if (itemError) {
+          console.error('Error inserting new item:', itemError);
+          throw itemError;
+        }
       }
 
       toast({
