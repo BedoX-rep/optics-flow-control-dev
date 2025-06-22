@@ -89,65 +89,87 @@ const Pricing = () => {
 
       {/* Pricing Section */}
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-16 -mt-6 md:-mt-8">
-        <div className="grid md:grid-cols-3 gap-4 md:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {pricingPlans.map((plan) => (
-            <div 
-              key={plan.name} 
-              className={`bg-white rounded-lg shadow-sm overflow-hidden border transition-all relative ${
-                plan.popular 
-                  ? "border-primary ring-2 ring-primary/10 transform md:-translate-y-4" 
-                  : "border-gray-100"
-              }`}
+            <div
+              key={plan.name}
+              className="transform transition-all duration-300 hover:-translate-y-2"
             >
-              {/* Limited Offer Badge */}
-              <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
-                {t('limitedOffer')}
-              </div>
-              
-              {plan.popular && (
-                <div className="bg-primary text-white text-center text-sm py-1.5">
-                  Most Popular
+              <div className={`
+                relative overflow-hidden h-full transition-all duration-300 bg-white rounded-lg
+                ${plan.current ? 
+                  'border-2 border-teal-500 shadow-xl' : 
+                  'hover:shadow-lg hover:border-teal-300 border border-gray-100'
+                }
+              `}>
+                {plan.popular && (
+                  <div className="absolute -left-12 top-6 rotate-[-45deg] bg-teal-500 text-white px-12 py-1 text-sm">
+                    {t('popular')}
+                  </div>
+                )}
+                {/* Limited Offer Badge */}
+                <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
+                  {t('limitedOffer')}
                 </div>
-              )}
-
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                <div className="mb-1 flex items-baseline">
-                  <span className="text-4xl font-bold">{plan.price} {plan.currency}</span>
-                </div>
-                <div className="mb-4">
-                  <span className="text-gray-500 text-sm">{plan.billingCycle}</span>
-                  {plan.savingsText && (
-                    <div className="text-green-600 text-xs mt-1 font-medium">
-                      {plan.savingsText}
+                
+                <div className={`
+                  ${plan.popular ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
+                  ${plan.current ? 'bg-teal-50' : ''}
+                  p-6 pb-4
+                `}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-800">{plan.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {plan.billingCycle}
+                      </p>
                     </div>
-                  )}
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold text-gray-900">
+                        {plan.price}
+                      </span>
+                      <span className="ml-1 text-gray-600">{plan.currency}</span>
+                    </div>
+                    {plan.savingsText && (
+                      <div className="text-green-600 text-xs mt-1 font-medium">
+                        {plan.savingsText}
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="border-t border-gray-100 my-6 pt-6">
+                
+                <div className="pt-6 p-6">
                   <ul className="space-y-3">
                     {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                        <span className="text-sm">{feature.name}</span>
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="h-3 w-3 text-teal-600" />
+                        </div>
+                        <span className="text-gray-600">{feature.name}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-
-                {plan.current ? (
-                  <div className="bg-gray-200 text-center py-2 px-4 mt-6 rounded-md">
-                    {t('currentPlan')}
-                  </div>
-                ) : (
-                  <Button 
-                    variant={plan.buttonVariant} 
-                    className="w-full mt-6"
-                    onClick={() => navigate("/auth")}
-                  >
-                    {plan.buttonText}
-                  </Button>
-                )}
+                
+                <div className="pt-6 p-6 flex flex-col gap-3">
+                  {plan.current ? (
+                    <div className="bg-gray-200 text-center py-3 px-4 rounded-md h-11 flex items-center justify-center">
+                      {t('currentPlan')}
+                    </div>
+                  ) : (
+                    <Button 
+                      variant={plan.buttonVariant} 
+                      className={`w-full h-11 ${plan.popular ? 
+                        'bg-teal-600 hover:bg-teal-700' : 
+                        'bg-gray-800 hover:bg-gray-900'}`}
+                      onClick={() => navigate("/auth")}
+                    >
+                      {plan.buttonText}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
