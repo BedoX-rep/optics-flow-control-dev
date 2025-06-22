@@ -401,7 +401,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
             {/* Save Button positioned between cards */}
             <div className="relative flex justify-center -my-2">
-              <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
                 <Button
                   type="submit"
                   form="product-form"
