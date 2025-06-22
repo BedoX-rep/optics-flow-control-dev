@@ -9,7 +9,7 @@ import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench } from "lucide-react";
+import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -197,13 +197,22 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-      <DialogHeader className="space-y-2 pb-4 border-b">
-        <DialogTitle className="text-2xl font-semibold text-gray-900">
+      <DialogHeader className="space-y-2 pb-4 border-b relative">
+        <DialogTitle className="text-2xl font-semibold text-gray-900 pr-16">
           {initialValues.name ? t('editProduct') : t('addProduct')}
         </DialogTitle>
+        <Button
+          type="submit"
+          form="product-form"
+          disabled={disabled || uploading}
+          className="absolute right-0 top-0 w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
+          size="sm"
+        >
+          <Check className="h-5 w-5" />
+        </Button>
       </DialogHeader>
 
-      <form className="space-y-6 p-4" onSubmit={onFormSubmit}>
+      <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
         {/* Auto Name Generation */}
         <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
           <Checkbox
@@ -292,25 +301,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
               </CardContent>
             </Card>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={onCancel}
-                disabled={disabled || uploading}
-                size="lg"
-              >
-                {t('cancel')}
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={disabled || uploading}
-                size="lg"
-              >
-                {uploading ? t('uploading') : t('saveButton')}
-              </Button>
-            </div>
+            
 
             {/* Lens Specifications - Only for lenses */}
             {showIndexTreatment && (
