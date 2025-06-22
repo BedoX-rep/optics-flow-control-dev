@@ -205,7 +205,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           type="submit"
           form="product-form"
           disabled={disabled || uploading}
-          className="absolute right-0 top-0 w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
           size="sm"
         >
           <Check className="h-5 w-5" />
