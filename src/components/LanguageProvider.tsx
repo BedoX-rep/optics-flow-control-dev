@@ -2307,7 +2307,7 @@ const purchasesTranslations: Translations = {
     fr: 'Assurance'
   },
   loan: {
-    en: 'Loan',```text
+    en: 'Loan',
     fr: 'Prêt'
   },
   other: {
