@@ -349,19 +349,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </div>
 
           {/* Right Column - Pricing & Details */}
-          <div className="space-y-4 relative">
-            {/* Save Button positioned between cards */}
-            <div className="absolute -left-16 top-80 z-10">
-              <Button
-                type="submit"
-                form="product-form"
-                disabled={disabled || uploading}
-                className="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
-                size="sm"
-              >
-                <Check className="h-5 w-5" />
-              </Button>
-            </div>
+          <div className="space-y-4">
             <Card className="border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
@@ -410,6 +398,21 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                 )}
               </CardContent>
             </Card>
+
+            {/* Save Button positioned between cards */}
+            <div className="relative flex justify-center -my-2">
+              <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 z-10">
+                <Button
+                  type="submit"
+                  form="product-form"
+                  disabled={disabled || uploading}
+                  className="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  size="sm"
+                >
+                  <Check className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
 
             {/* Product Name */}
             <Card className="border-gray-200">
