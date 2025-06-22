@@ -161,12 +161,12 @@ const renderSubscriptionPlans = () => {
               }
             `}>
               {type === 'Quarterly' && (
-                <div className="absolute -right-12 top-6 rotate-45 bg-teal-500 text-white px-12 py-1 text-sm">
+                <div className="absolute -left-12 top-6 rotate-[-45deg] bg-teal-500 text-white px-12 py-1 text-sm">
                   {t('popular')}
                 </div>
               )}
               {/* Limited Offer Badge */}
-              <div className="absolute -left-12 top-6 rotate-[-45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
+              <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
                 {t('limitedOffer')}
               </div>
               <CardHeader className={`

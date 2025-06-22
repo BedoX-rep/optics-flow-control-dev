@@ -100,7 +100,7 @@ const Pricing = () => {
               }`}
             >
               {/* Limited Offer Badge */}
-              <div className="absolute -left-12 top-6 rotate-[-45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
+              <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
                 {t('limitedOffer')}
               </div>
               

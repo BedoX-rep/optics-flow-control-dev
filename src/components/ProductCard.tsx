@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -237,7 +236,7 @@ const ProductCard = React.memo<ProductCardProps>(({
               </div>
             ) : (
               <div>
-                <label className="text-xs text-gray-600 font-medium block mb-1">{t('autoName') || 'Auto Name'}</label>
+                <label className="text-xs text-gray-600 font-medium block mb-1">{t('generateNameAuto')}</label>
                 <div className="flex items-center h-7">
                   <Switch
                     checked={product.automated_name}
