@@ -338,6 +338,18 @@ const productTranslations: Translations = {
     en: 'Product Classification',
     fr: 'Classification du Produit'
   },
+  productInformation: {
+    en: 'Product Information',
+    fr: 'Informations du Produit'
+  },
+  pricingFinancial: {
+    en: 'Pricing & Financial',
+    fr: 'Prix et Financier'
+  },
+  inventoryMedia: {
+    en: 'Inventory & Media',
+    fr: 'Inventaire et Média'
+  },
   lensSpecifications: {
     en: 'Lens Specifications',
     fr: 'Spécifications des Verres'
