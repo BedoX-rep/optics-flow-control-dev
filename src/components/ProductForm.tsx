@@ -292,6 +292,26 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
               </CardContent>
             </Card>
 
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onCancel}
+                disabled={disabled || uploading}
+                size="lg"
+              >
+                {t('cancel')}
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={disabled || uploading}
+                size="lg"
+              >
+                {uploading ? t('uploading') : t('saveButton')}
+              </Button>
+            </div>
+
             {/* Lens Specifications - Only for lenses */}
             {showIndexTreatment && (
               <Card className="border-gray-200">
@@ -481,23 +501,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onCancel}
-            disabled={disabled || uploading}
-          >
-            {t('cancel')}
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={disabled || uploading}
-          >
-            {uploading ? t('uploading') : t('saveButton')}
-          </Button>
-        </div>
+        
       </form>
     </DialogContent>
   );
