@@ -196,16 +196,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const IconComponent = selectedCategory?.icon || Package;
 
   return (
-    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+    <DialogContent className="max-w-6xl max-h-[95vh] bg-white">
       <DialogHeader className="space-y-2 pb-4 border-b">
         <DialogTitle className="text-2xl font-semibold text-gray-900">
           {initialValues.name ? t('editProduct') : t('addProduct')}
         </DialogTitle>
       </DialogHeader>
 
-      <form className="space-y-6 p-4" onSubmit={onFormSubmit}>
+      <form className="space-y-4 p-4" onSubmit={onFormSubmit}>
         {/* Auto Name Generation */}
-        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
           <Checkbox
             checked={autoName}
             onCheckedChange={handleAutoNameToggle}
@@ -223,19 +223,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - Product Classification */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-base">
                   <Tag className="h-4 w-4" />
                   {t('productClassification') || 'Product Classification'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 {/* Category */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('category')}
                   </Label>
@@ -243,7 +243,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     value={form.category ?? ""}
                     onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9">
                       <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -258,7 +258,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                 </div>
 
                 {/* Company */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('company')}
                   </Label>
@@ -266,7 +266,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     value={form.company ?? ""}
                     onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9">
                       <SelectValue placeholder={t('selectCompany')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -279,88 +279,109 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                 </div>
 
                 {/* Gamma */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('gamma')}
                   </Label>
                   <Input
+                    className="h-9"
                     value={form.gamma ?? ""}
                     onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
                     placeholder={t('enterGamma')}
                   />
                 </div>
+
+                {/* Lens Specifications - Only for lenses */}
+                {showIndexTreatment && (
+                  <>
+                    <Separator className="my-2" />
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Eye className="h-4 w-4" />
+                        <span className="text-sm font-medium text-gray-800">{t('lensSpecifications') || 'Lens Specifications'}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium text-gray-700">
+                          {t('index')}
+                        </Label>
+                        <Select
+                          value={form.index ?? ""}
+                          onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder={t('selectIndex')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none_selected">{t('none')}</SelectItem>
+                            {INDEX_OPTIONS.map(opt => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium text-gray-700">
+                          {t('treatment')}
+                        </Label>
+                        <Select
+                          value={form.treatment ?? ""}
+                          onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder={t('selectTreatment')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none_selected">{t('none')}</SelectItem>
+                            {TREATMENT_OPTIONS.map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
-            {/* Lens Specifications - Only for lenses */}
-            {showIndexTreatment && (
-              <Card className="border-gray-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                    <Eye className="h-4 w-4" />
-                    {t('lensSpecifications') || 'Lens Specifications'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('index')}
-                    </Label>
-                    <Select
-                      value={form.index ?? ""}
-                      onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectIndex')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none_selected">{t('none')}</SelectItem>
-                        {INDEX_OPTIONS.map(opt => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('treatment')}
-                    </Label>
-                    <Select
-                      value={form.treatment ?? ""}
-                      onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectTreatment')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none_selected">{t('none')}</SelectItem>
-                        {TREATMENT_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Action Buttons moved here */}
+            <div className="flex flex-col gap-2 pt-2">
+              <Button 
+                type="submit" 
+                disabled={disabled || uploading}
+                className="w-full"
+              >
+                {uploading ? t('uploading') : t('saveButton')}
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onCancel}
+                disabled={disabled || uploading}
+                className="w-full"
+              >
+                {t('cancel')}
+              </Button>
+            </div>
           </div>
 
-          {/* Right Column - Pricing & Details */}
-          <div className="space-y-4">
+          {/* Middle Column - Pricing & Financial */}
+          <div className="space-y-3">
             <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-base">
                   <DollarSign className="h-4 w-4" />
                   {t('pricingFinancial') || 'Pricing & Financial'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-3">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('price')} (DH)
                   </Label>
                   <Input
+                    className="h-9"
                     type="number"
                     value={form.price}
                     onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
@@ -370,11 +391,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('costTTC')} (DH)
                   </Label>
                   <Input
+                    className="h-9"
                     type="number"
                     value={form.cost_ttc ?? 0}
                     onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
@@ -385,7 +407,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
                 {/* Profit Margin Display */}
                 {form.price > 0 && (form.cost_ttc ?? 0) > 0 && (
-                  <div className="p-3 bg-gray-50 rounded border">
+                  <div className="p-2 bg-gray-50 rounded border">
                     <div className="flex justify-between text-sm">
                       <span>{t('profitMargin') || 'Profit Margin'}:</span>
                       <span className="font-semibold">
@@ -396,21 +418,24 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                 )}
               </CardContent>
             </Card>
+          </div>
 
-            {/* Product Name */}
+          {/* Right Column - Product Details */}
+          <div className="space-y-3">
             <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-base">
                   <Package className="h-4 w-4" />
                   {t('productDetails') || 'Product Details'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-3">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('productName')}
                   </Label>
                   <Input
+                    className="h-9"
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     disabled={autoName}
@@ -419,7 +444,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('stockStatus')}
                   </Label>
@@ -427,7 +452,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     value={form.stock_status}
                     onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9">
                       <SelectValue placeholder={t('selectStockStatus')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -440,11 +465,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                 </div>
 
                 {form.stock_status === 'inStock' && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label className="text-sm font-medium text-gray-700">
                       {t('stock')} {t('quantity') || 'Quantity'}
                     </Label>
                     <Input
+                      className="h-9"
                       type="number"
                       value={form.stock ?? 0}
                       onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
@@ -454,14 +480,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   </div>
                 )}
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label className="text-sm font-medium text-gray-700">
                     {t('image')}
                   </Label>
                   <input
                     type="file"
                     accept="image/*"
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700"
+                    className="w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-50 file:text-gray-700"
                     onChange={e => {
                       if (e.target.files && e.target.files[0]) {
                         setImageFile(e.target.files[0]);
@@ -472,31 +498,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     <img 
                       src={form.image} 
                       alt="product preview" 
-                      className="w-24 h-24 object-cover rounded border" 
+                      className="w-16 h-16 object-cover rounded border mt-2" 
                     />
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onCancel}
-            disabled={disabled || uploading}
-          >
-            {t('cancel')}
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={disabled || uploading}
-          >
-            {uploading ? t('uploading') : t('saveButton')}
-          </Button>
         </div>
       </form>
     </DialogContent>
