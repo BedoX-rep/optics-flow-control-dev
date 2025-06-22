@@ -239,81 +239,100 @@ const Pricing = () => {
 
       {/* Pricing Section */}
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-16 -mt-6 md:-mt-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {pricingPlans.map((plan) => (
             <div
               key={plan.name}
-              className="transform transition-all duration-300 hover:-translate-y-2"
+              className={`group relative transform transition-all duration-500 hover:-translate-y-3 ${
+                plan.popular ? 'md:-translate-y-4' : ''
+              }`}
             >
               <div className={`
-                relative overflow-hidden h-full transition-all duration-300 bg-white rounded-lg
+                relative overflow-hidden h-full transition-all duration-500 rounded-2xl bg-white
                 ${plan.current ? 
-                  'border-2 border-teal-500 shadow-xl' : 
-                  'hover:shadow-lg hover:border-teal-300 border border-gray-100'
+                  'ring-4 ring-teal-500/20 border-2 border-teal-500 shadow-2xl shadow-teal-500/10' : 
+                  plan.popular ?
+                  'ring-2 ring-teal-200 border border-teal-200 shadow-xl shadow-teal-500/5 group-hover:shadow-2xl group-hover:shadow-teal-500/10' :
+                  'border border-gray-200 shadow-lg group-hover:shadow-xl group-hover:border-gray-300'
                 }
               `}>
+                
+                {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute -left-12 top-6 rotate-[-45deg] bg-teal-500 text-white px-12 py-1 text-sm">
-                    {t('popular')}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      {t('popular')}
+                    </div>
                   </div>
                 )}
+                
                 {/* Limited Offer Badge */}
-                <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
-                  {t('limitedOffer')}
+                <div className="absolute -top-1 -right-1 z-10">
+                  <div className="bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-2xl shadow-lg">
+                    {t('limitedOffer')}
+                  </div>
                 </div>
                 
+                {/* Header */}
                 <div className={`
-                  ${plan.popular ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
-                  ${plan.current ? 'bg-teal-50' : ''}
-                  p-6 pb-4
+                  relative px-8 pt-8 pb-6
+                  ${plan.popular ? 'bg-gradient-to-br from-teal-50 via-white to-teal-50/50' : 
+                    plan.current ? 'bg-gradient-to-br from-teal-50 to-white' : 
+                    'bg-gradient-to-br from-gray-50 to-white'
+                  }
                 `}>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-800">{plan.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {plan.billingCycle}
-                      </p>
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4">{plan.billingCycle}</p>
+                    
+                    <div className="flex items-baseline justify-center mb-2">
+                      <span className="text-5xl font-extrabold text-gray-900">{plan.price}</span>
+                      <span className="ml-2 text-xl text-gray-600 font-medium">{plan.currency}</span>
                     </div>
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold text-gray-900">
-                        {plan.price}
-                      </span>
-                      <span className="ml-1 text-gray-600">{plan.currency}</span>
-                    </div>
+                    
                     {plan.savingsText && (
-                      <div className="text-green-600 text-xs mt-1 font-medium">
+                      <div className="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
                         {plan.savingsText}
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="pt-6 p-6">
-                  <ul className="space-y-3">
+                {/* Features */}
+                <div className="px-8 py-6">
+                  <ul className="space-y-4">
                     {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
-                        <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="h-3 w-3 text-teal-600" />
+                      <li key={index} className="flex items-start gap-3">
+                        <div className={`
+                          mt-0.5 h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0
+                          ${plan.popular ? 'bg-teal-100' : 'bg-gray-100'}
+                        `}>
+                          <CheckCircle className={`h-3 w-3 ${plan.popular ? 'text-teal-600' : 'text-gray-600'}`} />
                         </div>
-                        <span className="text-gray-600">{feature.name}</span>
+                        <span className="text-gray-700 text-sm leading-relaxed">{feature.name}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 
-                <div className="pt-6 p-6 flex flex-col gap-3">
+                {/* CTA Button */}
+                <div className="px-8 pb-8 mt-auto">
                   {plan.current ? (
-                    <div className="bg-gray-200 text-center py-3 px-4 rounded-md h-11 flex items-center justify-center">
+                    <div className={`
+                      w-full py-4 px-6 rounded-xl text-center font-semibold text-sm
+                      bg-gradient-to-r from-teal-100 to-teal-50 text-teal-700 border-2 border-teal-200
+                    `}>
                       {t('currentPlan')}
                     </div>
                   ) : (
                     <Button 
-                      variant={plan.buttonVariant} 
-                      className={`w-full h-11 ${plan.popular ? 
-                        'bg-teal-600 hover:bg-teal-700' : 
-                        'bg-gray-800 hover:bg-gray-900'}`}
+                      className={`
+                        w-full py-4 px-6 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105
+                        ${plan.popular ? 
+                          'bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white shadow-lg hover:shadow-xl' : 
+                          'bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black text-white shadow-lg hover:shadow-xl'
+                        }
+                      `}
                       onClick={() => navigate("/auth")}
                     >
                       {plan.buttonText}
