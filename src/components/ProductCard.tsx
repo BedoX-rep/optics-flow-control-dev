@@ -172,62 +172,92 @@ const ProductCard = React.memo<ProductCardProps>(({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              value={product.gamma || ""}
-              onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
-              className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-              placeholder={t('gamma')}
-            />
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('gamma')}</label>
+              <input
+                type="text"
+                value={product.gamma || ""}
+                onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
+                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                placeholder={t('gamma')}
+              />
+            </div>
 
-            <input
-              type="number"
-              value={product.cost_ttc || 0}
-              onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
-              className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-              placeholder={t('costTTC')}
-              min={0}
-              step={0.01}
-            />
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('costTTC')} (DH)</label>
+              <input
+                type="number"
+                value={product.cost_ttc || 0}
+                onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
+                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                placeholder="0.00"
+                min={0}
+                step={0.01}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Select
-              value={product.stock_status || 'Order'}
-              onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
-                onFieldChange(product.id, 'stock_status', value)
-              }
-            >
-              <SelectTrigger className="h-7 text-xs border-gray-200">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Order">{t('order')}</SelectItem>
-                <SelectItem value="inStock">{t('inStock')}</SelectItem>
-                <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
-                <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('stockStatus')}</label>
+              <Select
+                value={product.stock_status || 'Order'}
+                onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
+                  onFieldChange(product.id, 'stock_status', value)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs border-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Order">{t('order')}</SelectItem>
+                  <SelectItem value="inStock">{t('inStock')}</SelectItem>
+                  <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                  <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {product.stock_status === 'inStock' ? (
-              <input
-                type="number"
-                value={product.stock || 0}
-                onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-                placeholder={t('stock')}
-                min={0}
-              />
+              <div>
+                <label className="text-xs text-gray-600 font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
+                <input
+                  type="number"
+                  value={product.stock || 0}
+                  onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
+                  className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                  placeholder="0"
+                  min={0}
+                />
+              </div>
             ) : (
-              <div className="flex items-center justify-center">
+              <div>
+                <label className="text-xs text-gray-600 font-medium block mb-1">{t('autoName') || 'Auto Name'}</label>
+                <div className="flex items-center h-7">
+                  <Switch
+                    checked={product.automated_name}
+                    onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
+                    className="scale-75"
+                  />
+                  <span className="text-xs text-gray-500 ml-1">{t('auto')}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Auto Toggle - Always visible at bottom */}
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <label className="text-xs text-gray-600 font-medium">{t('autoGenerate') || 'Auto Generate Name'}</label>
+              <div className="flex items-center">
                 <Switch
                   checked={product.automated_name}
                   onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
                   className="scale-75"
                 />
-                <span className="text-xs text-gray-500 ml-1">{t('auto')}</span>
+                <span className="text-xs text-gray-500 ml-1">{product.automated_name ? t('on') || 'ON' : t('off') || 'OFF'}</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
