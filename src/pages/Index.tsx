@@ -124,6 +124,14 @@ const IndexPage = () => {
                       {t('pricing')}
                     </button>
                   </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <button
+                      onClick={() => navigate("/how-to-use")}
+                      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white cursor-pointer"
+                    >
+                      {t('howToUse')}
+                    </button>
+                  </NavigationMenuItem>
                   <ContactMenu />
                 </NavigationMenuList>
               </NavigationMenu>
@@ -167,6 +175,12 @@ const IndexPage = () => {
                   setMobileMenuOpen(false);
                 }} className="text-white py-3 text-xl font-medium">
                   {t('pricing')}
+                </button>
+                <button onClick={() => {
+                  navigate("/how-to-use");
+                  setMobileMenuOpen(false);
+                }} className="text-white py-3 text-xl font-medium">
+                  {t('howToUse')}
                 </button>
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-white/80">{t('features')}</h3>

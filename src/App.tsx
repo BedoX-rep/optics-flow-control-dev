@@ -18,7 +18,8 @@ import NewReceipt from "./pages/NewReceipt";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
-import Pricing from "./pages/Pricing";
+import Pricing from './pages/Pricing';
+import HowToUse from './pages/HowToUse';
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 import Invoices from './pages/Invoices';
@@ -116,6 +117,7 @@ const AppRoutes = () => (
     <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/pricing" element={<Pricing />} />
+	  <Route path="/how-to-use" element={<HowToUse />} />
 
     <Route path="/dashboard" element={
       <ProtectedRoute>

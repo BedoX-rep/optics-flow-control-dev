@@ -2045,6 +2045,266 @@ const pricingTranslations: Translations = {
     en: 'Lifetime access',
     fr: 'Accès à vie'
   },
+  howToUse: {
+    en: 'How to Use',
+    fr: 'Comment Utiliser'
+  },
+  howToUseTitle: {
+    en: 'How to Use Lensly',
+    fr: 'Comment Utiliser Lensly'
+  },
+  howToUseSubtitle: {
+    en: 'Learn how to make the most of your optical management system with our comprehensive guide',
+    fr: 'Apprenez à tirer le meilleur parti de votre système de gestion optique avec notre guide complet'
+  },
+  gettingStarted: {
+    en: 'Getting Started with Lensly',
+    fr: 'Commencer avec Lensly'
+  },
+  howToUseIntro: {
+    en: 'Lensly is designed to streamline your optical business operations. This guide will walk you through each feature and show you how to maximize your productivity.',
+    fr: 'Lensly est conçu pour rationaliser les opérations de votre entreprise optique. Ce guide vous guidera à travers chaque fonctionnalité et vous montrera comment maximiser votre productivité.'
+  },
+  quickSetup: {
+    en: 'Quick Setup',
+    fr: 'Configuration Rapide'
+  },
+  quickSetupDesc: {
+    en: 'Get started in minutes with our intuitive setup process',
+    fr: 'Commencez en quelques minutes avec notre processus de configuration intuitif'
+  },
+  easyManagement: {
+    en: 'Easy Management',
+    fr: 'Gestion Facile'
+  },
+  easyManagementDesc: {
+    en: 'Manage products, clients, and transactions with ease',
+    fr: 'Gérez les produits, clients et transactions en toute simplicité'
+  },
+  powerfulAnalytics: {
+    en: 'Powerful Analytics',
+    fr: 'Analyses Puissantes'
+  },
+  powerfulAnalyticsDesc: {
+    en: 'Track your business performance with detailed reports',
+    fr: 'Suivez les performances de votre entreprise avec des rapports détaillés'
+  },
+  stepByStepGuide: {
+    en: 'Step-by-Step Guide',
+    fr: 'Guide Étape par Étape'
+  },
+  stepsToFollow: {
+    en: 'Steps to Follow',
+    fr: 'Étapes à Suivre'
+  },
+  howToUseStep1Title: {
+    en: 'Initial Setup & Configuration',
+    fr: 'Configuration et Installation Initiales'
+  },
+  howToUseStep1Desc: {
+    en: 'Set up your optical business profile and configure basic settings',
+    fr: 'Configurez le profil de votre entreprise optique et les paramètres de base'
+  },
+  howToUseStep1Sub1: {
+    en: 'Create your account and verify your email address',
+    fr: 'Créez votre compte et vérifiez votre adresse e-mail'
+  },
+  howToUseStep1Sub2: {
+    en: 'Complete your business information in Optician Settings',
+    fr: 'Complétez les informations de votre entreprise dans les Paramètres Opticien'
+  },
+  howToUseStep1Sub3: {
+    en: 'Set up your markup percentages for different product categories',
+    fr: 'Configurez vos pourcentages de majoration pour différentes catégories de produits'
+  },
+  howToUseStep1Sub4: {
+    en: 'Configure user access permissions if you have multiple staff members',
+    fr: 'Configurez les autorisations d\'accès utilisateur si vous avez plusieurs membres du personnel'
+  },
+  howToUseStep2Title: {
+    en: 'Product Management',
+    fr: 'Gestion des Produits'
+  },
+  howToUseStep2Desc: {
+    en: 'Add and organize your inventory of frames, lenses, and accessories',
+    fr: 'Ajoutez et organisez votre inventaire de montures, verres et accessoires'
+  },
+  howToUseStep2Sub1: {
+    en: 'Navigate to Products page and click "Add Product" to create new items',
+    fr: 'Naviguez vers la page Produits et cliquez sur "Ajouter un Produit" pour créer de nouveaux articles'
+  },
+  howToUseStep2Sub2: {
+    en: 'Use the import feature to bulk upload products from Excel/CSV files',
+    fr: 'Utilisez la fonction d\'importation pour télécharger en masse des produits depuis des fichiers Excel/CSV'
+  },
+  howToUseStep2Sub3: {
+    en: 'Organize products by categories: Frames, Single Vision, Progressive, Sunglasses, Contact Lenses, Accessories',
+    fr: 'Organisez les produits par catégories : Montures, Vision Simple, Progressif, Lunettes de Soleil, Lentilles de Contact, Accessoires'
+  },
+  howToUseStep2Sub4: {
+    en: 'Set stock levels and enable low-stock alerts for inventory management',
+    fr: 'Définissez les niveaux de stock et activez les alertes de stock faible pour la gestion des stocks'
+  },
+  howToUseStep3Title: {
+    en: 'Client Management',
+    fr: 'Gestion des Clients'
+  },
+  howToUseStep3Desc: {
+    en: 'Create detailed client profiles with prescription history and contact information',
+    fr: 'Créez des profils clients détaillés avec l\'historique des prescriptions et les informations de contact'
+  },
+  howToUseStep3Sub1: {
+    en: 'Add new clients with complete contact information and personal details',
+    fr: 'Ajoutez de nouveaux clients avec des informations de contact complètes et des détails personnels'
+  },
+  howToUseStep3Sub2: {
+    en: 'Record detailed eye prescriptions including sphere, cylinder, axis, and addition values',
+    fr: 'Enregistrez des prescriptions oculaires détaillées incluant les valeurs de sphère, cylindre, axe et addition'
+  },
+  howToUseStep3Sub3: {
+    en: 'Track prescription history and changes over time for better patient care',
+    fr: 'Suivez l\'historique des prescriptions et les changements au fil du temps pour de meilleurs soins aux patients'
+  },
+  howToUseStep3Sub4: {
+    en: 'Use the search function to quickly find clients by name, phone, or email',
+    fr: 'Utilisez la fonction de recherche pour trouver rapidement des clients par nom, téléphone ou e-mail'
+  },
+  howToUseStep4Title: {
+    en: 'Sales & Receipt Management',
+    fr: 'Gestion des Ventes et Reçus'
+  },
+  howToUseStep4Desc: {
+    en: 'Process sales transactions and generate professional receipts and invoices',
+    fr: 'Traitez les transactions de vente et générez des reçus et factures professionnels'
+  },
+  howToUseStep4Sub1: {
+    en: 'Create new receipts by selecting client and adding products to the order',
+    fr: 'Créez de nouveaux reçus en sélectionnant le client et en ajoutant des produits à la commande'
+  },
+  howToUseStep4Sub2: {
+    en: 'Apply automatic markup calculations and discounts as needed',
+    fr: 'Appliquez des calculs de majoration automatiques et des remises selon les besoins'
+  },
+  howToUseStep4Sub3: {
+    en: 'Process payments with multiple payment methods (cash, card, transfer)',
+    fr: 'Traitez les paiements avec plusieurs méthodes de paiement (espèces, carte, virement)'
+  },
+  howToUseStep4Sub4: {
+    en: 'Print or email receipts directly to clients for their records',
+    fr: 'Imprimez ou envoyez par e-mail les reçus directement aux clients pour leurs dossiers'
+  },
+  howToUseStep5Title: {
+    en: 'Purchase & Supplier Management',
+    fr: 'Gestion des Achats et Fournisseurs'
+  },
+  howToUseStep5Desc: {
+    en: 'Track purchases from suppliers and manage your business expenses',
+    fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
+  },
+  howToUseStep5Sub1: {
+    en: 'Add suppliers with complete contact and payment information',
+    fr: 'Ajoutez des fournisseurs avec des informations de contact et de paiement complètes'
+  },
+  howToUseStep5Sub2: {
+    en: 'Record purchases and track what you owe to each supplier',
+    fr: 'Enregistrez les achats et suivez ce que vous devez à chaque fournisseur'
+  },
+  howToUseStep5Sub3: {
+    en: 'Monitor supplier balances and payment schedules',
+    fr: 'Surveillez les soldes des fournisseurs et les calendriers de paiement'
+  },
+  howToUseStep5Sub4: {
+    en: 'Generate purchase reports for expense tracking and tax purposes',
+    fr: 'Générez des rapports d\'achat pour le suivi des dépenses et les fins fiscales'
+  },
+  howToUseStep6Title: {
+    en: 'Analytics & Reporting',
+    fr: 'Analyses et Rapports'
+  },
+  howToUseStep6Desc: {
+    en: 'Monitor your business performance with comprehensive analytics and reports',
+    fr: 'Surveillez les performances de votre entreprise avec des analyses et rapports complets'
+  },
+  howToUseStep6Sub1: {
+    en: 'View dashboard for daily, weekly, and monthly sales summaries',
+    fr: 'Consultez le tableau de bord pour des résumés de ventes quotidiens, hebdomadaires et mensuels'
+  },
+  howToUseStep6Sub2: {
+    en: 'Analyze financial metrics including revenue, costs, and profit margins',
+    fr: 'Analysez les métriques financières incluant les revenus, coûts et marges bénéficiaires'
+  },
+  howToUseStep6Sub3: {
+    en: 'Track inventory turnover and identify best-selling products',
+    fr: 'Suivez la rotation des stocks et identifiez les produits les plus vendus'
+  },
+  howToUseStep6Sub4: {
+    en: 'Export reports for accounting and business planning purposes',
+    fr: 'Exportez des rapports pour la comptabilité et la planification d\'entreprise'
+  },
+  proTips: {
+    en: 'Pro Tips for Maximum Efficiency',
+    fr: 'Conseils Pro pour une Efficacité Maximale'
+  },
+  tip1Title: {
+    en: 'Use Quick Search',
+    fr: 'Utilisez la Recherche Rapide'
+  },
+  tip1Desc: {
+    en: 'Save time by using the search functionality to quickly find products, clients, or transactions',
+    fr: 'Économisez du temps en utilisant la fonctionnalité de recherche pour trouver rapidement des produits, clients ou transactions'
+  },
+  tip2Title: {
+    en: 'Bulk Import Products',
+    fr: 'Importation en Masse de Produits'
+  },
+  tip2Desc: {
+    en: 'Use the import feature to quickly add multiple products from your supplier catalogs',
+    fr: 'Utilisez la fonction d\'importation pour ajouter rapidement plusieurs produits de vos catalogues fournisseurs'
+  },
+  tip3Title: {
+    en: 'Customize Receipts',
+    fr: 'Personnalisez les Reçus'
+  },
+  tip3Desc: {
+    en: 'Set up your business logo and information in settings for professional-looking receipts',
+    fr: 'Configurez le logo et les informations de votre entreprise dans les paramètres pour des reçus d\'aspect professionnel'
+  },
+  tip4Title: {
+    en: 'Track Prescriptions',
+    fr: 'Suivez les Prescriptions'
+  },
+  tip4Desc: {
+    en: 'Always record complete prescription details for better customer service and compliance',
+    fr: 'Enregistrez toujours les détails complets des prescriptions pour un meilleur service client et la conformité'
+  },
+  tip5Title: {
+    en: 'Regular Backups',
+    fr: 'Sauvegardes Régulières'
+  },
+  tip5Desc: {
+    en: 'Export your data regularly to ensure you never lose important business information',
+    fr: 'Exportez vos données régulièrement pour vous assurer de ne jamais perdre d\'informations commerciales importantes'
+  },
+  tip6Title: {
+    en: 'Monitor Financial Health',
+    fr: 'Surveillez la Santé Financière'
+  },
+  tip6Desc: {
+    en: 'Check your financial dashboard regularly to track profit margins and business growth',
+    fr: 'Vérifiez régulièrement votre tableau de bord financier pour suivre les marges bénéficiaires et la croissance de l\'entreprise'
+  },
+  readyToStart: {
+    en: 'Ready to Transform Your Optical Business?',
+    fr: 'Prêt à Transformer Votre Entreprise Optique ?'
+  },
+  readyToStartDesc: {
+    en: 'Start your free trial today and see how Lensly can streamline your operations and boost your productivity.',
+    fr: 'Commencez votre essai gratuit aujourd\'hui et voyez comment Lensly peut rationaliser vos opérations et augmenter votre productivité.'
+  },
+  viewPricing: {
+    en: 'View Pricing',
+    fr: 'Voir les Tarifs'
+  },
   saveVsMonthly: {
     en: 'Save 11% vs monthly',
     fr: 'Économisez 11% par rapport au mensuel'

@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Menu, X, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useAuth } from '@/components/AuthProvider';
@@ -16,64 +15,38 @@ import {
 } from "@/components/ui/navigation-menu";
 import ContactMenu from '@/components/ContactMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Menu,
+  X,
+  ArrowRight,
+  Package,
+  Users,
+  Receipt,
+  FileText,
+  Calculator,
+  Settings,
+  ChevronRight,
+  Eye,
+  ShoppingCart,
+  CreditCard,
+  BarChart3,
+  UserCheck,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Download,
+  Upload,
+  PrinterIcon,
+  CheckCircle
+} from 'lucide-react';
 
-const Pricing = () => {
+const HowToUse = () => {
   const { t, direction } = useLanguage();
   const navigate = useNavigate();
-  const { user, subscription } = useAuth();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Check if user has a subscription and if it's the quarterly plan
-  const isQuarterlyPlan = subscription?.subscription_status === 'Active' && 
-                          subscription?.subscription_type === 'Quarterly';
-
-  const pricingPlans = [
-    {
-      name: t('monthly'),
-      price: "100",
-      currency: "DH",
-      billingCycle: t('monthlySubscription'),
-      features: [
-        { name: t('fullAccess') },
-        { name: t('monthlyBilling') },
-      ],
-      buttonText: t('startFreeTrial'),
-      buttonVariant: "outline" as const,
-      current: false
-    },
-    {
-      name: t('quarterly'),
-      price: "300",
-      currency: "DH",
-      billingCycle: t('quarterlySubscription'),
-      savingsText: t('saveVsMonthly'),
-      features: [
-        { name: t('fullAccess') },
-        { name: t('quarterlyBilling') },
-        { name: t('prioritySupport') },
-      ],
-      buttonText: t('startFreeTrial'),
-      buttonVariant: "default" as const,
-      popular: true,
-      current: isQuarterlyPlan
-    },
-    {
-      name: t('lifetime'),
-      price: "1000",
-      currency: "DH",
-      billingCycle: t('oneTimePayment'),
-      features: [
-        { name: t('fullAccess') },
-        { name: t('unlimitedUpdates') },
-        { name: t('noRecurring') },
-        { name: t('lifetimeAccess') },
-      ],
-      buttonText: t('purchaseNow'),
-      buttonVariant: "outline" as const,
-      current: false
-    }
-  ];
 
   const features = [
     {
@@ -99,6 +72,75 @@ const Pricing = () => {
     {
       title: "Access Control",
       description: "Manage user permissions and control access to sensitive data",
+    }
+  ];
+
+  const guideSteps = [
+    {
+      title: t('howToUseStep1Title'),
+      description: t('howToUseStep1Desc'),
+      icon: <UserCheck className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep1Sub1'),
+        t('howToUseStep1Sub2'),
+        t('howToUseStep1Sub3'),
+        t('howToUseStep1Sub4')
+      ]
+    },
+    {
+      title: t('howToUseStep2Title'),
+      description: t('howToUseStep2Desc'),
+      icon: <Package className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep2Sub1'),
+        t('howToUseStep2Sub2'),
+        t('howToUseStep2Sub3'),
+        t('howToUseStep2Sub4')
+      ]
+    },
+    {
+      title: t('howToUseStep3Title'),
+      description: t('howToUseStep3Desc'),
+      icon: <Users className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep3Sub1'),
+        t('howToUseStep3Sub2'),
+        t('howToUseStep3Sub3'),
+        t('howToUseStep3Sub4')
+      ]
+    },
+    {
+      title: t('howToUseStep4Title'),
+      description: t('howToUseStep4Desc'),
+      icon: <Receipt className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep4Sub1'),
+        t('howToUseStep4Sub2'),
+        t('howToUseStep4Sub3'),
+        t('howToUseStep4Sub4')
+      ]
+    },
+    {
+      title: t('howToUseStep5Title'),
+      description: t('howToUseStep5Desc'),
+      icon: <ShoppingCart className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep5Sub1'),
+        t('howToUseStep5Sub2'),
+        t('howToUseStep5Sub3'),
+        t('howToUseStep5Sub4')
+      ]
+    },
+    {
+      title: t('howToUseStep6Title'),
+      description: t('howToUseStep6Desc'),
+      icon: <BarChart3 className="h-8 w-8 text-teal-600" />,
+      steps: [
+        t('howToUseStep6Sub1'),
+        t('howToUseStep6Sub2'),
+        t('howToUseStep6Sub3'),
+        t('howToUseStep6Sub4')
+      ]
     }
   ];
 
@@ -230,95 +272,75 @@ const Pricing = () => {
 
         {/* Hero Section */}
         <div className="container mx-auto px-4 md:px-6 py-8 md:py-16 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('pricingTitle')}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('howToUseTitle')}</h1>
           <p className="text-white/90 text-lg md:text-xl max-w-3xl mx-auto">
-            {t('pricingSubtitle')}
+            {t('howToUseSubtitle')}
           </p>
         </div>
       </div>
 
-      {/* Pricing Section */}
+      {/* Introduction Section */}
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-16 -mt-6 md:-mt-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {pricingPlans.map((plan) => (
-            <div
-              key={plan.name}
-              className="transform transition-all duration-300 hover:-translate-y-2"
-            >
-              <div className={`
-                relative overflow-hidden h-full transition-all duration-300 bg-white rounded-lg
-                ${plan.current ? 
-                  'border-2 border-teal-500 shadow-xl' : 
-                  'hover:shadow-lg hover:border-teal-300 border border-gray-100'
-                }
-              `}>
-                {plan.popular && (
-                  <div className="absolute -left-12 top-6 rotate-[-45deg] bg-teal-500 text-white px-12 py-1 text-sm">
-                    {t('popular')}
-                  </div>
-                )}
-                {/* Limited Offer Badge */}
-                <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
-                  {t('limitedOffer')}
-                </div>
-                
-                <div className={`
-                  ${plan.popular ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
-                  ${plan.current ? 'bg-teal-50' : ''}
-                  p-6 pb-4
-                `}>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-800">{plan.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {plan.billingCycle}
-                      </p>
+        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t('gettingStarted')}</h2>
+          <p className="text-gray-600 text-lg leading-relaxed text-center mb-8">
+            {t('howToUseIntro')}
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck className="h-8 w-8 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('quickSetup')}</h3>
+              <p className="text-gray-600 text-sm">{t('quickSetupDesc')}</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="h-8 w-8 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('easyManagement')}</h3>
+              <p className="text-gray-600 text-sm">{t('easyManagementDesc')}</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-8 w-8 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('powerfulAnalytics')}</h3>
+              <p className="text-gray-600 text-sm">{t('powerfulAnalyticsDesc')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Step-by-Step Guide */}
+      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 text-center">{t('stepByStepGuide')}</h2>
+        
+        <div className="space-y-8">
+          {guideSteps.map((step, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="flex flex-col md:flex-row">
+                <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-6 md:p-8 md:w-1/3">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
+                      <span className="text-teal-600 font-bold text-xl">{index + 1}</span>
                     </div>
+                    {step.icon}
                   </div>
-                  <div className="mt-4">
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold text-gray-900">
-                        {plan.price}
-                      </span>
-                      <span className="ml-1 text-gray-600">{plan.currency}</span>
-                    </div>
-                    {plan.savingsText && (
-                      <div className="text-green-600 text-xs mt-1 font-medium">
-                        {plan.savingsText}
-                      </div>
-                    )}
-                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-800">{step.title}</h3>
+                  <p className="text-gray-600">{step.description}</p>
                 </div>
-                
-                <div className="pt-6 p-6">
+                <div className="p-6 md:p-8 md:w-2/3">
+                  <h4 className="font-semibold mb-4 text-lg">{t('stepsToFollow')}:</h4>
                   <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
-                        <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="h-3 w-3 text-teal-600" />
-                        </div>
-                        <span className="text-gray-600">{feature.name}</span>
+                    {step.steps.map((substep, stepIndex) => (
+                      <li key={stepIndex} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-teal-600 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{substep}</span>
                       </li>
                     ))}
                   </ul>
-                </div>
-                
-                <div className="pt-6 p-6 flex flex-col gap-3">
-                  {plan.current ? (
-                    <div className="bg-gray-200 text-center py-3 px-4 rounded-md h-11 flex items-center justify-center">
-                      {t('currentPlan')}
-                    </div>
-                  ) : (
-                    <Button 
-                      variant={plan.buttonVariant} 
-                      className={`w-full h-11 ${plan.popular ? 
-                        'bg-teal-600 hover:bg-teal-700' : 
-                        'bg-gray-800 hover:bg-gray-900'}`}
-                      onClick={() => navigate("/auth")}
-                    >
-                      {plan.buttonText}
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
@@ -326,33 +348,53 @@ const Pricing = () => {
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16 border-t border-gray-100">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">Frequently Asked Questions</h2>
-        <div className="grid md:grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg p-5 md:p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-semibold text-lg mb-2">Can I upgrade my plan later?</h3>
-            <p className="text-gray-600 text-sm">
-              Yes, you can upgrade your plan at any time. Your billing will be prorated for the remainder of your billing cycle.
-            </p>
-          </div>
-          <div className="bg-white rounded-lg p-5 md:p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-semibold text-lg mb-2">Is there a setup fee?</h3>
-            <p className="text-gray-600 text-sm">
-              No, there are no setup fees for any of our plans. You only pay the subscription fee.
-            </p>
-          </div>
-          <div className="bg-white rounded-lg p-5 md:p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-semibold text-lg mb-2">What payment methods do you accept?</h3>
-            <p className="text-gray-600 text-sm">
-              We accept all major credit cards, PayPal, and bank transfers for our subscription plans.
-            </p>
-          </div>
-          <div className="bg-white rounded-lg p-5 md:p-6 border border-gray-100 shadow-sm">
-            <h3 className="font-semibold text-lg mb-2">How long is the free trial?</h3>
-            <p className="text-gray-600 text-sm">
-              All our plans come with a 7-day free trial, allowing you to test all features before committing.
-            </p>
+      {/* Pro Tips Section */}
+      <div className="bg-teal-50 py-8 md:py-16">
+        <div className="container mx-auto px-4 md:px-6">
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">{t('proTips')}</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <Search className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip1Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip1Desc')}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <Upload className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip2Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip2Desc')}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <PrinterIcon className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip3Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip3Desc')}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <Eye className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip4Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip4Desc')}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <Settings className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip5Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip5Desc')}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
+                <Calculator className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold mb-2">{t('tip6Title')}</h3>
+              <p className="text-gray-600 text-sm">{t('tip6Desc')}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -360,13 +402,13 @@ const Pricing = () => {
       {/* CTA Section */}
       <div className="bg-primary/5 py-8 md:py-16">
         <div className="container mx-auto px-4 md:px-6 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to get started?</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">{t('readyToStart')}</h2>
           <p className="text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto">
-            Try Lensly free for 7 days. No credit card required.
+            {t('readyToStartDesc')}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" onClick={() => navigate("/auth")}>Start Free Trial</Button>
-            <Button variant="outline" size="lg">Contact Sales</Button>
+            <Button size="lg" onClick={() => navigate("/auth")}>{t('startFreeTrial')}</Button>
+            <Button variant="outline" size="lg" onClick={() => navigate("/pricing")}>{t('viewPricing')}</Button>
           </div>
         </div>
       </div>
@@ -384,4 +426,4 @@ const Pricing = () => {
   );
 };
 
-export default Pricing;
+export default HowToUse;
