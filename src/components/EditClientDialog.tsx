@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -18,11 +17,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { User, Phone, Eye, FileText, Shield, Check } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -175,278 +176,322 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[600px] p-6">
-        <DialogHeader>
-          <DialogTitle>Edit Client</DialogTitle>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+        <DialogHeader className="space-y-2 pb-4 border-b relative">
+          <DialogTitle className="text-2xl font-semibold text-gray-900 pr-16">
+            Edit Client
+          </DialogTitle>
+          <Button
+            type="submit"
+            form="edit-client-form"
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
+            size="sm"
+          >
+            <Check className="h-5 w-5" />
+          </Button>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="tel" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">Right Eye</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="right_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">SPH</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">CYL</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">AXE</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            inputMode="numeric"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              const numValue = parseInt(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
-                              }
-                            }} 
-                            className="h-8"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+          <form id="edit-client-form" className="space-y-6 p-4" onSubmit={form.handleSubmit(onSubmit)}>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Personal Information */}
+              <div className="space-y-4">
+                <Card className="border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                      <User className="h-4 w-4" />
+                      Personal Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">Phone</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="tel" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                      <Shield className="h-4 w-4" />
+                      Additional Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="assurance"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">Assurance</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="text" className="h-8" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">Notes</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="text" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">Left Eye</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="left_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">SPH</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
+              {/* Right Column - Eye Prescription */}
+              <div className="space-y-4">
+                <Card className="border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                      <Eye className="h-4 w-4" />
+                      Eye Prescription
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-medium text-gray-700">Right Eye</h3>
+                        <div className="grid grid-cols-3 gap-2">
+                          <FormField
+                            control={form.control}
+                            name="right_eye_sph"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">SPH</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      if (/^-?\d*\.?\d*$/.test(value)) {
+                                        field.onChange(value);
+                                      }
+                                    }}
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">CYL</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              if (/^-?\d*\.?\d*$/.test(value)) {
-                                field.onChange(value);
-                              }
-                            }}
-                            className="h-8"
+                          <FormField
+                            control={form.control}
+                            name="right_eye_cyl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">CYL</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      if (/^-?\d*\.?\d*$/.test(value)) {
+                                        field.onChange(value);
+                                      }
+                                    }}
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">AXE</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="text"
-                            inputMode="numeric"
-                            value={field.value !== null ? field.value : ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value === '') {
-                                field.onChange(null);
-                                return;
-                              }
-                              const numValue = parseInt(value);
-                              if (!isNaN(numValue)) {
-                                field.onChange(numValue);
-                              }
-                            }} 
-                            className="h-8"
+                          <FormField
+                            control={form.control}
+                            name="right_eye_axe"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">AXE</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      const numValue = parseInt(value);
+                                      if (!isNaN(numValue)) {
+                                        field.onChange(numValue);
+                                      }
+                                    }} 
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-            <FormField
-              control={form.control}
-              name="Add"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Add</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="text"
-                      value={field.value !== null ? field.value : ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          field.onChange(null);
-                          return;
-                        }
-                        if (/^-?\d*\.?\d*$/.test(value)) {
-                          field.onChange(value);
-                        }
-                      }}
-                      className="h-8"
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-medium text-gray-700">Left Eye</h3>
+                        <div className="grid grid-cols-3 gap-2">
+                          <FormField
+                            control={form.control}
+                            name="left_eye_sph"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">SPH</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      if (/^-?\d*\.?\d*$/.test(value)) {
+                                        field.onChange(value);
+                                      }
+                                    }}
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="left_eye_cyl"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">CYL</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      if (/^-?\d*\.?\d*$/.test(value)) {
+                                        field.onChange(value);
+                                      }
+                                    }}
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="left_eye_axe"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs text-gray-600">AXE</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={field.value !== null ? field.value : ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '') {
+                                        field.onChange(null);
+                                        return;
+                                      }
+                                      const numValue = parseInt(value);
+                                      if (!isNaN(numValue)) {
+                                        field.onChange(numValue);
+                                      }
+                                    }} 
+                                    className="h-8"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="Add"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium text-gray-700">Add</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="text"
+                              value={field.value !== null ? field.value : ''}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  field.onChange(null);
+                                  return;
+                                }
+                                if (/^-?\d*\.?\d*$/.test(value)) {
+                                  field.onChange(value);
+                                }
+                              }}
+                              className="h-8"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="assurance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assurance</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" className="h-8" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit">Update Client</Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </form>
         </Form>
