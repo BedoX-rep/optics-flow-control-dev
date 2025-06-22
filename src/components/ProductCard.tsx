@@ -252,7 +252,7 @@ const ProductCard = React.memo<ProductCardProps>(({
           {/* Auto Toggle - Always visible at bottom */}
           <div className="mt-2 pt-2 border-t border-gray-100">
             <div className="flex items-center justify-between">
-              <label className="text-xs text-gray-600 font-medium">{t('autoGenerateName') || 'Auto Generate Name'}</label>
+              <label className="text-xs text-gray-600 font-medium">{t('generateNameAuto')}</label>
               <div className="flex items-center">
                 <Switch
                   checked={product.automated_name}
