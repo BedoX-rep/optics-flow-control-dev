@@ -3347,7 +3347,6 @@ const financialTranslations: Translations = {
     fr: 'Position Actuelle (Revenus Reçus)'
   },
   actualCashReceivedFromCustomers: {
-    ```text
     en: 'Actual cash received from customers',
     fr: 'Liquidités réellement reçues des clients'
   },
