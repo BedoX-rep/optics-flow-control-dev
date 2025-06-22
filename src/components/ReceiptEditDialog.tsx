@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -16,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { User, Eye, Package2, Receipt, Banknote, FileText, Search } from "lucide-react";
+import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
 interface ReceiptEditDialogProps {
@@ -28,7 +27,7 @@ interface ReceiptEditDialogProps {
 const ProductSelector = () => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const { data: products = [] } = useQuery({
     queryKey: ['products-for-linking', searchTerm],
     queryFn: async () => {
@@ -196,7 +195,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
       const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
-      
+
       // Calculate paid_at_delivery_cost
       const paidAtDeliveryCost = formData.items.reduce((sum, item) => {
         if (item.paid_at_delivery) {
@@ -242,7 +241,12 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         if (clientError) throw clientError;
       }
 
-      for (const item of formData.items) {
+      // Prepare items for update. Differentiate between existing and new items.
+      const itemsToUpdate = formData.items.filter(item => item.id);
+      const newItems = formData.items.filter(item => !item.id);
+
+      // Update existing items
+      for (const item of itemsToUpdate) {
         const { error: itemError } = await supabase
           .from('receipt_items')
           .update({
@@ -256,6 +260,25 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
           })
           .eq('id', item.id);
+
+        if (itemError) throw itemError;
+      }
+
+      // Insert new items
+      for (const item of newItems) {
+        const { error: itemError } = await supabase
+          .from('receipt_items')
+          .insert({
+            receipt_id: receipt.id, // Associate with the current receipt
+            product_id: item.product_id || null,
+            custom_item_name: item.custom_item_name,
+            price: item.price,
+            cost: item.cost,
+            quantity: item.quantity,
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            linked_eye: item.linked_eye || null,
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
+          });
 
         if (itemError) throw itemError;
       }
@@ -283,6 +306,22 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
     return total;
+  };
+
+  const handleAddItem = () => {
+    // Add a new empty item to the form data
+    setFormData({
+      ...formData,
+      items: [...formData.items, {
+        product_id: null,
+        custom_item_name: '',
+        price: 0,
+        cost: 0,
+        quantity: 1,
+        paid_at_delivery: false,
+        linked_eye: null
+      }]
+    });
   };
 
   return (
@@ -568,7 +607,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                                   .select('*')
                                   .eq('id', productId)
                                   .single();
-                                
+
                                 if (product) {
                                   const newItems = [...formData.items];
                                   newItems[index] = { 
@@ -713,18 +752,41 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           )}
                         </div>
 
-                        {/* Profit Display */}
-                        <div className="text-sm">
-                          <span className="text-gray-500">{t('profit')} </span>
-                          <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
-                          </span>
+                        {/* Profit Display and Remove Button */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm">
+                            <span className="text-gray-500">{t('profit')} </span>
+                            <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newItems = formData.items.filter((_, i) => i !== index);
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Add Item Button */}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleAddItem}
+              >
+                {t('addItem')}
+              </Button>
             </CardContent>
           </Card>
         </div>
