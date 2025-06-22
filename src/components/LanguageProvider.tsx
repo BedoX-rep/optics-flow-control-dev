@@ -2306,10 +2306,7 @@ const purchasesTranslations: Translations = {
     en: 'Insurance',
     fr: 'Assurance'
   },
-  loan:<previous_generation>```text
-
-</previous_generation>
-{
+  loan: {
     en: 'Loan',
     fr: 'Prêt'
   },
