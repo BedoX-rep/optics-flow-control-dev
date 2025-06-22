@@ -345,6 +345,14 @@ const productTranslations: Translations = {
     en: 'Accessories',
     fr: 'Accessoires'
   },
+  'Service': {
+    en: 'Service',
+    fr: 'Service'
+  },
+  'Other': {
+    en: 'Other',
+    fr: 'Autre'
+  },
   // Index filter options
   allIndexes: {
     en: 'All Indexes',
@@ -457,6 +465,18 @@ const productTranslations: Translations = {
   photochromic: {
     en: 'Photochromic',
     fr: 'Photochromique'
+  },
+  polarized: {
+    en: 'Polarized',
+    fr: 'Polarisé'
+  },
+  uvProtection: {
+    en: 'UV Protection',
+    fr: 'Protection UV'
+  },
+  tint: {
+    en: 'Tint',
+    fr: 'Teinte'
   },
   // Stock status options
   order: {
@@ -830,6 +850,14 @@ const productTranslations: Translations = {
   accessories: {
     en: 'Accessories',
     fr: 'Accessoires'
+  },
+  service: {
+    en: 'Service',
+    fr: 'Service'
+  },
+  other: {
+    en: 'Other',
+    fr: 'Autre'
   },
   units: {
     en: 'units',
