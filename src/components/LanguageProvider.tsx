@@ -2306,7 +2306,10 @@ const purchasesTranslations: Translations = {
     en: 'Insurance',
     fr: 'Assurance'
   },
-  loan: {
+  loan:<previous_generation>```text
+
+</previous_generation>
+{
     en: 'Loan',
     fr: 'Prêt'
   },
@@ -3796,6 +3799,75 @@ const allTranslations: Translations = {
     en: 'No items added yet',
     fr: 'Aucun article ajouté'
   }
+};
+
+const useTranslations = () => {
+  const { language } = useLanguage();
+
+  return React.useMemo(
+    () => ({
+      // Products
+      newProduct: language === 'fr' ? 'Nouveau produit' : 'New product',
+      editProduct: language === 'fr' ? 'Modifier le produit' : 'Edit product',
+      addProduct: language === 'fr' ? 'Ajouter un nouveau produit' : 'Add new product',
+      searchProducts: language === 'fr' ? 'Rechercher des produits...' : 'Search products...',
+      noProductsFound: language === 'fr' ? 'Aucun produit trouvé' : 'No products found',
+      productName: language === 'fr' ? 'Nom du produit' : 'Product Name',
+      price: language === 'fr' ? 'Prix' : 'Price',
+      costTTC: language === 'fr' ? 'Coût TTC' : 'Cost TTC',
+      stock: language === 'fr' ? 'Stock' : 'Stock',
+      stockStatus: language === 'fr' ? 'État du stock' : 'Stock Status',
+      category: language === 'fr' ? 'Catégorie' : 'Category',
+      index: language === 'fr' ? 'Indice' : 'Index',
+      treatment: language === 'fr' ? 'Traitement' : 'Treatment',
+      company: language === 'fr' ? 'Entreprise' : 'Company',
+      gamma: language === 'fr' ? 'Gamme' : 'Gamma',
+      image: language === 'fr' ? 'Image' : 'Image',
+      generateNameAuto: language === 'fr' ? 'Générer automatiquement le nom' : 'Auto-generate name',
+      autoGenerateName: language === 'fr' ? 'Générer nom automatiquement' : 'Auto Generate Name',
+      save: language === 'fr' ? 'Enregistrer' : 'Save',
+      cancel: language === 'fr' ? 'Annuler' : 'Cancel',
+      edit: language === 'fr' ? 'Modifier' : 'Edit',
+      delete: language === 'fr' ? 'Supprimer' : 'Delete',
+      import: language === 'fr' ? 'Importer' : 'Import',
+      saveAll: language === 'fr' ? 'Tout enregistrer' : 'Save All',
+      auto: language === 'fr' ? 'Auto' : 'Auto',
+      // Categories
+      singleVisionLenses: language === 'fr' ? 'Verres unifocaux' : 'Single Vision Lenses',
+      progressiveLenses: language === 'fr' ? 'Verres progressifs' : 'Progressive Lenses',
+      frames: language === 'fr' ? 'Montures' : 'Frames',
+      sunglasses: language === 'fr' ? 'Lunettes de soleil' : 'Sunglasses',
+      contactLenses: language === 'fr' ? 'Lentilles de contact' : 'Contact Lenses',
+      accessories: language === 'fr' ? 'Accessoires' : 'Accessories',
+      service: language === 'fr' ? 'Service' : 'Service',
+      other: language === 'fr' ? 'Autre' : 'Other',
+
+      // Indexes
+      index56: language === 'fr' ? '1.56' : '1.56',
+      index6: language === 'fr' ? '1.6' : '1.6',
+      index67: language === 'fr' ? '1.67' : '1.67',
+      index74: language === 'fr' ? '1.74' : '1.74',
+      index50: language === 'fr' ? '1.50' : '1.50',
+      index59: language === 'fr' ? '1.59' : '1.59',
+
+      // Treatments
+      ar: language === 'fr' ? 'Anti-reflet' : 'AR',
+      blue: language === 'fr' ? 'Bleu' : 'Blue',
+      white: language === 'fr' ? 'Blanc' : 'White',
+      photochromic: language === 'fr' ? 'Photochromique' : 'Photochromic',
+      polarized: language === 'fr' ? 'Polarisé' : 'Polarized',
+      uvProtection: language === 'fr' ? 'Protection UV' : 'UV Protection',
+      tint: language === 'fr' ? 'Teinte' : 'Tint',
+
+      // Companies
+      indo: language === 'fr' ? 'Indo' : 'Indo',
+      abLens: language === 'fr' ? 'ABlens' : 'ABlens',
+      essilor: language === 'fr' ? 'Essilor' : 'Essilor',
+      glassAndLens: language === 'fr' ? 'GLASSANDLENS' : 'GLASSANDLENS',
+      optifak: language === 'fr' ? 'Optifak' : 'Optifak',
+    }),
+    [language]
+  );
 };
 
 const LanguageContext = createContext<LanguageContextType>({

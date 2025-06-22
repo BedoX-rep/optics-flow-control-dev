@@ -10,11 +10,13 @@ const CATEGORY_OPTIONS = [
   "Frames",
   "Sunglasses",
   "Contact Lenses",
-  "Accessories"
+  "Accessories",
+  "Service",
+  "Other"
 ];
 
-const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
+const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
+const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic", "Polarized", "UV protection", "Tint"];
 const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
 const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
 

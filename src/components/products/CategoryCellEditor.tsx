@@ -8,7 +8,9 @@ export const CATEGORY_OPTIONS = [
   "Frames",
   "Sunglasses",
   "Contact Lenses",
-  "Accessories"
+  "Accessories",
+  "Service",
+  "Other"
 ];
 
 interface Props {

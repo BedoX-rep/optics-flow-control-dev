@@ -19,11 +19,15 @@ const CATEGORY_OPTIONS = [
   { value: "Frames", abbr: "FR", labelKey: "frames", icon: Package },
   { value: "Sunglasses", abbr: "SG", labelKey: "sunglasses", icon: Eye },
   { value: "Contact Lenses", abbr: "CL", labelKey: "contactLenses", icon: Eye },
-  { value: "Accessories", abbr: "AC", labelKey: "accessories", icon: Package }
+  { value: "Accessories", abbr: "AC", labelKey: "accessories", icon: Package },
+  { value: "Service", abbr: "SV", labelKey: "service", icon: Wrench },
+  { value: "Other", abbr: "OT", labelKey: "other", icon: Package }
 ];
 
 const INDEX_OPTIONS = [
+  "1.50",
   "1.56",
+  "1.59",
   "1.6",
   "1.67",
   "1.74"
@@ -33,7 +37,10 @@ const TREATMENT_OPTIONS = [
   { value: "White", labelKey: "white" },
   { value: "AR", labelKey: "ar" },
   { value: "Blue", labelKey: "blue" },
-  { value: "Photochromic", labelKey: "photochromic" }
+  { value: "Photochromic", labelKey: "photochromic" },
+  { value: "Polarized", labelKey: "polarized" },
+  { value: "UV protection", labelKey: "uvProtection" },
+  { value: "Tint", labelKey: "tint" }
 ];
 
 const COMPANY_OPTIONS = [
@@ -100,7 +107,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       // Only include index/treatment for SV/PG
       let parts = [abbr];
 
-      if (["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "")) {
+      if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "")) {
         if (form.index) parts.push(form.index);
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
@@ -130,7 +137,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   }, [form.automated_name]);
 
   // Determine which extra fields should show
-  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "");
+  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "");
 
   // Image handling (upload to Supabase Storage or base64 preview instead for now)
   const handleImageUpload = async () => {

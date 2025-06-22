@@ -364,7 +364,7 @@ const Products = () => {
           let abbr = getCategoryAbbr(updated.category);
           let parts = [abbr];
 
-          if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+          if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(updated.category ?? "")) {
             if (updated.index) parts.push(updated.index);
             if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
           }
@@ -396,7 +396,7 @@ const Products = () => {
           let abbr = getCategoryAbbr(updated.category);
           let parts = [abbr];
 
-          if (["Single Vision Lenses", "Progressive Lenses"].includes(updated.category ?? "")) {
+          if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(updated.category ?? "")) {
             if (updated.index) parts.push(updated.index);
             if (updated.treatment) parts.push(updated.treatment?.toUpperCase());
           }

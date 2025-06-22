@@ -40,15 +40,20 @@ const CATEGORY_OPTIONS = [
   { value: "Frames", labelKey: "frames" },
   { value: "Sunglasses", labelKey: "sunglasses" },
   { value: "Contact Lenses", labelKey: "contactLenses" },
-  { value: "Accessories", labelKey: "accessories" }
+  { value: "Accessories", labelKey: "accessories" },
+  { value: "Service", labelKey: "service" },
+  { value: "Other", labelKey: "other" }
 ];
 
-const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
+const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
 const TREATMENT_OPTIONS = [
   { value: "White", labelKey: "white" },
   { value: "AR", labelKey: "ar" },
   { value: "Blue", labelKey: "blue" },
-  { value: "Photochromic", labelKey: "photochromic" }
+  { value: "Photochromic", labelKey: "photochromic" },
+  { value: "Polarized", labelKey: "polarized" },
+  { value: "UV protection", labelKey: "uvProtection" },
+  { value: "Tint", labelKey: "tint" }
 ];
 const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
 
@@ -248,7 +253,7 @@ const ProductCard = React.memo<ProductCardProps>(({
           {/* Auto Toggle - Always visible at bottom */}
           <div className="mt-2 pt-2 border-t border-gray-100">
             <div className="flex items-center justify-between">
-              <label className="text-xs text-gray-600 font-medium">{t('autoGenerate') || 'Auto Generate Name'}</label>
+              <label className="text-xs text-gray-600 font-medium">{t('autoGenerateName') || 'Auto Generate Name'}</label>
               <div className="flex items-center">
                 <Switch
                   checked={product.automated_name}
