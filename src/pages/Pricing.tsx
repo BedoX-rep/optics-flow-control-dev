@@ -18,7 +18,7 @@ const Pricing = () => {
   const pricingPlans = [
     {
       name: t('monthly'),
-      price: "150",
+      price: "100",
       currency: "DH",
       billingCycle: t('monthlySubscription'),
       features: [
@@ -31,7 +31,7 @@ const Pricing = () => {
     },
     {
       name: t('quarterly'),
-      price: "400",
+      price: "300",
       currency: "DH",
       billingCycle: t('quarterlySubscription'),
       savingsText: t('saveVsMonthly'),
@@ -47,7 +47,7 @@ const Pricing = () => {
     },
     {
       name: t('lifetime'),
-      price: "1500",
+      price: "1000",
       currency: "DH",
       billingCycle: t('oneTimePayment'),
       features: [
@@ -93,12 +93,17 @@ const Pricing = () => {
           {pricingPlans.map((plan) => (
             <div 
               key={plan.name} 
-              className={`bg-white rounded-lg shadow-sm overflow-hidden border transition-all ${
+              className={`bg-white rounded-lg shadow-sm overflow-hidden border transition-all relative ${
                 plan.popular 
                   ? "border-primary ring-2 ring-primary/10 transform md:-translate-y-4" 
                   : "border-gray-100"
               }`}
             >
+              {/* Limited Offer Badge */}
+              <div className="absolute -left-12 top-6 rotate-[-45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold z-10">
+                {t('limitedOffer')}
+              </div>
+              
               {plan.popular && (
                 <div className="bg-primary text-white text-center text-sm py-1.5">
                   Most Popular

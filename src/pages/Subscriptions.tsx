@@ -29,9 +29,9 @@ interface Subscription {
 
 const SUBSCRIPTION_PRICES = {
   Trial: 0,
-  Monthly: 150,
-  Quarterly: 400,
-  Lifetime: 1500
+  Monthly: 100,
+  Quarterly: 300,
+  Lifetime: 1000
 };
 
 const Subscriptions = () => {
@@ -165,6 +165,10 @@ const renderSubscriptionPlans = () => {
                   {t('popular')}
                 </div>
               )}
+              {/* Limited Offer Badge */}
+              <div className="absolute -left-12 top-6 rotate-[-45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
+                {t('limitedOffer')}
+              </div>
               <CardHeader className={`
                 ${type === 'Quarterly' ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
                 ${currentSubscription?.subscription_type === type ? 'bg-teal-50' : ''}

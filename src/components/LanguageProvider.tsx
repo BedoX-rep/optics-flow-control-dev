@@ -303,6 +303,10 @@ const productTranslations: Translations = {
     en: 'Contact Lenses',
     fr: 'Lentilles de Contact'
   },
+  'Contact Lenses': {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact'
+  },
   accessories: {
     en: 'Accessories',
     fr: 'Accessoires'
@@ -1128,6 +1132,10 @@ const productTranslations: Translations = {
   autoGenerateProductName: {
     en: 'Automatically generate product name based on specifications',
     fr: 'Générer automatiquement le nom du produit selon les spécifications'
+  },
+  generateNameAuto: {
+    en: 'Generate Name Automatically',
+    fr: 'Générer le Nom Automatiquement'
   },
   fillProductDetails: {
     en: 'Fill in the product details below',
@@ -2653,6 +2661,10 @@ const subscriptionsTranslations: Translations = {
   failedToLoadSubscription: {
     en: 'Failed to load subscription data. Please try again.',
     fr: 'Échec du chargement des données d\'abonnement. Veuillez réessayer.'
+  },
+  limitedOffer: {
+    en: 'Limited Offer!',
+    fr: 'Offre Limitée!'
   }
 };
 
