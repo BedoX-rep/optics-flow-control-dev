@@ -112,7 +112,7 @@ const MainNav = () => {
   return (
     <div 
       className={cn(
-        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 relative",
+        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
         collapsed ? "w-20" : "w-64"
       )}
     >
@@ -219,33 +219,7 @@ const MainNav = () => {
         )}
       </nav>
 
-      {!collapsed && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-teal-600/20">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-9 w-9 border-2 border-white/20">
-              <span className="text-xs font-medium">
-                {user?.email?.substring(0, 2).toUpperCase() || 'U'}
-              </span>
-            </Avatar>
-            <div className="flex flex-col">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.email?.split('@')[0] || 'User'}
-              </p>
-              <p className="text-xs text-white/60">Active Subscription</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {collapsed && (
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-teal-600/20 flex justify-center">
-          <Avatar className="h-9 w-9 border-2 border-white/20">
-            <span className="text-xs font-medium">
-              {user?.email?.substring(0, 2).toUpperCase() || 'U'}
-            </span>
-          </Avatar>
-        </div>
-      )}
+      
     </div>
   );
 };

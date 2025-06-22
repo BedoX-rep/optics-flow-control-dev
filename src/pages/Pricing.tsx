@@ -257,21 +257,7 @@ const Pricing = () => {
                 }
               `}>
                 
-                {/* Popular Badge */}
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg">
-                      {t('popular')}
-                    </div>
-                  </div>
-                )}
                 
-                {/* Limited Offer Badge */}
-                <div className="absolute top-4 -right-8 rotate-12 z-10">
-                  <div className="bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-6 py-1 rounded-md shadow-lg">
-                    {t('limitedOffer')}
-                  </div>
-                </div>
                 
                 {/* Header */}
                 <div className={`
