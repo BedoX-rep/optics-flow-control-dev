@@ -197,10 +197,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-      <DialogHeader className="space-y-2 pb-4 border-b">
-        <DialogTitle className="text-2xl font-semibold text-gray-900">
+      <DialogHeader className="space-y-2 pb-4 border-b relative">
+        <DialogTitle className="text-2xl font-semibold text-gray-900 pr-16">
           {initialValues.name ? t('editProduct') : t('addProduct')}
         </DialogTitle>
+        <Button
+          type="submit"
+          form="product-form"
+          disabled={disabled || uploading}
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
+          size="sm"
+        >
+          <Check className="h-5 w-5" />
+        </Button>
       </DialogHeader>
 
       <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
@@ -485,27 +494,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
         
       </form>
-
-      <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={disabled || uploading}
-          className="px-6"
-        >
-          {t('cancel')}
-        </Button>
-        <Button
-          type="submit"
-          form="product-form"
-          disabled={disabled || uploading}
-          className="px-6 bg-green-600 hover:bg-green-700 text-white"
-        >
-          <Check className="h-4 w-4 mr-2" />
-          {uploading ? t('saving') : t('save')}
-        </Button>
-      </div>
     </DialogContent>
   );
 };
