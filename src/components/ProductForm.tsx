@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -226,9 +225,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Product Classification */}
           <div className="space-y-4">
-            <Card className="border-gray-200">
+            <Card className="border-blue-200 bg-white/80 backdrop-blur-sm shadow-lg">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                <CardTitle className="flex items-center gap-2 text-blue-800 text-lg">
                   <Tag className="h-4 w-4" />
                   {t('productClassification') || 'Product Classification'}
                 </CardTitle>
@@ -294,9 +293,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
             {/* Lens Specifications - Only for lenses */}
             {showIndexTreatment && (
-              <Card className="border-gray-200">
+              <Card className="border-blue-200 bg-white/80 backdrop-blur-sm shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <CardTitle className="flex items-center gap-2 text-blue-800 text-lg">
                     <Eye className="h-4 w-4" />
                     {t('lensSpecifications') || 'Lens Specifications'}
                   </CardTitle>
@@ -348,9 +347,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
           {/* Right Column - Pricing & Details */}
           <div className="space-y-4">
-            <Card className="border-gray-200">
+            <Card className="border-blue-200 bg-white/80 backdrop-blur-sm shadow-lg">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                <CardTitle className="flex items-center gap-2 text-blue-800 text-lg">
                   <DollarSign className="h-4 w-4" />
                   {t('pricingFinancial') || 'Pricing & Financial'}
                 </CardTitle>
@@ -398,9 +397,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
             </Card>
 
             {/* Product Name */}
-            <Card className="border-gray-200">
+            <Card className="border-blue-200 bg-white/80 backdrop-blur-sm shadow-lg">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                <CardTitle className="flex items-center gap-2 text-blue-800 text-lg">
                   <Package className="h-4 w-4" />
                   {t('productDetails') || 'Product Details'}
                 </CardTitle>
