@@ -9,7 +9,7 @@ import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Check } from "lucide-react";
+import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
 
@@ -406,10 +406,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   type="submit"
                   form="product-form"
                   disabled={disabled || uploading}
-                  className="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   size="sm"
                 >
-                  <Check className="h-5 w-5" />
+                  <Save className="h-6 w-6" />
                 </Button>
               </div>
             </div>
