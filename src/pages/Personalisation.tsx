@@ -14,9 +14,20 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Save, Settings, DollarSign } from 'lucide-react';
 
-interface UserPersonalisation {
+interface UserInformation {
   id?: string;
   user_id: string;
+  store_name?: string;
+  display_name?: string;
+  address?: string;
+  vat_number?: string;
+  ice?: string;
+  inpe?: string;
+  company_legal_status?: string;
+  logo_url?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
   auto_additional_costs: boolean;
   sv_lens_cost: number;
   progressive_lens_cost: number;
@@ -28,7 +39,7 @@ const Personalisation = () => {
   const { toast } = useToast();
   const { translate: t } = useLanguage();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<UserPersonalisation>({
+  const [formData, setFormData] = useState<UserInformation>({
     user_id: user?.id || '',
     auto_additional_costs: true,
     sv_lens_cost: 10.00,
@@ -37,62 +48,61 @@ const Personalisation = () => {
   });
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Fetch user personalisation
-  const { data: userPersonalisation, isLoading } = useQuery({
-    queryKey: ['user-personalisation', user?.id],
+  // Fetch user information
+  const { data: userInformation, isLoading } = useQuery({
+    queryKey: ['user-information', user?.id],
     queryFn: async () => {
       if (!user) return null;
 
-      // First, try to get existing user personalisation
-      const { data: existingPersonalisation } = await supabase
-        .from('user_personalisation')
+      // Try to get existing user information
+      const { data: existingInfo } = await supabase
+        .from('user_information')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (existingPersonalisation) {
-        return existingPersonalisation;
+      if (existingInfo) {
+        return existingInfo;
       }
 
-      // If no user personalisation exists, initialize it
+      // If no user information exists, initialize it
       await supabase.rpc('initialize_user_personalisation', { user_uuid: user.id });
 
-      // Fetch the newly created record
-      const { data: newPersonalisation, error } = await supabase
-        .from('user_personalisation')
+      // Fetch the newly created/updated record
+      const { data: newInfo, error } = await supabase
+        .from('user_information')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
       if (error) {
-        console.error('Error fetching user personalisation:', error);
+        console.error('Error fetching user information:', error);
         return null;
       }
 
-      return newPersonalisation;
+      return newInfo;
     },
     enabled: !!user,
   });
 
-  // Update form data when user personalisation is loaded
+  // Update form data when user information is loaded
   useEffect(() => {
-    if (userPersonalisation) {
+    if (userInformation) {
       setFormData({
-        id: userPersonalisation.id,
-        user_id: userPersonalisation.user_id,
-        auto_additional_costs: userPersonalisation.auto_additional_costs,
-        sv_lens_cost: userPersonalisation.sv_lens_cost || 10.00,
-        progressive_lens_cost: userPersonalisation.progressive_lens_cost || 20.00,
-        frames_cost: userPersonalisation.frames_cost || 10.00
+        ...userInformation,
+        auto_additional_costs: userInformation.auto_additional_costs ?? true,
+        sv_lens_cost: userInformation.sv_lens_cost ?? 10.00,
+        progressive_lens_cost: userInformation.progressive_lens_cost ?? 20.00,
+        frames_cost: userInformation.frames_cost ?? 10.00
       });
     }
-  }, [userPersonalisation]);
+  }, [userInformation]);
 
   // Save mutation
   const saveMutation = useMutation({
-    mutationFn: async (data: UserPersonalisation) => {
+    mutationFn: async (data: UserInformation) => {
       const { error } = await supabase
-        .from('user_personalisation')
+        .from('user_information')
         .upsert({
           ...data,
           updated_at: new Date().toISOString()
@@ -108,10 +118,10 @@ const Personalisation = () => {
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      queryClient.invalidateQueries({ queryKey: ['user-personalisation', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
     },
     onError: (error) => {
-      console.error('Error saving user personalisation:', error);
+      console.error('Error saving user information:', error);
       toast({
         title: t('error'),
         description: t('failedToSaveInfo'),
@@ -120,7 +130,7 @@ const Personalisation = () => {
     }
   });
 
-  const handleSwitchChange = (field: keyof UserPersonalisation, value: boolean) => {
+  const handleSwitchChange = (field: keyof UserInformation, value: boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -128,7 +138,7 @@ const Personalisation = () => {
     setHasChanges(true);
   };
 
-  const handleInputChange = (field: keyof UserPersonalisation, value: string) => {
+  const handleInputChange = (field: keyof UserInformation, value: string) => {
     const numericValue = parseFloat(value) || 0;
     setFormData(prev => ({
       ...prev,

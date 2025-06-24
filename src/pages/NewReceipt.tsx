@@ -242,20 +242,20 @@ const NewReceipt = () => {
     enabled: !!user
   });
 
-  // Fetch personalization settings
+  // Fetch user information including personalization settings
   const { data: personalisationData } = useQuery({
-    queryKey: ['user-personalisation', user?.id],
+    queryKey: ['user-information', user?.id],
     queryFn: async () => {
       if (!user) return null;
 
       const { data, error } = await supabase
-        .from('user_personalisation')
-        .select('*')
+        .from('user_information')
+        .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
         .eq('user_id', user.id)
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching personalisation:', error);
+        console.error('Error fetching user information:', error);
         return null;
       }
 
@@ -282,10 +282,18 @@ const NewReceipt = () => {
 
     if (personalisationData) {
       setPersonalisation({
-        auto_additional_costs: personalisationData.auto_additional_costs,
-        sv_lens_cost: personalisationData.sv_lens_cost || 10.00,
-        progressive_lens_cost: personalisationData.progressive_lens_cost || 20.00,
-        frames_cost: personalisationData.frames_cost || 10.00
+        auto_additional_costs: personalisationData.auto_additional_costs ?? true,
+        sv_lens_cost: personalisationData.sv_lens_cost ?? 10.00,
+        progressive_lens_cost: personalisationData.progressive_lens_cost ?? 20.00,
+        frames_cost: personalisationData.frames_cost ?? 10.00
+      });
+    } else {
+      // Use default values if no user information found
+      setPersonalisation({
+        auto_additional_costs: true,
+        sv_lens_cost: 10.00,
+        progressive_lens_cost: 20.00,
+        frames_cost: 10.00
       });
     }
   }, [productsData, clientsData, personalisationData, user, navigate]);
@@ -442,30 +450,6 @@ const NewReceipt = () => {
       }, 0);
     }
     // For 'Sell' type, additional costs remain 0
-  } else if (!personalisation.auto_additional_costs && orderType !== 'Unspecified') {
-    // Fallback to default values if user has no personalization record
-    const defaultSettings = {
-      sv_lens_cost: 10.00,
-      progressive_lens_cost: 20.00,
-      frames_cost: 10.00
-    };
-    
-    if (orderType === 'Retoyage') {
-      montageCosts = items.reduce((sum, item) => {
-        const product = products.find(p => p.id === item.productId);
-        return sum + (product?.category === 'Frames' ? defaultSettings.frames_cost * item.quantity : 0);
-      }, 0);
-    } else if (orderType === 'Montage') {
-      montageCosts = items.reduce((sum, item) => {
-        const product = products.find(p => p.id === item.productId);
-        if (product?.category === 'Single Vision Lenses') {
-          return sum + (defaultSettings.sv_lens_cost * item.quantity);
-        } else if (product?.category === 'Progressive Lenses') {
-          return sum + (defaultSettings.progressive_lens_cost * item.quantity);
-        }
-        return sum;
-      }, 0);
-    }
   }
 
   // Calculate tax first
