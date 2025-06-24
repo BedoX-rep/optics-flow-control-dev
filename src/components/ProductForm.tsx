@@ -47,7 +47,7 @@ interface ProductFormProps {
   onSuccess?: () => void;
 }
 
-export function ProductForm({ open, onOpenChange, product, onSuccess }: ProductFormProps) {
+function ProductForm({ open, onOpenChange, product, onSuccess }: ProductFormProps) {
   const { companies, addCompany } = useCompanies();
   const [loading, setLoading] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
@@ -297,3 +297,5 @@ export function ProductForm({ open, onOpenChange, product, onSuccess }: ProductF
     </Dialog>
   );
 }
+
+export default ProductForm;

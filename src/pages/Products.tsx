@@ -14,8 +14,24 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
-import ProductForm, { ProductFormValues } from "@/components/ProductForm";
+import ProductForm from "@/components/ProductForm";
 import ProductFilters from "@/components/ProductFilters";
+
+export interface ProductFormValues {
+  name: string;
+  price: number;
+  cost_ttc?: number;
+  category?: string;
+  index?: string;
+  treatment?: string;
+  company?: string;
+  gamma?: string;
+  automated_name?: boolean;
+  image?: string;
+  created_at?: string;
+  stock_status?: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock';
+  stock?: number;
+}
 import ProductStatsSummary from "@/components/ProductStatsSummary";
 import ProductImage from "@/components/ProductImage";
 import ProductCard from "@/components/ProductCard";

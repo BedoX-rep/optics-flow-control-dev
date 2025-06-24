@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -38,9 +37,9 @@ interface ProductFiltersProps {
   onClearAll: () => void;
 }
 
-function ProductFilters({ filters, onChange, onClearAll }: ProductFiltersProps) {
+const ProductFilters = ({ filters, onChange, onClearAll }: ProductFiltersProps) => {
   const { companies } = useCompanies();
-  
+
   // Combine default companies with user's custom companies
   const allCompanies = [
     ...COMPANY_OPTIONS,
@@ -197,6 +196,6 @@ function ProductFilters({ filters, onChange, onClearAll }: ProductFiltersProps) 
       )}
     </div>
   );
-}
+};
 
 export default ProductFilters;
