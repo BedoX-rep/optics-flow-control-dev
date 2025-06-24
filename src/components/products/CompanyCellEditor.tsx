@@ -169,7 +169,6 @@ const CompanyCellEditor = forwardRef<CompanyCellEditorRef, CompanyCellEditorProp
           .from('companies')
           .select('*')
           .eq('user_id', user.id)
-          .eq('is_default', false)
           .order('name');
 
         if (error) {

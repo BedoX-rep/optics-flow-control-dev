@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Save, Settings, DollarSign, Building2, Plus, Edit, Trash2 } from 'lucide-react';
+import { DEFAULT_COMPANIES } from '../components/products/CompanyCellEditor';
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
@@ -25,7 +25,6 @@ interface Company {
   id: string;
   name: string;
   user_id: string;
-  is_default: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -127,16 +126,7 @@ const Personalisation = () => {
         return [];
       }
 
-      // Default companies that show for all users
-      const defaultCompanies = [
-        { id: 'default-indo', name: 'Indo', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-ablens', name: 'ABlens', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-essilor', name: 'Essilor', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-glassandlens', name: 'GLASSANDLENS', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-optifak', name: 'Optifak', user_id: '', is_default: true, created_at: '', updated_at: '' }
-      ];
-
-      return [...defaultCompanies, ...userCompanies];
+      return [...DEFAULT_COMPANIES, ...userCompanies];
     },
     enabled: !!user,
   });
@@ -374,7 +364,7 @@ const Personalisation = () => {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">{t('allCompanies') || 'All Companies'}</h3>
-                
+
                 <div className="grid gap-3">
                   {companies.map((company) => (
                     <div
@@ -392,11 +382,6 @@ const Personalisation = () => {
                           />
                         ) : (
                           <span className="font-medium">{company.name}</span>
-                        )}
-                        {company.is_default && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                            {t('default') || 'Default'}
-                          </span>
                         )}
                       </div>
 
@@ -424,26 +409,22 @@ const Personalisation = () => {
                           </>
                         ) : (
                           <>
-                            {!company.is_default && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditCompany(company)}
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleDeleteCompany(company.id)}
-                                  className="text-red-600 hover:text-red-700"
-                                  disabled={deleteCompanyMutation.isPending}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </>
-                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditCompany(company)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteCompany(company.id)}
+                              className="text-red-600 hover:text-red-700"
+                              disabled={deleteCompanyMutation.isPending}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
                           </>
                         )}
                       </div>
@@ -489,7 +470,7 @@ const Personalisation = () => {
 
                 <div className="bg-blue-50/50 rounded-lg p-4 space-y-4">
                   <h4 className="font-medium text-blue-900">{t('currentSettings')}</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="sv_lens_cost" className="text-sm font-medium">

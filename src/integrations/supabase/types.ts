@@ -514,7 +514,6 @@ export type Database = {
           id: string
           name: string
           user_id: string
-          is_default: boolean
           created_at: string | null
           updated_at: string | null
         }
@@ -522,7 +521,6 @@ export type Database = {
           id?: string
           name: string
           user_id: string
-          is_default?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -530,7 +528,6 @@ export type Database = {
           id?: string
           name?: string
           user_id?: string
-          is_default?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -856,7 +853,6 @@ export interface Company {
   id: string;
   name: string;
   user_id: string;
-  is_default: boolean;
   created_at: string | null;
   updated_at: string | null;
 }
