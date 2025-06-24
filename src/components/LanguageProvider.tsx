@@ -303,6 +303,10 @@ const productTranslations: Translations = {
     en: 'Contact Lenses',
     fr: 'Lentilles de Contact'
   },
+  contactLenses: {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact'
+  },
   'Contact Lenses': {
     en: 'Contact Lenses',
     fr: 'Lentilles de Contact'
@@ -952,6 +956,10 @@ const productTranslations: Translations = {
     en: 'Company Management',
     fr: 'Gestion des Entreprises'
   },
+  companiesManagement: {
+    en: 'Companies Management',
+    fr: 'Gestion des Entreprises'
+  },
   addNewCompany: {
     en: 'Add New Company',
     fr: 'Ajouter une Nouvelle Entreprise'
@@ -1031,6 +1039,14 @@ const productTranslations: Translations = {
   theseCompaniesAlwaysAvailable: {
     en: 'These companies are always available across all features',
     fr: 'Ces entreprises sont toujours disponibles dans toutes les fonctionnalités'
+  },
+  itemsWithoutCosts: {
+    en: 'items without costs',
+    fr: 'articles sans coûts'
+  },
+  missingCosts: {
+    en: 'Missing Costs',
+    fr: 'Coûts Manquants'
   },
   // Additional client page translations
   saveAllChanges: {

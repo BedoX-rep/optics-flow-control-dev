@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X } from 'lucide-react';
+import { 
+  Eye, 
+  Search, 
+  Calendar, 
+  Package, 
+  Trash2, 
+  Edit, 
+  Phone, 
+  Wallet, 
+  X,
+  BarChart2, 
+  Check,
+  AlertTriangle
+} from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -45,6 +58,7 @@ interface Receipt {
   order_type?: string;
   call_status: string;
   time_called?: string;
+  receipt_items?: any[];
 }
 
 const ReceiptCard = ({ 
@@ -102,6 +116,11 @@ const ReceiptCard = ({
       default:
         return status;
     }
+  };
+
+  const getItemsWithoutCosts = (receipt: any) => {
+    if (!receipt.receipt_items) return [];
+    return receipt.receipt_items.filter((item: any) => !item.cost || item.cost === 0);
   };
 
   return (
@@ -190,6 +209,24 @@ const ReceiptCard = ({
                 </Button>
               </div>
             </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-900">
+                  {receipt.client_name || t('unknownClient')}
+                </span>
+                <span className="text-sm text-gray-500">
+                  #{receipt.id.slice(-6)}
+                </span>
+                {(() => {
+                  const itemsWithoutCosts = getItemsWithoutCosts(receipt);
+                  return itemsWithoutCosts.length > 0 ? (
+                    <div className="flex items-center gap-1 text-orange-600" title={`${itemsWithoutCosts.length} ${t('itemsWithoutCosts')}`}>
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-xs font-medium">{itemsWithoutCosts.length}</span>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
 
             <div className="grid grid-cols-2 gap-2 text-sm mb-6">
               <div className="bg-gray-50 rounded-lg p-3">
@@ -334,8 +371,6 @@ const Receipts = () => {
       };
 
       await queryClient.cancelQueries(['receipts']);
-
-      const previousReceipts = queryClient.getQueryData(['receipts']);
 
       queryClient.setQueryData(['receipts'], (old: any) => {
         return old?.map((r: Receipt) => 
