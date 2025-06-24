@@ -1,0 +1,53 @@
+chunk-W6L2VRDA.js?v=e0683f6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+Layout.tsx:44 Uncaught ReferenceError: useTranslation is not defined
+    at Layout (Layout.tsx:44:28)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=e0683f6d:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=e0683f6d:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=e0683f6d:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=e0683f6d:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=e0683f6d:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=e0683f6d:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=e0683f6d:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=e0683f6d:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=e0683f6d:19137:13)
+Layout.tsx:44 Uncaught ReferenceError: useTranslation is not defined
+    at Layout (Layout.tsx:44:28)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=e0683f6d:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=e0683f6d:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=e0683f6d:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=e0683f6d:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=e0683f6d:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=e0683f6d:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=e0683f6d:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=e0683f6d:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=e0683f6d:19137:13)
+chunk-W6L2VRDA.js?v=e0683f6d:14032 The above error occurred in the <Layout> component:
+
+    at Layout (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/src/components/Layout.tsx:27:19)
+    at ProtectedRoute (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/src/App.tsx:50:27)
+    at RenderedRoute (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=e0683f6d:4069:5)
+    at Routes (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=e0683f6d:4508:5)
+    at AppRoutes
+    at Router (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=e0683f6d:4451:15)
+    at BrowserRouter (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=e0683f6d:5196:5)
+    at AuthProvider (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/src/components/AuthProvider.tsx:16:32)
+    at LanguageProvider (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/src/components/LanguageProvider.tsx:4237:36)
+    at Provider (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/chunk-RYWAULHW.js?v=e0683f6d:48:15)
+    at TooltipProvider (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e0683f6d:61:5)
+    at QueryClientProvider (https://a9db48dd-e98e-484b-a571-c1de9277ad8e-00-948jde46j2kw.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=e0683f6d:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=e0683f6d:14032
+chunk-W6L2VRDA.js?v=e0683f6d:9129 Uncaught ReferenceError: useTranslation is not defined
+    at Layout (Layout.tsx:44:28)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=e0683f6d:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=e0683f6d:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=e0683f6d:15914:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=e0683f6d:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=e0683f6d:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=e0683f6d:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=e0683f6d:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=e0683f6d:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=e0683f6d:18879:28)
