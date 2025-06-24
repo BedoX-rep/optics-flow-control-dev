@@ -12,7 +12,8 @@ import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Save, Settings, DollarSign } from 'lucide-react';
+import { useCompanies } from '@/hooks/useCompanies';
+import { Save, Settings, DollarSign, Building2, Plus, Trash2, Edit } from 'lucide-react';
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
@@ -33,6 +34,10 @@ const Personalisation = () => {
     frames_cost: 10.00
   });
   const [hasChanges, setHasChanges] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const [editingCompany, setEditingCompany] = useState<{ id: string; name: string } | null>(null);
+  
+  const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
   // Fetch user personalisation data
   const { data: userPersonalisation, isLoading } = useQuery({
@@ -157,6 +162,63 @@ const Personalisation = () => {
     saveMutation.mutate(formData);
   };
 
+  const handleCreateCompany = async () => {
+    if (!newCompanyName.trim()) return;
+    
+    try {
+      await createCompany.mutateAsync(newCompanyName.trim());
+      setNewCompanyName('');
+      toast({
+        title: t('success'),
+        description: t('companyCreated'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message.includes('duplicate') ? t('companyAlreadyExists') : t('failedToCreateCompany'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateCompany = async () => {
+    if (!editingCompany || !editingCompany.name.trim()) return;
+    
+    try {
+      await updateCompany.mutateAsync({
+        id: editingCompany.id,
+        name: editingCompany.name.trim()
+      });
+      setEditingCompany(null);
+      toast({
+        title: t('success'),
+        description: t('companyUpdated'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message.includes('duplicate') ? t('companyAlreadyExists') : t('failedToUpdateCompany'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCompany = async (id: string) => {
+    try {
+      await deleteCompany.mutateAsync(id);
+      toast({
+        title: t('success'),
+        description: t('companyDeleted'),
+      });
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: t('failedToDeleteCompany'),
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
@@ -176,6 +238,115 @@ const Personalisation = () => {
         />
 
         <div className="space-y-6">
+          {/* Companies Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                {t('companiesManagement')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building2 className="h-5 w-5 text-teal-600" />
+                  <h3 className="text-lg font-semibold">{t('customCompanies')}</h3>
+                </div>
+
+                {/* Add new company */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={t('enterCompanyName')}
+                    value={newCompanyName}
+                    onChange={(e) => setNewCompanyName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCreateCompany()}
+                  />
+                  <Button
+                    onClick={handleCreateCompany}
+                    disabled={!newCompanyName.trim() || createCompany.isPending}
+                    className="bg-teal-600 hover:bg-teal-700"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Custom companies list */}
+                <div className="space-y-2">
+                  {customCompanies.map((company) => (
+                    <div key={company.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      {editingCompany?.id === company.id ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <Input
+                            value={editingCompany.name}
+                            onChange={(e) => setEditingCompany({ ...editingCompany, name: e.target.value })}
+                            onKeyPress={(e) => e.key === 'Enter' && handleUpdateCompany()}
+                            className="bg-white"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={handleUpdateCompany}
+                            disabled={updateCompany.isPending}
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingCompany(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-medium">{company.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingCompany({ id: company.id, name: company.name })}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteCompany(company.id)}
+                              disabled={deleteCompany.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {customCompanies.length === 0 && (
+                    <p className="text-gray-500 text-sm text-center py-4">
+                      {t('noCustomCompanies')}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              <Separator />
+
+              <div className="bg-blue-50/50 rounded-lg p-4">
+                <h4 className="font-medium text-blue-900 mb-2">{t('defaultCompanies')}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"].map((company) => (
+                    <span key={company} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      {company}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-blue-700 mt-2">
+                  {t('defaultCompaniesDesc')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Additional Costs Settings */}
           <Card>
             <CardHeader>

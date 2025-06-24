@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
+import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
   { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
@@ -43,13 +44,7 @@ const TREATMENT_OPTIONS = [
   { value: "Tint", labelKey: "tint" }
 ];
 
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
+
 
 const GAMMA_OPTIONS = [
   "Standard",
@@ -88,6 +83,7 @@ const getCategoryAbbr = (category: string | undefined) => {
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
   const { t } = useLanguage();
+  const { allCompanies } = useCompanies();
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
@@ -278,7 +274,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none_selected">{t('none')}</SelectItem>
-                      {COMPANY_OPTIONS.map(opt => (
+                      {allCompanies.map(opt => (
                         <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                       ))}
                     </SelectContent>

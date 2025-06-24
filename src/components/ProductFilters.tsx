@@ -3,6 +3,7 @@ import React from "react";
 import { Filter, Glasses, Album, Building2, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",
@@ -17,7 +18,7 @@ const CATEGORY_OPTIONS = [
 
 const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
 const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic", "Polarized", "UV protection", "Tint"];
-const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
+
 const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
 
 export interface ProductFiltersProps {
@@ -26,6 +27,8 @@ export interface ProductFiltersProps {
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
+  const { allCompanies } = useCompanies();
+  
   return (
     <div className="flex items-center gap-3">
       {/* Category Filter */}
@@ -122,7 +125,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_companies">All Companies</SelectItem>
-          {COMPANY_OPTIONS.map(opt => (
+          {allCompanies.map(opt => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
         </SelectContent>

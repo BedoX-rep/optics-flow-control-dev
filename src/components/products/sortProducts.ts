@@ -2,7 +2,7 @@
 import { CATEGORY_OPTIONS } from "./CategoryCellEditor";
 import { INDEX_OPTIONS } from "./IndexCellEditor";
 import { TREATMENT_OPTIONS } from "./TreatmentCellEditor";
-import { COMPANY_OPTIONS } from "./CompanyCellEditor";
+import { HARDCODED_COMPANIES } from "@/hooks/useCompanies";
 
 export interface ProductSortable {
   id: string;
@@ -34,7 +34,7 @@ export function sortProducts(products: ProductSortable[]) {
     const treatComp = idxOrLast(TREATMENT_OPTIONS, a.treatment) - idxOrLast(TREATMENT_OPTIONS, b.treatment);
     if (treatComp) return treatComp;
 
-    const compComp  = idxOrLast(COMPANY_OPTIONS, a.company)     - idxOrLast(COMPANY_OPTIONS, b.company);
+    const compComp  = idxOrLast(HARDCODED_COMPANIES, a.company)     - idxOrLast(HARDCODED_COMPANIES, b.company);
     if (compComp) return compComp;
 
     return 0;
