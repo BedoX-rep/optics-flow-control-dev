@@ -2,7 +2,7 @@
 import { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { supabase } from '../../integrations/supabase/client';
 import { Company } from '../../integrations/supabase/types';
-import { useAuthContext } from '../../components/AuthProvider';
+import { useAuth } from '../../components/AuthProvider';
 
 // Default companies that all users can see
 export const DEFAULT_COMPANIES = [
@@ -135,7 +135,7 @@ const CompanyCellEditor = forwardRef<CompanyCellEditorRef, CompanyCellEditorProp
     const [isOpen, setIsOpen] = useState(false);
     const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
-    const { user } = useAuthContext();
+    const { user } = useAuth();
 
     // Combine default companies with user companies
     const getAllCompanies = () => {
@@ -237,5 +237,8 @@ const CompanyCellEditor = forwardRef<CompanyCellEditorRef, CompanyCellEditorProp
 );
 
 CompanyCellEditor.displayName = 'CompanyCellEditor';
+
+// Export for backward compatibility
+export const COMPANY_OPTIONS = DEFAULT_COMPANIES;
 
 export default CompanyCellEditor;
