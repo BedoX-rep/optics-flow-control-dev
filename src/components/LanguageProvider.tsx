@@ -754,6 +754,42 @@ const productTranslations: Translations = {
     en: 'Manage your personal preferences and settings',
     fr: 'Gérez vos préférences personnelles et paramètres'
   },
+  manualAdditionalCosts: {
+    en: 'Manual Additional Costs',
+    fr: 'Coûts Supplémentaires Manuels'
+  },
+  additionalCostsSettings: {
+    en: 'Additional Costs Settings',
+    fr: 'Paramètres des Coûts Supplémentaires'
+  },
+  currentSettings: {
+    en: 'Current Settings',
+    fr: 'Paramètres Actuels'
+  },
+  singleVisionLensCost: {
+    en: 'Single Vision Lens Cost',
+    fr: 'Coût Verres Simple Vision'
+  },
+  svLensCostDesc: {
+    en: 'Cost per SV lens for Montage orders',
+    fr: 'Coût par verre SV pour commandes Montage'
+  },
+  progressiveLensCost: {
+    en: 'Progressive Lens Cost', 
+    fr: 'Coût Verres Progressifs'
+  },
+  progressiveCostDesc: {
+    en: 'Cost per progressive lens for Montage orders',
+    fr: 'Coût par verre progressif pour commandes Montage'
+  },
+  framesCost: {
+    en: 'Frames Cost',
+    fr: 'Coût Montures'
+  },
+  framesCostDesc: {
+    en: 'Cost per frame for Retoyage orders',  
+    fr: 'Coût par monture pour commandes Retoyage'
+  },
   saving: {
     en: 'Saving...',
     fr: 'Enregistrement...'

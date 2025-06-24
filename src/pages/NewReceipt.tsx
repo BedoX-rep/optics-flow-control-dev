@@ -442,6 +442,30 @@ const NewReceipt = () => {
       }, 0);
     }
     // For 'Sell' type, additional costs remain 0
+  } else if (!personalisation.auto_additional_costs && orderType !== 'Unspecified') {
+    // Fallback to default values if user has no personalization record
+    const defaultSettings = {
+      sv_lens_cost: 10.00,
+      progressive_lens_cost: 20.00,
+      frames_cost: 10.00
+    };
+    
+    if (orderType === 'Retoyage') {
+      montageCosts = items.reduce((sum, item) => {
+        const product = products.find(p => p.id === item.productId);
+        return sum + (product?.category === 'Frames' ? defaultSettings.frames_cost * item.quantity : 0);
+      }, 0);
+    } else if (orderType === 'Montage') {
+      montageCosts = items.reduce((sum, item) => {
+        const product = products.find(p => p.id === item.productId);
+        if (product?.category === 'Single Vision Lenses') {
+          return sum + (defaultSettings.sv_lens_cost * item.quantity);
+        } else if (product?.category === 'Progressive Lenses') {
+          return sum + (defaultSettings.progressive_lens_cost * item.quantity);
+        }
+        return sum;
+      }, 0);
+    }
   }
 
   // Calculate tax first
