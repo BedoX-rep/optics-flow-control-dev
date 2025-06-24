@@ -111,7 +111,15 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full relative">
+        {(() => {
+          const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
+          return itemsWithoutCost > 0 ? (
+            <div className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+              {itemsWithoutCost}
+            </div>
+          ) : null;
+        })()}
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -136,14 +144,7 @@ const ReceiptCard = ({
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
                       {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                     </Badge>
-                    {(() => {
-                      const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
-                      return itemsWithoutCost > 0 ? (
-                        <Badge variant="destructive" className="text-xs bg-orange-100 text-orange-700 border-orange-200">
-                          {itemsWithoutCost} {t('noCost')}
-                        </Badge>
-                      ) : null;
-                    })()}
+                    
                     <div className="flex items-center gap-1">
                       <div className={cn("w-2 h-2 rounded-full",
                         receipt.call_status === 'Called' ? "bg-green-500" :
