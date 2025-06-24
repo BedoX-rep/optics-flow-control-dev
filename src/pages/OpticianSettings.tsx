@@ -70,33 +70,47 @@ const OpticianSettings = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      // First, try to get existing user information
-      const { data: existingInfo } = await supabase
-        .from('user_information')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      try {
+        // First, try to get existing user information
+        const { data: existingInfo, error: fetchError } = await supabase
+          .from('user_information')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
 
-      if (existingInfo) {
+        if (existingInfo) {
+          return existingInfo;
+        }
+
+        // If no user information exists, initialize from subscription data
+        if (fetchError && fetchError.code === 'PGRST116') {
+          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
+
+          // Fetch the newly created record
+          const { data: newInfo, error: newError } = await supabase
+            .from('user_information')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (newError) {
+            console.error('Error fetching new user information:', newError);
+            return null;
+          }
+
+          return newInfo;
+        }
+
+        if (fetchError) {
+          console.error('Error fetching user information:', fetchError);
+          return null;
+        }
+
         return existingInfo;
-      }
-
-      // If no user information exists, initialize from subscription data
-      await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-      // Fetch the newly created record
-      const { data: newInfo, error } = await supabase
-        .from('user_information')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user information:', error);
+      } catch (error) {
+        console.error('Unexpected error:', error);
         return null;
       }
-
-      return newInfo;
     },
     enabled: !!user,
   });

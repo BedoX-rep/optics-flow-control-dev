@@ -248,18 +248,40 @@ const NewReceipt = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      const { data, error } = await supabase
-        .from('user_information')
-        .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
-        .eq('user_id', user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('user_information')
+          .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+          .eq('user_id', user.id)
+          .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user information:', error);
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No data found, initialize with defaults
+            await supabase.rpc('initialize_user_information', { user_uuid: user.id });
+            
+            const { data: newData, error: newError } = await supabase
+              .from('user_information')
+              .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+              .eq('user_id', user.id)
+              .single();
+
+            if (newError) {
+              console.error('Error fetching new user information:', newError);
+              return null;
+            }
+
+            return newData;
+          }
+          console.error('Error fetching user information:', error);
+          return null;
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Unexpected error fetching user information:', error);
         return null;
       }
-
-      return data;
     },
     enabled: !!user
   });

@@ -120,28 +120,28 @@ const AppRoutes = () => (
     <Route path="/pricing" element={<Pricing />} />
 	  <Route path="/how-to-use" element={<HowToUse />} />
 
-    <Route path="/dashboard" element={
+    <Route path="/dashboard/*" element={
       <ProtectedRoute>
         <Layout><Dashboard /></Layout>
       </ProtectedRoute>
     } />
 
-    <Route path="/products" element={
+    <Route path="/products/*" element={
               <ProtectedRoute requiredPermission="can_manage_products">
                 <Layout><Products /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/clients" element={
+            <Route path="/clients/*" element={
               <ProtectedRoute requiredPermission="can_manage_clients">
                 <Layout><Clients /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/receipts" element={
+            <Route path="/receipts/*" element={
               <ProtectedRoute requiredPermission="can_manage_receipts">
                 <Layout><Receipts /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/financial" element={
+            <Route path="/financial/*" element={
               <ProtectedRoute requiredPermission="can_view_financial">
                 <Layout><Financial /></Layout>
               </ProtectedRoute>
@@ -151,37 +151,37 @@ const AppRoutes = () => (
                 <Layout><Purchases /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/access" element={
+            <Route path="/access/*" element={
               <ProtectedRoute requiredPermission="admin_session">
                 <Layout><Access /></Layout>
               </ProtectedRoute>
             } />
 
-    <Route path="/new-receipt" element={
+    <Route path="/new-receipt/*" element={
       <ProtectedRoute>
         <Layout><NewReceipt /></Layout>
       </ProtectedRoute>
     } />
 
-    <Route path="/optician-settings" element={
+    <Route path="/optician-settings/*" element={
               <ProtectedRoute requiredPermission="admin_session">
                 <Layout><OpticianSettings /></Layout>
               </ProtectedRoute>
             } />
 
-    <Route path="/personalisation" element={
+    <Route path="/personalisation/*" element={
               <ProtectedRoute requiredPermission="admin_session">
                 <Layout><Personalisation /></Layout>
               </ProtectedRoute>
             } />
 
-    <Route path="/subscriptions" element={
+    <Route path="/subscriptions/*" element={
       <ProtectedRoute requiresActiveSubscription={false}>
         <Layout><Subscriptions /></Layout>
       </ProtectedRoute>
     } />
 
-    <Route path="/invoices" element={
+    <Route path="/invoices/*" element={
               <ProtectedRoute requiredPermission="can_manage_invoices">
                 <Layout><Invoices /></Layout>
               </ProtectedRoute>

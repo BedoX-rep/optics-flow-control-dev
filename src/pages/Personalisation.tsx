@@ -40,33 +40,47 @@ const Personalisation = () => {
     queryFn: async () => {
       if (!user) return null;
 
-      // Try to get existing user information
-      const { data: existingInfo } = await supabase
-        .from('user_information')
-        .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
-        .eq('user_id', user.id)
-        .single();
+      try {
+        // Try to get existing user information
+        const { data: existingInfo, error: fetchError } = await supabase
+          .from('user_information')
+          .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+          .eq('user_id', user.id)
+          .single();
 
-      if (existingInfo) {
+        if (existingInfo) {
+          return existingInfo;
+        }
+
+        // If no user information exists, initialize it
+        if (fetchError && fetchError.code === 'PGRST116') {
+          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
+
+          // Fetch the newly created/updated record
+          const { data: newInfo, error: newError } = await supabase
+            .from('user_information')
+            .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+            .eq('user_id', user.id)
+            .single();
+
+          if (newError) {
+            console.error('Error fetching new user personalisation:', newError);
+            return null;
+          }
+
+          return newInfo;
+        }
+
+        if (fetchError) {
+          console.error('Error fetching user personalisation:', fetchError);
+          return null;
+        }
+
         return existingInfo;
-      }
-
-      // If no user information exists, initialize it
-      await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-      // Fetch the newly created/updated record
-      const { data: newInfo, error } = await supabase
-        .from('user_information')
-        .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user personalisation:', error);
+      } catch (error) {
+        console.error('Unexpected error:', error);
         return null;
       }
-
-      return newInfo;
     },
     enabled: !!user,
   });
@@ -86,11 +100,16 @@ const Personalisation = () => {
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async (data: PersonalisationData) => {
+      if (!user) throw new Error('User not authenticated');
+
       const { error } = await supabase
         .from('user_information')
         .upsert({
-          user_id: user?.id,
-          ...data,
+          user_id: user.id,
+          auto_additional_costs: data.auto_additional_costs,
+          sv_lens_cost: data.sv_lens_cost,
+          progressive_lens_cost: data.progressive_lens_cost,
+          frames_cost: data.frames_cost,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
