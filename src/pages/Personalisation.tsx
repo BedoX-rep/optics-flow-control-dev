@@ -340,7 +340,9 @@ const Personalisation = () => {
                     </span>
                   ))}
                 </div>
-                
+                <p className="text-xs text-blue-700 mt-2">
+                  {t('defaultCompaniesDesc')}
+                </p>
               </div>
             </CardContent>
           </Card>

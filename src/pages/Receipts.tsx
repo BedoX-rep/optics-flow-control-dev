@@ -28,154 +28,6 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/components/LanguageProvider';
 
-// ReceiptCard component
-const ReceiptCard = ({ receipt, onPaid, onDelivered, onDelete, onView, onEdit, onMontageChange, onCallStatusChange, itemsWithoutCost }) => {
-  const { t } = useLanguage();
-  
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            {/* Header */}
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-900">
-                    {receipt.clients?.name || 'Unknown Client'}
-                  </h3>
-                  {itemsWithoutCost > 0 && (
-                    <Badge variant="destructive" className="text-xs">
-                      {itemsWithoutCost} no cost
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-gray-600">{receipt.clients?.phone || 'No phone'}</p>
-                <p className="text-xs text-gray-500">
-                  {formatDistanceToNow(new Date(receipt.created_at), { addSuffix: true })}
-                </p>
-              </div>
-              
-              <div className="flex flex-col items-end space-y-1">
-                <span className="text-lg font-bold text-gray-900">
-                  {receipt.total.toFixed(2)} DH
-                </span>
-                {receipt.balance > 0 && (
-                  <span className="text-sm text-red-600 font-medium">
-                    Balance: {receipt.balance.toFixed(2)} DH
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Status badges */}
-            <div className="flex flex-wrap gap-2">
-              <Badge 
-                variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} 
-                className="text-xs"
-              >
-                {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
-              </Badge>
-              <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
-                {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
-              </Badge>
-              <div className="flex items-center gap-1">
-                <div className={cn("w-2 h-2 rounded-full",
-                  receipt.call_status === 'Called' ? "bg-green-500" :
-                  receipt.call_status === 'Unresponsive' ? "bg-red-500" :
-                  "bg-gray-400"
-                )} />
-                <span className="text-xs font-medium">
-                  {receipt.call_status === 'Called' ? t('called') : 
-                   receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
-                </span>
-              </div>
-            </div>
-
-            {/* Financial details */}
-            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-gray-100">
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('advance')}</p>
-                <p className="font-medium text-blue-600">{receipt.advance_payment.toFixed(2)} DH</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('cost')}</p>
-                <p className="font-medium text-red-600">{(receipt.cost_ttc || 0).toFixed(2)} DH</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">{t('profit')}</p>
-                <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onView()}
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onEdit()}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onDelete()}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-1">
-                {receipt.balance > 0 && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onPaid()}
-                    className="h-7 text-xs"
-                  >
-                    <Check className="h-3 w-3 mr-1" />
-                    {t('paid')}
-                  </Button>
-                )}
-                
-                {receipt.delivery_status !== 'Completed' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onDelivered()}
-                    className="h-7 text-xs"
-                  >
-                    <Package className="h-3 w-3 mr-1" />
-                    {t('delivered')}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
-
 interface Receipt {
   id: string;
   client_id: string | null;
@@ -897,27 +749,19 @@ const Receipts = () => {
                 {t('noReceiptsFound')}
               </div>
             ) : (
-              filteredReceipts.map((receipt) => {
-                // Count items without cost
-                const itemsWithoutCost = receipt.receipt_items?.filter(item => 
-                  !item.cost || item.cost === 0
-                ).length || 0;
-
-                return (
-                  <ReceiptCard
-                    key={receipt.id}
-                    receipt={receipt}
-                    onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
-                    onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
-                    onDelete={() => handleDelete(receipt.id)}
-                    onView={() => setSelectedReceipt(receipt)}
-                    onEdit={() => setEditingReceipt(receipt)}
-                    onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
-                    onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
-                    itemsWithoutCost={itemsWithoutCost}
-                  />
-                );
-              })
+              filteredReceipts.map((receipt) => (
+                <ReceiptCard
+                  key={receipt.id}
+                  receipt={receipt}
+                  onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
+                  onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
+                  onDelete={() => handleDelete(receipt.id)}
+                  onView={() => setSelectedReceipt(receipt)}
+                  onEdit={() => setEditingReceipt(receipt)}
+                  onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
+                  onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
+                />
+              ))
             )}
           </AnimatePresence>
         </div>
