@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { X } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { Company } from '../integrations/supabase/types';
-import { useAuthContext } from './AuthProvider';
+import { useAuth } from './AuthProvider';
 import { DEFAULT_COMPANIES } from './products/CompanyCellEditor';
 
 interface ProductFiltersProps {
