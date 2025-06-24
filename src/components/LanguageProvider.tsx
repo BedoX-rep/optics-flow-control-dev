@@ -960,10 +960,7 @@ const productTranslations: Translations = {
     en: 'Contact Lenses',
     fr: 'Lentilles de Contact'
   },
-  defaultCompaniesDesk: {
-    en: 'Default companies are always available across all features',
-    fr: 'Les entreprises par défaut sont toujours disponibles dans toutes les fonctionnalités'
-  },
+  
   addNewCompany: {
     en: 'Add New Company',
     fr: 'Ajouter une Nouvelle Entreprise'
