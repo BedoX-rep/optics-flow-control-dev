@@ -952,6 +952,18 @@ const productTranslations: Translations = {
     en: 'Company Management',
     fr: 'Gestion des Entreprises'
   },
+  companiesManagement: {
+    en: 'Companies Management',
+    fr: 'Gestion des Entreprises'
+  },
+  contactLenses: {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact'
+  },
+  defaultCompaniesDesk: {
+    en: 'Default companies are always available across all features',
+    fr: 'Les entreprises par défaut sont toujours disponibles dans toutes les fonctionnalités'
+  },
   addNewCompany: {
     en: 'Add New Company',
     fr: 'Ajouter une Nouvelle Entreprise'
