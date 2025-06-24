@@ -828,32 +828,6 @@ export interface InvoiceItem {
 export interface Database {
   public: {
     Tables: {
-      companies: {
-        Row: {
-          id: string
-          name: string
-          user_id: string
-          is_default: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          user_id: string
-          is_default?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          user_id?: string
-          is_default?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
       user_information: {
         Row: UserInformation;
         Insert: Omit<UserInformation, 'id' | 'created_at' | 'updated_at'>;

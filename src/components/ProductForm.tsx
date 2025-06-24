@@ -1,38 +1,75 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
-import { useCompanies } from "@/hooks/useCompanies";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/components/LanguageProvider";
 
 const CATEGORY_OPTIONS = [
-  "Single Vision Lenses",
-  "Progressive Lenses", 
-  "Frames",
-  "Sunglasses",
-  "Contact Lenses",
-  "Accessories"
+  { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
+  { value: "Progressive Lenses", abbr: "PG", labelKey: "progressiveLenses", icon: Layers },
+  { value: "Frames", abbr: "FR", labelKey: "frames", icon: Package },
+  { value: "Sunglasses", abbr: "SG", labelKey: "sunglasses", icon: Eye },
+  { value: "Contact Lenses", abbr: "CL", labelKey: "contactLenses", icon: Eye },
+  { value: "Accessories", abbr: "AC", labelKey: "accessories", icon: Package },
+  { value: "Service", abbr: "SV", labelKey: "service", icon: Wrench },
+  { value: "Other", abbr: "OT", labelKey: "other", icon: Package }
 ];
 
-const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
-const GAMMA_OPTIONS = ["Standard", "Premium", "High-End", "Budget"];
+const INDEX_OPTIONS = [
+  "1.50",
+  "1.56",
+  "1.59",
+  "1.6",
+  "1.67",
+  "1.74"
+];
+
+const TREATMENT_OPTIONS = [
+  { value: "White", labelKey: "white" },
+  { value: "AR", labelKey: "ar" },
+  { value: "Blue", labelKey: "blue" },
+  { value: "Photochromic", labelKey: "photochromic" },
+  { value: "Polarized", labelKey: "polarized" },
+  { value: "UV protection", labelKey: "uvProtection" },
+  { value: "Tint", labelKey: "tint" }
+];
+
+const COMPANY_OPTIONS = [
+  "Indo",
+  "ABlens",
+  "Essilor",
+  "GLASSANDLENS",
+  "Optifak"
+];
+
+const GAMMA_OPTIONS = [
+  "Standard",
+  "Premium",
+  "High-End",
+  "Budget"
+];
 
 export interface ProductFormValues {
   name: string;
   price: number;
-  cost_ttc?: number;
   category?: string;
   index?: string;
   treatment?: string;
   company?: string;
   gamma?: string;
-  automated_name?: boolean;
   image?: string;
+  automated_name?: boolean;
   created_at?: string;
+  cost_ttc?: number;
   stock_status?: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock';
   stock?: number;
 }
@@ -44,302 +81,434 @@ interface ProductFormProps {
   disabled?: boolean;
 }
 
-function ProductForm({ initialValues, onSubmit, onCancel, disabled }: ProductFormProps) {
-  const { companies, addCompany } = useCompanies();
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [showAddCompany, setShowAddCompany] = useState(false);
+const getCategoryAbbr = (category: string | undefined) => {
+  const found = CATEGORY_OPTIONS.find(o => o.value === category);
+  return found?.abbr || "";
+};
 
-  const [formData, setFormData] = useState<ProductFormValues>({
-    name: '',
+const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
+  const { t } = useLanguage();
+  const [form, setForm] = useState<ProductFormValues>({
+    name: "",
     price: 0,
-    cost_ttc: 0,
-    category: '',
-    index: '',
-    treatment: '',
-    company: '',
-    gamma: '',
-    automated_name: true,
-    image: '',
     stock_status: 'Order',
-    stock: 0,
+    automated_name: true,
+    ...initialValues
   });
+  const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  // Combine default companies with user's custom companies
-  const allCompanies = [
-    ...COMPANY_OPTIONS,
-    ...companies.filter(c => !COMPANY_OPTIONS.includes(c.name)).map(c => c.name)
-  ];
-
+  // Auto-generate name if toggled on and any relevant field changes
   useEffect(() => {
-    if (initialValues) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialValues,
-        name: initialValues.name || '',
-        price: initialValues.price || 0,
-        cost_ttc: initialValues.cost_ttc || 0,
-        category: initialValues.category || '',
-        index: initialValues.index || '',
-        treatment: initialValues.treatment || '',
-        company: initialValues.company || '',
-        gamma: initialValues.gamma || '',
-        automated_name: initialValues.automated_name !== undefined ? initialValues.automated_name : true,
-        image: initialValues.image || '',
-        stock_status: initialValues.stock_status || 'Order',
-        stock: initialValues.stock || 0,
+    if (autoName) {
+      let abbr = getCategoryAbbr(form.category);
+
+      // Only include index/treatment for SV/PG
+      let parts = [abbr];
+
+      if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "")) {
+        if (form.index) parts.push(form.index);
+        if (form.treatment) parts.push(form.treatment?.toUpperCase());
+      }
+      if (form.company) parts.push(form.company?.toUpperCase());
+      if (form.gamma) parts.push(form.gamma?.toUpperCase());
+      if (form.stock_status === 'inStock' || form.stock_status === 'Fabrication') {
+        parts.push(form.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
+      }
+
+      const generatedName = parts.filter(Boolean).join(" ");
+      setForm(f => ({
+        ...f,
+        name: generatedName,
+        automated_name: true
+      }));
+    } else {
+      setForm(f => ({
+        ...f,
+        automated_name: false
       }));
     }
-  }, [initialValues]);
+  }, [form.category, form.index, form.treatment, form.company, form.gamma, form.stock_status, autoName]);
 
-  const handleAddCompany = async () => {
-    if (!newCompanyName.trim()) {
-      return;
-    }
+  // Update autoName state when form.automated_name changes from external source
+  useEffect(() => {
+    setAutoName(form.automated_name ?? true);
+  }, [form.automated_name]);
 
-    const result = await addCompany(newCompanyName.trim());
-    if (result.success) {
-      setFormData(prev => ({ ...prev, company: newCompanyName.trim() }));
-      setNewCompanyName("");
-      setShowAddCompany(false);
-    }
-  };
+  // Determine which extra fields should show
+  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "");
 
-  const generateAutomaticName = (data: ProductFormValues) => {
-    const getCategoryAbbr = (category: string | undefined) => {
-      switch (category) {
-        case 'Single Vision Lenses': return 'SV';
-        case 'Progressive Lenses': return 'PG';
-        case 'Frames': return 'FR';
-        case 'Sunglasses': return 'SG';
-        case 'Contact Lenses': return 'CL';
-        case 'Accessories': return 'AC';
-        default: return '';
-      }
-    };
-
-    let abbr = getCategoryAbbr(data.category);
-    let parts = [abbr];
-
-    if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(data.category ?? "")) {
-      if (data.index) parts.push(data.index);
-      if (data.treatment) parts.push(data.treatment.toUpperCase());
-    }
-    if (data.company) parts.push(data.company.toUpperCase());
-    if (data.gamma) parts.push(data.gamma.toUpperCase());
-    if (data.stock_status === 'inStock' || data.stock_status === 'Fabrication') {
-      parts.push(data.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
-    }
-
-    return parts.filter(Boolean).join(" ");
-  };
-
-  const handleFieldChange = (field: keyof ProductFormValues, value: any) => {
-    setFormData(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Handle automated name generation
-      if (field === 'automated_name' && value === true) {
-        updated.name = generateAutomaticName(updated);
-      } else if (updated.automated_name && (
-        field === 'category' || field === 'index' || field === 'treatment' || 
-        field === 'company' || field === 'gamma' || field === 'stock_status'
-      )) {
-        updated.name = generateAutomaticName(updated);
-      }
-
-      return updated;
+  // Image handling (upload to Supabase Storage or base64 preview instead for now)
+  const handleImageUpload = async () => {
+    if (!imageFile) return "";
+    setUploading(true);
+    // Use Supabase Storage if available. For now, base64 preview:
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploading(false);
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(imageFile);
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const onFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Validate required fields
+    if (!form.name.trim()) {
+      return;
+    }
+
+    let imageUrl = form.image;
+    if (imageFile) {
+      imageUrl = await handleImageUpload();
+    }
+
+    // Ensure proper data types and clean up the form data
+    const submissionData = {
+      name: form.name.trim(),
+      price: Number(form.price) || 0,
+      cost_ttc: Number(form.cost_ttc) || 0,
+      stock: form.stock_status === 'inStock' ? (Number(form.stock) || 0) : undefined,
+      stock_status: form.stock_status,
+      category: form.category || undefined,
+      index: form.index || undefined,
+      treatment: form.treatment || undefined,
+      company: form.company || undefined,
+      gamma: form.gamma || undefined,
+      automated_name: autoName,
+      image: imageUrl || undefined
+    };
+
+    console.log('Submitting form data:', submissionData); // Debug log
+    onSubmit(submissionData);
   };
 
+  const handleAutoNameToggle = (checked: boolean) => {
+    setAutoName(checked);
+    // If turning off auto-naming, keep the current name but allow editing
+    if (!checked) {
+      setForm(f => ({
+        ...f,
+        automated_name: false
+      }));
+    }
+  };
+
+  const selectedCategory = CATEGORY_OPTIONS.find(cat => cat.value === form.category);
+  const IconComponent = selectedCategory?.icon || Package;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Product Name *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleFieldChange('name', e.target.value)}
-            disabled={formData.automated_name}
-            required
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogHeader className="space-y-2 pb-4 border-b">
+        <DialogTitle className="text-2xl font-semibold text-gray-900">
+          {initialValues.name ? t('editProduct') : t('addProduct')}
+        </DialogTitle>
+      </DialogHeader>
+
+      <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
+        {/* Auto Name Generation */}
+        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+          <Checkbox
+            checked={autoName}
+            onCheckedChange={handleAutoNameToggle}
+            id="auto-name"
+            className="border-gray-400"
           />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="automated_name"
-            checked={formData.automated_name}
-            onCheckedChange={(checked) => handleFieldChange('automated_name', checked)}
-          />
-          <Label htmlFor="automated_name">Auto-generate name</Label>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Select value={formData.category} onValueChange={(value) => handleFieldChange('category', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORY_OPTIONS.map(option => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="index">Index</Label>
-          <Select value={formData.index} onValueChange={(value) => handleFieldChange('index', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select index" />
-            </SelectTrigger>
-            <SelectContent>
-              {INDEX_OPTIONS.map(option => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="treatment">Treatment</Label>
-          <Select value={formData.treatment} onValueChange={(value) => handleFieldChange('treatment', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select treatment" />
-            </SelectTrigger>
-            <SelectContent>
-              {TREATMENT_OPTIONS.map(option => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="gamma">Gamma</Label>
-          <Select value={formData.gamma} onValueChange={(value) => handleFieldChange('gamma', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select gamma" />
-            </SelectTrigger>
-            <SelectContent>
-              {GAMMA_OPTIONS.map(option => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="company">Company</Label>
-        <div className="space-y-2">
-          <Select value={formData.company} onValueChange={(value) => handleFieldChange('company', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select company" />
-            </SelectTrigger>
-            <SelectContent>
-              {allCompanies.map(option => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowAddCompany(!showAddCompany)}
-            className="w-full"
-          >
-            {showAddCompany ? "Cancel" : "Add New Company"}
-          </Button>
-          {showAddCompany && (
-            <div className="flex gap-2">
-              <Input
-                placeholder="Company name"
-                value={newCompanyName}
-                onChange={(e) => setNewCompanyName(e.target.value)}
-              />
-              <Button type="button" onClick={handleAddCompany} size="sm">
-                Add
-              </Button>
-            </div>
+          <Label htmlFor="auto-name" className="cursor-pointer font-medium text-gray-700">
+            {t('generateNameAuto')}
+          </Label>
+          {autoName && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+              {t('auto')}
+            </Badge>
           )}
         </div>
-      </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="price">Selling Price *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            min="0"
-            value={formData.price}
-            onChange={(e) => handleFieldChange('price', parseFloat(e.target.value) || 0)}
-            required
-          />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Product Classification */}
+          <div className="space-y-4">
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <Tag className="h-4 w-4" />
+                  {t('productClassification') || 'Product Classification'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('category')}
+                  </Label>
+                  <Select
+                    value={form.category ?? ""}
+                    onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectCategory')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none_selected">{t('none')}</SelectItem>
+                      {CATEGORY_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {t(opt.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Company */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('company')}
+                  </Label>
+                  <Select
+                    value={form.company ?? ""}
+                    onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectCompany')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none_selected">{t('none')}</SelectItem>
+                      {COMPANY_OPTIONS.map(opt => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Gamma */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('gamma')}
+                  </Label>
+                  <Input
+                    value={form.gamma ?? ""}
+                    onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
+                    placeholder={t('enterGamma')}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            
+
+            {/* Lens Specifications - Only for lenses */}
+            {showIndexTreatment && (
+              <Card className="border-gray-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                    <Eye className="h-4 w-4" />
+                    {t('lensSpecifications') || 'Lens Specifications'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('index')}
+                    </Label>
+                    <Select
+                      value={form.index ?? ""}
+                      onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectIndex')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {INDEX_OPTIONS.map(opt => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('treatment')}
+                    </Label>
+                    <Select
+                      value={form.treatment ?? ""}
+                      onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectTreatment')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {TREATMENT_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column - Pricing & Details */}
+          <div className="space-y-4">
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <DollarSign className="h-4 w-4" />
+                  {t('pricingFinancial') || 'Pricing & Financial'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('price')} (DH)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={form.price}
+                    onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
+                    min={0}
+                    required
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('costTTC')} (DH)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={form.cost_ttc ?? 0}
+                    onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
+                    min={0}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {/* Profit Margin Display */}
+                {form.price > 0 && (form.cost_ttc ?? 0) > 0 && (
+                  <div className="p-3 bg-gray-50 rounded border">
+                    <div className="flex justify-between text-sm">
+                      <span>{t('profitMargin') || 'Profit Margin'}:</span>
+                      <span className="font-semibold">
+                        {(((form.price - (form.cost_ttc ?? 0)) / form.price) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Save Button positioned between cards */}
+            <div className="relative flex justify-center -my-2">
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
+                <Button
+                  type="submit"
+                  form="product-form"
+                  disabled={disabled || uploading}
+                  className="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  size="sm"
+                >
+                  <Save className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Product Name */}
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <Package className="h-4 w-4" />
+                  {t('productDetails') || 'Product Details'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('productName')}
+                  </Label>
+                  <Input
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    disabled={autoName}
+                    required
+                    placeholder={autoName ? t('autoGenerated') || 'Auto-generated' : t('enterProductName') || 'Enter product name'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('stockStatus')}
+                  </Label>
+                  <Select
+                    value={form.stock_status}
+                    onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectStockStatus')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Order">{t('order')}</SelectItem>
+                      <SelectItem value="inStock">{t('inStock')}</SelectItem>
+                      <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                      <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {form.stock_status === 'inStock' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('stock')} {t('quantity') || 'Quantity'}
+                    </Label>
+                    <Input
+                      type="number"
+                      value={form.stock ?? 0}
+                      onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
+                      min={0}
+                      placeholder="0"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('image')}
+                  </Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setImageFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  {form.image && typeof form.image === "string" && (
+                    <img 
+                      src={form.image} 
+                      alt="product preview" 
+                      className="w-24 h-24 object-cover rounded border" 
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        <div>
-          <Label htmlFor="cost_ttc">Cost Price</Label>
-          <Input
-            id="cost_ttc"
-            type="number"
-            step="0.01"
-            min="0"
-            value={formData.cost_ttc}
-            onChange={(e) => handleFieldChange('cost_ttc', parseFloat(e.target.value) || 0)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="stock">Stock</Label>
-          <Input
-            id="stock"
-            type="number"
-            min="0"
-            value={formData.stock}
-            onChange={(e) => handleFieldChange('stock', parseInt(e.target.value) || 0)}
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="stock_status">Stock Status</Label>
-        <Select value={formData.stock_status} onValueChange={(value) => handleFieldChange('stock_status', value as any)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select stock status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Order">Order</SelectItem>
-            <SelectItem value="inStock">In Stock</SelectItem>
-            <SelectItem value="Fabrication">Fabrication</SelectItem>
-            <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={disabled}>
-          {disabled ? 'Saving...' : 'Save Product'}
-        </Button>
-      </div>
-    </form>
+        
+      </form>
+    </DialogContent>
   );
-}
+};
 
 export default ProductForm;

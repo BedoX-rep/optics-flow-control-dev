@@ -1,35 +1,36 @@
-import { CellEditor } from "ag-grid-react";
+
+import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCompanies } from "@/hooks/useCompanies";
 
-export const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
+export const COMPANY_OPTIONS = [
+  "None",
+  "Indo",
+  "ABlens",
+  "Essilor",
+  "GLASSANDLENS",
+  "Optifak"
+];
 
-export const CompanyCellEditor: CellEditor = (props) => {
-  const { companies } = useCompanies();
+interface Props {
+  value: string | null | undefined;
+  onChange: (newValue: string | null) => void;
+  disabled?: boolean;
+}
+const CompanyCellEditor: React.FC<Props> = ({ value, onChange, disabled }) => (
+  <Select
+    value={value || ""}
+    onValueChange={onChange}
+    disabled={disabled}
+  >
+    <SelectTrigger className="w-full h-8 bg-[#fafafa] border border-neutral-300 rounded text-xs font-medium px-2">
+      <SelectValue placeholder="Select company" />
+    </SelectTrigger>
+    <SelectContent className="z-50 bg-white">
+      {COMPANY_OPTIONS.map(comp => (
+        <SelectItem key={comp} value={comp}>{comp}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+);
 
-  // Combine default companies with user's custom companies
-  const allCompanies = [
-    ...COMPANY_OPTIONS,
-    ...companies.filter(c => !COMPANY_OPTIONS.includes(c.name)).map(c => c.name)
-  ];
-
-  const handleValueChange = (value: string) => {
-    props.onValueChange?.(value);
-    props.stopEditing?.();
-  };
-
-  return (
-    <Select value={props.value || ''} onValueChange={handleValueChange}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select company" />
-      </SelectTrigger>
-      <SelectContent>
-        {allCompanies.map(company => (
-          <SelectItem key={company} value={company}>
-            {company}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
+export default CompanyCellEditor;
