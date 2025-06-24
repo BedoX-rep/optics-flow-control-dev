@@ -115,7 +115,7 @@ const ReceiptCard = ({
         {(() => {
           const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
           return itemsWithoutCost > 0 ? (
-            <div className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+            <div className="absolute top-0 right-0 z-10 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg" style={{ top: '4px', right: '4px' }}>
               {itemsWithoutCost}
             </div>
           ) : null;
