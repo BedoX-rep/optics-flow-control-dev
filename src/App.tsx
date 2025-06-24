@@ -13,6 +13,7 @@ import Purchases from './pages/Purchases';
 import Financial from './pages/Financial';
 import Access from './pages/Access';
 import OpticianSettings from './pages/OpticianSettings';
+import Personalisation from './pages/Personalisation';
 import Subscriptions from './pages/Subscriptions';
 import NewReceipt from "./pages/NewReceipt";
 import Auth from "./pages/Auth";
@@ -165,6 +166,12 @@ const AppRoutes = () => (
     <Route path="/optician-settings" element={
               <ProtectedRoute requiredPermission="admin_session">
                 <Layout><OpticianSettings /></Layout>
+              </ProtectedRoute>
+            } />
+
+    <Route path="/personalisation" element={
+              <ProtectedRoute requiredPermission="admin_session">
+                <Layout><Personalisation /></Layout>
               </ProtectedRoute>
             } />
 

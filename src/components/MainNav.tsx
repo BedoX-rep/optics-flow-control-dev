@@ -36,6 +36,7 @@ const getAdministrationNavigation = (t: any) => [
   { name: t('subscriptions'), href: '/subscriptions', icon: Bell, permission: null }, // Always visible
   { name: t('access'), href: '/access', icon: Shield, permission: 'admin_session' },
   { name: t('settings'), href: '/optician-settings', icon: Settings, permission: 'admin_session' },
+  { name: t('personalisation'), href: '/personalisation', icon: Settings, permission: 'admin_session' },
 ];
 
 const MainNav = () => {
