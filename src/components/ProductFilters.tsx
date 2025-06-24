@@ -1,194 +1,205 @@
 
-import React from "react";
-import { Filter, Glasses, Album, Building2, Package } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from 'react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { X } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
+import { Company } from '../integrations/supabase/types';
+import { useAuthContext } from './AuthProvider';
+import { DEFAULT_COMPANIES } from './products/CompanyCellEditor';
 
-const CATEGORY_OPTIONS = [
-  "Single Vision Lenses",
-  "Progressive Lenses",
-  "Frames",
-  "Sunglasses",
-  "Contact Lenses",
-  "Accessories",
-  "Service",
-  "Other"
-];
-
-const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic", "Polarized", "UV protection", "Tint"];
-const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
-
-export interface ProductFiltersProps {
-  filters: Record<string, string>;
-  onChange: (filters: Record<string, string>) => void;
+interface ProductFiltersProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (value: string) => void;
+  selectedCompany: string;
+  onCompanyChange: (value: string) => void;
+  selectedTreatment: string;
+  onTreatmentChange: (value: string) => void;
+  selectedIndex: string;
+  onIndexChange: (value: string) => void;
+  onClearFilters: () => void;
 }
 
-const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
-  const { user } = useAuth();
+const ProductFilters = ({
+  searchTerm,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  selectedCompany,
+  onCompanyChange,
+  selectedTreatment,
+  onTreatmentChange,
+  selectedIndex,
+  onIndexChange,
+  onClearFilters,
+}: ProductFiltersProps) => {
+  const [userCompanies, setUserCompanies] = useState<Company[]>([]);
+  const { user } = useAuthContext();
 
-  // Fetch companies
-  const { data: companies = [] } = useQuery({
-    queryKey: ['companies', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserCompanies();
+    }
+  }, [user?.id]);
 
-      // Fetch user's custom companies
-      const { data: userCompanies, error } = await supabase
+  const fetchUserCompanies = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
         .from('companies')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_default', false)
         .order('name');
 
       if (error) {
-        console.error('Error fetching companies:', error);
-        return [];
+        console.error('Error fetching user companies:', error);
+        return;
       }
 
-      // Default companies that show for all users
-      const defaultCompanies = [
-        { id: 'default-indo', name: 'Indo', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-ablens', name: 'ABlens', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-essilor', name: 'Essilor', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-glassandlens', name: 'GLASSANDLENS', user_id: '', is_default: true, created_at: '', updated_at: '' },
-        { id: 'default-optifak', name: 'Optifak', user_id: '', is_default: true, created_at: '', updated_at: '' }
-      ];
+      setUserCompanies(data || []);
+    } catch (error) {
+      console.error('Error fetching user companies:', error);
+    }
+  };
 
-      return [...defaultCompanies, ...userCompanies];
-    },
-    enabled: !!user,
-  });
+  // Combine default companies with user companies
+  const getAllCompanies = () => {
+    const userCompanyNames = userCompanies.map(company => company.name);
+    return [...DEFAULT_COMPANIES, ...userCompanyNames].sort();
+  };
+
+  const categories = [
+    'Frames',
+    'Single Vision',
+    'Progressive',
+    'Sunglasses',
+    'Contact Lens',
+    'Accessories',
+    'Other'
+  ];
+
+  const treatments = [
+    'Anti-reflective',
+    'Blue Light',
+    'Photochromic',
+    'Polarized',
+    'Scratch Resistant',
+    'UV Protection',
+    'Anti-fog',
+    'Mirror',
+    'Gradient',
+    'Tinted'
+  ];
+
+  const indices = [
+    '1.50',
+    '1.56',
+    '1.59',
+    '1.60',
+    '1.67',
+    '1.70',
+    '1.74',
+    '1.76'
+  ];
+
+  const allCompanies = getAllCompanies();
+
   return (
-    <div className="flex items-center gap-3">
-      {/* Category Filter */}
-      <Select value={filters.category || "all_categories"} onValueChange={v => onChange({ category: v })}>
-        <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.category !== 'all_categories'
-            ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
-            : "bg-white/10 hover:bg-white/20"
-        )}>
-          {filters.category === 'all_categories' ? (
-            <>
-              <Glasses className="h-4 w-4" />
-              <span>Category</span>
-            </>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all_categories">All Categories</SelectItem>
-          {CATEGORY_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onClearFilters}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Clear All
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div>
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full"
+            />
+          </div>
 
-      {/* Index Filter */}
-      <Select value={filters.index || "all_indexes"} onValueChange={v => onChange({ index: v })}>
-        <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.index !== 'all_indexes'
-            ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
-            : "bg-white/10 hover:bg-white/20"
-        )}>
-          {filters.index === 'all_indexes' ? (
-            <>
-              <Album className="h-4 w-4" />
-              <span>Index</span>
-            </>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all_indexes">All Indexes</SelectItem>
-          {INDEX_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <div>
+            <Select value={selectedCategory} onValueChange={onCategoryChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Treatment Filter */}
-      <Select value={filters.treatment || "all_treatments"} onValueChange={v => onChange({ treatment: v })}>
-        <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.treatment !== 'all_treatments'
-            ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
-            : "bg-white/10 hover:bg-white/20"
-        )}>
-          {filters.treatment === 'all_treatments' ? (
-            <>
-              <Filter className="h-4 w-4" />
-              <span>Treatment</span>
-            </>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all_treatments">All Treatments</SelectItem>
-          {TREATMENT_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <div>
+            <Select value={selectedCompany} onValueChange={onCompanyChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Company" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {allCompanies.map((company) => (
+                  <SelectItem key={company} value={company}>
+                    {company}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Company Filter */}
-      <Select value={filters.company || "all_companies"} onValueChange={v => onChange({ company: v })}>
-        <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.company !== 'all_companies'
-            ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"
-            : "bg-white/10 hover:bg-white/20"
-        )}>
-          {filters.company === 'all_companies' ? (
-            <>
-              <Building2 className="h-4 w-4" />
-              <span>Company</span>
-            </>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all_companies">All Companies</SelectItem>
-          {companies.map(company => (
-            <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <div>
+            <Select value={selectedTreatment} onValueChange={onTreatmentChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Treatment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Treatments</SelectItem>
+                {treatments.map((treatment) => (
+                  <SelectItem key={treatment} value={treatment}>
+                    {treatment}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Stock Status Filter */}
-      <Select value={filters.stock_status || "all_stock_statuses"} onValueChange={v => onChange({ stock_status: v })}>
-        <SelectTrigger className={cn(
-          "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-          filters.stock_status !== 'all_stock_statuses'
-            ? "bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-200"
-            : "bg-white/10 hover:bg-white/20"
-        )}>
-          {filters.stock_status === 'all_stock_statuses' ? (
-            <>
-              <Package className="h-4 w-4" />
-              <span>Stock</span>
-            </>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all_stock_statuses">All Stock Status</SelectItem>
-          {STOCK_STATUS_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>
-              {opt === 'inStock' ? 'In Stock' : opt}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <div>
+            <Select value={selectedIndex} onValueChange={onIndexChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Index" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Indices</SelectItem>
+                {indices.map((index) => (
+                  <SelectItem key={index} value={index}>
+                    {index}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
