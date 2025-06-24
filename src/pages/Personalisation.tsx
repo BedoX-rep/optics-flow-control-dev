@@ -12,7 +12,9 @@ import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Save, Settings, DollarSign } from 'lucide-react';
+import { Save, Settings, DollarSign, Building2, Plus, Trash2 } from 'lucide-react';
+import { useCompanies } from '@/hooks/useCompanies';
+import { COMPANY_OPTIONS } from '@/components/products/CompanyCellEditor';
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
@@ -33,6 +35,8 @@ const Personalisation = () => {
     frames_cost: 10.00
   });
   const [hasChanges, setHasChanges] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const { companies, addCompany, removeCompany } = useCompanies();
 
   // Fetch user personalisation data
   const { data: userPersonalisation, isLoading } = useQuery({
@@ -157,6 +161,63 @@ const Personalisation = () => {
     saveMutation.mutate(formData);
   };
 
+  const handleAddCompany = async () => {
+    if (!newCompanyName.trim()) {
+      toast({
+        title: t('error'),
+        description: "Please enter a company name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if company already exists
+    const allCompanies = [
+      ...COMPANY_OPTIONS,
+      ...companies.map(c => c.name)
+    ];
+    
+    if (allCompanies.includes(newCompanyName.trim())) {
+      toast({
+        title: t('error'),
+        description: "Company already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const result = await addCompany(newCompanyName.trim());
+    if (result.success) {
+      setNewCompanyName('');
+      toast({
+        title: t('success'),
+        description: "Company added successfully",
+      });
+    } else {
+      toast({
+        title: t('error'),
+        description: result.error || "Failed to add company",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemoveCompany = async (companyId: string) => {
+    const result = await removeCompany(companyId);
+    if (result.success) {
+      toast({
+        title: t('success'),
+        description: "Company removed successfully",
+      });
+    } else {
+      toast({
+        title: t('error'),
+        description: result.error || "Failed to remove company",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
@@ -270,6 +331,76 @@ const Personalisation = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Company Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                {t('companyManagement')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building2 className="h-5 w-5 text-teal-600" />
+                  <h3 className="text-lg font-semibold">{t('manageCompanies')}</h3>
+                </div>
+
+                <div className="bg-blue-50/50 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-blue-900">{t('defaultCompanies')}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {COMPANY_OPTIONS.map(company => (
+                      <div key={company} className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-800">
+                        {company}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-green-50/50 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-green-900">{t('customCompanies')}</h4>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter company name"
+                      value={newCompanyName}
+                      onChange={(e) => setNewCompanyName(e.target.value)}
+                      className="bg-white"
+                    />
+                    <Button 
+                      onClick={handleAddCompany}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+
+                  {companies.length > 0 && (
+                    <div className="space-y-2">
+                      {companies.map(company => (
+                        <div key={company.id} className="flex items-center justify-between bg-white p-3 rounded-lg border">
+                          <span className="font-medium">{company.name}</span>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleRemoveCompany(company.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {companies.length === 0 && (
+                    <p className="text-gray-500 text-sm italic">No custom companies added yet</p>
+                  )}
                 </div>
               </div>
             </CardContent>
