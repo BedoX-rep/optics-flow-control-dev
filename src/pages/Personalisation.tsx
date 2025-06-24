@@ -341,7 +341,7 @@ const Personalisation = () => {
                   ))}
                 </div>
                 <p className="text-xs text-blue-700 mt-2">
-                  {t('defaultCompaniesDesc')}
+                  {t('theseCompaniesAlwaysAvailable')}
                 </p>
               </div>
             </CardContent>
