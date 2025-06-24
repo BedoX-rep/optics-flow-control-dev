@@ -509,30 +509,6 @@ export type Database = {
         }
         Relationships: []
       }
-      companies: {
-        Row: {
-          id: string
-          name: string
-          user_id: string
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          name: string
-          user_id: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          name?: string
-          user_id?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -847,14 +823,6 @@ export interface InvoiceItem {
   is_deleted?: boolean;
   created_at: string;
   updated_at: string;
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  user_id: string;
-  created_at: string | null;
-  updated_at: string | null;
 }
 
 export interface Database {

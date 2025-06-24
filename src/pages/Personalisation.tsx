@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -11,22 +12,13 @@ import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Save, Settings, DollarSign, Building2, Plus, Edit, Trash2 } from 'lucide-react';
-import { DEFAULT_COMPANIES } from '../components/products/CompanyCellEditor';
+import { Save, Settings, DollarSign } from 'lucide-react';
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
   sv_lens_cost: number;
   progressive_lens_cost: number;
   frames_cost: number;
-}
-
-interface Company {
-  id: string;
-  name: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
 }
 
 const Personalisation = () => {
@@ -41,9 +33,6 @@ const Personalisation = () => {
     frames_cost: 10.00
   });
   const [hasChanges, setHasChanges] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState('');
-  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [editCompanyName, setEditCompanyName] = useState('');
 
   // Fetch user personalisation data
   const { data: userPersonalisation, isLoading } = useQuery({
@@ -108,123 +97,6 @@ const Personalisation = () => {
     }
   }, [userPersonalisation]);
 
-  // Fetch companies
-  const { data: companies = [], refetch: refetchCompanies } = useQuery({
-    queryKey: ['companies', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-
-      // Fetch user's custom companies
-      const { data: userCompanies, error } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching companies:', error);
-        return [];
-      }
-
-      return [...DEFAULT_COMPANIES, ...userCompanies];
-    },
-    enabled: !!user,
-  });
-
-  // Add company mutation
-  const addCompanyMutation = useMutation({
-    mutationFn: async (name: string) => {
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('companies')
-        .insert({
-          name: name.trim(),
-          user_id: user.id
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: t('success'),
-        description: 'Company added successfully',
-      });
-      setNewCompanyName('');
-      refetchCompanies();
-    },
-    onError: (error: any) => {
-      console.error('Error adding company:', error);
-      toast({
-        title: t('error'),
-        description: error.message || 'Failed to add company',
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Edit company mutation
-  const editCompanyMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: string, name: string }) => {
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('companies')
-        .update({ name: name.trim(), updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: t('success'),
-        description: 'Company updated successfully',
-      });
-      setEditingCompany(null);
-      setEditCompanyName('');
-      refetchCompanies();
-    },
-    onError: (error: any) => {
-      console.error('Error updating company:', error);
-      toast({
-        title: t('error'),
-        description: error.message || 'Failed to update company',
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Delete company mutation
-  const deleteCompanyMutation = useMutation({
-    mutationFn: async (id: string) => {
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('companies')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: t('success'),
-        description: 'Company deleted successfully',
-      });
-      refetchCompanies();
-    },
-    onError: (error: any) => {
-      console.error('Error deleting company:', error);
-      toast({
-        title: t('error'),
-        description: error.message || 'Failed to delete company',
-        variant: "destructive",
-      });
-    }
-  });
-
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async (data: PersonalisationData) => {
@@ -285,29 +157,6 @@ const Personalisation = () => {
     saveMutation.mutate(formData);
   };
 
-  const handleAddCompany = () => {
-    if (newCompanyName.trim()) {
-      addCompanyMutation.mutate(newCompanyName);
-    }
-  };
-
-  const handleEditCompany = (company: Company) => {
-    setEditingCompany(company);
-    setEditCompanyName(company.name);
-  };
-
-  const handleUpdateCompany = () => {
-    if (editingCompany && editCompanyName.trim()) {
-      editCompanyMutation.mutate({ id: editingCompany.id, name: editCompanyName });
-    }
-  };
-
-  const handleDeleteCompany = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this company?')) {
-      deleteCompanyMutation.mutate(id);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
@@ -327,114 +176,6 @@ const Personalisation = () => {
         />
 
         <div className="space-y-6">
-          {/* Companies Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                {t('companies') || 'Companies'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Plus className="h-5 w-5 text-teal-600" />
-                  <h3 className="text-lg font-semibold">{t('addNewCompany') || 'Add New Company'}</h3>
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    value={newCompanyName}
-                    onChange={(e) => setNewCompanyName(e.target.value)}
-                    placeholder={t('companyName') || 'Company name'}
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handleAddCompany}
-                    disabled={!newCompanyName.trim() || addCompanyMutation.isPending}
-                    className="bg-teal-600 hover:bg-teal-700"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t('add') || 'Add'}
-                  </Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">{t('allCompanies') || 'All Companies'}</h3>
-
-                <div className="grid gap-3">
-                  {companies.map((company) => (
-                    <div
-                      key={company.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Building2 className="h-4 w-4 text-gray-600" />
-                        {editingCompany?.id === company.id ? (
-                          <Input
-                            value={editCompanyName}
-                            onChange={(e) => setEditCompanyName(e.target.value)}
-                            className="bg-white"
-                            autoFocus
-                          />
-                        ) : (
-                          <span className="font-medium">{company.name}</span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {editingCompany?.id === company.id ? (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={handleUpdateCompany}
-                              disabled={!editCompanyName.trim() || editCompanyMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingCompany(null);
-                                setEditCompanyName('');
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditCompany(company)}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteCompany(company.id)}
-                              className="text-red-600 hover:text-red-700"
-                              disabled={deleteCompanyMutation.isPending}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Additional Costs Settings */}
           <Card>
             <CardHeader>
@@ -470,7 +211,7 @@ const Personalisation = () => {
 
                 <div className="bg-blue-50/50 rounded-lg p-4 space-y-4">
                   <h4 className="font-medium text-blue-900">{t('currentSettings')}</h4>
-
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="sv_lens_cost" className="text-sm font-medium">
