@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useLanguage } from "./LanguageProvider";
-import { AlertTriangle } from 'lucide-react';
 
 interface ReceiptDetailsMiniDialogProps {
   isOpen: boolean;
@@ -191,12 +190,6 @@ const ReceiptDetailsMiniDialog = ({
           {receipt.receipt_items && receipt.receipt_items.length > 0 && (
             <div>
               <h3 className="text-sm font-medium mb-2">{t('items')}</h3>
-              {receipt.receipt_items.some((item: any) => !item.cost) && (
-                <div className="flex items-center gap-2 mb-2 text-yellow-500">
-                  <AlertTriangle className="h-4 w-4" />
-                  {t('itemsWithNoCost', { count: receipt.receipt_items.filter((item: any) => !item.cost).length })}
-                </div>
-              )}
               <div className="max-h-60 overflow-y-auto border rounded">
                 <Table>
                   <TableHeader>

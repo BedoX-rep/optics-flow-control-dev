@@ -249,7 +249,20 @@ const ProductCard = React.memo<ProductCardProps>(({
             )}
           </div>
 
-          
+          {/* Auto Toggle - Always visible at bottom */}
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <label className="text-xs text-gray-600 font-medium">{t('generateNameAuto')}</label>
+              <div className="flex items-center">
+                <Switch
+                  checked={product.automated_name}
+                  onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
+                  className="scale-75"
+                />
+                <span className="text-xs text-gray-500 ml-1">{product.automated_name ? t('on') || 'ON' : t('off') || 'OFF'}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
