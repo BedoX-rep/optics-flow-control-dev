@@ -3,19 +3,24 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Save, Settings } from 'lucide-react';
+import { Save, Settings, DollarSign } from 'lucide-react';
 
 interface UserPersonalisation {
   id?: string;
   user_id: string;
   auto_additional_costs: boolean;
+  sv_lens_cost: number;
+  progressive_lens_cost: number;
+  frames_cost: number;
 }
 
 const Personalisation = () => {
@@ -25,7 +30,10 @@ const Personalisation = () => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<UserPersonalisation>({
     user_id: user?.id || '',
-    auto_additional_costs: true
+    auto_additional_costs: true,
+    sv_lens_cost: 10.00,
+    progressive_lens_cost: 20.00,
+    frames_cost: 10.00
   });
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -72,7 +80,10 @@ const Personalisation = () => {
       setFormData({
         id: userPersonalisation.id,
         user_id: userPersonalisation.user_id,
-        auto_additional_costs: userPersonalisation.auto_additional_costs
+        auto_additional_costs: userPersonalisation.auto_additional_costs,
+        sv_lens_cost: userPersonalisation.sv_lens_cost || 10.00,
+        progressive_lens_cost: userPersonalisation.progressive_lens_cost || 20.00,
+        frames_cost: userPersonalisation.frames_cost || 10.00
       });
     }
   }, [userPersonalisation]);
@@ -117,6 +128,15 @@ const Personalisation = () => {
     setHasChanges(true);
   };
 
+  const handleInputChange = (field: keyof UserPersonalisation, value: string) => {
+    const numericValue = parseFloat(value) || 0;
+    setFormData(prev => ({
+      ...prev,
+      [field]: numericValue
+    }));
+    setHasChanges(true);
+  };
+
   const handleSave = () => {
     saveMutation.mutate(formData);
   };
@@ -148,7 +168,7 @@ const Personalisation = () => {
                 {t('additionalCosts')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="auto_additional_costs" className="text-base font-medium">
@@ -163,6 +183,78 @@ const Personalisation = () => {
                   checked={formData.auto_additional_costs}
                   onCheckedChange={(value) => handleSwitchChange('auto_additional_costs', value)}
                 />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <DollarSign className="h-5 w-5 text-teal-600" />
+                  <h3 className="text-lg font-semibold">{t('additionalCostsSettings')}</h3>
+                </div>
+
+                <div className="bg-blue-50/50 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-blue-900">{t('currentSettings')}</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="sv_lens_cost" className="text-sm font-medium">
+                        {t('singleVisionLensCost')}
+                      </Label>
+                      <p className="text-xs text-gray-600">{t('svLensCostDesc')}</p>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="sv_lens_cost"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.sv_lens_cost}
+                          onChange={(e) => handleInputChange('sv_lens_cost', e.target.value)}
+                          className="bg-white"
+                        />
+                        <span className="text-sm text-gray-500">DH</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="progressive_lens_cost" className="text-sm font-medium">
+                        {t('progressiveLensCost')}
+                      </Label>
+                      <p className="text-xs text-gray-600">{t('progressiveCostDesc')}</p>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="progressive_lens_cost"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.progressive_lens_cost}
+                          onChange={(e) => handleInputChange('progressive_lens_cost', e.target.value)}
+                          className="bg-white"
+                        />
+                        <span className="text-sm text-gray-500">DH</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="frames_cost" className="text-sm font-medium">
+                        {t('framesCost')}
+                      </Label>
+                      <p className="text-xs text-gray-600">{t('framesCostDesc')}</p>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="frames_cost"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.frames_cost}
+                          onChange={(e) => handleInputChange('frames_cost', e.target.value)}
+                          className="bg-white"
+                        />
+                        <span className="text-sm text-gray-500">DH</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

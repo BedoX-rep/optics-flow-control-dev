@@ -43,6 +43,10 @@ interface OrderItemsProps {
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
   checkOutOfStockWarning?: React.MutableRefObject<(() => boolean) | null>;
   onProceedWithOutOfStock?: () => void;
+  manualAdditionalCostsEnabled: boolean;
+  setManualAdditionalCostsEnabled: (enabled: boolean) => void;
+  manualAdditionalCostsAmount: number;
+  setManualAdditionalCostsAmount: (amount: number) => void;
 }
 
 const OrderItems: React.FC<OrderItemsProps> = ({
@@ -61,7 +65,11 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   getEyeValues,
   calculateMarkup,
   checkOutOfStockWarning,
-  onProceedWithOutOfStock
+  onProceedWithOutOfStock,
+  manualAdditionalCostsEnabled,
+  setManualAdditionalCostsEnabled,
+  manualAdditionalCostsAmount,
+  setManualAdditionalCostsAmount
 }) => {
   const { t } = useLanguage();
   const [showOutOfStockWarning, setShowOutOfStockWarning] = useState(false);
@@ -439,7 +447,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                           )}
                         </div>
                       )}
-                      
+
                       {/* Paid at Delivery checkbox for Order/Fabrication items */}
                       {item.productId && (() => {
                         const product = products.find(p => p.id === item.productId);

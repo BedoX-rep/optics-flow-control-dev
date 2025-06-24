@@ -186,6 +186,14 @@ const NewReceipt = () => {
   const [currentTab, setCurrentTab] = useState('client');
   const [checkOutOfStock, setCheckOutOfStock] = useState<() => boolean>(() => () => false);
   const checkOutOfStockRef = useRef<() => boolean>(() => false);
+  const [manualAdditionalCostsEnabled, setManualAdditionalCostsEnabled] = useState(false);
+  const [manualAdditionalCostsAmount, setManualAdditionalCostsAmount] = useState(0);
+  const [personalisation, setPersonalisation] = useState({
+    auto_additional_costs: true,
+    sv_lens_cost: 10.00,
+    progressive_lens_cost: 20.00,
+    frames_cost: 10.00
+  });
 
   const steps = [
     { id: 'client', label: t('clientSelection'), icon: User },
@@ -234,6 +242,28 @@ const NewReceipt = () => {
     enabled: !!user
   });
 
+  // Fetch personalization settings
+  const { data: personalisationData } = useQuery({
+    queryKey: ['user-personalisation', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('user_personalisation')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching personalisation:', error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!user
+  });
+
   useEffect(() => {
     if (!user) {
       navigate('/auth');
@@ -249,7 +279,16 @@ const NewReceipt = () => {
       setClients(clientsData);
       setFilteredClients(clientsData);
     }
-  }, [productsData, clientsData, user, navigate]);
+
+    if (personalisationData) {
+      setPersonalisation({
+        auto_additional_costs: personalisationData.auto_additional_costs,
+        sv_lens_cost: personalisationData.sv_lens_cost || 10.00,
+        progressive_lens_cost: personalisationData.progressive_lens_cost || 20.00,
+        frames_cost: personalisationData.frames_cost || 10.00
+      });
+    }
+  }, [productsData, clientsData, personalisationData, user, navigate]);
 
   useEffect(() => {
     const filtered = clients.filter(client =>
@@ -378,26 +417,31 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   let montageCosts = 0;
-  if (autoMontage && orderType !== 'Unspecified') {
+  
+  // Use manual additional costs if enabled
+  if (manualAdditionalCostsEnabled) {
+    montageCosts = manualAdditionalCostsAmount;
+  } else if (personalisation.auto_additional_costs && orderType !== 'Unspecified') {
+    // Use automatic additional costs based on personalization settings
     if (orderType === 'Retoyage') {
-      // For Retoyage, only count Frames category and charge 10 DH per quantity
+      // For Retoyage, only count Frames category
       montageCosts = items.reduce((sum, item) => {
         const product = products.find(p => p.id === item.productId);
-        return sum + (product?.category === 'Frames' ? 10 * item.quantity : 0);
+        return sum + (product?.category === 'Frames' ? personalisation.frames_cost * item.quantity : 0);
       }, 0);
     } else if (orderType === 'Montage') {
-      // For Montage, charge based on lens types
+      // For Montage, charge based on lens types using personalization settings
       montageCosts = items.reduce((sum, item) => {
         const product = products.find(p => p.id === item.productId);
         if (product?.category === 'Single Vision Lenses') {
-          return sum + (10 * item.quantity); // 10 DH per Single Vision lens
+          return sum + (personalisation.sv_lens_cost * item.quantity);
         } else if (product?.category === 'Progressive Lenses') {
-          return sum + (20 * item.quantity); // 20 DH per Progressive lens
+          return sum + (personalisation.progressive_lens_cost * item.quantity);
         }
         return sum;
       }, 0);
     }
-    // For 'Sell' type, montage costs remain 0
+    // For 'Sell' type, additional costs remain 0
   }
 
   // Calculate tax first
@@ -855,6 +899,10 @@ const NewReceipt = () => {
           setCheckOutOfStock={(checkOutOfStock: () => boolean) => {
             checkOutOfStockRef.current = checkOutOfStock;
           }}
+          manualAdditionalCostsEnabled={manualAdditionalCostsEnabled}
+          setManualAdditionalCostsEnabled={setManualAdditionalCostsEnabled}
+          manualAdditionalCostsAmount={manualAdditionalCostsAmount}
+          setManualAdditionalCostsAmount={setManualAdditionalCostsAmount}
         />
 
         <Card className="border-0 shadow-lg">
