@@ -947,6 +947,91 @@ const productTranslations: Translations = {
     en: 'Revenue',
     fr: 'Revenus'
   },
+  // Company management translations
+  companyManagement: {
+    en: 'Company Management',
+    fr: 'Gestion des Entreprises'
+  },
+  addNewCompany: {
+    en: 'Add New Company',
+    fr: 'Ajouter une Nouvelle Entreprise'
+  },
+  customCompanies: {
+    en: 'Custom Companies',
+    fr: 'Entreprises Personnalisées'
+  },
+  noCustomCompanies: {
+    en: 'No custom companies added yet. Create your first company to get started.',
+    fr: 'Aucune entreprise personnalisée ajoutée. Créez votre première entreprise pour commencer.'
+  },
+  companyName: {
+    en: 'Company Name',
+    fr: 'Nom de l\'Entreprise'
+  },
+  enterCompanyName: {
+    en: 'Enter company name',
+    fr: 'Entrer le nom de l\'entreprise'
+  },
+  createCompany: {
+    en: 'Create Company',
+    fr: 'Créer l\'Entreprise'
+  },
+  creating: {
+    en: 'Creating...',
+    fr: 'Création...'
+  },
+  companyCreated: {
+    en: 'Company Created',
+    fr: 'Entreprise Créée'
+  },
+  companyCreatedSuccess: {
+    en: 'Company has been created successfully',
+    fr: 'L\'entreprise a été créée avec succès'
+  },
+  companyUpdated: {
+    en: 'Company Updated',
+    fr: 'Entreprise Mise à Jour'
+  },
+  companyUpdatedSuccess: {
+    en: 'Company has been updated successfully',
+    fr: 'L\'entreprise a été mise à jour avec succès'
+  },
+  companyDeleted: {
+    en: 'Company Deleted',
+    fr: 'Entreprise Supprimée'
+  },
+  companyDeletedSuccess: {
+    en: 'Company has been deleted successfully',
+    fr: 'L\'entreprise a été supprimée avec succès'
+  },
+  failedToCreateCompany: {
+    en: 'Failed to create company',
+    fr: 'Échec de la création de l\'entreprise'
+  },
+  failedToUpdateCompany: {
+    en: 'Failed to update company',
+    fr: 'Échec de la mise à jour de l\'entreprise'
+  },
+  failedToDeleteCompany: {
+    en: 'Failed to delete company',
+    fr: 'Échec de la suppression de l\'entreprise'
+  },
+  confirmDeleteCompany: {
+    en: 'Are you sure you want to delete this company?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cette entreprise?'
+  },
+  manageCustomCompanies: {
+    en: 'Manage your custom companies in addition to the default ones',
+    fr: 'Gérez vos entreprises personnalisées en plus de celles par défaut'
+  },
+  defaultCompanies: {
+    en: 'Default Companies',
+    fr: 'Entreprises par Défaut'
+  },
+  theseCompaniesAlwaysAvailable: {
+    en: 'These companies are always available across all features',
+    fr: 'Ces entreprises sont toujours disponibles dans toutes les fonctionnalités'
+  },
   // Additional client page translations
   saveAllChanges: {
     en: 'Save All Changes',
