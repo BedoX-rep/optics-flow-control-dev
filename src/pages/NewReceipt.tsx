@@ -225,6 +225,13 @@ const NewReceipt = () => {
     enabled: !!user
   });
 
+  // Function to refresh products list
+  const refreshProducts = async () => {
+    if (user) {
+      await queryClient.invalidateQueries(['products', user.id]);
+    }
+  };
+
   const { data: clientsData } = useQuery({
     queryKey: ['all-clients', user?.id],
     queryFn: async () => {
@@ -933,6 +940,7 @@ const NewReceipt = () => {
           setManualAdditionalCostsEnabled={setManualAdditionalCostsEnabled}
           manualAdditionalCostsAmount={manualAdditionalCostsAmount}
           setManualAdditionalCostsAmount={setManualAdditionalCostsAmount}
+          refreshProducts={refreshProducts}
         />
 
         <Card className="border-0 shadow-lg">

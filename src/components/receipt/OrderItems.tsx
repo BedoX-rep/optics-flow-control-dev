@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Copy, Plus, Receipt, Trash, AlertCircle } from 'lucide-react';
+import { Copy, Plus, Receipt, Trash, AlertCircle, Package } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -23,8 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog } from "@/components/ui/dialog";
 import ProductFilters from '@/components/ProductFilters';
+import ProductForm, { ProductFormValues } from '@/components/ProductForm';
 import { useLanguage } from '@/components/LanguageProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/AuthProvider';
+import { useToast } from '@/hooks/use-toast';
 
 interface OrderItemsProps {
   items: any[];
@@ -47,6 +52,7 @@ interface OrderItemsProps {
   setManualAdditionalCostsEnabled: (enabled: boolean) => void;
   manualAdditionalCostsAmount: number;
   setManualAdditionalCostsAmount: (amount: number) => void;
+  refreshProducts?: () => void;
 }
 
 const OrderItems: React.FC<OrderItemsProps> = ({
@@ -69,17 +75,74 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   manualAdditionalCostsEnabled,
   setManualAdditionalCostsEnabled,
   manualAdditionalCostsAmount,
-  setManualAdditionalCostsAmount
+  setManualAdditionalCostsAmount,
+  refreshProducts
 }) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [showOutOfStockWarning, setShowOutOfStockWarning] = useState(false);
   const [outOfStockProducts, setOutOfStockProducts] = useState<string[]>([]);
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
       setItems([...items, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
     } else {
       setItems([...items, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
+    }
+  };
+
+  const handleProductSubmit = async (values: ProductFormValues) => {
+    if (!user) {
+      toast({
+        title: t('error'),
+        description: t('mustBeLoggedIn'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const productData = {
+        ...values,
+        user_id: user.id,
+        is_deleted: false,
+        created_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('products')
+        .insert(productData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: t('success'),
+        description: t('productCreatedSuccessfully'),
+      });
+
+      setIsProductFormOpen(false);
+      
+      // Refresh the products list
+      if (refreshProducts) {
+        await refreshProducts();
+      }
+
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToCreateProduct'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,6 +238,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             </Button>
             <Button onClick={() => addItem('custom')} variant="outline" size="default">
               <Plus className="h-4 w-4 mr-2" /> {t('addCustomItem')}
+            </Button>
+            <Button onClick={() => setIsProductFormOpen(true)} variant="outline" size="default" className="border-green-300 text-green-700 hover:bg-green-50">
+              <Package className="h-4 w-4 mr-2" /> {t('newProduct')}
             </Button>
 
             {/* Manual Additional Costs Override */}
@@ -542,6 +608,15 @@ const OrderItems: React.FC<OrderItemsProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
+        <ProductForm
+          initialValues={{}}
+          onSubmit={handleProductSubmit}
+          onCancel={() => setIsProductFormOpen(false)}
+          disabled={isSubmitting}
+        />
+      </Dialog>
     </Card>
   );
 };
