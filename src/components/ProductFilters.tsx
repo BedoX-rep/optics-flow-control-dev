@@ -37,7 +37,7 @@ interface ProductFiltersProps {
   onClearAll: () => void;
 }
 
-const ProductFilters = ({ filters, onChange, onClearAll }: ProductFiltersProps) => {
+function ProductFilters({ filters, onChange, onClearAll }: ProductFiltersProps) {
   const { companies } = useCompanies();
 
   // Combine default companies with user's custom companies
@@ -196,6 +196,6 @@ const ProductFilters = ({ filters, onChange, onClearAll }: ProductFiltersProps) 
       )}
     </div>
   );
-};
+}
 
 export default ProductFilters;
