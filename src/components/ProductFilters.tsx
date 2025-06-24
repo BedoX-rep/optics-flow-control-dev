@@ -3,6 +3,9 @@ import React from "react";
 import { Filter, Glasses, Album, Building2, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",
@@ -17,7 +20,6 @@ const CATEGORY_OPTIONS = [
 
 const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
 const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic", "Polarized", "UV protection", "Tint"];
-const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
 const STOCK_STATUS_OPTIONS = ["Order", "inStock", "Fabrication", "Out Of Stock"];
 
 export interface ProductFiltersProps {
@@ -26,6 +28,39 @@ export interface ProductFiltersProps {
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
+  const { user } = useAuth();
+
+  // Fetch companies
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      // Fetch user's custom companies
+      const { data: userCompanies, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching companies:', error);
+        return [];
+      }
+
+      // Default companies that show for all users
+      const defaultCompanies = [
+        { id: 'default-indo', name: 'Indo', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-ablens', name: 'ABlens', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-essilor', name: 'Essilor', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-glassandlens', name: 'GLASSANDLENS', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-optifak', name: 'Optifak', user_id: '', is_default: true, created_at: '', updated_at: '' }
+      ];
+
+      return [...defaultCompanies, ...userCompanies];
+    },
+    enabled: !!user,
+  });
   return (
     <div className="flex items-center gap-3">
       {/* Category Filter */}
@@ -122,8 +157,8 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all_companies">All Companies</SelectItem>
-          {COMPANY_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          {companies.map(company => (
+            <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
           ))}
         </SelectContent>
       </Select>

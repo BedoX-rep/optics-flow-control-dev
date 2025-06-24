@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/components/AuthProvider";
 
 const CATEGORY_OPTIONS = [
   { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
@@ -43,13 +45,14 @@ const TREATMENT_OPTIONS = [
   { value: "Tint", labelKey: "tint" }
 ];
 
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
+interface Company {
+  id: string;
+  name: string;
+  user_id: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 const GAMMA_OPTIONS = [
   "Standard",
@@ -88,6 +91,7 @@ const getCategoryAbbr = (category: string | undefined) => {
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
@@ -98,6 +102,38 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Fetch companies
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      // Fetch user's custom companies
+      const { data: userCompanies, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching companies:', error);
+        return [];
+      }
+
+      // Default companies that show for all users
+      const defaultCompanies = [
+        { id: 'default-indo', name: 'Indo', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-ablens', name: 'ABlens', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-essilor', name: 'Essilor', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-glassandlens', name: 'GLASSANDLENS', user_id: '', is_default: true, created_at: '', updated_at: '' },
+        { id: 'default-optifak', name: 'Optifak', user_id: '', is_default: true, created_at: '', updated_at: '' }
+      ];
+
+      return [...defaultCompanies, ...userCompanies];
+    },
+    enabled: !!user,
+  });
 
   // Auto-generate name if toggled on and any relevant field changes
   useEffect(() => {
@@ -278,8 +314,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none_selected">{t('none')}</SelectItem>
-                      {COMPANY_OPTIONS.map(opt => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      {companies.map(company => (
+                        <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
