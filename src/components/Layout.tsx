@@ -29,6 +29,7 @@ import {
 
 import SidebarMenuButton from './SidebarMenuButton';
 import SidebarMenuItem from './SidebarMenuItem';
+import { useLanguage } from './LanguageProvider';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [adminAccessDialogOpen, setAdminAccessDialogOpen] = useState(false);
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
-  const { t: translate } = useTranslation();
+  const { t } = useLanguage();
 
   const copyReferralCode = () => {
     if (subscription?.referral_code) {
