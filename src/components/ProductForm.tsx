@@ -1,562 +1,299 @@
-
-import React, { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/components/LanguageProvider";
+import { toast } from "sonner";
+import { COMPANY_OPTIONS } from "@/components/products/CompanyCellEditor";
 import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
-  { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
-  { value: "Progressive Lenses", abbr: "PG", labelKey: "progressiveLenses", icon: Layers },
-  { value: "Frames", abbr: "FR", labelKey: "frames", icon: Package },
-  { value: "Sunglasses", abbr: "SG", labelKey: "sunglasses", icon: Eye },
-  { value: "Contact Lenses", abbr: "CL", labelKey: "contactLenses", icon: Eye },
-  { value: "Accessories", abbr: "AC", labelKey: "accessories", icon: Package },
-  { value: "Service", abbr: "SV", labelKey: "service", icon: Wrench },
-  { value: "Other", abbr: "OT", labelKey: "other", icon: Package }
-];
-
-const INDEX_OPTIONS = [
-  "1.50",
-  "1.56",
-  "1.59",
-  "1.6",
-  "1.67",
-  "1.74"
+  'Single Vision',
+  'Progressive', 
+  'Frames',
+  'Sunglasses',
+  'Contact Lens',
+  'Accessories'
 ];
 
 const TREATMENT_OPTIONS = [
-  { value: "White", labelKey: "white" },
-  { value: "AR", labelKey: "ar" },
-  { value: "Blue", labelKey: "blue" },
-  { value: "Photochromic", labelKey: "photochromic" },
-  { value: "Polarized", labelKey: "polarized" },
-  { value: "UV protection", labelKey: "uvProtection" },
-  { value: "Tint", labelKey: "tint" }
+  'None',
+  'Anti-Reflection',
+  'Blue Light',
+  'Photochromic',
+  'Polarized',
+  'Mirror'
 ];
 
-
-
-const GAMMA_OPTIONS = [
-  "Standard",
-  "Premium",
-  "High-End",
-  "Budget"
-];
-
-export interface ProductFormValues {
+interface Product {
+  id?: string;
   name: string;
-  price: number;
-  category?: string;
-  index?: string;
-  treatment?: string;
-  company?: string;
-  gamma?: string;
-  image?: string;
-  automated_name?: boolean;
-  created_at?: string;
-  cost_ttc?: number;
-  stock_status?: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock';
-  stock?: number;
+  category: string;
+  company: string;
+  treatment: string;
+  cost_price: number;
+  selling_price: number;
+  quantity: number;
+  description?: string;
 }
 
 interface ProductFormProps {
-  initialValues: Partial<ProductFormValues>;
-  onSubmit: (values: ProductFormValues) => void;
-  onCancel: () => void;
-  disabled?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  product?: Product | null;
+  onSuccess?: () => void;
 }
 
-const getCategoryAbbr = (category: string | undefined) => {
-  const found = CATEGORY_OPTIONS.find(o => o.value === category);
-  return found?.abbr || "";
-};
-
-const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
-  const { t } = useLanguage();
+export function ProductForm({ open, onOpenChange, product, onSuccess }: ProductFormProps) {
   const { companies, addCompany } = useCompanies();
-  const [form, setForm] = useState<ProductFormValues>({
-    name: "",
-    price: 0,
-    stock_status: 'Order',
-    automated_name: true,
-    ...initialValues
-  });
-  const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [showAddCompany, setShowAddCompany] = useState(false);
 
-  // Auto-generate name if toggled on and any relevant field changes
+  const [formData, setFormData] = useState<Product>({
+    name: '',
+    category: '',
+    company: '',
+    treatment: 'None',
+    cost_price: 0,
+    selling_price: 0,
+    quantity: 1,
+    description: ''
+  });
+
+  // Combine default companies with user's custom companies
+  const allCompanies = [
+    ...COMPANY_OPTIONS,
+    ...companies.filter(c => !COMPANY_OPTIONS.includes(c.name)).map(c => c.name)
+  ];
+
   useEffect(() => {
-    if (autoName) {
-      let abbr = getCategoryAbbr(form.category);
-
-      // Only include index/treatment for SV/PG
-      let parts = [abbr];
-
-      if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "")) {
-        if (form.index) parts.push(form.index);
-        if (form.treatment) parts.push(form.treatment?.toUpperCase());
-      }
-      if (form.company) parts.push(form.company?.toUpperCase());
-      if (form.gamma) parts.push(form.gamma?.toUpperCase());
-      if (form.stock_status === 'inStock' || form.stock_status === 'Fabrication') {
-        parts.push(form.stock_status === 'inStock' ? 'INSTOCK' : 'FABRICATION');
-      }
-
-      const generatedName = parts.filter(Boolean).join(" ");
-      setForm(f => ({
-        ...f,
-        name: generatedName,
-        automated_name: true
-      }));
+    if (product) {
+      setFormData(product);
     } else {
-      setForm(f => ({
-        ...f,
-        automated_name: false
-      }));
+      setFormData({
+        name: '',
+        category: '',
+        company: '',
+        treatment: 'None',
+        cost_price: 0,
+        selling_price: 0,
+        quantity: 1,
+        description: ''
+      });
     }
-  }, [form.category, form.index, form.treatment, form.company, form.gamma, form.stock_status, autoName]);
+  }, [product, open]);
 
-  // Update autoName state when form.automated_name changes from external source
-  useEffect(() => {
-    setAutoName(form.automated_name ?? true);
-  }, [form.automated_name]);
-
-  // Determine which extra fields should show
-  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "");
-
-  // Image handling (upload to Supabase Storage or base64 preview instead for now)
-  const handleImageUpload = async () => {
-    if (!imageFile) return "";
-    setUploading(true);
-    // Use Supabase Storage if available. For now, base64 preview:
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setUploading(false);
-        resolve(reader.result as string);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(imageFile);
-    });
-  };
-
-  const onFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate required fields
-    if (!form.name.trim()) {
+  const handleAddCompany = async () => {
+    if (!newCompanyName.trim()) {
+      toast.error("Please enter a company name");
       return;
     }
 
-    let imageUrl = form.image;
-    if (imageFile) {
-      imageUrl = await handleImageUpload();
-    }
-
-    // Ensure proper data types and clean up the form data
-    const submissionData = {
-      name: form.name.trim(),
-      price: Number(form.price) || 0,
-      cost_ttc: Number(form.cost_ttc) || 0,
-      stock: form.stock_status === 'inStock' ? (Number(form.stock) || 0) : undefined,
-      stock_status: form.stock_status,
-      category: form.category || undefined,
-      index: form.index || undefined,
-      treatment: form.treatment || undefined,
-      company: form.company || undefined,
-      gamma: form.gamma || undefined,
-      automated_name: autoName,
-      image: imageUrl || undefined
-    };
-
-    console.log('Submitting form data:', submissionData); // Debug log
-    onSubmit(submissionData);
-  };
-
-  const handleAutoNameToggle = (checked: boolean) => {
-    setAutoName(checked);
-    // If turning off auto-naming, keep the current name but allow editing
-    if (!checked) {
-      setForm(f => ({
-        ...f,
-        automated_name: false
-      }));
-    }
-  };
-
-  const selectedCategory = CATEGORY_OPTIONS.find(cat => cat.value === form.category);
-  const IconComponent = selectedCategory?.icon || Package;
-
-  const handleAddCompany = async () => {
-    if (!newCompanyName.trim()) return;
-    
     const result = await addCompany(newCompanyName.trim());
     if (result.success) {
-      setForm(f => ({ ...f, company: newCompanyName.trim() }));
+      setFormData({ ...formData, company: newCompanyName.trim() });
       setNewCompanyName("");
       setShowAddCompany(false);
+      toast.success("Company added successfully");
+    } else {
+      toast.error(result.error || "Failed to add company");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const productData = {
+        name: formData.name,
+        category: formData.category,
+        company: formData.company,
+        treatment: formData.treatment,
+        cost_price: formData.cost_price,
+        selling_price: formData.selling_price,
+        quantity: formData.quantity,
+        description: formData.description || null,
+      };
+
+      if (product?.id) {
+        const { error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', product.id);
+
+        if (error) throw error;
+        toast.success("Product updated successfully");
+      } else {
+        const { error } = await supabase
+          .from('products')
+          .insert([productData]);
+
+        if (error) throw error;
+        toast.success("Product added successfully");
+      }
+
+      onSuccess?.();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      toast.error("Failed to save product");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-      <DialogHeader className="space-y-2 pb-4 border-b">
-        <DialogTitle className="text-2xl font-semibold text-gray-900">
-          {initialValues.name ? t('editProduct') : t('addProduct')}
-        </DialogTitle>
-      </DialogHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+        </DialogHeader>
 
-      <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
-        {/* Auto Name Generation */}
-        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-          <Checkbox
-            checked={autoName}
-            onCheckedChange={handleAutoNameToggle}
-            id="auto-name"
-            className="border-gray-400"
-          />
-          <Label htmlFor="auto-name" className="cursor-pointer font-medium text-gray-700">
-            {t('generateNameAuto')}
-          </Label>
-          {autoName && (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {t('auto')}
-            </Badge>
-          )}
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Product Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Product Classification */}
-          <div className="space-y-4">
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <Tag className="h-4 w-4" />
-                  {t('productClassification') || 'Product Classification'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Category */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('category')}
-                  </Label>
-                  <Select
-                    value={form.category ?? ""}
-                    onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none_selected">{t('none')}</SelectItem>
-                      {CATEGORY_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {t(opt.labelKey)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Company */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('company')}
-                  </Label>
-                  <div className="space-y-2">
-                    <Select
-                      value={form.company ?? ""}
-                      onValueChange={v => {
-                        if (v === "add_new") {
-                          setShowAddCompany(true);
-                        } else {
-                          setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }));
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectCompany')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none_selected">{t('none')}</SelectItem>
-                        {companies.map(company => (
-                          <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
-                        ))}
-                        <SelectItem value="add_new" className="text-blue-600 font-medium">+ Add New Company</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    {showAddCompany && (
-                      <div className="flex gap-2">
-                        <Input
-                          value={newCompanyName}
-                          onChange={(e) => setNewCompanyName(e.target.value)}
-                          placeholder="Enter company name"
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={handleAddCompany}
-                          disabled={!newCompanyName.trim()}
-                        >
-                          Add
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setShowAddCompany(false);
-                            setNewCompanyName("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Gamma */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('gamma')}
-                  </Label>
-                  <Input
-                    value={form.gamma ?? ""}
-                    onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
-                    placeholder={t('enterGamma')}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            
-
-            {/* Lens Specifications - Only for lenses */}
-            {showIndexTreatment && (
-              <Card className="border-gray-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                    <Eye className="h-4 w-4" />
-                    {t('lensSpecifications') || 'Lens Specifications'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('index')}
-                    </Label>
-                    <Select
-                      value={form.index ?? ""}
-                      onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectIndex')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none_selected">{t('none')}</SelectItem>
-                        {INDEX_OPTIONS.map(opt => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('treatment')}
-                    </Label>
-                    <Select
-                      value={form.treatment ?? ""}
-                      onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectTreatment')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none_selected">{t('none')}</SelectItem>
-                        {TREATMENT_OPTIONS.map(opt => (
-                          <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <div>
+              <Label htmlFor="category">Category *</Label>
+              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_OPTIONS.map(option => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Right Column - Pricing & Details */}
-          <div className="space-y-4">
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <DollarSign className="h-4 w-4" />
-                  {t('pricingFinancial') || 'Pricing & Financial'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('price')} (DH)
-                  </Label>
-                  <Input
-                    type="number"
-                    value={form.price}
-                    onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
-                    min={0}
-                    required
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('costTTC')} (DH)
-                  </Label>
-                  <Input
-                    type="number"
-                    value={form.cost_ttc ?? 0}
-                    onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
-                    min={0}
-                    placeholder="0.00"
-                  />
-                </div>
-
-                {/* Profit Margin Display */}
-                {form.price > 0 && (form.cost_ttc ?? 0) > 0 && (
-                  <div className="p-3 bg-gray-50 rounded border">
-                    <div className="flex justify-between text-sm">
-                      <span>{t('profitMargin') || 'Profit Margin'}:</span>
-                      <span className="font-semibold">
-                        {(((form.price - (form.cost_ttc ?? 0)) / form.price) * 100).toFixed(1)}%
-                      </span>
-                    </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="company">Company *</Label>
+              <div className="space-y-2">
+                <Select value={formData.company} onValueChange={(value) => setFormData({ ...formData, company: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allCompanies.map(option => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowAddCompany(!showAddCompany)}
+                  className="w-full"
+                >
+                  {showAddCompany ? "Cancel" : "Add New Company"}
+                </Button>
+                {showAddCompany && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Company name"
+                      value={newCompanyName}
+                      onChange={(e) => setNewCompanyName(e.target.value)}
+                    />
+                    <Button type="button" onClick={handleAddCompany} size="sm">
+                      Add
+                    </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Save Button positioned between cards */}
-            <div className="relative flex justify-center -my-2">
-              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
-                <Button
-                  type="submit"
-                  form="product-form"
-                  disabled={disabled || uploading}
-                  className="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                  size="sm"
-                >
-                  <Save className="h-6 w-6" />
-                </Button>
               </div>
             </div>
 
-            {/* Product Name */}
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <Package className="h-4 w-4" />
-                  {t('productDetails') || 'Product Details'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('productName')}
-                  </Label>
-                  <Input
-                    value={form.name}
-                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    disabled={autoName}
-                    required
-                    placeholder={autoName ? t('autoGenerated') || 'Auto-generated' : t('enterProductName') || 'Enter product name'}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('stockStatus')}
-                  </Label>
-                  <Select
-                    value={form.stock_status}
-                    onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectStockStatus')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Order">{t('order')}</SelectItem>
-                      <SelectItem value="inStock">{t('inStock')}</SelectItem>
-                      <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
-                      <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {form.stock_status === 'inStock' && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('stock')} {t('quantity') || 'Quantity'}
-                    </Label>
-                    <Input
-                      type="number"
-                      value={form.stock ?? 0}
-                      onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
-                      min={0}
-                      placeholder="0"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('image')}
-                  </Label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        setImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  {form.image && typeof form.image === "string" && (
-                    <img 
-                      src={form.image} 
-                      alt="product preview" 
-                      className="w-24 h-24 object-cover rounded border" 
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <div>
+              <Label htmlFor="treatment">Treatment</Label>
+              <Select value={formData.treatment} onValueChange={(value) => setFormData({ ...formData, treatment: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select treatment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TREATMENT_OPTIONS.map(option => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        
-      </form>
-    </DialogContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="cost_price">Cost Price *</Label>
+              <Input
+                id="cost_price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.cost_price}
+                onChange={(e) => setFormData({ ...formData, cost_price: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="selling_price">Selling Price *</Label>
+              <Input
+                id="selling_price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.selling_price}
+                onChange={(e) => setFormData({ ...formData, selling_price: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="quantity">Quantity *</Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="0"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Optional product description..."
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : (product ? 'Update Product' : 'Add Product')}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default ProductForm;
+}
