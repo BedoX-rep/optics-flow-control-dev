@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { supabase } from '../integrations/supabase/client';
-import { useAuthContext } from './AuthProvider';
+import { useAuth } from './AuthProvider';
 import { Company } from '../integrations/supabase/types';
 import { DEFAULT_COMPANIES } from './products/CompanyCellEditor';
 
@@ -17,7 +17,7 @@ interface ProductFormProps {
 }
 
 const ProductForm = ({ onSubmit, initialData, isEditing = false }: ProductFormProps) => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [userCompanies, setUserCompanies] = useState<Company[]>([]);
   const [formData, setFormData] = useState({
     name: '',
