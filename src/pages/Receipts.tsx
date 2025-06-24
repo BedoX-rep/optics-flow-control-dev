@@ -136,6 +136,14 @@ const ReceiptCard = ({
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
                       {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                     </Badge>
+                    {(() => {
+                      const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
+                      return itemsWithoutCost > 0 ? (
+                        <Badge variant="destructive" className="text-xs bg-orange-100 text-orange-700 border-orange-200">
+                          {itemsWithoutCost} {t('noCost')}
+                        </Badge>
+                      ) : null;
+                    })()}
                     <div className="flex items-center gap-1">
                       <div className={cn("w-2 h-2 rounded-full",
                         receipt.call_status === 'Called' ? "bg-green-500" :
