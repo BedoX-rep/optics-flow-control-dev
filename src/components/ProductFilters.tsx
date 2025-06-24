@@ -1,8 +1,8 @@
-
 import React from "react";
 import { Filter, Glasses, Album, Building2, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
   "Single Vision Lenses",

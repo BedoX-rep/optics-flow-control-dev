@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2, Save } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { useLanguage } from './LanguageProvider';
+import { useCompanies } from '@/hooks/useCompanies';
 
 interface Product {
   id: string;
@@ -54,7 +55,7 @@ const TREATMENT_OPTIONS = [
   { value: "UV protection", labelKey: "uvProtection" },
   { value: "Tint", labelKey: "tint" }
 ];
-const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
+
 
 const ProductCard = React.memo<ProductCardProps>(({ 
   product, 
@@ -65,6 +66,7 @@ const ProductCard = React.memo<ProductCardProps>(({
   isSubmitting 
 }) => {
   const { t } = useLanguage();
+  const { companies } = useCompanies();
   return (
     <Card 
       className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
@@ -167,8 +169,8 @@ const ProductCard = React.memo<ProductCardProps>(({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{t('none')}</SelectItem>
-                  {COMPANY_OPTIONS.map(option => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  {companies.map(company => (
+                    <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -249,20 +251,7 @@ const ProductCard = React.memo<ProductCardProps>(({
             )}
           </div>
 
-          {/* Auto Toggle - Always visible at bottom */}
-          <div className="mt-2 pt-2 border-t border-gray-100">
-            <div className="flex items-center justify-between">
-              <label className="text-xs text-gray-600 font-medium">{t('generateNameAuto')}</label>
-              <div className="flex items-center">
-                <Switch
-                  checked={product.automated_name}
-                  onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
-                  className="scale-75"
-                />
-                <span className="text-xs text-gray-500 ml-1">{product.automated_name ? t('on') || 'ON' : t('off') || 'OFF'}</span>
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">

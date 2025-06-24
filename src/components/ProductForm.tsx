@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
+import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
   { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
@@ -43,13 +44,7 @@ const TREATMENT_OPTIONS = [
   { value: "Tint", labelKey: "tint" }
 ];
 
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
+
 
 const GAMMA_OPTIONS = [
   "Standard",
@@ -88,6 +83,7 @@ const getCategoryAbbr = (category: string | undefined) => {
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
   const { t } = useLanguage();
+  const { companies, addCompany } = useCompanies();
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
@@ -98,6 +94,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const [autoName, setAutoName] = useState<boolean>(initialValues.automated_name ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [showAddCompany, setShowAddCompany] = useState(false);
 
   // Auto-generate name if toggled on and any relevant field changes
   useEffect(() => {
@@ -202,6 +200,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   const selectedCategory = CATEGORY_OPTIONS.find(cat => cat.value === form.category);
   const IconComponent = selectedCategory?.icon || Package;
 
+  const handleAddCompany = async () => {
+    if (!newCompanyName.trim()) return;
+    
+    const result = await addCompany(newCompanyName.trim());
+    if (result.success) {
+      setForm(f => ({ ...f, company: newCompanyName.trim() }));
+      setNewCompanyName("");
+      setShowAddCompany(false);
+    }
+  };
+
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
       <DialogHeader className="space-y-2 pb-4 border-b">
@@ -269,20 +278,59 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
                   <Label className="text-sm font-medium text-gray-700">
                     {t('company')}
                   </Label>
-                  <Select
-                    value={form.company ?? ""}
-                    onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectCompany')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none_selected">{t('none')}</SelectItem>
-                      {COMPANY_OPTIONS.map(opt => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Select
+                      value={form.company ?? ""}
+                      onValueChange={v => {
+                        if (v === "add_new") {
+                          setShowAddCompany(true);
+                        } else {
+                          setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectCompany')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {companies.map(company => (
+                          <SelectItem key={company.id} value={company.name}>{company.name}</SelectItem>
+                        ))}
+                        <SelectItem value="add_new" className="text-blue-600 font-medium">+ Add New Company</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {showAddCompany && (
+                      <div className="flex gap-2">
+                        <Input
+                          value={newCompanyName}
+                          onChange={(e) => setNewCompanyName(e.target.value)}
+                          placeholder="Enter company name"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleAddCompany}
+                          disabled={!newCompanyName.trim()}
+                        >
+                          Add
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowAddCompany(false);
+                            setNewCompanyName("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Gamma */}
