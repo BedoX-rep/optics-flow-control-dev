@@ -750,6 +750,18 @@ const productTranslations: Translations = {
     en: 'Balance:',
     fr: 'Solde:'
   },
+  managePersonalPreferences: {
+    en: 'Manage your personal preferences and settings',
+    fr: 'Gérez vos préférences personnelles et paramètres'
+  },
+  saving: {
+    en: 'Saving...',
+    fr: 'Enregistrement...'
+  },
+  saveChanges: {
+    en: 'Save Changes',
+    fr: 'Enregistrer les Modifications'
+  },
   item: {
     en: 'Item',
     fr: 'Article'
@@ -783,9 +795,37 @@ const productTranslations: Translations = {
     en: 'Total Products Cost',
     fr: 'Coût Total des Produits'
   },
+  totalAdditionalCosts: {
+    en: 'Total Additional Costs',
+    fr: 'Coûts Supplémentaires Totaux'
+  },
+  additionalCosts: {
+    en: 'Additional Costs',
+    fr: 'Coûts Supplémentaires'
+  },
+  montageCosts: {
+    en: 'Additional Costs',
+    fr: 'Coûts Supplémentaires'
+  },
+  personalisation: {
+    en: 'Personalisation',
+    fr: 'Personnalisation'
+  },
+  autoAdditionalCosts: {
+    en: 'Automatic Additional Costs',
+    fr: 'Coûts Supplémentaires Automatiques'
+  },
+  autoAdditionalCostsDesc: {
+    en: 'Enable automatic calculation of additional costs based on order type',
+    fr: 'Activer le calcul automatique des coûts supplémentaires selon le type de commande'
+  },
+  settingsUpdated: {
+    en: 'Settings Updated',
+    fr: 'Paramètres Mis à Jour'
+  },
   totalMontageCosts: {
-    en: 'Total Montage Costs',
-    fr: 'Coûts Totaux de Montage'
+    en: 'Total Additional Costs',
+    fr: 'Coûts Supplémentaires Totaux Montage'
   },
   totalCosts: {
     en: 'Total Costs',

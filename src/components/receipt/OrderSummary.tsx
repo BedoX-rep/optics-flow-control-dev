@@ -70,7 +70,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <span className="font-medium">{totalCost.toFixed(2)} DH</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">{translate('montageCosts')}</span>
+            <span className="text-gray-600">{translate('additionalCosts')}</span>
             <span className="font-medium">{montageCosts.toFixed(2)} DH</span>
           </div>
           <div className="flex justify-between text-sm font-medium">

@@ -17,8 +17,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthProvider';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { Home, Package, Receipt, DollarSign, ShoppingCart, CreditCard, Menu, Search, Settings } from 'lucide-react';
+import { Home, Package, Receipt, DollarSign, ShoppingCart, CreditCard, Menu, Search, Settings, Building } from 'lucide-react';
 import LanguageToggle from './LanguageToggle';
+import OpticianSettings from '@/pages/OpticianSettings';
+import Personalisation from '@/pages/Personalisation';
+import {
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
+import { useTranslation } from 'react-i18next';
+import SidebarMenuButton from './SidebarMenuButton';
+import SidebarMenuItem from './SidebarMenuItem';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,6 +41,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [adminAccessDialogOpen, setAdminAccessDialogOpen] = useState(false);
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
+  const { t: translate } = useTranslation();
 
   const copyReferralCode = () => {
     if (subscription?.referral_code) {
@@ -160,6 +171,10 @@ const Layout = ({ children }: LayoutProps) => {
         </header>
         <main className="flex-1 overflow-y-auto">
           <div className="h-full animate-fade-in">
+            <Routes>
+              <Route path="/optician-settings" element={<OpticianSettings />} />
+              <Route path="/personalisation" element={<Personalisation />} />
+            </Routes>
             {children}
           </div>
         </main>
