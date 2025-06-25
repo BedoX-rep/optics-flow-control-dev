@@ -35,8 +35,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const { translate } = useLanguage();
 
   return (
-    <div className="flex-1 bg-gray-50/50 rounded-lg p-6 space-y-4">
-      <h3 className="font-semibold text-xl text-gray-900">{translate('orderSummary')}</h3>
+    <div className="flex-1 bg-gray-50/50 rounded-lg p-4 md:p-6 space-y-4">
+      <h3 className="font-semibold text-lg md:text-xl text-gray-900">{translate('orderSummary')}</h3>
       <div className="space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">{translate('subtotal')}</span>
@@ -51,7 +51,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         )}
 
         {(discount > 0 || numericDiscount > 0) && (
-          <div className="flex justify-between text-sm">
+          <div className="flex flex-col md:flex-row md:justify-between text-sm gap-1 md:gap-0">
             <span className="text-gray-600">{translate('discount')} ({discount}% + {numericDiscount} DH)</span>
             <span className="font-medium text-red-600">-{totalDiscount.toFixed(2)} DH</span>
           </div>
@@ -60,7 +60,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="pt-3 border-t">
           <div className="flex justify-between">
             <span className="font-medium">{translate('total')}</span>
-            <span className="font-semibold text-lg text-blue-900">{total.toFixed(2)} DH</span>
+            <span className="font-semibold text-lg md:text-xl text-blue-900">{total.toFixed(2)} DH</span>
           </div>
         </div>
 
@@ -90,7 +90,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="font-medium">{translate('balanceDue')}</span>
-            <span className="font-semibold text-lg">{balance.toFixed(2)} DH</span>
+            <span className="font-semibold text-lg md:text-xl">{balance.toFixed(2)} DH</span>
           </div>
         </div>
       </div>

@@ -950,8 +950,8 @@ const NewReceipt = () => {
               {t('paymentDetails')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex gap-8">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
               <OrderSummary
                 subtotal={subtotal}
                 tax={tax}
