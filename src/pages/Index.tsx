@@ -86,8 +86,8 @@ const IndexPage = () => {
       <div className="w-full min-h-screen md:h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white relative">
         <header className="container mx-auto py-4 px-4 md:px-6 lg:px-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
+            <div className="flex items-center justify-start w-full">
+              <h1 className="text-3xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
             </div>
 
             {/* Desktop Navigation */}
@@ -296,11 +296,11 @@ const IndexPage = () => {
             <div className={`relative order-1 ${direction === 'rtl' ? 'md:order-1' : 'md:order-2'} md:scale-[1.32] mt-8 md:mt-0 md:translate-x-8`}>
               <div className="rounded-xl overflow-hidden shadow-2xl transform -rotate-6">
                 <img 
-                  src="/lovable-uploads/2e06dd1e-f886-4184-8b53-def6765f32d3.png" 
+                  src="/lovable-uploads/1ee9153a-e7e1-41c4-b82e-f1e5f3fffc11.png" 
                   alt="Lensly software interface" 
                   className="w-full h-auto"
                 />
-              </div>
+              </div></div>
               <div className="absolute -z-10 -bottom-6 -right-6 w-32 h-32 md:w-64 md:h-64 bg-primary/10 rounded-full"></div>
               <div className="absolute -z-10 -top-6 -left-6 w-24 h-24 md:w-48 md:h-48 bg-primary/10 rounded-full"></div>
             </div>
