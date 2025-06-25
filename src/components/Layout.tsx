@@ -84,94 +84,189 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
       <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-20 lg:ml-64'}`}>
-        <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div>
-              <h2 className="text-lg font-medium text-gray-800">
-                Welcome back, {user?.email?.split('@')[0] || 'User'}
-              </h2>
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-gray-500">{currentDate}</p>
-                <Badge 
-                  variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
-                  className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
-                >
-                  {sessionRole}
-                </Badge>
+        {/* Desktop Header */}
+        {!isMobile && (
+          <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div>
+                <h2 className="text-lg font-medium text-gray-800">
+                  Welcome back, {user?.email?.split('@')[0] || 'User'}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-500">{currentDate}</p>
+                  <Badge 
+                    variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
+                    className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+                  >
+                    {sessionRole}
+                  </Badge>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            {/* Left side controls */}
-            <div className="flex items-center space-x-2">
-              {sessionRole === 'Store Staff' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAdminAccessDialogOpen(true)}
-                  className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-3 py-1.5 text-xs font-medium"
-                >
-                  <Shield className="h-3 w-3 mr-1" />
-                  Access as Admin
-                </Button>
-              )}
-              <LanguageToggle />
-            </div>
-
-            {/* Right side controls */}
             <div className="flex items-center space-x-3">
-              {sessionRole === 'Admin' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    exitAdminSession();
-                    toast({
-                      title: "Session Updated",
-                      description: "You are now signed out of the admin session",
-                    });
-                    // Small delay to ensure state updates, then refresh
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 100);
-                  }}
-                  className="text-xs text-red-600 border-red-300 hover:bg-red-50"
-                >
-                  Exit Admin Session
-                </Button>
-              )}
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setReferralDialogOpen(true)}
-                title="Your referral code"
-              >
-                <Users className="h-5 w-5" />
-              </Button>
-
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <span>Account</span>
-                    <ChevronDown size={16} />
+              {/* Left side controls */}
+              <div className="flex items-center space-x-2">
+                {sessionRole === 'Store Staff' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAdminAccessDialogOpen(true)}
+                    className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-3 py-1.5 text-xs font-medium"
+                  >
+                    <Shield className="h-3 w-3 mr-1" />
+                    Access as Admin
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={signOut} className="cursor-pointer">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    <span>Sign out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                )}
+                <LanguageToggle />
+              </div>
+
+              {/* Right side controls */}
+              <div className="flex items-center space-x-3">
+                {sessionRole === 'Admin' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      exitAdminSession();
+                      toast({
+                        title: "Session Updated",
+                        description: "You are now signed out of the admin session",
+                      });
+                      // Small delay to ensure state updates, then refresh
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 100);
+                    }}
+                    className="text-xs text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    Exit Admin Session
+                  </Button>
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setReferralDialogOpen(true)}
+                  title="Your referral code"
+                >
+                  <Users className="h-5 w-5" />
+                </Button>
+
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                      <span>Account</span>
+                      <ChevronDown size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Sign out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
+
+        {/* Mobile Header */}
+        {isMobile && (
+          <header className="bg-white shadow-sm px-4 py-3">
+            <div className="flex flex-col space-y-3">
+              {/* Welcome Message */}
+              <div>
+                <h2 className="text-base font-medium text-gray-800">
+                  Welcome back, {user?.email?.split('@')[0] || 'User'}
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-gray-500">{currentDate}</p>
+                  <Badge 
+                    variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
+                    className={`text-xs ${sessionRole === 'Admin' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}
+                  >
+                    {sessionRole}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Mobile Controls */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {sessionRole === 'Store Staff' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAdminAccessDialogOpen(true)}
+                      className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-2 py-1 text-xs font-medium"
+                    >
+                      <Shield className="h-3 w-3 mr-1" />
+                      Admin
+                    </Button>
+                  )}
+                  <LanguageToggle />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {sessionRole === 'Admin' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        exitAdminSession();
+                        toast({
+                          title: "Session Updated",
+                          description: "You are now signed out of the admin session",
+                        });
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 100);
+                      }}
+                      className="text-xs text-red-600 border-red-300 hover:bg-red-50 px-2 py-1"
+                    >
+                      Exit Admin
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReferralDialogOpen(true)}
+                    title="Your referral code"
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
+
+                  <Button variant="ghost" size="sm" className="relative">
+                    <Bell className="h-4 w-4" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        <ChevronDown size={14} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-36">
+                      <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        <span>Sign out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+          </header>
+        )}
         <main className="flex-1 overflow-y-auto">
           <div className="h-full animate-fade-in">
             <Routes>
