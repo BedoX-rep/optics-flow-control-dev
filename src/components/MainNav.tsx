@@ -17,7 +17,6 @@ import {
   ChevronDown,
   ChevronUp,
   Menu,
-  FileInvoice,
   Palette
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
@@ -32,7 +31,7 @@ const getNavigation = (t: any) => [
   { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
   { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
   { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
-  { name: t('invoices'), href: '/invoices', icon: FileInvoice, permission: 'can_manage_invoices' },
+  { name: t('invoices'), href: '/invoices', icon: FileText, permission: 'can_manage_invoices' },
   { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
   { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
 ];
