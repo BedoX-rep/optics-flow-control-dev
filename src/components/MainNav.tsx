@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard,
+import { cn } from '@/lib/utils';
+import {
+  LayoutDashboard,
   Package,
   Users,
   Receipt,
@@ -13,15 +15,11 @@ import { LayoutDashboard,
   Shield,
   Settings,
   ChevronDown,
-  ChevronUp, X
+  ChevronUp
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
 import { Avatar } from '@/components/ui/avatar';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const getNavigation = (t: any) => [
   { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
@@ -47,8 +45,6 @@ const MainNav = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const [administrationOpen, setAdministrationOpen] = useState(false);
-  const isMobile = useIsMobile();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Regenerate navigation items when language changes
   const navigation = useMemo(() => getNavigation(t), [t, language]);
@@ -114,112 +110,8 @@ const MainNav = () => {
     return filteredAdministrationNavigation.some(item => location.pathname === item.href);
   }, [filteredAdministrationNavigation, location.pathname]);
 
-  // Mobile Sidebar Component
-  const MobileSidebar = () => (
-    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="fixed top-4 left-4 z-50 lg:hidden bg-gray-900/80 backdrop-blur-sm text-white hover:bg-gray-800/80"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0 bg-gradient-to-b from-gray-900 to-gray-800 text-white border-gray-700">
-        <div className="p-4 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <LayoutDashboard className="h-8 w-8 text-blue-400" />
-            <div>
-              <h1 className="text-xl font-bold">Lensly</h1>
-              <p className="text-xs text-gray-300">{t('opticalStore')}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-3 space-y-1 mt-2">
-          {filteredNavigation.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all group",
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/70 hover:bg-white/5 hover:text-white"
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    "flex-shrink-0 h-5 w-5 mr-3",
-                    isActive ? "text-white" : "text-white/70 group-hover:text-white"
-                  )}
-                />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
-
-          {filteredAdministrationNavigation.length > 0 && (
-            <>
-              <div className="pt-4 pb-2">
-                <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                  {t('administration')}
-                </div>
-              </div>
-              {filteredAdministrationNavigation.map((item) => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all group",
-                      isActive
-                        ? "bg-white/10 text-white"
-                        : "text-white/70 hover:bg-white/5 hover:text-white"
-                    )}
-                  >
-                    <item.icon
-                      className={cn(
-                        "flex-shrink-0 h-5 w-5 mr-3",
-                        isActive ? "text-white" : "text-white/70 group-hover:text-white"
-                      )}
-                    />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-            </>
-          )}
-        </div>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="p-3 bg-white/5 rounded-lg">
-            <p className="text-xs text-gray-300 text-center">
-              {user?.email?.split('@')[0] || 'User'}
-            </p>
-            <p className="text-xs text-gray-400 text-center mt-1">
-              {sessionRole}
-            </p>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-
-  // Return mobile sidebar for mobile devices
-  if (isMobile) {
-    return <MobileSidebar />;
-  }
-
-  // Desktop sidebar (unchanged)
   return (
-    <div
+    <div 
       className={cn(
         "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
         collapsed ? "w-20" : "w-64"
@@ -234,7 +126,7 @@ const MainNav = () => {
             <h2 className="text-xl font-bold text-white">L</h2>
           )}
         </div>
-        <button
+        <button 
           onClick={toggleSidebar}
           className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-teal-600/20"
         >
@@ -328,7 +220,7 @@ const MainNav = () => {
         )}
       </nav>
 
-
+      
     </div>
   );
 };
