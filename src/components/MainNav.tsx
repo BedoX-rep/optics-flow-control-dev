@@ -43,7 +43,7 @@ const MainNav = () => {
   const { user, subscription, permissions, sessionRole } = useAuth();
   const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(true); // Always collapsed by default
+  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const [administrationOpen, setAdministrationOpen] = useState(false);
 
   // Regenerate navigation items when language changes
@@ -52,14 +52,10 @@ const MainNav = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      // On mobile, always keep collapsed. On desktop, allow expansion
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      }
+      setCollapsed(window.innerWidth < 768);
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -117,38 +113,28 @@ const MainNav = () => {
   return (
     <div 
       className={cn(
-        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40 flex flex-col",
-        collapsed ? "w-16 md:w-20" : "w-64"
+        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
+        collapsed ? "w-20" : "w-64"
       )}
     >
-      <div className="p-2 md:p-4 flex items-center justify-between border-b border-teal-600/20 flex-shrink-0">
+      <div className="p-4 flex items-center justify-between border-b border-teal-600/20">
         <div className={cn("flex items-center", collapsed && "justify-center w-full")}>
           {!collapsed && (
-            <h2 className="text-lg md:text-xl font-bold text-white">Lensly</h2>
+            <h2 className="text-xl font-bold text-white">Lensly</h2>
           )}
           {collapsed && (
-            <h2 className="text-lg md:text-xl font-bold text-white">L</h2>
+            <h2 className="text-xl font-bold text-white">L</h2>
           )}
         </div>
-        {!collapsed && (
-          <button 
-            onClick={toggleSidebar}
-            className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-teal-600/20 hidden md:block"
-          >
-            <ChevronLeft size={18} />
-          </button>
-        )}
-        {collapsed && window.innerWidth >= 768 && (
-          <button 
-            onClick={toggleSidebar}
-            className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-teal-600/20"
-          >
-            <ChevronRight size={18} />
-          </button>
-        )}
+        <button 
+          onClick={toggleSidebar}
+          className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-teal-600/20"
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
-      <nav className="p-2 md:p-3 space-y-1 mt-1 md:mt-2 flex-1 overflow-y-auto">
+      <nav className="p-3 space-y-1 mt-2">
         {filteredNavigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (
@@ -156,21 +142,19 @@ const MainNav = () => {
               key={item.name}
               to={item.href}
               className={cn(
-                "flex items-center px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm font-medium rounded-lg transition-all group relative",
+                "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
                 isActive
                   ? "bg-white/10 text-white"
-                  : "text-white/70 hover:bg-white/5 hover:text-white",
-                collapsed && "justify-center"
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
               )}
-              title={collapsed ? item.name : undefined}
             >
               <item.icon
                 className={cn(
-                  "flex-shrink-0 h-4 w-4 md:h-5 md:w-5",
+                  "flex-shrink-0 h-5 w-5",
                   isActive ? "text-white" : "text-white/70 group-hover:text-white"
                 )}
               />
-              {!collapsed && <span className="ml-2 md:ml-3 truncate">{item.name}</span>}
+              {!collapsed && <span className="ml-3">{item.name}</span>}
             </Link>
           );
         })}
@@ -179,36 +163,34 @@ const MainNav = () => {
         {filteredAdministrationNavigation.length > 0 && (
           <div className="space-y-1">
             <button
-              onClick={collapsed ? undefined : toggleAdministration}
+              onClick={toggleAdministration}
               className={cn(
-                "w-full flex items-center px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm font-medium rounded-lg transition-all group",
+                "w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
                 isAdministrationActive
                   ? "bg-white/10 text-white"
-                  : "text-white/70 hover:bg-white/5 hover:text-white",
-                collapsed && "justify-center"
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
               )}
-              title={collapsed ? t('administration') : undefined}
             >
               <Settings
                 className={cn(
-                  "flex-shrink-0 h-4 w-4 md:h-5 md:w-5",
+                  "flex-shrink-0 h-5 w-5",
                   isAdministrationActive ? "text-white" : "text-white/70 group-hover:text-white"
                 )}
               />
               {!collapsed && (
                 <>
-                  <span className="ml-2 md:ml-3 flex-1 text-left truncate">{t('administration')}</span>
+                  <span className="ml-3 flex-1 text-left">{t('administration')}</span>
                   {administrationOpen ? (
-                    <ChevronUp className="h-3 w-3 md:h-4 md:w-4" />
+                    <ChevronUp className="h-4 w-4" />
                   ) : (
-                    <ChevronDown className="h-3 w-3 md:h-4 md:w-4" />
+                    <ChevronDown className="h-4 w-4" />
                   )}
                 </>
               )}
             </button>
 
             {!collapsed && administrationOpen && (
-              <div className="ml-4 md:ml-8 space-y-1">
+              <div className="ml-8 space-y-1">
                 {filteredAdministrationNavigation.map((item) => {
                   const isActive = location.pathname === item.href;
                   return (
@@ -216,7 +198,7 @@ const MainNav = () => {
                       key={item.name}
                       to={item.href}
                       className={cn(
-                        "flex items-center px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-all group",
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all group",
                         isActive
                           ? "bg-white/10 text-white"
                           : "text-white/70 hover:bg-white/5 hover:text-white"
@@ -224,11 +206,11 @@ const MainNav = () => {
                     >
                       <item.icon
                         className={cn(
-                          "flex-shrink-0 h-3 w-3 md:h-4 md:w-4",
+                          "flex-shrink-0 h-4 w-4",
                           isActive ? "text-white" : "text-white/70 group-hover:text-white"
                         )}
                       />
-                      <span className="ml-2 md:ml-3 truncate">{item.name}</span>
+                      <span className="ml-3">{item.name}</span>
                     </Link>
                   );
                 })}
