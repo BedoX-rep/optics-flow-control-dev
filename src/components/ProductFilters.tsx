@@ -53,7 +53,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         <SelectContent>
           <SelectItem value="all_categories">{t('allCategories')}</SelectItem>
           {CATEGORY_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            <SelectItem key={opt} value={opt}>{t(opt.replace(/\s+/g, '').toLowerCase())}</SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -103,7 +103,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
         <SelectContent>
           <SelectItem value="all_treatments">{t('allTreatments')}</SelectItem>
           {TREATMENT_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            <SelectItem key={opt} value={opt}>{t(opt.toLowerCase())}</SelectItem>
           ))}
         </SelectContent>
       </Select>

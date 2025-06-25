@@ -378,6 +378,72 @@ const productTranslations: Translations = {
     en: 'Stock',
     fr: 'Stock'
   },
+  // Category translations for filters
+  singlevisionlenses: {
+    en: 'Single Vision Lenses',
+    fr: 'Verres de Vision Simple'
+  },
+  progressivelenses: {
+    en: 'Progressive Lenses',
+    fr: 'Verres Progressifs'
+  },
+  frames: {
+    en: 'Frames',
+    fr: 'Montures'
+  },
+  sunglasses: {
+    en: 'Sunglasses',
+    fr: 'Lunettes de Soleil'
+  },
+  contactlenses: {
+    en: 'Contact Lenses',
+    fr: 'Lentilles de Contact'
+  },
+  accessories: {
+    en: 'Accessories',
+    fr: 'Accessoires'
+  },
+  service: {
+    en: 'Service',
+    fr: 'Service'
+  },
+  other: {
+    en: 'Other',
+    fr: 'Autre'
+  },
+  // Treatment translations for filters
+  white: {
+    en: 'White',
+    fr: 'Blanc'
+  },
+  ar: {
+    en: 'AR',
+    fr: 'AR'
+  },
+  blue: {
+    en: 'Blue',
+    fr: 'Bleu'
+  },
+  photochromic: {
+    en: 'Photochromic',
+    fr: 'Photochromique'
+  },
+  polarized: {
+    en: 'Polarized',
+    fr: 'Polarisé'
+  },
+  'uv protection': {
+    en: 'UV Protection',
+    fr: 'Protection UV'
+  },
+  uvprotection: {
+    en: 'UV Protection',
+    fr: 'Protection UV'
+  },
+  tint: {
+    en: 'Tint',
+    fr: 'Teinte'
+  },
   // Index filter options
   allIndexes: {
     en: 'All Indexes',
