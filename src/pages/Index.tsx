@@ -232,9 +232,15 @@ const IndexPage = () => {
         {/* Diagonal cut that spans both sections */}
         <div className="absolute inset-0 z-0">
           <div 
-            className="absolute inset-0 bg-white"
+            className="absolute inset-0 bg-white md:block hidden"
             style={{
               clipPath: 'polygon(0% 95%, 100% 65%, 100% 100%, 0% 100%)'
+            }}
+          />
+          <div 
+            className="absolute inset-0 bg-white md:hidden block"
+            style={{
+              clipPath: 'polygon(0% 85%, 100% 55%, 100% 100%, 0% 100%)'
             }}
           />
         </div>
