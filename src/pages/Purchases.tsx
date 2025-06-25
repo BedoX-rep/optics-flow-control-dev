@@ -413,7 +413,7 @@ const PURCHASE_TYPES = [
     enabled: !!user,
     staleTime: 0, // Ensure fresh data
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   // Calculate purchase linking when purchases and receipts are loaded
