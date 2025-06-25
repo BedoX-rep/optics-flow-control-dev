@@ -31,7 +31,7 @@ const Pricing = () => {
   const pricingPlans = [
     {
       name: t('monthly'),
-      price: "100",
+      price: "150",
       currency: "DH",
       billingCycle: t('monthlySubscription'),
       features: [
@@ -44,7 +44,7 @@ const Pricing = () => {
     },
     {
       name: t('quarterly'),
-      price: "300",
+      price: "400",
       currency: "DH",
       billingCycle: t('quarterlySubscription'),
       savingsText: t('saveVsMonthly'),
@@ -59,7 +59,7 @@ const Pricing = () => {
     },
     {
       name: t('lifetime'),
-      price: "1000",
+      price: "1500",
       currency: "DH",
       billingCycle: t('oneTimePayment'),
       features: [
