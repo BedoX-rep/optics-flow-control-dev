@@ -151,5 +151,24 @@
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
+
+  /* Mobile viewport optimization */
+  @media screen and (max-width: 768px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    
+    body {
+      -webkit-overflow-scrolling: touch;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure products page elements don't cause horizontal scroll */
+    .container {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+  }
 }
 
