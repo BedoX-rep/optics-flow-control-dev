@@ -29,9 +29,9 @@ interface Subscription {
 
 const SUBSCRIPTION_PRICES = {
   Trial: 0,
-  Monthly: 100,
-  Quarterly: 300,
-  Lifetime: 1000
+  Monthly: 150,
+  Quarterly: 400,
+  Lifetime: 1500
 };
 
 const Subscriptions = () => {
@@ -160,11 +160,7 @@ const renderSubscriptionPlans = () => {
                 'hover:shadow-lg hover:border-teal-300'
               }
             `}>
-              {type === 'Quarterly' && (
-                <div className="absolute -left-12 top-6 rotate-[-45deg] bg-teal-500 text-white px-12 py-1 text-sm">
-                  {t('popular')}
-                </div>
-              )}
+              
               {/* Limited Offer Badge */}
               <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
                 {t('limitedOffer')}
@@ -176,7 +172,11 @@ const renderSubscriptionPlans = () => {
               `}>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle className="text-2xl font-bold text-gray-800">{type}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-gray-800">
+                      {type === 'Monthly' ? t('monthly') : 
+                       type === 'Quarterly' ? t('quarterly') : 
+                       type === 'Lifetime' ? t('lifetime') : type}
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {type === 'Lifetime' ? t('oneTimePayment') : 
                        type === 'Monthly' ? t('billedMonthly') : 
