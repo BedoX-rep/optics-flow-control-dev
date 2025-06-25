@@ -55,7 +55,6 @@ const Pricing = () => {
       ],
       buttonText: t('startFreeTrial'),
       buttonVariant: "default" as const,
-      popular: true,
       current: isQuarterlyPlan
     },
     {

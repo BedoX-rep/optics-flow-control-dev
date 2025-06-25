@@ -2176,7 +2176,7 @@ const pricingTranslations: Translations = {
   },
   lifetime: {
     en: 'Lifetime',
-    fr: 'À vie'
+    fr: 'À Vie'
   },
   monthlySubscription: {
     en: 'Monthly subscription',
@@ -4355,7 +4355,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguage] = useState<Language>(() => {
     // Try to get language from localStorage if available
     const savedLanguage = localStorage.getItem('language');
-    return (savedLanguage as Language) || 'en';
+    return (savedLanguage as Language) || 'fr';
   });
 
   useEffect(() => {
