@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -17,7 +16,9 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
-  Menu
+  Menu,
+  FileInvoice,
+  Palette
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
@@ -31,7 +32,7 @@ const getNavigation = (t: any) => [
   { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
   { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
   { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
-  { name: t('invoices'), href: '/invoices', icon: FileText, permission: 'can_manage_invoices' },
+  { name: t('invoices'), href: '/invoices', icon: FileInvoice, permission: 'can_manage_invoices' },
   { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
   { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
 ];
@@ -40,7 +41,7 @@ const getAdministrationNavigation = (t: any) => [
   { name: t('subscriptions'), href: '/subscriptions', icon: Bell, permission: null }, // Always visible
   { name: t('access'), href: '/access', icon: Shield, permission: 'admin_session' },
   { name: t('settings'), href: '/optician-settings', icon: Settings, permission: 'admin_session' },
-  { name: t('personalisation'), href: '/personalisation', icon: Settings, permission: 'admin_session' },
+  { name: t('personalisation'), href: '/personalisation', icon: Palette, permission: 'admin_session' },
 ];
 
 const NavigationContent = ({ 
@@ -251,7 +252,7 @@ const MainNav = () => {
             <div className="p-4 flex items-center border-b border-teal-600/20">
               <h2 className="text-xl font-bold text-white">Lensly</h2>
             </div>
-            
+
             <NavigationContent
               filteredNavigation={filteredNavigation}
               filteredAdministrationNavigation={filteredAdministrationNavigation}

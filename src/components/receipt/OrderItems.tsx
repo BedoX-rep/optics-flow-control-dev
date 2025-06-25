@@ -343,36 +343,12 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               <Button onClick={() => setIsProductFormOpen(true)} variant="outline" size="default" className="border-green-300 text-green-700 hover:bg-green-50">
                 <Package className="h-4 w-4 mr-2" /> {t('newProduct')}
               </Button>
+            </div>
+          </div>
 
-              {/* Manual Additional Costs Override */}
-              <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg border">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-blue-900 whitespace-nowrap">
-                    {t('manualAdditionalCosts')}:
-                  </Label>
-                  <input
-                    type="checkbox"
-                    checked={manualAdditionalCostsEnabled}
-                    onChange={(e) => setManualAdditionalCostsEnabled(e.target.checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                </div>
-                {manualAdditionalCostsEnabled && (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={manualAdditionalCostsAmount}
-                      onChange={(e) => setManualAdditionalCostsAmount(parseFloat(e.target.value) || 0)}
-                      className="w-20 h-8"
-                      placeholder="0.00"
-                    />
-                    <span className="text-sm text-gray-600">DH</span>
-                  </div>
-                )}
-              </div>
-
+          {/* Second row with Order Type and Manual Additional Costs */}
+          <div className="flex flex-wrap items-center gap-4 justify-between">
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('orderType')}:</Label>
                 <Select value={orderType} onValueChange={setOrderType}>
@@ -417,6 +393,35 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                     </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Manual Additional Costs Override */}
+              <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg border">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium text-blue-900 whitespace-nowrap">
+                    {t('manualAdditionalCosts')}:
+                  </Label>
+                  <input
+                    type="checkbox"
+                    checked={manualAdditionalCostsEnabled}
+                    onChange={(e) => setManualAdditionalCostsEnabled(e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                </div>
+                {manualAdditionalCostsEnabled && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={manualAdditionalCostsAmount}
+                      onChange={(e) => setManualAdditionalCostsAmount(parseFloat(e.target.value) || 0)}
+                      className="w-20 h-8"
+                      placeholder="0.00"
+                    />
+                    <span className="text-sm text-gray-600">DH</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
