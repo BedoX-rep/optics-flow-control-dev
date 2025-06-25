@@ -43,7 +43,7 @@ const MainNav = () => {
   const { user, subscription, permissions, sessionRole } = useAuth();
   const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+  const [collapsed, setCollapsed] = useState(true); // Always collapsed by default on mobile
   const [administrationOpen, setAdministrationOpen] = useState(false);
 
   // Regenerate navigation items when language changes
@@ -52,10 +52,15 @@ const MainNav = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setCollapsed(window.innerWidth < 768);
+      // On desktop, auto-expand/collapse based on screen size
+      // On mobile, keep user's preference
+      if (window.innerWidth >= 768) {
+        setCollapsed(false); // Auto-expand on desktop
+      }
     };
 
     window.addEventListener('resize', handleResize);
+    handleResize(); // Call once on mount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -113,7 +118,9 @@ const MainNav = () => {
   return (
     <div 
       className={cn(
-        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
+        "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300",
+        "md:fixed md:top-0 md:left-0 md:z-40", // Fixed positioning only on desktop
+        "relative z-10", // Static positioning on mobile
         collapsed ? "w-20" : "w-64"
       )}
     >
