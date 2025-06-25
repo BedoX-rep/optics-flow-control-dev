@@ -55,26 +55,26 @@ const IndexPage = () => {
       detail: "Track stock levels, set reorder points, manage suppliers, and categorize products for easy searching and management."
     },
     {
-      title: "Simplified Billing",
-      description: "Create and manage receipts, invoices, and track payments efficiently",
+      title: t('simplifiedBilling'),
+      description: t('simplifiedBillingDesc'),
       icon: <Receipt className="h-6 w-6" />,
       detail: "Generate professional receipts, manage payment methods, track outstanding balances, and integrate with common accounting systems."
     },
     {
-      title: "Prescription Management",
-      description: "Easily record and track patient prescriptions and changes over time",
+      title: t('prescriptionManagement'),
+      description: t('prescriptionManagementDesc'),
       icon: <FileText className="h-6 w-6" />,
       detail: "Record detailed prescription data, track changes over time, and quickly retrieve prescription history for returning clients."
     },
     {
-      title: "Statistics",
-      description: "Comprehensive analytics and reporting on your business performance",
+      title: t('statistics'),
+      description: t('statisticsDesc'),
       icon: <ChartBar className="h-6 w-6" />,
       detail: "Monitor sales trends, analyze customer preferences, and generate insightful reports to optimize your business operations."
     },
     {
-      title: "Access Control",
-      description: "Manage user permissions and control access to sensitive data",
+      title: t('accessControl'),
+      description: t('accessControlDesc'),
       icon: <Database className="h-6 w-6" />,
       detail: "Set role-based permissions, secure sensitive client information, and ensure data privacy compliance."
     }
@@ -84,10 +84,10 @@ const IndexPage = () => {
     <div className={`flex flex-col min-h-screen ${direction === 'rtl' ? 'text-right' : 'text-left'}`} dir={direction}>
       {/* Header/Navigation with Gradient Background */}
       <div className="w-full min-h-screen md:h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white relative">
-        <header className="container mx-auto py-4 px-4 md:px-6 lg:px-10">
+        <header className="container mx-auto py-4 px-6 md:px-8 lg:px-12">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
+              <h1 className="text-2xl md:text-3xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
             </div>
 
             {/* Desktop Navigation */}
@@ -168,7 +168,7 @@ const IndexPage = () => {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 top-16 bg-teal-700 z-50 px-4 py-5 shadow-lg animate-in fade-in slide-in-from-top overflow-auto">
+            <div className="md:hidden fixed inset-0 top-16 bg-teal-700 z-50 px-6 py-5 shadow-lg animate-in fade-in slide-in-from-top overflow-auto">
               <div className="flex flex-col space-y-6">
                 <button onClick={() => {
                   navigate("/pricing");
@@ -211,7 +211,7 @@ const IndexPage = () => {
         </header>
 
         {/* Combined Hero and Effortless Section */}
-          <section className="container mx-auto pt-8 pb-[65px] md:py-16 px-4 md:px-6 lg:px-10 text-center relative">
+          <section className="container mx-auto pt-8 pb-[65px] md:py-16 px-6 md:px-8 lg:px-12 text-center relative">
           <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             {t('heroTitle')}
           </h1>
@@ -247,7 +247,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless Section Content */}
-            <section className="pt-0 -mt-[400px] md:-mt-[160px] -pt-8 md:pt-0 px-4 md:px-6 lg:px-10 bg-transparent relative z-10">
+            <section className="pt-0 -mt-[400px] md:-mt-[160px] -pt-8 md:pt-0 px-6 md:px-8 lg:px-12 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-1`}>
@@ -274,19 +274,19 @@ const IndexPage = () => {
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-xs">Simplified Billing - Create and manage receipts, invoices, and track payments efficiently</span>
+                  <span className="text-gray-700 text-xs">{t('simplifiedBilling')} - {t('simplifiedBillingDesc')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-xs">Prescription Management - Easily record and track patient prescriptions and changes over time</span>
+                  <span className="text-gray-700 text-xs">{t('prescriptionManagement')} - {t('prescriptionManagementDesc')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-xs">Statistics - Comprehensive analytics and reporting on your business performance</span>
+                  <span className="text-gray-700 text-xs">{t('statistics')} - {t('statisticsDesc')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
-                  <span className="text-gray-700 text-xs">Access Control - Manage user permissions and control access to sensitive data</span>
+                  <span className="text-gray-700 text-xs">{t('accessControl')} - {t('accessControlDesc')}</span>
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-3 w-3 text-teal-500 mr-2 flex-shrink-0" />
@@ -315,7 +315,7 @@ const IndexPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-10 md:py-20 px-4 md:px-6 lg:px-10 bg-gray-50">
+      <section id="features" className="py-10 md:py-20 px-6 md:px-8 lg:px-12 bg-gray-50">
         <div className="container mx-auto">
           <div className="text-center mb-8 md:mb-16">
             <h2 className="text-2xl md:text-4xl font-bold mb-4">{t('powerfulFeatures')}</h2>
@@ -336,7 +336,7 @@ const IndexPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-10 md:py-20 px-4 md:px-6 lg:px-10 bg-primary text-white">
+      <section className="py-10 md:py-20 px-6 md:px-8 lg:px-12 bg-primary text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t('ctaTitle')}</h2>
           <p className="text-base md:text-xl mb-6 md:mb-10 max-w-2xl mx-auto text-white/90">
@@ -353,7 +353,7 @@ const IndexPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 md:py-12 px-4 md:px-6 lg:px-10">
+      <footer className="bg-gray-900 text-gray-300 py-8 md:py-12 px-6 md:px-8 lg:px-12">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
@@ -378,7 +378,7 @@ const IndexPage = () => {
                 </li>
                 <li className="flex items-center gap-2 text-xs md:text-sm">
                   <Phone className="h-3 w-3 md:h-4 md:w-4" /> 
-                  <span>+1-234-567-8900</span>
+                  <span>0627026249</span>
                 </li>
               </ul>
               {/* Language switcher in footer */}

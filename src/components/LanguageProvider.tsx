@@ -83,6 +83,38 @@ const homeTranslations: Translations = {
     en: 'Manage your frames, lenses, and other products with real-time stock updates',
     fr: 'Gérez vos montures, verres et autres produits avec des mises à jour en temps réel'
   },
+  simplifiedBilling: {
+    en: 'Simplified Billing',
+    fr: 'Facturation Simplifiée'
+  },
+  simplifiedBillingDesc: {
+    en: 'Create and manage receipts, invoices, and track payments efficiently',
+    fr: 'Créez et gérez les reçus, factures et suivez les paiements efficacement'
+  },
+  prescriptionManagement: {
+    en: 'Prescription Management',
+    fr: 'Gestion des Prescriptions'
+  },
+  prescriptionManagementDesc: {
+    en: 'Easily record and track patient prescriptions and changes over time',
+    fr: 'Enregistrez et suivez facilement les prescriptions des patients et leurs modifications dans le temps'
+  },
+  statistics: {
+    en: 'Statistics',
+    fr: 'Statistiques'
+  },
+  statisticsDesc: {
+    en: 'Comprehensive analytics and reporting on your business performance',
+    fr: 'Analyses complètes et rapports sur les performances de votre entreprise'
+  },
+  accessControl: {
+    en: 'Access Control',
+    fr: 'Contrôle d\'Accès'
+  },
+  accessControlDesc: {
+    en: 'Manage user permissions and control access to sensitive data',
+    fr: 'Gérez les autorisations des utilisateurs et contrôlez l\'accès aux données sensibles'
+  },
   ctaTitle: {
     en: 'Join the Leading Optical Management Solution',
     fr: 'Rejoignez la Solution de Gestion Optique de Premier Plan'
