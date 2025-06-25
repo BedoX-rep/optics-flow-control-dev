@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -15,11 +16,14 @@ import {
   Shield,
   Settings,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Menu
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
-import { Avatar } from '@/components/ui/avatar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const getNavigation = (t: any) => [
   { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
@@ -39,12 +43,124 @@ const getAdministrationNavigation = (t: any) => [
   { name: t('personalisation'), href: '/personalisation', icon: Settings, permission: 'admin_session' },
 ];
 
+const NavigationContent = ({ 
+  filteredNavigation, 
+  filteredAdministrationNavigation, 
+  isAdministrationActive,
+  administrationOpen,
+  toggleAdministration,
+  collapsed,
+  location,
+  t,
+  onNavigate 
+}: {
+  filteredNavigation: any[],
+  filteredAdministrationNavigation: any[],
+  isAdministrationActive: boolean,
+  administrationOpen: boolean,
+  toggleAdministration: () => void,
+  collapsed: boolean,
+  location: any,
+  t: any,
+  onNavigate?: () => void
+}) => (
+  <nav className="p-3 space-y-1 mt-2">
+    {filteredNavigation.map((item) => {
+      const isActive = location.pathname === item.href;
+      return (
+        <Link
+          key={item.name}
+          to={item.href}
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
+            isActive
+              ? "bg-white/10 text-white"
+              : "text-white/70 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <item.icon
+            className={cn(
+              "flex-shrink-0 h-5 w-5",
+              isActive ? "text-white" : "text-white/70 group-hover:text-white"
+            )}
+          />
+          {!collapsed && <span className="ml-3">{item.name}</span>}
+        </Link>
+      );
+    })}
+
+    {/* Administration Dropdown */}
+    {filteredAdministrationNavigation.length > 0 && (
+      <div className="space-y-1">
+        <button
+          onClick={toggleAdministration}
+          className={cn(
+            "w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
+            isAdministrationActive
+              ? "bg-white/10 text-white"
+              : "text-white/70 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <Settings
+            className={cn(
+              "flex-shrink-0 h-5 w-5",
+              isAdministrationActive ? "text-white" : "text-white/70 group-hover:text-white"
+            )}
+          />
+          {!collapsed && (
+            <>
+              <span className="ml-3 flex-1 text-left">{t('administration')}</span>
+              {administrationOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </>
+          )}
+        </button>
+
+        {!collapsed && administrationOpen && (
+          <div className="ml-8 space-y-1">
+            {filteredAdministrationNavigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all group",
+                    isActive
+                      ? "bg-white/10 text-white"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      "flex-shrink-0 h-4 w-4",
+                      isActive ? "text-white" : "text-white/70 group-hover:text-white"
+                    )}
+                  />
+                  <span className="ml-3">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    )}
+  </nav>
+);
+
 const MainNav = () => {
   const { user, subscription, permissions, sessionRole } = useAuth();
   const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
+  const isMobile = useIsMobile();
+  const [collapsed, setCollapsed] = useState(false);
   const [administrationOpen, setAdministrationOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Regenerate navigation items when language changes
   const navigation = useMemo(() => getNavigation(t), [t, language]);
@@ -52,12 +168,16 @@ const MainNav = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setCollapsed(window.innerWidth < 768);
+      // Only set collapsed for desktop breakpoint
+      if (!isMobile) {
+        setCollapsed(window.innerWidth < 1024); // lg breakpoint
+      }
     };
 
     window.addEventListener('resize', handleResize);
+    handleResize(); // Set initial state
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isMobile]);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -110,6 +230,46 @@ const MainNav = () => {
     return filteredAdministrationNavigation.some(item => location.pathname === item.href);
   }, [filteredAdministrationNavigation, location.pathname]);
 
+  // Mobile Navigation
+  if (isMobile) {
+    return (
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-4 left-4 z-50 bg-teal-600/80 text-white hover:bg-teal-600 backdrop-blur-sm"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent 
+          side="left" 
+          className="w-80 p-0 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 border-teal-600/20"
+        >
+          <div className="sidebar-gradient min-h-full">
+            <div className="p-4 flex items-center border-b border-teal-600/20">
+              <h2 className="text-xl font-bold text-white">Lensly</h2>
+            </div>
+            
+            <NavigationContent
+              filteredNavigation={filteredNavigation}
+              filteredAdministrationNavigation={filteredAdministrationNavigation}
+              isAdministrationActive={isAdministrationActive}
+              administrationOpen={administrationOpen}
+              toggleAdministration={toggleAdministration}
+              collapsed={false}
+              location={location}
+              t={t}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop Navigation
   return (
     <div 
       className={cn(
@@ -134,93 +294,16 @@ const MainNav = () => {
         </button>
       </div>
 
-      <nav className="p-3 space-y-1 mt-2">
-        {filteredNavigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
-                isActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/70 hover:bg-white/5 hover:text-white"
-              )}
-            >
-              <item.icon
-                className={cn(
-                  "flex-shrink-0 h-5 w-5",
-                  isActive ? "text-white" : "text-white/70 group-hover:text-white"
-                )}
-              />
-              {!collapsed && <span className="ml-3">{item.name}</span>}
-            </Link>
-          );
-        })}
-
-        {/* Administration Dropdown */}
-        {filteredAdministrationNavigation.length > 0 && (
-          <div className="space-y-1">
-            <button
-              onClick={toggleAdministration}
-              className={cn(
-                "w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all group",
-                isAdministrationActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/70 hover:bg-white/5 hover:text-white"
-              )}
-            >
-              <Settings
-                className={cn(
-                  "flex-shrink-0 h-5 w-5",
-                  isAdministrationActive ? "text-white" : "text-white/70 group-hover:text-white"
-                )}
-              />
-              {!collapsed && (
-                <>
-                  <span className="ml-3 flex-1 text-left">{t('administration')}</span>
-                  {administrationOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </>
-              )}
-            </button>
-
-            {!collapsed && administrationOpen && (
-              <div className="ml-8 space-y-1">
-                {filteredAdministrationNavigation.map((item) => {
-                  const isActive = location.pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all group",
-                        isActive
-                          ? "bg-white/10 text-white"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"
-                      )}
-                    >
-                      <item.icon
-                        className={cn(
-                          "flex-shrink-0 h-4 w-4",
-                          isActive ? "text-white" : "text-white/70 group-hover:text-white"
-                        )}
-                      />
-                      <span className="ml-3">{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </nav>
-
-      
+      <NavigationContent
+        filteredNavigation={filteredNavigation}
+        filteredAdministrationNavigation={filteredAdministrationNavigation}
+        isAdministrationActive={isAdministrationActive}
+        administrationOpen={administrationOpen}
+        toggleAdministration={toggleAdministration}
+        collapsed={collapsed}
+        location={location}
+        t={t}
+      />
     </div>
   );
 };

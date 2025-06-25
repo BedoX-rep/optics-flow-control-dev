@@ -30,6 +30,7 @@ import {
 import SidebarMenuButton from './SidebarMenuButton';
 import SidebarMenuItem from './SidebarMenuItem';
 import { useLanguage } from './LanguageProvider';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -43,6 +44,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
 
   const copyReferralCode = () => {
     if (subscription?.referral_code) {
@@ -81,7 +83,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
-      <div className="flex-1 flex flex-col ml-20 lg:ml-64">
+      <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-20 lg:ml-64'}`}>
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
