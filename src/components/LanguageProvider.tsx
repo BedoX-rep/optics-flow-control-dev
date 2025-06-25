@@ -357,6 +357,27 @@ const productTranslations: Translations = {
     en: 'Other',
     fr: 'Autre'
   },
+  // ProductFilters translation keys
+  filterCategory: {
+    en: 'Category',
+    fr: 'Catégorie'
+  },
+  filterIndex: {
+    en: 'Index',
+    fr: 'Indice'
+  },
+  filterTreatment: {
+    en: 'Treatment',
+    fr: 'Traitement'
+  },
+  filterCompany: {
+    en: 'Company',
+    fr: 'Entreprise'
+  },
+  filterStock: {
+    en: 'Stock',
+    fr: 'Stock'
+  },
   // Index filter options
   allIndexes: {
     en: 'All Indexes',
