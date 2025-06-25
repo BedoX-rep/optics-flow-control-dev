@@ -79,9 +79,9 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="md:flex min-h-screen bg-[#F7FAFC]">
+    <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
-      <div className="flex-1 flex flex-col md:ml-20 lg:ml-64">
+      <div className="flex-1 flex flex-col ml-20 lg:ml-64">
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
