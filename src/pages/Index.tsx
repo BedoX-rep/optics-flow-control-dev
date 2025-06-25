@@ -84,7 +84,7 @@ const IndexPage = () => {
     <div className={`flex flex-col min-h-screen ${direction === 'rtl' ? 'text-right' : 'text-left'}`} dir={direction}>
       {/* Header/Navigation with Gradient Background */}
       <div className="w-full min-h-screen md:h-screen bg-gradient-to-b from-teal-600 to-teal-700 text-white relative">
-        <header className="container mx-auto py-4 px-6 md:px-8 lg:px-12">
+        <header className="container mx-auto py-4 px-6 md:px-8 lg:px-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <h1 className="text-2xl md:text-3xl font-bold cursor-pointer" onClick={() => navigate('/')}>Lensly</h1>
@@ -211,7 +211,7 @@ const IndexPage = () => {
         </header>
 
         {/* Combined Hero and Effortless Section */}
-          <section className="container mx-auto pt-8 pb-[65px] md:py-16 px-6 md:px-8 lg:px-12 text-center relative">
+          <section className="container mx-auto pt-8 pb-[65px] md:py-16 px-6 md:px-8 lg:px-0 text-center relative">
           <h1 className="text-3xl md:text-5xl font-bold mb-5 leading-tight max-w-2xl mx-auto">
             {t('heroTitle')}
           </h1>
@@ -247,7 +247,7 @@ const IndexPage = () => {
       </div>
 
       {/* Effortless Section Content */}
-            <section className="pt-0 -mt-[400px] md:-mt-[160px] -pt-8 md:pt-0 px-6 md:px-8 lg:px-12 bg-transparent relative z-10">
+            <section className="pt-0 -mt-[400px] md:-mt-[160px] -pt-8 md:pt-0 px-6 md:px-8 lg:px-0 bg-transparent relative z-10">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className={`order-2 ${direction === 'rtl' ? 'md:order-2' : 'md:order-1'} md:pl-1`}>
@@ -315,7 +315,7 @@ const IndexPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-10 md:py-20 px-6 md:px-8 lg:px-12 bg-gray-50">
+      <section id="features" className="py-10 md:py-20 px-6 md:px-8 lg:px-0 bg-gray-50">
         <div className="container mx-auto">
           <div className="text-center mb-8 md:mb-16">
             <h2 className="text-2xl md:text-4xl font-bold mb-4">{t('powerfulFeatures')}</h2>
@@ -336,7 +336,7 @@ const IndexPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-10 md:py-20 px-6 md:px-8 lg:px-12 bg-primary text-white">
+      <section className="py-10 md:py-20 px-6 md:px-8 lg:px-0 bg-primary text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t('ctaTitle')}</h2>
           <p className="text-base md:text-xl mb-6 md:mb-10 max-w-2xl mx-auto text-white/90">
@@ -353,7 +353,7 @@ const IndexPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 md:py-12 px-6 md:px-8 lg:px-12">
+      <footer className="bg-gray-900 text-gray-300 py-8 md:py-12 px-6 md:px-8 lg:px-0">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
