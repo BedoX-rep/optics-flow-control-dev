@@ -300,7 +300,7 @@ const IndexPage = () => {
                   alt="Lensly software interface" 
                   className="w-full h-auto"
                 />
-              </div></div>
+              </div>
               <div className="absolute -z-10 -bottom-6 -right-6 w-32 h-32 md:w-64 md:h-64 bg-primary/10 rounded-full"></div>
               <div className="absolute -z-10 -top-6 -left-6 w-24 h-24 md:w-48 md:h-48 bg-primary/10 rounded-full"></div>
             </div>
