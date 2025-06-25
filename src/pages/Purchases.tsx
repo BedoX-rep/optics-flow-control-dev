@@ -386,6 +386,7 @@ const PURCHASE_TYPES = [
     queryKey: ['purchases', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      console.log('Fetching purchases for user:', user.id);
       const { data, error } = await supabase
         .from('purchases')
         .select(`
@@ -402,10 +403,17 @@ const PURCHASE_TYPES = [
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching purchases:', error);
+        throw error;
+      }
+      console.log('Fetched purchases count:', data?.length || 0);
       return data || [];
     },
     enabled: !!user,
+    staleTime: 0, // Ensure fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Calculate purchase linking when purchases and receipts are loaded

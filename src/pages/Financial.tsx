@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,6 +56,7 @@ interface Purchase {
 const Financial = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -153,7 +154,36 @@ const Financial = () => {
       return data || [];
     },
     enabled: !!user,
+    staleTime: 0, // Force refresh to ensure fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
+
+  // Set up real-time subscription for purchases
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('purchases-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'purchases',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Purchase change detected:', payload);
+          queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   // Filter data by date range and exclude deleted receipts
   const filteredReceipts = useMemo(() => {
