@@ -21,6 +21,7 @@ interface Product {
   company?: string | null;
   gamma?: string | null;
   image?: string | null;
+  created_at?: string | null;
   isEdited?: boolean;
 }
 
@@ -88,16 +89,27 @@ const ProductCard = React.memo<ProductCardProps>(({
               disabled={product.automated_name}
               className="font-semibold text-sm w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-1"
             />
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={product.price}
-                onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
-                className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
-                min={0}
-                step={0.01}
-              />
-              <span className="text-xs text-gray-500">DH</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  value={product.price}
+                  onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
+                  className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
+                  min={0}
+                  step={0.01}
+                />
+                <span className="text-xs text-gray-500">DH</span>
+              </div>
+              {product.created_at && (
+                <span className="text-xs text-gray-400">
+                  {new Date(product.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -222,7 +234,7 @@ const ProductCard = React.memo<ProductCardProps>(({
               </Select>
             </div>
 
-            {product.stock_status === 'inStock' ? (
+            {product.stock_status === 'inStock' && (
               <div>
                 <label className="text-xs text-gray-600 font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
                 <input
@@ -233,18 +245,6 @@ const ProductCard = React.memo<ProductCardProps>(({
                   placeholder="0"
                   min={0}
                 />
-              </div>
-            ) : (
-              <div>
-                <label className="text-xs text-gray-600 font-medium block mb-1">{t('generateNameAuto')}</label>
-                <div className="flex items-center h-7">
-                  <Switch
-                    checked={product.automated_name}
-                    onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
-                    className="scale-75"
-                  />
-                  <span className="text-xs text-gray-500 ml-1">{t('auto')}</span>
-                </div>
               </div>
             )}
           </div>
@@ -274,6 +274,14 @@ const ProductCard = React.memo<ProductCardProps>(({
               <Edit size={12} className="mr-1" />
               {t('edit')}
             </Button>
+            <div className="flex items-center gap-1 ml-2">
+              <Switch
+                checked={product.automated_name}
+                onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
+                className="scale-75"
+              />
+              <span className="text-xs text-gray-500">{t('auto')}</span>
+            </div>
           </div>
 
           <Button

@@ -557,7 +557,15 @@ const Products = () => {
     }
   }, [user, queryClient, toast]);
 
-  const sortedEditableProducts = useMemo(() => sortProducts(editableProducts || []), [editableProducts]);
+  const sortedEditableProducts = useMemo(() => {
+    const products = editableProducts || [];
+    // First sort by creation date (newest first), then apply secondary sorting
+    return products.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA; // Newest first
+    });
+  }, [editableProducts]);
   const hasEditedProducts = useMemo(() => editableProducts.some(p => p.isEdited), [editableProducts]);
 
   return (
