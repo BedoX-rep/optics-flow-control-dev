@@ -509,7 +509,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <Label>{t('montageCosts')}</Label>
+                    <Label>{t('additionalCosts') || 'Additional Costs'}</Label>
                     <Input
                       type="number"
                       value={formData.montage_costs}
@@ -670,7 +670,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       </div>
 
                       {/* Financial Details Section */}
-                      <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-4 gap-4 mb-4">
                         <div>
                           <Label>{t('price')}</Label>
                           <Input
@@ -687,7 +687,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                         <div>
-                          <Label>{t('cost')}</Label>
+                          <Label>{t('cost')} ({t('perUnit') || 'Per Unit'})</Label>
                           <Input
                             type="number"
                             min="0"
@@ -696,6 +696,22 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             onChange={(e) => {
                               const newItems = [...formData.items];
                               newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label>{t('totalCost') || 'Total Cost'}</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={((item.cost || 0) * item.quantity).toFixed(2)}
+                            onChange={(e) => {
+                              const totalCost = parseFloat(e.target.value) || 0;
+                              const costPerUnit = item.quantity > 0 ? totalCost / item.quantity : 0;
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...item, cost: costPerUnit };
                               setFormData({ ...formData, items: newItems });
                             }}
                           />
