@@ -70,7 +70,7 @@ const SidebarProvider = React.forwardRef<
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
-    const [_open, _setOpen] = React.useState(isMobile ? false : defaultOpen)
+    const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -192,41 +192,21 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <>
-          {/* Mobile overlay */}
-          {openMobile && (
-            <div 
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
-              onClick={() => setOpenMobile(false)}
-            />
-          )}
-          {/* Mobile sidebar */}
-          <div
-            ref={ref}
-            className={cn(
-              "fixed inset-y-0 z-50 flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out md:hidden",
-              side === "left" ? "left-0" : "right-0",
-              openMobile 
-                ? "translate-x-0" 
-                : side === "left" 
-                  ? "-translate-x-full" 
-                  : "translate-x-full"
-            )}
+        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetContent
+            data-sidebar="sidebar"
+            data-mobile="true"
+            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            data-sidebar="sidebar"
-            data-mobile="true"
-            data-state={openMobile ? "expanded" : "collapsed"}
-            data-variant={variant}
-            data-side={side}
-            {...props}
+            side={side}
           >
-            <div className="flex h-full w-full flex-col bg-sidebar">{children}</div>
-          </div>
-        </>
+            <div className="flex h-full w-full flex-col">{children}</div>
+          </SheetContent>
+        </Sheet>
       )
     }
 
@@ -289,7 +269,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7 z-50", className)}
+      className={cn("h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
