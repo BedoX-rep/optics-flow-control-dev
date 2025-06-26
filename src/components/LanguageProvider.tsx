@@ -3113,10 +3113,6 @@ const purchasesTranslations: Translations = {
   close: {
     en: 'Close',
     fr: 'Fermer'
-  },
-  viewNote: {
-    en: 'View Note',
-    fr: 'Voir la Note'
   }
 };
 
