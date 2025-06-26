@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote, Pencil } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -218,28 +218,30 @@ const ReceiptCard = ({
                   </Button>
                 </div>
                 
-                {/* Note buttons */}
+                {/* Note buttons positioned below edit and delete buttons */}
                 <div className="flex gap-1 justify-end">
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsViewingNote(true)}
+                    className={cn("h-8 w-8", receipt.note ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : "invisible")}
+                    title={t('viewNote')}
+                  >
+                    <StickyNote className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setIsAddingNote(true)}
-                    className="h-6 w-6 p-0"
+                    className="h-8 w-8"
                     title={t('addNote')}
                   >
-                    <Plus className="h-3 w-3" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
-                  {receipt.note && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsViewingNote(true)}
-                      className={cn("h-6 w-6 p-0 bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200")}
-                      title={t('viewNote')}
-                    >
-                      <StickyNote className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
