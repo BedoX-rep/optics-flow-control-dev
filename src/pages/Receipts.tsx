@@ -178,65 +178,48 @@ const ReceiptCard = ({
                 </div>
               </div>
 
-              <div className="flex gap-1 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onCallStatusChange(
-                    receipt.call_status === 'Not Called' ? 'Called' :
-                    receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                  )}
-                  className={cn("h-8 w-8", 
-                    receipt.call_status === 'Called' ? "hover:bg-green-100" :
-                    receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
-                    "hover:bg-gray-100"
-                  )}
-                >
-                  <Phone className={cn("h-4 w-4",
-                    receipt.call_status === 'Called' ? "text-green-600" :
-                    receipt.call_status === 'Unresponsive' ? "text-red-600" :
-                    "text-gray-600"
-                  )} />
-                </Button>
-                {receipt.balance > 0 && (
-                  <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
-                    <Check className="h-4 w-4 text-green-600" />
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onCallStatusChange(
+                      receipt.call_status === 'Not Called' ? 'Called' :
+                      receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                    )}
+                    className={cn("h-8 w-8", 
+                      receipt.call_status === 'Called' ? "hover:bg-green-100" :
+                      receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
+                      "hover:bg-gray-100"
+                    )}
+                  >
+                    <Phone className={cn("h-4 w-4",
+                      receipt.call_status === 'Called' ? "text-green-600" :
+                      receipt.call_status === 'Unresponsive' ? "text-red-600" :
+                      "text-gray-600"
+                    )} />
                   </Button>
-                )}
-                <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
-                  <Package className="h-4 w-4 text-blue-600" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('total')}</p>
-                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('advance')}</p>
-                    <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
-                  </div>
+                  {receipt.balance > 0 && (
+                    <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
+                    <Package className="h-4 w-4 text-blue-600" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
                 </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 relative">
-                <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
-                <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
                 
-                {/* Note buttons positioned below balance box */}
-                <div className="flex gap-1 mt-2 justify-end">
+                {/* Note buttons */}
+                <div className="flex gap-1 justify-end">
                   <Button
                     variant="outline"
                     size="sm"
@@ -259,6 +242,25 @@ const ReceiptCard = ({
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('total')}</p>
+                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('advance')}</p>
+                    <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
+                <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
+              </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
@@ -274,8 +276,7 @@ const ReceiptCard = ({
             </div>
 
             {/* Note Section */}
-            <div className="mb-4">
-
+            <div className="mb-2">
               {/* Add Note Dialog */}
               {isAddingNote && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
