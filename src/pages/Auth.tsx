@@ -198,194 +198,257 @@ const Auth = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="login" className="space-y-6 mt-0">
+                <TabsContent value="login" className="space-y-8 mt-0">
                   <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
-                        Email address
-                      </Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="name@company.com" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl transition-all"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="password" 
-                          type={showPassword ? "text" : "password"} 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl pr-12 transition-all"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all duration-200"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Signing in...</span>
-                        </div>
-                      ) : "Sign in"}
-                    </Button>
-                  </form>
-                </TabsContent>
-
-                <TabsContent value="signup" className="space-y-5 mt-0">
-                  <form onSubmit={handleSignup} className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-6">
                       <div className="space-y-2">
-                        <Label htmlFor="email-signup" className="text-gray-700 font-medium text-sm">
-                          Email*
+                        <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
+                          Email Address
                         </Label>
                         <Input 
-                          id="email-signup" 
+                          id="email" 
                           type="email" 
                           placeholder="name@company.com" 
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all"
+                          className="h-14 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl transition-all shadow-sm text-base"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="display-name" className="text-gray-700 font-medium text-sm">
-                          Name
-                        </Label>
-                        <Input 
-                          id="display-name" 
-                          type="text" 
-                          placeholder="John Doe" 
-                          value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all"
-                        />
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
+                            Password
+                          </Label>
+                          <button
+                            type="button"
+                            className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Input 
+                            id="password" 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="h-14 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl pr-12 transition-all shadow-sm text-base"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full h-14 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/35 transition-all duration-200 text-lg"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Signing you in...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <span>Sign in to Dashboard</span>
+                          <Glasses className="w-5 h-5" />
+                        </div>
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="store-name" className="text-gray-700 font-medium text-sm">
-                        Store Name
-                      </Label>
-                      <Input 
-                        id="store-name" 
-                        type="text" 
-                        placeholder="My Optical Store" 
-                        value={storeName}
-                        onChange={(e) => setStoreName(e.target.value)}
-                        className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all"
-                      />
-                    </div>
+                <TabsContent value="signup" className="space-y-6 mt-0">
+                  <form onSubmit={handleSignup} className="space-y-6">
+                    {/* Personal Information Section */}
+                    <div className="space-y-4">
+                      <div className="pb-2 border-b border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Personal Information</h3>
+                        <p className="text-xs text-gray-500">Basic details about you and your store</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="email-signup" className="text-gray-700 font-medium text-sm flex items-center">
+                            Email Address*
+                          </Label>
+                          <Input 
+                            id="email-signup" 
+                            type="email" 
+                            placeholder="name@company.com" 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="display-name" className="text-gray-700 font-medium text-sm">
+                            Full Name
+                          </Label>
+                          <Input 
+                            id="display-name" 
+                            type="text" 
+                            placeholder="John Doe" 
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
+                          />
+                        </div>
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="access-code" className="text-gray-700 font-medium text-sm">
-                          Access Code*
+                        <Label htmlFor="store-name" className="text-gray-700 font-medium text-sm">
+                          Store Name
                         </Label>
                         <Input 
-                          id="access-code" 
+                          id="store-name" 
                           type="text" 
-                          placeholder="ABCDE" 
-                          maxLength={5}
-                          value={accessCode}
-                          onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono transition-all"
-                          required
+                          placeholder="My Optical Store" 
+                          value={storeName}
+                          onChange={(e) => setStoreName(e.target.value)}
+                          className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="referral-code" className="text-gray-700 font-medium text-sm">
-                          Referral
-                        </Label>
-                        <Input 
-                          id="referral-code" 
-                          type="text" 
-                          placeholder="ABCD" 
-                          maxLength={4}
-                          value={referralCode}
-                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono transition-all"
-                        />
+                        <p className="text-xs text-gray-500">This will appear on your receipts and invoices</p>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password-signup" className="text-gray-700 font-medium text-sm">
-                        Password*
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="password-signup" 
-                          type={showPassword ? "text" : "password"} 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
+                    {/* Access & Referral Section */}
+                    <div className="space-y-4">
+                      <div className="pb-2 border-b border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Access & Referral</h3>
+                        <p className="text-xs text-gray-500">Required codes for account verification</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="access-code" className="text-gray-700 font-medium text-sm flex items-center">
+                            Access Code*
+                            <span className="ml-1 text-red-500">*</span>
+                          </Label>
+                          <Input 
+                            id="access-code" 
+                            type="text" 
+                            placeholder="ABCDE" 
+                            maxLength={5}
+                            value={accessCode}
+                            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono text-center text-lg tracking-wider transition-all shadow-sm"
+                            required
+                          />
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-xs text-blue-700">
+                              <strong>Required:</strong> This is your unique 5-character access code provided during your subscription purchase. Contact support if you don't have one.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="referral-code" className="text-gray-700 font-medium text-sm">
+                            Referral Code
+                            <span className="ml-1 text-gray-400">(Optional)</span>
+                          </Label>
+                          <Input 
+                            id="referral-code" 
+                            type="text" 
+                            placeholder="ABCD" 
+                            maxLength={4}
+                            value={referralCode}
+                            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono text-center text-lg tracking-wider transition-all shadow-sm"
+                          />
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p className="text-xs text-green-700">
+                              <strong>Optional:</strong> Enter a referral code from an existing user to get special benefits. Leave blank if you don't have one.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-gray-700 font-medium text-sm">
-                        Confirm Password*
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="confirm-password" 
-                          type={showConfirmPassword ? "text" : "password"} 
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="h-11 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
+                    {/* Password Section */}
+                    <div className="space-y-4">
+                      <div className="pb-2 border-b border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Security</h3>
+                        <p className="text-xs text-gray-500">Create a secure password for your account</p>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="password-signup" className="text-gray-700 font-medium text-sm">
+                            Password*
+                          </Label>
+                          <div className="relative">
+                            <Input 
+                              id="password-signup" 
+                              type={showPassword ? "text" : "password"} 
+                              placeholder="Create a strong password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all shadow-sm"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="confirm-password" className="text-gray-700 font-medium text-sm">
+                            Confirm Password*
+                          </Label>
+                          <div className="relative">
+                            <Input 
+                              id="confirm-password" 
+                              type={showConfirmPassword ? "text" : "password"} 
+                              placeholder="Confirm your password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all shadow-sm"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
                     <Button 
                       type="submit" 
-                      className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all duration-200"
+                      className="w-full h-14 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/35 transition-all duration-200 text-lg"
                       disabled={isLoading}
                     >
                       {isLoading ? (
                         <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Creating account...</span>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Creating your account...</span>
                         </div>
-                      ) : "Create account"}
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <span>Create My Account</span>
+                          <ShieldCheck className="w-5 h-5" />
+                        </div>
+                      )}
                     </Button>
                   </form>
                 </TabsContent>
