@@ -27,6 +27,8 @@ import ReceiptStatistics from '@/components/ReceiptStatistics';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/components/LanguageProvider';
+import { Textarea } from '@/components/ui/textarea';
+import { StickyNote, Plus } from 'lucide-react';
 
 interface Receipt {
   id: string;
@@ -45,6 +47,7 @@ interface Receipt {
   order_type?: string;
   call_status: string;
   time_called?: string;
+  note?: string;
 }
 
 const ReceiptCard = ({ 
@@ -55,7 +58,8 @@ const ReceiptCard = ({
   onView, 
   onEdit, 
   onMontageChange,
-  onCallStatusChange 
+  onCallStatusChange,
+  onNoteChange 
 }: {
   receipt: Receipt;
   onPaid: () => void;
@@ -65,10 +69,24 @@ const ReceiptCard = ({
   onEdit: () => void;
   onMontageChange: (status: string) => void;
   onCallStatusChange: (status: string) => void;
+  onNoteChange: (note: string) => void;
 }) => {
   const { t } = useLanguage();
+  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [isViewingNote, setIsViewingNote] = useState(false);
+  const [noteText, setNoteText] = useState(receipt.note || '');
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+
+  const handleSaveNote = () => {
+    onNoteChange(noteText);
+    setIsAddingNote(false);
+  };
+
+  const handleCancelNote = () => {
+    setNoteText(receipt.note || '');
+    setIsAddingNote(false);
+  };
 
   const getTimeDisplay = (dateString: string) => {
     const date = new Date(dateString);
@@ -200,7 +218,7 @@ const ReceiptCard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm mb-6">
+            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
@@ -229,6 +247,62 @@ const ReceiptCard = ({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Note Section */}
+            <div className="mb-4">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddingNote(true)}
+                  className="flex-1 h-8 text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  {t('addNote')}
+                </Button>
+                {receipt.note && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsViewingNote(true)}
+                    className={cn("h-8 px-3 bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200")}
+                  >
+                    <StickyNote className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+
+              {/* Add Note Dialog */}
+              {isAddingNote && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+                  <Textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    placeholder={t('enterNote')}
+                    className="mb-2 text-sm"
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleSaveNote} className="text-xs">
+                      {t('save')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleCancelNote} className="text-xs">
+                      {t('cancel')}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* View Note Dialog */}
+              {isViewingNote && (
+                <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-gray-700 mb-2">{receipt.note}</p>
+                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} className="text-xs">
+                    {t('close')}
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-6 gap-1 w-full relative">
@@ -441,6 +515,34 @@ const Receipts = () => {
       toast({
         title: "Error",
         description: "Failed to update call status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNoteChange = async (id: string, note: string) => {
+    try {
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { ...r, note } : r);
+      });
+
+      const { error } = await supabase
+        .from('receipts')
+        .update({ note })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Note Updated",
+        description: "Receipt note has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update note. Please try again.",
         variant: "destructive",
       });
     }
@@ -769,6 +871,7 @@ const Receipts = () => {
                   onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
                   onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
+                  onNoteChange={(note) => handleNoteChange(receipt.id, note)}
                 />
               ))
             )}
