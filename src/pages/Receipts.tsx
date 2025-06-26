@@ -231,9 +231,33 @@ const ReceiptCard = ({
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-lg p-3 relative">
                 <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
                 <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
+                
+                {/* Note buttons positioned below balance box */}
+                <div className="flex gap-1 mt-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddingNote(true)}
+                    className="h-6 w-6 p-0"
+                    title={t('addNote')}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                  {receipt.note && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsViewingNote(true)}
+                      className={cn("h-6 w-6 p-0 bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200")}
+                      title={t('viewNote')}
+                    >
+                      <StickyNote className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
@@ -251,27 +275,6 @@ const ReceiptCard = ({
 
             {/* Note Section */}
             <div className="mb-4">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAddingNote(true)}
-                  className="flex-1 h-8 text-xs"
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  {t('addNote')}
-                </Button>
-                {receipt.note && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsViewingNote(true)}
-                    className={cn("h-8 px-3 bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200")}
-                  >
-                    <StickyNote className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
 
               {/* Add Note Dialog */}
               {isAddingNote && (
