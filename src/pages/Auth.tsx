@@ -348,7 +348,7 @@ const Auth = () => {
                           />
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <p className="text-xs text-blue-700">
-                              <strong>Required:</strong> This is your unique 5-character access code provided during your subscription purchase. Contact support if you don't have one.
+                              <strong>Required:</strong> This is your unique 5-character access code which will give admin access to any user with access to it.
                             </p>
                           </div>
                         </div>
