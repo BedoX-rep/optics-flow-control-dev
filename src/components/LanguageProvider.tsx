@@ -3101,6 +3101,18 @@ const purchasesTranslations: Translations = {
   updating: {
     en: 'Updating...',
     fr: 'Mise à jour...'
+  },
+  addNote: {
+    en: 'Add Note',
+    fr: 'Ajouter une Note'
+  },
+  enterNote: {
+    en: 'Enter your note here...',
+    fr: 'Entrez votre note ici...'
+  },
+  close: {
+    en: 'Close',
+    fr: 'Fermer'
   }
 };
 
