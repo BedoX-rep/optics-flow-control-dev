@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2, Save } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { useLanguage } from './LanguageProvider';
+import { useCompanies } from '@/hooks/useCompanies';
 
 interface Product {
   id: string;
@@ -55,8 +56,6 @@ const TREATMENT_OPTIONS = [
   { value: "UV protection", labelKey: "uvProtection" },
   { value: "Tint", labelKey: "tint" }
 ];
-const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
-
 const ProductCard = React.memo<ProductCardProps>(({ 
   product, 
   onFieldChange, 
@@ -66,6 +65,7 @@ const ProductCard = React.memo<ProductCardProps>(({
   isSubmitting 
 }) => {
   const { t } = useLanguage();
+  const { allCompanies } = useCompanies();
   return (
     <Card 
       className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
@@ -179,7 +179,7 @@ const ProductCard = React.memo<ProductCardProps>(({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{t('none')}</SelectItem>
-                  {COMPANY_OPTIONS.map(option => (
+                  {allCompanies.map(option => (
                     <SelectItem key={option} value={option}>{option}</SelectItem>
                   ))}
                 </SelectContent>
