@@ -466,11 +466,17 @@ const Auth = () => {
               <div className="text-center mt-8 pt-6 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
                   {t('byContinuing')}{' '}
-                  <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">
+                  <span 
+                    className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium"
+                    onClick={() => navigate('/terms-of-service')}
+                  >
                     {t('termsOfService')}
                   </span>{' '}
                   {t('and')}{' '}
-                  <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">
+                  <span 
+                    className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium"
+                    onClick={() => navigate('/privacy-policy')}
+                  >
                     {t('privacyPolicy')}
                   </span>
                 </p>

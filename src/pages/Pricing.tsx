@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -84,20 +83,20 @@ const Pricing = () => {
       description: t('inventoryControlDesc'),
     },
     {
-      title: "Simplified Billing",
-      description: "Create and manage receipts, invoices, and track payments efficiently",
+      title: t('simplifiedBilling'),
+      description: t('simplifiedBillingDesc'),
     },
     {
-      title: "Prescription Management",
-      description: "Easily record and track patient prescriptions and changes over time",
+      title: t('prescriptionManagement'),
+      description: t('prescriptionManagementDesc'),
     },
     {
-      title: "Statistics",
-      description: "Comprehensive analytics and reporting on your business performance",
+      title: t('statistics'),
+      description: t('statisticsDesc'),
     },
     {
-      title: "Access Control",
-      description: "Manage user permissions and control access to sensitive data",
+      title: t('accessControl'),
+      description: t('accessControlDesc'),
     }
   ];
 
@@ -255,9 +254,9 @@ const Pricing = () => {
                   'border border-gray-200 shadow-lg group-hover:shadow-xl group-hover:border-gray-300'
                 }
               `}>
-                
-                
-                
+
+
+
                 {/* Header */}
                 <div className={`
                   relative px-8 pt-8 pb-6
@@ -269,12 +268,12 @@ const Pricing = () => {
                   <div className="text-center">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                     <p className="text-sm text-gray-600 mb-4">{plan.billingCycle}</p>
-                    
+
                     <div className="flex items-baseline justify-center mb-2">
                       <span className="text-5xl font-extrabold text-gray-900">{plan.price}</span>
                       <span className="ml-2 text-xl text-gray-600 font-medium">{plan.currency}</span>
                     </div>
-                    
+
                     {plan.savingsText && (
                       <div className="inline-flex items-center bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
                         {plan.savingsText}
@@ -282,7 +281,7 @@ const Pricing = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Features */}
                 <div className="px-8 py-6">
                   <ul className="space-y-4">
@@ -299,7 +298,7 @@ const Pricing = () => {
                     ))}
                   </ul>
                 </div>
-                
+
                 {/* CTA Button */}
                 <div className="px-8 pb-8 mt-auto">
                   {plan.current ? (

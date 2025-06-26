@@ -21,6 +21,8 @@ import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import Pricing from './pages/Pricing';
 import HowToUse from './pages/HowToUse';
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 import Invoices from './pages/Invoices';
@@ -119,6 +121,9 @@ const AppRoutes = () => (
     <Route path="/auth" element={<Auth />} />
     <Route path="/pricing" element={<Pricing />} />
 	  <Route path="/how-to-use" element={<HowToUse />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="*" element={<NotFound />} />
 
     <Route path="/dashboard/*" element={
       <ProtectedRoute>
