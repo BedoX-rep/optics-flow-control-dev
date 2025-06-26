@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -295,7 +294,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
               </CardContent>
             </Card>
 
-            
+
 
             {/* Lens Specifications - Only for lenses */}
             {showIndexTreatment && (
@@ -501,7 +500,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
           </div>
         </div>
 
-        
+
       </form>
     </DialogContent>
   );
