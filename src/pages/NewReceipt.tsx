@@ -180,47 +180,7 @@ const NewReceipt = () => {
     ],
   });
 
-  // Update markup settings when personalisation data is loaded
-  useEffect(() => {
-    if (personalisationData) {
-      setMarkupSettings({
-        sph: [
-          { 
-            min: personalisationData.markup_sph_range_1_min ?? 0, 
-            max: personalisationData.markup_sph_range_1_max ?? 4, 
-            markup: personalisationData.markup_sph_range_1_markup ?? 0 
-          },
-          { 
-            min: personalisationData.markup_sph_range_2_min ?? 4, 
-            max: personalisationData.markup_sph_range_2_max ?? 8, 
-            markup: personalisationData.markup_sph_range_2_markup ?? 15 
-          },
-          { 
-            min: personalisationData.markup_sph_range_3_min ?? 8, 
-            max: personalisationData.markup_sph_range_3_max === 999 ? Infinity : (personalisationData.markup_sph_range_3_max ?? Infinity), 
-            markup: personalisationData.markup_sph_range_3_markup ?? 30 
-          },
-        ],
-        cyl: [
-          { 
-            min: personalisationData.markup_cyl_range_1_min ?? 0, 
-            max: personalisationData.markup_cyl_range_1_max ?? 2, 
-            markup: personalisationData.markup_cyl_range_1_markup ?? 0 
-          },
-          { 
-            min: personalisationData.markup_cyl_range_2_min ?? 2, 
-            max: personalisationData.markup_cyl_range_2_max ?? 4, 
-            markup: personalisationData.markup_cyl_range_2_markup ?? 15 
-          },
-          { 
-            min: personalisationData.markup_cyl_range_3_min ?? 4, 
-            max: personalisationData.markup_cyl_range_3_max === 999 ? Infinity : (personalisationData.markup_cyl_range_3_max ?? Infinity), 
-            markup: personalisationData.markup_cyl_range_3_markup ?? 30 
-          },
-        ],
-      });
-    }
-  }, [personalisationData]);
+  
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
   const [formData, setFormData] = useState({}); // Added formData state
   const [currentStep, setCurrentStep] = useState('details');
@@ -291,7 +251,7 @@ const NewReceipt = () => {
     enabled: !!user
   });
 
-  // Fetch user information including personalization settings
+  // Fetch user information including personalization settings with caching
   const { data: personalisationData } = useQuery({
     queryKey: ['user-information', user?.id],
     queryFn: async () => {
@@ -348,7 +308,11 @@ const NewReceipt = () => {
         return null;
       }
     },
-    enabled: !!user
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
   useEffect(() => {
@@ -373,6 +337,44 @@ const NewReceipt = () => {
         sv_lens_cost: personalisationData.sv_lens_cost ?? 10.00,
         progressive_lens_cost: personalisationData.progressive_lens_cost ?? 20.00,
         frames_cost: personalisationData.frames_cost ?? 10.00
+      });
+      
+      // Update markup settings when personalisation data is loaded
+      setMarkupSettings({
+        sph: [
+          { 
+            min: personalisationData.markup_sph_range_1_min ?? 0, 
+            max: personalisationData.markup_sph_range_1_max ?? 4, 
+            markup: personalisationData.markup_sph_range_1_markup ?? 0 
+          },
+          { 
+            min: personalisationData.markup_sph_range_2_min ?? 4, 
+            max: personalisationData.markup_sph_range_2_max ?? 8, 
+            markup: personalisationData.markup_sph_range_2_markup ?? 15 
+          },
+          { 
+            min: personalisationData.markup_sph_range_3_min ?? 8, 
+            max: personalisationData.markup_sph_range_3_max === 999 ? Infinity : (personalisationData.markup_sph_range_3_max ?? Infinity), 
+            markup: personalisationData.markup_sph_range_3_markup ?? 30 
+          },
+        ],
+        cyl: [
+          { 
+            min: personalisationData.markup_cyl_range_1_min ?? 0, 
+            max: personalisationData.markup_cyl_range_1_max ?? 2, 
+            markup: personalisationData.markup_cyl_range_1_markup ?? 0 
+          },
+          { 
+            min: personalisationData.markup_cyl_range_2_min ?? 2, 
+            max: personalisationData.markup_cyl_range_2_max ?? 4, 
+            markup: personalisationData.markup_cyl_range_2_markup ?? 15 
+          },
+          { 
+            min: personalisationData.markup_cyl_range_3_min ?? 4, 
+            max: personalisationData.markup_cyl_range_3_max === 999 ? Infinity : (personalisationData.markup_cyl_range_3_max ?? Infinity), 
+            markup: personalisationData.markup_cyl_range_3_markup ?? 30 
+          },
+        ],
       });
     } else {
       // Use default values if no user information found
