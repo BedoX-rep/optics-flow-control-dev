@@ -179,6 +179,48 @@ const NewReceipt = () => {
       { min: 4, max: Infinity, markup: 30 },
     ],
   });
+
+  // Update markup settings when personalisation data is loaded
+  useEffect(() => {
+    if (personalisationData) {
+      setMarkupSettings({
+        sph: [
+          { 
+            min: personalisationData.markup_sph_range_1_min ?? 0, 
+            max: personalisationData.markup_sph_range_1_max ?? 4, 
+            markup: personalisationData.markup_sph_range_1_markup ?? 0 
+          },
+          { 
+            min: personalisationData.markup_sph_range_2_min ?? 4, 
+            max: personalisationData.markup_sph_range_2_max ?? 8, 
+            markup: personalisationData.markup_sph_range_2_markup ?? 15 
+          },
+          { 
+            min: personalisationData.markup_sph_range_3_min ?? 8, 
+            max: personalisationData.markup_sph_range_3_max === 999 ? Infinity : (personalisationData.markup_sph_range_3_max ?? Infinity), 
+            markup: personalisationData.markup_sph_range_3_markup ?? 30 
+          },
+        ],
+        cyl: [
+          { 
+            min: personalisationData.markup_cyl_range_1_min ?? 0, 
+            max: personalisationData.markup_cyl_range_1_max ?? 2, 
+            markup: personalisationData.markup_cyl_range_1_markup ?? 0 
+          },
+          { 
+            min: personalisationData.markup_cyl_range_2_min ?? 2, 
+            max: personalisationData.markup_cyl_range_2_max ?? 4, 
+            markup: personalisationData.markup_cyl_range_2_markup ?? 15 
+          },
+          { 
+            min: personalisationData.markup_cyl_range_3_min ?? 4, 
+            max: personalisationData.markup_cyl_range_3_max === 999 ? Infinity : (personalisationData.markup_cyl_range_3_max ?? Infinity), 
+            markup: personalisationData.markup_cyl_range_3_markup ?? 30 
+          },
+        ],
+      });
+    }
+  }, [personalisationData]);
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
   const [formData, setFormData] = useState({}); // Added formData state
   const [currentStep, setCurrentStep] = useState('details');
@@ -258,7 +300,15 @@ const NewReceipt = () => {
       try {
         const { data, error } = await supabase
           .from('user_information')
-          .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+          .select(`
+            auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
+            markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
+            markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
+            markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
+            markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
+            markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
+            markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
+          `)
           .eq('user_id', user.id)
           .single();
 
@@ -269,7 +319,15 @@ const NewReceipt = () => {
             
             const { data: newData, error: newError } = await supabase
               .from('user_information')
-              .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+              .select(`
+                auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
+                markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
+                markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
+                markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
+                markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
+                markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
+                markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
+              `)
               .eq('user_id', user.id)
               .single();
 

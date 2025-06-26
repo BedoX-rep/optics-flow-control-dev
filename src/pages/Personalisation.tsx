@@ -20,6 +20,24 @@ interface PersonalisationData {
   sv_lens_cost: number;
   progressive_lens_cost: number;
   frames_cost: number;
+  markup_sph_range_1_min: number;
+  markup_sph_range_1_max: number;
+  markup_sph_range_1_markup: number;
+  markup_sph_range_2_min: number;
+  markup_sph_range_2_max: number;
+  markup_sph_range_2_markup: number;
+  markup_sph_range_3_min: number;
+  markup_sph_range_3_max: number;
+  markup_sph_range_3_markup: number;
+  markup_cyl_range_1_min: number;
+  markup_cyl_range_1_max: number;
+  markup_cyl_range_1_markup: number;
+  markup_cyl_range_2_min: number;
+  markup_cyl_range_2_max: number;
+  markup_cyl_range_2_markup: number;
+  markup_cyl_range_3_min: number;
+  markup_cyl_range_3_max: number;
+  markup_cyl_range_3_markup: number;
 }
 
 const Personalisation = () => {
@@ -31,7 +49,25 @@ const Personalisation = () => {
     auto_additional_costs: true,
     sv_lens_cost: 10.00,
     progressive_lens_cost: 20.00,
-    frames_cost: 10.00
+    frames_cost: 10.00,
+    markup_sph_range_1_min: 0,
+    markup_sph_range_1_max: 4,
+    markup_sph_range_1_markup: 0,
+    markup_sph_range_2_min: 4,
+    markup_sph_range_2_max: 8,
+    markup_sph_range_2_markup: 15,
+    markup_sph_range_3_min: 8,
+    markup_sph_range_3_max: 999,
+    markup_sph_range_3_markup: 30,
+    markup_cyl_range_1_min: 0,
+    markup_cyl_range_1_max: 2,
+    markup_cyl_range_1_markup: 0,
+    markup_cyl_range_2_min: 2,
+    markup_cyl_range_2_max: 4,
+    markup_cyl_range_2_markup: 15,
+    markup_cyl_range_3_min: 4,
+    markup_cyl_range_3_max: 999,
+    markup_cyl_range_3_markup: 30
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState('');
@@ -49,7 +85,15 @@ const Personalisation = () => {
         // Try to get existing user information
         const { data: existingInfo, error: fetchError } = await supabase
           .from('user_information')
-          .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+          .select(`
+            auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
+            markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
+            markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
+            markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
+            markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
+            markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
+            markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
+          `)
           .eq('user_id', user.id)
           .single();
 
@@ -64,7 +108,15 @@ const Personalisation = () => {
           // Fetch the newly created/updated record
           const { data: newInfo, error: newError } = await supabase
             .from('user_information')
-            .select('auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost')
+            .select(`
+              auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
+              markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
+              markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
+              markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
+              markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
+              markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
+              markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
+            `)
             .eq('user_id', user.id)
             .single();
 
@@ -97,7 +149,25 @@ const Personalisation = () => {
         auto_additional_costs: userPersonalisation.auto_additional_costs ?? true,
         sv_lens_cost: userPersonalisation.sv_lens_cost ?? 10.00,
         progressive_lens_cost: userPersonalisation.progressive_lens_cost ?? 20.00,
-        frames_cost: userPersonalisation.frames_cost ?? 10.00
+        frames_cost: userPersonalisation.frames_cost ?? 10.00,
+        markup_sph_range_1_min: userPersonalisation.markup_sph_range_1_min ?? 0,
+        markup_sph_range_1_max: userPersonalisation.markup_sph_range_1_max ?? 4,
+        markup_sph_range_1_markup: userPersonalisation.markup_sph_range_1_markup ?? 0,
+        markup_sph_range_2_min: userPersonalisation.markup_sph_range_2_min ?? 4,
+        markup_sph_range_2_max: userPersonalisation.markup_sph_range_2_max ?? 8,
+        markup_sph_range_2_markup: userPersonalisation.markup_sph_range_2_markup ?? 15,
+        markup_sph_range_3_min: userPersonalisation.markup_sph_range_3_min ?? 8,
+        markup_sph_range_3_max: userPersonalisation.markup_sph_range_3_max ?? 999,
+        markup_sph_range_3_markup: userPersonalisation.markup_sph_range_3_markup ?? 30,
+        markup_cyl_range_1_min: userPersonalisation.markup_cyl_range_1_min ?? 0,
+        markup_cyl_range_1_max: userPersonalisation.markup_cyl_range_1_max ?? 2,
+        markup_cyl_range_1_markup: userPersonalisation.markup_cyl_range_1_markup ?? 0,
+        markup_cyl_range_2_min: userPersonalisation.markup_cyl_range_2_min ?? 2,
+        markup_cyl_range_2_max: userPersonalisation.markup_cyl_range_2_max ?? 4,
+        markup_cyl_range_2_markup: userPersonalisation.markup_cyl_range_2_markup ?? 15,
+        markup_cyl_range_3_min: userPersonalisation.markup_cyl_range_3_min ?? 4,
+        markup_cyl_range_3_max: userPersonalisation.markup_cyl_range_3_max ?? 999,
+        markup_cyl_range_3_markup: userPersonalisation.markup_cyl_range_3_markup ?? 30
       });
     }
   }, [userPersonalisation]);
@@ -115,6 +185,24 @@ const Personalisation = () => {
           sv_lens_cost: data.sv_lens_cost,
           progressive_lens_cost: data.progressive_lens_cost,
           frames_cost: data.frames_cost,
+          markup_sph_range_1_min: data.markup_sph_range_1_min,
+          markup_sph_range_1_max: data.markup_sph_range_1_max,
+          markup_sph_range_1_markup: data.markup_sph_range_1_markup,
+          markup_sph_range_2_min: data.markup_sph_range_2_min,
+          markup_sph_range_2_max: data.markup_sph_range_2_max,
+          markup_sph_range_2_markup: data.markup_sph_range_2_markup,
+          markup_sph_range_3_min: data.markup_sph_range_3_min,
+          markup_sph_range_3_max: data.markup_sph_range_3_max,
+          markup_sph_range_3_markup: data.markup_sph_range_3_markup,
+          markup_cyl_range_1_min: data.markup_cyl_range_1_min,
+          markup_cyl_range_1_max: data.markup_cyl_range_1_max,
+          markup_cyl_range_1_markup: data.markup_cyl_range_1_markup,
+          markup_cyl_range_2_min: data.markup_cyl_range_2_min,
+          markup_cyl_range_2_max: data.markup_cyl_range_2_max,
+          markup_cyl_range_2_markup: data.markup_cyl_range_2_markup,
+          markup_cyl_range_3_min: data.markup_cyl_range_3_min,
+          markup_cyl_range_3_max: data.markup_cyl_range_3_max,
+          markup_cyl_range_3_markup: data.markup_cyl_range_3_markup,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
@@ -439,6 +527,255 @@ const Personalisation = () => {
                         />
                         <span className="text-sm text-gray-500">DH</span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Eyes Linking Markup Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Eyes Linking Markup Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-blue-50/50 rounded-lg p-4 space-y-6">
+                <h4 className="font-medium text-blue-900">Markup Ranges Configuration</h4>
+                
+                {/* SPH Ranges */}
+                <div className="space-y-4">
+                  <h5 className="font-medium text-gray-700">SPH (Sphere) Ranges</h5>
+                  
+                  {/* Range 1 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 1</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_1_min}
+                        onChange={(e) => handleInputChange('markup_sph_range_1_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_1_max}
+                        onChange={(e) => handleInputChange('markup_sph_range_1_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_1_markup}
+                        onChange={(e) => handleInputChange('markup_sph_range_1_markup', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Range 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 2</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_2_min}
+                        onChange={(e) => handleInputChange('markup_sph_range_2_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_2_max}
+                        onChange={(e) => handleInputChange('markup_sph_range_2_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_2_markup}
+                        onChange={(e) => handleInputChange('markup_sph_range_2_markup', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Range 3 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 3</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_3_min}
+                        onChange={(e) => handleInputChange('markup_sph_range_3_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_3_max}
+                        onChange={(e) => handleInputChange('markup_sph_range_3_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_sph_range_3_markup}
+                        onChange={(e) => handleInputChange('markup_sph_range_3_markup', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* CYL Ranges */}
+                <div className="space-y-4">
+                  <h5 className="font-medium text-gray-700">CYL (Cylinder) Ranges</h5>
+                  
+                  {/* Range 1 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 1</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_1_min}
+                        onChange={(e) => handleInputChange('markup_cyl_range_1_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_1_max}
+                        onChange={(e) => handleInputChange('markup_cyl_range_1_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_1_markup}
+                        onChange={(e) => handleInputChange('markup_cyl_range_1_markup', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Range 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 2</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_2_min}
+                        onChange={(e) => handleInputChange('markup_cyl_range_2_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_2_max}
+                        onChange={(e) => handleInputChange('markup_cyl_range_2_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_2_markup}
+                        onChange={(e) => handleInputChange('markup_cyl_range_2_markup', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Range 3 */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
+                    <div>
+                      <Label className="text-sm font-medium">Range 3</Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Min</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_3_min}
+                        onChange={(e) => handleInputChange('markup_cyl_range_3_min', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Max</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_3_max}
+                        onChange={(e) => handleInputChange('markup_cyl_range_3_max', e.target.value)}
+                        className="bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Markup %</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.markup_cyl_range_3_markup}
+                        onChange={(e) => handleInputChange('markup_cyl_range_3_markup', e.target.value)}
+                        className="bg-white"
+                      />
                     </div>
                   </div>
                 </div>
