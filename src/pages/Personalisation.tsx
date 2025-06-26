@@ -216,8 +216,12 @@ const Personalisation = () => {
         description: t('settingsSaved'),
       });
       setHasChanges(false);
+      // Invalidate both query keys to ensure all pages using personalisation data are updated
       queryClient.invalidateQueries({ queryKey: ['user-personalisation', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
+      
+      // Force refetch of the user information query to ensure immediate update
+      queryClient.refetchQueries({ queryKey: ['user-information', user?.id] });
     },
     onError: (error) => {
       console.error('Error saving user personalisation:', error);
