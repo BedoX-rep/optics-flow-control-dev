@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check, User, Phone, Eye, Receipt, CreditCard } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check, User, Phone, Eye, Receipt, CreditCard, DollarSign } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import {
   Alert,
@@ -132,7 +132,7 @@ const NewReceipt = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { translate: t } = useLanguage();
-  
+
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -180,7 +180,7 @@ const NewReceipt = () => {
     ],
   });
 
-  
+
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
   const [formData, setFormData] = useState({}); // Added formData state
   const [currentStep, setCurrentStep] = useState('details');
@@ -196,6 +196,8 @@ const NewReceipt = () => {
     progressive_lens_cost: 20.00,
     frames_cost: 10.00
   });
+
+  const [note, setNote] = useState('');
 
   const steps = [
     { id: 'client', label: t('clientSelection'), icon: User },
@@ -276,7 +278,7 @@ const NewReceipt = () => {
           if (error.code === 'PGRST116') {
             // No data found, initialize with defaults
             await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-            
+
             const { data: newData, error: newError } = await supabase
               .from('user_information')
               .select(`
@@ -338,7 +340,7 @@ const NewReceipt = () => {
         progressive_lens_cost: personalisationData.progressive_lens_cost ?? 20.00,
         frames_cost: personalisationData.frames_cost ?? 10.00
       });
-      
+
       // Update markup settings when personalisation data is loaded
       setMarkupSettings({
         sph: [
@@ -514,7 +516,7 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   let montageCosts = 0;
-  
+
   // Use manual additional costs if enabled
   if (manualAdditionalCostsEnabled) {
     montageCosts = manualAdditionalCostsAmount;
@@ -642,7 +644,7 @@ const NewReceipt = () => {
     try {
       // Invalidate and refetch the clients query
       await queryClient.invalidateQueries(['all-clients', user.id]);
-      
+
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select('*')
@@ -1162,7 +1164,7 @@ const NewReceipt = () => {
             </div>
           </div>
         </div>
-        
+
         </CardContent>
       </Card>
     );
@@ -1247,11 +1249,10 @@ const NewReceipt = () => {
           balance: total - advancePayment,
           advance_payment: advancePayment,
           payment_status: paymentStatus,
-          delivery_status: 'Undelivered',
-          montage_status: 'UnOrdered',
-          montage_costs: montageCosts,
-          products_cost: totalCost,
-          order_type: orderType,
+          delivery_status: "Undelivered",
+          montage_status: "UnOrdered",
+          order_type: "Unspecified",
+          note: note || null,
           call_status: 'Not Called',
           paid_at_delivery_cost: paidAtDeliveryCost,
           created_at: new Date().toISOString(),
@@ -1416,7 +1417,7 @@ const NewReceipt = () => {
         autoMontage={autoMontage}
         onAutoMontageChange={setAutoMontage}
       />
-      
+
     </div>
   );
 };

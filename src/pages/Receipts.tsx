@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, FileText } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -45,6 +45,7 @@ interface Receipt {
   order_type?: string;
   call_status: string;
   time_called?: string;
+  note?: string;
 }
 
 const ReceiptCard = ({ 
@@ -144,7 +145,7 @@ const ReceiptCard = ({
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
                       {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                     </Badge>
-                    
+
                     <div className="flex items-center gap-1">
                       <div className={cn("w-2 h-2 rounded-full",
                         receipt.call_status === 'Called' ? "bg-green-500" :

@@ -187,6 +187,17 @@ const ReceiptDetailsMiniDialog = ({
 
           <Separator />
 
+          {receipt.note && (
+            <div>
+              <h3 className="text-sm font-medium mb-2">{t('notes')}</h3>
+              <div className="p-3 bg-gray-50 rounded-lg border">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{receipt.note}</p>
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
           {receipt.receipt_items && receipt.receipt_items.length > 0 && (
             <div>
               <h3 className="text-sm font-medium mb-2">{t('items')}</h3>

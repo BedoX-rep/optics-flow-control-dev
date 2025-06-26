@@ -116,6 +116,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     delivery_status: '',
     montage_status: '',
     order_type: '',
+    note: '',
     items: [] as any[],
     total: 0
   });
@@ -175,6 +176,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           delivery_status: fullReceipt.delivery_status || '',
           montage_status: fullReceipt.montage_status || '',
           order_type: fullReceipt.order_type || '',
+          note: fullReceipt.note || '',
           items: (fullReceipt.receipt_items || []).map(item => ({
             ...item,
             paid_at_delivery: Boolean(item.paid_at_delivery),
@@ -219,6 +221,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           delivery_status: formData.delivery_status,
           montage_status: formData.montage_status,
           order_type: formData.order_type,
+          note: formData.note,
           products_cost: totalProductsCost,
           cost_ttc: costTtc,
           total: total,
@@ -544,6 +547,25 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               </CardContent>
             </Card>
           </div>
+
+          {/* Notes */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <FileText className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">{t('notes')}</h3>
+              </div>
+              <div>
+                <Label>{t('additionalNotes')}</Label>
+                <textarea
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  className="w-full h-20 px-3 py-2 border border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 resize-none"
+                  placeholder={t('enterAdditionalNotes')}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Items */}
           <Card>
