@@ -4140,6 +4140,259 @@ const financialTranslations: Translations = {
   }
 };
 
+const authTranslations: Translations = {
+  // Auth page UI
+  welcomeBack: {
+    en: 'Welcome back',
+    fr: 'Bienvenue'
+  },
+  createAccount: {
+    en: 'Create account',
+    fr: 'Créer un compte'
+  },
+  signInToAccessDashboard: {
+    en: 'Sign in to access your optical store dashboard',
+    fr: 'Connectez-vous pour accéder au tableau de bord de votre magasin d\'optique'
+  },
+  startManagingOpticalStore: {
+    en: 'Start managing your optical store today',
+    fr: 'Commencez à gérer votre magasin d\'optique aujourd\'hui'
+  },
+  signIn: {
+    en: 'Sign In',
+    fr: 'Se connecter'
+  },
+  signUp: {
+    en: 'Sign Up',
+    fr: 'S\'inscrire'
+  },
+  emailAddress: {
+    en: 'Email Address',
+    fr: 'Adresse e-mail'
+  },
+  enterEmailPlaceholder: {
+    en: 'name@company.com',
+    fr: 'nom@entreprise.com'
+  },
+  password: {
+    en: 'Password',
+    fr: 'Mot de passe'
+  },
+  enterPasswordPlaceholder: {
+    en: 'Enter your password',
+    fr: 'Entrez votre mot de passe'
+  },
+  forgotPassword: {
+    en: 'Forgot password?',
+    fr: 'Mot de passe oublié ?'
+  },
+  signingYouIn: {
+    en: 'Signing you in...',
+    fr: 'Connexion en cours...'
+  },
+  signInToDashboard: {
+    en: 'Sign in to Dashboard',
+    fr: 'Se connecter au tableau de bord'
+  },
+  personalInformation: {
+    en: 'Personal Information',
+    fr: 'Informations personnelles'
+  },
+  basicDetailsAboutYou: {
+    en: 'Basic details about you and your store',
+    fr: 'Informations de base sur vous et votre magasin'
+  },
+  fullName: {
+    en: 'Full Name',
+    fr: 'Nom complet'
+  },
+  fullNamePlaceholder: {
+    en: 'John Doe',
+    fr: 'Jean Dupont'
+  },
+  storeName: {
+    en: 'Store Name',
+    fr: 'Nom du magasin'
+  },
+  storeNamePlaceholder: {
+    en: 'My Optical Store',
+    fr: 'Mon Magasin d\'Optique'
+  },
+  storeNameDescription: {
+    en: 'This will appear on your receipts and invoices',
+    fr: 'Ceci apparaîtra sur vos reçus et factures'
+  },
+  accessAndReferral: {
+    en: 'Access & Referral',
+    fr: 'Accès et parrainage'
+  },
+  requiredCodesVerification: {
+    en: 'Required codes for account verification',
+    fr: 'Codes requis pour la vérification du compte'
+  },
+  accessCode: {
+    en: 'Access Code',
+    fr: 'Code d\'accès'
+  },
+  accessCodePlaceholder: {
+    en: 'ABCDE',
+    fr: 'ABCDE'
+  },
+  accessCodeRequired: {
+    en: 'Required: This is your unique 5-character access code which will give admin access to any user with access to it.',
+    fr: 'Requis : Il s\'agit de votre code d\'accès unique à 5 caractères qui donnera un accès administrateur à tout utilisateur y ayant accès.'
+  },
+  referralCode: {
+    en: 'Referral Code',
+    fr: 'Code de parrainage'
+  },
+  referralCodeOptional: {
+    en: '(Optional)',
+    fr: '(Optionnel)'
+  },
+  referralCodePlaceholder: {
+    en: 'ABCD',
+    fr: 'ABCD'
+  },
+  referralCodeOptionalDesc: {
+    en: 'Optional: Enter a referral code from an existing user to get special benefits. Leave blank if you don\'t have one.',
+    fr: 'Optionnel : Entrez un code de parrainage d\'un utilisateur existant pour obtenir des avantages spéciaux. Laissez vide si vous n\'en avez pas.'
+  },
+  security: {
+    en: 'Security',
+    fr: 'Sécurité'
+  },
+  createSecurePassword: {
+    en: 'Create a secure password for your account',
+    fr: 'Créez un mot de passe sécurisé pour votre compte'
+  },
+  passwordRequired: {
+    en: 'Password*',
+    fr: 'Mot de passe*'
+  },
+  createStrongPasswordPlaceholder: {
+    en: 'Create a strong password',
+    fr: 'Créez un mot de passe fort'
+  },
+  confirmPassword: {
+    en: 'Confirm Password*',
+    fr: 'Confirmer le mot de passe*'
+  },
+  confirmPasswordPlaceholder: {
+    en: 'Confirm your password',
+    fr: 'Confirmez votre mot de passe'
+  },
+  creatingAccount: {
+    en: 'Creating your account...',
+    fr: 'Création de votre compte...'
+  },
+  createMyAccount: {
+    en: 'Create My Account',
+    fr: 'Créer mon compte'
+  },
+  byContinuing: {
+    en: 'By continuing, you agree to our',
+    fr: 'En continuant, vous acceptez nos'
+  },
+  termsOfService: {
+    en: 'Terms of Service',
+    fr: 'Conditions d\'utilisation'
+  },
+  and: {
+    en: 'and',
+    fr: 'et'
+  },
+  privacyPolicy: {
+    en: 'Privacy Policy',
+    fr: 'Politique de confidentialité'
+  },
+  needHelp: {
+    en: 'Need help?',
+    fr: 'Besoin d\'aide ?'
+  },
+  contactSupport: {
+    en: 'Contact Support',
+    fr: 'Contacter le support'
+  },
+  opticalStoreManagement: {
+    en: 'Optical Store Management',
+    fr: 'Gestion de Magasin d\'Optique'
+  },
+  modernOpticalDescription: {
+    en: 'Modern optical store management system designed for efficiency and growth',
+    fr: 'Système de gestion moderne pour magasins d\'optique conçu pour l\'efficacité et la croissance'
+  },
+  lightningFast: {
+    en: 'Lightning Fast',
+    fr: 'Ultra Rapide'
+  },
+  lightningFastDesc: {
+    en: 'Optimized for speed and performance',
+    fr: 'Optimisé pour la vitesse et la performance'
+  },
+  secureReliable: {
+    en: 'Secure & Reliable',
+    fr: 'Sécurisé et Fiable'
+  },
+  secureReliableDesc: {
+    en: 'Enterprise-grade security',
+    fr: 'Sécurité de niveau entreprise'
+  },
+  multiUserReady: {
+    en: 'Multi-User Ready',
+    fr: 'Multi-utilisateurs'
+  },
+  multiUserReadyDesc: {
+    en: 'Perfect for teams of any size',
+    fr: 'Parfait pour les équipes de toute taille'
+  },
+  // Toast messages
+  error: {
+    en: 'Error',
+    fr: 'Erreur'
+  },
+  enterBothEmailPassword: {
+    en: 'Please enter both email and password.',
+    fr: 'Veuillez saisir l\'e-mail et le mot de passe.'
+  },
+  success: {
+    en: 'Success',
+    fr: 'Succès'
+  },
+  loggedInSuccessfully: {
+    en: 'Logged in successfully.',
+    fr: 'Connexion réussie.'
+  },
+  loginFailed: {
+    en: 'Login Failed',
+    fr: 'Échec de la connexion'
+  },
+  loginError: {
+    en: 'An error occurred during login.',
+    fr: 'Une erreur s\'est produite lors de la connexion.'
+  },
+  fillAllRequiredFields: {
+    en: 'Please fill in all required fields including access code.',
+    fr: 'Veuillez remplir tous les champs requis, y compris le code d\'accès.'
+  },
+  passwordsDoNotMatch: {
+    en: 'Passwords do not match.',
+    fr: 'Les mots de passe ne correspondent pas.'
+  },
+  accountCreatedSuccessfully: {
+    en: 'Account created successfully. You may need to verify your email before logging in.',
+    fr: 'Compte créé avec succès. Vous devrez peut-être vérifier votre e-mail avant de vous connecter.'
+  },
+  signupFailed: {
+    en: 'Signup Failed',
+    fr: 'Échec de l\'inscription'
+  },
+  signupError: {
+    en: 'An error occurred during signup.',
+    fr: 'Une erreur s\'est produite lors de l\'inscription.'
+  }
+};
+
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
@@ -4153,6 +4406,7 @@ const allTranslations: Translations = {
   ...settingsTranslations,
   ...accessTranslations,
   ...financialTranslations,
+  ...authTranslations,
   navigation: {
     en: {
       home: 'Home',

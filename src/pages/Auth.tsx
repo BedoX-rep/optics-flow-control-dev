@@ -19,11 +19,14 @@ import {
 } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/components/LanguageProvider';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Eye, EyeOff, Glasses, ShieldCheck, Zap, Users } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -52,8 +55,8 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password) {
       toast({
-        title: "Error",
-        description: "Please enter both email and password.",
+        title: t('error'),
+        description: t('enterBothEmailPassword'),
         variant: "destructive",
       });
       return;
@@ -69,16 +72,16 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Logged in successfully.",
+        title: t('success'),
+        description: t('loggedInSuccessfully'),
       });
 
       navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
-        title: "Login Failed",
-        description: error.message || "An error occurred during login.",
+        title: t('loginFailed'),
+        description: error.message || t('loginError'),
         variant: "destructive",
       });
     } finally {
@@ -90,8 +93,8 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password || !confirmPassword || !accessCode) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields including access code.",
+        title: t('error'),
+        description: t('fillAllRequiredFields'),
         variant: "destructive",
       });
       return;
@@ -99,8 +102,8 @@ const Auth = () => {
 
     if (password !== confirmPassword) {
       toast({
-        title: "Error",
-        description: "Passwords do not match.",
+        title: t('error'),
+        description: t('passwordsDoNotMatch'),
         variant: "destructive",
       });
       return;
@@ -132,16 +135,16 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Account created successfully. You may need to verify your email before logging in.",
+        title: t('success'),
+        description: t('accountCreatedSuccessfully'),
       });
 
       setActiveTab('login');
     } catch (error: any) {
       console.error('Signup error:', error);
       toast({
-        title: "Signup Failed",
-        description: error.message || "An error occurred during signup.",
+        title: t('signupFailed'),
+        description: error.message || t('signupError'),
         variant: "destructive",
       });
     } finally {
@@ -160,18 +163,23 @@ const Auth = () => {
               <Glasses className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Lensly</h1>
-            <p className="text-gray-600 mt-2">Optical Store Management</p>
+            <p className="text-gray-600 mt-2">{t('opticalStoreManagement')}</p>
+            
+            {/* Language Switcher for Mobile */}
+            <div className="mt-4 flex justify-center">
+              <LanguageSwitcher />
+            </div>
           </div>
 
           <Card className="border-0 shadow-2xl shadow-black/5">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-2xl font-bold text-gray-900">
-                {activeTab === 'login' ? 'Welcome back' : 'Create account'}
+                {activeTab === 'login' ? t('welcomeBack') : t('createAccount')}
               </CardTitle>
               <CardDescription className="text-gray-600">
                 {activeTab === 'login' 
-                  ? 'Sign in to access your optical store dashboard' 
-                  : 'Start managing your optical store today'
+                  ? t('signInToAccessDashboard') 
+                  : t('startManagingOpticalStore')
                 }
               </CardDescription>
             </CardHeader>
@@ -188,13 +196,13 @@ const Auth = () => {
                     value="login" 
                     className="h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
                   >
-                    Sign In
+                    {t('signIn')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
                     className="h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
                   >
-                    Sign Up
+                    {t('signUp')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -203,12 +211,12 @@ const Auth = () => {
                     <div className="space-y-6">
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
-                          Email Address
+                          {t('emailAddress')}
                         </Label>
                         <Input 
                           id="email" 
                           type="email" 
-                          placeholder="name@company.com" 
+                          placeholder={t('enterEmailPlaceholder')}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="h-14 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl transition-all shadow-sm text-base"
@@ -218,20 +226,20 @@ const Auth = () => {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label htmlFor="password" className="text-gray-700 font-medium text-sm">
-                            Password
+                            {t('password')}
                           </Label>
                           <button
                             type="button"
                             className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors"
                           >
-                            Forgot password?
+                            {t('forgotPassword')}
                           </button>
                         </div>
                         <div className="relative">
                           <Input 
                             id="password" 
                             type={showPassword ? "text" : "password"} 
-                            placeholder="Enter your password"
+                            placeholder={t('enterPasswordPlaceholder')}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="h-14 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl pr-12 transition-all shadow-sm text-base"
@@ -256,11 +264,11 @@ const Auth = () => {
                       {isLoading ? (
                         <div className="flex items-center space-x-2">
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Signing you in...</span>
+                          <span>{t('signingYouIn')}</span>
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
-                          <span>Sign in to Dashboard</span>
+                          <span>{t('signInToDashboard')}</span>
                           <Glasses className="w-5 h-5" />
                         </div>
                       )}
@@ -273,19 +281,19 @@ const Auth = () => {
                     {/* Personal Information Section */}
                     <div className="space-y-4">
                       <div className="pb-2 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Personal Information</h3>
-                        <p className="text-xs text-gray-500">Basic details about you and your store</p>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('personalInformation')}</h3>
+                        <p className="text-xs text-gray-500">{t('basicDetailsAboutYou')}</p>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="email-signup" className="text-gray-700 font-medium text-sm flex items-center">
-                            Email Address*
+                            {t('emailAddress')}*
                           </Label>
                           <Input 
                             id="email-signup" 
                             type="email" 
-                            placeholder="name@company.com" 
+                            placeholder={t('enterEmailPlaceholder')}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
@@ -294,12 +302,12 @@ const Auth = () => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="display-name" className="text-gray-700 font-medium text-sm">
-                            Full Name
+                            {t('fullName')}
                           </Label>
                           <Input 
                             id="display-name" 
                             type="text" 
-                            placeholder="John Doe" 
+                            placeholder={t('fullNamePlaceholder')}
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
@@ -309,37 +317,37 @@ const Auth = () => {
 
                       <div className="space-y-2">
                         <Label htmlFor="store-name" className="text-gray-700 font-medium text-sm">
-                          Store Name
+                          {t('storeName')}
                         </Label>
                         <Input 
                           id="store-name" 
                           type="text" 
-                          placeholder="My Optical Store" 
+                          placeholder={t('storeNamePlaceholder')}
                           value={storeName}
                           onChange={(e) => setStoreName(e.target.value)}
                           className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg transition-all shadow-sm"
                         />
-                        <p className="text-xs text-gray-500">This will appear on your receipts and invoices</p>
+                        <p className="text-xs text-gray-500">{t('storeNameDescription')}</p>
                       </div>
                     </div>
 
                     {/* Access & Referral Section */}
                     <div className="space-y-4">
                       <div className="pb-2 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Access & Referral</h3>
-                        <p className="text-xs text-gray-500">Required codes for account verification</p>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('accessAndReferral')}</h3>
+                        <p className="text-xs text-gray-500">{t('requiredCodesVerification')}</p>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="access-code" className="text-gray-700 font-medium text-sm flex items-center">
-                            Access Code*
+                            {t('accessCode')}*
                             <span className="ml-1 text-red-500">*</span>
                           </Label>
                           <Input 
                             id="access-code" 
                             type="text" 
-                            placeholder="ABCDE" 
+                            placeholder={t('accessCodePlaceholder')}
                             maxLength={5}
                             value={accessCode}
                             onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
@@ -348,19 +356,19 @@ const Auth = () => {
                           />
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <p className="text-xs text-blue-700">
-                              <strong>Required:</strong> This is your unique 5-character access code which will give admin access to any user with access to it.
+                              <strong>{t('error').replace(':', '')}:</strong> {t('accessCodeRequired')}
                             </p>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="referral-code" className="text-gray-700 font-medium text-sm">
-                            Referral Code
-                            <span className="ml-1 text-gray-400">(Optional)</span>
+                            {t('referralCode')}
+                            <span className="ml-1 text-gray-400">{t('referralCodeOptional')}</span>
                           </Label>
                           <Input 
                             id="referral-code" 
                             type="text" 
-                            placeholder="ABCD" 
+                            placeholder={t('referralCodePlaceholder')}
                             maxLength={4}
                             value={referralCode}
                             onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
@@ -368,7 +376,7 @@ const Auth = () => {
                           />
                           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                             <p className="text-xs text-green-700">
-                              <strong>Optional:</strong> Enter a referral code from an existing user to get special benefits. Leave blank if you don't have one.
+                              <strong>{t('referralCodeOptional').replace('(', '').replace(')', '')}:</strong> {t('referralCodeOptionalDesc')}
                             </p>
                           </div>
                         </div>
@@ -378,20 +386,20 @@ const Auth = () => {
                     {/* Password Section */}
                     <div className="space-y-4">
                       <div className="pb-2 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Security</h3>
-                        <p className="text-xs text-gray-500">Create a secure password for your account</p>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('security')}</h3>
+                        <p className="text-xs text-gray-500">{t('createSecurePassword')}</p>
                       </div>
                       
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="password-signup" className="text-gray-700 font-medium text-sm">
-                            Password*
+                            {t('passwordRequired')}
                           </Label>
                           <div className="relative">
                             <Input 
                               id="password-signup" 
                               type={showPassword ? "text" : "password"} 
-                              placeholder="Create a strong password"
+                              placeholder={t('createStrongPasswordPlaceholder')}
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all shadow-sm"
@@ -409,13 +417,13 @@ const Auth = () => {
 
                         <div className="space-y-2">
                           <Label htmlFor="confirm-password" className="text-gray-700 font-medium text-sm">
-                            Confirm Password*
+                            {t('confirmPassword')}
                           </Label>
                           <div className="relative">
                             <Input 
                               id="confirm-password" 
                               type={showConfirmPassword ? "text" : "password"} 
-                              placeholder="Confirm your password"
+                              placeholder={t('confirmPasswordPlaceholder')}
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg pr-12 transition-all shadow-sm"
@@ -441,11 +449,11 @@ const Auth = () => {
                       {isLoading ? (
                         <div className="flex items-center space-x-2">
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                          <span>Creating your account...</span>
+                          <span>{t('creatingAccount')}</span>
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
-                          <span>Create My Account</span>
+                          <span>{t('createMyAccount')}</span>
                           <ShieldCheck className="w-5 h-5" />
                         </div>
                       )}
@@ -457,19 +465,19 @@ const Auth = () => {
               {/* Footer */}
               <div className="text-center mt-8 pt-6 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  By continuing, you agree to our{' '}
+                  {t('byContinuing')}{' '}
                   <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">
-                    Terms of Service
+                    {t('termsOfService')}
                   </span>{' '}
-                  and{' '}
+                  {t('and')}{' '}
                   <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">
-                    Privacy Policy
+                    {t('privacyPolicy')}
                   </span>
                 </p>
                 <p className="text-sm text-gray-600 mt-4">
-                  Need help?{' '}
+                  {t('needHelp')}{' '}
                   <span className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium">
-                    Contact Support
+                    {t('contactSupport')}
                   </span>
                 </p>
               </div>
@@ -486,6 +494,11 @@ const Auth = () => {
           <div className="absolute bottom-40 right-20 w-48 h-48 border border-white rounded-full"></div>
           <div className="absolute top-1/2 right-40 w-24 h-24 border border-white rounded-full"></div>
         </div>
+
+        {/* Language Switcher for Desktop - Top Right */}
+        <div className="absolute top-6 right-6 z-20">
+          <LanguageSwitcher />
+        </div>
         
         <div className="relative z-10 text-center text-white">
           <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
@@ -493,7 +506,7 @@ const Auth = () => {
           </div>
           <h1 className="text-5xl font-bold mb-6">Lensly</h1>
           <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-md">
-            Modern optical store management system designed for efficiency and growth
+            {t('modernOpticalDescription')}
           </p>
           
           {/* Feature highlights */}
@@ -503,8 +516,8 @@ const Auth = () => {
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold">Lightning Fast</h3>
-                <p className="text-white/80 text-sm">Optimized for speed and performance</p>
+                <h3 className="font-semibold">{t('lightningFast')}</h3>
+                <p className="text-white/80 text-sm">{t('lightningFastDesc')}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -512,8 +525,8 @@ const Auth = () => {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold">Secure & Reliable</h3>
-                <p className="text-white/80 text-sm">Enterprise-grade security</p>
+                <h3 className="font-semibold">{t('secureReliable')}</h3>
+                <p className="text-white/80 text-sm">{t('secureReliableDesc')}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -521,8 +534,8 @@ const Auth = () => {
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold">Multi-User Ready</h3>
-                <p className="text-white/80 text-sm">Perfect for teams of any size</p>
+                <h3 className="font-semibold">{t('multiUserReady')}</h3>
+                <p className="text-white/80 text-sm">{t('multiUserReadyDesc')}</p>
               </div>
             </div>
           </div>
