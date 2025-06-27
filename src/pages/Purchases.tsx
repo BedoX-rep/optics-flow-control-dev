@@ -1378,17 +1378,17 @@ const PURCHASE_TYPES = [
                   >
                     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
                       <CardContent className="p-4">
-                        {/* Header Section with Supplier, Dates, and Actions */}
+                        {/* Header Section with Description, Dates, and Actions */}
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
-                                <h3 className="text-sm font-semibold text-gray-800 truncate">
-                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Receipt className="h-4 w-4 text-primary flex-shrink-0" />
+                                <h3 className="text-base font-bold text-gray-900 truncate">
+                                  {purchase.description}
                                 </h3>
                               </div>
-                              <div className="flex items-center gap-2 text-xs">
+                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
                                 {purchase.payment_urgency && (
                                   <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
                                     Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
@@ -1401,12 +1401,17 @@ const PURCHASE_TYPES = [
                                 )}
                               </div>
                             </div>
-                            <p className="text-xs text-gray-600 truncate font-medium mb-1">
-                              {purchase.description}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <Calendar className="h-3 w-3" />
-                              <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
+                            <div className="flex items-center gap-4 text-xs text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <Building2 className="h-3 w-3" />
+                                <span className="truncate max-w-[150px]">
+                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="flex gap-1 flex-shrink-0 ml-2">

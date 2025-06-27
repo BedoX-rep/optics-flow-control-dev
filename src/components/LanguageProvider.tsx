@@ -2779,6 +2779,26 @@ const purchasesTranslations: Translations = {
     en: 'Add Supplier',
     fr: 'Ajouter un Fournisseur'
   },
+  addNewSupplier: {
+    en: 'Add New Supplier',
+    fr: 'Ajouter un Nouveau Fournisseur'
+  },
+  supplierAdded: {
+    en: 'Supplier added successfully',
+    fr: 'Fournisseur ajouté avec succès'
+  },
+  failedToAddSupplier: {
+    en: 'Failed to add supplier',
+    fr: 'Échec de l\'ajout du fournisseur'
+  },
+  adding: {
+    en: 'Adding...',
+    fr: 'Ajout en cours...'
+  },
+  addSupplierButton: {
+    en: 'Add Supplier',
+    fr: 'Ajouter le Fournisseur'
+  },
   searchPurchasesSuppliers: {
     en: 'Search purchases or suppliers...',
     fr: 'Rechercher des achats ou fournisseurs...'
