@@ -3859,7 +3859,7 @@ const financialTranslations: Translations = {
     fr: 'Payé'
   },
   unpaid: {
-    en: 'Impayé',
+    en: 'Unpaid',
     fr: 'Impayé'
   },
   operational: {
