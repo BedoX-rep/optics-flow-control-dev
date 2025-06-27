@@ -4773,8 +4773,8 @@ const authTranslations: Translations = {
     fr: 'ABCD'
   },
   referralCodeOptionalDesc: {
-    en: 'Enter a referral code from an existing user. Leave blank if you don\'t have one.',
-    fr: 'Entrez un code de parrainage d\'un utilisateur existant. Laissez vide si vous n\'en avez pas.'
+    en: 'Optional: Enter a referral code from an existing user. Leave blank if you don\'t have one.',
+    fr: 'Optionnel : Entrez un code de parrainage d\'un utilisateur existant. Laissez vide si vous n\'en avez pas.'
   },
   security: {
     en: 'Security',
