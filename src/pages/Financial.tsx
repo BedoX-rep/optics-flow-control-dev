@@ -59,11 +59,17 @@ const Financial = () => {
   const queryClient = useQueryClient();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  // Receipt Items Analysis filters
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState('all');
   const [selectedCompany, setSelectedCompany] = useState('all');
   const [selectedPaidAtDelivery, setSelectedPaidAtDelivery] = useState('all');
   const [includePaidAtDelivery, setIncludePaidAtDelivery] = useState(true);
+
+  // Detailed Expenditure Analysis filters
+  const [selectedExpenseType, setSelectedExpenseType] = useState('all');
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('all');
+  const [selectedSupplier, setSelectedSupplier] = useState('all');
 
   // Fetch receipts with more detailed data
   const { data: receipts = [], isLoading: receiptsLoading } = useQuery({
@@ -125,7 +131,7 @@ const Financial = () => {
       })) || [];
 
       console.log('Processed receipts data:', processedData);
-      
+
       return processedData;
     },
     enabled: !!user,
@@ -622,7 +628,7 @@ const Financial = () => {
           <DollarSign className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-gray-900">{t('financial')}</h1>
         </div>
-        
+
         {/* Integrated Date Range Filter */}
         <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex flex-wrap items-end gap-4">
@@ -1118,33 +1124,43 @@ const Financial = () => {
         </CardHeader>
         <CardContent>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-            <div className="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
-              <span className="font-medium">{t('totalCapitalExpenditure')}</span>
-              <span className="font-bold text-purple-900">
-                {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
-              </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-purple-900">{t('totalCapitalExpenditure')}</span>
+                <span className="font-bold text-purple-900 text-lg">
+                  {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('paid')}:</span>
+                  <span className="font-medium text-green-600">{financialMetrics.capitalAnalysis.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('unpaid')}:</span>
+                  <span className="font-medium text-red-600">{financialMetrics.capitalAnalysis.outstanding.toFixed(2)} DH</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-              <span className="font-medium">{t('totalOperationalExpenses')}</span>
-              <span className="font-bold text-blue-900">
-                {financialMetrics.operationalExpenses.total.toFixed(2)} DH
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-              <span className="font-medium">{t('totalPaid')}</span>
-              <span className="font-bold text-green-600">
-                {(financialMetrics.capitalAnalysis.paid + financialMetrics.operationalExpenses.paid).toFixed(2)} DH
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-              <span className="font-medium">{t('totalUnpaid')}</span>
-              <span className="font-bold text-red-600">
-                {(financialMetrics.capitalAnalysis.outstanding + financialMetrics.operationalExpenses.unpaid).toFixed(2)} DH
-              </span>
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-blue-900">{t('totalOperationalExpenses')}</span>
+                <span className="font-bold text-blue-900 text-lg">
+                  {financialMetrics.operationalExpenses.total.toFixed(2)} DH
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('paid')}:</span>
+                  <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('unpaid')}:</span>
+                  <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1152,7 +1168,7 @@ const Financial = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <Label htmlFor="expenseTypeFilter">{t('expenseTypeFilter')}</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedExpenseType} onValueChange={setSelectedExpenseType}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -1166,7 +1182,7 @@ const Financial = () => {
 
             <div>
               <Label htmlFor="paymentStatusFilter">{t('paymentStatusFilter')}</Label>
-              <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
+              <Select value={selectedPaymentStatus} onValueChange={setSelectedPaymentStatus}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -1181,7 +1197,7 @@ const Financial = () => {
 
             <div>
               <Label htmlFor="supplierFilter">{t('supplierFilter')}</Label>
-              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
@@ -1196,32 +1212,41 @@ const Financial = () => {
           </div>
 
           {/* Filtered Expenses List */}
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {filteredPurchases
-              .filter(purchase => {
-                const matchesType = selectedCategory === 'all' || purchase.purchase_type === selectedCategory;
-                const matchesSupplier = selectedCompany === 'all' || (purchase.supplier?.name || 'Unknown') === selectedCompany;
-                
+          <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
+            {(() => {
+              const filteredExpenses = filteredPurchases.filter(purchase => {
+                const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
+                const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
+
                 const paid = purchase.advance_payment || 0;
                 const total = purchase.amount_ttc || purchase.amount || 0;
                 const outstanding = total - paid;
-                
+
                 let matchesPaymentStatus = true;
-                if (selectedPaidAtDelivery === 'paid') {
+                if (selectedPaymentStatus === 'paid') {
                   matchesPaymentStatus = outstanding === 0 && paid > 0;
-                } else if (selectedPaidAtDelivery === 'unpaid') {
+                } else if (selectedPaymentStatus === 'unpaid') {
                   matchesPaymentStatus = paid === 0;
-                } else if (selectedPaidAtDelivery === 'partial') {
+                } else if (selectedPaymentStatus === 'partial') {
                   matchesPaymentStatus = paid > 0 && outstanding > 0;
                 }
-                
+
                 return matchesType && matchesSupplier && matchesPaymentStatus;
-              })
-              .map((purchase) => {
+              });
+
+              if (filteredExpenses.length === 0) {
+                return (
+                  <div className="text-center py-8 text-gray-500">
+                    {t('noExpensesFoundMatchingFilters')}
+                  </div>
+                );
+              }
+
+              return filteredExpenses.map((purchase) => {
                 const total = purchase.amount_ttc || purchase.amount || 0;
                 const paid = purchase.advance_payment || 0;
                 const outstanding = total - paid;
-                
+
                 return (
                   <div key={purchase.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
                     <div className="flex justify-between items-start mb-3">
@@ -1271,36 +1296,66 @@ const Financial = () => {
                     )}
                   </div>
                 );
-              })}
+              });
+            })()}
           </div>
 
-          {filteredPurchases.filter(purchase => {
-            const matchesType = selectedCategory === 'all' || purchase.purchase_type === selectedCategory;
-            const matchesSupplier = selectedCompany === 'all' || (purchase.supplier?.name || 'Unknown') === selectedCompany;
-            
-            const paid = purchase.advance_payment || 0;
-            const total = purchase.amount_ttc || purchase.amount || 0;
-            const outstanding = total - paid;
-            
-            let matchesPaymentStatus = true;
-            if (selectedPaidAtDelivery === 'paid') {
-              matchesPaymentStatus = outstanding === 0 && paid > 0;
-            } else if (selectedPaidAtDelivery === 'unpaid') {
-              matchesPaymentStatus = paid === 0;
-            } else if (selectedPaidAtDelivery === 'partial') {
-              matchesPaymentStatus = paid > 0 && outstanding > 0;
-            }
-            
-            return matchesType && matchesSupplier && matchesPaymentStatus;
-          }).length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              {t('noExpensesFoundMatchingFilters')}
+          {/* Total for Filtered Items */}
+          <div className="flex justify-end">
+            <div className="bg-gray-100 rounded-lg p-4 border border-gray-300 min-w-[300px]">
+              <h4 className="font-semibold text-gray-800 mb-2">{t('totalFilteredExpenses')}</h4>
+              {(() => {
+                const filteredExpenses = filteredPurchases.filter(purchase => {
+                  const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
+                  const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
+
+                  const paid = purchase.advance_payment || 0;
+                  const total = purchase.amount_ttc || purchase.amount || 0;
+                  const outstanding = total - paid;
+
+                  let matchesPaymentStatus = true;
+                  if (selectedPaymentStatus === 'paid') {
+                    matchesPaymentStatus = outstanding === 0 && paid > 0;
+                  } else if (selectedPaymentStatus === 'unpaid') {
+                    matchesPaymentStatus = paid === 0;
+                  } else if (selectedPaymentStatus === 'partial') {
+                    matchesPaymentStatus = paid > 0 && outstanding > 0;
+                  }
+
+                  return matchesType && matchesSupplier && matchesPaymentStatus;
+                });
+
+                const totalAmount = filteredExpenses.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount || 0), 0);
+                const totalPaid = filteredExpenses.reduce((sum, purchase) => sum + (purchase.advance_payment || 0), 0);
+                const totalOutstanding = totalAmount - totalPaid;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('totalAmount')}:</span>
+                      <span className="font-bold text-gray-900">{totalAmount.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('totalPaid')}:</span>
+                      <span className="font-medium text-green-600">{totalPaid.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('totalOutstanding')}:</span>
+                      <span className="font-medium text-red-600">{totalOutstanding.toFixed(2)} DH</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-500 border-t pt-2">
+                      <span>{t('itemsCount')}:</span>
+                      <span>{filteredExpenses.length}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
-      
+
     </div>
   );
 };
