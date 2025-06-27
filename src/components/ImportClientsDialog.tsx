@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import {
   Dialog,
@@ -36,17 +35,17 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
   const [availableColumns, setAvailableColumns] = useState<string[]>([])
   const [step, setStep] = useState(1)
   const [errors, setErrors] = useState<string[]>([])
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
-    
+
     if (!selectedFile) {
       setFile(null)
       setPreviewData([])
       setAvailableColumns([])
       return
     }
-    
+
     // Check if file is CSV or XLSX
     if (!selectedFile.name.endsWith('.csv') && !selectedFile.name.endsWith('.xlsx')) {
       toast({
@@ -56,9 +55,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
       })
       return
     }
-    
+
     setFile(selectedFile)
-    
+
     if (selectedFile.name.endsWith('.xlsx')) {
       // Handle XLSX file
       const reader = new FileReader()
@@ -69,9 +68,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           const sheetName = workbook.SheetNames[0]
           const worksheet = workbook.Sheets[sheetName]
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: hasHeaders ? 1 : undefined })
-          
+
           setPreviewData(jsonData.slice(0, 5)) // Preview first 5 rows
-          
+
           if (hasHeaders && jsonData.length > 0) {
             setAvailableColumns(Object.keys(jsonData[0]))
           } else if (!hasHeaders && jsonData.length > 0) {
@@ -95,7 +94,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         preview: 5, // Preview first 5 rows
         complete: (results) => {
           setPreviewData(results.data)
-          
+
           // Get column names
           if (hasHeaders && results.meta.fields) {
             setAvailableColumns(results.meta.fields)
@@ -117,10 +116,10 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
 
   const handleNext = () => {
     if (!file || availableColumns.length === 0) return
-    
+
     // Auto-detect column mappings based on common names
     const autoMappings: Record<string, string> = {}
-    
+
     availableColumns.forEach(col => {
       const lowerCol = col.toLowerCase()
       if (lowerCol.includes('name') || lowerCol.includes('client')) {
@@ -141,35 +140,33 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         autoMappings.Add = col
       }
     })
-    
+
     setColumnMappings(autoMappings)
     setStep(2)
   }
-  
+
   const validateClients = (clients: any[]) => {
     const errors = []
-    
+
     // Check for missing required fields
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i]
       if (!client.name || client.name.toString().trim() === "") {
         errors.push(`Row ${i + 1}: Missing client name`)
       }
-      if (!client.phone || client.phone.toString().trim() === "") {
-        errors.push(`Row ${i + 1}: Missing phone number`)
-      }
+      
     }
-    
+
     return errors
   }
-  
+
   const handleImport = () => {
     if (!file) return
-    
+
     const processData = (data: any[]) => {
       let clients = data.map((row: any, index: number) => {
         const client: any = {}
-        
+
         // Map required fields
         REQUIRED_FIELDS.forEach(field => {
           const mappedColumn = columnMappings[field]
@@ -177,7 +174,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             client[field] = hasHeaders ? row[mappedColumn] : row[parseInt(mappedColumn.replace("Column ", "")) - 1]
           }
         })
-        
+
         // Map optional fields
         OPTIONAL_FIELDS.forEach(field => {
           const mappedColumn = columnMappings[field]
@@ -188,10 +185,10 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             }
           }
         })
-        
+
         return client
       })
-      
+
       // Validate clients
       const validationErrors = validateClients(clients)
       if (validationErrors.length > 0) {
@@ -199,7 +196,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         setStep(3) // Show errors
         return
       }
-      
+
       onImport(clients)
       resetDialog()
       toast({
@@ -207,7 +204,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         description: `${clients.length} client(s) imported successfully`,
       })
     }
-    
+
     if (file.name.endsWith('.xlsx')) {
       // Handle XLSX file
       const reader = new FileReader()
@@ -246,7 +243,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
       })
     }
   }
-  
+
   const resetDialog = () => {
     setFile(null)
     setPreviewData([])
@@ -255,12 +252,12 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
     setStep(1)
     setErrors([])
   }
-  
+
   const handleClose = () => {
     resetDialog()
     onClose()
   }
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -270,7 +267,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
             Import your clients from a CSV or XLSX file. The file should contain at least name and phone columns.
           </DialogDescription>
         </DialogHeader>
-        
+
         {step === 1 && (
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -281,7 +278,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
               />
               <Label htmlFor="hasHeaders">First row contains column headers</Label>
             </div>
-            
+
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -379,10 +376,10 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                       }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select column" />
+                        <SelectValue placeholder={t('selectColumn')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">-- Not mapped --</SelectItem>
+                        <SelectItem value="none">{t('notMapped')}</SelectItem>
                         {availableColumns.map(col => (
                           <SelectItem key={col} value={col}>{col}</SelectItem>
                         ))}
@@ -407,10 +404,10 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                       }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select column" />
+                        <SelectValue placeholder={t('selectColumn')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">-- Not mapped --</SelectItem>
+                        <SelectItem value="none">{t('notMapped')}</SelectItem>
                         {availableColumns.map(col => (
                           <SelectItem key={col} value={col}>{col}</SelectItem>
                         ))}
@@ -427,7 +424,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
               </Button>
               <Button 
                 onClick={handleImport}
-                disabled={!columnMappings.name || !columnMappings.phone}
+                disabled={!columnMappings.name }
               >
                 Import Clients
               </Button>
@@ -444,7 +441,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                 Please fix the following issues and try again:
               </AlertDescription>
             </Alert>
-            
+
             <div className="max-h-60 overflow-y-auto border rounded p-3">
               <ul className="list-disc pl-5 space-y-1">
                 {errors.map((error, index) => (
@@ -454,7 +451,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                 ))}
               </ul>
             </div>
-            
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(1)}>
                 Back

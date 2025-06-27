@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import * as XLSX from 'xlsx'
+import { useLanguage } from "./LanguageProvider"
 
 interface ImportProductsDialogProps {
   isOpen: boolean
@@ -29,6 +30,7 @@ const OPTIONAL_FIELDS = ['category', 'index', 'treatment', 'company', 'gamma', '
 
 export const ImportProductsDialog = ({ isOpen, onClose, onImport }: ImportProductsDialogProps) => {
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [file, setFile] = useState<File | null>(null)
   const [previewData, setPreviewData] = useState<any[]>([])
   const [hasHeaders, setHasHeaders] = useState(true)
@@ -288,9 +290,9 @@ export const ImportProductsDialog = ({ isOpen, onClose, onImport }: ImportProduc
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Products</DialogTitle>
+          <DialogTitle>{t('importProducts')}</DialogTitle>
           <DialogDescription>
-            Import your products from a CSV or XLSX file. The file should contain at least name and price columns.
+            {t('importProductsDescription')}
           </DialogDescription>
         </DialogHeader>
         

@@ -2086,6 +2086,151 @@ const receiptTranslations: Translations = {
   newClient: {
     en: 'New Client',
     fr: 'Nouveau Client'
+  },
+  // Import dialogs
+  importClients: {
+    en: 'Import Clients',
+    fr: 'Importer les Clients'
+  },
+  importProducts: {
+    en: 'Import Products',
+    fr: 'Importer les Produits'
+  },
+  importClientsDescription: {
+    en: 'Import your clients from a CSV or XLSX file. The file should contain at least a name column.',
+    fr: 'Importez vos clients à partir d\'un fichier CSV ou XLSX. Le fichier doit contenir au moins une colonne nom.'
+  },
+  importProductsDescription: {
+    en: 'Import your products from a CSV or XLSX file. The file should contain at least name and price columns.',
+    fr: 'Importez vos produits à partir d\'un fichier CSV ou XLSX. Le fichier doit contenir au moins les colonnes nom et prix.'
+  },
+  firstRowHeaders: {
+    en: 'First row contains column headers',
+    fr: 'La première ligne contient les en-têtes de colonnes'
+  },
+  clickToUpload: {
+    en: 'Click to upload',
+    fr: 'Cliquer pour télécharger'
+  },
+  dragAndDrop: {
+    en: 'or drag and drop',
+    fr: 'ou glisser-déposer'
+  },
+  csvOrXlsxFile: {
+    en: 'CSV or XLSX file',
+    fr: 'Fichier CSV ou XLSX'
+  },
+  previewFirstRows: {
+    en: 'Preview (first 5 rows):',
+    fr: 'Aperçu (5 premières lignes) :'
+  },
+  columnMapping: {
+    en: 'Column Mapping',
+    fr: 'Mappage des Colonnes'
+  },
+  columnMappingDescription: {
+    en: 'Map the columns in your file to client fields. Required fields are marked with *.',
+    fr: 'Mappez les colonnes de votre fichier aux champs client. Les champs obligatoires sont marqués d\'un *.'
+  },
+  columnMappingProductDescription: {
+    en: 'Map the columns in your file to product fields. Required fields are marked with *.',
+    fr: 'Mappez les colonnes de votre fichier aux champs produit. Les champs obligatoires sont marqués d\'un *.'
+  },
+  requiredFields: {
+    en: 'Required Fields',
+    fr: 'Champs Obligatoires'
+  },
+  optionalFields: {
+    en: 'Optional Fields',
+    fr: 'Champs Optionnels'
+  },
+  optionalFieldsPrescription: {
+    en: 'Optional Fields (Prescription)',
+    fr: 'Champs Optionnels (Prescription)'
+  },
+  selectColumn: {
+    en: 'Select column',
+    fr: 'Sélectionner une colonne'
+  },
+  notMapped: {
+    en: '-- Not mapped --',
+    fr: '-- Non mappé --'
+  },
+  importFailed: {
+    en: 'Import failed',
+    fr: 'Échec de l\'importation'
+  },
+  fixIssuesAndRetry: {
+    en: 'Please fix the following issues and try again:',
+    fr: 'Veuillez corriger les problèmes suivants et réessayer :'
+  },
+  invalidFileType: {
+    en: 'Invalid file type',
+    fr: 'Type de fichier invalide'
+  },
+  pleaseUploadCsvXlsx: {
+    en: 'Please upload a CSV or XLSX file',
+    fr: 'Veuillez télécharger un fichier CSV ou XLSX'
+  },
+  errorReadingXlsx: {
+    en: 'Error reading XLSX file',
+    fr: 'Erreur de lecture du fichier XLSX'
+  },
+  validExcelFile: {
+    en: 'Please make sure the file is a valid Excel file',
+    fr: 'Veuillez vous assurer que le fichier est un fichier Excel valide'
+  },
+  errorReadingCsv: {
+    en: 'Error reading CSV file',
+    fr: 'Erreur de lecture du fichier CSV'
+  },
+  errorImportingXlsx: {
+    en: 'Error importing XLSX',
+    fr: 'Erreur d\'importation XLSX'
+  },
+  failedProcessExcel: {
+    en: 'Failed to process the Excel file',
+    fr: 'Échec du traitement du fichier Excel'
+  },
+  errorImportingCsv: {
+    en: 'Error importing CSV',
+    fr: 'Erreur d\'importation CSV'
+  },
+  clientsImportedSuccessfully: {
+    en: 'client(s) imported successfully',
+    fr: 'client(s) importé(s) avec succès'
+  },
+  productsImportedSuccessfully: {
+    en: 'product(s) imported successfully',
+    fr: 'produit(s) importé(s) avec succès'
+  },
+  missingClientName: {
+    en: 'Missing client name',
+    fr: 'Nom du client manquant'
+  },
+  missingProductName: {
+    en: 'Missing product name',
+    fr: 'Nom du produit manquant'
+  },
+  missingInvalidPrice: {
+    en: 'Missing or invalid price',
+    fr: 'Prix manquant ou invalide'
+  },
+  importClients: {
+    en: 'Import Clients',
+    fr: 'Importer les Clients'
+  },
+  importProducts: {
+    en: 'Import Products',
+    fr: 'Importer les Produits'
+  },
+  next: {
+    en: 'Next',
+    fr: 'Suivant'
+  },
+  back: {
+    en: 'Back',
+    fr: 'Retour'
   }
 };
 
