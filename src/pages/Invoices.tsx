@@ -64,6 +64,21 @@ const InvoiceCard = ({
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'paid':
+        return t('paid') || 'Paid';
+      case 'pending':
+        return t('pending') || 'Pending';
+      case 'overdue':
+        return t('overdue') || 'Overdue';
+      case 'draft':
+        return t('draft') || 'Draft';
+      default:
+        return status;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -89,14 +104,15 @@ const InvoiceCard = ({
               </div>
               <div className="flex items-center gap-2">
                 <Badge className={`${getStatusColor(invoice.status)} px-3 py-1 text-xs font-medium`}>
-                  {invoice.status}
+                  {getStatusText(invoice.status)}
                 </Badge>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1">
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={onView}
                     className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
+                    title={t('viewDetails') || 'View Details'}
                   >
                     <Eye className="h-3 w-3" />
                   </Button>
@@ -105,6 +121,7 @@ const InvoiceCard = ({
                     size="icon" 
                     onClick={onEdit}
                     className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
+                    title={t('edit') || 'Edit'}
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -113,6 +130,7 @@ const InvoiceCard = ({
                     size="icon" 
                     onClick={onPrint}
                     className="h-7 w-7 hover:bg-green-100 hover:text-green-600"
+                    title={t('print') || 'Print'}
                   >
                     <Printer className="h-3 w-3" />
                   </Button>
@@ -121,6 +139,7 @@ const InvoiceCard = ({
                     size="icon" 
                     onClick={onDelete}
                     className="h-7 w-7 hover:bg-red-100 hover:text-red-600"
+                    title={t('delete') || 'Delete'}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -136,7 +155,7 @@ const InvoiceCard = ({
               </div>
               {invoice.due_date && (
                 <div className="flex items-center gap-1 text-amber-600">
-                  <span className="font-medium">Due:</span>
+                  <span className="font-medium">{t('due') || 'Due'}:</span>
                   <span>{format(new Date(invoice.due_date), 'MMM dd')}</span>
                 </div>
               )}
@@ -149,7 +168,7 @@ const InvoiceCard = ({
             <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border border-primary/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-primary/70 uppercase tracking-wide">Total Amount</p>
+                  <p className="text-xs font-medium text-primary/70 uppercase tracking-wide">{t('totalAmount') || 'Total Amount'}</p>
                   <p className="text-2xl font-bold text-primary">{invoice.total.toFixed(2)} DH</p>
                 </div>
                 <div className="p-3 bg-primary/10 rounded-full">
@@ -163,7 +182,7 @@ const InvoiceCard = ({
               <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg p-3 border border-emerald-200/50">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                  <p className="text-xs font-medium text-emerald-700">Assurance Total</p>
+                  <p className="text-xs font-medium text-emerald-700">{t('assuranceTotal') || 'Assurance Total'}</p>
                 </div>
                 <p className="text-lg font-bold text-emerald-800">
                   {invoice.tax_amount?.toFixed(2) || '0.00'} DH
@@ -173,7 +192,7 @@ const InvoiceCard = ({
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200/50">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <p className="text-xs font-medium text-blue-700">Balance Due</p>
+                  <p className="text-xs font-medium text-blue-700">{t('balanceDue') || 'Balance Due'}</p>
                 </div>
                 <p className="text-lg font-bold text-blue-800">
                   {invoice.balance?.toFixed(2) || invoice.total.toFixed(2)} DH
@@ -202,7 +221,7 @@ const InvoiceCard = ({
             {/* Notes Section */}
             {invoice.notes && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-xs text-amber-800 font-medium mb-1">Notes</p>
+                <p className="text-xs text-amber-800 font-medium mb-1">{t('notes') || 'Notes'}</p>
                 <p className="text-xs text-amber-700 line-clamp-2">{invoice.notes}</p>
               </div>
             )}
@@ -211,10 +230,10 @@ const InvoiceCard = ({
           {/* Footer */}
           <div className="px-4 pb-4">
             <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-100 pt-3">
-              <span>Created {format(new Date(invoice.created_at), 'MMM dd, yyyy')}</span>
+              <span>{t('created') || 'Created'} {format(new Date(invoice.created_at), 'MMM dd, yyyy')}</span>
               <span className="flex items-center gap-1">
                 <Package className="h-3 w-3" />
-                {invoice.invoice_items?.length || 0} items
+                {invoice.invoice_items?.length || 0} {t('items') || 'items'}
               </span>
             </div>
           </div>

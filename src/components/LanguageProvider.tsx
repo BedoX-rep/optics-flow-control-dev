@@ -4954,13 +4954,31 @@ const allTranslations: Translations = {
   // Invoice translations
   addInvoice: {
     en: 'Add Invoice',
-    fr: 'Ajouter Facture',
-    ar: 'إضافة فاتورة'
+    fr: 'Ajouter Facture'
   },
   invoices: {
     en: 'Invoices',
-    fr: 'Factures',
-    ar: 'الفواتير'
+    fr: 'Factures'
+  },
+  viewDetails: {
+    en: 'View Details',
+    fr: 'Voir les Détails'
+  },
+  print: {
+    en: 'Print',
+    fr: 'Imprimer'
+  },
+  due: {
+    en: 'Due',
+    fr: 'Échéance'
+  },
+  created: {
+    en: 'Created',
+    fr: 'Créé'
+  },
+  assuranceTotal: {
+    en: 'Assurance Total',
+    fr: 'Total Assurance'
   },
   copyFromReceipt: {
     en: 'Copy from Receipt',
