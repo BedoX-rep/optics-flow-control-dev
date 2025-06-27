@@ -4725,8 +4725,8 @@ const authTranslations: Translations = {
     fr: 'Nom complet'
   },
   fullNamePlaceholder: {
-    en: 'John Doe',
-    fr: 'Jean Dupont'
+    en: 'Othman Taoudan',
+    fr: 'Othman Taoudan'
   },
   storeName: {
     en: 'Store Name',
@@ -4773,8 +4773,8 @@ const authTranslations: Translations = {
     fr: 'ABCD'
   },
   referralCodeOptionalDesc: {
-    en: 'Optional: Enter a referral code from an existing user to get special benefits. Leave blank if you don\'t have one.',
-    fr: 'Optionnel : Entrez un code de parrainage d\'un utilisateur existant pour obtenir des avantages spéciaux. Laissez vide si vous n\'en avez pas.'
+    en: 'Optional: Enter a referral code from an existing use. Leave blank if you don\'t have one.',
+    fr: 'Optionnel : Entrez un code de parrainage d\'un utilisateur existant. Laissez vide si vous n\'en avez pas.'
   },
   security: {
     en: 'Security',
