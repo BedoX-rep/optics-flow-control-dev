@@ -335,7 +335,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
 
         {/* Editable prescription data */}
-        <div className="mt-4 space-y-6">
+        <div className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-3">
               <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
@@ -446,15 +446,15 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
           
-          {/* Add field */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">{t('add') || 'ADD'}</h3>
-            <div className="w-32">
+          {/* Add field - positioned between eye sections */}
+          <div className="flex justify-center">
+            <div className="w-32 space-y-1">
+              <span className="text-xs text-gray-500 block text-center">{t('add') || 'ADD'}</span>
               <input 
                 type="text"
                 inputMode="decimal"
                 name="add"
-                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
                 value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
                 onChange={(e) => {
                   const inputValue = e.target.value;

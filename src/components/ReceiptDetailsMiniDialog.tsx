@@ -149,9 +149,9 @@ const ReceiptDetailsMiniDialog = ({
                   </div>
                 </div>
               </div>
-              {receipt.add_value && (
+              {(receipt.add_value || receipt.Add) && (
                 <div className="text-sm">
-                  <span className="text-gray-500">{t('add') || 'ADD'}:</span> {receipt.add_value}
+                  <span className="text-gray-500">{t('add') || 'ADD'}:</span> {receipt.add_value || receipt.Add}
                 </div>
               )}
             </div>
