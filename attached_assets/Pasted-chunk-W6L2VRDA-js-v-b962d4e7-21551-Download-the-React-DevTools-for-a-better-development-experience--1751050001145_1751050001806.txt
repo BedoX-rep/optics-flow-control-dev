@@ -1,0 +1,116 @@
+chunk-W6L2VRDA.js?v=b962d4e7:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ImportClientsDialog.tsx:379 Uncaught ReferenceError: t is not defined
+    at ImportClientsDialog.tsx:379:51
+    at Array.map (<anonymous>)
+    at ImportClientsDialog (ImportClientsDialog.tsx:366:34)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=b962d4e7:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=b962d4e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=b962d4e7:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=b962d4e7:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19765:15)
+(anonymous) @ ImportClientsDialog.tsx:379
+ImportClientsDialog @ ImportClientsDialog.tsx:366
+renderWithHooks @ chunk-W6L2VRDA.js?v=b962d4e7:11548
+updateFunctionComponent @ chunk-W6L2VRDA.js?v=b962d4e7:14582
+beginWork @ chunk-W6L2VRDA.js?v=b962d4e7:15924
+callCallback2 @ chunk-W6L2VRDA.js?v=b962d4e7:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=b962d4e7:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=b962d4e7:3733
+beginWork$1 @ chunk-W6L2VRDA.js?v=b962d4e7:19765
+performUnitOfWork @ chunk-W6L2VRDA.js?v=b962d4e7:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=b962d4e7:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=b962d4e7:19116
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=b962d4e7:18874
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=b962d4e7:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=b962d4e7:18627
+ImportClientsDialog.tsx:379 Uncaught ReferenceError: t is not defined
+    at ImportClientsDialog.tsx:379:51
+    at Array.map (<anonymous>)
+    at ImportClientsDialog (ImportClientsDialog.tsx:366:34)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=b962d4e7:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=b962d4e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=b962d4e7:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=b962d4e7:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19765:15)
+(anonymous) @ ImportClientsDialog.tsx:379
+ImportClientsDialog @ ImportClientsDialog.tsx:366
+renderWithHooks @ chunk-W6L2VRDA.js?v=b962d4e7:11548
+updateFunctionComponent @ chunk-W6L2VRDA.js?v=b962d4e7:14582
+beginWork @ chunk-W6L2VRDA.js?v=b962d4e7:15924
+callCallback2 @ chunk-W6L2VRDA.js?v=b962d4e7:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=b962d4e7:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=b962d4e7:3733
+beginWork$1 @ chunk-W6L2VRDA.js?v=b962d4e7:19765
+performUnitOfWork @ chunk-W6L2VRDA.js?v=b962d4e7:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=b962d4e7:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=b962d4e7:19116
+recoverFromConcurrentError @ chunk-W6L2VRDA.js?v=b962d4e7:18736
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=b962d4e7:18879
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=b962d4e7:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=b962d4e7:18627
+chunk-W6L2VRDA.js?v=b962d4e7:14032 The above error occurred in the <ImportClientsDialog> component:
+
+    at ImportClientsDialog (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/components/ImportClientsDialog.tsx:35:39)
+    at div
+    at Clients (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/pages/Clients.tsx:32:22)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/components/Layout.tsx:29:19)
+    at ProtectedRoute (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/App.tsx:53:27)
+    at RenderedRoute (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4069:5)
+    at Routes (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4508:5)
+    at AppRoutes
+    at Router (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4451:15)
+    at BrowserRouter (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:5196:5)
+    at AuthProvider (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/components/AuthProvider.tsx:16:32)
+    at LanguageProvider (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/src/components/LanguageProvider.tsx:5219:36)
+    at Provider (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/chunk-MJJZPI6X.js?v=b962d4e7:38:15)
+    at TooltipProvider (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=b962d4e7:61:5)
+    at QueryClientProvider (https://675345eb-c312-4432-97b4-0d9c942bff51-00-mlyjc70k2eb2.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=b962d4e7:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=b962d4e7:14032
+update.callback @ chunk-W6L2VRDA.js?v=b962d4e7:14052
+callCallback @ chunk-W6L2VRDA.js?v=b962d4e7:11248
+commitUpdateQueue @ chunk-W6L2VRDA.js?v=b962d4e7:11265
+commitLayoutEffectOnFiber @ chunk-W6L2VRDA.js?v=b962d4e7:17093
+commitLayoutMountEffects_complete @ chunk-W6L2VRDA.js?v=b962d4e7:17980
+commitLayoutEffects_begin @ chunk-W6L2VRDA.js?v=b962d4e7:17969
+commitLayoutEffects @ chunk-W6L2VRDA.js?v=b962d4e7:17920
+commitRootImpl @ chunk-W6L2VRDA.js?v=b962d4e7:19353
+commitRoot @ chunk-W6L2VRDA.js?v=b962d4e7:19277
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=b962d4e7:18895
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=b962d4e7:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=b962d4e7:18627
+chunk-W6L2VRDA.js?v=b962d4e7:9129 Uncaught ReferenceError: t is not defined
+    at ImportClientsDialog.tsx:379:51
+    at Array.map (<anonymous>)
+    at ImportClientsDialog (ImportClientsDialog.tsx:366:34)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at updateFunctionComponent (chunk-W6L2VRDA.js?v=b962d4e7:14582:28)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15924:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=b962d4e7:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=b962d4e7:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=b962d4e7:19116:15)
+(anonymous) @ ImportClientsDialog.tsx:379
+ImportClientsDialog @ ImportClientsDialog.tsx:366
+renderWithHooks @ chunk-W6L2VRDA.js?v=b962d4e7:11548
+updateFunctionComponent @ chunk-W6L2VRDA.js?v=b962d4e7:14582
+beginWork @ chunk-W6L2VRDA.js?v=b962d4e7:15924
+beginWork$1 @ chunk-W6L2VRDA.js?v=b962d4e7:19753
+performUnitOfWork @ chunk-W6L2VRDA.js?v=b962d4e7:19198
+workLoopSync @ chunk-W6L2VRDA.js?v=b962d4e7:19137
+renderRootSync @ chunk-W6L2VRDA.js?v=b962d4e7:19116
+recoverFromConcurrentError @ chunk-W6L2VRDA.js?v=b962d4e7:18736
+performSyncWorkOnRoot @ chunk-W6L2VRDA.js?v=b962d4e7:18879
+flushSyncCallbacks @ chunk-W6L2VRDA.js?v=b962d4e7:9119
+(anonymous) @ chunk-W6L2VRDA.js?v=b962d4e7:18627
