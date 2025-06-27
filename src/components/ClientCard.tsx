@@ -334,13 +334,16 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('sph')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="right_eye_sph"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_sph', value);
+                    const inputValue = e.target.value;
+                    // Allow empty string, numbers, decimal point, and minus sign
+                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
+                      const value = inputValue === "" ? null : (inputValue === "-" || inputValue === "." || inputValue === "-." ? inputValue : parseFloat(inputValue));
+                      handleFieldChange('right_eye_sph', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />
@@ -349,13 +352,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('cyl')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="right_eye_cyl"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_cyl', value);
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_cyl', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />
@@ -364,13 +368,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('axe')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="right_eye_axe"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseInt(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_axe', value);
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_axe', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />
@@ -384,13 +389,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('sph')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="left_eye_sph"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_sph', value);
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_sph', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />
@@ -399,13 +405,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('cyl')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="left_eye_cyl"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_cyl', value);
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_cyl', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />
@@ -414,13 +421,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 <span className="text-xs text-gray-500">{t('axe')}</span>
                 <input 
                   type="text"
+                  inputMode="decimal"
                   name="left_eye_axe"
                   className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
                   value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
                   onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseInt(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_axe', value);
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_axe', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
                     }
                   }}
                 />

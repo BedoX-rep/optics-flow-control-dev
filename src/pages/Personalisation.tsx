@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -72,7 +71,7 @@ const Personalisation = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState('');
   const [editingCompany, setEditingCompany] = useState<{ id: string; name: string } | null>(null);
-  
+
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
   // Fetch user personalisation data
@@ -219,7 +218,7 @@ const Personalisation = () => {
       // Invalidate both query keys to ensure all pages using personalisation data are updated
       queryClient.invalidateQueries({ queryKey: ['user-personalisation', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
-      
+
       // Force refetch of the user information query to ensure immediate update
       queryClient.refetchQueries({ queryKey: ['user-information', user?.id] });
     },
@@ -256,7 +255,7 @@ const Personalisation = () => {
 
   const handleCreateCompany = async () => {
     if (!newCompanyName.trim()) return;
-    
+
     try {
       await createCompany.mutateAsync(newCompanyName.trim());
       setNewCompanyName('');
@@ -275,7 +274,7 @@ const Personalisation = () => {
 
   const handleUpdateCompany = async () => {
     if (!editingCompany || !editingCompany.name.trim()) return;
-    
+
     try {
       await updateCompany.mutateAsync({
         id: editingCompany.id,
@@ -420,7 +419,7 @@ const Personalisation = () => {
                   )}
                 </div>
               </div>
-              
+
               <Separator />
 
               <div className="bg-blue-50/50 rounded-lg p-4">
@@ -474,7 +473,7 @@ const Personalisation = () => {
 
                 <div className="bg-blue-50/50 rounded-lg p-4 space-y-4">
                   <h4 className="font-medium text-blue-900">{t('currentSettings')}</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="sv_lens_cost" className="text-sm font-medium">
@@ -549,18 +548,18 @@ const Personalisation = () => {
             <CardContent className="space-y-6">
               <div className="bg-blue-50/50 rounded-lg p-4 space-y-6">
                 <h4 className="font-medium text-blue-900">Markup Ranges Configuration</h4>
-                
+
                 {/* SPH Ranges */}
                 <div className="space-y-4">
                   <h5 className="font-medium text-gray-700">SPH (Sphere) Ranges</h5>
-                  
+
                   {/* Range 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 1</Label>
+                      <Label className="text-sm font-medium">{t('range1') || 'Plage 1'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -570,7 +569,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -580,7 +579,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -594,10 +593,10 @@ const Personalisation = () => {
                   {/* Range 2 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 2</Label>
+                      <Label className="text-sm font-medium">{t('range2') || 'Plage 2'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -607,7 +606,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -617,7 +616,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -631,10 +630,10 @@ const Personalisation = () => {
                   {/* Range 3 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 3</Label>
+                      <Label className="text-sm font-medium">{t('range3') || 'Plage 3'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -644,7 +643,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -654,7 +653,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -671,14 +670,14 @@ const Personalisation = () => {
                 {/* CYL Ranges */}
                 <div className="space-y-4">
                   <h5 className="font-medium text-gray-700">CYL (Cylinder) Ranges</h5>
-                  
+
                   {/* Range 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 1</Label>
+                      <Label className="text-sm font-medium">{t('range1') || 'Plage 1'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -688,7 +687,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -698,7 +697,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -712,10 +711,10 @@ const Personalisation = () => {
                   {/* Range 2 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 2</Label>
+                      <Label className="text-sm font-medium">{t('range2') || 'Plage 2'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -725,7 +724,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -735,8 +734,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
-                      <Input
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label                      <Input
                         type="number"
                         step="0.01"
                         value={formData.markup_cyl_range_2_markup}
@@ -749,10 +747,10 @@ const Personalisation = () => {
                   {/* Range 3 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
                     <div>
-                      <Label className="text-sm font-medium">Range 3</Label>
+                      <Label className="text-sm font-medium">{t('range3') || 'Plage 3'}</Label>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Min</Label>
+                      <Label className="text-xs">{t('min') || 'Min'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -762,7 +760,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Max</Label>
+                      <Label className="text-xs">{t('max') || 'Max'}</Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -772,7 +770,7 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Markup %</Label>
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
                       <Input
                         type="number"
                         step="0.01"

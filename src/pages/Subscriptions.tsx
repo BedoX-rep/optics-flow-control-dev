@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Check, Phone, CreditCard, Copy } from 'lucide-react';
 import BankTransferDialog from '@/components/BankTransferDialog';
+import ContactSubscriptionDialog from '@/components/ContactSubscriptionDialog';
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
@@ -136,6 +137,7 @@ const Subscriptions = () => {
 
 
 const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
+const [contactDialogOpen, setContactDialogOpen] = React.useState(false);
 
 const renderSubscriptionPlans = () => {
   return (
@@ -143,6 +145,11 @@ const renderSubscriptionPlans = () => {
       <BankTransferDialog 
         isOpen={bankTransferDialogOpen}
         onClose={() => setBankTransferDialogOpen(false)}
+      />
+      
+      <ContactSubscriptionDialog
+        isOpen={contactDialogOpen}
+        onClose={() => setContactDialogOpen(false)}
       />
       
       
@@ -216,7 +223,7 @@ const renderSubscriptionPlans = () => {
               </CardContent>
               <CardFooter className="pt-6 flex flex-col gap-3">
                 <Button 
-                  onClick={() => setBankTransferDialogOpen(true)}
+                  onClick={() => setContactDialogOpen(true)}
                   variant="outline"
                   className="w-full flex items-center justify-center gap-2 border-teal-200 hover:bg-teal-50 h-11"
                 >
@@ -225,7 +232,7 @@ const renderSubscriptionPlans = () => {
                 </Button>
 
                 <Button 
-                  onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
+                  onClick={() => setContactDialogOpen(true)}
                   disabled={currentSubscription?.subscription_type === type}
                   className={`
                     w-full h-11 ${type === 'Quarterly' ? 
