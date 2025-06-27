@@ -26,7 +26,7 @@ interface ImportClientsDialogProps {
 }
 
 const REQUIRED_FIELDS = ['name']
-const OPTIONAL_FIELDS = ['phone', 'right_eye_sph', 'right_eye_cyl', 'right_eye_axe', 'left_eye_sph', 'left_eye_cyl', 'Add']
+const OPTIONAL_FIELDS = ['phone', 'right_eye_sph', 'right_eye_cyl', 'right_eye_axe', 'left_eye_sph', 'left_eye_cyl', 'left_eye_axe', 'Add']
 
 export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClientsDialogProps) => {
   const { toast } = useToast()
