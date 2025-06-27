@@ -681,47 +681,49 @@ const Financial = () => {
       </Card>
 
       {/* Enhanced Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Available Cash Card */}
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+          <CardContent className="pt-8 pb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-600">{t('availableCash')}</p>
+                <p className="text-lg font-semibold text-green-700 mb-2">{t('availableCash')}</p>
                 <p className={cn(
-                  "text-2xl font-bold",
+                  "text-3xl font-bold mb-2",
                   financialMetrics.availableCash >= 0 ? "text-green-900" : "text-red-600"
                 )}>
                   {financialMetrics.availableCash.toFixed(2)} DH
                 </p>
-                <p className="text-xs text-green-600 mt-1">
+                <p className="text-sm text-green-600">
                   {t('netFlow')}: {financialMetrics.netCashFlow >= 0 ? '+' : ''}{financialMetrics.netCashFlow.toFixed(2)} DH
                 </p>
               </div>
-              <Wallet className="h-8 w-8 text-green-600" />
+              <div className="bg-green-200 p-3 rounded-full">
+                <Wallet className="h-10 w-10 text-green-700" />
+              </div>
             </div>
-            <details className="mt-2">
-              <summary className="text-xs text-green-700 cursor-pointer hover:text-green-800">
+            <details className="mt-4">
+              <summary className="text-sm text-green-700 cursor-pointer hover:text-green-800 font-medium">
                 {t('viewCalculation')}
               </summary>
-              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+              <div className="mt-3 text-sm space-y-2 border-t pt-3">
                 <div className="flex justify-between">
                   <span>{t('revenueReceived')}:</span>
-                  <span>+{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                  <span className="font-medium">+{financialMetrics.totalReceived.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('paidOperationalExpenses')}:</span>
-                  <span>-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('paidMontageExpenses')}:</span>
-                  <span>-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('paidAtDeliveryCosts')}:</span>
-                  <span>-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between font-semibold border-t pt-1">
+                <div className="flex justify-between font-bold border-t pt-2 text-green-800">
                   <span>{t('availableCash')}:</span>
                   <span>{financialMetrics.availableCash.toFixed(2)} DH</span>
                 </div>
@@ -731,38 +733,40 @@ const Financial = () => {
         </Card>
 
         {/* Total Revenue Card */}
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+          <CardContent className="pt-8 pb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
-                <p className="text-sm font-medium text-blue-600">{t('totalRevenue')}</p>
-                <p className="text-2xl font-bold text-blue-900">
+                <p className="text-lg font-semibold text-blue-700 mb-2">{t('totalRevenue')}</p>
+                <p className="text-3xl font-bold text-blue-900 mb-2">
                   {financialMetrics.totalRevenue.toFixed(2)} DH
                 </p>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-sm text-blue-600">
                   {t('collected')}: {financialMetrics.collectionRate.toFixed(1)}%
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <div className="bg-blue-200 p-3 rounded-full">
+                <TrendingUp className="h-10 w-10 text-blue-700" />
+              </div>
             </div>
-            <details className="mt-2">
-              <summary className="text-xs text-blue-700 cursor-pointer hover:text-blue-800">
+            <details className="mt-4">
+              <summary className="text-sm text-blue-700 cursor-pointer hover:text-blue-800 font-medium">
                 {t('viewCalculation')}
               </summary>
-              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+              <div className="mt-3 text-sm space-y-2 border-t pt-3">
                 <div className="flex justify-between">
                   <span>{t('totalInvoicedRevenue')}:</span>
-                  <span>{financialMetrics.totalRevenue.toFixed(2)} DH</span>
+                  <span className="font-medium">{financialMetrics.totalRevenue.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('revenueReceived')}:</span>
-                  <span>{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                  <span className="font-medium">{financialMetrics.totalReceived.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('unclaimedBalance')}:</span>
-                  <span>{financialMetrics.totalOutstanding.toFixed(2)} DH</span>
+                  <span className="font-medium">{financialMetrics.totalOutstanding.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between font-semibold border-t pt-1">
+                <div className="flex justify-between font-bold border-t pt-2 text-blue-800">
                   <span>{t('collectionValue')}:</span>
                   <span>{financialMetrics.totalReceived.toFixed(2)} DH ({financialMetrics.collectionRate.toFixed(1)}%)</span>
                 </div>
@@ -771,101 +775,52 @@ const Financial = () => {
           </CardContent>
         </Card>
 
-        {/* Net Profit (Real) Card */}
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-purple-600">{t('netProfitReal')}</p>
-                <p className={cn(
-                  "text-2xl font-bold",
-                  (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) >= 0 ? "text-green-600" : "text-red-600"
-                )}>
-                  {(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH
-                </p>
-                <p className="text-xs text-purple-600 mt-1">
-                  {t('margin')}: {financialMetrics.totalReceived > 0 ? (((financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) / financialMetrics.totalReceived) * 100).toFixed(1) : '0.0'}%
-                </p>
-              </div>
-              <Calculator className="h-8 w-8 text-purple-600" />
-            </div>
-            <details className="mt-2">
-              <summary className="text-xs text-purple-700 cursor-pointer hover:text-purple-800">
-                {t('viewCalculation')}
-              </summary>
-              <div className="mt-2 text-xs space-y-1 border-t pt-2">
-                <div className="flex justify-between">
-                  <span>{t('revenueReceived')}:</span>
-                  <span>+{financialMetrics.totalReceived.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{t('productCosts')} (COGS):</span>
-                  <span>-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{t('paidOperationalExpenses')}:</span>
-                  <span>-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{t('paidMontageExpenses')}:</span>
-                  <span>-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between font-semibold border-t pt-1">
-                  <span>{t('netProfitReal')}:</span>
-                  <span>{(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH</span>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  * {t('basedOnActualReceivedRevenueOnly')}
-                </div>
-              </div>
-            </details>
-          </CardContent>
-        </Card>
-
         {/* Net Profit (Total) Card */}
-        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
+        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 shadow-lg">
+          <CardContent className="pt-8 pb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
-                <p className="text-sm font-medium text-emerald-600">{t('netProfitTotal')}</p>
+                <p className="text-lg font-semibold text-emerald-700 mb-2">{t('netProfitTotal')}</p>
                 <p className={cn(
-                  "text-2xl font-bold",
+                  "text-3xl font-bold mb-2",
                   financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
                 )}>
                   {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
                 </p>
-                <p className="text-xs text-emerald-600 mt-1">
+                <p className="text-sm text-emerald-600">
                   {t('margin')}: {financialMetrics.totalRevenue > 0 ? (financialMetrics.netMarginTotal).toFixed(1) : '0.0'}%
                 </p>
               </div>
-              <Target className="h-8 w-8 text-emerald-600" />
+              <div className="bg-emerald-200 p-3 rounded-full">
+                <Target className="h-10 w-10 text-emerald-700" />
+              </div>
             </div>
-            <details className="mt-2">
-              <summary className="text-xs text-emerald-700 cursor-pointer hover:text-emerald-800">
+            <details className="mt-4">
+              <summary className="text-sm text-emerald-700 cursor-pointer hover:text-emerald-800 font-medium">
                 {t('viewCalculation')}
               </summary>
-              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+              <div className="mt-3 text-sm space-y-2 border-t pt-3">
                 <div className="flex justify-between">
                   <span>{t('totalInvoicedRevenue')}:</span>
-                  <span>+{financialMetrics.totalRevenue.toFixed(2)} DH</span>
+                  <span className="font-medium">+{financialMetrics.totalRevenue.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('productCosts')} (COGS):</span>
-                  <span>-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('totalOperationalExpenses')}:</span>
-                  <span>-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t('totalMontageExpenses')}:</span>
-                  <span>-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                  <span className="font-medium">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between font-semibold border-t pt-1">
+                <div className="flex justify-between font-bold border-t pt-2 text-emerald-800">
                   <span>{t('netProfitTotal')}:</span>
                   <span>{financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH</span>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 mt-2">
                   * {t('includesUnpaidBalance')} ({financialMetrics.totalOutstanding.toFixed(2)} DH)
                 </div>
               </div>
@@ -1061,303 +1016,107 @@ const Financial = () => {
         </CardContent>
       </Card>
 
-      {/* Comprehensive Financial Analysis - Integrated Profit & Expenses */}
+      {/* Detailed Expense Analysis */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            {t('comprehensiveFinancialAnalysisProfit')}
+            {t('detailedExpenseAnalysis')}
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">
-            {t('completeProfitAnalysisDescription')}
+            {t('comprehensiveBreakdownOfAllBusinessExpenses')}
           </p>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            {/* Revenue and Cost Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Revenue Side */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">{t('revenueAnalysis')}</h3>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <span className="font-medium">{t('totalRevenueInvoiced')}</span>
-                    <span className="font-bold text-blue-600">
-                      {financialMetrics.totalRevenue.toFixed(2)} DH
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                    <span className="font-medium">{t('revenueReceived')}</span>
-                    <span className="font-bold text-green-600">
-                      {financialMetrics.totalReceived.toFixed(2)} DH
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                    <span className="font-medium">{t('unclaimedBalance')}</span>
-                    <span className="font-bold text-orange-600">
-                      {financialMetrics.totalOutstanding.toFixed(2)} DH
-                    </span>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Operational Expenses Detail */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('operationalExpenses')}</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between p-3 bg-purple-50 rounded-lg">
+                  <span className="font-medium">{t('total')}</span>
+                  <span className="font-bold text-purple-600">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
                 </div>
-              </div>
-
-              {/* Cost Breakdown */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-900 border-b pb-2">{t('costBreakdown')}</h3>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                    <span className="font-medium">{t('productCostsCOGS')}</span>
-                    <span className="font-bold text-red-600">
-                      {financialMetrics.totalProductCosts.toFixed(2)} DH
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                    <span className="font-medium">{t('operationalExpenses')}</span>
-                    <span className="font-bold text-purple-600">
-                      {financialMetrics.operationalExpenses.total.toFixed(2)} DH
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
-                    <span className="font-medium">{t('montageCosts')}</span>
-                    <span className="font-bold text-indigo-600">
-                      {financialMetrics.montageMetrics.total.toFixed(2)} DH
-                    </span>
-                  </div>
+                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
+                  <span className="font-medium text-green-600">{t('paid')}</span>
+                  <span className="font-bold text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                 </div>
+                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
+                  <span className="font-medium text-red-600">{t('unpaid')}</span>
+                  <span className="font-bold text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                </div>
+                {financialMetrics.operationalExpenses.total > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
+                    </div>
+                    <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Detailed Expense Analysis */}
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('detailedExpenseAnalysis')}</h3>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Operational Expenses Detail */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('operationalExpenses')}</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>{t('total')}</span>
-                      <span className="font-medium">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-green-600">{t('paid')}</span>
-                      <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-red-600">{t('unpaid')}</span>
-                      <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
-                    </div>
-                    {financialMetrics.operationalExpenses.total > 0 && (
-                      <div className="mt-2">
-                        <div className="text-xs text-gray-500 mb-1">
-                          {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
-                        </div>
-                        <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-1.5" />
-                      </div>
-                    )}
-                  </div>
+            {/* Montage Costs Detail */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('montageCosts')}</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between p-3 bg-indigo-50 rounded-lg">
+                  <span className="font-medium">{t('total')}</span>
+                  <span className="font-bold text-indigo-600">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
                 </div>
-
-                {/* Montage Costs Detail */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('montageCosts')}</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>{t('total')}</span>
-                      <span className="font-medium">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-green-600">{t('paid')}</span>
-                      <span className="font-medium text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-red-600">{t('unpaid')}</span>
-                      <span className="font-medium text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
-                    </div>
-                    {financialMetrics.montageMetrics.total > 0 && (
-                      <div className="mt-2">
-                        <div className="text-xs text-gray-500 mb-1">
-                          {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
-                        </div>
-                        <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-1.5" />
-                      </div>
-                    )}
-                  </div>
+                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
+                  <span className="font-medium text-green-600">{t('paid')}</span>
+                  <span className="font-bold text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
                 </div>
-
-                {/* Product Costs Analysis by Category */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 border-b pb-1">{t('productCostsByCategory')}</h4>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
-                      <div key={category} className="p-2 bg-gray-50 rounded text-xs">
-                        <div className="flex justify-between font-medium">
-                          <span>{category}</span>
-                          <span>{data.cost.toFixed(2)} DH</span>
-                        </div>
-                        <div className="flex justify-between text-gray-600">
-                          <span>{t('profit')}: {data.profit.toFixed(2)} DH</span>
-                          <span>{t('margin')}: {data.margin.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    {t('totalProductCosts')}: {financialMetrics.totalProductCosts.toFixed(2)} DH
-                  </div>
+                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
+                  <span className="font-medium text-red-600">{t('unpaid')}</span>
+                  <span className="font-bold text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
                 </div>
+                {financialMetrics.montageMetrics.total > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
+                    </div>
+                    <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-2" />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Profit Analysis with Revenue Scenarios */}
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('profitAnalysisRevenueScenarios')}</h3>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Current Scenario (Based on Received Revenue) */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">{t('currentPositionReceivedRevenue')}</h4>
-
-                  <div className="space-y-3">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">{t('revenueReceived')}</span>
-                        <span className="font-bold text-blue-600">{financialMetrics.totalReceived.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-xs text-blue-600">{t('actualCashReceivedFromCustomers')}</div>
+            {/* Product Costs Analysis by Category */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('productCostsByCategory')}</h4>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
+                  <div key={category} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between font-medium mb-2">
+                      <span className="text-gray-800">{category}</span>
+                      <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
                     </div>
-
-                    <div className="p-3 bg-red-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">{t('lessProductCostsIncludingPaidAtDelivery')}</span>
-                        <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-xs text-red-500 mb-2">{t('productCostsBreakdown')}</div>
-                      <div className="pl-2 space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span>{t('directMaterialCostsBreakdown')}</span>
-                          <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{t('paidAtDeliveryCostsBreakdown')}</span>
-                          <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mb-1 mt-2">
-                        <span className="text-sm">{t('lessPaidOpExpenses')}</span>
-                        <span className="text-red-600">-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">{t('lessPaidMontage')}</span>
-                        <span className="text-red-600">-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{t('currentNetPosition')}</span>
-                        <span className={cn(
-                          "font-bold text-lg",
-                          financialMetrics.availableCash >= 0 ? "text-green-600" : "text-red-600"
-                        )}>
-                          {financialMetrics.availableCash.toFixed(2)} DH
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('profit')}:</span>
+                        <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
+                          {data.profit.toFixed(2)} DH
                         </span>
                       </div>
-                      <div className="text-xs text-green-600 mt-1">
-                        {t('currentCashPositionAfterAllPaidCosts')}
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-yellow-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-yellow-800">{t('pendingLiabilities')}</span>
-                        <span className="font-bold text-yellow-800">-{financialMetrics.totalExpensesUnpaid.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-xs text-yellow-700 mt-1">
-                        {t('unpaidExpensesFutureCashFlow')}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('margin')}:</span>
+                        <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
+                          {data.margin.toFixed(1)}%
+                        </span>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Full Scenario (If All Revenue Collected) */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-800 bg-gray-50 p-2 rounded">{t('fullPotentialIfAllRevenueCollected')}</h4>
-
-                  <div className="space-y-3">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">{t('totalInvoicedRevenue')}</span>
-                        <span className="font-bold text-blue-600">{financialMetrics.totalRevenue.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-xs text-blue-600">{t('includingUnclaimedBalance')} +{financialMetrics.totalOutstanding.toFixed(2)} DH</div>
-                    </div>
-
-                    <div className="p-3 bg-red-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">{t('lessProductCostsIncludingPaidAtDelivery')}</span>
-                        <span className="text-red-600">-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
-                      </div>
-                      <div className="text-xs text-red-500 mb-2">{t('productCostsBreakdown')}</div>
-                      <div className="pl-2 space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span>{t('directMaterialCostsBreakdown')}</span>
-                          <span>{(financialMetrics.totalProductCosts - financialMetrics.totalPaidAtDeliveryCost).toFixed(2)} DH</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{t('paidAtDeliveryCostsBreakdown')}</span>
-                          <span>{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mb-1 mt-2">
-                        <span className="text-sm">{t('lessAllOpExpenses')}</span>
-                        <span className="text-red-600">-{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">{t('lessAllMontage')}</span>
-                        <span className="text-red-600">-{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{t('totalNetProfit')}</span>
-                        <span className={cn(
-                          "font-bold text-lg",
-                          financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
-                        )}>
-                          {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
-                        </span>
-                      </div>
-                      <div className="text-xs text-green-600 mt-1">
-                        {t('maximumPotentialProfitIfAllRevenueCollected')}
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-purple-800">{t('collectionImpact')}</span>
-                        <span className="font-bold text-purple-800">
-                          +{(financialMetrics.netProfitAfterAllExpenses - financialMetrics.availableCash).toFixed(2)} DH
-                        </span>
-                      </div>
-                      <div className="text-xs text-purple-700 mt-1">
-                        {t('additionalProfitFromCollectingBalance')}
-                      </div>
-                    </div>
-                  </div>
+                ))}
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex justify-between font-bold text-blue-800">
+                  <span>{t('totalProductCosts')}:</span>
+                  <span>{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
                 </div>
               </div>
             </div>
-
-            
           </div>
         </CardContent>
       </Card>
