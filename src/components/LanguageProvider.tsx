@@ -159,8 +159,8 @@ const dashboardTranslations: Translations = {
     fr: 'Reçus Terminés'
   },
   montageRevenue: {
-    en: 'Montage Revenue',
-    fr: 'Revenus de Montage'
+    en: 'Additional Costs',
+    fr: 'Coûts supplémentaires'
   },
   productRevenue: {
     en: 'Product Revenue',
