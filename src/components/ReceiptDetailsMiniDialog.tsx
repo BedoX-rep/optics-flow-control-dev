@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileText, Printer, Edit, Trash2, Eye } from "lucide-react";
+import { FileText, Edit, Trash2, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
@@ -118,35 +118,42 @@ const ReceiptDetailsMiniDialog = ({
 
           <div>
             <h3 className="text-sm font-medium mb-2">{t('prescription')}</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-xs text-gray-500">{t('rightEyeLabel')}</p>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <span className="text-gray-500">SPH:</span> {receipt.right_eye_sph || "–"}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-500">{t('rightEyeLabel')}</p>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">SPH:</span> {receipt.right_eye_sph || "–"}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">CYL:</span> {receipt.right_eye_cyl || "–"}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">AXE:</span> {receipt.right_eye_axe || "–"}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-gray-500">CYL:</span> {receipt.right_eye_cyl || "–"}
-                  </div>
-                  <div>
-                    <span className="text-gray-500">AXE:</span> {receipt.right_eye_axe || "–"}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-500">{t('leftEyeLabel')}</p>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">SPH:</span> {receipt.left_eye_sph || "–"}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">CYL:</span> {receipt.left_eye_cyl || "–"}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">AXE:</span> {receipt.left_eye_axe || "–"}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-gray-500">{t('leftEyeLabel')}</p>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <span className="text-gray-500">SPH:</span> {receipt.left_eye_sph || "–"}
-                  </div>
-                  <div>
-                    <span className="text-gray-500">CYL:</span> {receipt.left_eye_cyl || "–"}
-                  </div>
-                  <div>
-                    <span className="text-gray-500">AXE:</span> {receipt.left_eye_axe || "–"}
-                  </div>
+              {receipt.add_value && (
+                <div className="text-sm">
+                  <span className="text-gray-500">{t('add') || 'ADD'}:</span> {receipt.add_value}
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -220,28 +227,21 @@ const ReceiptDetailsMiniDialog = ({
           )}
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 sm:flex-none" 
-              onClick={() => onEdit(receipt)}
-            >
-              <Edit size={16} className="mr-1" /> {t('edit')}
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              className="flex-1 sm:flex-none" 
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              <Trash2 size={16} className="mr-1" /> {t('delete')}
-            </Button>
-          </div>
-          <Button variant="default" className="bg-teal-600 hover:bg-teal-700">
-            <Printer size={16} className="mr-1" /> {t('print')}
+        <DialogFooter className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onEdit(receipt)}
+          >
+            <Edit size={16} className="mr-1" /> {t('edit')}
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            <Trash2 size={16} className="mr-1" /> {t('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
