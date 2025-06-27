@@ -335,9 +335,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
 
         {/* Editable prescription data */}
-        <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-3">
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col">
@@ -391,7 +391,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
               <div className="grid grid-cols-3 gap-2">
                 <div className="flex flex-col">
@@ -446,24 +446,29 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
           
-          {/* Add field - positioned between eye sections */}
-          <div className="flex justify-center">
-            <div className="w-32 space-y-1">
-              <span className="text-xs text-gray-500 block text-center">{t('add') || 'ADD'}</span>
-              <input 
-                type="text"
-                inputMode="decimal"
-                name="add"
-                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
-                value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                    handleFieldChange('Add', inputValue === "" ? null : inputValue);
-                  }
-                }}
-                placeholder="0.00"
-              />
+          {/* Add field - positioned below axe boxes */}
+          <div className="grid grid-cols-2 gap-4">
+            <div></div>
+            <div className="grid grid-cols-3 gap-2">
+              <div></div>
+              <div></div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500">{t('add') || 'ADD'}</span>
+                <input 
+                  type="text"
+                  inputMode="decimal"
+                  name="add"
+                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                  value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                  placeholder="0.00"
+                />
+              </div>
             </div>
           </div>
         </div>
