@@ -151,7 +151,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
   const validateClients = (clients: any[]) => {
     const errors = []
 
-    // Check for missing required fields
+    // Check for missing required fields (only name is required)
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i]
       if (!client.name || client.name.toString().trim() === "") {
@@ -182,7 +182,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           const mappedColumn = columnMappings[field]
           if (mappedColumn) {
             const value = hasHeaders ? row[mappedColumn] : row[parseInt(mappedColumn.replace("Column ", "")) - 1]
-            if (value !== undefined && value !== null && value !== "") {
+            // Allow empty phone values, but still validate other fields
+            if (value !== undefined && value !== null && (field === 'phone' || value !== "")) {
               client[field] = field.includes('eye') || field === 'Add' ? Number(value) : value
             }
           }
