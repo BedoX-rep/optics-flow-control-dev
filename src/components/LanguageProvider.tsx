@@ -3530,6 +3530,10 @@ const accessTranslations: Translations = {
 
 const financialTranslations: Translations = {
   // Financial page UI
+  financial: {
+    en: 'Financial',
+    fr: 'Financier'
+  },
   financialOverview: {
     en: 'Financial Overview',
     fr: 'Aperçu Financier'
@@ -3537,6 +3541,94 @@ const financialTranslations: Translations = {
   comprehensiveBusinessAnalytics: {
     en: 'Comprehensive business financial analytics & profitability tracking',
     fr: 'Analyses financières complètes de l\'entreprise et suivi de rentabilité'
+  },
+  viewCalculation: {
+    en: 'View Calculation',
+    fr: 'Voir le Calcul'
+  },
+  paidAtDeliveryCosts: {
+    en: 'Paid at Delivery Costs',
+    fr: 'Coûts Payés à la Livraison'
+  },
+  paidOperationalExpenses: {
+    en: 'Paid Operational Expenses',
+    fr: 'Dépenses Opérationnelles Payées'
+  },
+  paidMontageExpenses: {
+    en: 'Paid Montage Expenses',
+    fr: 'Dépenses de Montage Payées'
+  },
+  totalOperationalExpenses: {
+    en: 'Total Operational Expenses',
+    fr: 'Total des Dépenses Opérationnelles'
+  },
+  totalMontageExpenses: {
+    en: 'Total Montage Expenses',
+    fr: 'Total des Dépenses de Montage'
+  },
+  includesUnpaidBalance: {
+    en: 'Includes unpaid balance',
+    fr: 'Inclut le solde impayé'
+  },
+  collectionValue: {
+    en: 'Collection Value',
+    fr: 'Valeur de Collection'
+  },
+  comprehensiveBreakdownOfAllBusinessExpenses: {
+    en: 'Comprehensive breakdown of all business expenses',
+    fr: 'Répartition complète de toutes les dépenses commerciales'
+  },
+  productCostsByCategory: {
+    en: 'Product Costs by Category',
+    fr: 'Coûts des Produits par Catégorie'
+  },
+  analysisOfCapitalExpenditureAndOperationalExpenses: {
+    en: 'Analysis of capital expenditure and operational expenses',
+    fr: 'Analyse des dépenses d\'investissement et des dépenses opérationnelles'
+  },
+  totalPaid: {
+    en: 'Total Paid',
+    fr: 'Total Payé'
+  },
+  totalUnpaid: {
+    en: 'Total Unpaid',
+    fr: 'Total Impayé'
+  },
+  expenseTypeFilter: {
+    en: 'Expense Type Filter',
+    fr: 'Filtre de Type de Dépense'
+  },
+  allExpenseTypes: {
+    en: 'All Expense Types',
+    fr: 'Tous les Types de Dépenses'
+  },
+  paymentStatusFilter: {
+    en: 'Payment Status Filter',
+    fr: 'Filtre de Statut de Paiement'
+  },
+  allPaymentStatus: {
+    en: 'All Payment Status',
+    fr: 'Tous les Statuts de Paiement'
+  },
+  partiallyPaid: {
+    en: 'Partially Paid',
+    fr: 'Partiellement Payé'
+  },
+  supplierFilter: {
+    en: 'Supplier Filter',
+    fr: 'Filtre de Fournisseur'
+  },
+  allSuppliers: {
+    en: 'All Suppliers',
+    fr: 'Tous les Fournisseurs'
+  },
+  fullyPaid: {
+    en: 'Fully Paid',
+    fr: 'Entièrement Payé'
+  },
+  noExpensesFoundMatchingFilters: {
+    en: 'No expenses found matching the selected filters',
+    fr: 'Aucune dépense trouvée correspondant aux filtres sélectionnés'
   },
   dateRangeFilter: {
     en: 'Date Range Filter',
@@ -4153,6 +4245,150 @@ const financialTranslations: Translations = {
   noItemsFoundMatchingFilters: {
     en: 'No items found matching the selected filters.',
     fr: 'Aucun article trouvé correspondant aux filtres sélectionnés.'
+  },
+  comprehensiveFinancialAnalysisProfit: {
+    en: 'Comprehensive Financial Analysis & Profit Breakdown',
+    fr: 'Analyse Financière Complète et Répartition des Bénéfices'
+  },
+  completeProfitAnalysisDescription: {
+    en: 'Complete profit analysis including all costs, expenses, and unclaimed balance scenarios',
+    fr: 'Analyse complète des bénéfices incluant tous les coûts, dépenses et scénarios de soldes non réclamés'
+  },
+  revenueAnalysis: {
+    en: 'Revenue Analysis',
+    fr: 'Analyse des Revenus'
+  },
+  totalRevenueInvoiced: {
+    en: 'Total Revenue (Invoiced)',
+    fr: 'Chiffre d\'Affaires Total (Facturé)'
+  },
+  revenueReceived: {
+    en: 'Revenue Received',
+    fr: 'Revenus Reçus'
+  },
+  unclaimedBalance: {
+    en: 'Unclaimed Balance',
+    fr: 'Solde Non Réclamé'
+  },
+  costBreakdown: {
+    en: 'Cost Breakdown',
+    fr: 'Répartition des Coûts'
+  },
+  productCostsCOGS: {
+    en: 'Product Costs (COGS)',
+    fr: 'Coûts des Produits (COGS)'
+  },
+  detailedExpenseAnalysis: {
+    en: 'Detailed Expense Analysis',
+    fr: 'Analyse Détaillée des Dépenses'
+  },
+  directMaterialCosts: {
+    en: 'Direct Material Costs',
+    fr: 'Coûts Directs des Matériaux'
+  },
+  costOfGoodsSoldFromReceiptItems: {
+    en: 'Cost of goods sold from receipt items',
+    fr: 'Coût des marchandises vendues à partir des articles de reçus'
+  },
+  profitAnalysisRevenueScenarios: {
+    en: 'Profit Analysis & Revenue Scenarios',
+    fr: 'Analyse des Bénéfices et Scénarios de Revenus'
+  },
+  currentPositionReceivedRevenue: {
+    en: 'Current Position (Received Revenue)',
+    fr: 'Position Actuelle (Revenus Reçus)'
+  },
+  actualCashReceivedFromCustomers: {
+    en: 'Actual cash received from customers',
+    fr: 'Liquidités réellement reçues des clients'
+  },
+  lessProductCostsIncludingPaidAtDelivery: {
+    en: 'Less: Product Costs (Including Paid at Delivery)',
+    fr: 'Moins: Coûts des Produits (Y compris Payé à la Livraison)'
+  },
+  productCostsBreakdown: {
+    en: 'Product costs breakdown:',
+    fr: 'Répartition des coûts des produits:'
+  },
+  directMaterialCostsBreakdown: {
+    en: '• Direct material costs',
+    fr: '• Coûts directs des matériaux'
+  },
+  paidAtDeliveryCostsBreakdown: {
+    en: '• Paid at delivery costs',
+    fr: '• Coûts payés à la livraison'
+  },
+  lessPaidOpExpenses: {
+    en: 'Less: Paid Op. Expenses',
+    fr: 'Moins: Dépenses Op. Payées'
+  },
+  lessPaidMontage: {
+    en: 'Less: Paid Montage',
+    fr: 'Moins: Montage Payé'
+  },
+  currentNetPosition: {
+    en: 'Current Net Position',
+    fr: 'Position Nette Actuelle'
+  },
+  currentCashPositionAfterAllPaidCosts: {
+    en: 'This is your current cash position after all paid costs',
+    fr: 'Ceci est votre position de liquidités actuelle après tous les coûts payés'
+  },
+  pendingLiabilities: {
+    en: 'Pending Liabilities',
+    fr: 'Passifs en Attente'
+  },
+  unpaidExpensesFutureCashFlow: {
+    en: 'Unpaid expenses that will impact future cash flow',
+    fr: 'Dépenses impayées qui impacteront les flux de trésorerie futurs'
+  },
+  fullPotentialIfAllRevenueCollected: {
+    en: 'Full Potential (If All Revenue Collected)',
+    fr: 'Potentiel Complet (Si Tous les Revenus Sont Collectés)'
+  },
+  includingUnclaimedBalance: {
+    en: 'Including unclaimed balance:',
+    fr: 'Y compris le solde non réclamé:'
+  },
+  lessAllOpExpenses: {
+    en: 'Less: All Op. Expenses',
+    fr: 'Moins: Toutes les Dépenses Op.'
+  },
+  lessAllMontage: {
+    en: 'Less: All Montage',
+    fr: 'Moins: Tout le Montage'
+  },
+  totalNetProfit: {
+    en: 'Total Net Profit',
+    fr: 'Bénéfice Net Total'
+  },
+  maximumPotentialProfitIfAllRevenueCollected: {
+    en: 'Maximum potential profit if all revenue collected',
+    fr: 'Bénéfice potentiel maximum si tous les revenus sont collectés'
+  },
+  collectionImpact: {
+    en: 'Collection Impact',
+    fr: 'Impact de la Collecte'
+  },
+  additionalProfitFromCollectingBalance: {
+    en: 'Additional profit from collecting outstanding balance and paying remaining expenses',
+    fr: 'Bénéfice supplémentaire en collectant le solde impayé et en payant les dépenses restantes'
+  },
+  financialPerformanceMetrics: {
+    en: 'Financial Performance Metrics',
+    fr: 'Indicateurs de Performance Financière'
+  },
+  grossMargin: {
+    en: 'Gross Margin',
+    fr: 'Marge Brute'
+  },
+  netMarginCurrent: {
+    en: 'Net Margin (Current)',
+    fr: 'Marge Nette (Actuelle)'
+  },
+  netMarginFull: {
+    en: 'Net Margin (Full)',
+    fr: 'Marge Nette (Complète)'
   }
 };
 
