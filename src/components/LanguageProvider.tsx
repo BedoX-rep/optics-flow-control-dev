@@ -3210,6 +3210,46 @@ const subscriptionsTranslations: Translations = {
     en: 'An administrator will contact you shortly about your subscription.',
     fr: 'Un administrateur vous contactera bientôt au sujet de votre abonnement.'
   },
+  contactForSubscription: {
+    en: 'Contact for Subscription',
+    fr: 'Contact pour Abonnement'
+  },
+  contactSubscriptionDesc: {
+    en: 'To proceed with your subscription upgrade, please contact us at the number below.',
+    fr: 'Pour procéder à la mise à jour de votre abonnement, veuillez nous contacter au numéro ci-dessous.'
+  },
+  phoneNumber: {
+    en: 'Phone Number:',
+    fr: 'Numéro de téléphone :'
+  },
+  copy: {
+    en: 'Copy',
+    fr: 'Copier'
+  },
+  subscriptionContactNote: {
+    en: 'Our team will assist you with the subscription upgrade process and answer any questions you may have.',
+    fr: 'Notre équipe vous assistera dans le processus de mise à jour de votre abonnement et répondra à toutes vos questions.'
+  },
+  understood: {
+    en: 'Understood',
+    fr: 'Compris'
+  },
+  copied: {
+    en: 'Copied',
+    fr: 'Copié'
+  },
+  phoneNumberCopied: {
+    en: 'Phone number copied to clipboard',
+    fr: 'Numéro de téléphone copié dans le presse-papiers'
+  },
+  error: {
+    en: 'Error',
+    fr: 'Erreur'
+  },
+  failedToCopy: {
+    en: 'Failed to copy number',
+    fr: 'Impossible de copier le numéro'
+  },
   subscriptionUpdated: {
     en: 'Subscription Updated',
     fr: 'Abonnement Mis à Jour'
@@ -4222,7 +4262,7 @@ const financialTranslations: Translations = {
     en: 'Detailed Expenditure Analysis',
     fr: 'Analyse Détaillée des Dépenses'
   },
-  
+
   totalCapitalExpenditure: {
     en: 'Total Capital Expenditure',
     fr: 'Total des Dépenses d\'Investissement'
