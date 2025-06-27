@@ -542,16 +542,16 @@ const Personalisation = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                {t('eyesLinkingMarkupSettings') || 'Paramètres de Marge de Liaison des Yeux'}
+                Eyes Linking Markup Settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-blue-50/50 rounded-lg p-4 space-y-6">
-                <h4 className="font-medium text-blue-900">{t('markupRangesConfiguration') || 'Configuration des Plages de Marge'}</h4>
+                <h4 className="font-medium text-blue-900">Markup Ranges Configuration</h4>
 
                 {/* SPH Ranges */}
                 <div className="space-y-4">
-                  <h5 className="font-medium text-gray-700">{t('sphRanges') || 'Plages SPH (Sphère)'}</h5>
+                  <h5 className="font-medium text-gray-700">SPH (Sphere) Ranges</h5>
 
                   {/* Range 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
@@ -669,7 +669,7 @@ const Personalisation = () => {
 
                 {/* CYL Ranges */}
                 <div className="space-y-4">
-                  <h5 className="font-medium text-gray-700">{t('cylRanges') || 'Plages CYL (Cylindre)'}</h5>
+                  <h5 className="font-medium text-gray-700">CYL (Cylinder) Ranges</h5>
 
                   {/* Range 1 */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center p-3 bg-white rounded-lg border">
