@@ -225,9 +225,21 @@ export default function Clients() {
     try {
       if (!user) return;
 
-      // Check for duplicates
-      const phoneNumbers = new Set(allClients.map(client => client.phone));
-      const newClients = importedClients.filter(client => !phoneNumbers.has(client.phone));
+      // Check for duplicates - only check phone numbers that are not null/empty
+      const existingPhones = new Set(
+        allClients
+          .map(client => client.phone)
+          .filter(phone => phone && phone.trim() !== "")
+      );
+      
+      const newClients = importedClients.filter(client => {
+        // If client has no phone or empty phone, always allow import
+        if (!client.phone || client.phone.trim() === "") {
+          return true;
+        }
+        // If client has phone, check if it's not already in the database
+        return !existingPhones.has(client.phone);
+      });
 
       if (newClients.length === 0) {
         toast.warning("All imported clients already exist in your database");
