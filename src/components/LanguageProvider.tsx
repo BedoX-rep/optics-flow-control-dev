@@ -3322,6 +3322,46 @@ const settingsTranslations: Translations = {
     en: 'Settings Saved',
     fr: 'Paramètres Enregistrés'
   },
+  eyesLinkingMarkupSettings: {
+    en: 'Eyes Linking Markup Settings',
+    fr: 'Paramètres de Majoration de Liaison des Yeux'
+  },
+  markupRangesConfiguration: {
+    en: 'Markup Ranges Configuration',
+    fr: 'Configuration des Plages de Majoration'
+  },
+  sphRanges: {
+    en: 'SPH (Sphere) Ranges',
+    fr: 'Plages SPH (Sphère)'
+  },
+  cylRanges: {
+    en: 'CYL (Cylinder) Ranges',
+    fr: 'Plages CYL (Cylindre)'
+  },
+  range1: {
+    en: 'Range 1',
+    fr: 'Plage 1'
+  },
+  range2: {
+    en: 'Range 2',
+    fr: 'Plage 2'
+  },
+  range3: {
+    en: 'Range 3',
+    fr: 'Plage 3'
+  },
+  min: {
+    en: 'Min',
+    fr: 'Min'
+  },
+  max: {
+    en: 'Max',
+    fr: 'Max'
+  },
+  markupPercent: {
+    en: 'Markup %',
+    fr: 'Marge %'
+  },
   opticianInfoUpdated: {
     en: 'Your optician information has been successfully updated.',
     fr: 'Vos informations d\'opticien ont été mises à jour avec succès.'
