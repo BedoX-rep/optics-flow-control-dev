@@ -59,7 +59,7 @@ const Access = () => {
     queryFn: async () => {
       if (!isAdmin) return [];
 
-      const { data, error } = await supabase
+      const { data: subscriptionsData, error: subscriptionsError } = await supabase
         .from('subscriptions')
         .select(`
           user_id,
@@ -68,35 +68,48 @@ const Access = () => {
           access_code
         `);
 
-      if (error) throw error;
+      if (subscriptionsError) throw subscriptionsError;
       
-      // Fetch permissions separately for each user
-      const staffWithPermissions = await Promise.all(
-        data.map(async (staff) => {
-          const { data: permData } = await supabase
-            .from('permissions')
-            .select('*')
-            .eq('user_id', staff.user_id)
-            .single();
-          
-          return {
-            ...staff,
-            permissions: permData || {
-              can_manage_products: true,
-              can_manage_clients: true,
-              can_manage_receipts: true,
-              can_view_financial: false,
-              can_manage_purchases: false,
-              can_access_dashboard: true,
-              can_manage_invoices: true,
-            }
-          };
-        })
-      );
+      // Get all user IDs
+      const userIds = subscriptionsData.map(staff => staff.user_id);
+      
+      // Fetch all permissions in a single query
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .from('permissions')
+        .select('*')
+        .in('user_id', userIds);
+
+      if (permissionsError) {
+        console.error('Error fetching permissions:', permissionsError);
+      }
+      
+      // Create a map of permissions by user_id for quick lookup
+      const permissionsMap = new Map();
+      if (permissionsData) {
+        permissionsData.forEach(perm => {
+          permissionsMap.set(perm.user_id, perm);
+        });
+      }
+      
+      // Combine staff data with permissions
+      const staffWithPermissions = subscriptionsData.map(staff => ({
+        ...staff,
+        permissions: permissionsMap.get(staff.user_id) || {
+          can_manage_products: true,
+          can_manage_clients: true,
+          can_manage_receipts: true,
+          can_view_financial: false,
+          can_manage_purchases: false,
+          can_access_dashboard: true,
+          can_manage_invoices: true,
+        }
+      }));
       
       return staffWithPermissions as StaffMember[];
     },
     enabled: isAdmin,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Update own permissions mutation
