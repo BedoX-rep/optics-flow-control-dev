@@ -616,25 +616,18 @@ const Financial = () => {
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('financialOverview')}</h1>
-          <p className="text-gray-600 mt-1">{t('comprehensiveBusinessAnalytics')}</p>
+      {/* Header with integrated date filter */}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-gray-900">{t('financial')}</h1>
         </div>
-      </div>
-
-      {/* Date Range Filter */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            {t('dateRangeFilter')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        
+        {/* Integrated Date Range Filter */}
+        <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateFrom">{t('fromDate')}</Label>
+              <Label htmlFor="dateFrom" className="text-sm font-medium">{t('fromDate')}</Label>
               <Input
                 id="dateFrom"
                 type="date"
@@ -644,7 +637,7 @@ const Financial = () => {
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateTo">{t('toDate')}</Label>
+              <Label htmlFor="dateTo" className="text-sm font-medium">{t('toDate')}</Label>
               <Input
                 id="dateTo"
                 type="date"
@@ -677,8 +670,8 @@ const Financial = () => {
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Enhanced Key Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
