@@ -90,7 +90,7 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="flex items-center gap-4">
               <div>
                 <h2 className="text-lg font-medium text-gray-800">
-                  Welcome back, {user?.email?.split('@')[0] || 'User'}
+                  {t('welcomeBack') || 'Bon retour'}, {user?.email?.split('@')[0] || 'Utilisateur'}
                 </h2>
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-500">{currentDate}</p>
@@ -114,7 +114,7 @@ const Layout = ({ children }: LayoutProps) => {
                     className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-3 py-1.5 text-xs font-medium"
                   >
                     <Shield className="h-3 w-3 mr-1" />
-                    Access as Admin
+                    {t('accessAsAdmin') || 'Accès Admin'}
                   </Button>
                 )}
                 <LanguageToggle />
@@ -183,7 +183,7 @@ const Layout = ({ children }: LayoutProps) => {
               {/* Welcome Message */}
               <div>
                 <h2 className="text-base font-medium text-gray-800">
-                  Welcome back, {user?.email?.split('@')[0] || 'User'}
+                  {t('welcomeBack') || 'Bon retour'}, {user?.email?.split('@')[0] || 'Utilisateur'}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-xs text-gray-500">{currentDate}</p>
@@ -207,7 +207,7 @@ const Layout = ({ children }: LayoutProps) => {
                       className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 hover:text-teal-800 px-2 py-1 text-xs font-medium"
                     >
                       <Shield className="h-3 w-3 mr-1" />
-                      Admin
+                      {t('admin') || 'Admin'}
                     </Button>
                   )}
                   <LanguageToggle />
@@ -307,17 +307,17 @@ const Layout = ({ children }: LayoutProps) => {
         <Dialog open={adminAccessDialogOpen} onOpenChange={setAdminAccessDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Access as Admin</DialogTitle>
+              <DialogTitle>{t('accessAsAdmin') || 'Accès Admin'}</DialogTitle>
               <DialogDescription>
-                Enter your access code to elevate to Admin privileges for this session.
+                {t('enterAccessCodeToElevate') || 'Entrez votre code d\'accès pour élever vos privilèges Admin pour cette session.'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="admin-access-code">Access Code</Label>
+                <Label htmlFor="admin-access-code">{t('accessCode') || 'Code d\'Accès'}</Label>
                 <Input
                   id="admin-access-code"
-                  placeholder="Enter 5-character access code"
+                  placeholder={t('enterAccessCodePlaceholder') || 'Entrez le code d\'accès à 5 caractères'}
                   value={accessCodeInput}
                   onChange={(e) => setAccessCodeInput(e.target.value.toUpperCase())}
                   maxLength={5}
@@ -326,10 +326,10 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setAdminAccessDialogOpen(false)}>
-                  Cancel
+                  {t('cancel') || 'Annuler'}
                 </Button>
                 <Button onClick={handlePromoteToAdmin}>
-                  Elevate Access
+                  {t('elevateAccess') || 'Élever l\'Accès'}
                 </Button>
               </div>
             </div>

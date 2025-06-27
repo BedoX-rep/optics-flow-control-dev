@@ -734,7 +734,8 @@ const Personalisation = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label                      <Input
+                      <Label className="text-xs">{t('markupPercent') || 'Marge %'}</Label>
+                      <Input
                         type="number"
                         step="0.01"
                         value={formData.markup_cyl_range_2_markup}

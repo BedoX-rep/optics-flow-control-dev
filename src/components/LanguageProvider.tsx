@@ -3429,6 +3429,38 @@ const navigationTranslations: Translations = {
   administration: {
     en: 'Administration',
     fr: 'Administration'
+  },
+  welcomeBack: {
+    en: 'Welcome back',
+    fr: 'Bon retour'
+  },
+  accessAsAdmin: {
+    en: 'Access as Admin',
+    fr: 'Accès Admin'
+  },
+  admin: {
+    en: 'Admin',
+    fr: 'Admin'
+  },
+  enterAccessCodeToElevate: {
+    en: 'Enter your access code to elevate to Admin privileges for this session.',
+    fr: 'Entrez votre code d\'accès pour élever vos privilèges Admin pour cette session.'
+  },
+  accessCode: {
+    en: 'Access Code',
+    fr: 'Code d\'Accès'
+  },
+  enterAccessCodePlaceholder: {
+    en: 'Enter 5-character access code',
+    fr: 'Entrez le code d\'accès à 5 caractères'
+  },
+  cancel: {
+    en: 'Cancel',
+    fr: 'Annuler'
+  },
+  elevateAccess: {
+    en: 'Elevate Access',
+    fr: 'Élever l\'Accès'
   }
 };
 
