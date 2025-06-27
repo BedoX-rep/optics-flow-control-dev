@@ -298,25 +298,12 @@ const Dashboard = () => {
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard')}</h1>
-          <p className="text-gray-600 mt-1">{t('dashboardSubtitle')}</p>
-        </div>
-      </div>
-
-      {/* Date Range Filter */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            {t('dateRangeFilter')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Integrated Date Range Filter */}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateFrom">{t('fromDate')}</Label>
+              <Label htmlFor="dateFrom" className="text-sm font-medium">{t('fromDate')}</Label>
               <Input
                 id="dateFrom"
                 type="date"
@@ -326,7 +313,7 @@ const Dashboard = () => {
               />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <Label htmlFor="dateTo">{t('toDate')}</Label>
+              <Label htmlFor="dateTo" className="text-sm font-medium">{t('toDate')}</Label>
               <Input
                 id="dateTo"
                 type="date"
@@ -366,8 +353,8 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard 
