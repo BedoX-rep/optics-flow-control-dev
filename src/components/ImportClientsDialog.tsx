@@ -18,6 +18,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import * as XLSX from 'xlsx'
 import { useLanguage } from '@/components/LanguageProvider'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '@/components/AuthProvider'
 
 interface ImportClientsDialogProps {
   isOpen: boolean
@@ -31,6 +33,8 @@ const OPTIONAL_FIELDS = ['phone', 'right_eye_sph', 'right_eye_cyl', 'right_eye_a
 export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClientsDialogProps) => {
   const { toast } = useToast()
   const { t } = useLanguage()
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [file, setFile] = useState<File | null>(null)
   const [previewData, setPreviewData] = useState<any[]>([])
   const [hasHeaders, setHasHeaders] = useState(true)
@@ -182,9 +186,18 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           const mappedColumn = columnMappings[field]
           if (mappedColumn) {
             const value = hasHeaders ? row[mappedColumn] : row[parseInt(mappedColumn.replace("Column ", "")) - 1]
-            // Allow empty phone values, but still validate other fields
-            if (value !== undefined && value !== null && (field === 'phone' || value !== "")) {
-              client[field] = field.includes('eye') || field === 'Add' ? Number(value) : value
+            // Handle prescription fields (assign 0 for null/empty values)
+            if (field.includes('eye') || field === 'Add') {
+              const numValue = value !== undefined && value !== null && value !== "" ? Number(value) : 0
+              client[field] = isNaN(numValue) ? 0 : numValue
+            }
+            // Handle phone field (allow empty values)
+            else if (field === 'phone') {
+              client[field] = value !== undefined && value !== null ? value : ""
+            }
+            // Handle other fields
+            else if (value !== undefined && value !== null && value !== "") {
+              client[field] = value
             }
           }
         })
@@ -201,6 +214,12 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
       }
 
       onImport(clients)
+      
+      // Invalidate clients cache to refresh the UI
+      if (user) {
+        queryClient.invalidateQueries(['all-clients', user.id])
+      }
+      
       resetDialog()
       toast({
         title: t('success'),
