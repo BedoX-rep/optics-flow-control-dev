@@ -4757,8 +4757,8 @@ const authTranslations: Translations = {
     fr: 'ABCDE'
   },
   accessCodeRequired: {
-    en: 'Required: This is your unique 5-character access code which will give admin access to any user with access to it.',
-    fr: 'Requis : Il s\'agit de votre code d\'accès unique à 5 caractères qui donnera un accès administrateur à tout utilisateur y ayant accès.'
+    en: 'This is your unique 5-character access code which will give admin access to any user with access to it.',
+    fr: 'Il s\'agit de votre code d\'accès unique à 5 caractères qui donnera un accès administrateur à tout utilisateur y ayant accès.'
   },
   referralCode: {
     en: 'Referral Code',
@@ -4773,8 +4773,8 @@ const authTranslations: Translations = {
     fr: 'ABCD'
   },
   referralCodeOptionalDesc: {
-    en: 'Optional: Enter a referral code from an existing use. Leave blank if you don\'t have one.',
-    fr: 'Optionnel : Entrez un code de parrainage d\'un utilisateur existant. Laissez vide si vous n\'en avez pas.'
+    en: 'Enter a referral code from an existing user. Leave blank if you don\'t have one.',
+    fr: 'Entrez un code de parrainage d\'un utilisateur existant. Laissez vide si vous n\'en avez pas.'
   },
   security: {
     en: 'Security',
