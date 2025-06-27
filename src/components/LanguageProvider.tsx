@@ -4150,6 +4150,7 @@ const financialTranslations: Translations = {
     en: 'Detailed Expenditure Analysis',
     fr: 'Analyse Détaillée des Dépenses'
   },
+  
   totalCapitalExpenditure: {
     en: 'Total Capital Expenditure',
     fr: 'Total des Dépenses d\'Investissement'
@@ -4389,6 +4390,10 @@ const financialTranslations: Translations = {
   netMarginFull: {
     en: 'Net Margin (Full)',
     fr: 'Marge Nette (Complète)'
+  },
+  totalFilteredExpenses: {
+    en: 'Total Filtered Expenses',
+    fr: 'Total des Dépenses Filtrées'
   }
 };
 
