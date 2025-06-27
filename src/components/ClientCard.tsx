@@ -208,18 +208,27 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Save all edited fields - UPDATED to use name attributes from input fields
   const handleSaveChanges = async () => {
     try {
+      // Convert string values to numbers for database storage, handle commas as decimal separators
+      const convertToNumber = (value: any) => {
+        if (value === null || value === undefined || value === "") return null;
+        if (typeof value === "number") return value;
+        const stringValue = String(value).replace(',', '.');
+        const numValue = parseFloat(stringValue);
+        return isNaN(numValue) ? null : numValue;
+      };
+
       const { error } = await supabase
         .from('clients')
         .update({
           name: editedClient.name,
           phone: editedClient.phone,
-          right_eye_sph: editedClient.right_eye_sph,
-          right_eye_cyl: editedClient.right_eye_cyl,
-          right_eye_axe: editedClient.right_eye_axe,
-          left_eye_sph: editedClient.left_eye_sph,
-          left_eye_cyl: editedClient.left_eye_cyl,
-          left_eye_axe: editedClient.left_eye_axe,
-          Add: editedClient.Add
+          right_eye_sph: convertToNumber(editedClient.right_eye_sph),
+          right_eye_cyl: convertToNumber(editedClient.right_eye_cyl),
+          right_eye_axe: convertToNumber(editedClient.right_eye_axe),
+          left_eye_sph: convertToNumber(editedClient.left_eye_sph),
+          left_eye_cyl: convertToNumber(editedClient.left_eye_cyl),
+          left_eye_axe: convertToNumber(editedClient.left_eye_axe),
+          Add: convertToNumber(editedClient.Add)
         })
         .eq('id', client.id);
 
@@ -340,10 +349,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    // Allow empty string, numbers, decimal point, and minus sign
-                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
-                      const value = inputValue === "" ? null : (inputValue === "-" || inputValue === "." || inputValue === "-." ? inputValue : parseFloat(inputValue));
-                      handleFieldChange('right_eye_sph', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    // Allow empty string, numbers, decimal point, comma, and minus sign
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
@@ -358,8 +366,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
-                      handleFieldChange('right_eye_cyl', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
@@ -374,8 +382,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
-                      handleFieldChange('right_eye_axe', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
@@ -395,8 +403,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
-                      handleFieldChange('left_eye_sph', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
@@ -411,8 +419,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    if (inputValue === "" || /^-?\d*\.?\d*$/.test(inputValue)) {
-                      handleFieldChange('left_eye_cyl', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
@@ -427,8 +435,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
-                      handleFieldChange('left_eye_axe', inputValue === "" ? null : (isNaN(parseFloat(inputValue)) ? inputValue : parseFloat(inputValue)));
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
                     }
                   }}
                 />
