@@ -446,29 +446,24 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
           
-          {/* Add field - positioned below axe boxes */}
-          <div className="grid grid-cols-2 gap-4">
-            <div></div>
-            <div className="grid grid-cols-3 gap-2">
-              <div></div>
-              <div></div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">{t('add') || 'ADD'}</span>
-                <input 
-                  type="text"
-                  inputMode="decimal"
-                  name="add"
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                  value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                      handleFieldChange('Add', inputValue === "" ? null : inputValue);
-                    }
-                  }}
-                  placeholder="0.00"
-                />
-              </div>
+          {/* Add field - centered horizontally */}
+          <div className="flex justify-center">
+            <div className="w-32 flex flex-col">
+              <span className="text-xs text-gray-500 text-center">{t('add') || 'ADD'}</span>
+              <input 
+                type="text"
+                inputMode="decimal"
+                name="add"
+                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
+                value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                    handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                  }
+                }}
+                placeholder="0.00"
+              />
             </div>
           </div>
         </div>
