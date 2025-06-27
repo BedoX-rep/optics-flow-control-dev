@@ -4146,9 +4146,9 @@ const financialTranslations: Translations = {
     en: 'Collection Rate',
     fr: 'Taux de Collecte'
   },
-  detailedCapitalExpenditureAnalysis: {
-    en: 'Detailed Capital Expenditure Analysis',
-    fr: 'Analyse Détaillée des Dépenses d\'Investissement'
+  detailedExpenditureAnalysis: {
+    en: 'Detailed Expenditure Analysis',
+    fr: 'Analyse Détaillée des Dépenses'
   },
   totalCapitalExpenditure: {
     en: 'Total Capital Expenditure',

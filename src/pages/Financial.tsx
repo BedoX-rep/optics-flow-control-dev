@@ -1009,117 +1009,12 @@ const Financial = () => {
         </CardContent>
       </Card>
 
-      {/* Detailed Expense Analysis */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            {t('detailedExpenseAnalysis')}
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-1">
-            {t('comprehensiveBreakdownOfAllBusinessExpenses')}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Operational Expenses Detail */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('operationalExpenses')}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between p-3 bg-purple-50 rounded-lg">
-                  <span className="font-medium">{t('total')}</span>
-                  <span className="font-bold text-purple-600">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
-                  <span className="font-medium text-green-600">{t('paid')}</span>
-                  <span className="font-bold text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium text-red-600">{t('unpaid')}</span>
-                  <span className="font-bold text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
-                </div>
-                {financialMetrics.operationalExpenses.total > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-gray-600 mb-2">
-                      {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
-                    </div>
-                    <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Montage Costs Detail */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('montageCosts')}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between p-3 bg-indigo-50 rounded-lg">
-                  <span className="font-medium">{t('total')}</span>
-                  <span className="font-bold text-indigo-600">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
-                  <span className="font-medium text-green-600">{t('paid')}</span>
-                  <span className="font-bold text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium text-red-600">{t('unpaid')}</span>
-                  <span className="font-bold text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
-                </div>
-                {financialMetrics.montageMetrics.total > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-gray-600 mb-2">
-                      {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
-                    </div>
-                    <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-2" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Product Costs Analysis by Category */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('productCostsByCategory')}</h4>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
-                  <div key={category} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between font-medium mb-2">
-                      <span className="text-gray-800">{category}</span>
-                      <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('profit')}:</span>
-                        <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.profit.toFixed(2)} DH
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('margin')}:</span>
-                        <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.margin.toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex justify-between font-bold text-blue-800">
-                  <span>{t('totalProductCosts')}:</span>
-                  <span>{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Enhanced Capital Expenditure and Operational Expenses Analysis */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            {t('detailedCapitalExpenditureAnalysis')}
+            {t('detailedExpenditureAnalysis')}
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">
             {t('analysisOfCapitalExpenditureAndOperationalExpenses')}
@@ -1306,6 +1201,102 @@ const Financial = () => {
               {t('noExpensesFoundMatchingFilters')}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Detailed Expense Analysis */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Operational Expenses Detail */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('operationalExpenses')}</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between p-3 bg-purple-50 rounded-lg">
+                  <span className="font-medium">{t('total')}</span>
+                  <span className="font-bold text-purple-600">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
+                  <span className="font-medium text-green-600">{t('paid')}</span>
+                  <span className="font-bold text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
+                  <span className="font-medium text-red-600">{t('unpaid')}</span>
+                  <span className="font-bold text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                </div>
+                {financialMetrics.operationalExpenses.total > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
+                    </div>
+                    <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Montage Costs Detail */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('montageCosts')}</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between p-3 bg-indigo-50 rounded-lg">
+                  <span className="font-medium">{t('total')}</span>
+                  <span className="font-bold text-indigo-600">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
+                  <span className="font-medium text-green-600">{t('paid')}</span>
+                  <span className="font-bold text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
+                  <span className="font-medium text-red-600">{t('unpaid')}</span>
+                  <span className="font-bold text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
+                </div>
+                {financialMetrics.montageMetrics.total > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
+                    </div>
+                    <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-2" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Product Costs Analysis by Category */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('productCostsByCategory')}</h4>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
+                  <div key={category} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between font-medium mb-2">
+                      <span className="text-gray-800">{category}</span>
+                      <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('profit')}:</span>
+                        <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
+                          {data.profit.toFixed(2)} DH
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('margin')}:</span>
+                        <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
+                          {data.margin.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex justify-between font-bold text-blue-800">
+                  <span>{t('totalProductCosts')}:</span>
+                  <span>{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
