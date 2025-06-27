@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart, Filter } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, TrendingDown, Building2, Package, Calculator, Wallet, AlertTriangle, PieChart, Target, ShoppingCart, Filter, Eye, Glasses, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -125,7 +126,7 @@ const Financial = () => {
       })) || [];
 
       console.log('Processed receipts data:', processedData);
-      
+
       return processedData;
     },
     enabled: !!user,
@@ -614,6 +615,10 @@ const Financial = () => {
     }
   };
 
+    const totalExpenses = financialMetrics.operationalExpenses.total + financialMetrics.montageMetrics.total
+    const capitalPurchases = financialMetrics.capitalAnalysis.total
+    const operationalExpenses = financialMetrics.operationalExpenses.total
+
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       {/* Header with integrated date filter */}
@@ -622,7 +627,7 @@ const Financial = () => {
           <DollarSign className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-gray-900">{t('financial')}</h1>
         </div>
-        
+
         {/* Integrated Date Range Filter */}
         <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex flex-wrap items-end gap-4">
@@ -823,493 +828,277 @@ const Financial = () => {
       </div>
 
       {/* Comprehensive Receipt Items Analysis */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            {t('comprehensiveReceiptItemsAnalysis')}
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-1">
-            {t('detailedAnalysisAllSoldItems')}
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* Filter Controls */}
-          <div className="space-y-4 mb-6">
-            {/* Include/Exclude Paid at Delivery Checkbox */}
-            <div className="flex items-center space-x-2 p-3 bg-yellow-50 rounded-lg">
-              <input
-                type="checkbox"
-                id="includePaidAtDelivery"
-                checked={includePaidAtDelivery}
-                onChange={(e) => setIncludePaidAtDelivery(e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <Label htmlFor="includePaidAtDelivery" className="text-sm font-medium">
-                {t('includePaidAtDeliveryItems')}
-              </Label>
-              <span className="text-xs text-gray-500 ml-2">
-                ({includePaidAtDelivery ? t('currentlyIncluding') : t('currentlyExcluding')} {t('paidAtDeliveryItems')})
-              </span>
-            </div>
-
-            {/* Filter Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="categoryFilter">{t('categoryFilter')}</Label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allCategories')}</SelectItem>
-                    {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="companyFilter">{t('companyFilter')}</Label>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allCompanies')}</SelectItem>
-                    {!receiptsLoading && Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
-                      <SelectItem key={company} value={company}>{company}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="stockFilter">{t('stockStatusFilter')}</Label>
-                <Select value={selectedStockStatus} onValueChange={setSelectedStockStatus}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allStockStatus')}</SelectItem>
-                    <SelectItem value="InStock">{t('inStock')}</SelectItem>
-                    <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
-                    <SelectItem value="Order">{t('order')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="paidAtDeliveryFilter">{t('paidAtDeliveryFilter')}</Label>
-                <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allItems')}</SelectItem>
-                    <SelectItem value="yes">{t('paidAtDelivery')}</SelectItem>
-                    <SelectItem value="no">{t('notPaidAtDelivery')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Summary Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-50 rounded-lg p-3">
-              <p className="text-sm text-blue-600 mb-1">{t('totalItems')}</p>
-              <p className="text-xl font-bold text-blue-900">{filteredReceiptItems.length}</p>
-            </div>
-            <div className="bg-green-50 rounded-lg p-3">
-              <p className="text-sm text-green-600 mb-1">{t('totalRevenue')}</p>
-              <p className="text-xl font-bold text-green-900">
-                {filteredReceiptItems.reduce((sum, item) => sum + item.totalRevenue, 0).toFixed(2)} DH
-              </p>
-            </div>
-            <div className="bg-red-50 rounded-lg p-3">
-              <p className="text-sm text-red-600 mb-1">{t('totalCost')}</p>
-              <p className="text-xl font-bold text-red-900">
-                {filteredReceiptItems.reduce((sum, item) => sum + item.totalCost, 0).toFixed(2)} DH
-              </p>
-            </div>
-            <div className="bg-purple-50 rounded-lg p-3">
-              <p className="text-sm text-purple-600 mb-1">{t('totalProfit')}</p>
-              <p className={cn(
-                "text-xl font-bold",
-                filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0) >= 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0).toFixed(2)} DH
-              </p>
-            </div>
-          </div>
-
-          {/* Detailed Items List */}
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {filteredReceiptItems.map((item) => (
-              <div key={item.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h5 className="font-medium text-gray-900">{item.productName}</h5>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.company}</span>
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
-                      {item.paidAtDelivery && (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Paid at Delivery</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-gray-900">Qty: {item.quantity}</div>
-                    <div className="text-sm text-gray-600">
-                      {item.price.toFixed(2)} DH × {item.quantity} = {item.totalRevenue.toFixed(2)} DH
-                    </div>
-                  </div>
+      <Collapsible>
+        <Card>
+          <CardHeader>
+            <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-gray-50 rounded-lg p-2 -m-2">
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5" />
+                {t('comprehensiveReceiptItemsAnalysis')}
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 transition-transform" />
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              {/* Filter Controls */}
+              <div className="space-y-4 mb-6">
+                {/* Include/Exclude Paid at Delivery Checkbox */}
+                <div className="flex items-center space-x-2 p-3 bg-yellow-50 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="includePaidAtDelivery"
+                    checked={includePaidAtDelivery}
+                    onChange={(e) => setIncludePaidAtDelivery(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 rounded"
+                  />
+                  <Label htmlFor="includePaidAtDelivery" className="text-sm font-medium">
+                    {t('includePaidAtDeliveryItems')}
+                  </Label>
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({includePaidAtDelivery ? t('currentlyIncluding') : t('currentlyExcluding')} {t('paidAtDeliveryItems')})
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {/* Filter Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <span className="text-gray-600">Unit Cost: </span>
-                    <span className="font-medium">{item.cost.toFixed(2)} DH</span>
+                    <Label htmlFor="categoryFilter">{t('categoryFilter')}</Label>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('allCategories')}</SelectItem>
+                        {Object.keys(receiptItemsAnalysis.summaryData.categories).map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
                   <div>
-                    <span className="text-gray-600">Total Cost: </span>
-                    <span className="font-medium text-red-600">{item.totalCost.toFixed(2)} DH</span>
+                    <Label htmlFor="companyFilter">{t('companyFilter')}</Label>
+                    <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('allCompanies')}</SelectItem>
+                        {!receiptsLoading && Object.keys(receiptItemsAnalysis.summaryData.companies).map(company => (
+                          <SelectItem key={company} value={company}>{company}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
                   <div>
-                    <span className="text-gray-600">Profit: </span>
-                    <span className={cn(
-                      "font-medium",
-                      item.profit >= 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      {item.profit.toFixed(2)} DH
-                    </span>
+                    <Label htmlFor="stockFilter">{t('stockStatusFilter')}</Label>
+                    <Select value={selectedStockStatus} onValueChange={setSelectedStockStatus}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('allStockStatus')}</SelectItem>
+                        <SelectItem value="InStock">{t('inStock')}</SelectItem>
+                        <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                        <SelectItem value="Order">{t('order')}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
+
                   <div>
-                    <span className="text-gray-600">Margin: </span>
-                    <span className={cn(
-                      "font-medium",
-                      item.margin >= 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      {item.margin.toFixed(1)}%
-                    </span>
+                    <Label htmlFor="paidAtDeliveryFilter">{t('paidAtDeliveryFilter')}</Label>
+                    <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('allItems')}</SelectItem>
+                        <SelectItem value="yes">{t('paidAtDelivery')}</SelectItem>
+                        <SelectItem value="no">{t('notPaidAtDelivery')}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {filteredReceiptItems.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              {t('noItemsFoundMatchingFilters')}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Detailed Expense Analysis */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            {t('detailedExpenseAnalysis')}
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-1">
-            {t('comprehensiveBreakdownOfAllBusinessExpenses')}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Operational Expenses Detail */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('operationalExpenses')}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between p-3 bg-purple-50 rounded-lg">
-                  <span className="font-medium">{t('total')}</span>
-                  <span className="font-bold text-purple-600">{financialMetrics.operationalExpenses.total.toFixed(2)} DH</span>
+              {/* Summary Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="text-sm text-blue-600 mb-1">{t('totalItems')}</p>
+                  <p className="text-xl font-bold text-blue-900">{filteredReceiptItems.length}</p>
                 </div>
-                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
-                  <span className="font-medium text-green-600">{t('paid')}</span>
-                  <span className="font-bold text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <p className="text-sm text-green-600 mb-1">{t('totalRevenue')}</p>
+                  <p className="text-xl font-bold text-green-900">
+                    {filteredReceiptItems.reduce((sum, item) => sum + item.totalRevenue, 0).toFixed(2)} DH
+                  </p>
                 </div>
-                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium text-red-600">{t('unpaid')}</span>
-                  <span className="font-bold text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                <div className="bg-red-50 rounded-lg p-3">
+                  <p className="text-sm text-red-600 mb-1">{t('totalCost')}</p>
+                  <p className="text-xl font-bold text-red-900">
+                    {filteredReceiptItems.reduce((sum, item) => sum + item.totalCost, 0).toFixed(2)} DH
+                  </p>
                 </div>
-                {financialMetrics.operationalExpenses.total > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-gray-600 mb-2">
-                      {t('payment')}: {((financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100).toFixed(1)}%
-                    </div>
-                    <Progress value={(financialMetrics.operationalExpenses.paid / financialMetrics.operationalExpenses.total) * 100} className="h-2" />
-                  </div>
-                )}
+                <div className="bg-purple-50 rounded-lg p-3">
+                  <p className="text-sm text-purple-600 mb-1">{t('totalProfit')}</p>
+                  <p className={cn(
+                    "text-xl font-bold",
+                    filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0) >= 0 ? "text-green-600" : "text-red-600"
+                  )}>
+                    {filteredReceiptItems.reduce((sum, item) => sum + item.profit, 0).toFixed(2)} DH
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Montage Costs Detail */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('montageCosts')}</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between p-3 bg-indigo-50 rounded-lg">
-                  <span className="font-medium">{t('total')}</span>
-                  <span className="font-bold text-indigo-600">{financialMetrics.montageMetrics.total.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-green-50 rounded-lg">
-                  <span className="font-medium text-green-600">{t('paid')}</span>
-                  <span className="font-bold text-green-600">{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between p-3 bg-red-50 rounded-lg">
-                  <span className="font-medium text-red-600">{t('unpaid')}</span>
-                  <span className="font-bold text-red-600">{financialMetrics.montageMetrics.unpaid.toFixed(2)} DH</span>
-                </div>
-                {financialMetrics.montageMetrics.total > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-gray-600 mb-2">
-                      {t('payment')}: {((financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100).toFixed(1)}%
+              {/* Detailed Items List */}
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {filteredReceiptItems.map((item) => (
+                  <div key={item.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h5 className="font-medium text-gray-900">{item.productName}</h5>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{item.category}</span>
+                          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.company}</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{item.stockStatus}</span>
+                          {item.paidAtDelivery && (
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Paid at Delivery</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900">Qty: {item.quantity}</div>
+                        <div className="text-sm text-gray-600">
+                          {item.price.toFixed(2)} DH × {item.quantity} = {item.totalRevenue.toFixed(2)} DH
+                        </div>
+                      </div>
                     </div>
-                    <Progress value={(financialMetrics.montageMetrics.paid / financialMetrics.montageMetrics.total) * 100} className="h-2" />
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Product Costs Analysis by Category */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('productCostsByCategory')}</h4>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
-                  <div key={category} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between font-medium mb-2">
-                      <span className="text-gray-800">{category}</span>
-                      <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('profit')}:</span>
-                        <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.profit.toFixed(2)} DH
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Unit Cost: </span>
+                        <span className="font-medium">{item.cost.toFixed(2)} DH</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Total Cost: </span>
+                        <span className="font-medium text-red-600">{item.totalCost.toFixed(2)} DH</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Profit: </span>
+                        <span className={cn(
+                          "font-medium",
+                          item.profit >= 0 ? "text-green-600" : "text-red-600"
+                        )}>
+                          {item.profit.toFixed(2)} DH
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('margin')}:</span>
-                        <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.margin.toFixed(1)}%
+                      <div>
+                        <span className="text-gray-600">Margin: </span>
+                        <span className={cn(
+                          "font-medium",
+                          item.margin >= 0 ? "text-green-600" : "text-red-600"
+                        )}>
+                          {item.margin.toFixed(1)}%
                         </span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex justify-between font-bold text-blue-800">
-                  <span>{t('totalProductCosts')}:</span>
-                  <span>{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+
+              {filteredReceiptItems.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  {t('noItemsFoundMatchingFilters')}
                 </div>
-              </div>
+              )}
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      {/* Detailed Expense Analysis */}
+      <Card className="mb-8">
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+              <span className="font-medium">{t('totalExpenses')}</span>
+              <span className="font-bold text-red-600">{totalExpenses.toFixed(2)} DH</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+              <span className="font-medium">{t('capitalPurchases')}</span>
+              <span className="font-bold text-blue-600">{capitalPurchases.toFixed(2)} DH</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+              <span className="font-medium">{t('operationalExpenses')}</span>
+              <span className="font-bold text-purple-600">{operationalExpenses.toFixed(2)} DH</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Enhanced Capital Expenditure and Operational Expenses Analysis */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            {t('detailedCapitalExpenditureAnalysis')}
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-1">
-            {t('analysisOfCapitalExpenditureAndOperationalExpenses')}
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-            <div className="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
-              <span className="font-medium">{t('totalCapitalExpenditure')}</span>
-              <span className="font-bold text-purple-900">
-                {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-              <span className="font-medium">{t('totalOperationalExpenses')}</span>
-              <span className="font-bold text-blue-900">
-                {financialMetrics.operationalExpenses.total.toFixed(2)} DH
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-              <span className="font-medium">{t('totalPaid')}</span>
-              <span className="font-bold text-green-600">
-                {(financialMetrics.capitalAnalysis.paid + financialMetrics.operationalExpenses.paid).toFixed(2)} DH
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-              <span className="font-medium">{t('totalUnpaid')}</span>
-              <span className="font-bold text-red-600">
-                {(financialMetrics.capitalAnalysis.outstanding + financialMetrics.operationalExpenses.unpaid).toFixed(2)} DH
-              </span>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div>
-              <Label htmlFor="expenseTypeFilter">{t('expenseTypeFilter')}</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('allExpenseTypes')}</SelectItem>
-                  <SelectItem value="Capital Expenditure">{t('capitalExpenditure')}</SelectItem>
-                  <SelectItem value="Operational Expenses">{t('operationalExpenses')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="paymentStatusFilter">{t('paymentStatusFilter')}</Label>
-              <Select value={selectedPaidAtDelivery} onValueChange={setSelectedPaidAtDelivery}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('allPaymentStatus')}</SelectItem>
-                  <SelectItem value="paid">{t('paid')}</SelectItem>
-                  <SelectItem value="unpaid">{t('unpaid')}</SelectItem>
-                  <SelectItem value="partial">{t('partiallyPaid')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="supplierFilter">{t('supplierFilter')}</Label>
-              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('allSuppliers')}</SelectItem>
-                  {Array.from(new Set(filteredPurchases.map(p => p.supplier?.name || 'Unknown'))).map(supplier => (
-                    <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Filtered Expenses List */}
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {filteredPurchases
-              .filter(purchase => {
-                const matchesType = selectedCategory === 'all' || purchase.purchase_type === selectedCategory;
-                const matchesSupplier = selectedCompany === 'all' || (purchase.supplier?.name || 'Unknown') === selectedCompany;
-                
-                const paid = purchase.advance_payment || 0;
-                const total = purchase.amount_ttc || purchase.amount || 0;
-                const outstanding = total - paid;
-                
-                let matchesPaymentStatus = true;
-                if (selectedPaidAtDelivery === 'paid') {
-                  matchesPaymentStatus = outstanding === 0 && paid > 0;
-                } else if (selectedPaidAtDelivery === 'unpaid') {
-                  matchesPaymentStatus = paid === 0;
-                } else if (selectedPaidAtDelivery === 'partial') {
-                  matchesPaymentStatus = paid > 0 && outstanding > 0;
-                }
-                
-                return matchesType && matchesSupplier && matchesPaymentStatus;
-              })
-              .map((purchase) => {
-                const total = purchase.amount_ttc || purchase.amount || 0;
-                const paid = purchase.advance_payment || 0;
-                const outstanding = total - paid;
-                
-                return (
-                  <div key={purchase.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <h5 className="font-medium text-gray-900">{purchase.description}</h5>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          <span className={cn(
-                            "text-xs px-2 py-1 rounded",
-                            purchase.purchase_type === 'Capital Expenditure' ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                          )}>
-                            {purchase.purchase_type}
-                          </span>
-                          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                            {purchase.supplier?.name || 'Unknown'}
-                          </span>
-                          <span className={cn(
-                            "text-xs px-2 py-1 rounded",
-                            outstanding === 0 && paid > 0 ? "bg-green-100 text-green-800" :
-                            paid === 0 ? "bg-red-100 text-red-800" :
-                            "bg-yellow-100 text-yellow-800"
-                          )}>
-                            {outstanding === 0 && paid > 0 ? t('fullyPaid') :
-                             paid === 0 ? t('unpaid') : t('partiallyPaid')}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">{t('date')}: {format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</p>
-                      </div>
-                      <div className="text-right ml-4">
-                        <div className="font-bold text-gray-900">{total.toFixed(2)} DH</div>
-                        <div className="text-sm text-green-600">{t('paid')}: {paid.toFixed(2)} DH</div>
-                        {outstanding > 0 && (
-                          <div className="text-sm text-red-600">{t('outstanding')}: {outstanding.toFixed(2)} DH</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {total > 0 && (
-                      <div className="mt-3">
-                        <Progress 
-                          value={(paid / total) * 100} 
-                          className="h-2"
-                        />
-                        <div className="text-xs text-gray-500 mt-1">
-                          {((paid / total) * 100).toFixed(1)}% {t('paidPercentage')}
-                        </div>
-                      </div>
-                    )}
+      {/* Detailed Expenditure Analysis */}
+      <Collapsible>
+        <Card className="mb-8">
+          <CardHeader>
+            <CollapsibleTrigger className="flex items-center justify-between w-full hover:bg-gray-50 rounded-lg p-2 -m-2">
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                {t('detailedExpenditureAnalysis')}
+              </CardTitle>
+              <ChevronDown className="h-4 w-4 transition-transform" />
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="space-y-4">
+                {filteredPurchases.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    {t('noPurchasesFound')}
                   </div>
-                );
-              })}
-          </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredPurchases.map((purchase) => {
+                      const items = purchase.purchase_items || [];
+                      const totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                      const totalCost = items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.unit_cost || 0)), 0);
 
-          {filteredPurchases.filter(purchase => {
-            const matchesType = selectedCategory === 'all' || purchase.purchase_type === selectedCategory;
-            const matchesSupplier = selectedCompany === 'all' || (purchase.supplier?.name || 'Unknown') === selectedCompany;
-            
-            const paid = purchase.advance_payment || 0;
-            const total = purchase.amount_ttc || purchase.amount || 0;
-            const outstanding = total - paid;
-            
-            let matchesPaymentStatus = true;
-            if (selectedPaidAtDelivery === 'paid') {
-              matchesPaymentStatus = outstanding === 0 && paid > 0;
-            } else if (selectedPaidAtDelivery === 'unpaid') {
-              matchesPaymentStatus = paid === 0;
-            } else if (selectedPaidAtDelivery === 'partial') {
-              matchesPaymentStatus = paid > 0 && outstanding > 0;
-            }
-            
-            return matchesType && matchesSupplier && matchesPaymentStatus;
-          }).length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              {t('noExpensesFoundMatchingFilters')}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      return (
+                        <div key={purchase.id} className="border rounded-lg p-4 bg-white">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="font-semibold">{purchase.supplier?.name || t('unknownSupplier')}</h3>
+                              <p className="text-sm text-gray-600">
+                                {format(new Date(purchase.purchase_date), 'PPP')} - {t('totalItems')}: {totalItems}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold">{totalCost.toFixed(2)} DH</p>
+                              <p className="text-xs text-gray-500">{purchase.purchase_type}</p>
+                            </div>
+                          </div>
 
-      
+                          {items.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {items.map((item, index) => (
+                                <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
+                                  <span>{item.product_name}</span>
+                                  <span>{item.quantity} × {item.unit_cost?.toFixed(2)} DH = {((item.quantity || 0) * (item.unit_cost || 0)).toFixed(2)} DH</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
     </div>
   );
 };
