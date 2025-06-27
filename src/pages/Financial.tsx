@@ -890,28 +890,36 @@ const Financial = () => {
             <div className="space-y-4">
               <h4 className="font-semibold text-gray-800 border-b pb-2 text-lg">{t('productCostsByCategory')}</h4>
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => (
-                  <div key={category} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between font-medium mb-2">
-                      <span className="text-gray-800">{category}</span>
-                      <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('profit')}:</span>
-                        <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.profit.toFixed(2)} DH
-                        </span>
+                {Object.entries(financialMetrics.productAnalysis.categories).map(([category, data]) => {
+                  // Get translated category name
+                  const getCategoryTranslation = (cat: string) => {
+                    const categoryKey = cat.toLowerCase().replace(/\s+/g, '');
+                    return t(categoryKey) !== categoryKey ? t(categoryKey) : cat;
+                  };
+
+                  return (
+                    <div key={category} className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between font-medium mb-2">
+                        <span className="text-gray-800">{getCategoryTranslation(category)}</span>
+                        <span className="text-gray-900">{data.cost.toFixed(2)} DH</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">{t('margin')}:</span>
-                        <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
-                          {data.margin.toFixed(1)}%
-                        </span>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('profit')}:</span>
+                          <span className={cn("font-medium", data.profit >= 0 ? "text-green-600" : "text-red-600")}>
+                            {data.profit.toFixed(2)} DH
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('margin')}:</span>
+                          <span className={cn("font-medium", data.margin >= 0 ? "text-green-600" : "text-red-600")}>
+                            {data.margin.toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex justify-between font-bold text-blue-800">
@@ -1123,47 +1131,6 @@ const Financial = () => {
           </p>
         </CardHeader>
         <CardContent>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-medium text-purple-900">{t('totalCapitalExpenditure')}</span>
-                <span className="font-bold text-purple-900 text-lg">
-                  {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t('paid')}:</span>
-                  <span className="font-medium text-green-600">{financialMetrics.capitalAnalysis.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t('unpaid')}:</span>
-                  <span className="font-medium text-red-600">{financialMetrics.capitalAnalysis.outstanding.toFixed(2)} DH</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-medium text-blue-900">{t('totalOperationalExpenses')}</span>
-                <span className="font-bold text-blue-900 text-lg">
-                  {financialMetrics.operationalExpenses.total.toFixed(2)} DH
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t('paid')}:</span>
-                  <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">{t('unpaid')}:</span>
-                  <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
@@ -1211,145 +1178,200 @@ const Financial = () => {
             </div>
           </div>
 
-          {/* Filtered Expenses List */}
-          <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
-            {(() => {
-              const filteredExpenses = filteredPurchases.filter(purchase => {
-                const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
-                const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
-
-                const paid = purchase.advance_payment || 0;
-                const total = purchase.amount_ttc || purchase.amount || 0;
-                const outstanding = total - paid;
-
-                let matchesPaymentStatus = true;
-                if (selectedPaymentStatus === 'paid') {
-                  matchesPaymentStatus = outstanding === 0 && paid > 0;
-                } else if (selectedPaymentStatus === 'unpaid') {
-                  matchesPaymentStatus = paid === 0;
-                } else if (selectedPaymentStatus === 'partial') {
-                  matchesPaymentStatus = paid > 0 && outstanding > 0;
-                }
-
-                return matchesType && matchesSupplier && matchesPaymentStatus;
-              });
-
-              if (filteredExpenses.length === 0) {
-                return (
-                  <div className="text-center py-8 text-gray-500">
-                    {t('noExpensesFoundMatchingFilters')}
+          {/* Reorganized Layout: Summary Cards + Filtered Expenses */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Summary Cards - Left Side */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium text-purple-900">{t('totalCapitalExpenditure')}</span>
+                  <span className="font-bold text-purple-900 text-lg">
+                    {financialMetrics.capitalAnalysis.total.toFixed(2)} DH
+                  </span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('paid')}:</span>
+                    <span className="font-medium text-green-600">{financialMetrics.capitalAnalysis.paid.toFixed(2)} DH</span>
                   </div>
-                );
-              }
-
-              return filteredExpenses.map((purchase) => {
-                const total = purchase.amount_ttc || purchase.amount || 0;
-                const paid = purchase.advance_payment || 0;
-                const outstanding = total - paid;
-
-                return (
-                  <div key={purchase.id} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <h5 className="font-medium text-gray-900">{purchase.description}</h5>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          <span className={cn(
-                            "text-xs px-2 py-1 rounded",
-                            purchase.purchase_type === 'Capital Expenditure' ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                          )}>
-                            {purchase.purchase_type}
-                          </span>
-                          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                            {purchase.supplier?.name || 'Unknown'}
-                          </span>
-                          <span className={cn(
-                            "text-xs px-2 py-1 rounded",
-                            outstanding === 0 && paid > 0 ? "bg-green-100 text-green-800" :
-                            paid === 0 ? "bg-red-100 text-red-800" :
-                            "bg-yellow-100 text-yellow-800"
-                          )}>
-                            {outstanding === 0 && paid > 0 ? t('fullyPaid') :
-                             paid === 0 ? t('unpaid') : t('partiallyPaid')}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">{t('date')}: {format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</p>
-                      </div>
-                      <div className="text-right ml-4">
-                        <div className="font-bold text-gray-900">{total.toFixed(2)} DH</div>
-                        <div className="text-sm text-green-600">{t('paid')}: {paid.toFixed(2)} DH</div>
-                        {outstanding > 0 && (
-                          <div className="text-sm text-red-600">{t('outstanding')}: {outstanding.toFixed(2)} DH</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {total > 0 && (
-                      <div className="mt-3">
-                        <Progress 
-                          value={(paid / total) * 100} 
-                          className="h-2"
-                        />
-                        <div className="text-xs text-gray-500 mt-1">
-                          {((paid / total) * 100).toFixed(1)}% {t('paidPercentage')}
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('unpaid')}:</span>
+                    <span className="font-medium text-red-600">{financialMetrics.capitalAnalysis.outstanding.toFixed(2)} DH</span>
                   </div>
-                );
-              });
-            })()}
-          </div>
+                </div>
+              </div>
 
-          {/* Total for Filtered Items */}
-          <div className="flex justify-end">
-            <div className="bg-gray-100 rounded-lg p-4 border border-gray-300 min-w-[300px]">
-              <h4 className="font-semibold text-gray-800 mb-2">{t('totalFilteredExpenses')}</h4>
-              {(() => {
-                const filteredExpenses = filteredPurchases.filter(purchase => {
-                  const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
-                  const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
-
-                  const paid = purchase.advance_payment || 0;
-                  const total = purchase.amount_ttc || purchase.amount || 0;
-                  const outstanding = total - paid;
-
-                  let matchesPaymentStatus = true;
-                  if (selectedPaymentStatus === 'paid') {
-                    matchesPaymentStatus = outstanding === 0 && paid > 0;
-                  } else if (selectedPaymentStatus === 'unpaid') {
-                    matchesPaymentStatus = paid === 0;
-                  } else if (selectedPaymentStatus === 'partial') {
-                    matchesPaymentStatus = paid > 0 && outstanding > 0;
-                  }
-
-                  return matchesType && matchesSupplier && matchesPaymentStatus;
-                });
-
-                const totalAmount = filteredExpenses.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount || 0), 0);
-                const totalPaid = filteredExpenses.reduce((sum, purchase) => sum + (purchase.advance_payment || 0), 0);
-                const totalOutstanding = totalAmount - totalPaid;
-
-                return (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('totalAmount')}:</span>
-                      <span className="font-bold text-gray-900">{totalAmount.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('totalPaid')}:</span>
-                      <span className="font-medium text-green-600">{totalPaid.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('totalOutstanding')}:</span>
-                      <span className="font-medium text-red-600">{totalOutstanding.toFixed(2)} DH</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-500 border-t pt-2">
-                      <span>{t('itemsCount')}:</span>
-                      <span>{filteredExpenses.length}</span>
-                    </div>
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium text-blue-900">{t('totalOperationalExpenses')}</span>
+                  <span className="font-bold text-blue-900 text-lg">
+                    {financialMetrics.operationalExpenses.total.toFixed(2)} DH
+                  </span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('paid')}:</span>
+                    <span className="font-medium text-green-600">{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
                   </div>
-                );
-              })()}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('unpaid')}:</span>
+                    <span className="font-medium text-red-600">{financialMetrics.operationalExpenses.unpaid.toFixed(2)} DH</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total for Filtered Items - Integrated */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <h4 className="font-semibold text-gray-800 mb-3">{t('totalFilteredExpenses')}</h4>
+                {(() => {
+                  const filteredExpenses = filteredPurchases.filter(purchase => {
+                    const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
+                    const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
+
+                    const paid = purchase.advance_payment || 0;
+                    const total = purchase.amount_ttc || purchase.amount || 0;
+                    const outstanding = total - paid;
+
+                    let matchesPaymentStatus = true;
+                    if (selectedPaymentStatus === 'paid') {
+                      matchesPaymentStatus = outstanding === 0 && paid > 0;
+                    } else if (selectedPaymentStatus === 'unpaid') {
+                      matchesPaymentStatus = paid === 0;
+                    } else if (selectedPaymentStatus === 'partial') {
+                      matchesPaymentStatus = paid > 0 && outstanding > 0;
+                    }
+
+                    return matchesType && matchesSupplier && matchesPaymentStatus;
+                  });
+
+                  const totalAmount = filteredExpenses.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount || 0), 0);
+                  const totalPaid = filteredExpenses.reduce((sum, purchase) => sum + (purchase.advance_payment || 0), 0);
+                  const totalOutstanding = totalAmount - totalPaid;
+
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('totalAmount')}:</span>
+                        <span className="font-bold text-gray-900">{totalAmount.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('totalPaid')}:</span>
+                        <span className="font-medium text-green-600">{totalPaid.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">{t('totalOutstanding')}:</span>
+                        <span className="font-medium text-red-600">{totalOutstanding.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-500 border-t pt-2">
+                        <span>{t('itemsCount')}:</span>
+                        <span>{filteredExpenses.length}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Filtered Expenses List - Right Side */}
+            <div className="lg:col-span-2">
+              <div className="bg-white border rounded-lg">
+                <div className="p-4 border-b bg-gray-50">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    {t('filteredExpensesList')}
+                  </h4>
+                  <p className="text-sm text-gray-600 mt-1">{t('filteredExpensesDescription')}</p>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {(() => {
+                      const filteredExpenses = filteredPurchases.filter(purchase => {
+                        const matchesType = selectedExpenseType === 'all' || purchase.purchase_type === selectedExpenseType;
+                        const matchesSupplier = selectedSupplier === 'all' || (purchase.supplier?.name || 'Unknown') === selectedSupplier;
+
+                        const paid = purchase.advance_payment || 0;
+                        const total = purchase.amount_ttc || purchase.amount || 0;
+                        const outstanding = total - paid;
+
+                        let matchesPaymentStatus = true;
+                        if (selectedPaymentStatus === 'paid') {
+                          matchesPaymentStatus = outstanding === 0 && paid > 0;
+                        } else if (selectedPaymentStatus === 'unpaid') {
+                          matchesPaymentStatus = paid === 0;
+                        } else if (selectedPaymentStatus === 'partial') {
+                          matchesPaymentStatus = paid > 0 && outstanding > 0;
+                        }
+
+                        return matchesType && matchesSupplier && matchesPaymentStatus;
+                      });
+
+                      if (filteredExpenses.length === 0) {
+                        return (
+                          <div className="text-center py-8 text-gray-500">
+                            {t('noExpensesFoundMatchingFilters')}
+                          </div>
+                        );
+                      }
+
+                      return filteredExpenses.map((purchase) => {
+                        const total = purchase.amount_ttc || purchase.amount || 0;
+                        const paid = purchase.advance_payment || 0;
+                        const outstanding = total - paid;
+
+                        return (
+                          <div key={purchase.id} className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex-1">
+                                <h5 className="font-medium text-gray-900">{purchase.description}</h5>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  <span className={cn(
+                                    "text-xs px-2 py-1 rounded",
+                                    purchase.purchase_type === 'Capital Expenditure' ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                                  )}>
+                                    {purchase.purchase_type === 'Capital Expenditure' ? t('capitalExpenditure') : t('operationalExpenses')}
+                                  </span>
+                                  <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                    {purchase.supplier?.name || 'Unknown'}
+                                  </span>
+                                  <span className={cn(
+                                    "text-xs px-2 py-1 rounded",
+                                    outstanding === 0 && paid > 0 ? "bg-green-100 text-green-800" :
+                                    paid === 0 ? "bg-red-100 text-red-800" :
+                                    "bg-yellow-100 text-yellow-800"
+                                  )}>
+                                    {outstanding === 0 && paid > 0 ? t('fullyPaid') :
+                                     paid === 0 ? t('unpaid') : t('partiallyPaid')}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">{t('date')}: {format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</p>
+                              </div>
+                              <div className="text-right ml-4">
+                                <div className="font-bold text-gray-900">{total.toFixed(2)} DH</div>
+                                <div className="text-sm text-green-600">{t('paid')}: {paid.toFixed(2)} DH</div>
+                                {outstanding > 0 && (
+                                  <div className="text-sm text-red-600">{t('outstanding')}: {outstanding.toFixed(2)} DH</div>
+                                )}
+                              </div>
+                            </div>
+
+                            {total > 0 && (
+                              <div className="mt-3">
+                                <Progress 
+                                  value={(paid / total) * 100} 
+                                  className="h-2"
+                                />
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {((paid / total) * 100).toFixed(1)}% {t('paidPercentage')}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
