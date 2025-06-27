@@ -106,6 +106,26 @@ const Purchases = () => {
     t('other')
   ];
 
+  // Helper function to get translated category
+  const getTranslatedCategory = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'Office Supplies': t('officeSupplies'),
+      'Equipment': t('equipment'),
+      'Software': t('software'),
+      'Marketing': t('marketing'),
+      'Travel': t('travel'),
+      'Utilities': t('utilities'),
+      'Rent': t('rent'),
+      'Professional Services': t('professionalServices'),
+      'Inventory': t('inventory'),
+      'Maintenance': t('maintenance'),
+      'Insurance': t('insurance'),
+      'Loan': t('loan'),
+      'Other': t('other')
+    };
+    return categoryMap[category] || category;
+  };
+
 const PAYMENT_METHODS = [
   t('cash'),
   t('creditCard'),
@@ -1456,24 +1476,26 @@ const PURCHASE_TYPES = [
 
                         {/* Status Row */}
                         <div className="border-t border-gray-100 pt-2 mt-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                purchase.payment_status === t('paid') 
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 flex-wrap min-w-0 flex-1">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                                purchase.payment_status === 'Paid' 
                                   ? 'bg-green-100 text-green-800'
-                                  : purchase.payment_status === t('partiallyPaid')
+                                  : purchase.payment_status === 'Partially Paid'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-red-100 text-red-800'
                               }`}>
-                                {purchase.payment_status || t('unpaid')}
+                                {purchase.payment_status === 'Paid' ? t('paid') : 
+                                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
+                                 purchase.payment_status === 'Unpaid' ? t('unpaid') : t('unpaid')}
                               </span>
                               {purchase.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                                  {purchase.category.length > 8 ? purchase.category.slice(0, 8) + '...' : purchase.category}
+                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex-shrink-0 whitespace-nowrap">
+                                  {getTranslatedCategory(purchase.category)}
                                 </span>
                               )}
                               {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
-                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1">
+                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
                                   <Link className="h-3 w-3" />
                                   {purchase.linked_receipts.length} {t('receipts')}
                                 </span>
