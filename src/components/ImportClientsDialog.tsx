@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import {
   Dialog,
@@ -16,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import * as XLSX from 'xlsx'
+import { useLanguage } from '@/components/LanguageProvider'
 
 interface ImportClientsDialogProps {
   isOpen: boolean
@@ -23,11 +25,12 @@ interface ImportClientsDialogProps {
   onImport: (importedClients: any[]) => void
 }
 
-const REQUIRED_FIELDS = ['name', 'phone']
-const OPTIONAL_FIELDS = ['right_eye_sph', 'right_eye_cyl', 'right_eye_axe', 'left_eye_sph', 'left_eye_cyl', 'Add']
+const REQUIRED_FIELDS = ['name']
+const OPTIONAL_FIELDS = ['phone', 'right_eye_sph', 'right_eye_cyl', 'right_eye_axe', 'left_eye_sph', 'left_eye_cyl', 'Add']
 
 export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClientsDialogProps) => {
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [file, setFile] = useState<File | null>(null)
   const [previewData, setPreviewData] = useState<any[]>([])
   const [hasHeaders, setHasHeaders] = useState(true)
@@ -49,8 +52,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
     // Check if file is CSV or XLSX
     if (!selectedFile.name.endsWith('.csv') && !selectedFile.name.endsWith('.xlsx')) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload a CSV or XLSX file",
+        title: t('invalidFileType'),
+        description: t('pleaseUploadCsvXlsx'),
         variant: "destructive",
       })
       return
@@ -79,8 +82,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           }
         } catch (error) {
           toast({
-            title: "Error reading XLSX file",
-            description: "Please make sure the file is a valid Excel file",
+            title: t('errorReadingXlsx'),
+            description: t('validExcelFile'),
             variant: "destructive",
           })
         }
@@ -105,7 +108,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         },
         error: (error) => {
           toast({
-            title: "Error reading CSV file",
+            title: t('errorReadingCsv'),
             description: error.message,
             variant: "destructive",
           })
@@ -152,9 +155,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i]
       if (!client.name || client.name.toString().trim() === "") {
-        errors.push(`Row ${i + 1}: Missing client name`)
+        errors.push(`${t('row')} ${i + 1}: ${t('missingClientName')}`)
       }
-      
     }
 
     return errors
@@ -200,8 +202,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
       onImport(clients)
       resetDialog()
       toast({
-        title: "Success",
-        description: `${clients.length} client(s) imported successfully`,
+        title: t('success'),
+        description: `${clients.length} ${t('clientsImportedSuccessfully')}`,
       })
     }
 
@@ -218,8 +220,8 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           processData(jsonData)
         } catch (error) {
           toast({
-            title: "Error importing XLSX",
-            description: "Failed to process the Excel file",
+            title: t('errorImportingXlsx'),
+            description: t('failedProcessExcel'),
             variant: "destructive",
           })
         }
@@ -235,7 +237,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
         },
         error: (error) => {
           toast({
-            title: "Error importing CSV",
+            title: t('errorImportingCsv'),
             description: error.message,
             variant: "destructive",
           })
@@ -262,9 +264,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Clients</DialogTitle>
+          <DialogTitle>{t('importClients')}</DialogTitle>
           <DialogDescription>
-            Import your clients from a CSV or XLSX file. The file should contain at least name and phone columns.
+            {t('importClientsDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -276,7 +278,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                 checked={hasHeaders}
                 onCheckedChange={setHasHeaders}
               />
-              <Label htmlFor="hasHeaders">First row contains column headers</Label>
+              <Label htmlFor="hasHeaders">{t('firstRowHeaders')}</Label>
             </div>
 
             <div className="flex items-center justify-center w-full">
@@ -284,9 +286,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-2 text-gray-500" />
                   <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
+                    <span className="font-semibold">{t('clickToUpload')}</span> {t('dragAndDrop')}
                   </p>
-                  <p className="text-xs text-gray-500">CSV or XLSX file</p>
+                  <p className="text-xs text-gray-500">{t('csvOrXlsxFile')}</p>
                 </div>
                 <Input
                   type="file"
@@ -308,7 +310,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
 
             {previewData.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-medium">Preview (first 5 rows):</h4>
+                <h4 className="font-medium">{t('previewFirstRows')}</h4>
                 <div className="overflow-x-auto border rounded">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50">
@@ -338,13 +340,13 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleClose}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button 
                 onClick={handleNext} 
                 disabled={!file || availableColumns.length === 0}
               >
-                Next
+                {t('next')}
               </Button>
             </div>
           </div>
@@ -354,15 +356,15 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           <div className="space-y-4">
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Column Mapping</AlertTitle>
+              <AlertTitle>{t('columnMapping')}</AlertTitle>
               <AlertDescription>
-                Map the columns in your file to client fields. Required fields are marked with *.
+                {t('columnMappingDescription')}
               </AlertDescription>
             </Alert>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
-                <h4 className="font-medium text-green-700">Required Fields</h4>
+                <h4 className="font-medium text-green-700">{t('requiredFields')}</h4>
                 {REQUIRED_FIELDS.map(field => (
                   <div key={field} className="space-y-1">
                     <Label htmlFor={field} className="text-sm font-medium">
@@ -390,7 +392,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-medium text-blue-700">Optional Fields (Prescription)</h4>
+                <h4 className="font-medium text-blue-700">{t('optionalFieldsPrescription')}</h4>
                 {OPTIONAL_FIELDS.map(field => (
                   <div key={field} className="space-y-1">
                     <Label htmlFor={field} className="text-sm font-medium">
@@ -420,13 +422,13 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(1)}>
-                Back
+                {t('back')}
               </Button>
               <Button 
                 onClick={handleImport}
-                disabled={!columnMappings.name }
+                disabled={!columnMappings.name}
               >
-                Import Clients
+                {t('importClients')}
               </Button>
             </div>
           </div>
@@ -436,9 +438,9 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
           <div className="space-y-4">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Import failed</AlertTitle>
+              <AlertTitle>{t('importFailed')}</AlertTitle>
               <AlertDescription>
-                Please fix the following issues and try again:
+                {t('fixIssuesAndRetry')}
               </AlertDescription>
             </Alert>
 
@@ -454,7 +456,7 @@ export const ImportClientsDialog = ({ isOpen, onClose, onImport }: ImportClients
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setStep(1)}>
-                Back
+                {t('back')}
               </Button>
             </div>
           </div>

@@ -2092,6 +2092,10 @@ const receiptTranslations: Translations = {
     en: 'Import Clients',
     fr: 'Importer les Clients'
   },
+  row: {
+    en: 'Row',
+    fr: 'Ligne'
+  },
   importProducts: {
     en: 'Import Products',
     fr: 'Importer les Produits'
