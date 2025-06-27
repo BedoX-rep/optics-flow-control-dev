@@ -681,11 +681,12 @@ const Financial = () => {
       </Card>
 
       {/* Enhanced Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {/* Available Cash Card */}
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1">
                 <p className="text-sm font-medium text-green-600">{t('availableCash')}</p>
                 <p className={cn(
                   "text-2xl font-bold",
@@ -699,13 +700,41 @@ const Financial = () => {
               </div>
               <Wallet className="h-8 w-8 text-green-600" />
             </div>
+            <details className="mt-2">
+              <summary className="text-xs text-green-700 cursor-pointer hover:text-green-800">
+                {t('viewCalculation')}
+              </summary>
+              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+                <div className="flex justify-between">
+                  <span>{t('revenueReceived')}:</span>
+                  <span>+{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('paidOperationalExpenses')}:</span>
+                  <span>-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('paidMontageExpenses')}:</span>
+                  <span>-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('paidAtDeliveryCosts')}:</span>
+                  <span>-{financialMetrics.totalPaidAtDeliveryCost.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t pt-1">
+                  <span>{t('availableCash')}:</span>
+                  <span>{financialMetrics.availableCash.toFixed(2)} DH</span>
+                </div>
+              </div>
+            </details>
           </CardContent>
         </Card>
 
+        {/* Total Revenue Card */}
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1">
                 <p className="text-sm font-medium text-blue-600">{t('totalRevenue')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {financialMetrics.totalRevenue.toFixed(2)} DH
@@ -716,80 +745,80 @@ const Financial = () => {
               </div>
               <TrendingUp className="h-8 w-8 text-blue-600" />
             </div>
+            <details className="mt-2">
+              <summary className="text-xs text-blue-700 cursor-pointer hover:text-blue-800">
+                {t('viewCalculation')}
+              </summary>
+              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+                <div className="flex justify-between">
+                  <span>{t('totalInvoicedRevenue')}:</span>
+                  <span>{financialMetrics.totalRevenue.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('revenueReceived')}:</span>
+                  <span>{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('unclaimedBalance')}:</span>
+                  <span>{financialMetrics.totalOutstanding.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t pt-1">
+                  <span>{t('collectionValue')}:</span>
+                  <span>{financialMetrics.totalReceived.toFixed(2)} DH ({financialMetrics.collectionRate.toFixed(1)}%)</span>
+                </div>
+              </div>
+            </details>
           </CardContent>
         </Card>
 
+        {/* Net Profit (Real) Card */}
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">{t('netProfitPaid')}</p>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-purple-600">{t('netProfitReal')}</p>
                 <p className={cn(
                   "text-2xl font-bold",
-                  financialMetrics.netProfitAfterPaidExpenses >= 0 ? "text-green-600" : "text-red-600"
+                  (financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) >= 0 ? "text-green-600" : "text-red-600"
                 )}>
-                  {financialMetrics.netProfitAfterPaidExpenses.toFixed(2)} DH
+                  {(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH
                 </p>
                 <p className="text-xs text-purple-600 mt-1">
-                  {t('margin')}: {financialMetrics.netMarginPaid.toFixed(1)}%
+                  {t('margin')}: {financialMetrics.totalReceived > 0 ? (((financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid) / financialMetrics.totalReceived) * 100).toFixed(1) : '0.0'}%
                 </p>
               </div>
               <Calculator className="h-8 w-8 text-purple-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-indigo-600">{t('netProfitTotal')}</p>
-                <p className={cn(
-                  "text-2xl font-bold",
-                  financialMetrics.netProfitAfterAllExpenses >= 0 ? "text-green-600" : "text-red-600"
-                )}>
-                  {financialMetrics.netProfitAfterAllExpenses.toFixed(2)} DH
-                </p>
-                <p className="text-xs text-indigo-600 mt-1">
-                  {t('margin')}: {financialMetrics.netMarginTotal.toFixed(1)}%
-                </p>
+            <details className="mt-2">
+              <summary className="text-xs text-purple-700 cursor-pointer hover:text-purple-800">
+                {t('viewCalculation')}
+              </summary>
+              <div className="mt-2 text-xs space-y-1 border-t pt-2">
+                <div className="flex justify-between">
+                  <span>{t('revenueReceived')}:</span>
+                  <span>+{financialMetrics.totalReceived.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('productCosts')} (COGS):</span>
+                  <span>-{financialMetrics.totalProductCosts.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('paidOperationalExpenses')}:</span>
+                  <span>-{financialMetrics.operationalExpenses.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('paidMontageExpenses')}:</span>
+                  <span>-{financialMetrics.montageMetrics.paid.toFixed(2)} DH</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t pt-1">
+                  <span>{t('netProfitReal')}:</span>
+                  <span>{(financialMetrics.totalReceived - financialMetrics.totalProductCosts - financialMetrics.operationalExpenses.paid - financialMetrics.montageMetrics.paid).toFixed(2)} DH</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  * {t('basedOnActualReceivedRevenueOnly')}
+                </div>
               </div>
-              <Target className="h-8 w-8 text-indigo-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">{t('unpaidExpenses')}</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {financialMetrics.totalExpensesUnpaid.toFixed(2)} DH
-                </p>
-                <p className="text-xs text-orange-600 mt-1">
-                  {t('outstandingLiabilities')}
-                </p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-red-600">{t('productCosts')}</p>
-                <p className="text-2xl font-bold text-red-900">
-                  {financialMetrics.totalProductCosts.toFixed(2)} DH
-                </p>
-                <p className="text-xs text-red-600 mt-1">
-                  {t('totalCOGS')}
-                </p>
-              </div>
-              <Package className="h-8 w-8 text-red-600" />
-            </div>
+            </details>
           </CardContent>
         </Card>
       </div>
@@ -1277,49 +1306,7 @@ const Financial = () => {
               </div>
             </div>
 
-            {/* Summary Metrics */}
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">{t('financialPerformanceMetrics')}</h3>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">{t('grossMargin')}</p>
-                  <p className={cn(
-                    "text-xl font-bold",
-                    financialMetrics.grossMargin >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.grossMargin.toFixed(1)}%
-                  </p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">{t('netMarginCurrent')}</p>
-                  <p className={cn(
-                    "text-xl font-bold",
-                    financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.netMarginPaid.toFixed(1)}%
-                  </p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">{t('netMarginFull')}</p>
-                  <p className={cn(
-                    "text-xl font-bold",
-                    financialMetrics.netMarginTotal >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {financialMetrics.netMarginTotal.toFixed(1)}%
-                  </p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">{t('collectionRate')}</p>
-                  <p className="text-xl font-bold text-blue-600">
-                    {financialMetrics.collectionRate.toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </CardContent>
       </Card>
@@ -1409,58 +1396,7 @@ const Financial = () => {
         </CardContent>
       </Card>
 
-      {/* Performance Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PieChart className="h-5 w-5" />
-            {t('performanceSummary')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">{t('totalOrders')}</p>
-              <p className="text-2xl font-bold text-blue-600">{filteredReceipts.length}</p>
-            </div>
-
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">{t('capitalPurchases')}</p>
-              <p className="text-2xl font-bold text-orange-600">{financialMetrics.capitalAnalysis.purchases.length}</p>
-            </div>
-
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">{t('grossMargin')}</p>
-              <p className={cn(
-                "text-2xl font-bold",
-                financialMetrics.grossMargin >= 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {financialMetrics.grossMargin.toFixed(1)}%
-              </p>
-            </div>
-
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">{t('netMarginPaid')}</p>
-              <p className={cn(
-                "text-2xl font-bold",
-                financialMetrics.netMarginPaid >= 0 ? "text-green-600" : "text-red-600"
-              )}>
-                {financialMetrics.netMarginPaid.toFixed(1)}%
-              </p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">{t('averageOrderValue')}</p>
-              <p className="text-2xl font-bold text-gray-600">
-                {filteredReceipts.length > 0 
-                  ? (financialMetrics.totalRevenue / filteredReceipts.length).toFixed(2)
-                  : '0.00'
-                } DH
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      
     </div>
   );
 };
