@@ -66,6 +66,29 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     'Accessories'
   ];
 
+  // Fetch clients for selection
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients-for-invoice', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching clients:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!user && isOpen,
+  });
+
   // Fetch receipts with full details for data copying
   const { data: allReceipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
@@ -122,6 +145,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     enabled: !!user && isOpen,
   });
 
+  // Filter clients based on search term
+  const filteredClients = useMemo(() => {
+    if (!clientSearchTerm.trim()) return allClients;
+    
+    const searchLower = clientSearchTerm.toLowerCase();
+    return allClients.filter(client => 
+      client.name?.toLowerCase().includes(searchLower) ||
+      client.phone?.toLowerCase().includes(searchLower)
+    );
+  }, [allClients, clientSearchTerm]);
+
   // Filter receipts based on client search term
   const receipts = useMemo(() => {
     if (!clientSearchTerm.trim()) return allReceipts;
@@ -141,6 +175,49 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       setInvoiceData(prev => ({ ...prev, invoice_number: invoiceNumber }));
     }
   }, [isOpen, invoiceData.invoice_number]);
+
+  // Handle client selection
+  const handleClientSelect = (clientId: string) => {
+    if (clientId === "no-client") {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: '',
+        client_phone: '',
+        client_assurance: ''
+      }));
+      setPrescriptionData({
+        right_eye_sph: '',
+        right_eye_cyl: '',
+        right_eye_axe: '',
+        left_eye_sph: '',
+        left_eye_cyl: '',
+        left_eye_axe: '',
+        add_value: ''
+      });
+      return;
+    }
+
+    const selectedClient = allClients.find(c => c.id === clientId);
+    if (selectedClient) {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: selectedClient.name || '',
+        client_phone: selectedClient.phone || '',
+        client_assurance: selectedClient.assurance || ''
+      }));
+
+      // Populate prescription data from selected client
+      setPrescriptionData({
+        right_eye_sph: selectedClient.right_eye_sph?.toString() || '',
+        right_eye_cyl: selectedClient.right_eye_cyl?.toString() || '',
+        right_eye_axe: selectedClient.right_eye_axe?.toString() || '',
+        left_eye_sph: selectedClient.left_eye_sph?.toString() || '',
+        left_eye_cyl: selectedClient.left_eye_cyl?.toString() || '',
+        left_eye_axe: selectedClient.left_eye_axe?.toString() || '',
+        add_value: selectedClient.Add?.toString() || ''
+      });
+    }
+  };
 
   // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
@@ -899,9 +976,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               <CardTitle>{t('invoiceAndClientDetails') || 'Détails Facture & Client'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Receipt Selection */}
+              {/* Client Selection */}
               <div className="space-y-2">
-                <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
+                <Label>{t('selectClient') || 'Select Client'}</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
@@ -911,6 +988,30 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                     className="pl-9 mb-2"
                   />
                 </div>
+                <Select onValueChange={handleClientSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('selectClient') || 'Select Client'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no-client">{t('noClient') || 'No Client'}</SelectItem>
+                    {filteredClients.length === 0 ? (
+                      <SelectItem value="no-data" disabled>
+                        {clientSearchTerm ? 'No clients match your search' : 'No clients available'}
+                      </SelectItem>
+                    ) : (
+                      filteredClients.map(client => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name} - {client.phone || 'No phone'}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Receipt Selection */}
+              <div className="space-y-2">
+                <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
                 <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
                   <SelectTrigger>
                     <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
