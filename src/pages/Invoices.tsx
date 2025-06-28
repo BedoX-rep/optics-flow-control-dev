@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2, Printer } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2, Printer, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,13 +24,15 @@ const InvoiceCard = ({
   onView, 
   onEdit, 
   onDelete,
-  onPrint 
+  onPrint,
+  onMarkAsPaid 
 }: {
   invoice: Invoice;
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onPrint: () => void;
+  onMarkAsPaid: () => void;
 }) => {
   const { t } = useLanguage();
 
@@ -134,6 +136,17 @@ const InvoiceCard = ({
                   >
                     <Printer className="h-3 w-3" />
                   </Button>
+                  {invoice.status !== 'Paid' && invoice.balance > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={onMarkAsPaid}
+                      className="h-7 w-7 hover:bg-emerald-100 hover:text-emerald-600"
+                      title={t('markAsPaid') || 'Mark as Paid'}
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -376,6 +389,48 @@ const Invoices = () => {
     }
   };
 
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    if (!confirm(t('confirmMarkAsPaid') || 'Are you sure you want to mark this invoice as paid?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ 
+          status: 'Paid',
+          balance: 0,
+          advance_payment: invoice.total
+        })
+        .eq('id', invoice.id);
+
+      if (error) throw error;
+
+      // Optimistically update cache
+      queryClient.setQueryData(['invoices', user?.id], (oldData: Invoice[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(inv => 
+          inv.id === invoice.id 
+            ? { ...inv, status: 'Paid', balance: 0, advance_payment: invoice.total }
+            : inv
+        );
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      toast({
+        title: t('success') || "Success",
+        description: t('invoiceMarkedAsPaid') || "Invoice marked as paid successfully.",
+      });
+    } catch (error) {
+      console.error('Error marking invoice as paid:', error);
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['invoices', user?.id] });
+      toast({
+        title: t('error') || "Error",
+        description: t('failedToMarkAsPaid') || "Failed to mark invoice as paid. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container px-4 py-6 mx-auto">
@@ -523,6 +578,7 @@ const Invoices = () => {
                 onEdit={() => setEditingInvoice(invoice)}
                 onPrint={() => setPrintingInvoice(invoice)}
                 onDelete={() => handleDelete(invoice.id)}
+                onMarkAsPaid={() => handleMarkAsPaid(invoice)}
               />
             ))
           )}

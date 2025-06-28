@@ -1,0 +1,60 @@
+chunk-W6L2VRDA.js?v=b962d4e7:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+AddInvoiceDialog.tsx:126 Uncaught ReferenceError: useMemo is not defined
+    at AddInvoiceDialog (AddInvoiceDialog.tsx:126:20)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=b962d4e7:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=b962d4e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=b962d4e7:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=b962d4e7:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=b962d4e7:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=b962d4e7:19137:13)
+AddInvoiceDialog.tsx:126 Uncaught ReferenceError: useMemo is not defined
+    at AddInvoiceDialog (AddInvoiceDialog.tsx:126:20)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=b962d4e7:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=b962d4e7:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=b962d4e7:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=b962d4e7:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=b962d4e7:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=b962d4e7:19137:13)
+chunk-W6L2VRDA.js?v=b962d4e7:14032 The above error occurred in the <AddInvoiceDialog> component:
+
+    at AddInvoiceDialog (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/components/AddInvoiceDialog.tsx:26:29)
+    at div
+    at Invoices (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/pages/Invoices.tsx:1105:19)
+    at div
+    at main
+    at div
+    at div
+    at Layout (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/components/Layout.tsx:29:19)
+    at ProtectedRoute (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/App.tsx:53:27)
+    at RenderedRoute (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4069:5)
+    at Routes (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4508:5)
+    at AppRoutes
+    at Router (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:4451:15)
+    at BrowserRouter (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=b962d4e7:5196:5)
+    at AuthProvider (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/components/AuthProvider.tsx:16:32)
+    at LanguageProvider (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/src/components/LanguageProvider.tsx:5261:36)
+    at Provider (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/chunk-7MSDU5OG.js?v=b962d4e7:38:15)
+    at TooltipProvider (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=b962d4e7:61:5)
+    at QueryClientProvider (https://e8cdcab5-09d0-44e6-99da-8b700af8f022-00-13k8m40rvemvo.riker.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=b962d4e7:2875:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-W6L2VRDA.js?v=b962d4e7:14032
+chunk-W6L2VRDA.js?v=b962d4e7:9129 Uncaught ReferenceError: useMemo is not defined
+    at AddInvoiceDialog (AddInvoiceDialog.tsx:126:20)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=b962d4e7:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=b962d4e7:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=b962d4e7:15914:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=b962d4e7:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=b962d4e7:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=b962d4e7:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=b962d4e7:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=b962d4e7:18736:28)
+    at performSyncWorkOnRoot (chunk-W6L2VRDA.js?v=b962d4e7:18879:28)
