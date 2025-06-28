@@ -348,49 +348,442 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     setShowAssuranceAlert(isAssuranceMismatch && subtotal > 0);
   }, [isAssuranceMismatch, subtotal]);
 
-  // Auto-adjust prices function
+  // Time-limited smart auto-adjust item prices to match assurance total without decimals
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
-    // Store original prices if not already stored
-    if (Object.keys(originalPrices).length === 0) {
-      const newOriginalPrices: { [key: number]: number } = {};
+    // Store original prices if not already stored or if items have changed
+    let baselinePrices = { ...originalPrices };
+    let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
+                          Object.keys(baselinePrices).length !== invoiceItems.length;
+
+    if (needsNewBaseline) {
+      baselinePrices = {};
       invoiceItems.forEach((item, index) => {
-        newOriginalPrices[index] = item.unit_price || 0;
+        baselinePrices[index] = item.unit_price || 0;
       });
-      setOriginalPrices(newOriginalPrices);
+      setOriginalPrices(baselinePrices);
     }
 
-    const currentTotal = subtotal;
+    // Calculate difference from original baseline prices
+    const baselineTotal = Object.keys(baselinePrices).reduce((sum, index) => {
+      const itemIndex = parseInt(index);
+      const quantity = invoiceItems[itemIndex]?.quantity || 1;
+      return sum + (baselinePrices[itemIndex] * quantity);
+    }, 0);
+
     const targetTotal = invoiceData.assurance_total;
-    const difference = targetTotal - currentTotal;
+    const difference = Math.round(targetTotal - baselineTotal);
 
-    if (Math.abs(difference) < 0.01) return;
+    if (Math.abs(difference) < 1) return; // Already matches or difference is less than 1
 
-    const updatedItems = [...invoiceItems];
-    
-    if (updatedItems.length === 0) return;
+    const startTime = Date.now();
+    const TIME_LIMIT = 2000; // 2 seconds in milliseconds
 
-    // Distribute the difference across all items proportionally
-    const adjustmentPerItem = difference / updatedItems.length;
-    
-    updatedItems.forEach((item, index) => {
-      const currentUnitPrice = item.unit_price || 0;
-      const newUnitPrice = Math.max(0, currentUnitPrice + adjustmentPerItem);
-      updatedItems[index] = {
-        ...item,
-        unit_price: Math.round(newUnitPrice * 100) / 100, // Round to 2 decimal places
-        total_price: Math.round(((Math.round(newUnitPrice * 100) / 100) * (item.quantity || 1)) * 100) / 100
+    // Helper function to calculate total from items
+    const calculateTotal = (items: Partial<InvoiceItem>[]) => {
+      return items.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
+    };
+
+    // Helper function to check if prices end in 0
+    const hasNiceEndings = (items: Partial<InvoiceItem>[]) => {
+      return items.filter(item => (item.unit_price || 0) % 10 === 0).length;
+    };
+
+    // Helper function to check if prices end in double 0s (100, 200, etc.)
+    const hasDoubleZeroEndings = (items: Partial<InvoiceItem>[]) => {
+      return items.filter(item => (item.unit_price || 0) % 100 === 0 && (item.unit_price || 0) > 0).length;
+    };
+
+    // Helper function to check if we've exceeded time limit
+    const isTimeUp = () => Date.now() - startTime > TIME_LIMIT;
+
+    // Helper function to evaluate solution quality
+    const evaluateSolution = (items: Partial<InvoiceItem>[] | null) => {
+      if (!items) return { isValid: false, score: -1, niceEndings: 0, doubleZeroEndings: 0, exactMatch: false };
+
+      const total = calculateTotal(items);
+      const exactMatch = Math.abs(total - targetTotal) < 0.01;
+      const niceEndings = hasNiceEndings(items);
+      const doubleZeroEndings = hasDoubleZeroEndings(items);
+      const hasDecimals = items.some(item => (item.unit_price || 0) % 1 !== 0);
+
+      return {
+        isValid: exactMatch && !hasDecimals,
+        exactMatch,
+        niceEndings,
+        doubleZeroEndings,
+        score: exactMatch ? (doubleZeroEndings * 50 + niceEndings * 10 + (hasDecimals ? 0 : 5)) : 0,
+        items
       };
-    });
+    };
 
-    setInvoiceItems(updatedItems);
+    // Strategy 1: Try to adjust items to end in multiples of 100, then 10
+    const tryNiceDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
 
-    const finalTotal = updatedItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
-    toast({
-      title: "Prices Adjusted Successfully",
-      description: `Prices adjusted to match assurance total (${finalTotal.toFixed(2)} DH).`,
-    });
+      // Start from original baseline prices, not current prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        // Increase prices - try to round up to nearest 100 first, then 10
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
+          const originalPrice = baselinePrices[i] || 0;
+          const currentPrice = originalPrice;
+          const quantity = testItems[i].quantity || 1;
+
+          // Try rounding to nearest 100 first
+          const nextHundred = Math.ceil(currentPrice / 100) * 100;
+          const hundredIncrease = Math.max(1, nextHundred - currentPrice);
+
+          if (hundredIncrease * quantity <= remainingDiff) {
+            testItems[i].unit_price = currentPrice + hundredIncrease;
+            testItems[i].total_price = testItems[i].unit_price * quantity;
+            remainingDiff -= hundredIncrease * quantity;
+          } else {
+            // Fall back to rounding to nearest 10
+            const nextTen = Math.ceil(currentPrice / 10) * 10;
+            const tenIncrease = Math.max(1, nextTen - currentPrice);
+
+            if (tenIncrease * quantity <= remainingDiff) {
+              testItems[i].unit_price = currentPrice + tenIncrease;
+              testItems[i].total_price = testItems[i].unit_price * quantity;
+              remainingDiff -= tenIncrease * quantity;
+            }
+          }
+        }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          const maxIncrease = Math.floor(remainingDiff / quantity);
+
+          if (maxIncrease > 0) {
+            const currentPrice = item.unit_price || 0;
+            item.unit_price = currentPrice + maxIncrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= maxIncrease * quantity;
+          }
+          itemIndex++;
+        }
+      } else {
+        // Decrease prices - try to round down to nearest 100 first, then 10
+        remainingDiff = Math.abs(remainingDiff);
+
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
+          const currentPrice = testItems[i].unit_price || 0;
+          const quantity = testItems[i].quantity || 1;
+
+          // Try rounding down to nearest 100 first
+          const prevHundred = Math.floor(currentPrice / 100) * 100;
+          const hundredDecrease = Math.min(currentPrice, currentPrice - prevHundred);
+
+          if (hundredDecrease > 0 && hundredDecrease * quantity <= remainingDiff) {
+            testItems[i].unit_price = Math.max(0, currentPrice - hundredDecrease);
+            testItems[i].total_price = testItems[i].unit_price * quantity;
+            remainingDiff -= hundredDecrease * quantity;
+          } else {
+            // Fall back to rounding down to nearest 10
+            const prevTen = Math.floor(currentPrice / 10) * 10;
+            const tenDecrease = Math.min(currentPrice, currentPrice - prevTen);
+
+            if (tenDecrease > 0 && tenDecrease * quantity <= remainingDiff) {
+              testItems[i].unit_price = Math.max(0, currentPrice - tenDecrease);
+              testItems[i].total_price = testItems[i].unit_price * quantity;
+              remainingDiff -= tenDecrease * quantity;
+            }
+          }
+        }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          const maxDecrease = Math.min(currentPrice, Math.floor(remainingDiff / quantity));
+
+          if (maxDecrease > 0) {
+            item.unit_price = currentPrice - maxDecrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= maxDecrease * quantity;
+          }
+          itemIndex++;
+        }
+      }
+
+      return testItems;
+    };
+
+    // Strategy 2: Equal distribution across all items
+    const tryEqualDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+
+      // Start from original baseline prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        const baseIncrease = Math.floor(remainingDiff / testItems.length);
+        let extraAmount = remainingDiff - (baseIncrease * testItems.length);
+
+        // Distribute base increase to all items
+        testItems.forEach((item, index) => {
+          if (isTimeUp()) return;
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          testItems[index].unit_price = currentPrice + baseIncrease;
+          testItems[index].total_price = testItems[index].unit_price * quantity;
+        });
+
+        // Distribute remaining amount
+        let itemIndex = 0;
+        while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          item.unit_price = (item.unit_price || 0) + 1;
+          item.total_price = item.unit_price * quantity;
+          extraAmount -= 1;
+          itemIndex++;
+        }
+      } else {
+        remainingDiff = Math.abs(remainingDiff);
+        const baseDecrease = Math.floor(remainingDiff / testItems.length);
+        let extraAmount = remainingDiff - (baseDecrease * testItems.length);
+
+        // Distribute base decrease to all items
+        testItems.forEach((item, index) => {
+          if (isTimeUp()) return;
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+          testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
+          testItems[index].total_price = testItems[index].unit_price * quantity;
+        });
+
+        // Distribute remaining reduction
+        let itemIndex = 0;
+        while (extraAmount > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+          const quantity = item.quantity || 1;
+
+          if (currentPrice > 0) {
+            item.unit_price = currentPrice - 1;
+            item.total_price = item.unit_price * quantity;
+            extraAmount -= 1;
+          }
+          itemIndex++;
+        }
+      }
+
+      return testItems;
+    };
+
+    // Strategy 3: Weighted distribution based on original prices
+    const tryWeightedDistribution = (originalItems: Partial<InvoiceItem>[], diff: number): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+
+      // Start from original baseline prices
+      const testItems = originalItems.map((item, index) => ({
+        ...item,
+        unit_price: baselinePrices[index] || 0,
+        total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+      }));
+
+      const totalCurrentValue = calculateTotal(testItems);
+
+      if (totalCurrentValue === 0) return null;
+
+      let remainingDiff = diff;
+
+      if (diff > 0) {
+        // Distribute based on proportion of current value
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
+          const item = testItems[i];
+          const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
+          const proportion = currentItemTotal / totalCurrentValue;
+          const allocation = Math.round(remainingDiff * proportion);
+          const quantity = item.quantity || 1;
+          const priceIncrease = Math.floor(allocation / quantity);
+
+          if (priceIncrease > 0) {
+            item.unit_price = (item.unit_price || 0) + priceIncrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= priceIncrease * quantity;
+          }
+        }
+
+        // Distribute any remaining difference
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const quantity = item.quantity || 1;
+          item.unit_price = (item.unit_price || 0) + 1;
+          item.total_price = item.unit_price * quantity;
+          remainingDiff -= 1;
+          itemIndex++;
+        }
+      } else {
+        remainingDiff = Math.abs(remainingDiff);
+
+        // Similar logic for reduction
+        for (let i = 0; i < testItems.length && remainingDiff > 0 && !isTimeUp(); i++) {
+          const item = testItems[i];
+          const currentItemTotal = (item.unit_price || 0) * (item.quantity || 1);
+          const proportion = currentItemTotal / totalCurrentValue;
+          const allocation = Math.round(remainingDiff * proportion);
+          const quantity = item.quantity || 1;
+          const priceDecrease = Math.min(item.unit_price || 0, Math.floor(allocation / quantity));
+
+          if (priceDecrease > 0) {
+            item.unit_price = (item.unit_price || 0) - priceDecrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= priceDecrease * quantity;
+          }
+        }
+
+        // Distribute any remaining reduction
+        let itemIndex = 0;
+        while (remainingDiff > 0 && itemIndex < testItems.length && !isTimeUp()) {
+          const item = testItems[itemIndex];
+          const currentPrice = item.unit_price || 0;
+
+          if (currentPrice > 0) {
+            item.unit_price = currentPrice - 1;
+            item.total_price = item.unit_price * (item.quantity || 1);
+            remainingDiff -= 1;
+          }
+          itemIndex++;
+        }
+      }
+
+      return testItems;
+    };
+
+    // Strategy 4: Random variations for edge cases
+    const tryRandomVariations = (originalItems: Partial<InvoiceItem>[], diff: number, attempts: number = 50): Partial<InvoiceItem>[] | null => {
+      if (isTimeUp()) return null;
+
+      for (let attempt = 0; attempt < attempts && !isTimeUp(); attempt++) {
+        // Start from original baseline prices
+        const testItems = originalItems.map((item, index) => ({
+          ...item,
+          unit_price: baselinePrices[index] || 0,
+          total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
+        }));
+
+        let remainingDiff = diff;
+
+        // Randomly distribute the difference
+        while (Math.abs(remainingDiff) > 0 && !isTimeUp()) {
+          const randomIndex = Math.floor(Math.random() * testItems.length);
+          const item = testItems[randomIndex];
+          const quantity = item.quantity || 1;
+          const currentPrice = item.unit_price || 0;
+
+          if (remainingDiff > 0) {
+            const increase = Math.min(remainingDiff, Math.floor(Math.random() * 5) + 1);
+            item.unit_price = currentPrice + increase;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff -= increase;
+          } else if (remainingDiff < 0 && currentPrice > 0) {
+            const decrease = Math.min(Math.abs(remainingDiff), Math.min(currentPrice, Math.floor(Math.random() * 3) + 1));
+            item.unit_price = currentPrice - decrease;
+            item.total_price = item.unit_price * quantity;
+            remainingDiff += decrease;
+          } else {
+            break;
+          }
+        }
+
+        const evaluation = evaluateSolution(testItems);
+        if (evaluation.isValid) {
+          return testItems;
+        }
+      }
+
+      return null;
+    };
+
+    // Collect all possible solutions with their evaluations
+    const solutions = [];
+
+    // Try all strategies with time limits
+    if (!isTimeUp()) {
+      const niceResult = tryNiceDistribution([...invoiceItems], difference);
+      const niceEvaluation = evaluateSolution(niceResult);
+      if (niceEvaluation.items) solutions.push(niceEvaluation);
+    }
+
+    if (!isTimeUp()) {
+      const equalResult = tryEqualDistribution([...invoiceItems], difference);
+      const equalEvaluation = evaluateSolution(equalResult);
+      if (equalEvaluation.items) solutions.push(equalEvaluation);
+    }
+
+    if (!isTimeUp()) {
+      const weightedResult = tryWeightedDistribution([...invoiceItems], difference);
+      const weightedEvaluation = evaluateSolution(weightedResult);
+      if (weightedEvaluation.items) solutions.push(weightedEvaluation);
+    }
+
+    if (!isTimeUp()) {
+      const randomResult = tryRandomVariations([...invoiceItems], difference);
+      const randomEvaluation = evaluateSolution(randomResult);
+      if (randomEvaluation.items) solutions.push(randomEvaluation);
+    }
+
+    // Find the best solution based on priority:
+    // 1. Must have exact assurance total match
+    // 2. Higher score (more items ending in 0, no decimals)
+    const validSolutions = solutions.filter(s => s.isValid && s.exactMatch);
+    const bestSolution = validSolutions.length > 0 
+      ? validSolutions.reduce((best, current) => current.score > best.score ? current : best)
+      : solutions.find(s => s.exactMatch); // Fallback to any exact match even if has decimals
+
+    const executionTime = Date.now() - startTime;
+
+    if (bestSolution && bestSolution.items) {
+      setInvoiceItems(bestSolution.items);
+      const finalTotal = calculateTotal(bestSolution.items);
+
+      toast({
+        title: "Prices Adjusted Successfully",
+        description: `Prices adjusted in ${executionTime}ms to match assurance total (${finalTotal.toFixed(0)} DH)${bestSolution.doubleZeroEndings > 0 ? ` with ${bestSolution.doubleZeroEndings} items ending in 00` : ''}${bestSolution.niceEndings > 0 ? ` and ${bestSolution.niceEndings} items ending in 0` : ''}.`,
+      });
+    } else if (solutions.length > 0) {
+      // Use the best available solution even if not perfect
+      const fallbackSolution = solutions.reduce((best, current) => current.score > best.score ? current : best);
+      if (fallbackSolution.items) {
+        setInvoiceItems(fallbackSolution.items);
+        const finalTotal = calculateTotal(fallbackSolution.items);
+
+        toast({
+          title: "Partial Adjustment",
+          description: `Best available solution found in ${executionTime}ms (${finalTotal.toFixed(2)} DH). May need manual adjustment.`,
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Adjustment Failed",
+        description: `No valid solution found within ${executionTime}ms time limit. Please adjust manually.`,
+        variant: "destructive",
+      });
+    }
   };
 
   // Auto-calculate status based on balance
