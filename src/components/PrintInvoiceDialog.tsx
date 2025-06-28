@@ -52,6 +52,10 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     notes: ''
   });
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [printOptions, setPrintOptions] = useState({
+    showAdvancePayment: true,
+    showBalance: true
+  });
   
   // Category options for items
   const CATEGORY_OPTIONS = [
@@ -430,6 +434,16 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <div class="total-final">
               <strong>${isFrench ? 'Montant Total:' : 'Total Amount:'} ${total.toFixed(2)} DH</strong>
             </div>
+            ${printOptions.showAdvancePayment && invoice?.advance_payment ? `
+              <div class="total-line">
+                <strong>${isFrench ? 'Acompte:' : 'Advance Payment:'} ${invoice.advance_payment.toFixed(2)} DH</strong>
+              </div>
+            ` : ''}
+            ${printOptions.showBalance && invoice ? `
+              <div class="total-line">
+                <strong>${isFrench ? 'Solde Restant:' : 'Balance Due:'} ${(total - (invoice.advance_payment || 0)).toFixed(2)} DH</strong>
+              </div>
+            ` : ''}
           </div>
 
           ${invoiceData.notes ? `
@@ -682,6 +696,41 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                 placeholder={isFrench ? "Notes supplémentaires pour la facture..." : "Additional notes for the invoice..."}
                 rows={3}
               />
+            </CardContent>
+          </Card>
+
+          {/* Print Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{isFrench ? 'Options d\'Impression' : 'Print Options'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showAdvancePayment"
+                    checked={printOptions.showAdvancePayment}
+                    onChange={(e) => setPrintOptions(prev => ({ ...prev, showAdvancePayment: e.target.checked }))}
+                    className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                  />
+                  <Label htmlFor="showAdvancePayment" className="text-sm font-medium">
+                    {isFrench ? 'Afficher l\'acompte' : 'Show advance payment'}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="showBalance"
+                    checked={printOptions.showBalance}
+                    onChange={(e) => setPrintOptions(prev => ({ ...prev, showBalance: e.target.checked }))}
+                    className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                  />
+                  <Label htmlFor="showBalance" className="text-sm font-medium">
+                    {isFrench ? 'Afficher le solde restant' : 'Show balance due'}
+                  </Label>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

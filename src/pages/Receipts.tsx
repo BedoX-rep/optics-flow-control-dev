@@ -162,7 +162,7 @@ const ReceiptCard = ({
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
                       {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                     </Badge>
-                    
+
                     <div className="flex items-center gap-1">
                       <div className={cn("w-2 h-2 rounded-full",
                         receipt.call_status === 'Called' ? "bg-green-500" :
@@ -217,7 +217,7 @@ const ReceiptCard = ({
                     <Trash2 className="h-4 w-4 text-red-600" />
                   </Button>
                 </div>
-                
+
                 {/* Note buttons positioned below edit and delete buttons */}
                 <div className="flex gap-1 justify-end">
                   <div className="w-8"></div>
