@@ -5134,6 +5134,21 @@ const allTranslations: Translations = {
     fr: 'En Retard',
     ar: 'متأخر'
   },
+  selectDateRange: {
+    en: 'Select date range',
+    fr: 'Sélectionner une plage de dates',
+    ar: 'اختر نطاق التاريخ'
+  },
+  last7Days: {
+    en: 'Last 7 days',
+    fr: '7 derniers jours',
+    ar: 'آخر 7 أيام'
+  },
+  last30Days: {
+    en: 'Last 30 days',
+    fr: '30 derniers jours',
+    ar: 'آخر 30 يوماً'
+  },
   totalInvoices: {
     en: 'Total Invoices',
     fr: 'Total Factures'

@@ -520,58 +520,115 @@ const Invoices = () => {
               <Button
                 variant="outline"
                 className={cn(
-                  "h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+                  "h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm justify-start text-left font-normal",
                   (dateRange.from || dateRange.to)
                     ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-gray-200 hover:border-gray-300 text-muted-foreground"
                 )}
               >
                 <CalendarDays className="h-4 w-4 mr-2" />
                 {dateRange.from ? (
                   dateRange.to ? (
                     <>
-                      {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}
+                      {format(dateRange.from, "MMM dd, yyyy")} - {format(dateRange.to, "MMM dd, yyyy")}
                     </>
                   ) : (
                     format(dateRange.from, "MMM dd, yyyy")
                   )
                 ) : (
-                  <span>{t('dateRange') || 'Date Range'}</span>
+                  <span>{t('selectDateRange') || 'Select date range'}</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <div className="p-3 space-y-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('from') || 'From'}</label>
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateRange.from}
-                    onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))}
-                    initialFocus
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('to') || 'To'}</label>
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateRange.to}
-                    onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
-                    disabled={(date) => dateRange.from ? date < dateRange.from : false}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setDateRange({ from: undefined, to: undefined });
-                      setDateFilter('all');
-                    }}
-                    className="flex-1"
-                  >
-                    {t('clear') || 'Clear'}
-                  </Button>
+              <div className="p-4">
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-center border-b pb-2">
+                    {t('selectDateRange') || 'Select Date Range'}
+                  </div>
+                  
+                  {/* Quick Preset Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const today = new Date();
+                        setDateRange({ from: today, to: today });
+                      }}
+                      className="text-xs"
+                    >
+                      {t('today') || 'Today'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const today = new Date();
+                        const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        setDateRange({ from: lastWeek, to: today });
+                      }}
+                      className="text-xs"
+                    >
+                      {t('last7Days') || 'Last 7 days'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const today = new Date();
+                        const lastMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        setDateRange({ from: lastMonth, to: today });
+                      }}
+                      className="text-xs"
+                    >
+                      {t('last30Days') || 'Last 30 days'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const today = new Date();
+                        const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                        setDateRange({ from: currentMonth, to: today });
+                      }}
+                      className="text-xs"
+                    >
+                      {t('thisMonth') || 'This month'}
+                    </Button>
+                  </div>
+
+                  {/* Calendar for range selection */}
+                  <div className="border-t pt-4">
+                    <CalendarComponent
+                      mode="range"
+                      defaultMonth={dateRange?.from}
+                      selected={{ from: dateRange.from, to: dateRange.to }}
+                      onSelect={(range) => {
+                        setDateRange({ 
+                          from: range?.from, 
+                          to: range?.to 
+                        });
+                      }}
+                      numberOfMonths={2}
+                      className="rounded-md"
+                    />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 border-t pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setDateRange({ from: undefined, to: undefined });
+                        setDateFilter('all');
+                      }}
+                      className="flex-1"
+                    >
+                      {t('clear') || 'Clear'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </PopoverContent>
