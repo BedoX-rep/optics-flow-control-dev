@@ -1269,6 +1269,10 @@ const productTranslations: Translations = {
     en: 'Invoices',
     fr: 'Factures'
   },
+  saveInvoice: {
+   en: 'Save Invoice',
+    fr: 'Enregistrer Facture'
+  },
   addInvoice: {
     en: 'Add Invoice',
     fr: 'Ajouter Facture'
