@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDebounce } from "@/hooks/useDebounce";
+import { useLanguage } from '@/components/LanguageProvider';
 
 interface Client {
   id: string;
@@ -45,12 +47,15 @@ interface Client {
   }>;
 }
 
+const ITEMS_PER_PAGE = 20;
+
 export default function Clients() {
+  const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -59,11 +64,16 @@ export default function Clients() {
   const [sortBy, setSortBy] = useState<string>('recent');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
 
-  const fetchClients = async () => {
+  useEffect(() => {
+    setPage(0); // Reset to first page when search changes
+  }, [debouncedSearchTerm]);
+
+  const fetchAllClients = async () => {
     if (!user) return [];
 
-    let query = supabase
+    const { data: allClients, error } = await supabase
       .from('clients')
       .select(`
         *,
@@ -77,60 +87,35 @@ export default function Clients() {
           is_deleted,
           receipt_items(*)
         )
-      `, { count: 'exact' })
+      `)
       .eq('user_id', user.id)
       .eq('is_deleted', false)
-      .order(sortBy === 'name' ? 'name' : sortBy === 'phone' ? 'phone' : 'created_at', { ascending: sortBy === 'recent' ? false : true })
-      .range(page * 30, (page * 30) + (page === 0 ? 29 : 69)); // Get 30 initially, then 70 more
-
-    // Apply search filter if exists
-    if (searchTerm) {
-      query = query.or(`name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
-    }
-
-    const { data: clientsData, error, count } = await query;
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { clients: clientsData || [], hasMore: count ? count > ((page + 1) * 30) : false };
+    return allClients || [];
   };
 
-  const [page, setPage] = useState(0);
-  const { data, isLoading } = useQuery({
-    queryKey: ['clients', user?.id, page, searchTerm, sortBy],
-    queryFn: fetchClients,
+  const { data: allClients = [], isLoading } = useQuery({
+    queryKey: ['all-clients', user?.id],
+    queryFn: fetchAllClients,
     enabled: !!user,
-    keepPreviousData: true,
+    staleTime: Infinity,
+    cacheTime: Infinity,
   });
 
-  const [allClients, setAllClients] = useState<Client[]>([]);
-
-  useEffect(() => {
-    if (data?.clients) {
-      if (page === 0) {
-        setAllClients(data.clients);
-      } else {
-        setAllClients(prev => [...prev, ...data.clients]);
-      }
-    }
-  }, [data?.clients, page]);
-
-  const hasMore = data?.hasMore || false;
-
-  useEffect(() => {
-    setFilteredClients(allClients);
-  }, [allClients]);
-
-  // Filter and sort clients based on search term and sort option
-  useEffect(() => {
-    let filtered = allClients || [];
+  // Client-side filtering and pagination
+  const filteredClients = useMemo(() => {
+    let filtered = [...allClients];
 
     // Apply search filter
-    if (searchTerm && filtered.length > 0) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(client =>
-        client.name.toLowerCase().includes(term) ||
-        client.phone.includes(term)
-      );
+    if (debouncedSearchTerm) {
+      const searchWords = debouncedSearchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+      filtered = filtered.filter(client => {
+        const name = client.name?.toLowerCase() || '';
+        const phone = client.phone?.toLowerCase() || '';
+        return searchWords.every(word => name.includes(word) || phone.includes(word));
+      });
     }
 
     // Sort clients
@@ -145,8 +130,17 @@ export default function Clients() {
       return 0;
     });
 
-    setFilteredClients(filtered);
-  }, [allClients, searchTerm, sortBy]);
+    return filtered;
+  }, [allClients, debouncedSearchTerm, sortBy]);
+
+  // Client-side pagination
+  const paginatedClients = useMemo(() => {
+    const startIndex = page * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredClients.slice(startIndex, endIndex);
+  }, [filteredClients, page]);
+
+  const totalPages = Math.ceil(filteredClients.length / ITEMS_PER_PAGE);
 
   const handleAddClient = async (name: string, phone: string) => {
     try {
@@ -164,8 +158,12 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Update the cache with the new client
+      queryClient.setQueryData(['all-clients', user.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return [data];
+        return [data, ...oldData];
+      });
+
       toast.success('Client added successfully!');
       setIsAddClientOpen(false);
     } catch (error: any) {
@@ -186,8 +184,8 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
@@ -212,8 +210,9 @@ export default function Clients() {
 
       if (error) throw error;
 
-      // Invalidate and refetch clients
-      queryClient.invalidateQueries(['clients']);
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
+
       toast.success('Client deleted successfully!');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
@@ -226,9 +225,21 @@ export default function Clients() {
     try {
       if (!user) return;
 
-      // Check for duplicates
-      const phoneNumbers = new Set(clients.map(client => client.phone));
-      const newClients = importedClients.filter(client => !phoneNumbers.has(client.phone));
+      // Check for duplicates - only check phone numbers that are not null/empty
+      const existingPhones = new Set(
+        allClients
+          .map(client => client.phone)
+          .filter(phone => phone && phone.trim() !== "")
+      );
+      
+      const newClients = importedClients.filter(client => {
+        // If client has no phone or empty phone, always allow import
+        if (!client.phone || client.phone.trim() === "") {
+          return true;
+        }
+        // If client has phone, check if it's not already in the database
+        return !existingPhones.has(client.phone);
+      });
 
       if (newClients.length === 0) {
         toast.warning("All imported clients already exist in your database");
@@ -249,8 +260,13 @@ export default function Clients() {
 
       if (error) throw error;
 
+      // Update the cache with imported clients
+      queryClient.setQueryData(['all-clients', user.id], (oldData: Client[] | undefined) => {
+        if (!oldData) return data;
+        return [...data, ...oldData];
+      });
+
       toast.success(`${data?.length} clients imported successfully!`);
-      fetchClients(); // Refresh clients list
       setIsImportDialogOpen(false);
     } catch (error: any) {
       toast.error(`Error importing clients: ${error.message}`);
@@ -258,19 +274,22 @@ export default function Clients() {
   };
 
   const findDuplicateClients = () => {
-    // Group clients by phone number
-    const phoneGroups = clients.reduce((groups: any, client) => {
-      const phone = client.phone;
-      if (!groups[phone]) {
-        groups[phone] = [];
+    // Group clients by both phone number and name (case-insensitive)
+    const clientGroups = allClients.reduce((groups: any, client) => {
+      const phone = client.phone?.trim() || '';
+      const name = client.name?.trim().toLowerCase() || '';
+      const key = `${phone}_${name}`;
+      
+      if (!groups[key]) {
+        groups[key] = [];
       }
-      groups[phone].push(client);
+      groups[key].push(client);
       return groups;
     }, {});
 
     // Find groups with more than one client (duplicates)
     const duplicates: any[] = [];
-    Object.values(phoneGroups).forEach((group: any) => {
+    Object.values(clientGroups).forEach((group: any) => {
       if (group.length > 1) {
         duplicates.push(...group);
       }
@@ -285,7 +304,6 @@ export default function Clients() {
     setIsDuplicateDialogOpen(true);
   };
 
-  // Function to save all changes
   const handleSaveAllChanges = async () => {
     try {
       // Get all edited clients that need saving
@@ -339,7 +357,7 @@ export default function Clients() {
       });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
@@ -347,19 +365,23 @@ export default function Clients() {
 
   const handleDeleteDuplicates = async () => {
     try {
-      // Group by phone number and take the first client from each group
-      const phoneGroups: any = {};
+      // Group by both phone number and name (case-insensitive) and take the first client from each group
+      const clientGroups: any = {};
       duplicateClients.forEach(client => {
-        if (!phoneGroups[client.phone]) {
-          phoneGroups[client.phone] = [client];
+        const phone = client.phone?.trim() || '';
+        const name = client.name?.trim().toLowerCase() || '';
+        const key = `${phone}_${name}`;
+        
+        if (!clientGroups[key]) {
+          clientGroups[key] = [client];
         } else {
-          phoneGroups[client.phone].push(client);
+          clientGroups[key].push(client);
         }
       });
 
       // For each group, keep the first client and mark others as deleted
       const clientsToDelete: string[] = [];
-      Object.values(phoneGroups).forEach((group: any) => {
+      Object.values(clientGroups).forEach((group: any) => {
         for (let i = 1; i < group.length; i++) {
           clientsToDelete.push(group[i].id);
         }
@@ -378,8 +400,10 @@ export default function Clients() {
 
       if (error) throw error;
 
+      // Invalidate and refetch the cache to ensure consistency
+      await queryClient.invalidateQueries(['all-clients', user?.id]);
+
       toast.success(`${clientsToDelete.length} duplicate clients removed`);
-      fetchClients(); // Refresh client list
       setIsDuplicateDialogOpen(false);
     } catch (error: any) {
       toast.error(`Error deleting duplicates: ${error.message}`);
@@ -395,7 +419,7 @@ export default function Clients() {
             className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            New Client
+            {t('newClient')}
           </Button>
           <Button
             variant="outline"
@@ -403,7 +427,7 @@ export default function Clients() {
             className="rounded-xl border-neutral-200 shadow-sm"
           >
             <Save className="h-4 w-4 mr-2" />
-            Save All Changes
+            {t('saveAllChanges')}
           </Button>
         </div>
       </div>
@@ -414,7 +438,7 @@ export default function Clients() {
             <SearchInput
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search clients..."
+              placeholder={t('searchClients')}
               className="w-full"
             />
           </div>
@@ -422,12 +446,12 @@ export default function Clients() {
           <div className="flex items-center gap-3">
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
-                <SelectItem value="recent">Recently Added</SelectItem>
-                <SelectItem value="phone">Phone Number</SelectItem>
+                <SelectItem value="name">{t('nameAZ')}</SelectItem>
+                <SelectItem value="recent">{t('recentlyAdded')}</SelectItem>
+                <SelectItem value="phone">{t('phoneNumber')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -436,7 +460,7 @@ export default function Clients() {
               onClick={findDuplicateClients}
               className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
-              Find Duplicates
+              {t('findDuplicates')}
             </Button>
             <Button
               variant="ghost"
@@ -444,14 +468,14 @@ export default function Clients() {
               className="text-neutral-600 hover:text-neutral-900 rounded-xl"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Import
+              {t('import')}
             </Button>
           </div>
         </div>
       </div>
 
       {/* Client cards */}
-      {isLoading || !filteredClients ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm space-y-4">
@@ -475,46 +499,16 @@ export default function Clients() {
             </div>
           ))}
         </div>
-      ) : filteredClients?.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
-          {filteredClients.map((client) => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onEdit={handleEditClient}
-              onDelete={openDeleteDialog}
-              onRefresh={fetchClients}
-            />
-          ))}
-          {hasMore && (
-            <div className="col-span-full flex justify-center p-4">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => !isLoading && setPage(prev => prev + 1)}
-                className="w-full max-w-xs gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"/>
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-                Load More Clients
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
+      ) : filteredClients.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
           <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
             <UserPlus size={24} className="text-teal-600" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No clients found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noClientsFound')}</h3>
           <p className="text-gray-500 max-w-md mb-4">
             {searchTerm
-              ? `No clients match your search "${searchTerm}"`
-              : "You haven't added any clients yet. Get started by adding your first client."
+              ? t('noClientsMatchSearch')
+              : t('noClientsYet')
             }
           </p>
           {!searchTerm && (
@@ -523,10 +517,85 @@ export default function Clients() {
               className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
             >
               <UserPlus size={16} className="mr-2" />
-              Add Your First Client
+              {t('addFirstClient')}
             </Button>
           )}
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+            {paginatedClients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onEdit={handleEditClient}
+                onDelete={openDeleteDialog}
+                onRefresh={() => queryClient.invalidateQueries(['all-clients'])}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0 || isLoading}
+                className="flex items-center gap-1"
+              >
+                <ChevronDown className="h-4 w-4 rotate-90" />
+                {t('previous')}
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i;
+                  } else if (page < 3) {
+                    pageNum = i;
+                  } else if (page > totalPages - 4) {
+                    pageNum = totalPages - 5 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      disabled={isLoading}
+                      className="w-10 h-8"
+                    >
+                      {pageNum + 1}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || isLoading}
+                className="flex items-center gap-1"
+              >
+                {t('next')}
+                <ChevronDown className="h-4 w-4 -rotate-90" />
+              </Button>
+            </div>
+          )}
+
+          {filteredClients.length > 0 && (
+            <div className="text-center text-sm text-gray-500 mt-4">
+              Showing {page * ITEMS_PER_PAGE + 1}-{Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
+            </div>
+          )}
+        </>
       )}
 
       {/* Floating action button */}
@@ -559,15 +628,15 @@ export default function Clients() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Client</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteClient')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {clientToDelete?.name}? This action cannot be undone.
+              {t('deleteConfirmation', { clientName: clientToDelete?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
-              Delete
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -577,13 +646,12 @@ export default function Clients() {
       <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Duplicate Clients Found</AlertDialogTitle>
+            <AlertDialogTitle>{t('duplicateClientsFound')}</AlertDialogTitle>
             <AlertDialogDescription>
               {duplicateClients.length > 0 && (
                 <>
                   <p className="mb-2">
-                    {duplicateClients.length} duplicate clients found with the same phone numbers.
-                    For each duplicate set, the first client will be kept and others marked as deleted.
+                    Found {duplicateClients.length} duplicate clients with matching names and phone numbers. Would you like to remove the duplicates? (One client from each duplicate group will be kept.)
                   </p>
                   <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
                     {duplicateClients.map(client => (
@@ -597,9 +665,9 @@ export default function Clients() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteDuplicates} className="bg-red-500 hover:bg-red-600">
-              Delete Duplicates
+              {t('deleteDuplicates')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

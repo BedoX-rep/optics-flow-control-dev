@@ -2,7 +2,7 @@
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
+export const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic", "Polarized", "UV protection", "Tint"];
 
 interface Props {
   value: string | null | undefined;

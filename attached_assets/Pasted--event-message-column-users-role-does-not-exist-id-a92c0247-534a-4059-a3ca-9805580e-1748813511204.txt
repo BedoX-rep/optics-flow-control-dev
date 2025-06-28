@@ -1,0 +1,44 @@
+{
+  "event_message": "column users.role does not exist",
+  "id": "a92c0247-534a-4059-a3ca-9805580ef552",
+  "metadata": [
+    {
+      "file": null,
+      "host": "db-vbcdgubnvbilavetsjlr",
+      "metadata": [],
+      "parsed": [
+        {
+          "application_name": null,
+          "backend_type": "client backend",
+          "command_tag": "PARSE",
+          "connection_from": "127.0.0.1:42359",
+          "context": null,
+          "database_name": "postgres",
+          "detail": null,
+          "error_severity": "ERROR",
+          "hint": null,
+          "internal_query": null,
+          "internal_query_pos": null,
+          "leader_pid": null,
+          "location": null,
+          "process_id": 901987,
+          "query": "SELECT users.aud, users.banned_until, users.confirmation_sent_at, users.confirmation_token, users.confirmed_at, users.created_at, users.deleted_at, users.email, users.email_change, users.email_change_confirm_status, users.email_change_sent_at, users.email_change_token_current, users.email_change_token_new, users.email_confirmed_at, users.encrypted_password, users.id, users.instance_id, users.invited_at, users.is_anonymous, users.is_sso_user, users.last_sign_in_at, users.phone, users.phone_change, users.phone_change_sent_at, users.phone_change_token, users.phone_confirmed_at, users.raw_app_meta_data, users.raw_user_meta_data, users.reauthentication_sent_at, users.reauthentication_token, users.recovery_sent_at, users.recovery_token, users.role, users.updated_at FROM users AS users WHERE instance_id = $1 and LOWER(email) = $2 and aud = $3 and is_sso_user = false LIMIT 1",
+          "query_id": 0,
+          "query_pos": 742,
+          "session_id": "683cc680.dc363",
+          "session_line_num": 3,
+          "session_start_time": "2025-06-01 21:30:40 UTC",
+          "sql_state_code": "42703",
+          "timestamp": "2025-06-01 21:30:43.587 UTC",
+          "transaction_id": 0,
+          "user_name": "supabase_auth_admin",
+          "virtual_transaction_id": "8/632604"
+        }
+      ],
+      "parsed_from": null,
+      "project": null,
+      "source_type": null
+    }
+  ],
+  "timestamp": 1748813443587000
+}

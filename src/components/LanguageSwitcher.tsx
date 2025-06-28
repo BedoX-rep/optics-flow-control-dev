@@ -13,8 +13,7 @@ const LanguageSwitcher: React.FC = () => {
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'ar', name: 'العربية', flag: '🇲🇦' }
+    { code: 'fr', name: 'Français', flag: '🇫🇷' }
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
@@ -32,7 +31,7 @@ const LanguageSwitcher: React.FC = () => {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code as 'en' | 'fr' | 'ar')}
+            onClick={() => setLanguage(lang.code as 'en' | 'fr')}
             className="flex items-center gap-2 cursor-pointer"
           >
             <span className="text-lg leading-none">{lang.flag}</span>

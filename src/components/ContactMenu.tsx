@@ -15,7 +15,7 @@ const contactMethods = [
   },
   {
     method: "WhatsApp",
-    detail: "+1-234-567-8900",
+    detail: "0627026249",
     icon: Phone
   }
 ];

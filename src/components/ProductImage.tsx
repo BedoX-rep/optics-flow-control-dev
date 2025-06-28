@@ -49,6 +49,8 @@ const ProductImage: React.FC<ProductImageProps> = ({
               alt === "Sunglasses" ? "bg-orange-500" :
               alt === "Contact Lenses" ? "bg-cyan-500" :
               alt === "Accessories" ? "bg-pink-500" :
+              alt === "Service" ? "bg-indigo-500" :
+              alt === "Other" ? "bg-gray-500" :
               "bg-gray-400"
             }`}>
               {alt === "Single Vision Lenses" ? "SV" :
@@ -57,6 +59,8 @@ const ProductImage: React.FC<ProductImageProps> = ({
                alt === "Sunglasses" ? "SG" :
                alt === "Contact Lenses" ? "CL" :
                alt === "Accessories" ? "AC" :
+               alt === "Service" ? "SV" :
+               alt === "Other" ? "OT" :
                "?"
               }
             </div>

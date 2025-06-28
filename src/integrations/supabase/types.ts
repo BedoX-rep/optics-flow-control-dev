@@ -88,6 +88,7 @@ export type Database = {
           position: number
           price: number
           stock: number
+          stock_status: string | null
           treatment: string | null
           user_id: string
         }
@@ -106,6 +107,7 @@ export type Database = {
           position?: number
           price: number
           stock?: number
+          stock_status?: string | null
           treatment?: string | null
           user_id: string
         }
@@ -124,6 +126,7 @@ export type Database = {
           position?: number
           price?: number
           stock?: number
+          stock_status?: string | null
           treatment?: string | null
           user_id?: string
         }
@@ -138,6 +141,7 @@ export type Database = {
           id: string
           is_deleted: boolean | null
           linked_eye: string | null
+          paid_at_delivery: boolean | null
           price: number
           product_id: string | null
           profit: number
@@ -153,6 +157,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           linked_eye?: string | null
+          paid_at_delivery?: boolean | null
           price: number
           product_id?: string | null
           profit?: number
@@ -168,6 +173,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           linked_eye?: string | null
+          paid_at_delivery?: boolean | null
           price?: number
           product_id?: string | null
           profit?: number
@@ -211,6 +217,7 @@ export type Database = {
           left_eye_sph: number | null
           montage_costs: number | null
           montage_status: string
+          paid_at_delivery_cost: number | null
           payment_status: string | null
           products_cost: number | null
           profit: number | null
@@ -242,6 +249,7 @@ export type Database = {
           left_eye_sph?: number | null
           montage_costs?: number | null
           montage_status?: string
+          paid_at_delivery_cost?: number | null
           payment_status?: string | null
           products_cost?: number | null
           profit?: number | null
@@ -275,6 +283,7 @@ export type Database = {
           left_eye_sph?: number | null
           montage_costs?: number | null
           montage_status?: string
+          paid_at_delivery_cost?: number | null
           payment_status?: string | null
           products_cost?: number | null
           profit?: number | null
@@ -663,3 +672,262 @@ export const Constants = {
     },
   },
 } as const
+
+export interface Product {
+  id: string;
+  user_id: string;
+  name: string;
+  price: number;
+  cost_ttc: number;
+  stock: number;
+  position: number;
+  category?: string;
+  company?: string;
+  treatment?: string;
+  stock_status?: string;
+  index?: string;
+  image?: string;
+  gamma?: string;
+  created_at: string;
+  updated_at: string;
+  automated_name?: boolean;
+  is_deleted?: boolean;
+}
+
+export interface Client {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  gender?: string;
+  assurance?: string;
+  notes?: string;
+  left_eye_sph: number;
+  left_eye_cyl: number;
+  left_eye_axe: number;
+  right_eye_sph: number;
+  right_eye_cyl: number;
+  right_eye_axe: number;
+  add?: number;
+  favorite: boolean;
+  created_at: string;
+  updated_at: string;
+  last_prescription_update?: string;
+  is_deleted?: boolean;
+}
+
+export interface Receipt {
+  id: string;
+  user_id: string;
+  client_id?: string;
+  client_name?: string;
+  client_phone?: string;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  add?: number;
+  montage_costs?: number;
+  total_discount?: number;
+  tax?: number;
+  advance_payment?: number;
+  balance?: number;
+  total?: number;
+  products_cost?: number;
+  cost_ttc?: number;
+  paid_at_delivery_cost?: number;
+  delivery_status?: string;
+  montage_status?: string;
+  order_type?: string;
+  created_at: string;
+  updated_at: string;
+  is_deleted?: boolean;
+  receipt_items?: ReceiptItem[];
+  client?: {
+    id: string;
+    name: string;
+    phone?: string;
+  };
+}
+
+export interface ReceiptItem {
+  id: string;
+  user_id: string;
+  receipt_id: string;
+  product_id?: string;
+  custom_item_name?: string;
+  quantity: number;
+  price: number;
+  cost?: number;
+  profit?: number;
+  linked_eye?: string;
+  applied_markup?: number;
+  paid_at_delivery?: boolean;
+  created_at: string;
+  updated_at: string;
+  is_deleted?: boolean;
+  product?: Product;
+}
+export interface UserInformation {
+  id: string;
+  user_id: string;
+  store_name?: string;
+  display_name?: string;
+  address?: string;
+  vat_number?: string;
+  ice?: string;
+  inpe?: string;
+  company_legal_status?: string;
+  logo_url?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  user_id: string;
+  invoice_number: string;
+  client_name: string;
+  client_phone?: string;
+  client_address?: string;
+  subtotal: number;
+  tax_percentage: number;
+  tax_amount: number;
+  total: number;
+  invoice_date: string;
+  due_date?: string;
+  status: string;
+  notes?: string;
+  is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+  invoice_items?: InvoiceItem[];
+  advance_payment?: number;
+  balance?: number;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoice_id: string;
+  product_name: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  user_id: string;
+  is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Database {
+  public: {
+    Tables: {
+      user_information: {
+        Row: UserInformation;
+        Insert: Omit<UserInformation, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserInformation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      invoices: {
+        Row: {
+          advance_payment: number | null
+          balance: number | null
+          client_address: string | null
+          client_assurance: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted: boolean | null
+          notes: string | null
+          status: string | null
+          subtotal: number
+          tax_amount: number | null
+          tax_percentage: number | null
+          total: number
+          updated_at: string | null
+          user_id: string
+          right_eye_sph: number | null
+          right_eye_cyl: number | null
+          right_eye_axe: number | null
+          left_eye_sph: number | null
+          left_eye_cyl: number | null
+          left_eye_axe: number | null
+          add_value: number | null
+        }
+        Insert: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_assurance?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total: number
+          updated_at?: string | null
+          user_id: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+        }
+        Update: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_assurance?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total?: number
+          updated_at?: string | null
+          user_id?: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+        }
+      };
+      invoice_items: {
+        Row: InvoiceItem;
+        Insert: Omit<InvoiceItem, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<InvoiceItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      // ... other existing tables
+    };
+  };
+}

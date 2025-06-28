@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2, Save } from 'lucide-react';
 import ProductImage from './ProductImage';
+import { useLanguage } from './LanguageProvider';
+import { useCompanies } from '@/hooks/useCompanies';
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ interface Product {
   company?: string | null;
   gamma?: string | null;
   image?: string | null;
+  created_at?: string | null;
   isEdited?: boolean;
 }
 
@@ -34,18 +36,26 @@ interface ProductCardProps {
 }
 
 const CATEGORY_OPTIONS = [
-  "Single Vision Lenses",
-  "Progressive Lenses", 
-  "Frames",
-  "Sunglasses",
-  "Contact Lenses",
-  "Accessories"
+  { value: "Single Vision Lenses", labelKey: "singleVisionLenses" },
+  { value: "Progressive Lenses", labelKey: "progressiveLenses" },
+  { value: "Frames", labelKey: "frames" },
+  { value: "Sunglasses", labelKey: "sunglasses" },
+  { value: "Contact Lenses", labelKey: "contactLenses" },
+  { value: "Accessories", labelKey: "accessories" },
+  { value: "Service", labelKey: "service" },
+  { value: "Other", labelKey: "other" }
 ];
 
-const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
-const TREATMENT_OPTIONS = ["White", "AR", "Blue", "Photochromic"];
-const COMPANY_OPTIONS = ["Indo", "ABlens", "Essilor", "GLASSANDLENS", "Optifak"];
-
+const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
+const TREATMENT_OPTIONS = [
+  { value: "White", labelKey: "white" },
+  { value: "AR", labelKey: "ar" },
+  { value: "Blue", labelKey: "blue" },
+  { value: "Photochromic", labelKey: "photochromic" },
+  { value: "Polarized", labelKey: "polarized" },
+  { value: "UV protection", labelKey: "uvProtection" },
+  { value: "Tint", labelKey: "tint" }
+];
 const ProductCard = React.memo<ProductCardProps>(({ 
   product, 
   onFieldChange, 
@@ -54,6 +64,8 @@ const ProductCard = React.memo<ProductCardProps>(({
   onDelete, 
   isSubmitting 
 }) => {
+  const { t } = useLanguage();
+  const { allCompanies } = useCompanies();
   return (
     <Card 
       className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
@@ -77,16 +89,27 @@ const ProductCard = React.memo<ProductCardProps>(({
               disabled={product.automated_name}
               className="font-semibold text-sm w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-1"
             />
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={product.price}
-                onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
-                className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
-                min={0}
-                step={0.01}
-              />
-              <span className="text-xs text-gray-500">DH</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  value={product.price}
+                  onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
+                  className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
+                  min={0}
+                  step={0.01}
+                />
+                <span className="text-xs text-gray-500">DH</span>
+              </div>
+              {product.created_at && (
+                <span className="text-xs text-gray-400">
+                  {new Date(product.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -99,12 +122,12 @@ const ProductCard = React.memo<ProductCardProps>(({
                 onValueChange={(value) => onFieldChange(product.id, 'category', value === "none" ? null : value)}
               >
                 <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder={t('category')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('none')}</SelectItem>
                   {CATEGORY_OPTIONS.map(option => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                    <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -116,10 +139,10 @@ const ProductCard = React.memo<ProductCardProps>(({
                 onValueChange={(value) => onFieldChange(product.id, 'index', value === "none" ? null : value)}
               >
                 <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder="Index" />
+                  <SelectValue placeholder={t('index')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('none')}</SelectItem>
                   {INDEX_OPTIONS.map(option => (
                     <SelectItem key={option} value={option}>{option}</SelectItem>
                   ))}
@@ -135,12 +158,12 @@ const ProductCard = React.memo<ProductCardProps>(({
                 onValueChange={(value) => onFieldChange(product.id, 'treatment', value === "none" ? null : value)}
               >
                 <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder="Treatment" />
+                  <SelectValue placeholder={t('treatment')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('none')}</SelectItem>
                   {TREATMENT_OPTIONS.map(option => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                    <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -152,11 +175,11 @@ const ProductCard = React.memo<ProductCardProps>(({
                 onValueChange={(value) => onFieldChange(product.id, 'company', value === "none" ? null : value)}
               >
                 <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder="Company" />
+                  <SelectValue placeholder={t('company')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {COMPANY_OPTIONS.map(option => (
+                  <SelectItem value="none">{t('none')}</SelectItem>
+                  {allCompanies.map(option => (
                     <SelectItem key={option} value={option}>{option}</SelectItem>
                   ))}
                 </SelectContent>
@@ -165,63 +188,68 @@ const ProductCard = React.memo<ProductCardProps>(({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              value={product.gamma || ""}
-              onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
-              className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-              placeholder="Gamma"
-            />
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('gamma')}</label>
+              <input
+                type="text"
+                value={product.gamma || ""}
+                onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
+                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                placeholder={t('gamma')}
+              />
+            </div>
 
-            <input
-              type="number"
-              value={product.cost_ttc || 0}
-              onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
-              className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-              placeholder="Cost TTC"
-              min={0}
-              step={0.01}
-            />
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('costTTC')} (DH)</label>
+              <input
+                type="number"
+                value={product.cost_ttc || 0}
+                onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
+                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                placeholder="0.00"
+                min={0}
+                step={0.01}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Select
-              value={product.stock_status || 'Order'}
-              onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
-                onFieldChange(product.id, 'stock_status', value)
-              }
-            >
-              <SelectTrigger className="h-7 text-xs border-gray-200">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Order">Order</SelectItem>
-                <SelectItem value="inStock">In Stock</SelectItem>
-                <SelectItem value="Fabrication">Fabrication</SelectItem>
-                <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <label className="text-xs text-gray-600 font-medium block mb-1">{t('stockStatus')}</label>
+              <Select
+                value={product.stock_status || 'Order'}
+                onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
+                  onFieldChange(product.id, 'stock_status', value)
+                }
+              >
+                <SelectTrigger className="h-7 text-xs border-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Order">{t('order')}</SelectItem>
+                  <SelectItem value="inStock">{t('inStock')}</SelectItem>
+                  <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                  <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            {product.stock_status === 'inStock' ? (
-              <input
-                type="number"
-                value={product.stock || 0}
-                onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none"
-                placeholder="Stock"
-                min={0}
-              />
-            ) : (
-              <div className="flex items-center justify-center">
-                <Switch
-                  checked={product.automated_name}
-                  onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
-                  className="scale-75"
+            {product.stock_status === 'inStock' && (
+              <div>
+                <label className="text-xs text-gray-600 font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
+                <input
+                  type="number"
+                  value={product.stock || 0}
+                  onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
+                  className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                  placeholder="0"
+                  min={0}
                 />
-                <span className="text-xs text-gray-500 ml-1">Auto</span>
               </div>
             )}
           </div>
+
+          
         </div>
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
@@ -234,7 +262,7 @@ const ProductCard = React.memo<ProductCardProps>(({
                 className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
               >
                 <Save size={12} className="mr-1" />
-                Save
+                {t('saveButton')}
               </Button>
             )}
             <Button
@@ -244,8 +272,16 @@ const ProductCard = React.memo<ProductCardProps>(({
               className="text-gray-600 hover:text-blue-600 h-7 px-2 text-xs"
             >
               <Edit size={12} className="mr-1" />
-              Edit
+              {t('edit')}
             </Button>
+            <div className="flex items-center gap-1 ml-2">
+              <Switch
+                checked={product.automated_name}
+                onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
+                className="scale-75"
+              />
+              <span className="text-xs text-gray-500">{t('auto')}</span>
+            </div>
           </div>
 
           <Button

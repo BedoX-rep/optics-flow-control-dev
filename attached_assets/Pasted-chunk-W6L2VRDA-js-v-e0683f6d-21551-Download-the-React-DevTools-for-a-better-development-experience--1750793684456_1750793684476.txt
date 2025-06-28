@@ -1,0 +1,71 @@
+chunk-W6L2VRDA.js?v=e0683f6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/dashboard" (under <Route path="/dashboard">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/dashboard"> to <Route path="/dashboard/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/receipts" (under <Route path="/receipts">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/receipts"> to <Route path="/receipts/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/personalisation" (under <Route path="/personalisation">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/personalisation"> to <Route path="/personalisation/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Personalisation.tsx:65 Error fetching user personalisation: Object
+queryFn @ Personalisation.tsx:65
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/new-receipt" (under <Route path="/new-receipt">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/new-receipt"> to <Route path="/new-receipt/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+NewReceipt.tsx:258 Error fetching user information: Object
+queryFn @ NewReceipt.tsx:258
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+NewReceipt.tsx:258 Error fetching user information: Object
+queryFn @ NewReceipt.tsx:258
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+NewReceipt.tsx:258 Error fetching user information: Object
+queryFn @ NewReceipt.tsx:258
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?select=auto_additional_costs%2Csv_lens_cost%2Cprogressive_lens_cost%2Cframes_cost&user_id=eq.6ed37d8f-76ec-482a-8f82-d122757caf13:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Personalisation.tsx:65 Error fetching user personalisation: Object
+queryFn @ Personalisation.tsx:65
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/optician-settings" (under <Route path="/optician-settings">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/optician-settings"> to <Route path="/optician-settings/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+react-router-dom.js?v=e0683f6d:214 You rendered descendant <Routes> (or called `useRoutes()`) at "/invoices" (under <Route path="/invoices">) but the parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+Please change the parent <Route path="/invoices"> to <Route path="/invoices/*">.
+warning @ react-router-dom.js?v=e0683f6d:214
+chunk-BNN5ROAP.js?v=e0683f6d:336 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-BNN5ROAP.js?v=e0683f6d:336
+vbcdgubnvbilavetsjlr.supabase.co/rest/v1/user_information?on_conflict=user_id:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 ()
+Personalisation.tsx:111 Error saving user personalisation: Object
+onError @ Personalisation.tsx:111

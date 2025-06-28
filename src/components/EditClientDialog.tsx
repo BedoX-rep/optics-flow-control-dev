@@ -155,7 +155,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       if (error) throw error;
 
       // Invalidate and refetch queries
-      await queryClient.invalidateQueries({ queryKey: ['clients'] });
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user.id] });
       
       toast({
         title: "Success",

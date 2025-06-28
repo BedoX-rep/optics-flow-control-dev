@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { User, Eye, Package2, Receipt, Banknote, FileText } from "lucide-react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -23,8 +24,79 @@ interface ReceiptEditDialogProps {
   receipt: Receipt | null;
 }
 
+const ProductSelector = () => {
+  const { t } = useLanguage();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const { data: products = [] } = useQuery({
+    queryKey: ['products-for-linking', searchTerm],
+    queryFn: async () => {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .eq('is_deleted', false)
+        .order('name');
+
+      if (searchTerm) {
+        query = query.ilike('name', `%${searchTerm}%`);
+      }
+
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: true
+  });
+
+  return (
+    <>
+      <div className="p-2 border-b">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder={t('searchProducts')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+      {products.map(product => (
+        <SelectItem key={product.id} value={product.id}>
+          <div className="flex justify-between items-center w-full gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium truncate">{product.name}</div>
+              <div className="text-xs text-gray-500 truncate">
+                {product.category} • {product.company || 'No Company'}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className={`text-xs px-2 py-1 rounded ${
+                product.stock_status === 'inStock' ? 'bg-green-100 text-green-700' :
+                product.stock_status === 'Out Of Stock' ? 'bg-red-100 text-red-700' :
+                'bg-orange-100 text-orange-700'
+              }`}>
+                {product.stock_status}
+              </span>
+              <span className="text-sm font-medium text-blue-600">
+                {product.price?.toFixed(2)} DH
+              </span>
+            </div>
+          </div>
+        </SelectItem>
+      ))}
+      {products.length === 0 && (
+        <div className="p-4 text-center text-gray-500 text-sm">
+          {t('noProductsFound')}
+        </div>
+      )}
+    </>
+  );
+};
+
 const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
@@ -39,6 +111,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     add: '',
     montage_costs: 0,
     total_discount: 0,
+    tax: 0,
     advance_payment: 0,
     delivery_status: '',
     montage_status: '',
@@ -48,28 +121,71 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   });
 
   useEffect(() => {
-    if (receipt) {
-      setFormData({
-        client_name: receipt.client_name || '',
-        client_phone: receipt.client_phone || '',
-        right_eye_sph: receipt.right_eye_sph !== null ? String(receipt.right_eye_sph) : '',
-        right_eye_cyl: receipt.right_eye_cyl !== null ? String(receipt.right_eye_cyl) : '',
-        right_eye_axe: receipt.right_eye_axe !== null ? String(receipt.right_eye_axe) : '',
-        left_eye_sph: receipt.left_eye_sph !== null ? String(receipt.left_eye_sph) : '',
-        left_eye_cyl: receipt.left_eye_cyl !== null ? String(receipt.left_eye_cyl) : '',
-        left_eye_axe: receipt.left_eye_axe !== null ? String(receipt.left_eye_axe) : '',
-        add: receipt.add !== null ? String(receipt.add) : '',
-        montage_costs: receipt.montage_costs || 0,
-        total_discount: receipt.total_discount || 0,
-        tax: receipt.tax || 0,
-        advance_payment: receipt.advance_payment || 0,
-        delivery_status: receipt.delivery_status || '',
-        montage_status: receipt.montage_status || '',
-        order_type: receipt.order_type || '',
-        items: receipt.receipt_items || [],
-        total: receipt.total || 0
-      });
-    }
+    const loadReceiptData = async () => {
+      if (receipt) {
+        // Fetch full receipt data with product information and client data
+        const { data: fullReceipt, error } = await supabase
+          .from('receipts')
+          .select(`
+            *,
+            clients!client_id (
+              id,
+              name,
+              phone
+            ),
+            receipt_items (
+              *,
+              product:product_id (
+                id,
+                name,
+                category,
+                company,
+                price,
+                cost_ttc,
+                stock_status
+              )
+            )
+          `)
+          .eq('id', receipt.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching receipt details:', error);
+          return;
+        }
+
+        // Use client data from clients table if available, otherwise fallback to receipt fields
+        const clientName = fullReceipt.clients?.name || fullReceipt.client_name || '';
+        const clientPhone = fullReceipt.clients?.phone || fullReceipt.client_phone || '';
+
+        setFormData({
+          client_name: clientName,
+          client_phone: clientPhone,
+          right_eye_sph: fullReceipt.right_eye_sph !== null ? String(fullReceipt.right_eye_sph) : '',
+          right_eye_cyl: fullReceipt.right_eye_cyl !== null ? String(fullReceipt.right_eye_cyl) : '',
+          right_eye_axe: fullReceipt.right_eye_axe !== null ? String(fullReceipt.right_eye_axe) : '',
+          left_eye_sph: fullReceipt.left_eye_sph !== null ? String(fullReceipt.left_eye_sph) : '',
+          left_eye_cyl: fullReceipt.left_eye_cyl !== null ? String(fullReceipt.left_eye_cyl) : '',
+          left_eye_axe: fullReceipt.left_eye_axe !== null ? String(fullReceipt.left_eye_axe) : '',
+          add: fullReceipt.add !== null ? String(fullReceipt.add) : '',
+          montage_costs: fullReceipt.montage_costs || 0,
+          total_discount: fullReceipt.total_discount || 0,
+          tax: fullReceipt.tax || 0,
+          advance_payment: fullReceipt.advance_payment || 0,
+          delivery_status: fullReceipt.delivery_status || '',
+          montage_status: fullReceipt.montage_status || '',
+          order_type: fullReceipt.order_type || '',
+          items: (fullReceipt.receipt_items || []).map(item => ({
+            ...item,
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            product: item.product // This will now contain the full product data
+          })),
+          total: fullReceipt.total || 0
+        });
+      }
+    };
+
+    loadReceiptData();
   }, [receipt]);
 
   const handleSubmit = async () => {
@@ -79,6 +195,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       const costTtc = totalProductsCost + (formData.montage_costs || 0);
       const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
+
+      // Calculate paid_at_delivery_cost
+      const paidAtDeliveryCost = formData.items.reduce((sum, item) => {
+        if (item.paid_at_delivery) {
+          return sum + ((item.cost || 0) * (item.quantity || 1));
+        }
+        return sum;
+      }, 0);
 
       const { error: receiptError } = await supabase
         .from('receipts')
@@ -97,12 +221,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           order_type: formData.order_type,
           products_cost: totalProductsCost,
           cost_ttc: costTtc,
-          total: total
+          total: total,
+          paid_at_delivery_cost: paidAtDeliveryCost
         })
         .eq('id', receipt.id);
 
       if (receiptError) throw receiptError;
 
+      // Update client table if client_id exists
       if (receipt.client_id) {
         const { error: clientError } = await supabase
           .from('clients')
@@ -115,23 +241,56 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         if (clientError) throw clientError;
       }
 
-      for (const item of formData.items) {
+      // Prepare items for update. Differentiate between existing and new items.
+      const itemsToUpdate = formData.items.filter(item => item.id);
+      const newItems = formData.items.filter(item => !item.id);
+
+      // Update existing items
+      for (const item of itemsToUpdate) {
         const { error: itemError } = await supabase
           .from('receipt_items')
           .update({
+            product_id: item.product_id || null,
             custom_item_name: item.custom_item_name,
-            price: item.price,
-            cost: item.cost,
-            quantity: item.quantity
+            price: item.price || 0,
+            cost: item.cost || 0,
+            quantity: item.quantity || 1,
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            linked_eye: item.linked_eye || null,
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1)
           })
           .eq('id', item.id);
 
         if (itemError) throw itemError;
       }
 
+      // Insert new items
+      for (const item of newItems) {
+        const { error: itemError } = await supabase
+          .from('receipt_items')
+          .insert({
+            receipt_id: receipt.id,
+            user_id: receipt.user_id, // Add user_id which is required
+            product_id: item.product_id || null,
+            custom_item_name: item.custom_item_name || null,
+            price: item.price || 0,
+            cost: item.cost || 0,
+            quantity: item.quantity || 1,
+            paid_at_delivery: Boolean(item.paid_at_delivery),
+            linked_eye: item.linked_eye || null,
+            profit: ((item.price || 0) - (item.cost || 0)) * (item.quantity || 1),
+            is_deleted: false
+          });
+
+        if (itemError) {
+          console.error('Error inserting new item:', itemError);
+          throw itemError;
+        }
+      }
+
       toast({
-        title: "Success",
-        description: "Receipt updated successfully",
+        title: t('success'),
+        description: t('receiptUpdatedSuccessfully'),
       });
 
       queryClient.invalidateQueries(['receipts']);
@@ -139,8 +298,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     } catch (error) {
       console.error('Error updating receipt:', error);
       toast({
-        title: "Error",
-        description: "Failed to update receipt",
+        title: t('error'),
+        description: t('failedToUpdateReceipt'),
         variant: "destructive",
       });
     } finally {
@@ -154,13 +313,29 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     return total;
   };
 
+  const handleAddItem = () => {
+    // Add a new empty item to the form data
+    setFormData({
+      ...formData,
+      items: [...formData.items, {
+        product_id: null,
+        custom_item_name: '',
+        price: 0,
+        cost: 0,
+        quantity: 1,
+        paid_at_delivery: false,
+        linked_eye: null
+      }]
+    });
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
             <FileText className="h-5 w-5 text-primary" />
-            Edit Receipt
+            {t('editReceipt')}
           </DialogTitle>
         </DialogHeader>
 
@@ -170,18 +345,18 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <User className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Client Information</h3>
+                <h3 className="font-semibold">{t('clientInformation')}</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Name</Label>
+                  <Label>{t('name')}</Label>
                   <Input
                     value={formData.client_name}
                     onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>Phone</Label>
+                  <Label>{t('phone')}</Label>
                   <Input
                     value={formData.client_phone}
                     onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
@@ -196,11 +371,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <Eye className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Prescription Details</h3>
+                <h3 className="font-semibold">{t('prescriptionDetails')}</h3>
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-medium">Right Eye</h4>
+                  <h4 className="font-medium">{t('rightEye')}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label>SPH</Label>
@@ -226,7 +401,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <h4 className="font-medium">Left Eye</h4>
+                  <h4 className="font-medium">{t('leftEye')}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label>SPH</Label>
@@ -268,57 +443,57 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Receipt className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Order Status</h3>
+                  <h3 className="font-semibold">{t('orderStatus')}</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <Label>Delivery Status</Label>
+                    <Label>{t('deliveryStatus')}</Label>
                     <Select
                       value={formData.delivery_status}
                       onValueChange={(value) => setFormData({ ...formData, delivery_status: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder={t('selectStatus')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Undelivered">Undelivered</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Undelivered">{t('undelivered')}</SelectItem>
+                        <SelectItem value="Completed">{t('completed')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Order Type</Label>
+                    <Label>{t('orderType')}</Label>
                     <Select
                       value={formData.order_type || 'Unspecified'}
                       onValueChange={(value) => setFormData({ ...formData, order_type: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select order type" />
+                        <SelectValue placeholder={t('selectOrderType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Unspecified">Unspecified</SelectItem>
-                        <SelectItem value="Montage">Montage</SelectItem>
-                        <SelectItem value="Retoyage">Retoyage</SelectItem>
-                        <SelectItem value="Sell">Sell</SelectItem>
+                        <SelectItem value="Unspecified">{t('unspecified')}</SelectItem>
+                        <SelectItem value="Montage">{t('montage')}</SelectItem>
+                        <SelectItem value="Retoyage">{t('retoyage')}</SelectItem>
+                        <SelectItem value="Sell">{t('sell')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Montage Status</Label>
+                    <Label>{t('montageStatus')}</Label>
                     <Select
                       value={formData.montage_status}
                       onValueChange={(value) => setFormData({ ...formData, montage_status: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder={t('selectStatus')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UnOrdered">UnOrdered</SelectItem>
-                        <SelectItem value="Ordered">Ordered</SelectItem>
-                        <SelectItem value="InStore">InStore</SelectItem>
-                        <SelectItem value="InCutting">InCutting</SelectItem>
-                        <SelectItem value="Ready">Ready</SelectItem>
-                        <SelectItem value="Paid costs">Paid costs</SelectItem>
+                        <SelectItem value="UnOrdered">{t('unOrdered')}</SelectItem>
+                        <SelectItem value="Ordered">{t('ordered')}</SelectItem>
+                        <SelectItem value="InStore">{t('inStore')}</SelectItem>
+                        <SelectItem value="InCutting">{t('inCutting')}</SelectItem>
+                        <SelectItem value="Ready">{t('ready')}</SelectItem>
+                        <SelectItem value="Paid costs">{t('paidCosts')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -330,11 +505,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Banknote className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Financial Details</h3>
+                  <h3 className="font-semibold">{t('financialDetails')}</h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <Label>Montage Costs</Label>
+                    <Label>{t('additionalCosts') || 'Additional Costs'}</Label>
                     <Input
                       type="number"
                       value={formData.montage_costs}
@@ -342,7 +517,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Total Discount</Label>
+                    <Label>{t('totalDiscount')}</Label>
                     <Input
                       type="number"
                       value={formData.total_discount}
@@ -350,7 +525,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Tax</Label>
+                    <Label>{t('tax')}</Label>
                     <Input
                       type="number"
                       value={formData.tax}
@@ -358,7 +533,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     />
                   </div>
                   <div>
-                    <Label>Advance Payment</Label>
+                    <Label>{t('advancePayment')}</Label>
                     <Input
                       type="number"
                       value={formData.advance_payment}
@@ -376,19 +551,98 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Package2 className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Items</h3>
+                  <h3 className="font-semibold">{t('items')}</h3>
                 </div>
                 <div className="text-lg font-semibold">
-                  Total: {calculateItemsTotal().toFixed(2)} DH
+                  {t('total')}: {calculateItemsTotal().toFixed(2)} DH
                 </div>
               </div>
               <div className="space-y-4">
                 {formData.items.map((item, index) => (
                   <Card key={index} className="border-dashed">
                     <CardContent className="pt-4">
-                      <div className="grid grid-cols-4 gap-4">
+                      {/* Product Linking Section */}
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package2 className="h-4 w-4 text-blue-600" />
+                          <Label className="text-sm font-semibold">{t('productLink')}</Label>
+                        </div>
+                        {item.product_id ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 p-2 bg-white rounded border">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium">{item.product?.name || t('unknownProduct')}</span>
+                                  <div className="text-sm text-gray-500">
+                                    {item.product?.category} • {item.product?.company || 'No Company'} • Stock: {item.product?.stock_status}
+                                  </div>
+                                </div>
+                                <div className="text-sm text-blue-600">
+                                  {item.product?.price?.toFixed(2)} DH
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                // Unlink product
+                                const newItems = [...formData.items];
+                                newItems[index] = { 
+                                  ...item, 
+                                  product_id: null, 
+                                  product: null,
+                                  custom_item_name: item.product?.name || item.custom_item_name || ''
+                                };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                            >
+                              {t('unlink')}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value=""
+                              onValueChange={async (productId) => {
+                                // Fetch product details
+                                const { data: product } = await supabase
+                                  .from('products')
+                                  .select('*')
+                                  .eq('id', productId)
+                                  .single();
+
+                                if (product) {
+                                  const newItems = [...formData.items];
+                                  newItems[index] = { 
+                                    ...item, 
+                                    product_id: productId,
+                                    product: product,
+                                    price: product.price,
+                                    cost: product.cost_ttc || 0,
+                                    custom_item_name: null
+                                  };
+                                  setFormData({ ...formData, items: newItems });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder={t('linkToProduct')} />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-60">
+                                {/* We'll fetch products dynamically */}
+                                <ProductSelector />
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Item Details Section */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <Label>Name</Label>
+                          <Label>{t('itemName')}</Label>
                           <Input
                             value={item.custom_item_name || item.product?.name || ''}
                             onChange={(e) => {
@@ -396,12 +650,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                               newItems[index] = { ...item, custom_item_name: e.target.value };
                               setFormData({ ...formData, items: newItems });
                             }}
+                            placeholder={t('enterItemName')}
                           />
                         </div>
                         <div>
-                          <Label>Quantity</Label>
+                          <Label>{t('quantity')}</Label>
                           <Input
                             type="number"
+                            min="1"
                             value={item.quantity}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -411,10 +667,16 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             }}
                           />
                         </div>
+                      </div>
+
+                      {/* Financial Details Section */}
+                      <div className="grid grid-cols-4 gap-4 mb-4">
                         <div>
-                          <Label>Price</Label>
+                          <Label>{t('price')}</Label>
                           <Input
                             type="number"
+                            min="0"
+                            step="0.01"
                             value={item.price}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -425,9 +687,11 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           />
                         </div>
                         <div>
-                          <Label>Cost</Label>
+                          <Label>{t('cost')} ({t('perUnit') || 'Per Unit'})</Label>
                           <Input
                             type="number"
+                            min="0"
+                            step="0.01"
                             value={item.cost}
                             onChange={(e) => {
                               const newItems = [...formData.items];
@@ -436,23 +700,126 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                             }}
                           />
                         </div>
+                        <div>
+                          <Label>{t('totalCost') || 'Total Cost'}</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={((item.cost || 0) * item.quantity).toFixed(2)}
+                            onChange={(e) => {
+                              const totalCost = parseFloat(e.target.value) || 0;
+                              const costPerUnit = item.quantity > 0 ? totalCost / item.quantity : 0;
+                              const newItems = [...formData.items];
+                              newItems[index] = { ...item, cost: costPerUnit };
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label>{t('total')}</Label>
+                          <div className="h-10 px-3 py-2 rounded-md bg-gray-50 font-medium flex items-center">
+                            {(item.price * item.quantity).toFixed(2)} DH
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Additional Options */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          {/* Payment Status */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`paid-delivery-${index}`}
+                              checked={item.paid_at_delivery || false}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[index] = { ...item, paid_at_delivery: e.target.checked };
+                                setFormData({ ...formData, items: newItems });
+                              }}
+                              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            />
+                            <Label htmlFor={`paid-delivery-${index}`} className="text-sm">
+                              {t('paidAtDelivery')}
+                            </Label>
+                          </div>
+
+                          {/* Eye Linking for Lens Products */}
+                          {item.product?.category?.includes('Lenses') && (
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm">{t('eye')}</Label>
+                              <Select
+                                value={item.linked_eye || 'none'}
+                                onValueChange={(value) => {
+                                  const newItems = [...formData.items];
+                                  newItems[index] = { 
+                                    ...item, 
+                                    linked_eye: value === 'none' ? null : value 
+                                  };
+                                  setFormData({ ...formData, items: newItems });
+                                }}
+                              >
+                                <SelectTrigger className="w-20">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">{t('none')}</SelectItem>
+                                  <SelectItem value="RE">RE</SelectItem>
+                                  <SelectItem value="LE">LE</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Profit Display and Remove Button */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm">
+                            <span className="text-gray-500">{t('profit')} </span>
+                            <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newItems = formData.items.filter((_, i) => i !== index);
+                              setFormData({ ...formData, items: newItems });
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Add Item Button */}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleAddItem}
+              >
+                {t('addItem')}
+              </Button>
             </CardContent>
           </Card>
         </div>
 
         <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('cancel')}</Button>
           <Button 
             onClick={handleSubmit} 
             disabled={loading}
             className="bg-primary hover:bg-primary/90"
           >
-            {loading ? "Updating..." : "Update Receipt"}
+            {loading ? t('updating') : t('updateReceipt')}
           </Button>
         </DialogFooter>
       </DialogContent>

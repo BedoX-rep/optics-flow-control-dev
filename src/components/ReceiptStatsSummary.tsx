@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useLanguage } from "./LanguageProvider";
 
 interface Receipt {
   delivery_status?: string;
@@ -14,21 +15,22 @@ interface ReceiptStatsSummaryProps {
 }
 
 const ReceiptStatsSummary: React.FC<ReceiptStatsSummaryProps> = ({ receipts }) => {
+  const { t } = useLanguage();
   const total = receipts.length;
   const totalAmount = receipts.reduce((sum, r) => sum + (r.total || 0), 0);
   const totalBalance = receipts.reduce((sum, r) => sum + (r.balance || 0), 0);
   
   const stats = [
     {
-      label: "Pending",
+      label: t('pending'),
       count: receipts.filter(r => r.delivery_status !== 'Completed').length
     },
     {
-      label: "Unpaid",
+      label: t('unpaid'),
       count: receipts.filter(r => r.balance > 0).length
     },
     {
-      label: "Completed",
+      label: t('completed'),
       count: receipts.filter(r => 
         r.delivery_status === 'Completed' && 
         r.montage_status === 'Completed' && 
@@ -41,7 +43,7 @@ const ReceiptStatsSummary: React.FC<ReceiptStatsSummaryProps> = ({ receipts }) =
     <div className="flex flex-col items-start gap-0.5 min-w-[130px]">
       <div className="flex items-baseline gap-1">
         <span className="text-[1.35rem] leading-none font-bold text-black">{total}</span>
-        <span className="text-gray-400 text-xs font-medium font-inter">receipts</span>
+        <span className="text-gray-400 text-xs font-medium font-inter">{t('receiptsLabel')}</span>
       </div>
       <div className="flex flex-wrap gap-1">
         {stats.map(({ label, count }) => (

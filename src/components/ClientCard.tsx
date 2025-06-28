@@ -6,6 +6,7 @@ import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from './LanguageProvider';
 
 interface Receipt {
   id: string;
@@ -49,6 +50,7 @@ interface ClientCardProps {
 
 export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardProps) => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
@@ -206,18 +208,27 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   // Save all edited fields - UPDATED to use name attributes from input fields
   const handleSaveChanges = async () => {
     try {
+      // Convert string values to numbers for database storage, handle commas as decimal separators
+      const convertToNumber = (value: any) => {
+        if (value === null || value === undefined || value === "") return null;
+        if (typeof value === "number") return value;
+        const stringValue = String(value).replace(',', '.');
+        const numValue = parseFloat(stringValue);
+        return isNaN(numValue) ? null : numValue;
+      };
+
       const { error } = await supabase
         .from('clients')
         .update({
           name: editedClient.name,
           phone: editedClient.phone,
-          right_eye_sph: editedClient.right_eye_sph,
-          right_eye_cyl: editedClient.right_eye_cyl,
-          right_eye_axe: editedClient.right_eye_axe,
-          left_eye_sph: editedClient.left_eye_sph,
-          left_eye_cyl: editedClient.left_eye_cyl,
-          left_eye_axe: editedClient.left_eye_axe,
-          Add: editedClient.Add
+          right_eye_sph: convertToNumber(editedClient.right_eye_sph),
+          right_eye_cyl: convertToNumber(editedClient.right_eye_cyl),
+          right_eye_axe: convertToNumber(editedClient.right_eye_axe),
+          left_eye_sph: convertToNumber(editedClient.left_eye_sph),
+          left_eye_cyl: convertToNumber(editedClient.left_eye_cyl),
+          left_eye_axe: convertToNumber(editedClient.left_eye_axe),
+          Add: convertToNumber(editedClient.Add)
         })
         .eq('id', client.id);
 
@@ -324,105 +335,135 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
 
         {/* Editable prescription data */}
-        <div className="mt-4 grid grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Right Eye</h3>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">SPH</span>
-                <input 
-                  type="text"
-                  name="right_eye_sph" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_sph', value);
-                    }
-                  }}
-                />
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('sph')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="right_eye_sph"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      // Allow empty string, numbers, decimal point, comma, and minus sign
+                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('cyl')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="right_eye_cyl"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('axe')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="right_eye_axe"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">CYL</span>
-                <input 
-                  type="text"
-                  name="right_eye_cyl" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_cyl', value);
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">AXE</span>
-                <input 
-                  type="text"
-                  name="right_eye_axe" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseInt(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('right_eye_axe', value);
-                    }
-                  }}
-                />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('sph')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="left_eye_sph"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('cyl')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="left_eye_cyl"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">{t('axe')}</span>
+                  <input 
+                    type="text"
+                    inputMode="decimal"
+                    name="left_eye_axe"
+                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                        handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Left Eye</h3>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">SPH</span>
-                <input 
-                  type="text"
-                  name="left_eye_sph" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_sph', value);
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">CYL</span>
-                <input 
-                  type="text"
-                  name="left_eye_cyl" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_cyl', value);
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">AXE</span>
-                <input 
-                  type="text"
-                  name="left_eye_axe" // Added name attribute
-                  className="text-sm font-medium border rounded px-1 py-0.5 w-full"
-                  value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : parseInt(e.target.value);
-                    if (e.target.value === "" || !isNaN(value as number)) {
-                      handleFieldChange('left_eye_axe', value);
-                    }
-                  }}
-                />
-              </div>
+          
+          {/* Add field - centered horizontally */}
+          <div className="flex justify-center">
+            <div className="w-32 flex flex-col">
+              <span className="text-xs text-gray-500 text-center">{t('add') || 'ADD'}</span>
+              <input 
+                type="text"
+                inputMode="decimal"
+                name="add"
+                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
+                value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                    handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                  }
+                }}
+                placeholder="0.00"
+              />
             </div>
           </div>
         </div>
@@ -431,7 +472,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       <div className="bg-white bg-opacity-30 px-4 py-2 flex justify-between items-center">
         <div className="flex items-center text-xs text-gray-500">
           <Calendar size={14} className="mr-1" />
-          <span>Added on {formattedDate}</span>
+          <span>{t('addedOn')} {formattedDate}</span>
         </div>
         <Button 
           variant="ghost" 

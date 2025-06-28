@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote, Pencil } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,9 @@ import ReceiptStatsSummary from '@/components/ReceiptStatsSummary';
 import ReceiptStatistics from '@/components/ReceiptStatistics';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/components/LanguageProvider';
+import { Textarea } from '@/components/ui/textarea';
+
 
 interface Receipt {
   id: string;
@@ -44,6 +47,7 @@ interface Receipt {
   order_type?: string;
   call_status: string;
   time_called?: string;
+  note?: string;
 }
 
 const ReceiptCard = ({ 
@@ -54,7 +58,8 @@ const ReceiptCard = ({
   onView, 
   onEdit, 
   onMontageChange,
-  onCallStatusChange 
+  onCallStatusChange,
+  onNoteChange 
 }: {
   receipt: Receipt;
   onPaid: () => void;
@@ -64,9 +69,24 @@ const ReceiptCard = ({
   onEdit: () => void;
   onMontageChange: (status: string) => void;
   onCallStatusChange: (status: string) => void;
+  onNoteChange: (note: string) => void;
 }) => {
+  const { t } = useLanguage();
+  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [isViewingNote, setIsViewingNote] = useState(false);
+  const [noteText, setNoteText] = useState(receipt.note || '');
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
+
+  const handleSaveNote = () => {
+    onNoteChange(noteText);
+    setIsAddingNote(false);
+  };
+
+  const handleCancelNote = () => {
+    setNoteText(receipt.note || '');
+    setIsAddingNote(false);
+  };
 
   const getTimeDisplay = (dateString: string) => {
     const date = new Date(dateString);
@@ -75,11 +95,30 @@ const ReceiptCard = ({
     const diffInHours = diffInMinutes / 60;
 
     if (diffInMinutes < 60) {
-      return `${Math.floor(diffInMinutes)} minutes ago`;
+      return `${Math.floor(diffInMinutes)} ${t('minutesAgoShort')}`;
     } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)} hours ago`;
+      return `${Math.floor(diffInHours)} ${t('hoursAgoShort')}`;
     } else {
       return format(date, 'MMM dd, yyyy');
+    }
+  };
+
+  const getMontageStatusTranslation = (status: string) => {
+    switch (status) {
+      case 'UnOrdered':
+        return t('unOrdered');
+      case 'Ordered':
+        return t('ordered');
+      case 'InStore':
+        return t('inStore');
+      case 'InCutting':
+        return t('inCutting');
+      case 'Ready':
+        return t('ready');
+      case 'Paid costs':
+        return t('paidCosts');
+      default:
+        return status;
     }
   };
 
@@ -90,7 +129,15 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full relative">
+        {(() => {
+          const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
+          return itemsWithoutCost > 0 ? (
+            <div className="absolute top-0 right-0 z-10 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg" style={{ top: '4px', right: '4px' }}>
+              {itemsWithoutCost}
+            </div>
+          ) : null;
+        })()}
         <CardContent className="p-6">
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between">
@@ -110,11 +157,12 @@ const ReceiptCard = ({
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1.5">
                     <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} className="text-xs">
-                      {receipt.balance === 0 ? 'Paid' : receipt.advance_payment > 0 ? 'Partial' : 'Unpaid'}
+                      {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
                     </Badge>
                     <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
-                      {receipt.delivery_status}
+                      {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                     </Badge>
+                    
                     <div className="flex items-center gap-1">
                       <div className={cn("w-2 h-2 rounded-full",
                         receipt.call_status === 'Called' ? "bg-green-500" :
@@ -122,82 +170,145 @@ const ReceiptCard = ({
                         "bg-gray-400"
                       )} />
                       <span className="text-xs font-medium">
-                        {receipt.call_status || 'Not Called'}
+                        {receipt.call_status === 'Called' ? t('called') : 
+                         receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-1 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onCallStatusChange(
-                    receipt.call_status === 'Not Called' ? 'Called' :
-                    receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                  )}
-                  className={cn("h-8 w-8", 
-                    receipt.call_status === 'Called' ? "hover:bg-green-100" :
-                    receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
-                    "hover:bg-gray-100"
-                  )}
-                >
-                  <Phone className={cn("h-4 w-4",
-                    receipt.call_status === 'Called' ? "text-green-600" :
-                    receipt.call_status === 'Unresponsive' ? "text-red-600" :
-                    "text-gray-600"
-                  )} />
-                </Button>
-                {receipt.balance > 0 && (
-                  <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
-                    <Check className="h-4 w-4 text-green-600" />
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onCallStatusChange(
+                      receipt.call_status === 'Not Called' ? 'Called' :
+                      receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                    )}
+                    className={cn("h-8 w-8", 
+                      receipt.call_status === 'Called' ? "hover:bg-green-100" :
+                      receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
+                      "hover:bg-gray-100"
+                    )}
+                  >
+                    <Phone className={cn("h-4 w-4",
+                      receipt.call_status === 'Called' ? "text-green-600" :
+                      receipt.call_status === 'Unresponsive' ? "text-red-600" :
+                      "text-gray-600"
+                    )} />
                   </Button>
-                )}
-                <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
-                  <Package className="h-4 w-4 text-blue-600" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                </Button>
+                  {receipt.balance > 0 && (
+                    <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
+                    <Package className="h-4 w-4 text-blue-600" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+                
+                {/* Note buttons positioned below edit and delete buttons */}
+                <div className="flex gap-1 justify-end">
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
+                  <div className="w-8"></div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsViewingNote(true)}
+                    className={cn("h-8 w-8", receipt.note ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : "invisible")}
+                    title={t('viewNote')}
+                  >
+                    <StickyNote className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsAddingNote(true)}
+                    className="h-8 w-8"
+                    title={t('addNote')}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm mb-6">
+            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('total')}</p>
                     <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5">Advance</p>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('advance')}</p>
                     <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
                   </div>
                 </div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">Balance</p>
+                <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
                 <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5">Cost</p>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('cost')}</p>
                     <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5">Profit</p>
+                    <p className="text-xs text-gray-500 mb-0.5">{t('profit')}</p>
                     <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Note Section */}
+            <div className="mb-2">
+              {/* Add Note Dialog */}
+              {isAddingNote && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+                  <Textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    placeholder={t('enterNote')}
+                    className="mb-2 text-sm"
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleSaveNote} className="text-xs">
+                      {t('save')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleCancelNote} className="text-xs">
+                      {t('cancel')}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* View Note Dialog */}
+              {isViewingNote && (
+                <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-gray-700 mb-2">{receipt.note}</p>
+                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} className="text-xs">
+                    {t('close')}
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-6 gap-1 w-full relative">
@@ -221,7 +332,7 @@ const ReceiptCard = ({
                     <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium whitespace-nowrap ${
                       isCurrent ? 'text-teal-600' : 'text-gray-500'
                     }`}>
-                      {status}
+                      {getMontageStatusTranslation(status)}
                     </div>
                     {isCurrent && (
                       <motion.div
@@ -252,6 +363,7 @@ const ReceiptCard = ({
 };
 
 const Receipts = () => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
@@ -389,7 +501,7 @@ const Receipts = () => {
           time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
         } : r);
       });
-      
+
       const { error } = await supabase
         .from('receipts')
         .update({ 
@@ -409,6 +521,34 @@ const Receipts = () => {
       toast({
         title: "Error",
         description: "Failed to update call status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNoteChange = async (id: string, note: string) => {
+    try {
+      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((r: Receipt) => r.id === id ? { ...r, note } : r);
+      });
+
+      const { error } = await supabase
+        .from('receipts')
+        .update({ note })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Note Updated",
+        description: "Receipt note has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update note. Please try again.",
         variant: "destructive",
       });
     }
@@ -487,7 +627,7 @@ const Receipts = () => {
       console.error('Error deleting receipt:', error);
       toast({
         title: "Error",
-        description: "Failed to delete receipt. Please try again.",
+        description: "Failed to update receipt. Please try again.",
         variant: "destructive",
       });
     }
@@ -511,6 +651,7 @@ const Receipts = () => {
           cost,
           profit,
           custom_item_name,
+          paid_at_delivery,
           product:product_id (
             name,
             category
@@ -587,7 +728,7 @@ const Receipts = () => {
           <Link to="/new-receipt">
             <Button className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
               <Plus className="h-4 w-4 mr-2" />
-              New Receipt
+              {t('newReceipt')}
             </Button>
           </Link>
           <ReceiptStatsSummary receipts={receipts} />
@@ -599,7 +740,7 @@ const Receipts = () => {
           onClick={() => setIsStatsOpen(true)}
         >
           <BarChart2 className="h-5 w-5 mr-2" />
-          Statistics
+          {t('statistics')}
         </Button>
       </div>
 
@@ -609,7 +750,7 @@ const Receipts = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
               type="text" 
-              placeholder="Search receipts..." 
+              placeholder={t('searchReceipts')} 
               className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -629,11 +770,11 @@ const Receipts = () => {
                   : "bg-white/10 hover:bg-white/20"
               )}>
                 <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Date">
-                  {dateFilter === 'all' ? 'Date' :
-                   dateFilter === 'today' ? 'Today' :
-                   dateFilter === 'week' ? 'This Week' :
-                   dateFilter === 'month' ? 'This Month' : 'This Year'}
+                <SelectValue placeholder={t('date')}>
+                  {dateFilter === 'all' ? t('date') :
+                   dateFilter === 'today' ? t('today') :
+                   dateFilter === 'week' ? t('thisWeek') :
+                   dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
                 </SelectValue>
                 {dateFilter !== 'all' && (
                   <X
@@ -646,11 +787,11 @@ const Receipts = () => {
                 )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Dates</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="year">This Year</SelectItem>
+                <SelectItem value="all">{t('allDates')}</SelectItem>
+                <SelectItem value="today">{t('today')}</SelectItem>
+                <SelectItem value="week">{t('thisWeek')}</SelectItem>
+                <SelectItem value="month">{t('thisMonth')}</SelectItem>
+                <SelectItem value="year">{t('thisYear')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -667,17 +808,17 @@ const Receipts = () => {
                 "bg-white/10 hover:bg-white/20"
               )}>
                 <Wallet className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Payment">
-                  {paymentFilter === 'all' ? 'Payment' :
-                   paymentFilter === 'paid' ? 'Paid' :
-                   paymentFilter === 'partial' ? 'Partial' : 'Unpaid'}
+                <SelectValue placeholder={t('payment')}>
+                  {paymentFilter === 'all' ? t('payment') :
+                   paymentFilter === 'paid' ? t('paid') :
+                   paymentFilter === 'partial' ? t('partial') : t('unpaid')}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-gray-600">All Payments</SelectItem>
-                <SelectItem value="paid" className="text-green-600">Paid</SelectItem>
-                <SelectItem value="partial" className="text-yellow-600">Partially Paid</SelectItem>
-                <SelectItem value="unpaid" className="text-red-600">Unpaid</SelectItem>
+                <SelectItem value="all" className="text-gray-600">{t('allPayments')}</SelectItem>
+                <SelectItem value="paid" className="text-green-600">{t('paid')}</SelectItem>
+                <SelectItem value="partial" className="text-yellow-600">{t('partial')}</SelectItem>
+                <SelectItem value="unpaid" className="text-red-600">{t('unpaid')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -693,15 +834,15 @@ const Receipts = () => {
                 "bg-white/10 hover:bg-white/20"
               )}>
                 <Package className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Delivery">
-                  {deliveryFilter === 'all' ? 'Delivery' :
-                   deliveryFilter === 'Completed' ? 'Delivered' : 'Undelivered'}
+                <SelectValue placeholder={t('deliveryLabel')}>
+                  {deliveryFilter === 'all' ? t('deliveryLabel') :
+                   deliveryFilter === 'Completed' ? t('delivered') : t('undelivered')}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-gray-600">All Deliveries</SelectItem>
-                <SelectItem value="Completed" className="text-green-600">Delivered</SelectItem>
-                <SelectItem value="Undelivered" className="text-orange-600">Undelivered</SelectItem>
+                <SelectItem value="all" className="text-gray-600">{t('allDeliveries')}</SelectItem>
+                <SelectItem value="Completed" className="text-green-600">{t('delivered')}</SelectItem>
+                <SelectItem value="Undelivered" className="text-orange-600">{t('undelivered')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -722,7 +863,7 @@ const Receipts = () => {
               ))
             ) : filteredReceipts.length === 0 ? (
               <div className="col-span-full text-center py-10 text-gray-500">
-                No receipts found
+                {t('noReceiptsFound')}
               </div>
             ) : (
               filteredReceipts.map((receipt) => (
@@ -736,6 +877,7 @@ const Receipts = () => {
                   onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
                   onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
+                  onNoteChange={(note) => handleNoteChange(receipt.id, note)}
                 />
               ))
             )}

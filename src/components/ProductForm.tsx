@@ -1,43 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { DialogFooter } from "@/components/ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UploadIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/components/LanguageProvider";
+import { useCompanies } from "@/hooks/useCompanies";
 
 const CATEGORY_OPTIONS = [
-  { value: "Single Vision Lenses", abbr: "SV" },
-  { value: "Progressive Lenses", abbr: "PG" },
-  { value: "Frames", abbr: "FR" },
-  { value: "Sunglasses", abbr: "SG" },
-  { value: "Contact Lenses", abbr: "CL" },
-  { value: "Accessories", abbr: "AC" }
+  { value: "Single Vision Lenses", abbr: "SV", labelKey: "singleVisionLenses", icon: Eye },
+  { value: "Progressive Lenses", abbr: "PG", labelKey: "progressiveLenses", icon: Layers },
+  { value: "Frames", abbr: "FR", labelKey: "frames", icon: Package },
+  { value: "Sunglasses", abbr: "SG", labelKey: "sunglasses", icon: Eye },
+  { value: "Contact Lenses", abbr: "CL", labelKey: "contactLenses", icon: Eye },
+  { value: "Accessories", abbr: "AC", labelKey: "accessories", icon: Package },
+  { value: "Service", abbr: "SV", labelKey: "service", icon: Wrench },
+  { value: "Other", abbr: "OT", labelKey: "other", icon: Package }
 ];
 
 const INDEX_OPTIONS = [
+  "1.50",
   "1.56",
+  "1.59",
   "1.6",
   "1.67",
   "1.74"
 ];
 
 const TREATMENT_OPTIONS = [
-  "White",
-  "AR",
-  "Blue",
-  "Photochromic"
+  { value: "White", labelKey: "white" },
+  { value: "AR", labelKey: "ar" },
+  { value: "Blue", labelKey: "blue" },
+  { value: "Photochromic", labelKey: "photochromic" },
+  { value: "Polarized", labelKey: "polarized" },
+  { value: "UV protection", labelKey: "uvProtection" },
+  { value: "Tint", labelKey: "tint" }
 ];
 
-const COMPANY_OPTIONS = [
-  "Indo",
-  "ABlens",
-  "Essilor",
-  "GLASSANDLENS",
-  "Optifak"
-];
+
 
 const GAMMA_OPTIONS = [
   "Standard",
@@ -75,6 +81,8 @@ const getCategoryAbbr = (category: string | undefined) => {
 };
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCancel, disabled }) => {
+  const { t } = useLanguage();
+  const { allCompanies } = useCompanies();
   const [form, setForm] = useState<ProductFormValues>({
     name: "",
     price: 0,
@@ -94,7 +102,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       // Only include index/treatment for SV/PG
       let parts = [abbr];
 
-      if (["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "")) {
+      if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "")) {
         if (form.index) parts.push(form.index);
         if (form.treatment) parts.push(form.treatment?.toUpperCase());
       }
@@ -124,7 +132,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   }, [form.automated_name]);
 
   // Determine which extra fields should show
-  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses"].includes(form.category ?? "");
+  const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "");
 
   // Image handling (upload to Supabase Storage or base64 preview instead for now)
   const handleImageUpload = async () => {
@@ -186,204 +194,315 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
     }
   };
 
+  const selectedCategory = CATEGORY_OPTIONS.find(cat => cat.value === form.category);
+  const IconComponent = selectedCategory?.icon || Package;
+
   return (
-    <form className="space-y-4" onSubmit={onFormSubmit}>
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          checked={autoName}
-          onCheckedChange={handleAutoNameToggle}
-          id="auto-name"
-        />
-        <Label htmlFor="auto-name" className="cursor-pointer">Generate Name Automatically</Label>
-      </div>
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogHeader className="space-y-2 pb-4 border-b">
+        <DialogTitle className="text-2xl font-semibold text-gray-900">
+          {initialValues.name ? t('editProduct') : t('addProduct')}
+        </DialogTitle>
+      </DialogHeader>
 
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="category">Category</Label>
-        <Select
-          value={form.category ?? ""}
-          onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
-        >
-          <SelectTrigger className="col-span-3" id="category">
-            <SelectValue placeholder="Select Category" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-white">
-            <SelectItem value="none_selected">None</SelectItem>
-            {CATEGORY_OPTIONS.map(opt => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.value}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {showIndexTreatment && (
-        <>
-          <div className="grid grid-cols-4 items-center gap-3">
-            <Label htmlFor="index">Index</Label>
-            <Select
-              value={form.index ?? ""}
-              onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
-            >
-              <SelectTrigger className="col-span-3" id="index">
-                <SelectValue placeholder="Select Index" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                <SelectItem value="none_selected">None</SelectItem>
-                {INDEX_OPTIONS.map(opt => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-3">
-            <Label htmlFor="treatment">Treatment</Label>
-            <Select
-              value={form.treatment ?? ""}
-              onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
-            >
-              <SelectTrigger className="col-span-3" id="treatment">
-                <SelectValue placeholder="Select Treatment" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-white">
-                <SelectItem value="none_selected">None</SelectItem>
-                {TREATMENT_OPTIONS.map(opt => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </>
-      )}
-
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="company">Company</Label>
-        <Select
-          value={form.company ?? ""}
-          onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
-        >
-          <SelectTrigger className="col-span-3" id="company">
-            <SelectValue placeholder="Select Company" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-white">
-            <SelectItem value="none_selected">None</SelectItem>
-            {COMPANY_OPTIONS.map(opt => (
-              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="gamma">Gamma</Label>
-        <Input
-          id="gamma"
-          className="col-span-3"
-          value={form.gamma ?? ""}
-          onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
-          placeholder="Enter gamma value"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="price">Price</Label>
-        <Input
-          id="price"
-          type="number"
-          className="col-span-3"
-          value={form.price}
-          onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
-          min={0}
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="cost_ttc">Cost TTC</Label>
-        <Input
-          id="cost_ttc"
-          type="number"
-          className="col-span-3"
-          value={form.cost_ttc ?? 0}
-          onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
-          min={0}
-        />
-      </div>
-
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="stock_status">Stock Status</Label>
-        <Select
-          value={form.stock_status}
-          onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
-        >
-          <SelectTrigger className="col-span-3" id="stock_status">
-            <SelectValue placeholder="Select Stock Status" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-white">
-            <SelectItem value="Order">Order</SelectItem>
-            <SelectItem value="inStock">In Stock</SelectItem>
-            <SelectItem value="Fabrication">Fabrication</SelectItem>
-            <SelectItem value="Out Of Stock">Out Of Stock</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {form.stock_status === 'inStock' && (
-        <div className="grid grid-cols-4 items-center gap-3">
-          <Label htmlFor="stock">Stock</Label>
-          <Input
-            id="stock"
-            type="number"
-            className="col-span-3"
-            value={form.stock ?? 0}
-            onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
-            min={0}
+      <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
+        {/* Auto Name Generation */}
+        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+          <Checkbox
+            checked={autoName}
+            onCheckedChange={handleAutoNameToggle}
+            id="auto-name"
+            className="border-gray-400"
           />
+          <Label htmlFor="auto-name" className="cursor-pointer font-medium text-gray-700">
+            {t('generateNameAuto')}
+          </Label>
+          {autoName && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+              {t('auto')}
+            </Badge>
+          )}
         </div>
-      )}
 
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="image">Image</Label>
-        <input
-          id="image"
-          type="file"
-          accept="image/*"
-          className="col-span-3"
-          onChange={e => {
-            if (e.target.files && e.target.files[0]) {
-              setImageFile(e.target.files[0]);
-            }
-          }}
-        />
-        {form.image && typeof form.image === "string" && (
-          <img src={form.image} alt="product preview" className="w-12 h-12 object-cover border ml-2" />
-        )}
-      </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Product Classification */}
+          <div className="space-y-4">
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <Tag className="h-4 w-4" />
+                  {t('productClassification') || 'Product Classification'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('category')}
+                  </Label>
+                  <Select
+                    value={form.category ?? ""}
+                    onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectCategory')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none_selected">{t('none')}</SelectItem>
+                      {CATEGORY_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {t(opt.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      <div className="grid grid-cols-4 items-center gap-3">
-        <Label htmlFor="name">Product Name</Label>
-        <Input
-          id="name"
-          className="col-span-3"
-          value={form.name}
-          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          disabled={autoName}
-          required
-        />
-      </div>
+                {/* Company */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('company')}
+                  </Label>
+                  <Select
+                    value={form.company ?? ""}
+                    onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectCompany')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none_selected">{t('none')}</SelectItem>
+                      {allCompanies.map(opt => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      <DialogFooter>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={onCancel}
-          disabled={disabled || uploading}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-optics-600 hover:bg-optics-700" disabled={disabled || uploading}>
-          {uploading ? "Uploading..." : "Save"}
-        </Button>
-      </DialogFooter>
-    </form>
+                {/* Gamma */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('gamma')}
+                  </Label>
+                  <Input
+                    value={form.gamma ?? ""}
+                    onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
+                    placeholder={t('enterGamma')}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+
+
+            {/* Lens Specifications - Only for lenses */}
+            {showIndexTreatment && (
+              <Card className="border-gray-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                    <Eye className="h-4 w-4" />
+                    {t('lensSpecifications') || 'Lens Specifications'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('index')}
+                    </Label>
+                    <Select
+                      value={form.index ?? ""}
+                      onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectIndex')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {INDEX_OPTIONS.map(opt => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('treatment')}
+                    </Label>
+                    <Select
+                      value={form.treatment ?? ""}
+                      onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectTreatment')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {TREATMENT_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column - Pricing & Details */}
+          <div className="space-y-4">
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <DollarSign className="h-4 w-4" />
+                  {t('pricingFinancial') || 'Pricing & Financial'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('price')} (DH)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={form.price}
+                    onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
+                    min={0}
+                    required
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('costTTC')} (DH)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={form.cost_ttc ?? 0}
+                    onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
+                    min={0}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {/* Profit Margin Display */}
+                {form.price > 0 && (form.cost_ttc ?? 0) > 0 && (
+                  <div className="p-3 bg-gray-50 rounded border">
+                    <div className="flex justify-between text-sm">
+                      <span>{t('profitMargin') || 'Profit Margin'}:</span>
+                      <span className="font-semibold">
+                        {(((form.price - (form.cost_ttc ?? 0)) / form.price) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Save Button positioned between cards */}
+            <div className="relative flex justify-center -my-2">
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
+                <Button
+                  type="submit"
+                  form="product-form"
+                  disabled={disabled || uploading}
+                  className="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  size="sm"
+                >
+                  <Save className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Product Name */}
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
+                  <Package className="h-4 w-4" />
+                  {t('productDetails') || 'Product Details'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('productName')}
+                  </Label>
+                  <Input
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    disabled={autoName}
+                    required
+                    placeholder={autoName ? t('autoGenerated') || 'Auto-generated' : t('enterProductName') || 'Enter product name'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('stockStatus')}
+                  </Label>
+                  <Select
+                    value={form.stock_status}
+                    onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectStockStatus')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Order">{t('order')}</SelectItem>
+                      <SelectItem value="inStock">{t('inStock')}</SelectItem>
+                      <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                      <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {form.stock_status === 'inStock' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('stock')} {t('quantity') || 'Quantity'}
+                    </Label>
+                    <Input
+                      type="number"
+                      value={form.stock ?? 0}
+                      onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
+                      min={0}
+                      placeholder="0"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    {t('image')}
+                  </Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setImageFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  {form.image && typeof form.image === "string" && (
+                    <img 
+                      src={form.image} 
+                      alt="product preview" 
+                      className="w-24 h-24 object-cover rounded border" 
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+
+      </form>
+    </DialogContent>
   );
 };
 

@@ -2,7 +2,7 @@
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const INDEX_OPTIONS = ["1.56", "1.6", "1.67", "1.74"];
+export const INDEX_OPTIONS = ["1.50", "1.56", "1.59", "1.6", "1.67", "1.74"];
 
 interface Props {
   value: string | null | undefined;

@@ -1,0 +1,48 @@
+chunk-W6L2VRDA.js?v=9ddd2bc6:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+Auth.tsx:62 
+            
+            
+           POST https://vbcdgubnvbilavetsjlr.supabase.co/auth/v1/token?grant_type=password 500 (Internal Server Error)
+(anonymous) @ @supabase_supabase-js.js?v=9ddd2bc6:4309
+_handleRequest2 @ @supabase_supabase-js.js?v=9ddd2bc6:4558
+_request @ @supabase_supabase-js.js?v=9ddd2bc6:4548
+signInWithPassword @ @supabase_supabase-js.js?v=9ddd2bc6:5301
+handleLogin @ Auth.tsx:62
+callCallback2 @ chunk-W6L2VRDA.js?v=9ddd2bc6:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=9ddd2bc6:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=9ddd2bc6:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-W6L2VRDA.js?v=9ddd2bc6:3736
+executeDispatch @ chunk-W6L2VRDA.js?v=9ddd2bc6:7014
+processDispatchQueueItemsInOrder @ chunk-W6L2VRDA.js?v=9ddd2bc6:7034
+processDispatchQueue @ chunk-W6L2VRDA.js?v=9ddd2bc6:7043
+dispatchEventsForPlugins @ chunk-W6L2VRDA.js?v=9ddd2bc6:7051
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:7174
+batchedUpdates$1 @ chunk-W6L2VRDA.js?v=9ddd2bc6:18913
+batchedUpdates @ chunk-W6L2VRDA.js?v=9ddd2bc6:3579
+dispatchEventForPluginEventSystem @ chunk-W6L2VRDA.js?v=9ddd2bc6:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-W6L2VRDA.js?v=9ddd2bc6:5478
+dispatchEvent @ chunk-W6L2VRDA.js?v=9ddd2bc6:5472
+dispatchDiscreteEvent @ chunk-W6L2VRDA.js?v=9ddd2bc6:5449
+Auth.tsx:76 Login error: AuthApiError: Database error querying schema
+    at handleError2 (@supabase_supabase-js.js?v=9ddd2bc6:4523:9)
+    at async _handleRequest2 (@supabase_supabase-js.js?v=9ddd2bc6:4564:5)
+    at async _request (@supabase_supabase-js.js?v=9ddd2bc6:4548:16)
+    at async SupabaseAuthClient.signInWithPassword (@supabase_supabase-js.js?v=9ddd2bc6:5301:15)
+    at async handleLogin (Auth.tsx:62:25)
+handleLogin @ Auth.tsx:76
+await in handleLogin
+callCallback2 @ chunk-W6L2VRDA.js?v=9ddd2bc6:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=9ddd2bc6:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=9ddd2bc6:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-W6L2VRDA.js?v=9ddd2bc6:3736
+executeDispatch @ chunk-W6L2VRDA.js?v=9ddd2bc6:7014
+processDispatchQueueItemsInOrder @ chunk-W6L2VRDA.js?v=9ddd2bc6:7034
+processDispatchQueue @ chunk-W6L2VRDA.js?v=9ddd2bc6:7043
+dispatchEventsForPlugins @ chunk-W6L2VRDA.js?v=9ddd2bc6:7051
+(anonymous) @ chunk-W6L2VRDA.js?v=9ddd2bc6:7174
+batchedUpdates$1 @ chunk-W6L2VRDA.js?v=9ddd2bc6:18913
+batchedUpdates @ chunk-W6L2VRDA.js?v=9ddd2bc6:3579
+dispatchEventForPluginEventSystem @ chunk-W6L2VRDA.js?v=9ddd2bc6:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-W6L2VRDA.js?v=9ddd2bc6:5478
+dispatchEvent @ chunk-W6L2VRDA.js?v=9ddd2bc6:5472
+dispatchDiscreteEvent @ chunk-W6L2VRDA.js?v=9ddd2bc6:5449

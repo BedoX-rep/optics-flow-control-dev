@@ -2,13 +2,14 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Check, Phone, CreditCard, RefreshCw, Copy } from 'lucide-react';
+import { Calendar, Check, Phone, CreditCard, Copy } from 'lucide-react';
 import BankTransferDialog from '@/components/BankTransferDialog';
-import { Switch } from "@/components/ui/switch";
+import ContactSubscriptionDialog from '@/components/ContactSubscriptionDialog';
 import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import SubscriptionBadge from '@/components/SubscriptionBadge';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 
@@ -37,6 +38,7 @@ const SUBSCRIPTION_PRICES = {
 const Subscriptions = () => {
   const { user, subscription: userSubscription } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const { data: currentSubscription, isLoading } = useQuery({
     queryKey: ['subscriptions', user?.id],
@@ -71,8 +73,8 @@ const Subscriptions = () => {
 
   const contactAdmin = () => {
     toast({
-      title: "Contact Request Sent",
-      description: "An administrator will contact you shortly about your subscription.",
+      title: t('contactRequestSent'),
+      description: t('adminWillContact'),
     });
   };
 
@@ -107,8 +109,8 @@ const Subscriptions = () => {
       if (error) throw error;
 
       toast({
-        title: "Subscription Updated",
-        description: `You are now subscribed to the ${type} plan.`,
+        title: t('subscriptionUpdated'),
+        description: `${t('nowSubscribedTo')} ${type} ${t('plan')}`,
       });
 
       const { data, error: fetchError } = await supabase
@@ -124,34 +126,18 @@ const Subscriptions = () => {
     } catch (error) {
       console.error('Error updating subscription:', error);
       toast({
-        title: "Error",
-        description: "Failed to update subscription. Please try again.",
+        title: t('error'),
+        description: t('failedToUpdateSubscription'),
         variant: "destructive",
       });
     }
   };
 
 
-const AutoRenewalToggle = ({ isRecurring, onToggle }: { isRecurring: boolean; onToggle: () => void }) => (
-  <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur rounded-lg shadow-sm mb-6">
-    <div className="flex items-center space-x-3">
-      <div className={`p-2 rounded-full ${isRecurring ? 'bg-teal-100' : 'bg-gray-100'}`}>
-        <RefreshCw className={`h-5 w-5 ${isRecurring ? 'text-teal-600' : 'text-gray-500'}`} />
-      </div>
-      <div>
-        <h3 className="font-medium">Auto-Renewal</h3>
-        <p className="text-sm text-gray-500">{isRecurring ? 'Your subscription will renew automatically' : 'Manual renewal required'}</p>
-      </div>
-    </div>
-    <Switch
-      checked={isRecurring}
-      onCheckedChange={onToggle}
-      className={`${isRecurring ? 'bg-teal-600' : 'bg-gray-200'}`}
-    />
-  </div>
-);
+
 
 const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
+const [contactDialogOpen, setContactDialogOpen] = React.useState(false);
 
 const renderSubscriptionPlans = () => {
   return (
@@ -161,15 +147,12 @@ const renderSubscriptionPlans = () => {
         onClose={() => setBankTransferDialogOpen(false)}
       />
       
-      {currentSubscription && (
-        <AutoRenewalToggle 
-          isRecurring={currentSubscription.is_recurring || false}
-          onToggle={() => updateSubscription(
-            currentSubscription.subscription_type as any,
-            !currentSubscription.is_recurring
-          )}
-        />
-      )}
+      <ContactSubscriptionDialog
+        isOpen={contactDialogOpen}
+        onClose={() => setContactDialogOpen(false)}
+      />
+      
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {['Monthly', 'Quarterly', 'Lifetime'].map((type) => (
           <motion.div
@@ -184,11 +167,11 @@ const renderSubscriptionPlans = () => {
                 'hover:shadow-lg hover:border-teal-300'
               }
             `}>
-              {type === 'Quarterly' && (
-                <div className="absolute -right-12 top-6 rotate-45 bg-teal-500 text-white px-12 py-1 text-sm">
-                  Popular
-                </div>
-              )}
+              
+              {/* Limited Offer Badge */}
+              <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
+                {t('limitedOffer')}
+              </div>
               <CardHeader className={`
                 ${type === 'Quarterly' ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
                 ${currentSubscription?.subscription_type === type ? 'bg-teal-50' : ''}
@@ -196,9 +179,15 @@ const renderSubscriptionPlans = () => {
               `}>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle className="text-2xl font-bold text-gray-800">{type}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-gray-800">
+                      {type === 'Monthly' ? t('monthly') : 
+                       type === 'Quarterly' ? t('quarterly') : 
+                       type === 'Lifetime' ? t('lifetime') : type}
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {type === 'Lifetime' ? 'One-time payment' : `Billed ${type.toLowerCase()}`}
+                      {type === 'Lifetime' ? t('oneTimePayment') : 
+                       type === 'Monthly' ? t('billedMonthly') : 
+                       type === 'Quarterly' ? t('billedQuarterly') : `Billed ${type.toLowerCase()}`}
                     </p>
                   </div>
                 </div>
@@ -214,14 +203,14 @@ const renderSubscriptionPlans = () => {
               <CardContent className="pt-6">
                 <ul className="space-y-3">
                   {[
-                    'Client Management System',
-                    'Receipt Generation',
-                    'Product Inventory',
-                    'Sales Analytics',
-                    'Prescription Management',
-                    type === 'Quarterly' && 'Priority support',
-                    type === 'Lifetime' && 'Lifetime updates',
-                    type === 'Lifetime' && 'No recurring payments'
+                    t('clientManagementSystem'),
+                    t('receiptGeneration'),
+                    t('productInventory'),
+                    t('salesAnalytics'),
+                    t('prescriptionManagement'),
+                    type === 'Quarterly' && t('prioritySupport'),
+                    type === 'Lifetime' && t('lifetimeUpdates'),
+                    type === 'Lifetime' && t('noRecurringPayments')
                   ].filter(Boolean).map((feature, index) => (
                     <li key={index} className="flex items-center gap-2 text-sm">
                       <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
@@ -234,16 +223,16 @@ const renderSubscriptionPlans = () => {
               </CardContent>
               <CardFooter className="pt-6 flex flex-col gap-3">
                 <Button 
-                  onClick={() => setBankTransferDialogOpen(true)}
+                  onClick={() => setContactDialogOpen(true)}
                   variant="outline"
                   className="w-full flex items-center justify-center gap-2 border-teal-200 hover:bg-teal-50 h-11"
                 >
                   <Phone className="h-4 w-4" />
-                  Pay via Bank Transfer
+                  {t('payViaBankTransfer')}
                 </Button>
 
                 <Button 
-                  onClick={() => updateSubscription(type as any, type !== 'Lifetime')}
+                  onClick={() => setContactDialogOpen(true)}
                   disabled={currentSubscription?.subscription_type === type}
                   className={`
                     w-full h-11 ${type === 'Quarterly' ? 
@@ -253,8 +242,8 @@ const renderSubscriptionPlans = () => {
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
                   {currentSubscription?.subscription_type === type ? 
-                    'Current Plan' : 
-                    'Pay with Card/PayPal'}
+                    t('currentPlan') : 
+                    t('payWithCardPayPal')}
                 </Button>
               </CardFooter>
             </Card>
@@ -274,13 +263,13 @@ const renderSubscriptionPlans = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Current Plan</p>
+                    <p className="text-sm text-gray-500">{t('currentPlan')}</p>
                     <h3 className="text-xl font-bold mt-1">{currentSubscription.subscription_type}</h3>
                     <p className="text-sm mt-1">
                       {currentSubscription.price || SUBSCRIPTION_PRICES[currentSubscription.subscription_type]} DH
                       {currentSubscription.is_recurring ? 
                         ` / ${currentSubscription.subscription_type.toLowerCase()}` : 
-                        ' (one-time)'}
+                        ` (${t('oneTimePayment')})`}
                     </p>
                   </div>
                   <SubscriptionBadge status={currentSubscription.subscription_status} />
@@ -292,11 +281,11 @@ const renderSubscriptionPlans = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Start Date</p>
+                    <p className="text-sm text-gray-500">{t('startDate')}</p>
                     <h3 className="text-xl font-bold mt-1">
                       {currentSubscription.start_date ? 
                         new Date(currentSubscription.start_date).toLocaleDateString() : 
-                        'Not Started'}
+                        t('notStarted')}
                     </h3>
                   </div>
                   <div className="p-2 rounded-full bg-teal-100 text-teal-600">
@@ -310,13 +299,13 @@ const renderSubscriptionPlans = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Expiration Date</p>
+                    <p className="text-sm text-gray-500">{t('expirationDate')}</p>
                     <h3 className="text-xl font-bold mt-1">
                       {currentSubscription.subscription_type === 'Lifetime' ? 
-                        'Never' : 
+                        t('never') : 
                         currentSubscription.end_date ? 
                           new Date(currentSubscription.end_date).toLocaleDateString() : 
-                          'Not Set'}
+                          t('notSet')}
                     </h3>
                   </div>
                   <div className="p-2 rounded-full bg-teal-100 text-teal-600">
