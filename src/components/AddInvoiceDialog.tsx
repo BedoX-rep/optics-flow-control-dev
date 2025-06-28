@@ -973,27 +973,27 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-6">
-            <div className="grid grid-cols-2 gap-6 h-full">
+          <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-4">
+            <div className="grid grid-cols-2 gap-4 h-full">
               {/* Client Information */}
               <Card className="border-teal-200 shadow-sm">
-                <CardHeader className="bg-teal-50 border-b border-teal-200">
-                  <CardTitle className="text-teal-800 flex items-center gap-2">
-                    <User className="h-5 w-5" />
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <User className="h-4 w-4" />
                     {t('clientInformation') || 'Client Information'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-4 space-y-3">
                   {/* Client Selection */}
-                  <div className="space-y-2">
-                    <Label className="text-teal-700 font-medium">{t('selectClient') || 'Select Client'}</Label>
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('selectClient') || 'Select Client'}</Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-400" />
                       <Input
                         placeholder={t('searchClients') || 'Search clients...'}
                         value={clientSearchTerm}
                         onChange={(e) => setClientSearchTerm(e.target.value)}
-                        className="pl-9 mb-2 border-teal-200 focus:border-teal-500"
+                        className="pl-9 mb-1 border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                     <Select onValueChange={handleClientSelect}>
@@ -1018,10 +1018,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   </div>
 
                   {/* Receipt Selection */}
-                  <div className="space-y-2">
-                    <Label className="text-teal-700 font-medium">{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
                     <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
-                      <SelectTrigger className="border-teal-200 focus:border-teal-500">
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
                         <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
                       </SelectTrigger>
                       <SelectContent>
@@ -1042,88 +1042,88 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   </div>
 
                   {/* Invoice Details */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('invoiceNumber') || 'Invoice Number'}</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('invoiceNumber') || 'Invoice Number'}</Label>
                       <Input
                         value={invoiceData.invoice_number}
                         onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
                         placeholder={t('invoiceNumber') || 'Invoice Number'}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('status') || 'Status'} (Auto-calculated)</Label>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('status') || 'Status'} (Auto-calculated)</Label>
                       <Input
                         value={getInvoiceStatus()}
                         disabled
-                        className="bg-teal-50 border-teal-200"
+                        className="bg-teal-50 border-teal-200 h-9"
                       />
                     </div>
                   </div>
 
                   {/* Client Information */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('clientName') || 'Client Name'} *</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('clientName') || 'Client Name'} *</Label>
                       <Input
                         value={invoiceData.client_name}
                         onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
                         placeholder={t('clientName') || 'Client Name'}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('clientPhone') || 'Client Phone'}</Label>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('clientPhone') || 'Client Phone'}</Label>
                       <Input
                         value={invoiceData.client_phone}
                         onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
                         placeholder={t('clientPhone') || 'Client Phone'}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-teal-700 font-medium">{t('clientAssurance') || 'Client Assurance'}</Label>
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('clientAssurance') || 'Client Assurance'}</Label>
                     <Input
                       value={invoiceData.client_assurance}
                       onChange={(e) => setInvoiceData(prev => ({ ...prev, client_assurance: e.target.value }))}
                       placeholder={t('clientAssurance') || 'Client Assurance'}
-                      className="border-teal-200 focus:border-teal-500"
+                      className="border-teal-200 focus:border-teal-500 h-9"
                     />
                   </div>
 
                   {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('invoiceDate') || 'Invoice Date'}</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('invoiceDate') || 'Invoice Date'}</Label>
                       <Input
                         type="date"
                         value={invoiceData.invoice_date}
                         onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_date: e.target.value }))}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-teal-700 font-medium">{t('dueDate') || 'Due Date'}</Label>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('dueDate') || 'Due Date'}</Label>
                       <Input
                         type="date"
                         value={invoiceData.due_date}
                         onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                   </div>
 
-                  {/* Notes */}
-                  <div className="space-y-2">
-                    <Label className="text-teal-700 font-medium">{t('notes') || 'Notes'}</Label>
+                  {/* Notes - can scroll to see */}
+                  <div className="space-y-1 mt-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('notes') || 'Notes'}</Label>
                     <Textarea
                       value={invoiceData.notes}
                       onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
                       placeholder={t('notes') || 'Notes'}
-                      rows={3}
+                      rows={2}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -1132,40 +1132,40 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
               {/* Prescription */}
               <Card className="border-teal-200 shadow-sm">
-                <CardHeader className="bg-teal-50 border-b border-teal-200">
-                  <CardTitle className="text-teal-800 flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Eye className="h-4 w-4" />
                     {t('prescription') || 'Prescription'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-semibold text-lg text-teal-700">{t('rightEye') || 'Right Eye'}</h4>
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">SPH</Label>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-base text-teal-700">{t('rightEye') || 'Right Eye'}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">SPH</Label>
                           <Input
                             type="number"step="0.25"
                             value={prescriptionData.right_eye_sph}
                             onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
                             placeholder="0.00"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">CYL</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">CYL</Label>
                           <Input
                             type="number"
                             step="0.25"
                             value={prescriptionData.right_eye_cyl}
                             onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
                             placeholder="0.00"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">AXE</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">AXE</Label>
                           <Input
                             type="number"
                             value={prescriptionData.right_eye_axe}
@@ -1173,38 +1173,38 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                             placeholder="0"
                             min="0"
                             max="180"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <h4 className="font-semibold text-lg text-teal-700">{t('leftEye') || 'Left Eye'}</h4>
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">SPH</Label>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-base text-teal-700">{t('leftEye') || 'Left Eye'}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">SPH</Label>
                           <Input
                             type="number"
                             step="0.25"
                             value={prescriptionData.left_eye_sph}
                             onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
                             placeholder="0.00"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">CYL</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">CYL</Label>
                           <Input
                             type="number"
                             step="0.25"
                             value={prescriptionData.left_eye_cyl}
                             onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
                             placeholder="0.00"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-teal-700 font-medium">AXE</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">AXE</Label>
                           <Input
                             type="number"
                             value={prescriptionData.left_eye_axe}
@@ -1212,21 +1212,21 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                             placeholder="0"
                             min="0"
                             max="180"
-                            className="border-teal-200 focus:border-teal-500"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="mt-6">
-                    <Label className="text-teal-700 font-medium">{t('add') || 'ADD'}</Label>
+                  <div className="mt-4">
+                    <Label className="text-teal-700 font-medium text-sm">{t('add') || 'ADD'}</Label>
                     <Input
                       type="number"
                       step="0.25"
                       value={prescriptionData.add_value}
                       onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
                       placeholder="0.00"
-                      className="mt-2 w-1/3 border-teal-200 focus:border-teal-500"
+                      className="mt-1 w-1/3 border-teal-200 focus:border-teal-500 h-8"
                     />
                   </div>
                 </CardContent>
