@@ -159,7 +159,7 @@ const InvoiceCard = ({
                 </div>
               </div>
             </div>
-
+            
             {/* Date Information */}
             <div className="flex items-center gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-1">
@@ -201,7 +201,7 @@ const InvoiceCard = ({
                   {invoice.tax_amount?.toFixed(2) || '0.00'} DH
                 </p>
               </div>
-
+              
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200/50">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -497,8 +497,7 @@ const Invoices = () => {
               { value: 'today', label: t('today') || 'Today' },
               { value: 'week', label: t('week') || 'Week' },
               { value: 'month', label: t('month') || 'Month' },
-              { value: 'year', label: t('year') || 'Year' },
-              { value: 'custom', label: t('custom') || 'Custom' }
+              { value: 'year', label: t('year') || 'Year' }
             ].map((option) => (
               <Button
                 key={option.value}
