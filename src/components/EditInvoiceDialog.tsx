@@ -13,7 +13,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { useQueryClient } from '@tanstack/react-query';
 import { Invoice, InvoiceItem } from '@/integrations/supabase/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Plus, AlertTriangle, DollarSign, Calculator } from 'lucide-react';
+import { Trash2, Plus, AlertTriangle, DollarSign, Calculator, Save } from 'lucide-react';
 
 interface EditInvoiceDialogProps {
   isOpen: boolean;
@@ -444,8 +444,18 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-2xl font-bold">{t('editInvoice') || 'Edit Invoice'}</DialogTitle>
+          <Button 
+            onClick={handleSave} 
+            disabled={isLoading || isAssuranceMismatch}
+            className={`w-12 h-12 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 ${
+              isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            }`}
+            size="sm"
+          >
+            <Save className="h-5 w-5" />
+          </Button>
         </DialogHeader>
 
         {/* Assurance Mismatch Alert */}
@@ -840,19 +850,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
           </Card>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
-          <Button variant="outline" onClick={onClose}>
-            {t('cancel') || 'Cancel'}
-          </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={isLoading || isAssuranceMismatch}
-            className={isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : ''}
-          >
-            {isLoading ? (t('saving') || 'Saving...') : (t('updateInvoice') || 'Update Invoice')}
-          </Button>
-        </div>
+        
       </DialogContent>
     </Dialog>
   );
