@@ -490,7 +490,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           products_cost: totalProductsCost,
           cost_ttc: costTtc,
           total: total,
-          paid_at_delivery_cost: paidAtDeliveryCost
+          paid_at_delivery_cost: paidAtDeliveryCost,
+          total_discount: formData.total_discount || 0,
+          tax: formData.tax || 0
         })
         .eq('id', receipt.id);
 
