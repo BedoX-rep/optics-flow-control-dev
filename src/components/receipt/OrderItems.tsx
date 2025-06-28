@@ -128,7 +128,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
       });
 
       setIsProductFormOpen(false);
-      
+
       // Refresh the products list
       if (refreshProducts) {
         await refreshProducts();
