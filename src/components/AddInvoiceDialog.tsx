@@ -148,7 +148,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Filter clients based on search term
   const filteredClients = useMemo(() => {
     if (!clientSearchTerm.trim()) return allClients;
-    
+
     const searchLower = clientSearchTerm.toLowerCase();
     return allClients.filter(client => 
       client.name?.toLowerCase().includes(searchLower) ||
@@ -159,7 +159,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Filter receipts based on client search term
   const receipts = useMemo(() => {
     if (!clientSearchTerm.trim()) return allReceipts;
-    
+
     const searchLower = clientSearchTerm.toLowerCase();
     return allReceipts.filter(receipt => 
       receipt.client_name?.toLowerCase().includes(searchLower) ||
@@ -1122,7 +1122,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h4 className="font-semibold text-lg">{t('rightEye') || 'Right Eye'}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -1158,7 +1158,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h4 className="font-semibold text-lg">{t('leftEye') || 'Left Eye'}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">

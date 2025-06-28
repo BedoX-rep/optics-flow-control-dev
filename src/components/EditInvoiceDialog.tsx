@@ -568,7 +568,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h4 className="font-semibold text-lg">{t('rightEye') || 'Right Eye'}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -604,7 +604,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <h4 className="font-semibold text-lg">{t('leftEye') || 'Left Eye'}</h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
