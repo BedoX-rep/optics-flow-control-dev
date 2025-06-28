@@ -53,8 +53,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   });
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [printOptions, setPrintOptions] = useState({
-    showAdvancePayment: true,
-    showBalance: true
+    showAdvancePayment: false,
+    showBalance: false
   });
   
   // Category options for items

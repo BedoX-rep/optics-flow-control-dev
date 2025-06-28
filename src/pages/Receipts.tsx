@@ -220,10 +220,11 @@ const ReceiptCard = ({
 
                 {/* Note buttons positioned below edit and delete buttons */}
                 <div className="flex gap-1 justify-end">
-                  <div className="w-8"></div>
-                  <div className="w-8"></div>
-                  <div className="w-8"></div>
-                  <div className="w-8"></div>
+                  {/* Spacers to align with the edit and delete buttons above */}
+                  <div className="w-8"></div> {/* Phone button spacer */}
+                  {receipt.balance > 0 && <div className="w-8"></div>} {/* Paid button spacer (conditional) */}
+                  <div className="w-8"></div> {/* Delivered button spacer */}
+                  <div className="w-8"></div> {/* View button spacer */}
                   <Button
                     variant="ghost"
                     size="icon"
