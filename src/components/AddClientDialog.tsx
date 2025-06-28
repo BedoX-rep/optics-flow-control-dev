@@ -203,6 +203,17 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
             </div>
 
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <Button 
+                type="submit"
+                size="icon"
+                className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+            </div>
+
             {/* Eye Prescription */}
             <div className="bg-white/70 backdrop-blur-sm rounded-lg p-6 border border-teal-100">
               <div className="flex items-center gap-2 mb-4">
@@ -403,24 +414,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-teal-100">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleClose}
-                className="border-teal-300 text-teal-700 hover:bg-teal-50 hover:border-teal-400"
-              >
-                {t('cancel')}
-              </Button>
-              <Button 
-                type="submit"
-                size="icon"
-                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-            </div>
+            
           </form>
         </Form>
       </DialogContent>
