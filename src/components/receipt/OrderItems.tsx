@@ -547,7 +547,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
 
                     {/* Price and Cost Grid */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
+                      <div className="flex-1">
                         <Label className="text-xs">{t('unitPrice')}</Label>
                         <Input
                           type="number"
@@ -558,7 +558,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                           className="mt-1"
                         />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <Label className="text-xs">{t('unitCost')}</Label>
                         <Input
                           type="number"
@@ -570,7 +570,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                         />
                       </div>
                     </div>
-
                     {/* Total */}
                     <div>
                       <Label className="text-xs">{t('total')}</Label>
@@ -583,7 +582,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   {/* Desktop Layout */}
                   <div className="hidden md:grid md:grid-cols-12 gap-4 items-start">
                     {item.customName !== undefined ? (
-                      <div className="col-span-5">
+                      <div className="col-span-6">
                         <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
                         <Input
                           id={`custom-${item.id}`}
@@ -593,7 +592,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="col-span-5">
+                      <div className="col-span-7">
                         <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
                         <div className="flex gap-2 mt-1">
                           <Select
@@ -659,7 +658,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <Label className="text-xs">{t('unitPrice')}</Label>
                       <Input
                         type="number"
@@ -671,7 +670,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <Label className="text-xs">{t('unitCost')}</Label>
                       <Input
                         type="number"
