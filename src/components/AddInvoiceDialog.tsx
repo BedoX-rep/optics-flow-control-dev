@@ -1115,21 +1115,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             </CardContent>
           </Card>
 
-          {/* Save Button positioned between sections */}
-          <div className="relative flex justify-end -my-2">
-            <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
-              <Button
-                onClick={handleSave}
-                disabled={isLoading || isAssuranceMismatch}
-                className={`w-14 h-14 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 ${
-                  isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-                }`}
-                size="sm"
-              >
-                <Save className="h-6 w-6" />
-              </Button>
-            </div>
-          </div>
+          
 
           {/* Prescription */}
           <Card>
@@ -1410,7 +1396,18 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           </Card>
         </div>
 
-        
+        {/* Save Button at the end */}
+        <div className="flex justify-end pt-6 border-t mt-6">
+          <Button
+            onClick={handleSave}
+            disabled={isLoading || isAssuranceMismatch}
+            className={`px-8 py-2 ${
+              isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            } text-white`}
+          >
+            {isLoading ? 'Saving...' : t('saveInvoice') || 'Save Invoice'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
