@@ -67,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
@@ -185,6 +186,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const promoteToAdmin = async (accessCode: string) => {
     try {
+      // Anti-spam protection: 10 seconds cooldown
+      const now = Date.now();
+      const timeSinceLastAttempt = now - lastAccessCodeAttempt;
+      const cooldownPeriod = 10 * 1000; // 10 seconds
+
+      if (timeSinceLastAttempt < cooldownPeriod) {
+        const remainingTime = Math.ceil((cooldownPeriod - timeSinceLastAttempt) / 1000);
+        return { 
+          success: false, 
+          message: `Please wait ${remainingTime} seconds before trying again` 
+        };
+      }
+
+      setLastAccessCodeAttempt(now);
+
       const { data, error } = await supabase.rpc('check_access_code', {
         input_access_code: accessCode
       });
