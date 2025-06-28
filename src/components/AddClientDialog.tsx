@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useQueryClient } from '@tanstack/react-query'
 import { useLanguage } from './LanguageProvider'
+import { User, Eye, Phone, FileText, Shield, X, Save } from 'lucide-react'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -122,186 +123,295 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     }
   }
 
+  const handleClose = () => {
+    form.reset()
+    onClose()
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{t('addClient')}</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[720px] bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 shadow-xl">
+        <DialogHeader className="relative pb-6">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl font-light text-teal-800 flex items-center gap-3">
+              <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center">
+                <User className="h-5 w-5 text-white" />
+              </div>
+              {t('addClient')}
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="h-8 w-8 p-0 text-teal-600 hover:text-teal-800 hover:bg-teal-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="h-px bg-gradient-to-r from-transparent via-teal-300 to-transparent mt-4"></div>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('clientName')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder={t('enterClientName')} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('phoneNumber')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="tel" placeholder={t('enterPhoneNumber')} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="right_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('sph')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('cyl')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="right_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('axe')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Basic Information */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-lg p-6 border border-teal-100">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-4 w-4 text-teal-600" />
+                <h3 className="text-lg font-medium text-teal-800">Basic Information</h3>
               </div>
-
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="left_eye_sph"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('sph')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_cyl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('cyl')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="left_eye_axe"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">{t('axe')}</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="text" className="h-8" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium">{t('clientName')}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder={t('enterClientName')} 
+                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium flex items-center gap-2">
+                        <Phone className="h-3 w-3" />
+                        {t('phoneNumber')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="tel" 
+                          placeholder={t('enterPhoneNumber')} 
+                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="Add"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Add</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" className="h-8" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Eye Prescription */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-lg p-6 border border-teal-100">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="h-4 w-4 text-teal-600" />
+                <h3 className="text-lg font-medium text-teal-800">Eye Prescription</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Right Eye */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-teal-100">
+                    <div className="w-3 h-3 bg-teal-400 rounded-full"></div>
+                    <h4 className="font-medium text-teal-700">{t('rightEyeShort')}</h4>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="right_eye_sph"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('sph')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="right_eye_cyl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('cyl')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="right_eye_axe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('axe')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
 
-            <FormField
-              control={form.control}
-              name="assurance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('assurance')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Left Eye */}
+                <div className="space-y-4 relative">
+                  <div className="flex items-center gap-2 pb-2 border-b border-teal-100">
+                    <div className="w-3 h-3 bg-teal-400 rounded-full"></div>
+                    <h4 className="font-medium text-teal-700">{t('leftEyeShort')}</h4>
+                    <Button 
+                      type="submit"
+                      size="icon"
+                      className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10 absolute"
+                      style={{ right: '-30px' }}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="left_eye_sph"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('sph')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="left_eye_cyl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('cyl')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="left_eye_axe"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-medium text-teal-600">{t('axe')}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="text" 
+                              className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80 text-center" 
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('notes')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => {
-                form.reset()
-                onClose()
-              }}>
-                {t('cancel')}
-              </Button>
-              <Button type="submit">{t('addClient')}</Button>
+              {/* Add Power */}
+              <div className="mt-6 max-w-xs">
+                <FormField
+                  control={form.control}
+                  name="Add"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium">Add Power</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="text" 
+                          className="h-9 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80" 
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
+
+            {/* Additional Information */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-lg p-6 border border-teal-100">
+              <div className="flex items-center gap-2 mb-4">
+                <FileText className="h-4 w-4 text-teal-600" />
+                <h3 className="text-lg font-medium text-teal-800">Additional Information</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="assurance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium flex items-center gap-2">
+                        <Shield className="h-3 w-3" />
+                        {t('assurance')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="text" 
+                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium">{t('notes')}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="text" 
+                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            
           </form>
         </Form>
       </DialogContent>

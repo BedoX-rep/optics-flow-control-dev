@@ -1418,15 +1418,6 @@ const PURCHASE_TYPES = [
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => handleOpenLinkingDialog(purchase)}
-                              className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
-                              title="Link to Receipts"
-                            >
-                              <Link className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
                               onClick={() => handleOpenBalanceHistoryDialog(purchase)}
                               className="h-7 w-7 hover:bg-purple-50 hover:text-purple-600"
                               title="View Balance History"

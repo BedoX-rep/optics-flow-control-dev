@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
@@ -13,7 +14,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Invoice, InvoiceItem } from '@/integrations/supabase/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Plus, AlertTriangle, DollarSign, Calculator, Search } from 'lucide-react';
+import { Trash2, Plus, AlertTriangle, DollarSign, Calculator, Search, Save, Eye, User } from 'lucide-react';
 
 interface AddInvoiceDialogProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const [isLoading, setIsLoading] = useState(false);
   const [showAssuranceAlert, setShowAssuranceAlert] = useState(false);
   const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [originalPrices, setOriginalPrices] = useState<{ [key: number]: number }>({});
 
   // Category options for items
   const CATEGORY_OPTIONS = [
@@ -65,6 +67,29 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     'Contact Lenses',
     'Accessories'
   ];
+
+  // Fetch clients for selection
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients-for-invoice', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching clients:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!user && isOpen,
+  });
 
   // Fetch receipts with full details for data copying
   const { data: allReceipts = [] } = useQuery({
@@ -122,10 +147,21 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     enabled: !!user && isOpen,
   });
 
+  // Filter clients based on search term
+  const filteredClients = useMemo(() => {
+    if (!clientSearchTerm.trim()) return allClients;
+
+    const searchLower = clientSearchTerm.toLowerCase();
+    return allClients.filter(client => 
+      client.name?.toLowerCase().includes(searchLower) ||
+      client.phone?.toLowerCase().includes(searchLower)
+    );
+  }, [allClients, clientSearchTerm]);
+
   // Filter receipts based on client search term
   const receipts = useMemo(() => {
     if (!clientSearchTerm.trim()) return allReceipts;
-    
+
     const searchLower = clientSearchTerm.toLowerCase();
     return allReceipts.filter(receipt => 
       receipt.client_name?.toLowerCase().includes(searchLower) ||
@@ -141,6 +177,48 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       setInvoiceData(prev => ({ ...prev, invoice_number: invoiceNumber }));
     }
   }, [isOpen, invoiceData.invoice_number]);
+
+  // Handle client selection
+  const handleClientSelect = (clientId: string) => {
+    if (clientId === "no-client") {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: '',
+        client_phone: '',
+        client_assurance: ''
+      }));
+      setPrescriptionData({
+        right_eye_sph: '',
+        right_eye_cyl: '',
+        right_eye_axe: '',
+        left_eye_sph: '',
+        left_eye_cyl: '',
+        left_eye_axe: '',
+        add_value: ''
+      });
+      return;
+    }
+
+    const selectedClient = allClients.find(c => c.id === clientId);
+    if (selectedClient) {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: selectedClient.name || '',
+        client_phone: selectedClient.phone || '',
+        client_assurance: selectedClient.assurance || ''
+      }));
+
+      setPrescriptionData({
+        right_eye_sph: selectedClient.right_eye_sph?.toString() || '',
+        right_eye_cyl: selectedClient.right_eye_cyl?.toString() || '',
+        right_eye_axe: selectedClient.right_eye_axe?.toString() || '',
+        left_eye_sph: selectedClient.left_eye_sph?.toString() || '',
+        left_eye_cyl: selectedClient.left_eye_cyl?.toString() || '',
+        left_eye_axe: selectedClient.left_eye_axe?.toString() || '',
+        add_value: selectedClient.Add?.toString() || ''
+      });
+    }
+  };
 
   // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
@@ -173,7 +251,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       const itemsTotal = selectedReceipt.receipt_items?.reduce((sum, item) => 
         sum + ((item.quantity || 1) * (item.price || 0)), 0) || 0;
 
-      // Set assurance total from receipt tax, or use items total if tax is 0
       const assuranceTotal = (selectedReceipt.tax && selectedReceipt.tax > 0) 
         ? selectedReceipt.tax 
         : itemsTotal;
@@ -186,7 +263,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         assurance_total: assuranceTotal
       }));
 
-      // Populate prescription data from the client linked to the receipt
       if (selectedReceipt.clients) {
         setPrescriptionData({
           right_eye_sph: selectedReceipt.clients.right_eye_sph?.toString() || '',
@@ -199,7 +275,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
         });
       }
 
-      // Convert receipt items to invoice items with manual price and quantity
       const items = selectedReceipt.receipt_items?.map(item => ({
         product_name: item.product?.name || item.custom_item_name || 'Unknown Product',
         description: '',
@@ -210,7 +285,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       })) || [];
 
       setInvoiceItems(items);
-      // Reset original prices when receipt selection changes
       setOriginalPrices({});
     }
   };
@@ -225,7 +299,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       total_price: 0,
       item_category: 'Single Vision Lenses'
     }]);
-    // Reset original prices when items change
     setOriginalPrices({});
   };
 
@@ -235,7 +308,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
 
-      // Recalculate total price for quantity and unit_price changes
       if (field === 'quantity' || field === 'unit_price') {
         const quantity = field === 'quantity' ? value : updated[index].quantity || 0;
         const unitPrice = field === 'unit_price' ? value : updated[index].unit_price || 0;
@@ -249,7 +321,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Remove item
   const removeItem = (index: number) => {
     setInvoiceItems(prev => prev.filter((_, i) => i !== index));
-    // Reset original prices when items change
     setOriginalPrices({});
   };
 
@@ -276,9 +347,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   useEffect(() => {
     setShowAssuranceAlert(isAssuranceMismatch && subtotal > 0);
   }, [isAssuranceMismatch, subtotal]);
-
-  // Store original prices for consistent calculations across multiple runs
-  const [originalPrices, setOriginalPrices] = useState<{ [key: number]: number }>({});
 
   // Time-limited smart auto-adjust item prices to match assurance total without decimals
   const adjustItemPrices = () => {
@@ -747,7 +815,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       return;
     }
 
-    // Check if assurance total matches items total
     if (isAssuranceMismatch) {
       toast({
         title: "Error",
@@ -762,7 +829,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     try {
       const finalStatus = getInvoiceStatus();
 
-      // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
@@ -795,7 +861,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
       if (invoiceError) throw invoiceError;
 
-      // Create invoice items
       const itemsToInsert = invoiceItems.map(item => ({
         invoice_id: invoice.id,
         user_id: user.id,
@@ -863,21 +928,25 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{t('addInvoice') || 'Add Invoice'}</DialogTitle>
+      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden">
+        <DialogHeader className="border-b border-teal-100 pb-4 mb-6">
+          <DialogTitle className="text-3xl font-bold text-teal-800 flex items-center gap-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+              <Save className="h-6 w-6 text-teal-600" />
+            </div>
+            {t('addInvoice') || 'Add Invoice'}
+          </DialogTitle>
         </DialogHeader>
 
         {/* Assurance Mismatch Alert */}
         {showAssuranceAlert && (
-          <Alert className="border-orange-200 bg-orange-50">
+          <Alert className="border-orange-200 bg-orange-50 mb-4">
             <AlertTriangle className="h-4 w-4 text-orange-600" />
             <AlertDescription className="text-orange-700">
               <div className="flex items-center justify-between">
                 <div>
                   <strong>Assurance Total Mismatch:</strong> The assurance total ({invoiceData.assurance_total.toFixed(2)} DH) 
-                  doesn't match the items total ({subtotal.toFixed(2)} DH). 
-                  You cannot save the invoice until these amounts match.
+                  doesn't match the items total ({subtotal.toFixed(2)} DH).
                 </div>
                 <Button 
                   onClick={adjustItemPrices}
@@ -892,418 +961,480 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           </Alert>
         )}
 
-        <div className="space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('invoiceAndClientDetails') || 'Détails Facture & Client'}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Receipt Selection */}
-              <div className="space-y-2">
-                <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder={t('searchClients') || 'Search clients...'}
-                    value={clientSearchTerm}
-                    onChange={(e) => setClientSearchTerm(e.target.value)}
-                    className="pl-9 mb-2"
-                  />
-                </div>
-                <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no-receipt">{t('noReceipt') || 'No Receipt'}</SelectItem>
-                    {receipts.length === 0 ? (
-                      <SelectItem value="no-data" disabled>
-                        {clientSearchTerm ? 'No receipts match your search' : 'No receipts available'}
-                      </SelectItem>
-                    ) : (
-                      receipts.map(receipt => (
-                        <SelectItem key={receipt.id} value={receipt.id}>
-                          {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+        <Tabs defaultValue="client-prescription" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 bg-teal-50 border border-teal-200">
+            <TabsTrigger value="client-prescription" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <User className="h-4 w-4 mr-2" />
+              Client & Prescription
+            </TabsTrigger>
+            <TabsTrigger value="items-payment" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Items & Payment
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Invoice Details */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('invoiceNumber') || 'Invoice Number'}</Label>
-                  <Input
-                    value={invoiceData.invoice_number}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
-                    placeholder={t('invoiceNumber') || 'Invoice Number'}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('status') || 'Status'} (Auto-calculated)</Label>
-                  <Input
-                    value={getInvoiceStatus()}
-                    disabled
-                    className="bg-gray-100"
-                  />
-                </div>
-              </div>
-
+          <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-4">
+            <div className="grid grid-cols-2 gap-4 h-full">
               {/* Client Information */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('clientName') || 'Client Name'} *</Label>
-                  <Input
-                    value={invoiceData.client_name}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
-                    placeholder={t('clientName') || 'Client Name'}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('clientPhone') || 'Client Phone'}</Label>
-                  <Input
-                    value={invoiceData.client_phone}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
-                    placeholder={t('clientPhone') || 'Client Phone'}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t('clientAssurance') || 'Client Assurance'}</Label>
-                <Input
-                  value={invoiceData.client_assurance}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, client_assurance: e.target.value }))}
-                  placeholder={t('clientAssurance') || 'Client Assurance'}
-                />
-              </div>
-
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('invoiceDate') || 'Invoice Date'}</Label>
-                  <Input
-                    type="date"
-                    value={invoiceData.invoice_date}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_date: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('dueDate') || 'Due Date'}</Label>
-                  <Input
-                    type="date"
-                    value={invoiceData.due_date}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label>{t('notes') || 'Notes'}</Label>
-                <Textarea
-                  value={invoiceData.notes}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder={t('notes') || 'Notes'}
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Prescription */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('prescription') || 'Prescription'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-lg">{t('rightEye') || 'Right Eye'}</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>SPH</Label>
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <User className="h-4 w-4" />
+                    {t('clientInformation') || 'Client Information'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-3">
+                  {/* Client Selection */}
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('selectClient') || 'Select Client'}</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-400" />
                       <Input
-                        type="number"
-                        step="0.25"
-                        value={prescriptionData.right_eye_sph}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
-                        placeholder="0.00"
+                        placeholder={t('searchClients') || 'Search clients...'}
+                        value={clientSearchTerm}
+                        onChange={(e) => setClientSearchTerm(e.target.value)}
+                        className="pl-9 mb-1 border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>CYL</Label>
+                    <Select onValueChange={handleClientSelect}>
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500">
+                        <SelectValue placeholder={t('selectClient') || 'Select Client'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-client">{t('noClient') || 'No Client'}</SelectItem>
+                        {filteredClients.length === 0 ? (
+                          <SelectItem value="no-data" disabled>
+                            {clientSearchTerm ? 'No clients match your search' : 'No clients available'}
+                          </SelectItem>
+                        ) : (
+                          filteredClients.map(client => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name} - {client.phone || 'No phone'}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Receipt Selection */}
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
+                    <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-receipt">{t('noReceipt') || 'No Receipt'}</SelectItem>
+                        {receipts.length === 0 ? (
+                          <SelectItem value="no-data" disabled>
+                            {clientSearchTerm ? 'No receipts match your search' : 'No receipts available'}
+                          </SelectItem>
+                        ) : (
+                          receipts.map(receipt => (
+                            <SelectItem key={receipt.id} value={receipt.id}>
+                              {receipt.client_name} - {receipt.total?.toFixed(2) || '0.00'} DH - {new Date(receipt.created_at).toLocaleDateString()}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Invoice Details */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('invoiceNumber') || 'Invoice Number'}</Label>
                       <Input
-                        type="number"
-                        step="0.25"
-                        value={prescriptionData.right_eye_cyl}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
-                        placeholder="0.00"
+                        value={invoiceData.invoice_number}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
+                        placeholder={t('invoiceNumber') || 'Invoice Number'}
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>AXE</Label>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('status') || 'Status'} (Auto-calculated)</Label>
                       <Input
-                        type="number"
-                        value={prescriptionData.right_eye_axe}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
-                        placeholder="0"
-                        min="0"
-                        max="180"
+                        value={getInvoiceStatus()}
+                        disabled
+                        className="bg-teal-50 border-teal-200 h-9"
                       />
                     </div>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-lg">{t('leftEye') || 'Left Eye'}</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>SPH</Label>
+
+                  {/* Client Information */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('clientName') || 'Client Name'} *</Label>
                       <Input
-                        type="number"
-                        step="0.25"
-                        value={prescriptionData.left_eye_sph}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
-                        placeholder="0.00"
+                        value={invoiceData.client_name}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
+                        placeholder={t('clientName') || 'Client Name'}
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>CYL</Label>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('clientPhone') || 'Client Phone'}</Label>
                       <Input
-                        type="number"
-                        step="0.25"
-                        value={prescriptionData.left_eye_cyl}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>AXE</Label>
-                      <Input
-                        type="number"
-                        value={prescriptionData.left_eye_axe}
-                        onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
-                        placeholder="0"
-                        min="0"
-                        max="180"
+                        value={invoiceData.client_phone}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
+                        placeholder={t('clientPhone') || 'Client Phone'}
+                        className="border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className="mt-6 w-1/3">
-                <Label>{t('add') || 'ADD'}</Label>
-                <Input
-                  type="number"
-                  step="0.25"
-                  value={prescriptionData.add_value}
-                  onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
-                  placeholder="0.00"
-                />
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Items */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t('items') || 'Items'}</CardTitle>
-              <Button onClick={addItem} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('addItem') || 'Add Item'}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {invoiceItems.map((item, index) => (
-                  <Card key={index} className="border-l-4 border-l-blue-500">
-                    <CardContent className="p-4">
-                      <div className="grid grid-cols-12 gap-3 items-end">
-                        <div className="col-span-3">
-                          <Label className="text-sm">{t('productName') || 'Product Name'}</Label>
+                  <div className="space-y-1">
+                    <Label className="text-teal-700 font-medium text-sm">{t('clientAssurance') || 'Client Assurance'}</Label>
+                    <Input
+                      value={invoiceData.client_assurance}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, client_assurance: e.target.value }))}
+                      placeholder={t('clientAssurance') || 'Client Assurance'}
+                      className="border-teal-200 focus:border-teal-500 h-9"
+                    />
+                  </div>
+
+                  {/* Dates */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('invoiceDate') || 'Invoice Date'}</Label>
+                      <Input
+                        type="date"
+                        value={invoiceData.invoice_date}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_date: e.target.value }))}
+                        className="border-teal-200 focus:border-teal-500 h-9"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-teal-700 font-medium text-sm">{t('dueDate') || 'Due Date'}</Label>
+                      <Input
+                        type="date"
+                        value={invoiceData.due_date}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
+                        className="border-teal-200 focus:border-teal-500 h-9"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Notes - can scroll to see */}
+                  <div className="space-y-1 mt-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('notes') || 'Notes'}</Label>
+                    <Textarea
+                      value={invoiceData.notes}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder={t('notes') || 'Notes'}
+                      rows={2}
+                      className="border-teal-200 focus:border-teal-500"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Prescription */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Eye className="h-4 w-4" />
+                    {t('prescription') || 'Prescription'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-base text-teal-700">{t('rightEye') || 'Right Eye'}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">SPH</Label>
                           <Input
-                            value={item.product_name || ''}
-                            onChange={(e) => updateItem(index, 'product_name', e.target.value)}
-                            placeholder={t('productName') || 'Product Name'}
+                            type="number"step="0.25"
+                            value={prescriptionData.right_eye_sph}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
+                            placeholder="0.00"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="col-span-2">
-                          <Label className="text-sm">{t('category') || 'Category'}</Label>
-                          <Select
-                            value={item.item_category || 'Single Vision Lenses'}
-                            onValueChange={(value) => updateItem(index, 'item_category', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {CATEGORY_OPTIONS.map(category => (
-                                <SelectItem key={category} value={category}>
-                                  {t(category.toLowerCase().replace(/\s+/g, '')) || category}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="col-span-2">
-                          <Label className="text-sm">{t('description') || 'Description'}</Label>
-                          <Input
-                            value={item.description || ''}
-                            onChange={(e) => updateItem(index, 'description', e.target.value)}
-                            placeholder={t('description') || 'Description'}
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label className="text-sm">{t('quantity') || 'Quantity'}</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">CYL</Label>
                           <Input
                             type="number"
-                            value={item.quantity || ''}
-                            onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
-                            min="1"
+                            step="0.25"
+                            value={prescriptionData.right_eye_cyl}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
+                            placeholder="0.00"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
                         </div>
-                        <div className="col-span-2">
-                          <Label className="text-sm">{t('unitPrice') || 'Unit Price'}</Label>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">AXE</Label>
                           <Input
                             type="number"
-                            step="0.01"
-                            value={item.unit_price || ''}
-                            onChange={(e) => updateItem(index, 'unit_price', Number(e.target.value))}
+                            value={prescriptionData.right_eye_axe}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
+                            placeholder="0"
                             min="0"
+                            max="180"
+                            className="border-teal-200 focus:border-teal-500 h-8"
                           />
-                        </div>
-                        <div className="col-span-1">
-                          <Button
-                            onClick={() => removeItem(index)}
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-600 hover:bg-red-100"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                       </div>
-                      <div className="mt-3 text-right">
-                        <span className="text-sm font-medium bg-blue-50 px-3 py-1 rounded">
-                          {t('total') || 'Total'}: {(item.total_price || 0).toFixed(2)} DH
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-base text-teal-700">{t('leftEye') || 'Left Eye'}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">SPH</Label>
+                          <Input
+                            type="number"
+                            step="0.25"
+                            value={prescriptionData.left_eye_sph}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
+                            placeholder="0.00"
+                            className="border-teal-200 focus:border-teal-500 h-8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">CYL</Label>
+                          <Input
+                            type="number"
+                            step="0.25"
+                            value={prescriptionData.left_eye_cyl}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
+                            placeholder="0.00"
+                            className="border-teal-200 focus:border-teal-500 h-8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-teal-700 font-medium text-xs">AXE</Label>
+                          <Input
+                            type="number"
+                            value={prescriptionData.left_eye_axe}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
+                            placeholder="0"
+                            min="0"
+                            max="180"
+                            className="border-teal-200 focus:border-teal-500 h-8"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Label className="text-teal-700 font-medium text-sm">{t('add') || 'ADD'}</Label>
+                    <Input
+                      type="number"
+                      step="0.25"
+                      value={prescriptionData.add_value}
+                      onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
+                      placeholder="0.00"
+                      className="mt-1 w-1/3 border-teal-200 focus:border-teal-500 h-8"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="items-payment" className="flex-1 overflow-auto mt-6">
+            <div className="grid grid-cols-2 gap-6 h-full">
+              {/* Items */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 flex flex-row items-center justify-between">
+                  <CardTitle className="text-teal-800 flex items-center gap-2">
+                    <div className="w-5 h-5 bg-teal-600 rounded"></div>
+                    {t('items') || 'Items'}
+                  </CardTitle>
+                  <Button onClick={addItem} size="sm" className="bg-teal-600 hover:bg-teal-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('addItem') || 'Add Item'}
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {invoiceItems.map((item, index) => (
+                      <Card key={index} className="border-l-4 border-l-teal-500 border-teal-100">
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-teal-700">{t('productName') || 'Product Name'}</Label>
+                                <Input
+                                  value={item.product_name || ''}
+                                  onChange={(e) => updateItem(index, 'product_name', e.target.value)}
+                                  placeholder={t('productName') || 'Product Name'}
+                                  className="border-teal-200 focus:border-teal-500"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-teal-700">{t('category') || 'Category'}</Label>
+                                <Select
+                                  value={item.item_category || 'Single Vision Lenses'}
+                                  onValueChange={(value) => updateItem(index, 'item_category', value)}
+                                >
+                                  <SelectTrigger className="border-teal-200 focus:border-teal-500">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {CATEGORY_OPTIONS.map(category => (
+                                      <SelectItem key={category} value={category}>
+                                        {t(category.toLowerCase().replace(/\s+/g, '')) || category}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-teal-700">{t('description') || 'Description'}</Label>
+                              <Input
+                                value={item.description || ''}
+                                onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                placeholder={t('description') || 'Description'}
+                                className="border-teal-200 focus:border-teal-500"
+                              />
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 items-end">
+                              <div>
+                                <Label className="text-xs text-teal-700">{t('quantity') || 'Quantity'}</Label>
+                                <Input
+                                  type="number"
+                                  value={item.quantity || ''}
+                                  onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
+                                  min="1"
+                                  className="border-teal-200 focus:border-teal-500"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-teal-700">{t('unitPrice') || 'Unit Price'}</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={item.unit_price || ''}
+                                  onChange={(e) => updateItem(index, 'unit_price', Number(e.target.value))}
+                                  min="0"
+                                  className="border-teal-200 focus:border-teal-500"
+                                />
+                              </div>
+                              <Button
+                                onClick={() => removeItem(index)}
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-600 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-sm font-medium bg-teal-50 px-3 py-1 rounded text-teal-700">
+                                {t('total') || 'Total'}: {(item.total_price || 0).toFixed(2)} DH
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    {invoiceItems.length === 0 && (
+                      <div className="text-center py-8 text-teal-500">
+                        <p>{t('noItemsAdded') || 'No items added yet'}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment & Assurance */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200">
+                  <CardTitle className="text-teal-800 flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    {t('paymentAndAssuranceDetails') || 'Payment & Assurance Details'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-lg font-semibold text-teal-700">
+                        Assurance Total *
+                      </Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={invoiceData.assurance_total}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, assurance_total: Number(e.target.value) }))}
+                        min="0"
+                        className={isAssuranceMismatch ? 'border-red-300 bg-red-50' : 'border-teal-300 bg-teal-50'}
+                      />
+                      <p className="text-sm text-teal-600">
+                        Must equal items total: {subtotal.toFixed(2)} DH
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium">{t('advancePayment') || 'Advance Payment'}</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={invoiceData.advance_payment}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, advance_payment: Number(e.target.value) }))}
+                        min="0"
+                        max={total}
+                        className="border-teal-200 focus:border-teal-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium">{t('balance') || 'Balance'} (Auto-calculated)</Label>
+                      <Input
+                        value={invoiceData.balance.toFixed(2)}
+                        disabled
+                        className="bg-teal-50 border-teal-200"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment Summary */}
+                  <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                    <h4 className="font-semibold mb-3 text-teal-800">{t('paymentSummary') || 'Payment Summary'}</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-teal-600">{t('itemsTotal') || 'Items Total'}:</span>
+                        <span className="font-medium text-teal-800">{subtotal.toFixed(2)} DH</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-teal-600">{t('assuranceTotal') || 'Assurance Total'}:</span>
+                        <span className={`font-medium ${isAssuranceMismatch ? 'text-red-600' : 'text-teal-600'}`}>
+                          {invoiceData.assurance_total.toFixed(2)} DH
                         </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <div className="flex justify-between">
+                        <span className="text-teal-600">{t('advancePayment') || 'Advance Payment'}:</span>
+                        <span className="font-medium text-teal-800">{invoiceData.advance_payment.toFixed(2)} DH</span>
+                      </div>
+                      <div className="border-t border-teal-200 pt-2 flex justify-between text-lg">
+                        <span className="font-bold text-teal-700">{t('balanceDue') || 'Balance Due'}:</span>
+                        <span className="font-bold text-teal-800">{invoiceData.balance.toFixed(2)} DH</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
 
-                {invoiceItems.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>{t('noItemsAdded') || 'No items added yet'}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Totals Summary */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-2 text-right">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">{t('subtotal') || 'Subtotal'}:</span>
-                    <span className="font-medium">{subtotal.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between text-lg">
-                    <span className="font-bold">{t('total') || 'Total'}:</span>
-                    <span className="font-bold text-blue-600">{total.toFixed(2)} DH</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment & Assurance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                {t('paymentAndAssuranceDetails') || 'Détails Paiement & Assurance'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-lg font-semibold text-blue-600">
-                    Assurance Total *
-                  </Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={invoiceData.assurance_total}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, assurance_total: Number(e.target.value) }))}
-                    min="0"
-                    className={isAssuranceMismatch ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}
-                  />
-                  <p className="text-sm text-gray-600">
-                    Must equal items total: {subtotal.toFixed(2)} DH
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('advancePayment') || 'Advance Payment'}</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={invoiceData.advance_payment}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, advance_payment: Number(e.target.value) }))}
-                    min="0"
-                    max={total}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('balance') || 'Balance'} (Auto-calculated)</Label>
-                  <Input
-                    value={invoiceData.balance.toFixed(2)}
-                    disabled
-                    className="bg-gray-100"
-                  />
-                </div>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold mb-3">{t('paymentSummary') || 'Résumé de Paiement'}</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>{t('itemsTotal') || 'Total Articles'}:</span>
-                    <span className="font-medium">{subtotal.toFixed(2)} DH</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t('assuranceTotal') || 'Total Assurance'}:</span>
-                    <span className={`font-medium ${isAssuranceMismatch ? 'text-red-600' : 'text-green-600'}`}>
-                      {invoiceData.assurance_total.toFixed(2)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t('advancePayment') || 'Paiement d\'Avance'}:</span>
-                    <span className="font-medium">{invoiceData.advance_payment.toFixed(2)} DH</span>
-                  </div>
-                  <div className="border-t pt-2 flex justify-between text-lg">
-                    <span className="font-bold">{t('balanceDue') || 'Solde Dû'}:</span>
-                    <span className="font-bold text-blue-600">{invoiceData.balance.toFixed(2)} DH</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
-          <Button variant="outline" onClick={onClose}>
-            {t('cancel') || 'Cancel'}
-          </Button>
-          <Button 
-            onClick={handleSave} 
+        {/* Save Button */}
+        <div className="flex justify-end pt-4 border-t border-teal-100 mt-auto">
+          <Button
+            onClick={handleSave}
             disabled={isLoading || isAssuranceMismatch}
-            className={isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : ''}
+            className={`px-8 py-3 text-white font-medium ${
+              isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'
+            }`}
           >
-            {isLoading ? (t('saving') || 'Saving...') : (t('createInvoice') || 'Create Invoice')}
+            {isLoading ? 'Saving...' : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                {t('saveInvoice') || 'Save Invoice'}
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>

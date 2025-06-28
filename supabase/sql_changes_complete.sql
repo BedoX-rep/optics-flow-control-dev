@@ -157,21 +157,22 @@ CREATE TRIGGER handle_new_user_trigger
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Function to check if access code is valid (for session elevation)
+-- Function to check if access code is valid and belongs to current user (for session elevation)
 CREATE OR REPLACE FUNCTION public.check_access_code(input_access_code VARCHAR(5))
 RETURNS TABLE (valid BOOLEAN, message TEXT) AS $$
 DECLARE
-  code_exists BOOLEAN;
+  code_belongs_to_user BOOLEAN;
 BEGIN
-  -- Check if access code exists
+  -- Check if access code exists and belongs to the current authenticated user
   SELECT EXISTS(
-    SELECT 1 FROM subscriptions WHERE access_code = input_access_code
-  ) INTO code_exists;
+    SELECT 1 FROM subscriptions 
+    WHERE access_code = input_access_code AND user_id = auth.uid()
+  ) INTO code_belongs_to_user;
   
-  IF code_exists THEN
-    RETURN QUERY SELECT true, 'Valid access code';
+  IF code_belongs_to_user THEN
+    RETURN QUERY SELECT true, 'Valid access code - session elevated to Admin';
   ELSE
-    RETURN QUERY SELECT false, 'Invalid access code';
+    RETURN QUERY SELECT false, 'Invalid access code or access code does not belong to your account';
   END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

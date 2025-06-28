@@ -1269,6 +1269,10 @@ const productTranslations: Translations = {
     en: 'Invoices',
     fr: 'Factures'
   },
+  saveInvoice: {
+   en: 'Save Invoice',
+    fr: 'Enregistrer Facture'
+  },
   addInvoice: {
     en: 'Add Invoice',
     fr: 'Ajouter Facture'
@@ -3239,6 +3243,102 @@ const purchasesTranslations: Translations = {
     en: 'Enter description',
     fr: 'Entrer la description'
   },
+  selectSupplier: {
+    en: 'Select supplier',
+    fr: 'Sélectionner un fournisseur'
+  },
+  selectCategory: {
+    en: 'Select category',
+    fr: 'Sélectionner une catégorie'
+  },
+  selectPurchaseType: {
+    en: 'Select purchase type',
+    fr: 'Sélectionner le type d\'achat'
+  },
+  selectPaymentMethod: {
+    en: 'Select payment method',
+    fr: 'Sélectionner le mode de paiement'
+  },
+  selectPaymentStatus: {
+    en: 'Select payment status',
+    fr: 'Sélectionner le statut de paiement'
+  },
+  businessInformation: {
+    en: 'Business Information',
+    fr: 'Informations Commerciales'
+  },
+  financialDetails: {
+    en: 'Financial Details',
+    fr: 'Détails Financiers'
+  },
+  paymentDetails: {
+    en: 'Payment Details',
+    fr: 'Détails de Paiement'
+  },
+  taxIndicator: {
+    en: 'Tax Rate',
+    fr: 'Taux de Taxe'
+  },
+  amountHT: {
+    en: 'Amount HT',
+    fr: 'Montant HT'
+  },
+  amountTTC: {
+    en: 'Amount TTC',
+    fr: 'Montant TTC'
+  },
+  advancePayment: {
+    en: 'Advance Payment',
+    fr: 'Paiement d\'Avance'
+  },
+  enterAmount: {
+    en: 'Enter amount',
+    fr: 'Entrer le montant'
+  },
+  summary: {
+    en: 'Summary',
+    fr: 'Résumé'
+  },
+  notes: {
+    en: 'Notes',
+    fr: 'Notes'
+  },
+  paymentMethod: {
+    en: 'Payment Method',
+    fr: 'Mode de Paiement'
+  },
+  paymentStatus: {
+    en: 'Payment Status',
+    fr: 'Statut de Paiement'
+  },
+  cancel: {
+    en: 'Cancel',
+    fr: 'Annuler'
+  },
+  saving: {
+    en: 'Saving...',
+    fr: 'Enregistrement...'
+  },
+  updating: {
+    en: 'Updating...',
+    fr: 'Mise à jour...'
+  },
+  updatePurchase: {
+    en: 'Update Purchase',
+    fr: 'Mettre à Jour l\'Achat'
+  },
+  none: {
+    en: 'None',
+    fr: 'Aucun'
+  },
+  operationalExpenses: {
+    en: 'Operational Expenses',
+    fr: 'Dépenses Opérationnelles'
+  },
+  capitalExpenditure: {
+    en: 'Capital Expenditure',
+    fr: 'Dépenses d\'Investissement'
+  },
   enterAmount: {
     en: 'Enter amount',
     fr: 'Entrer le montant'
@@ -5129,6 +5229,21 @@ const allTranslations: Translations = {
     en: 'Overdue',
     fr: 'En Retard',
     ar: 'متأخر'
+  },
+  selectDateRange: {
+    en: 'Select date range',
+    fr: 'Sélectionner une plage de dates',
+    ar: 'اختر نطاق التاريخ'
+  },
+  last7Days: {
+    en: 'Last 7 days',
+    fr: '7 derniers jours',
+    ar: 'آخر 7 أيام'
+  },
+  last30Days: {
+    en: 'Last 30 days',
+    fr: '30 derniers jours',
+    ar: 'آخر 30 يوماً'
   },
   totalInvoices: {
     en: 'Total Invoices',
