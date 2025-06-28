@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ interface ReceiptEditDialogProps {
   receipt: Receipt | null;
 }
 
-const ProductSelector = () => {
+const ProductSelector = memo(() => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -47,8 +47,13 @@ const ProductSelector = () => {
       if (error) throw error;
       return data || [];
     },
-    enabled: true
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
 
   return (
     <>
@@ -58,7 +63,7 @@ const ProductSelector = () => {
           <Input
             placeholder={t('searchProducts')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-8"
           />
         </div>
@@ -94,7 +99,237 @@ const ProductSelector = () => {
       )}
     </>
   );
-};
+});
+
+ProductSelector.displayName = 'ProductSelector';
+
+const ItemCard = memo(({ item, index, onUpdateItem, onRemoveItem, t }: {
+  item: any;
+  index: number;
+  onUpdateItem: (index: number, updates: any) => void;
+  onRemoveItem: (index: number) => void;
+  t: (key: string) => string;
+}) => {
+  const handleInputChange = useCallback((field: string, value: any) => {
+    onUpdateItem(index, { [field]: value });
+  }, [index, onUpdateItem]);
+
+  const handleProductLink = useCallback(async (productId: string) => {
+    const { data: product } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single();
+
+    if (product) {
+      onUpdateItem(index, { 
+        product_id: productId,
+        product: product,
+        price: product.price,
+        cost: product.cost_ttc || 0,
+        custom_item_name: null
+      });
+    }
+  }, [index, onUpdateItem]);
+
+  const handleUnlink = useCallback(() => {
+    onUpdateItem(index, { 
+      product_id: null, 
+      product: null,
+      custom_item_name: item.product?.name || item.custom_item_name || ''
+    });
+  }, [index, onUpdateItem, item]);
+
+  const handleRemove = useCallback(() => {
+    onRemoveItem(index);
+  }, [index, onRemoveItem]);
+
+  return (
+    <Card className="border-l-4 border-l-teal-500 border-teal-100">
+      <CardContent className="p-4">
+        <div className="space-y-4">
+          {/* Product Linking Section */}
+          <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Package2 className="h-4 w-4 text-teal-600" />
+              <Label className="text-sm font-semibold text-teal-700">{t('productLink') || 'Product Link'}</Label>
+            </div>
+            {item.product_id ? (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 p-2 bg-white rounded border border-teal-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-teal-800">{item.product?.name || t('unknownProduct')}</span>
+                      <div className="text-sm text-teal-600">
+                        {item.product?.category} • {item.product?.company || 'No Company'} • Stock: {item.product?.stock_status}
+                      </div>
+                    </div>
+                    <div className="text-sm text-teal-600 font-medium">
+                      {item.product?.price?.toFixed(2)} DH
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUnlink}
+                  className="border-teal-300 text-teal-700 hover:bg-teal-50"
+                >
+                  {t('unlink') || 'Unlink'}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Select
+                  value=""
+                  onValueChange={handleProductLink}
+                >
+                  <SelectTrigger className="flex-1 border-teal-200 focus:border-teal-500">
+                    <SelectValue placeholder={t('linkToProduct') || 'Link to Product'} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    <ProductSelector />
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          {/* Item Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('itemName') || 'Item Name'}</Label>
+              <Input
+                value={item.custom_item_name || item.product?.name || ''}
+                onChange={(e) => handleInputChange('custom_item_name', e.target.value)}
+                placeholder={t('enterItemName') || 'Enter Item Name'}
+                className="border-teal-200 focus:border-teal-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('quantity') || 'Quantity'}</Label>
+              <Input
+                type="number"
+                min="1"
+                value={item.quantity}
+                onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 1)}
+                className="border-teal-200 focus:border-teal-500"
+              />
+            </div>
+          </div>
+
+          {/* Financial Details */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('price') || 'Price'}</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={item.price}
+                onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                className="border-teal-200 focus:border-teal-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('cost') || 'Cost'} ({t('perUnit') || 'Per Unit'})</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={item.cost}
+                onChange={(e) => handleInputChange('cost', parseFloat(e.target.value) || 0)}
+                className="border-teal-200 focus:border-teal-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('totalCost') || 'Total Cost'}</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={((item.cost || 0) * item.quantity).toFixed(2)}
+                onChange={(e) => {
+                  const totalCost = parseFloat(e.target.value) || 0;
+                  const costPerUnit = item.quantity > 0 ? totalCost / item.quantity : 0;
+                  handleInputChange('cost', costPerUnit);
+                }}
+                className="border-teal-200 focus:border-teal-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-teal-700 font-medium">{t('total') || 'Total'}</Label>
+              <div className="h-10 px-3 py-2 rounded-md bg-teal-50 font-medium flex items-center border border-teal-200 text-teal-800">
+                {(item.price * item.quantity).toFixed(2)} DH
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Options */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Payment Status */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`paid-delivery-${index}`}
+                  checked={item.paid_at_delivery || false}
+                  onChange={(e) => handleInputChange('paid_at_delivery', e.target.checked)}
+                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
+                />
+                <Label htmlFor={`paid-delivery-${index}`} className="text-sm text-teal-700">
+                  {t('paidAtDelivery') || 'Paid at Delivery'}
+                </Label>
+              </div>
+
+              {/* Eye Linking for Lens Products */}
+              {item.product?.category?.includes('Lenses') && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm text-teal-700">{t('eye') || 'Eye'}</Label>
+                  <Select
+                    value={item.linked_eye || 'none'}
+                    onValueChange={(value) => handleInputChange('linked_eye', value === 'none' ? null : value)}
+                  >
+                    <SelectTrigger className="w-20 border-teal-200 focus:border-teal-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t('none') || 'None'}</SelectItem>
+                      <SelectItem value="RE">RE</SelectItem>
+                      <SelectItem value="LE">LE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Profit Display and Remove Button */}
+            <div className="flex items-center gap-4">
+              <div className="text-sm">
+                <span className="text-teal-600">{t('profit') || 'Profit'}: </span>
+                <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRemove}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+ItemCard.displayName = 'ItemCard';
 
 const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps) => {
   const { toast } = useToast();
@@ -121,6 +356,46 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     items: [] as any[],
     total: 0
   });
+
+  // Memoized calculations
+  const itemsTotal = useMemo(() => {
+    const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return subtotal + (formData.tax || 0) - (formData.total_discount || 0);
+  }, [formData.items, formData.tax, formData.total_discount]);
+
+  // Optimized handlers with useCallback
+  const handleUpdateItem = useCallback((index: number, updates: any) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) => i === index ? { ...item, ...updates } : item)
+    }));
+  }, []);
+
+  const handleRemoveItem = useCallback((index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  }, []);
+
+  const handleAddItem = useCallback(() => {
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, {
+        product_id: null,
+        custom_item_name: '',
+        price: 0,
+        cost: 0,
+        quantity: 1,
+        paid_at_delivery: false,
+        linked_eye: null
+      }]
+    }));
+  }, []);
+
+  const handleFormFieldChange = useCallback((field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   useEffect(() => {
     const loadReceiptData = async () => {
@@ -187,10 +462,12 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       }
     };
 
-    loadReceiptData();
-  }, [receipt]);
+    if (isOpen && receipt) {
+      loadReceiptData();
+    }
+  }, [receipt, isOpen]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
       const totalProductsCost = formData.items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
@@ -307,29 +584,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateItemsTotal = () => {
-    const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const total = subtotal + (formData.tax || 0) - (formData.total_discount || 0);
-    return total;
-  };
-
-  const handleAddItem = () => {
-    // Add a new empty item to the form data
-    setFormData({
-      ...formData,
-      items: [...formData.items, {
-        product_id: null,
-        custom_item_name: '',
-        price: 0,
-        cost: 0,
-        quantity: 1,
-        paid_at_delivery: false,
-        linked_eye: null
-      }]
-    });
-  };
+  }, [formData, receipt, t, toast, queryClient, onClose]);
 
   if (!receipt) return null;
 
@@ -377,7 +632,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       <Label className="text-teal-700 font-medium">{t('name') || 'Name'}</Label>
                       <Input
                         value={formData.client_name}
-                        onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                        onChange={(e) => handleFormFieldChange('client_name', e.target.value)}
                         className="border-teal-200 focus:border-teal-500"
                       />
                     </div>
@@ -385,7 +640,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       <Label className="text-teal-700 font-medium">{t('phone') || 'Phone'}</Label>
                       <Input
                         value={formData.client_phone}
-                        onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
+                        onChange={(e) => handleFormFieldChange('client_phone', e.target.value)}
                         className="border-teal-200 focus:border-teal-500"
                       />
                     </div>
@@ -410,7 +665,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">SPH</Label>
                           <Input
                             value={formData.right_eye_sph}
-                            onChange={(e) => setFormData({ ...formData, right_eye_sph: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('right_eye_sph', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -418,7 +673,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">CYL</Label>
                           <Input
                             value={formData.right_eye_cyl}
-                            onChange={(e) => setFormData({ ...formData, right_eye_cyl: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('right_eye_cyl', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -426,7 +681,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">AXE</Label>
                           <Input
                             value={formData.right_eye_axe}
-                            onChange={(e) => setFormData({ ...formData, right_eye_axe: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('right_eye_axe', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -439,7 +694,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">SPH</Label>
                           <Input
                             value={formData.left_eye_sph}
-                            onChange={(e) => setFormData({ ...formData, left_eye_sph: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('left_eye_sph', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -447,7 +702,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">CYL</Label>
                           <Input
                             value={formData.left_eye_cyl}
-                            onChange={(e) => setFormData({ ...formData, left_eye_cyl: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('left_eye_cyl', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -455,7 +710,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                           <Label className="text-teal-700 font-medium">AXE</Label>
                           <Input
                             value={formData.left_eye_axe}
-                            onChange={(e) => setFormData({ ...formData, left_eye_axe: e.target.value })}
+                            onChange={(e) => handleFormFieldChange('left_eye_axe', e.target.value)}
                             className="border-teal-200 focus:border-teal-500"
                           />
                         </div>
@@ -466,7 +721,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Label className="text-teal-700 font-medium">ADD</Label>
                     <Input
                       value={formData.add}
-                      onChange={(e) => setFormData({ ...formData, add: e.target.value })}
+                      onChange={(e) => handleFormFieldChange('add', e.target.value)}
                       className="mt-2 w-1/3 border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -490,7 +745,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Label className="text-teal-700 font-medium">{t('deliveryStatus') || 'Delivery Status'}</Label>
                     <Select
                       value={formData.delivery_status}
-                      onValueChange={(value) => setFormData({ ...formData, delivery_status: value })}
+                      onValueChange={(value) => handleFormFieldChange('delivery_status', value)}
                     >
                       <SelectTrigger className="border-teal-200 focus:border-teal-500">
                         <SelectValue placeholder={t('selectStatus')} />
@@ -505,7 +760,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Label className="text-teal-700 font-medium">{t('orderType') || 'Order Type'}</Label>
                     <Select
                       value={formData.order_type || 'Unspecified'}
-                      onValueChange={(value) => setFormData({ ...formData, order_type: value })}
+                      onValueChange={(value) => handleFormFieldChange('order_type', value)}
                     >
                       <SelectTrigger className="border-teal-200 focus:border-teal-500">
                         <SelectValue placeholder={t('selectOrderType')} />
@@ -522,7 +777,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Label className="text-teal-700 font-medium">{t('montageStatus') || 'Montage Status'}</Label>
                     <Select
                       value={formData.montage_status}
-                      onValueChange={(value) => setFormData({ ...formData, montage_status: value })}
+                      onValueChange={(value) => handleFormFieldChange('montage_status', value)}
                     >
                       <SelectTrigger className="border-teal-200 focus:border-teal-500">
                         <SelectValue placeholder={t('selectStatus')} />
@@ -554,7 +809,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Input
                       type="number"
                       value={formData.montage_costs}
-                      onChange={(e) => setFormData({ ...formData, montage_costs: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => handleFormFieldChange('montage_costs', parseFloat(e.target.value) || 0)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -563,7 +818,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Input
                       type="number"
                       value={formData.total_discount}
-                      onChange={(e) => setFormData({ ...formData, total_discount: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => handleFormFieldChange('total_discount', parseFloat(e.target.value) || 0)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -572,7 +827,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Input
                       type="number"
                       value={formData.tax}
-                      onChange={(e) => setFormData({ ...formData, tax: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => handleFormFieldChange('tax', parseFloat(e.target.value) || 0)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -581,7 +836,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Input
                       type="number"
                       value={formData.advance_payment}
-                      onChange={(e) => setFormData({ ...formData, advance_payment: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) => handleFormFieldChange('advance_payment', parseFloat(e.target.value) || 0)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
@@ -592,7 +847,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-teal-600">{t('total') || 'Total'}:</span>
-                        <span className="font-medium text-teal-800">{calculateItemsTotal().toFixed(2)} DH</span>
+                        <span className="font-medium text-teal-800">{itemsTotal.toFixed(2)} DH</span>
                       </div>
                     </div>
                   </div>
@@ -610,7 +865,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                 </CardTitle>
                 <div className="flex items-center gap-4">
                   <div className="text-lg font-semibold text-teal-700">
-                    {t('total') || 'Total'}: {calculateItemsTotal().toFixed(2)} DH
+                    {t('total') || 'Total'}: {itemsTotal.toFixed(2)} DH
                   </div>
                   <Button onClick={handleAddItem} size="sm" className="bg-teal-600 hover:bg-teal-700">
                     <Plus className="h-4 w-4 mr-2" />
@@ -621,251 +876,14 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {formData.items.map((item, index) => (
-                    <Card key={index} className="border-l-4 border-l-teal-500 border-teal-100">
-                      <CardContent className="p-4">
-                        <div className="space-y-4">
-                          {/* Product Linking Section */}
-                          <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Package2 className="h-4 w-4 text-teal-600" />
-                              <Label className="text-sm font-semibold text-teal-700">{t('productLink') || 'Product Link'}</Label>
-                            </div>
-                            {item.product_id ? (
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 p-2 bg-white rounded border border-teal-200">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <span className="font-medium text-teal-800">{item.product?.name || t('unknownProduct')}</span>
-                                      <div className="text-sm text-teal-600">
-                                        {item.product?.category} • {item.product?.company || 'No Company'} • Stock: {item.product?.stock_status}
-                                      </div>
-                                    </div>
-                                    <div className="text-sm text-teal-600 font-medium">
-                                      {item.product?.price?.toFixed(2)} DH
-                                    </div>
-                                  </div>
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={async () => {
-                                    // Unlink product
-                                    const newItems = [...formData.items];
-                                    newItems[index] = { 
-                                      ...item, 
-                                      product_id: null, 
-                                      product: null,
-                                      custom_item_name: item.product?.name || item.custom_item_name || ''
-                                    };
-                                    setFormData({ ...formData, items: newItems });
-                                  }}
-                                  className="border-teal-300 text-teal-700 hover:bg-teal-50"
-                                >
-                                  {t('unlink') || 'Unlink'}
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <Select
-                                  value=""
-                                  onValueChange={async (productId) => {
-                                    // Fetch product details
-                                    const { data: product } = await supabase
-                                      .from('products')
-                                      .select('*')
-                                      .eq('id', productId)
-                                      .single();
-
-                                    if (product) {
-                                      const newItems = [...formData.items];
-                                      newItems[index] = { 
-                                        ...item, 
-                                        product_id: productId,
-                                        product: product,
-                                        price: product.price,
-                                        cost: product.cost_ttc || 0,
-                                        custom_item_name: null
-                                      };
-                                      setFormData({ ...formData, items: newItems });
-                                    }
-                                  }}
-                                >
-                                  <SelectTrigger className="flex-1 border-teal-200 focus:border-teal-500">
-                                    <SelectValue placeholder={t('linkToProduct') || 'Link to Product'} />
-                                  </SelectTrigger>
-                                  <SelectContent className="max-h-60">
-                                    <ProductSelector />
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Item Details */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('itemName') || 'Item Name'}</Label>
-                              <Input
-                                value={item.custom_item_name || item.product?.name || ''}
-                                onChange={(e) => {
-                                  const newItems = [...formData.items];
-                                  newItems[index] = { ...item, custom_item_name: e.target.value };
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                placeholder={t('enterItemName') || 'Enter Item Name'}
-                                className="border-teal-200 focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('quantity') || 'Quantity'}</Label>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={item.quantity}
-                                onChange={(e) => {
-                                  const newItems = [...formData.items];
-                                  const newQuantity = parseInt(e.target.value) || 1;
-                                  newItems[index] = { ...item, quantity: newQuantity };
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                className="border-teal-200 focus:border-teal-500"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Financial Details */}
-                          <div className="grid grid-cols-4 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('price') || 'Price'}</Label>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={item.price}
-                                onChange={(e) => {
-                                  const newItems = [...formData.items];
-                                  const newPrice = parseFloat(e.target.value) || 0;
-                                  newItems[index] = { ...item, price: newPrice };
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                className="border-teal-200 focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('cost') || 'Cost'} ({t('perUnit') || 'Per Unit'})</Label>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={item.cost}
-                                onChange={(e) => {
-                                  const newItems = [...formData.items];
-                                  newItems[index] = { ...item, cost: parseFloat(e.target.value) || 0 };
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                className="border-teal-200 focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('totalCost') || 'Total Cost'}</Label>
-                              <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={((item.cost || 0) * item.quantity).toFixed(2)}
-                                onChange={(e) => {
-                                  const totalCost = parseFloat(e.target.value) || 0;
-                                  const costPerUnit = item.quantity > 0 ? totalCost / item.quantity : 0;
-                                  const newItems = [...formData.items];
-                                  newItems[index] = { ...item, cost: costPerUnit };
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                className="border-teal-200 focus:border-teal-500"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-teal-700 font-medium">{t('total') || 'Total'}</Label>
-                              <div className="h-10 px-3 py-2 rounded-md bg-teal-50 font-medium flex items-center border border-teal-200 text-teal-800">
-                                {(item.price * item.quantity).toFixed(2)} DH
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Additional Options */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              {/* Payment Status */}
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  id={`paid-delivery-${index}`}
-                                  checked={item.paid_at_delivery || false}
-                                  onChange={(e) => {
-                                    const newItems = [...formData.items];
-                                    newItems[index] = { ...item, paid_at_delivery: e.target.checked };
-                                    setFormData({ ...formData, items: newItems });
-                                  }}
-                                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
-                                />
-                                <Label htmlFor={`paid-delivery-${index}`} className="text-sm text-teal-700">
-                                  {t('paidAtDelivery') || 'Paid at Delivery'}
-                                </Label>
-                              </div>
-
-                              {/* Eye Linking for Lens Products */}
-                              {item.product?.category?.includes('Lenses') && (
-                                <div className="flex items-center gap-2">
-                                  <Label className="text-sm text-teal-700">{t('eye') || 'Eye'}</Label>
-                                  <Select
-                                    value={item.linked_eye || 'none'}
-                                    onValueChange={(value) => {
-                                      const newItems = [...formData.items];
-                                      newItems[index] = { 
-                                        ...item, 
-                                        linked_eye: value === 'none' ? null : value 
-                                      };
-                                      setFormData({ ...formData, items: newItems });
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-20 border-teal-200 focus:border-teal-500">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="none">{t('none') || 'None'}</SelectItem>
-                                      <SelectItem value="RE">RE</SelectItem>
-                                      <SelectItem value="LE">LE</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Profit Display and Remove Button */}
-                            <div className="flex items-center gap-4">
-                              <div className="text-sm">
-                                <span className="text-teal-600">{t('profit') || 'Profit'}: </span>
-                                <span className={`font-medium ${((item.price - (item.cost || 0)) * item.quantity) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {((item.price - (item.cost || 0)) * item.quantity).toFixed(2)} DH
-                                </span>
-                              </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const newItems = formData.items.filter((_, i) => i !== index);
-                                  setFormData({ ...formData, items: newItems });
-                                }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <ItemCard 
+                      key={`${item.id || 'new'}-${index}`}
+                      item={item}
+                      index={index}
+                      onUpdateItem={handleUpdateItem}
+                      onRemoveItem={handleRemoveItem}
+                      t={t}
+                    />
                   ))}
 
                   {formData.items.length === 0 && (
@@ -900,4 +918,4 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   );
 };
 
-export default ReceiptEditDialog;
+export default memo(ReceiptEditDialog);
