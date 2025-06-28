@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -18,13 +19,12 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { format } from 'date-fns';
-import { Calculator, User, CreditCard, Calendar, RotateCcw, Receipt } from 'lucide-react';
-import { Plus, Building2 } from 'lucide-react';
-import { Link } from 'lucide-react';
+import { Calculator, User, CreditCard, Calendar, Receipt, Building2, Save, FileText } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 
 interface Supplier {
@@ -51,7 +51,6 @@ interface Purchase {
   recurring_type?: string;
   next_recurring_date?: string;
   purchase_type?: string;
-  linking_category?: string;
   tax_percentage?: number;
   created_at: string;
 }
@@ -75,7 +74,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   const { user } = useAuth();
   const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCalculating, setIsCalculating] = useState(false);
 
   const EXPENSE_CATEGORIES = [
     t('officeSupplies'),
@@ -130,10 +128,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: 'none',
-    purchase_type: 'Operational Expenses',
-    linking_category: 'none',
-    link_date_from: '',
-    link_date_to: ''
+    purchase_type: 'Operational Expenses'
   });
 
   // Initialize form with editing purchase data
@@ -154,10 +149,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: editingPurchase.recurring_type || 'none',
-        purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
-        linking_category: editingPurchase.linking_category || 'none',
-        link_date_from: editingPurchase.link_date_from || '',
-        link_date_to: editingPurchase.link_date_to || ''
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses'
       });
     } else {
       resetForm();
@@ -180,10 +172,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: 'none',
-      purchase_type: 'Operational Expenses',
-      linking_category: 'none',
-      link_date_from: '',
-      link_date_to: ''
+      purchase_type: 'Operational Expenses'
     });
   };
 
@@ -353,9 +342,6 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         recurring_type: formData.recurring_type === 'none' ? null : formData.recurring_type,
         next_recurring_date: nextRecurringDate,
         purchase_type: formData.purchase_type,
-        linking_category: formData.linking_category === 'none' ? null : formData.linking_category,
-        link_date_from: formData.linking_category !== 'none' && formData.link_date_from ? formData.link_date_from : null,
-        link_date_to: formData.linking_category !== 'none' && formData.link_date_to ? formData.link_date_to : null,
         is_deleted: false
       };
 
@@ -416,418 +402,396 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[900px] max-h-[95vh] overflow-y-auto" aria-describedby="record-purchase-description">
-        <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
-            <Receipt className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-6xl h-[90vh] overflow-hidden">
+        <DialogHeader className="border-b border-teal-100 pb-4 mb-6">
+          <DialogTitle className="text-3xl font-bold text-teal-800 flex items-center gap-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+              <Receipt className="h-6 w-6 text-teal-600" />
+            </div>
             {editingPurchase ? t('editPurchase') : t('recordPurchase')}
           </DialogTitle>
         </DialogHeader>
 
-        <div id="record-purchase-description" className="sr-only">
-          {editingPurchase ? t('editPurchase') : t('recordPurchase')}
-        </div>
+        <Tabs defaultValue="business-details" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 bg-teal-50 border border-teal-200">
+            <TabsTrigger value="business-details" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <Building2 className="h-4 w-4 mr-2" />
+              Business Details
+            </TabsTrigger>
+            <TabsTrigger value="payment-recurring" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payment & Recurring
+            </TabsTrigger>
+          </TabsList>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="h-4 w-4" />
-                {t('businessInformation')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="description">{t('description')} *</Label>
-                  <Input
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder={t('enterDescription')}
-                    required
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
+          <TabsContent value="business-details" className="flex-1 overflow-auto mt-6">
+            <div className="grid grid-cols-2 gap-6 h-full">
+              {/* Business Information */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <User className="h-4 w-4" />
+                    {t('businessInformation')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('description')} *</Label>
+                    <Input
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder={t('enterDescription')}
+                      required
+                      disabled={isSubmitting}
+                      className="border-teal-200 focus:border-teal-500 h-9"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="supplier">{t('supplier')}</Label>
-                  <Select
-                    value={formData.supplier_id || undefined}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={t('selectSupplier')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.map(supplier => (
-                        <SelectItem key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('supplier')}</Label>
+                    <Select
+                      value={formData.supplier_id || undefined}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value || '' }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectSupplier')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map(supplier => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <Label htmlFor="category">{t('category')}</Label>
-                  <Select
-                    value={formData.category || undefined}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={t('selectCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EXPENSE_CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('category')}</Label>
+                    <Select
+                      value={formData.category || undefined}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectCategory')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EXPENSE_CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <Label htmlFor="purchase_type">{t('purchaseType')} *</Label>
-                  <Select
-                    value={formData.purchase_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={t('selectPurchaseType')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PURCHASE_TYPES.map(type => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('purchaseType')} *</Label>
+                    <Select
+                      value={formData.purchase_type}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, purchase_type: value }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectPurchaseType')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PURCHASE_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Financial Information */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Calculator className="h-4 w-4" />
-                {t('paymentDetails')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="tax_percentage">{t('taxIndicator')} (%)</Label>
-                  <Input
-                    id="tax_percentage"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={formData.tax_percentage}
-                    onChange={(e) => handleTaxPercentageChange(e.target.value)}
-                    placeholder="20.00"
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">Purchase Date</Label>
+                    <Input
+                      type="date"
+                      value={formData.purchase_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
+                      disabled={isSubmitting}
+                      className="border-teal-200 focus:border-teal-500 h-9"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-                <div>
-                  <Label htmlFor="amount_ht">{t('amountHT')} *</Label>
-                  <Input
-                    id="amount_ht"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={formData.amount_ht}
-                    onChange={(e) => handleAmountHTChange(e.target.value)}
-                    placeholder={t('enterAmount')}
-                    required
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
+              {/* Financial Details */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Calculator className="h-4 w-4" />
+                    {t('financialDetails')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('taxIndicator')} (%)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.tax_percentage}
+                      onChange={(e) => handleTaxPercentageChange(e.target.value)}
+                      placeholder="20.00"
+                      disabled={isSubmitting}
+                      className="border-teal-200 focus:border-teal-500 h-9"
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="amount_ttc">{t('amountTTC')} *</Label>
-                  <Input
-                    id="amount_ttc"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={formData.amount_ttc}
-                    onChange={(e) => handleAmountTTCChange(e.target.value)}
-                    placeholder={t('enterAmount')}
-                    required
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium text-sm">{t('amountHT')} *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={formData.amount_ht}
+                        onChange={(e) => handleAmountHTChange(e.target.value)}
+                        placeholder={t('enterAmount')}
+                        required
+                        disabled={isSubmitting}
+                        className="border-teal-200 focus:border-teal-500 h-9"
+                      />
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="advance_payment">{t('advancePayment')}</Label>
-                  <Input
-                    id="advance_payment"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.advance_payment}
-                    onChange={(e) => {
-                      const newAdvancePayment = e.target.value;
-                      setFormData(prev => {
-                        const amountTtc = parseFloat(prev.amount_ttc) || 0;
-                        const advancePayment = parseFloat(newAdvancePayment) || 0;
-                        const balance = amountTtc - advancePayment;
-                        let paymentStatus = t('unpaid');
-                        if (advancePayment >= amountTtc && amountTtc > 0) {
-                          paymentStatus = t('paid');
-                        } else if (advancePayment > 0) {
-                          paymentStatus = t('partiallyPaid');
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium text-sm">{t('amountTTC')} *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={formData.amount_ttc}
+                        onChange={(e) => handleAmountTTCChange(e.target.value)}
+                        placeholder={t('enterAmount')}
+                        required
+                        disabled={isSubmitting}
+                        className="border-teal-200 focus:border-teal-500 h-9"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium text-sm">{t('advancePayment')}</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.advance_payment}
+                        onChange={(e) => {
+                          const newAdvancePayment = e.target.value;
+                          setFormData(prev => {
+                            const amountTtc = parseFloat(prev.amount_ttc) || 0;
+                            const advancePayment = parseFloat(newAdvancePayment) || 0;
+                            const balance = amountTtc - advancePayment;
+                            let paymentStatus = t('unpaid');
+                            if (advancePayment >= amountTtc && amountTtc > 0) {
+                              paymentStatus = t('paid');
+                            } else if (advancePayment > 0) {
+                              paymentStatus = t('partiallyPaid');
+                            }
+                            return { 
+                              ...prev, 
+                              advance_payment: newAdvancePayment,
+                              balance: balance.toString(),
+                              payment_status: paymentStatus
+                            };
+                          });
+                        }}
+                        placeholder={t('enterAmount')}
+                        disabled={isSubmitting}
+                        className="border-teal-200 focus:border-teal-500 h-9"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-teal-700 font-medium text-sm">{t('balance')}</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.balance}
+                        placeholder={t('enterAmount')}
+                        disabled
+                        className="bg-teal-50 border-teal-200 h-9"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Financial Summary */}
+                  <div className="p-3 bg-teal-50 rounded-lg border border-teal-200 mt-4">
+                    <h4 className="font-semibold mb-2 text-teal-800 text-sm">{t('summary') || 'Summary'}</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-teal-600">Amount TTC:</span>
+                        <span className="font-medium text-teal-800">{formData.amount_ttc || '0.00'} DH</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-teal-600">Advance Payment:</span>
+                        <span className="font-medium text-teal-800">{formData.advance_payment || '0.00'} DH</span>
+                      </div>
+                      <div className="flex justify-between text-xs border-t border-teal-200 pt-1">
+                        <span className="font-bold text-teal-700">Balance:</span>
+                        <span className="font-bold text-teal-800">{formData.balance || '0.00'} DH</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('notes')}</Label>
+                    <Textarea
+                      value={formData.notes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Additional notes about this purchase (optional)"
+                      rows={3}
+                      disabled={isSubmitting}
+                      className="border-teal-200 focus:border-teal-500"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="payment-recurring" className="flex-1 overflow-auto mt-6">
+            <div className="grid grid-cols-2 gap-6 h-full">
+              {/* Payment Details */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <CreditCard className="h-4 w-4" />
+                    {t('paymentDetails')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('paymentMethod')}</Label>
+                    <Select
+                      value={formData.payment_method}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectPaymentMethod')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_METHODS.map(method => (
+                          <SelectItem key={method} value={method}>
+                            {method}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">{t('paymentStatus')}</Label>
+                    <Select
+                      value={formData.payment_status}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder={t('selectPaymentStatus')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={t('unpaid')}>{t('unpaid')}</SelectItem>
+                        <SelectItem value={t('partiallyPaid')}>{t('partiallyPaid')}</SelectItem>
+                        <SelectItem value={t('paid')}>{t('paid')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">Payment Due Date</Label>
+                    <Input
+                      type="date"
+                      value={formData.payment_urgency}
+                      onChange={(e) => setFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
+                      disabled={isSubmitting}
+                      className="border-teal-200 focus:border-teal-500 h-9"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recurring Settings */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Calendar className="h-4 w-4" />
+                    Recurring Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium text-sm">Recurring Type</Label>
+                    <Select
+                      value={formData.recurring_type}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
+                        <SelectValue placeholder="Select recurring period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RECURRING_TYPES.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {formData.recurring_type !== 'none' && (
+                    <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                      <p className="text-sm text-teal-700">
+                        <strong>Next Occurrence:</strong>{' '}
+                        {formData.purchase_date && formData.recurring_type !== 'none' 
+                          ? calculateNextRecurringDate(formData.purchase_date, formData.recurring_type) || 'Invalid date'
+                          : 'Set purchase date first'
                         }
-                        return { 
-                          ...prev, 
-                          advance_payment: newAdvancePayment,
-                          balance: balance.toString(),
-                          payment_status: paymentStatus
-                        };
-                      });
-                    }}
-                    placeholder={t('enterAmount')}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
 
-                <div>
-                  <Label htmlFor="balance">{t('balance')}</Label>
-                  <Input
-                    id="balance"
-                    type="number"
-                    step="0.01"
-                    value={formData.balance}
-                    placeholder={t('enterAmount')}
-                    disabled
-                    className="mt-1 bg-gray-50"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment & Status Information */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <CreditCard className="h-4 w-4" />
-                {t('paymentDetails')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="payment_method">{t('paymentMethod')}</Label>
-                  <Select
-                    value={formData.payment_method}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={t('selectPaymentMethod')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map(method => (
-                        <SelectItem key={method} value={method}>
-                          {method}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="payment_status">{t('paymentStatus')}</Label>
-                  <Select
-                    value={formData.payment_status}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={t('selectPaymentStatus')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={t('unpaid')}>{t('unpaid')}</SelectItem>
-                      <SelectItem value={t('partiallyPaid')}>{t('partiallyPaid')}</SelectItem>
-                      <SelectItem value={t('paid')}>{t('paid')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Date & Recurring Information */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Calendar className="h-4 w-4" />
-                Date & Recurring Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="purchase_date">Purchase Date</Label>
-                  <Input
-                    id="purchase_date"
-                    type="date"
-                    value={formData.purchase_date}
-                    onChange={(e) => setFormData(prev => ({ ...prev, purchase_date: e.target.value }))}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="payment_urgency">Payment Due Date</Label>
-                  <Input
-                    id="payment_urgency"
-                    type="date"
-                    value={formData.payment_urgency}
-                    onChange={(e) => setFormData(prev => ({ ...prev, payment_urgency: e.target.value }))}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="recurring_type" className="flex items-center gap-2">
-                    <RotateCcw className="h-3 w-3" />
-                    Recurring Type
-                  </Label>
-                  <Select
-                    value={formData.recurring_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select recurring period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RECURRING_TYPES.map(type => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Receipt Linking */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Link className="h-4 w-4" />
-                Receipt Linking (Optional)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="linking_category">Linking Category</Label>
-                <Select
-                  value={formData.linking_category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, linking_category: value }))}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select linking category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Linking</SelectItem>
-                    <SelectItem value="montage_costs">Montage Costs</SelectItem>
-                    <SelectItem value="product_costs">Product Costs (Future)</SelectItem>
-                    <SelectItem value="total_costs">Total Costs (Future)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="link_date_from">Link From Date</Label>
-                  <Input
-                    id="link_date_from"
-                    type="date"
-                    value={formData.link_date_from}
-                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_from: e.target.value }))}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="link_date_to">Link To Date</Label>
-                  <Input
-                    id="link_date_to"
-                    type="date"
-                    value={formData.link_date_to}
-                    onChange={(e) => setFormData(prev => ({ ...prev, link_date_to: e.target.value }))}
-                    disabled={isSubmitting}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Additional Notes */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Additional Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Additional notes about this purchase (optional)"
-                rows={3}
-                disabled={isSubmitting}
-                className="mt-1"
-              />
-            </CardContent>
-          </Card>
-
-          <DialogFooter className="pt-6 border-t">
+        {/* Save Button */}
+        <div className="flex justify-end pt-4 border-t border-teal-100 mt-auto">
+          <div className="flex gap-3">
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleClose}
               disabled={isSubmitting}
-              className="min-w-[100px]"
+              className="px-6 border-teal-300 text-teal-700 hover:bg-teal-50"
             >
               {t('cancel')}
             </Button>
             <Button 
-              type="submit" 
+              onClick={handleSubmit}
               disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
-              className="min-w-[150px]"
+              className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium"
             >
-              {isSubmitting ? (editingPurchase ? t('updating') : t('saving')) : (editingPurchase ? t('editPurchase') : t('recordPurchase'))}
+              {isSubmitting ? (editingPurchase ? t('updating') : t('saving')) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  {editingPurchase ? t('updatePurchase') : t('recordPurchase')}
+                </>
+              )}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
