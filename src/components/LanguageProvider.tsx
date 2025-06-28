@@ -3337,7 +3337,7 @@ const purchasesTranslations: Translations = {
   },
   capitalExpenditure: {
     en: 'Capital Expenditure',
-    fr: 'Dépenses d\'Investissement'r la description'
+    fr: 'Dépenses d\'Investissement'
   },
   enterAmount: {
     en: 'Enter amount',
