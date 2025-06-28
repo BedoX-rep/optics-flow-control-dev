@@ -583,24 +583,24 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   {/* Desktop Layout */}
                   <div className="hidden md:grid md:grid-cols-12 gap-4 items-start">
                     {item.customName !== undefined ? (
-                      <div className="col-span-6 min-w-0">
+                      <div className="col-span-5">
                         <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
                         <Input
                           id={`custom-${item.id}`}
                           value={item.customName || ''}
                           onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                          className="mt-1 w-full"
+                          className="mt-1"
                         />
                       </div>
                     ) : (
-                      <div className="col-span-6 min-w-0">
+                      <div className="col-span-5">
                         <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
-                        <div className="flex gap-2 mt-1 min-w-0">
+                        <div className="flex gap-2 mt-1">
                           <Select
                             value={item.productId}
                             onValueChange={(value) => updateItem(item.id, 'productId', value)}
                           >
-                            <SelectTrigger id={`product-${item.id}`} className="flex-1 min-w-0 max-w-[200px]">
+                            <SelectTrigger id={`product-${item.id}`} className="flex-1">
                               <SelectValue placeholder={t('selectProduct')} />
                             </SelectTrigger>
                             <SelectContent className="min-w-[400px]">
@@ -642,7 +642,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                 [item.id]: e.target.value
                               }));
                             }}
-                            className="w-24 flex-shrink-0"
+                            className="w-32"
                           />
                         </div>
                       </div>
@@ -659,7 +659,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
 
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Label className="text-xs">{t('unitPrice')}</Label>
                       <Input
                         type="number"
@@ -671,7 +671,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
 
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Label className="text-xs">{t('unitCost')}</Label>
                       <Input
                         type="number"
