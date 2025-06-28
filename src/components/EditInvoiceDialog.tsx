@@ -173,90 +173,44 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
   const adjustItemPrices = () => {
     if (invoiceItems.length === 0 || invoiceData.assurance_total <= 0) return;
 
-    let baselinePrices = { ...originalPrices };
-    let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
-                          Object.keys(baselinePrices).length !== invoiceItems.length;
-
-    if (needsNewBaseline) {
-      baselinePrices = {};
+    // Store original prices if not already stored
+    if (Object.keys(originalPrices).length === 0) {
+      const newOriginalPrices: { [key: number]: number } = {};
       invoiceItems.forEach((item, index) => {
-        baselinePrices[index] = item.unit_price || 0;
+        newOriginalPrices[index] = item.unit_price || 0;
       });
-      setOriginalPrices(baselinePrices);
+      setOriginalPrices(newOriginalPrices);
     }
 
-    const baselineTotal = Object.keys(baselinePrices).reduce((sum, index) => {
-      const itemIndex = parseInt(index);
-      const quantity = invoiceItems[itemIndex]?.quantity || 1;
-      return sum + (baselinePrices[itemIndex] * quantity);
-    }, 0);
-
+    const currentTotal = subtotal;
     const targetTotal = invoiceData.assurance_total;
-    const difference = Math.round(targetTotal - baselineTotal);
+    const difference = targetTotal - currentTotal;
 
-    if (Math.abs(difference) < 1) return;
+    if (Math.abs(difference) < 0.01) return;
 
-    const testItems = invoiceItems.map((item, index) => ({
-      ...item,
-      unit_price: baselinePrices[index] || 0,
-      total_price: (baselinePrices[index] || 0) * (item.quantity || 1)
-    }));
-
-    let remainingDiff = difference;
-
-    if (difference > 0) {
-      const baseIncrease = Math.floor(remainingDiff / testItems.length);
-      let extraAmount = remainingDiff - (baseIncrease * testItems.length);
-
-      testItems.forEach((item, index) => {
-        const currentPrice = item.unit_price || 0;
-        const quantity = item.quantity || 1;
-        testItems[index].unit_price = currentPrice + baseIncrease;
-        testItems[index].total_price = testItems[index].unit_price * quantity;
-      });
-
-      let itemIndex = 0;
-      while (extraAmount > 0 && itemIndex < testItems.length) {
-        const item = testItems[itemIndex];
-        const quantity = item.quantity || 1;
-        item.unit_price = (item.unit_price || 0) + 1;
-        item.total_price = item.unit_price * quantity;
-        extraAmount -= 1;
-        itemIndex++;
-      }
-    } else {
-      remainingDiff = Math.abs(remainingDiff);
-      const baseDecrease = Math.floor(remainingDiff / testItems.length);
-      let extraAmount = remainingDiff - (baseDecrease * testItems.length);
-
-      testItems.forEach((item, index) => {
-        const currentPrice = item.unit_price || 0;
-        const quantity = item.quantity || 1;
-        testItems[index].unit_price = Math.max(0, currentPrice - baseDecrease);
-        testItems[index].total_price = testItems[index].unit_price * quantity;
-      });
-
-      let itemIndex = 0;
-      while (extraAmount > 0 && itemIndex < testItems.length) {
-        const item = testItems[itemIndex];
-        const currentPrice = item.unit_price || 0;
-        const quantity = item.quantity || 1;
-
-        if (currentPrice > 0) {
-          item.unit_price = currentPrice - 1;
-          item.total_price = item.unit_price * quantity;
-          extraAmount -= 1;
-        }
-        itemIndex++;
-      }
-    }
-
-    setInvoiceItems(testItems);
+    const updatedItems = [...invoiceItems];
     
-    const finalTotal = testItems.reduce((sum, item) => sum + ((item.unit_price || 0) * (item.quantity || 1)), 0);
+    if (updatedItems.length === 0) return;
+
+    // Distribute the difference across all items proportionally
+    const adjustmentPerItem = difference / updatedItems.length;
+    
+    updatedItems.forEach((item, index) => {
+      const currentUnitPrice = item.unit_price || 0;
+      const newUnitPrice = Math.max(0, currentUnitPrice + adjustmentPerItem);
+      updatedItems[index] = {
+        ...item,
+        unit_price: Math.round(newUnitPrice * 100) / 100, // Round to 2 decimal places
+        total_price: Math.round(((Math.round(newUnitPrice * 100) / 100) * (item.quantity || 1)) * 100) / 100
+      };
+    });
+
+    setInvoiceItems(updatedItems);
+
+    const finalTotal = updatedItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
     toast({
       title: "Prices Adjusted Successfully",
-      description: `Prices adjusted to match assurance total (${finalTotal.toFixed(0)} DH).`,
+      description: `Prices adjusted to match assurance total (${finalTotal.toFixed(2)} DH).`,
     });
   };
 
@@ -644,7 +598,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
                     {t('addItem') || 'Add Item'}
                   </Button>
                 </CardHeader>
-                <CardContent className="p-6 overflow-auto max-h-[400px]">
+                <CardContent className="p-6">
                   <div className="space-y-4">
                     {invoiceItems.map((item, index) => (
                       <Card key={index} className="border-l-4 border-l-teal-500 border-teal-100">
@@ -735,22 +689,6 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
                       </div>
                     )}
                   </div>
-
-                  {/* Totals Summary */}
-                  {invoiceItems.length > 0 && (
-                    <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200">
-                      <div className="space-y-2 text-right">
-                        <div className="flex justify-between">
-                          <span className="text-teal-600">{t('subtotal') || 'Subtotal'}:</span>
-                          <span className="font-medium text-teal-800">{subtotal.toFixed(2)} DH</span>
-                        </div>
-                        <div className="flex justify-between text-lg">
-                          <span className="font-bold text-teal-700">{t('total') || 'Total'}:</span>
-                          <span className="font-bold text-teal-800">{total.toFixed(2)} DH</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
