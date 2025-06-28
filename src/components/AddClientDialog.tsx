@@ -280,7 +280,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                     <Button 
                       type="submit"
                       size="icon"
-                      className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10 absolute right-0"
+                      className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10 absolute"
+                      style={{ right: '-30px' }}
                     >
                       <Save className="h-4 w-4" />
                     </Button>
