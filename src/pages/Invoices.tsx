@@ -99,9 +99,9 @@ const InvoiceCard = ({
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">
-                    {invoice.invoice_number}
+                    {invoice.client_name}
                   </h3>
-                  <p className="text-xs text-slate-600">{invoice.client_name}</p>
+                  <p className="text-xs text-slate-600">{invoice.invoice_number}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
