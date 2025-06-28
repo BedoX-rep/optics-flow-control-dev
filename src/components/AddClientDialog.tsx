@@ -23,7 +23,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useQueryClient } from '@tanstack/react-query'
 import { useLanguage } from './LanguageProvider'
-import { User, Eye, Phone, FileText, Shield, X } from 'lucide-react'
+import { User, Eye, Phone, FileText, Shield, X, Save } from 'lucide-react'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -415,9 +415,10 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </Button>
               <Button 
                 type="submit"
-                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                size="icon"
+                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
               >
-                {t('addClient')}
+                <Save className="h-4 w-4" />
               </Button>
             </div>
           </form>
