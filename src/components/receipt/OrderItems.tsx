@@ -581,9 +581,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                   </div>
 
                   {/* Desktop Layout */}
-                  <div className="hidden md:grid md:grid-cols-12 gap-4 items-start">
+                  <div className="hidden md:grid md:grid-cols-16 gap-4 items-start">
                     {item.customName !== undefined ? (
-                      <div className="col-span-5">
+                      <div className="col-span-8">
                         <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
                         <Input
                           id={`custom-${item.id}`}
@@ -593,7 +593,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="col-span-5">
+                      <div className="col-span-8">
                         <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
                         <div className="flex gap-2 mt-1">
                           <Select
@@ -683,7 +683,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       />
                     </div>
 
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Label className="text-xs">{t('total')}</Label>
                       <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-right">
                         {(item.price * item.quantity).toFixed(2)} {t('dh')}
