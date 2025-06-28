@@ -444,18 +444,8 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{t('editInvoice') || 'Edit Invoice'}</DialogTitle>
-          <Button 
-            onClick={handleSave} 
-            disabled={isLoading || isAssuranceMismatch}
-            className={`w-12 h-12 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 ${
-              isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-            }`}
-            size="sm"
-          >
-            <Save className="h-5 w-5" />
-          </Button>
         </DialogHeader>
 
         {/* Assurance Mismatch Alert */}
@@ -570,6 +560,22 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({ isOpen, onClose, 
               </div>
             </CardContent>
           </Card>
+
+          {/* Save Button positioned between sections */}
+          <div className="relative flex justify-end -my-2">
+            <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
+              <Button
+                onClick={handleSave}
+                disabled={isLoading || isAssuranceMismatch}
+                className={`w-14 h-14 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 ${
+                  isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                }`}
+                size="sm"
+              >
+                <Save className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
 
           {/* Prescription */}
           <Card>
