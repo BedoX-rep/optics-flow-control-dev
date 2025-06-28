@@ -13,7 +13,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Invoice, InvoiceItem } from '@/integrations/supabase/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Plus, AlertTriangle, DollarSign, Calculator } from 'lucide-react';
+import { Trash2, Plus, AlertTriangle, DollarSign, Calculator, Search } from 'lucide-react';
 
 interface AddInvoiceDialogProps {
   isOpen: boolean;
@@ -54,6 +54,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   const [invoiceItems, setInvoiceItems] = useState<Partial<InvoiceItem>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showAssuranceAlert, setShowAssuranceAlert] = useState(false);
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
 
   // Category options for items
   const CATEGORY_OPTIONS = [
@@ -66,7 +67,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   ];
 
   // Fetch receipts with full details for data copying
-  const { data: receipts = [] } = useQuery({
+  const { data: allReceipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -120,6 +121,17 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     },
     enabled: !!user && isOpen,
   });
+
+  // Filter receipts based on client search term
+  const receipts = useMemo(() => {
+    if (!clientSearchTerm.trim()) return allReceipts;
+    
+    const searchLower = clientSearchTerm.toLowerCase();
+    return allReceipts.filter(receipt => 
+      receipt.client_name?.toLowerCase().includes(searchLower) ||
+      receipt.client_phone?.toLowerCase().includes(searchLower)
+    );
+  }, [allReceipts, clientSearchTerm]);
 
   // Generate invoice number
   useEffect(() => {
@@ -822,6 +834,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
   const resetForm = () => {
     setSelectedReceiptId('');
+    setClientSearchTerm('');
     setInvoiceData({
       invoice_number: '',
       client_name: '',
@@ -889,6 +902,15 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               {/* Receipt Selection */}
               <div className="space-y-2">
                 <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder={t('searchClients') || 'Search clients...'}
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="pl-9 mb-2"
+                  />
+                </div>
                 <Select value={selectedReceiptId} onValueChange={handleReceiptSelect}>
                   <SelectTrigger>
                     <SelectValue placeholder={t('selectReceipt') || 'Select Receipt'} />
@@ -896,7 +918,9 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                   <SelectContent>
                     <SelectItem value="no-receipt">{t('noReceipt') || 'No Receipt'}</SelectItem>
                     {receipts.length === 0 ? (
-                      <SelectItem value="no-data" disabled>No receipts available</SelectItem>
+                      <SelectItem value="no-data" disabled>
+                        {clientSearchTerm ? 'No receipts match your search' : 'No receipts available'}
+                      </SelectItem>
                     ) : (
                       receipts.map(receipt => (
                         <SelectItem key={receipt.id} value={receipt.id}>
