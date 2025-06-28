@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2, Printer, Check } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, FileText, Calendar, DollarSign, Phone, MapPin, Filter, X, TrendingUp, Package, Building2, Printer, Check, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
@@ -264,6 +266,10 @@ const Invoices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [printingInvoice, setPrintingInvoice] = useState<Invoice | null>(null);
@@ -280,7 +286,7 @@ const Invoices = () => {
       `)
       .eq('user_id', user.id)
       .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+      .order('invoice_date', { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -312,8 +318,23 @@ const Invoices = () => {
       filtered = filtered.filter(invoice => invoice.status === statusFilter);
     }
 
-    // Date Filter Logic
-    if (dateFilter !== 'all') {
+    // Custom Date Range Filter
+    if (dateRange.from) {
+      filtered = filtered.filter(invoice => {
+        const invoiceDate = new Date(invoice.invoice_date);
+        return invoiceDate >= dateRange.from!;
+      });
+    }
+
+    if (dateRange.to) {
+      filtered = filtered.filter(invoice => {
+        const invoiceDate = new Date(invoice.invoice_date);
+        return invoiceDate <= dateRange.to!;
+      });
+    }
+
+    // Date Filter Logic (only if custom range is not set)
+    if (dateFilter !== 'all' && !dateRange.from && !dateRange.to) {
       const now = new Date();
       let startDate: Date | null = null;
 
@@ -336,8 +357,11 @@ const Invoices = () => {
       }
     }
 
+    // Sort by invoice date (latest first)
+    filtered.sort((a, b) => new Date(b.invoice_date).getTime() - new Date(a.invoice_date).getTime());
+
     return filtered;
-  }, [invoices, searchTerm, statusFilter, dateFilter]);
+  }, [invoices, searchTerm, statusFilter, dateFilter, dateRange]);
 
   // Calculate totals
   const totalAmount = useMemo(() => {
@@ -490,6 +514,69 @@ const Invoices = () => {
 
         {/* Compact Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Date Range Picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
+                  (dateRange.from || dateRange.to)
+                    ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
+                    : "border-gray-200 hover:border-gray-300"
+                )}
+              >
+                <CalendarDays className="h-4 w-4 mr-2" />
+                {dateRange.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "MMM dd, yyyy")
+                  )
+                ) : (
+                  <span>{t('dateRange') || 'Date Range'}</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className="p-3 space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('from') || 'From'}</label>
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateRange.from}
+                    onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))}
+                    initialFocus
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('to') || 'To'}</label>
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateRange.to}
+                    onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
+                    disabled={(date) => dateRange.from ? date < dateRange.from : false}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setDateRange({ from: undefined, to: undefined });
+                      setDateFilter('all');
+                    }}
+                    className="flex-1"
+                  >
+                    {t('clear') || 'Clear'}
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {/* Date Filter Buttons */}
           <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
             {[
@@ -501,12 +588,17 @@ const Invoices = () => {
             ].map((option) => (
               <Button
                 key={option.value}
-                variant={dateFilter === option.value ? "default" : "ghost"}
+                variant={dateFilter === option.value && !dateRange.from && !dateRange.to ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setDateFilter(option.value)}
+                onClick={() => {
+                  setDateFilter(option.value);
+                  if (option.value !== 'all') {
+                    setDateRange({ from: undefined, to: undefined });
+                  }
+                }}
                 className={cn(
                   "h-7 px-2 text-xs font-medium transition-all duration-200 rounded-md",
-                  dateFilter === option.value
+                  dateFilter === option.value && !dateRange.from && !dateRange.to
                     ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 )}
@@ -544,10 +636,21 @@ const Invoices = () => {
       </div>
 
       {/* Active Filters Tags - Only show when filters are active */}
-      {(dateFilter !== 'all' || statusFilter !== 'all') && (
+      {(dateFilter !== 'all' || statusFilter !== 'all' || dateRange.from || dateRange.to) && (
         <div className="mb-4 flex items-center gap-2 flex-wrap">
           <span className="text-xs font-medium text-gray-500">{t('active') || 'Active'}:</span>
-          {dateFilter !== 'all' && (
+          {(dateRange.from || dateRange.to) && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
+              {dateRange.from && dateRange.to 
+                ? `${format(dateRange.from, 'MMM dd')} - ${format(dateRange.to, 'MMM dd')}`
+                : dateRange.from 
+                ? `From ${format(dateRange.from, 'MMM dd')}`
+                : `To ${format(dateRange.to!, 'MMM dd')}`
+              }
+              <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setDateRange({ from: undefined, to: undefined })} />
+            </span>
+          )}
+          {dateFilter !== 'all' && !dateRange.from && !dateRange.to && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
               {dateFilter === 'today' ? t('today') : dateFilter === 'week' ? t('thisWeek') : dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
               <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateFilter('all')} />
