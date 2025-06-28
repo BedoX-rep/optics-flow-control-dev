@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,10 @@ import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/components/LanguageProvider';
 import { Invoice } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
-import { FileText, Calendar, Phone, MapPin, DollarSign, Edit, Trash2, User, Eye } from 'lucide-react';
+import { FileText, Calendar, Phone, MapPin, DollarSign, Edit, Trash2, User, Eye, CheckCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface InvoiceDetailsDialogProps {
   isOpen: boolean;
@@ -26,8 +29,46 @@ const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
   onDelete
 }) => {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isMarkingPaid, setIsMarkingPaid] = useState(false);
 
   if (!invoice) return null;
+
+  const handleMarkAsPaid = async () => {
+    if (!invoice || invoice.status === 'Paid') return;
+
+    setIsMarkingPaid(true);
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({
+          advance_payment: invoice.total,
+          balance: 0,
+          status: 'Paid'
+        })
+        .eq('id', invoice.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      toast({
+        title: "Success",
+        description: "Invoice marked as paid successfully.",
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error marking invoice as paid:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark invoice as paid. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMarkingPaid(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -57,6 +98,18 @@ const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
               </Badge>
             </DialogTitle>
             <div className="flex gap-2">
+              {invoice.status !== 'Paid' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAsPaid}
+                  disabled={isMarkingPaid}
+                  className="text-green-600 hover:bg-green-50"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {isMarkingPaid ? (t('marking') || 'Marking...') : (t('markAsPaid') || 'Mark as Paid')}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

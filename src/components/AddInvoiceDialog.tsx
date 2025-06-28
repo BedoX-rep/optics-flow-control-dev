@@ -65,6 +65,28 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     'Accessories'
   ];
 
+  // Fetch clients for search functionality
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients-for-invoice', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching clients:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!user && isOpen,
+  });
+
   // Fetch receipts with full details for data copying
   const { data: receipts = [] } = useQuery({
     queryKey: ['receipts-for-invoice', user?.id],
@@ -129,6 +151,51 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       setInvoiceData(prev => ({ ...prev, invoice_number: invoiceNumber }));
     }
   }, [isOpen, invoiceData.invoice_number]);
+
+  // Handle client selection for auto-filling data
+  const handleClientSelect = (clientId: string) => {
+    if (clientId === "no-client") {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: '',
+        client_phone: '',
+        client_assurance: '',
+        assurance_total: 0
+      }));
+      setPrescriptionData({
+        right_eye_sph: '',
+        right_eye_cyl: '',
+        right_eye_axe: '',
+        left_eye_sph: '',
+        left_eye_cyl: '',
+        left_eye_axe: '',
+        add_value: ''
+      });
+      return;
+    }
+
+    const selectedClient = clients.find(c => c.id === clientId);
+
+    if (selectedClient) {
+      setInvoiceData(prev => ({
+        ...prev,
+        client_name: selectedClient.name || '',
+        client_phone: selectedClient.phone || '',
+        client_assurance: selectedClient.assurance || '',
+      }));
+
+      // Populate prescription data from the selected client
+      setPrescriptionData({
+        right_eye_sph: selectedClient.right_eye_sph?.toString() || '',
+        right_eye_cyl: selectedClient.right_eye_cyl?.toString() || '',
+        right_eye_axe: selectedClient.right_eye_axe?.toString() || '',
+        left_eye_sph: selectedClient.left_eye_sph?.toString() || '',
+        left_eye_cyl: selectedClient.left_eye_cyl?.toString() || '',
+        left_eye_axe: selectedClient.left_eye_axe?.toString() || '',
+        add_value: selectedClient.Add?.toString() || ''
+      });
+    }
+  };
 
   // Handle receipt selection for data copying
   const handleReceiptSelect = (receiptId: string) => {
@@ -886,6 +953,28 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
               <CardTitle>{t('invoiceAndClientDetails') || 'Détails Facture & Client'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Client Selection */}
+              <div className="space-y-2">
+                <Label>{t('selectClient') || 'Select Client'} ({t('optional') || 'Optional'})</Label>
+                <Select onValueChange={handleClientSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('selectClientToAutofill') || 'Select Client to Auto-fill Data'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no-client">{t('noClient') || 'No Client'}</SelectItem>
+                    {clients.length === 0 ? (
+                      <SelectItem value="no-data" disabled>No clients available</SelectItem>
+                    ) : (
+                      clients.map(client => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name} {client.phone ? `- ${client.phone}` : ''}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Receipt Selection */}
               <div className="space-y-2">
                 <Label>{t('copyFromReceipt') || 'Copy from Receipt'} ({t('optional') || 'Optional'})</Label>
