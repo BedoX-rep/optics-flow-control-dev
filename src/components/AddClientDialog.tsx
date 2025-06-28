@@ -139,14 +139,23 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
               {t('addClient')}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-8 w-8 p-0 text-teal-600 hover:text-teal-800 hover:bg-teal-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                type="submit"
+                size="icon"
+                className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClose}
+                className="h-8 w-8 p-0 text-teal-600 hover:text-teal-800 hover:bg-teal-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div className="h-px bg-gradient-to-r from-transparent via-teal-300 to-transparent mt-4"></div>
         </DialogHeader>
@@ -201,17 +210,6 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                   )}
                 />
               </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end">
-              <Button 
-                type="submit"
-                size="icon"
-                className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Eye Prescription */}
