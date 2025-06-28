@@ -139,23 +139,14 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
               {t('addClient')}
             </DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button 
-                type="submit"
-                size="icon"
-                className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClose}
-                className="h-8 w-8 p-0 text-teal-600 hover:text-teal-800 hover:bg-teal-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="h-8 w-8 p-0 text-teal-600 hover:text-teal-800 hover:bg-teal-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           <div className="h-px bg-gradient-to-r from-transparent via-teal-300 to-transparent mt-4"></div>
         </DialogHeader>
@@ -282,10 +273,17 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </div>
 
                 {/* Left Eye */}
-                <div className="space-y-4">
+                <div className="space-y-4 relative">
                   <div className="flex items-center gap-2 pb-2 border-b border-teal-100">
                     <div className="w-3 h-3 bg-teal-400 rounded-full"></div>
                     <h4 className="font-medium text-teal-700">{t('leftEyeShort')}</h4>
+                    <Button 
+                      type="submit"
+                      size="icon"
+                      className="bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-10 w-10 absolute right-0"
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <FormField
