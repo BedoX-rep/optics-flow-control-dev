@@ -426,7 +426,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             </div>
           </div>
 
-          <div className="py-6">
+          <div className="flex flex-wrap items-center gap-3">
             <ProductFilters filters={filters} onChange={handleFilterChange} />
           </div>
         </div>
@@ -724,7 +724,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sm text-gray-600">{t('linkToEye')}:</span>
-                          <div className="flex items-center gap-4">
                           <div className="flex gap-2">
                             <Button
                               type="button"
@@ -792,16 +791,6 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                             >
                               👁️ RE
                             </Button>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`paid-delivery-${item.id}`}
-                              checked={item.paid_at_delivery || false}
-                              onCheckedChange={(checked) => updateItem(item.id, 'paid_at_delivery', checked)}
-                            />
-                            <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm">
-                              {t('paidAtDelivery')}
-                            </Label>
                           </div>
                         </div>
                         {item.appliedMarkup > 0 && (
