@@ -11,10 +11,11 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
-import { Printer, AlertTriangle, Building2, Phone, MapPin, FileText, Download } from 'lucide-react';
+import { Printer, Building2, Phone, MapPin, FileText, Download, Calculator, Settings, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PrintInvoiceDialogProps {
   isOpen: boolean;
@@ -54,7 +55,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [printOptions, setPrintOptions] = useState({
     showAdvancePayment: false,
-    showBalance: false
+    showBalance: false,
+    showProductNames: false
   });
   
   // Category options for items
@@ -367,6 +369,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <div class="client-details">
               <h3>${isFrench ? 'Détails du Client' : 'Client Details'}</h3>
               <p><strong>${isFrench ? 'Nom:' : 'Name:'}</strong> ${invoiceData.client_name}</p>
+              ${invoiceData.client_phone ? `<p><strong>${isFrench ? 'Téléphone:' : 'Phone:'}</strong> ${invoiceData.client_phone}</p>` : ''}
             </div>
           </div>
 
@@ -409,8 +412,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <thead>
               <tr>
                 <th>#</th>
-                <th>${isFrench ? 'Nom de l\'Article' : 'Item Name'}</th>
-                <th>${isFrench ? 'Catégorie' : 'Category'}</th>
+                <th>${isFrench ? 'Article' : 'Item'}</th>
                 <th class="number">${isFrench ? 'Quantité' : 'Quantity'}</th>
                 <th class="price">${isFrench ? 'Prix Unitaire' : 'Unit Price'}</th>
                 <th class="price">Total</th>
@@ -420,8 +422,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
               ${invoiceItems.map((item, index) => `
                 <tr>
                   <td class="number">${index + 1}</td>
-                  <td>${item.name}</td>
-                  <td>${translateCategory(item.category)}</td>
+                  <td>${printOptions.showProductNames ? item.name : translateCategory(item.category)}</td>
                   <td class="number">${item.quantity}</td>
                   <td class="price">${item.price.toFixed(2)} DH</td>
                   <td class="price">${(item.quantity * item.price).toFixed(2)} DH</td>
@@ -463,300 +464,340 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-            <Printer className="h-5 w-5 text-blue-600" />
+      <DialogContent className="max-w-6xl h-[90vh] overflow-hidden">
+        <DialogHeader className="border-b border-teal-100 pb-4 mb-6">
+          <DialogTitle className="text-3xl font-bold text-teal-800 flex items-center gap-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+              <Printer className="h-6 w-6 text-teal-600" />
+            </div>
             {isFrench ? `Imprimer la Facture - ${invoiceData.invoice_number}` : `Print Invoice - ${invoiceData.invoice_number}`}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Business Information Display */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Building2 className="h-4 w-4" />
-                {isFrench ? 'Informations Entreprise' : 'Business Information'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <Label className="text-xs text-gray-600">{isFrench ? 'Nom du Magasin' : 'Store Name'}</Label>
-                <p className="font-medium">{userInfo?.store_name || (isFrench ? 'Non défini' : 'Not set')}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-gray-600">{isFrench ? 'Téléphone' : 'Phone'}</Label>
-                <p className="font-medium">{userInfo?.phone || (isFrench ? 'Non défini' : 'Not set')}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-gray-600">{isFrench ? 'Adresse' : 'Address'}</Label>
-                <p className="font-medium">{userInfo?.address || (isFrench ? 'Non définie' : 'Not set')}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-gray-600">ICE</Label>
-                <p className="font-medium">{userInfo?.ice || (isFrench ? 'Non défini' : 'Not set')}</p>
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="invoice-details" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 bg-teal-50 border border-teal-200">
+            <TabsTrigger value="invoice-details" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <FileText className="h-4 w-4 mr-2" />
+              {isFrench ? 'Détails Facture' : 'Invoice Details'}
+            </TabsTrigger>
+            <TabsTrigger value="print-options" className="text-teal-700 data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+              <Settings className="h-4 w-4 mr-2" />
+              {isFrench ? 'Options d\'Impression' : 'Print Options'}
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Invoice Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <FileText className="h-4 w-4" />
-                {isFrench ? 'Informations Facture' : 'Invoice Information'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="invoice_number" className="text-sm font-medium">{isFrench ? 'Numéro de Facture' : 'Invoice Number'}</Label>
-                <Input
-                  id="invoice_number"
-                  value={invoiceData.invoice_number}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client_name" className="text-sm font-medium">{isFrench ? 'Nom du Client' : 'Client Name'}</Label>
-                <Input
-                  id="client_name"
-                  value={invoiceData.client_name}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="client_phone" className="text-sm font-medium">{isFrench ? 'Téléphone du Client' : 'Client Phone'}</Label>
-                <Input
-                  id="client_phone"
-                  value={invoiceData.client_phone}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">{isFrench ? 'Date Actuelle' : 'Current Date'}</Label>
-                <p className="mt-1 p-2 bg-gray-50 rounded text-sm">{format(new Date(), 'dd/MM/yyyy')}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Prescription Details */}
-          {Object.values(prescriptionData).some(val => val) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{isFrench ? 'Détails de la Prescription' : 'Prescription Details'}</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit SPH' : 'Right Eye SPH'}</Label>
-                  <Input
-                    value={prescriptionData.right_eye_sph}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit CYL' : 'Right Eye CYL'}</Label>
-                  <Input
-                    value={prescriptionData.right_eye_cyl}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Droit AXE' : 'Right Eye AXE'}</Label>
-                  <Input
-                    value={prescriptionData.right_eye_axe}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Valeur ADD' : 'ADD Value'}</Label>
-                  <Input
-                    value={prescriptionData.add_value}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche SPH' : 'Left Eye SPH'}</Label>
-                  <Input
-                    value={prescriptionData.left_eye_sph}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche CYL' : 'Left Eye CYL'}</Label>
-                  <Input
-                    value={prescriptionData.left_eye_cyl}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium">{isFrench ? 'Œil Gauche AXE' : 'Left Eye AXE'}</Label>
-                  <Input
-                    value={prescriptionData.left_eye_axe}
-                    onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Invoice Items */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{isFrench ? 'Articles de la Facture' : 'Invoice Items'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {invoiceItems.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
+          <TabsContent value="invoice-details" className="flex-1 overflow-auto mt-6">
+            <div className="grid grid-cols-2 gap-6 h-full">
+              {/* Business Information */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Building2 className="h-4 w-4" />
+                    {isFrench ? 'Informations Entreprise' : 'Business Information'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <Label className="text-xs text-gray-600">{t('productName') || 'Item Name'}</Label>
+                      <Label className="text-xs text-teal-600">{isFrench ? 'Nom du Magasin' : 'Store Name'}</Label>
+                      <p className="font-medium text-teal-800">{userInfo?.store_name || (isFrench ? 'Non défini' : 'Not set')}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-teal-600">{isFrench ? 'Téléphone' : 'Phone'}</Label>
+                      <p className="font-medium text-teal-800">{userInfo?.phone || (isFrench ? 'Non défini' : 'Not set')}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-xs text-teal-600">{isFrench ? 'Adresse' : 'Address'}</Label>
+                      <p className="font-medium text-teal-800">{userInfo?.address || (isFrench ? 'Non définie' : 'Not set')}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-teal-600">ICE</Label>
+                      <p className="font-medium text-teal-800">{userInfo?.ice || (isFrench ? 'Non défini' : 'Not set')}</p>
+                    </div>
+                  </div>
+
+                  <Separator className="my-4 border-teal-200" />
+
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="invoice_number" className="text-sm font-medium text-teal-700">{isFrench ? 'Numéro de Facture' : 'Invoice Number'}</Label>
                       <Input
-                        value={item.name}
-                        onChange={(e) => updateInvoiceItem(index, 'name', e.target.value)}
-                        className="mt-1"
+                        id="invoice_number"
+                        value={invoiceData.invoice_number}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
+                        className="mt-1 border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-600">{t('category') || 'Category'}</Label>
-                      <Select
-                        value={item.category}
-                        onValueChange={(value) => updateInvoiceItem(index, 'category', value)}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CATEGORY_OPTIONS.map(category => (
-                            <SelectItem key={category} value={category}>
-                              {t(category.toLowerCase().replace(/\s+/g, '')) || category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">{t('quantity') || 'Quantity'}</Label>
+                      <Label htmlFor="client_name" className="text-sm font-medium text-teal-700">{isFrench ? 'Nom du Client' : 'Client Name'}</Label>
                       <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateInvoiceItem(index, 'quantity', parseInt(e.target.value) || 0)}
-                        className="mt-1"
+                        id="client_name"
+                        value={invoiceData.client_name}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, client_name: e.target.value }))}
+                        className="mt-1 border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-600">{t('unitPrice') || 'Unit Price'} (DH)</Label>
+                      <Label htmlFor="client_phone" className="text-sm font-medium text-teal-700">{isFrench ? 'Téléphone du Client' : 'Client Phone'}</Label>
                       <Input
-                        type="number"
-                        step="0.01"
-                        value={item.price}
-                        onChange={(e) => updateInvoiceItem(index, 'price', parseFloat(e.target.value) || 0)}
-                        className="mt-1"
+                        id="client_phone"
+                        value={invoiceData.client_phone}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, client_phone: e.target.value }))}
+                        className="mt-1 border-teal-200 focus:border-teal-500 h-9"
                       />
                     </div>
-                    <div>
-                      <Label className="text-xs text-gray-600">Total</Label>
-                      <p className="mt-1 p-2 bg-white rounded font-medium">
-                        {(item.quantity * item.price).toFixed(2)} DH
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Invoice Items & Prescription */}
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Calculator className="h-4 w-4" />
+                    {isFrench ? 'Articles & Prescription' : 'Items & Prescription'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  {/* Prescription Section */}
+                  {Object.values(prescriptionData).some(val => val) && (
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-teal-700">{isFrench ? 'Prescription' : 'Prescription'}</Label>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OD SPH' : 'Right SPH'}</Label>
+                          <Input
+                            value={prescriptionData.right_eye_sph}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OD CYL' : 'Right CYL'}</Label>
+                          <Input
+                            value={prescriptionData.right_eye_cyl}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_cyl: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OD AXE' : 'Right AXE'}</Label>
+                          <Input
+                            value={prescriptionData.right_eye_axe}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_axe: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">ADD</Label>
+                          <Input
+                            value={prescriptionData.add_value}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, add_value: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OG SPH' : 'Left SPH'}</Label>
+                          <Input
+                            value={prescriptionData.left_eye_sph}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_sph: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OG CYL' : 'Left CYL'}</Label>
+                          <Input
+                            value={prescriptionData.left_eye_cyl}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_cyl: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-teal-600">{isFrench ? 'OG AXE' : 'Left AXE'}</Label>
+                          <Input
+                            value={prescriptionData.left_eye_axe}
+                            onChange={(e) => setPrescriptionData(prev => ({ ...prev, left_eye_axe: e.target.value }))}
+                            className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator className="border-teal-200" />
+
+                  {/* Invoice Items */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-teal-700">{isFrench ? 'Articles' : 'Items'}</Label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {invoiceItems.map((item, index) => (
+                        <div key={item.id} className="grid grid-cols-5 gap-2 p-2 bg-teal-50 rounded-lg">
+                          <div>
+                            <Input
+                              value={item.name}
+                              onChange={(e) => updateInvoiceItem(index, 'name', e.target.value)}
+                              className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                              placeholder="Name"
+                            />
+                          </div>
+                          <div>
+                            <Select
+                              value={item.category}
+                              onValueChange={(value) => updateInvoiceItem(index, 'category', value)}
+                            >
+                              <SelectTrigger className="h-8 text-xs border-teal-200 focus:border-teal-500">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CATEGORY_OPTIONS.map(category => (
+                                  <SelectItem key={category} value={category}>
+                                    {translateCategory(category)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateInvoiceItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                              className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                              placeholder="Qty"
+                            />
+                          </div>
+                          <div>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={item.price}
+                              onChange={(e) => updateInvoiceItem(index, 'price', parseFloat(e.target.value) || 0)}
+                              className="h-8 text-xs border-teal-200 focus:border-teal-500"
+                              placeholder="Price"
+                            />
+                          </div>
+                          <div>
+                            <p className="h-8 px-2 bg-white rounded text-xs flex items-center font-medium text-teal-800">
+                              {(item.quantity * item.price).toFixed(2)} DH
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                      <p className="text-xl font-bold text-teal-800 text-center">
+                        Total: {total.toFixed(2)} DH
                       </p>
                     </div>
                   </div>
-                ))}
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="text-right">
-                <p className="text-2xl font-bold text-blue-600">
-                  Total: {total.toFixed(2)} DH
-                </p>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{isFrench ? 'Notes' : 'Notes'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={invoiceData.notes}
-                onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder={isFrench ? "Notes supplémentaires pour la facture..." : "Additional notes for the invoice..."}
-                rows={3}
-              />
-            </CardContent>
-          </Card>
+                  {/* Notes */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-teal-700">{isFrench ? 'Notes' : 'Notes'}</Label>
+                    <Textarea
+                      value={invoiceData.notes}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder={isFrench ? "Notes supplémentaires..." : "Additional notes..."}
+                      rows={2}
+                      className="border-teal-200 focus:border-teal-500"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-          {/* Print Options */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{isFrench ? 'Options d\'Impression' : 'Print Options'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="showAdvancePayment"
-                    checked={printOptions.showAdvancePayment}
-                    onChange={(e) => setPrintOptions(prev => ({ ...prev, showAdvancePayment: e.target.checked }))}
-                    className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                  />
-                  <Label htmlFor="showAdvancePayment" className="text-sm font-medium">
-                    {isFrench ? 'Afficher l\'acompte' : 'Show advance payment'}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="showBalance"
-                    checked={printOptions.showBalance}
-                    onChange={(e) => setPrintOptions(prev => ({ ...prev, showBalance: e.target.checked }))}
-                    className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                  />
-                  <Label htmlFor="showBalance" className="text-sm font-medium">
-                    {isFrench ? 'Afficher le solde restant' : 'Show balance due'}
-                  </Label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TabsContent value="print-options" className="flex-1 overflow-auto mt-6">
+            <div className="max-w-2xl mx-auto">
+              <Card className="border-teal-200 shadow-sm">
+                <CardHeader className="bg-teal-50 border-b border-teal-200 py-3">
+                  <CardTitle className="text-teal-800 flex items-center gap-2 text-base">
+                    <Settings className="h-4 w-4" />
+                    {isFrench ? 'Options d\'Impression' : 'Print Options'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="showAdvancePayment" className="text-sm font-medium text-teal-700">
+                        {isFrench ? 'Afficher l\'acompte' : 'Show advance payment'}
+                      </Label>
+                      <input
+                        type="checkbox"
+                        id="showAdvancePayment"
+                        checked={printOptions.showAdvancePayment}
+                        onChange={(e) => setPrintOptions(prev => ({ ...prev, showAdvancePayment: e.target.checked }))}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="showBalance" className="text-sm font-medium text-teal-700">
+                        {isFrench ? 'Afficher le solde restant' : 'Show balance due'}
+                      </Label>
+                      <input
+                        type="checkbox"
+                        id="showBalance"
+                        checked={printOptions.showBalance}
+                        onChange={(e) => setPrintOptions(prev => ({ ...prev, showBalance: e.target.checked }))}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
+                      />
+                    </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button variant="outline" onClick={onClose}>
-              {isFrench ? 'Annuler' : 'Cancel'}
-            </Button>
-            <Button 
-              onClick={downloadPDF} 
-              disabled={isLoading}
-              variant="outline"
-              className="border-green-600 text-green-600 hover:bg-green-50"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              {isLoading ? (isFrench ? 'Génération...' : 'Generating...') : (isFrench ? 'Télécharger PDF' : 'Download PDF')}
-            </Button>
-            <Button 
-              onClick={handlePrint} 
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              {isLoading ? (isFrench ? 'Impression...' : 'Printing...') : (isFrench ? 'Imprimer la Facture' : 'Print Invoice')}
-            </Button>
-          </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="showProductNames" className="text-sm font-medium text-teal-700">
+                        {isFrench ? 'Afficher les noms des produits' : 'Show product names'}
+                      </Label>
+                      <input
+                        type="checkbox"
+                        id="showProductNames"
+                        checked={printOptions.showProductNames}
+                        onChange={(e) => setPrintOptions(prev => ({ ...prev, showProductNames: e.target.checked }))}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                    <h4 className="font-semibold text-teal-800 mb-2 text-sm">
+                      {isFrench ? 'Aperçu des articles' : 'Items Preview'}
+                    </h4>
+                    <div className="text-xs text-teal-600">
+                      {printOptions.showProductNames 
+                        ? (isFrench ? 'Les noms complets des produits seront affichés' : 'Full product names will be displayed')
+                        : (isFrench ? 'Seules les catégories des produits seront affichées' : 'Only product categories will be displayed')
+                      }
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-4 border-t border-teal-100 mt-auto">
+          <Button variant="outline" onClick={onClose} className="border-teal-300 text-teal-700 hover:bg-teal-50">
+            {isFrench ? 'Annuler' : 'Cancel'}
+          </Button>
+          <Button 
+            onClick={downloadPDF} 
+            disabled={isLoading}
+            variant="outline"
+            className="border-teal-600 text-teal-600 hover:bg-teal-50"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isLoading ? (isFrench ? 'Génération...' : 'Generating...') : (isFrench ? 'Télécharger PDF' : 'Download PDF')}
+          </Button>
+          <Button 
+            onClick={handlePrint} 
+            disabled={isLoading}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-8"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            {isLoading ? (isFrench ? 'Impression...' : 'Printing...') : (isFrench ? 'Imprimer' : 'Print')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
