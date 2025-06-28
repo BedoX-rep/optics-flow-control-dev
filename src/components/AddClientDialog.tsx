@@ -171,6 +171,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           {...field} 
                           placeholder={t('enterClientName')} 
                           className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                          autoComplete="off"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
@@ -192,6 +193,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           type="tel" 
                           placeholder={t('enterPhoneNumber')} 
                           className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                          autoComplete="off"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
