@@ -19,9 +19,21 @@ interface SubscriptionCache {
   };
 }
 
+// Rate limiting for subscription API calls
+interface RateLimitTracker {
+  [userId: string]: {
+    lastCall: number;
+    callsInWindow: number[];
+  };
+}
+
 const permissionsCache: PermissionsCache = {};
 const subscriptionCache: SubscriptionCache = {};
+const rateLimitTracker: RateLimitTracker = {};
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+const MIN_CALL_INTERVAL = 60 * 1000; // 1 minute
+const MAX_CALLS_PER_WINDOW = 3; // 3 calls per 5 minutes
 
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
                          'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
@@ -109,6 +121,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Rate limiting check for subscription API calls
+  const canMakeSubscriptionCall = (userId: string): boolean => {
+    const now = Date.now();
+    
+    if (!rateLimitTracker[userId]) {
+      rateLimitTracker[userId] = {
+        lastCall: 0,
+        callsInWindow: []
+      };
+    }
+
+    const userTracker = rateLimitTracker[userId];
+    
+    // Check minimum interval (1 call per minute)
+    if (now - userTracker.lastCall < MIN_CALL_INTERVAL) {
+      console.log('Rate limit: Too soon since last call (1 minute minimum)');
+      return false;
+    }
+
+    // Clean up old calls outside the 5-minute window
+    userTracker.callsInWindow = userTracker.callsInWindow.filter(
+      callTime => now - callTime < RATE_LIMIT_WINDOW
+    );
+
+    // Check if we've exceeded max calls per window
+    if (userTracker.callsInWindow.length >= MAX_CALLS_PER_WINDOW) {
+      console.log('Rate limit: Maximum calls per 5-minute window exceeded');
+      return false;
+    }
+
+    return true;
+  };
+
   const fetchSubscription = async (userId: string, force: boolean = false) => {
     const now = Date.now();
 
@@ -122,7 +167,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return; // Skip if recently fetched and not forced
     }
 
+    // Apply rate limiting for API calls
+    if (!canMakeSubscriptionCall(userId)) {
+      console.log('Subscription API call blocked due to rate limiting');
+      return; // Skip API call due to rate limiting
+    }
+
     try {
+      // Update rate limit tracker
+      if (!rateLimitTracker[userId]) {
+        rateLimitTracker[userId] = { lastCall: 0, callsInWindow: [] };
+      }
+      rateLimitTracker[userId].lastCall = now;
+      rateLimitTracker[userId].callsInWindow.push(now);
+
       const { data: subscriptionData, error: subError } = await supabase
         .from('subscriptions')
         .select('*')
@@ -229,6 +287,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!user) return;
+
+    // Check rate limiting even for forced calls
+    if (force && !canMakeSubscriptionCall(user.id)) {
+      console.log('Forced subscription refresh blocked due to rate limiting');
+      return;
+    }
 
     // Only make API call if forced or no subscription data exists
     if (force || !subscription) {
