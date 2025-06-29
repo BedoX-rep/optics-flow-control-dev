@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
       retry: false,
       networkMode: 'offlineFirst',
       refetchInterval: false,
-      refetchIntervalInBackground: true
+      refetchIntervalInBackground: false
     },
   },
 });
