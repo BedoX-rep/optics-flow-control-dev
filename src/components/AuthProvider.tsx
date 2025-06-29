@@ -216,6 +216,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSubscription(payload.new as UserSubscription);
             setLastRefreshTime(Date.now());
             
+            // Invalidate permissions cache and update permissions based on current role
+            invalidatePermissionsCache(userId);
+            updatePermissionsForRole(userId, sessionRoleRef.current);
+            
             // Invalidate React Query cache for subscription-related queries
             if (window.queryClient) {
               window.queryClient.invalidateQueries({ 
@@ -229,6 +233,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } else if (payload.eventType === 'DELETE') {
             setSubscription(null);
+            
+            // Invalidate permissions cache and update permissions based on current role
+            invalidatePermissionsCache(userId);
+            updatePermissionsForRole(userId, sessionRoleRef.current);
             
             // Invalidate React Query cache when subscription is deleted
             if (window.queryClient) {
