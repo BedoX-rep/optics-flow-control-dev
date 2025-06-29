@@ -57,6 +57,42 @@ const ProtectedRoute = ({
   requiredPermission?: string;
 }) => {
   const { user, subscription, isLoading, permissions, sessionRole } = useAuth();
+  const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
+
+  // Effect to handle instant redirects when sessionRole changes
+  useEffect(() => {
+    if (isLoading || !user) return;
+
+    // Check permission requirements
+    if (requiredPermission) {
+      // Special case for admin session requirement
+      if (requiredPermission === 'admin_session') {
+        if (sessionRole !== 'Admin') {
+          setShouldRedirect('/dashboard');
+          return;
+        }
+      }
+      // Check regular permissions for non-admin sessions
+      else if (sessionRole !== 'Admin') {
+        if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+          setShouldRedirect('/dashboard');
+          return;
+        }
+      }
+    }
+
+    // Check subscription requirements
+    if (requiresActiveSubscription && subscription) {
+      const subStatus = subscription.subscription_status.toLowerCase();
+      if (subStatus !== 'active') {
+        setShouldRedirect('/subscriptions');
+        return;
+      }
+    }
+
+    // Clear redirect if all checks pass
+    setShouldRedirect(null);
+  }, [sessionRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
 
   // Show loading state while initial auth check is happening
   if (isLoading) {
@@ -75,31 +111,9 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
-  // Instant permission checks - redirect immediately when conditions aren't met
-  if (user && !isLoading) {
-    // Check permission requirements
-    if (requiredPermission) {
-      // Special case for admin session requirement
-      if (requiredPermission === 'admin_session') {
-        if (sessionRole !== 'Admin') {
-          return <Navigate to="/dashboard" replace />;
-        }
-      }
-      // Check regular permissions for non-admin sessions
-      else if (sessionRole !== 'Admin') {
-        if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
-          return <Navigate to="/dashboard" replace />;
-        }
-      }
-    }
-
-    // Check subscription requirements - instant redirect on status change
-    if (requiresActiveSubscription && subscription) {
-      const subStatus = subscription.subscription_status.toLowerCase();
-      if (subStatus !== 'active') {
-        return <Navigate to="/subscriptions" replace />;
-      }
-    }
+  // Handle instant redirects
+  if (shouldRedirect) {
+    return <Navigate to={shouldRedirect} replace />;
   }
 
   return <>{children}</>;
