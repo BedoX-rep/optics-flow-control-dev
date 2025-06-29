@@ -400,7 +400,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Only handle specific auth events that actually require action
       if (event === 'SIGNED_IN') {
-        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in only
+        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription on sign-in events
       } else if (event === 'SIGNED_OUT') {
         debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
       } else if (event === 'TOKEN_REFRESHED') {
