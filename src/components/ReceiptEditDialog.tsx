@@ -336,7 +336,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     montage_status: '',
     order_type: '',
     items: [] as any[],
-    total: 0
+    total: 0,
+    created_at: ''
   });
 
   // Memoized calculations
@@ -446,7 +447,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             paid_at_delivery: Boolean(item.paid_at_delivery),
             product: item.product // This will now contain the full product data
           })),
-          total: fullReceipt.total || 0
+          total: fullReceipt.total || 0,
+          created_at: fullReceipt.created_at ? new Date(fullReceipt.created_at).toISOString().slice(0, 16) : ''
         });
       }
     };
@@ -492,7 +494,8 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           total: total,
           paid_at_delivery_cost: paidAtDeliveryCost,
           total_discount: formData.total_discount || 0,
-          tax: formData.tax || 0
+          tax: formData.tax || 0,
+          created_at: formData.created_at ? new Date(formData.created_at).toISOString() : null
         })
         .eq('id', receipt.id);
 
@@ -838,6 +841,15 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       type="number"
                       value={formData.advance_payment}
                       onChange={(e) => handleFormFieldChange('advance_payment', parseFloat(e.target.value) || 0)}
+                      className="border-teal-200 focus:border-teal-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium">{t('createdAt') || 'Created At'}</Label>
+                    <Input
+                      type="datetime-local"
+                      value={formData.created_at}
+                      onChange={(e) => handleFormFieldChange('created_at', e.target.value)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
