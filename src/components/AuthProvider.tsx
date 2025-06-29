@@ -280,8 +280,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let realtimeChannel: RealtimeChannel | null = null;
     let sessionCheckTimeout: NodeJS.Timeout | null = null;
+    let hasInitialized = false;
 
-    const debouncedSessionCheck = (currentSession: Session | null) => {
+    const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false) => {
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
       }
@@ -291,8 +292,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Only fetch subscription if we don't have recent data
-          fetchSubscription(currentSession.user.id, false);
+          // Only fetch subscription on initial load or if we don't have any subscription data
+          if (isInitialCheck || !subscription) {
+            fetchSubscription(currentSession.user.id, false);
+          }
           updatePermissionsForRole(currentSession.user.id, sessionRole);
 
           // Set up real-time subscription for existing session if not already set up
@@ -323,13 +326,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         realtimeChannel = null;
       }
 
-      debouncedSessionCheck(currentSession);
+      // Only trigger subscription fetch on actual auth changes, not window focus
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_OUT') {
+        debouncedSessionCheck(currentSession, event === 'SIGNED_IN');
+      }
     });
 
     // Check for existing session - only once on mount
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      debouncedSessionCheck(currentSession);
-    });
+    if (!hasInitialized) {
+      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+        hasInitialized = true;
+        debouncedSessionCheck(currentSession, true);
+      });
+    }
 
     return () => {
       authSubscription.unsubscribe();
@@ -340,7 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(sessionCheckTimeout);
       }
     };
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   // Handle instant permission updates when sessionRole changes
   useEffect(() => {
