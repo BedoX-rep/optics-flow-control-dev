@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Permissions cache
 interface PermissionsCache {
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>(
     (typeof window !== 'undefined' && localStorage.getItem('sessionRole')) as 'Admin' | 'Store Staff' || 'Store Staff'
   );
+  const sessionRoleRef = useRef(sessionRole);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
@@ -107,7 +109,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchSubscription = async (userId: string) => {
+  const fetchSubscription = async (userId: string, force: boolean = false) => {
+    const now = Date.now();
+
+    // Get current subscription state to avoid stale closure
+    const getCurrentSubscription = () => {
+      return subscription;
+    };
+
+    // Check if we have cached data and it's still fresh (unless forced)
+    if (!force && getCurrentSubscription() && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently fetched and not forced
+    }
+
     try {
       const { data: subscriptionData, error: subError } = await supabase
         .from('subscriptions')
@@ -118,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (subError) throw subError;
 
       setSubscription(subscriptionData);
-      setLastRefreshTime(Date.now());
+      setLastRefreshTime(now);
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
@@ -139,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         (payload) => {
           console.log('Real-time subscription update:', payload);
-          
+
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setSubscription(payload.new as UserSubscription);
             setLastRefreshTime(Date.now());
@@ -208,17 +222,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSubscription = async (force: boolean = false) => {
     const now = Date.now();
-    
+
     // With real-time subscriptions, only refresh if forced or very stale
     if (!force && subscription && now - lastRefreshTime < REFRESH_INTERVAL) {
       return; // Skip if recently refreshed and we have real-time data
     }
 
     if (!user) return;
-    
+
     // Only make API call if forced or no subscription data exists
     if (force || !subscription) {
-      await fetchSubscription(user.id);
+      await fetchSubscription(user.id, force);
     }
   };
 
@@ -270,72 +284,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    let realtimeChannel: any = null;
+    let realtimeChannel: RealtimeChannel | null = null;
+    let sessionCheckTimeout: NodeJS.Timeout | null = null;
+    let hasInitialized = false;
 
-    // First set up auth state listener to catch changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+    const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false, forceSubscriptionFetch: boolean = false) => {
+      if (sessionCheckTimeout) {
+        clearTimeout(sessionCheckTimeout);
+      }
 
-        // Clean up previous real-time subscription
-        if (realtimeChannel) {
-          supabase.removeChannel(realtimeChannel);
-          realtimeChannel = null;
-        }
+      sessionCheckTimeout = setTimeout(() => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
 
-        // Clear subscription data on sign out
-        if (event === 'SIGNED_OUT') {
+        if (currentSession?.user) {
+          // Only fetch subscription on initial load or force
+          if (isInitialCheck || forceSubscriptionFetch) {
+            fetchSubscription(currentSession.user.id, false);
+          }
+          updatePermissionsForRole(currentSession.user.id, sessionRoleRef.current);
+
+          // Set up real-time subscription for existing session if not already set up
+          if (!realtimeChannel) {
+            realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
+          }
+        } else {
           setSubscription(null);
           setPermissions(null);
-          localStorage.removeItem('sessionRole');
           setSessionRole('Store Staff');
-          setIsLoading(false);
-        } 
-        // Fetch subscription and set up real-time only on actual sign in
-        else if (event === 'SIGNED_IN' && newSession?.user) {
-          fetchSubscription(newSession.user!.id);
-          updatePermissionsForRole(newSession.user!.id, sessionRole);
-          
-          // Set up real-time subscription
-          realtimeChannel = setupRealtimeSubscription(newSession.user!.id);
-          
-          setIsLoading(false);
-        }
-        // Handle token refresh without fetching subscription (real-time handles updates)
-        else if (event === 'TOKEN_REFRESHED' && newSession?.user) {
-          updatePermissionsForRole(newSession.user!.id, sessionRole);
-          setIsLoading(false);
-        }
-      }
-    );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+          // Clean up real-time subscription when logged out
+          if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+          }
+        }
+        setIsLoading(false);
+      }, 100); // 100ms debounce
+    };
 
-      if (currentSession?.user) {
-        fetchSubscription(currentSession.user.id);
-        updatePermissionsForRole(currentSession.user.id, sessionRole);
-        
-        // Set up real-time subscription for existing session
-        realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log('Auth state change event:', event); // Debug log
+      
+      // Clean up existing real-time subscription on auth change
+      if (realtimeChannel && event === 'SIGNED_OUT') {
+        await supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
       }
 
-      setIsLoading(false);
+      // Only handle specific auth events that actually require action
+      if (event === 'SIGNED_IN') {
+        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+      } else if (event === 'SIGNED_OUT') {
+        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
+      } else if (event === 'TOKEN_REFRESHED') {
+        // For token refresh, just update session without fetching subscription
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+      }
+      // Ignore all other events (INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED, etc.)
     });
+
+    // Check for existing session - only once on mount
+    if (!hasInitialized) {
+      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+        hasInitialized = true;
+        debouncedSessionCheck(currentSession, true, true);
+      });
+    }
 
     return () => {
       authSubscription.unsubscribe();
       if (realtimeChannel) {
         supabase.removeChannel(realtimeChannel);
       }
+      if (sessionCheckTimeout) {
+        clearTimeout(sessionCheckTimeout);
+      }
     };
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   // Handle instant permission updates when sessionRole changes
   useEffect(() => {
+    sessionRoleRef.current = sessionRole;
     if (user && !isLoading) {
       updatePermissionsForRole(user.id, sessionRole);
     }
@@ -343,6 +376,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
+    sessionRoleRef.current = role;
     localStorage.setItem('sessionRole', role);
   };
 
