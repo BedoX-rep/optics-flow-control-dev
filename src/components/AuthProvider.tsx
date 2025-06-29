@@ -91,7 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
-  const [pendingRefresh, setPendingRefresh] = useState<boolean>(false);
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
@@ -198,22 +197,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Handle page visibility changes for pending refreshes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && pendingRefresh) {
-        console.log('User returned to tab with pending subscription refresh - refreshing now...');
-        setPendingRefresh(false);
-        window.location.reload();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [pendingRefresh]);
-
   // Real-time subscription handler
   const setupRealtimeSubscription = (userId: string) => {
     const channel = supabase
@@ -228,13 +211,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         (payload) => {
           console.log('Real-time subscription update:', payload);
-
-          // Verify the event is for the current user before processing
-          const eventUserId = payload.new?.user_id || payload.old?.user_id;
-          if (eventUserId !== userId) {
-            console.log('Ignoring subscription event for different user:', eventUserId);
-            return;
-          }
 
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setSubscription(payload.new as UserSubscription);
@@ -251,17 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 exact: false 
               });
             }
-
-            // Handle page refresh based on visibility
-            if (document.hidden) {
-              console.log(`Subscription changed for user ${userId} while tab inactive - will refresh when user returns`);
-              setPendingRefresh(true);
-            } else {
-              console.log(`Subscription changed for user ${userId} - refreshing page in 2 seconds...`);
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
-            }
           } else if (payload.eventType === 'DELETE') {
             setSubscription(null);
             
@@ -275,17 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 queryKey: ['user-subscription', userId],
                 exact: false 
               });
-            }
-
-            // Handle page refresh based on visibility
-            if (document.hidden) {
-              console.log(`Subscription deleted for user ${userId} while tab inactive - will refresh when user returns`);
-              setPendingRefresh(true);
-            } else {
-              console.log(`Subscription deleted for user ${userId} - refreshing page in 2 seconds...`);
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
             }
           }
         }
