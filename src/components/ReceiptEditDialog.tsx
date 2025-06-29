@@ -786,6 +786,15 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label className="text-teal-700 font-medium">{t('createdAt') || 'Created At'}</Label>
+                    <Input
+                      type="datetime-local"
+                      value={formData.created_at}
+                      onChange={(e) => handleFormFieldChange('created_at', e.target.value)}
+                      className="border-teal-200 focus:border-teal-500"
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
@@ -841,15 +850,6 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       type="number"
                       value={formData.advance_payment}
                       onChange={(e) => handleFormFieldChange('advance_payment', parseFloat(e.target.value) || 0)}
-                      className="border-teal-200 focus:border-teal-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-teal-700 font-medium">{t('createdAt') || 'Created At'}</Label>
-                    <Input
-                      type="datetime-local"
-                      value={formData.created_at}
-                      onChange={(e) => handleFormFieldChange('created_at', e.target.value)}
                       className="border-teal-200 focus:border-teal-500"
                     />
                   </div>
