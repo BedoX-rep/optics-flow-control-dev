@@ -79,8 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
+  const [lastWindowFocusTime, setLastWindowFocusTime] = useState<number>(Date.now());
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
+  const MIN_UNFOCUS_DURATION = 5 * 60 * 1000; // 5 minutes
 
   // Cache helper functions
   const getCachedPermissions = (userId: string): UserPermissions | null => {
@@ -109,13 +111,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchSubscription = async (userId: string, force: boolean = false) => {
+  const fetchSubscription = async (userId: string, force: boolean = false, allowWindowFocusFetch: boolean = false) => {
     const now = Date.now();
 
     // Get current subscription state to avoid stale closure
     const getCurrentSubscription = () => {
       return subscription;
     };
+
+    // Check window focus timing - don't fetch unless window has been unfocused for 5+ minutes
+    const timeSinceLastFocus = now - lastWindowFocusTime;
+    if (!force && !allowWindowFocusFetch && timeSinceLastFocus < MIN_UNFOCUS_DURATION) {
+      return; // Skip if window was recently focused
+    }
 
     // Check if we have cached data and it's still fresh (unless forced)
     if (!force && getCurrentSubscription() && now - lastRefreshTime < REFRESH_INTERVAL) {
@@ -288,6 +296,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let sessionCheckTimeout: NodeJS.Timeout | null = null;
     let hasInitialized = false;
 
+    // Window focus tracking
+    const handleWindowFocus = () => {
+      setLastWindowFocusTime(Date.now());
+    };
+
+    const handleWindowBlur = () => {
+      // Window lost focus - don't update lastWindowFocusTime
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('blur', handleWindowBlur);
+
     const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false, forceSubscriptionFetch: boolean = false) => {
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
@@ -300,7 +320,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (currentSession?.user) {
           // Only fetch subscription on initial load or force
           if (isInitialCheck || forceSubscriptionFetch) {
-            fetchSubscription(currentSession.user.id, false);
+            fetchSubscription(currentSession.user.id, false, isInitialCheck);
           }
           updatePermissionsForRole(currentSession.user.id, sessionRoleRef.current);
 
@@ -363,6 +383,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
       }
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('blur', handleWindowBlur);
     };
   }, []); // Empty dependency array to run only once
 
