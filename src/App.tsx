@@ -94,32 +94,6 @@ const ProtectedRoute = ({
     setShouldRedirect(null);
   }, [sessionRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
 
-  // Listen for subscription status changes and re-evaluate immediately
-  useEffect(() => {
-    const handleSubscriptionStatusChange = (event: CustomEvent) => {
-      console.log('Route protection re-evaluating due to subscription status change:', event.detail);
-      
-      if (isLoading || !user) return;
-
-      // Force immediate re-evaluation of subscription requirements
-      if (requiresActiveSubscription && subscription) {
-        const subStatus = subscription.subscription_status.toLowerCase();
-        if (subStatus !== 'active') {
-          setShouldRedirect('/subscriptions');
-        } else {
-          // Clear redirect if subscription is now active
-          setShouldRedirect(null);
-        }
-      }
-    };
-
-    window.addEventListener('subscription-status-changed', handleSubscriptionStatusChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('subscription-status-changed', handleSubscriptionStatusChange as EventListener);
-    };
-  }, [requiresActiveSubscription, subscription, isLoading, user]);
-
   // Show loading state while initial auth check is happening
   if (isLoading) {
     return (
