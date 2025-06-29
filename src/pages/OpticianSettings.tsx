@@ -113,12 +113,11 @@ const OpticianSettings = () => {
       }
     },
     enabled: !!user,
-    staleTime: 12 * 60 * 60 * 1000, // 12 hours
-    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (previously cacheTime)
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
-    refetchIntervalInBackground: true
+    refetchOnReconnect: true
   });
 
   // Update form data when user info is loaded
@@ -145,23 +144,31 @@ const OpticianSettings = () => {
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async (data: UserInformation) => {
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from('user_information')
         .upsert({
           ...data,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      return updatedData;
     },
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
       toast({
         title: t('settingsSaved'),
         description: t('opticianInfoUpdated'),
       });
       setHasChanges(false);
+      
+      // Update the query cache with the new data immediately
+      queryClient.setQueryData(['user-information', user?.id], updatedData);
+      
+      // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
     },
     onError: (error) => {
@@ -204,7 +211,14 @@ const OpticianSettings = () => {
         .from('product-images')
         .getPublicUrl(filePath);
 
-      handleInputChange('logo_url', data.publicUrl);
+      const newLogoUrl = data.publicUrl;
+      handleInputChange('logo_url', newLogoUrl);
+
+      // Update the cache immediately with the new logo URL
+      if (userInfo) {
+        const updatedUserInfo = { ...userInfo, logo_url: newLogoUrl };
+        queryClient.setQueryData(['user-information', user?.id], updatedUserInfo);
+      }
 
       toast({
         title: t('logoUploaded'),
