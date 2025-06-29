@@ -43,9 +43,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Make queryClient globally accessible for real-time updates
-(window as any).queryClient = queryClient;
-
 // Protected route wrapper
 const ProtectedRoute = ({ 
   children, 
