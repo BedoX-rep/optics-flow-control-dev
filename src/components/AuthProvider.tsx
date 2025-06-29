@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>(
     (typeof window !== 'undefined' && localStorage.getItem('sessionRole')) as 'Admin' | 'Store Staff' || 'Store Staff'
   );
+  const sessionRoleRef = useRef(sessionRole);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
@@ -111,8 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchSubscription = async (userId: string, force: boolean = false) => {
     const now = Date.now();
 
+    // Get current subscription state to avoid stale closure
+    const getCurrentSubscription = () => {
+      return subscription;
+    };
+
     // Check if we have cached data and it's still fresh (unless forced)
-    if (!force && subscription && now - lastRefreshTime < REFRESH_INTERVAL) {
+    if (!force && getCurrentSubscription() && now - lastRefreshTime < REFRESH_INTERVAL) {
       return; // Skip if recently fetched and not forced
     }
 
@@ -292,11 +298,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Only fetch subscription on initial load, force, or if we don't have any subscription data
-          if (isInitialCheck || forceSubscriptionFetch || !subscription) {
+          // Only fetch subscription on initial load or force
+          if (isInitialCheck || forceSubscriptionFetch) {
             fetchSubscription(currentSession.user.id, false);
           }
-          updatePermissionsForRole(currentSession.user.id, sessionRole);
+          updatePermissionsForRole(currentSession.user.id, sessionRoleRef.current);
 
           // Set up real-time subscription for existing session if not already set up
           if (!realtimeChannel) {
@@ -362,6 +368,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle instant permission updates when sessionRole changes
   useEffect(() => {
+    sessionRoleRef.current = sessionRole;
     if (user && !isLoading) {
       updatePermissionsForRole(user.id, sessionRole);
     }
@@ -369,6 +376,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
+    sessionRoleRef.current = role;
     localStorage.setItem('sessionRole', role);
   };
 
