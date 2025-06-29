@@ -116,7 +116,7 @@ const OpticianSettings = () => {
     staleTime: 25 * 60 * 1000, // Keep data fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnReconnect: true
   });
 
