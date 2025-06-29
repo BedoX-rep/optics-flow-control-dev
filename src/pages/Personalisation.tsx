@@ -139,12 +139,11 @@ const Personalisation = () => {
       }
     },
     enabled: !!user,
-    staleTime: 12 * 60 * 60 * 1000, // 12 hours
-    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
-    refetchIntervalInBackground: true
+    refetchOnReconnect: true
   });
 
   // Update form data when user personalisation is loaded
@@ -182,7 +181,7 @@ const Personalisation = () => {
     mutationFn: async (data: PersonalisationData) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from('user_information')
         .upsert({
           user_id: user.id,
@@ -211,21 +210,25 @@ const Personalisation = () => {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      return updatedData;
     },
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
       toast({
         title: t('settingsUpdated'),
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      // Invalidate the unified query key to ensure all pages using user information are updated
+      
+      // Update the query cache with the new data immediately
+      queryClient.setQueryData(['user-information', user?.id], updatedData);
+      
+      // Also invalidate to ensure consistency across all pages
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
-
-      // Force refetch of the user information query to ensure immediate update
-      queryClient.refetchQueries({ queryKey: ['user-information', user?.id] });
     },
     onError: (error) => {
       console.error('Error saving user personalisation:', error);
