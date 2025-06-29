@@ -113,6 +113,12 @@ const OpticianSettings = () => {
       }
     },
     enabled: !!user,
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours
+    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
+    refetchIntervalInBackground: true
   });
 
   // Update form data when user info is loaded

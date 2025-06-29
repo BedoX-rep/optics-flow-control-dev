@@ -309,10 +309,12 @@ const NewReceipt = () => {
       }
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours
+    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
+    refetchIntervalInBackground: true
   });
 
   useEffect(() => {

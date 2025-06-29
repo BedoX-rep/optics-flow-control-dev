@@ -75,7 +75,7 @@ const Personalisation = () => {
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
   // Fetch user personalisation data
-  const { data: userPersonalisation, isLoading } = useQuery({
+  const { data: personalisationInfo, isLoading } = useQuery({
     queryKey: ['user-personalisation', user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -139,37 +139,43 @@ const Personalisation = () => {
       }
     },
     enabled: !!user,
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours
+    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
+    refetchIntervalInBackground: true
   });
 
   // Update form data when user personalisation is loaded
   useEffect(() => {
-    if (userPersonalisation) {
+    if (personalisationInfo) {
       setFormData({
-        auto_additional_costs: userPersonalisation.auto_additional_costs ?? true,
-        sv_lens_cost: userPersonalisation.sv_lens_cost ?? 10.00,
-        progressive_lens_cost: userPersonalisation.progressive_lens_cost ?? 20.00,
-        frames_cost: userPersonalisation.frames_cost ?? 10.00,
-        markup_sph_range_1_min: userPersonalisation.markup_sph_range_1_min ?? 0,
-        markup_sph_range_1_max: userPersonalisation.markup_sph_range_1_max ?? 4,
-        markup_sph_range_1_markup: userPersonalisation.markup_sph_range_1_markup ?? 0,
-        markup_sph_range_2_min: userPersonalisation.markup_sph_range_2_min ?? 4,
-        markup_sph_range_2_max: userPersonalisation.markup_sph_range_2_max ?? 8,
-        markup_sph_range_2_markup: userPersonalisation.markup_sph_range_2_markup ?? 15,
-        markup_sph_range_3_min: userPersonalisation.markup_sph_range_3_min ?? 8,
-        markup_sph_range_3_max: userPersonalisation.markup_sph_range_3_max ?? 999,
-        markup_sph_range_3_markup: userPersonalisation.markup_sph_range_3_markup ?? 30,
-        markup_cyl_range_1_min: userPersonalisation.markup_cyl_range_1_min ?? 0,
-        markup_cyl_range_1_max: userPersonalisation.markup_cyl_range_1_max ?? 2,
-        markup_cyl_range_1_markup: userPersonalisation.markup_cyl_range_1_markup ?? 0,
-        markup_cyl_range_2_min: userPersonalisation.markup_cyl_range_2_min ?? 2,
-        markup_cyl_range_2_max: userPersonalisation.markup_cyl_range_2_max ?? 4,
-        markup_cyl_range_2_markup: userPersonalisation.markup_cyl_range_2_markup ?? 15,
-        markup_cyl_range_3_min: userPersonalisation.markup_cyl_range_3_min ?? 4,
-        markup_cyl_range_3_max: userPersonalisation.markup_cyl_range_3_max ?? 999,
-        markup_cyl_range_3_markup: userPersonalisation.markup_cyl_range_3_markup ?? 30
+        auto_additional_costs: personalisationInfo.auto_additional_costs ?? true,
+        sv_lens_cost: personalisationInfo.sv_lens_cost ?? 10.00,
+        progressive_lens_cost: personalisationInfo.progressive_lens_cost ?? 20.00,
+        frames_cost: personalisationInfo.frames_cost ?? 10.00,
+        markup_sph_range_1_min: personalisationInfo.markup_sph_range_1_min ?? 0,
+        markup_sph_range_1_max: personalisationInfo.markup_sph_range_1_max ?? 4,
+        markup_sph_range_1_markup: personalisationInfo.markup_sph_range_1_markup ?? 0,
+        markup_sph_range_2_min: personalisationInfo.markup_sph_range_2_min ?? 4,
+        markup_sph_range_2_max: personalisationInfo.markup_sph_range_2_max ?? 8,
+        markup_sph_range_2_markup: personalisationInfo.markup_sph_range_2_markup ?? 15,
+        markup_sph_range_3_min: personalisationInfo.markup_sph_range_3_min ?? 8,
+        markup_sph_range_3_max: personalisationInfo.markup_sph_range_3_max ?? 999,
+        markup_sph_range_3_markup: personalisationInfo.markup_sph_range_3_markup ?? 30,
+        markup_cyl_range_1_min: personalisationInfo.markup_cyl_range_1_min ?? 0,
+        markup_cyl_range_1_max: personalisationInfo.markup_cyl_range_1_max ?? 2,
+        markup_cyl_range_1_markup: personalisationInfo.markup_cyl_range_1_markup ?? 0,
+        markup_cyl_range_2_min: personalisationInfo.markup_cyl_range_2_min ?? 2,
+        markup_cyl_range_2_max: personalisationInfo.markup_cyl_range_2_max ?? 4,
+        markup_cyl_range_2_markup: personalisationInfo.markup_cyl_range_2_markup ?? 15,
+        markup_cyl_range_3_min: personalisationInfo.markup_cyl_range_3_min ?? 4,
+        markup_cyl_range_3_max: personalisationInfo.markup_cyl_range_3_max ?? 999,
+        markup_cyl_range_3_markup: personalisationInfo.markup_cyl_range_3_markup ?? 30
       });
     }
-  }, [userPersonalisation]);
+  }, [personalisationInfo]);
 
   // Save mutation
   const saveMutation = useMutation({
