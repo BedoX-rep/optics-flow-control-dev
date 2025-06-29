@@ -292,14 +292,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSessionRole('Store Staff');
           setIsLoading(false);
         } 
-        // Fetch subscription and set up real-time on sign in or token refresh
-        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
+        // Fetch subscription and set up real-time only on actual sign in
+        else if (event === 'SIGNED_IN' && newSession?.user) {
           fetchSubscription(newSession.user!.id);
           updatePermissionsForRole(newSession.user!.id, sessionRole);
           
           // Set up real-time subscription
           realtimeChannel = setupRealtimeSubscription(newSession.user!.id);
           
+          setIsLoading(false);
+        }
+        // Handle token refresh without fetching subscription (real-time handles updates)
+        else if (event === 'TOKEN_REFRESHED' && newSession?.user) {
+          updatePermissionsForRole(newSession.user!.id, sessionRole);
           setIsLoading(false);
         }
       }
