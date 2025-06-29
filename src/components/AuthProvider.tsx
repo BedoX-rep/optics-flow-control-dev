@@ -10,7 +10,16 @@ interface PermissionsCache {
   };
 }
 
+// Subscription cache
+interface SubscriptionCache {
+  [userId: string]: {
+    subscription: UserSubscription;
+    timestamp: number;
+  };
+}
+
 const permissionsCache: PermissionsCache = {};
+const subscriptionCache: SubscriptionCache = {};
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
@@ -116,6 +125,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Real-time subscription handler
+  const setupRealtimeSubscription = (userId: string) => {
+    const channel = supabase
+      .channel(`subscription-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('Real-time subscription update:', payload);
+          
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            setSubscription(payload.new as UserSubscription);
+            setLastRefreshTime(Date.now());
+          } else if (payload.eventType === 'DELETE') {
+            setSubscription(null);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscription channel status:', status);
+      });
+
+    return channel;
+  };
+
   const updatePermissionsForRole = (userId: string, role: 'Admin' | 'Store Staff') => {
     if (role === 'Admin') {
       // Admin gets all permissions immediately
@@ -169,12 +208,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSubscription = async (force: boolean = false) => {
     const now = Date.now();
-    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
-      return; // Skip if recently refreshed
+    
+    // With real-time subscriptions, only refresh if forced or very stale
+    if (!force && subscription && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently refreshed and we have real-time data
     }
 
     if (!user) return;
-    await fetchSubscription(user.id);
+    
+    // Only make API call if forced or no subscription data exists
+    if (force || !subscription) {
+      await fetchSubscription(user.id);
+    }
   };
 
   const signOut = async () => {
@@ -225,11 +270,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    let realtimeChannel: any = null;
+
     // First set up auth state listener to catch changes
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
+
+        // Clean up previous real-time subscription
+        if (realtimeChannel) {
+          supabase.removeChannel(realtimeChannel);
+          realtimeChannel = null;
+        }
 
         // Clear subscription data on sign out
         if (event === 'SIGNED_OUT') {
@@ -239,10 +292,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setSessionRole('Store Staff');
           setIsLoading(false);
         } 
-        // Fetch subscription on sign in or token refresh
+        // Fetch subscription and set up real-time on sign in or token refresh
         else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
           fetchSubscription(newSession.user!.id);
           updatePermissionsForRole(newSession.user!.id, sessionRole);
+          
+          // Set up real-time subscription
+          realtimeChannel = setupRealtimeSubscription(newSession.user!.id);
+          
           setIsLoading(false);
         }
       }
@@ -256,6 +313,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (currentSession?.user) {
         fetchSubscription(currentSession.user.id);
         updatePermissionsForRole(currentSession.user.id, sessionRole);
+        
+        // Set up real-time subscription for existing session
+        realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
       }
 
       setIsLoading(false);
@@ -263,6 +323,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       authSubscription.unsubscribe();
+      if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+      }
     };
   }, []);
 
