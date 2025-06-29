@@ -213,7 +213,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('Real-time subscription update:', payload);
 
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            setSubscription(payload.new as UserSubscription);
+            const newSubscription = payload.new as UserSubscription;
+            const oldSubscription = subscription;
+            
+            setSubscription(newSubscription);
             setLastRefreshTime(Date.now());
             
             // Invalidate React Query cache for subscription-related queries
@@ -226,6 +229,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 queryKey: ['user-subscription', userId],
                 exact: false 
               });
+            }
+
+            // Force route re-evaluation if subscription status changed
+            if (oldSubscription?.subscription_status !== newSubscription.subscription_status) {
+              console.log('Subscription status changed:', oldSubscription?.subscription_status, '->', newSubscription.subscription_status);
+              
+              // Trigger a forced re-render by updating a state that causes route protection re-evaluation
+              setTimeout(() => {
+                // This will trigger useEffect in ProtectedRoute components
+                window.dispatchEvent(new CustomEvent('subscription-status-changed', { 
+                  detail: { 
+                    oldStatus: oldSubscription?.subscription_status,
+                    newStatus: newSubscription.subscription_status 
+                  }
+                }));
+              }, 100);
             }
           } else if (payload.eventType === 'DELETE') {
             setSubscription(null);
@@ -241,6 +260,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 exact: false 
               });
             }
+
+            // Force route re-evaluation when subscription is deleted
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('subscription-status-changed', { 
+                detail: { 
+                  oldStatus: subscription?.subscription_status,
+                  newStatus: null 
+                }
+              }));
+            }, 100);
           }
         }
       )
