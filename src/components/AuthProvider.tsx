@@ -282,7 +282,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let sessionCheckTimeout: NodeJS.Timeout | null = null;
     let hasInitialized = false;
 
-    const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false) => {
+    const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false, forceSubscriptionFetch: boolean = false) => {
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
       }
@@ -292,8 +292,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          // Only fetch subscription on initial load or if we don't have any subscription data
-          if (isInitialCheck || !subscription) {
+          // Only fetch subscription on initial load, force, or if we don't have any subscription data
+          if (isInitialCheck || forceSubscriptionFetch || !subscription) {
             fetchSubscription(currentSession.user.id, false);
           }
           updatePermissionsForRole(currentSession.user.id, sessionRole);
@@ -320,23 +320,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log('Auth state change event:', event); // Debug log
+      
       // Clean up existing real-time subscription on auth change
       if (realtimeChannel && event === 'SIGNED_OUT') {
         await supabase.removeChannel(realtimeChannel);
         realtimeChannel = null;
       }
 
-      // Only trigger subscription fetch on actual auth changes, not window focus
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_OUT') {
-        debouncedSessionCheck(currentSession, event === 'SIGNED_IN');
+      // Only handle specific auth events that actually require action
+      if (event === 'SIGNED_IN') {
+        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+      } else if (event === 'SIGNED_OUT') {
+        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
+      } else if (event === 'TOKEN_REFRESHED') {
+        // For token refresh, just update session without fetching subscription
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
       }
+      // Ignore all other events (INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED, etc.)
     });
 
     // Check for existing session - only once on mount
     if (!hasInitialized) {
       supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
         hasInitialized = true;
-        debouncedSessionCheck(currentSession, true);
+        debouncedSessionCheck(currentSession, true, true);
       });
     }
 
