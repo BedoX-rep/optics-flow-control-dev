@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Rate limiting check for subscription API calls
   const canMakeSubscriptionCall = (userId: string): boolean => {
     const now = Date.now();
-    
+
     if (!rateLimitTracker[userId]) {
       rateLimitTracker[userId] = {
         lastCall: 0,
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const userTracker = rateLimitTracker[userId];
-    
+
     // Check minimum interval (1 call per minute)
     if (now - userTracker.lastCall < MIN_CALL_INTERVAL) {
       console.log('Rate limit: Too soon since last call (1 minute minimum)');
@@ -391,7 +391,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log('Auth state change event:', event); // Debug log
-      
+
       // Clean up existing real-time subscription on auth change
       if (realtimeChannel && event === 'SIGNED_OUT') {
         await supabase.removeChannel(realtimeChannel);
@@ -400,13 +400,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Only handle specific auth events that actually require action
       if (event === 'SIGNED_IN') {
-        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in only
       } else if (event === 'SIGNED_OUT') {
         debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
       } else if (event === 'TOKEN_REFRESHED') {
-        // For token refresh, just update session without fetching subscription
+        // For token refresh, just update session without any subscription API calls
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        // Don't call fetchSubscription - rely on WebSocket for updates
       }
       // Ignore all other events (INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED, etc.)
     });
