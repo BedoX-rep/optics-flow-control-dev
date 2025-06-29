@@ -136,7 +136,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Check minimum interval (1 call per minute)
     if (now - userTracker.lastCall < MIN_CALL_INTERVAL) {
-      console.log('Rate limit: Too soon since last call (1 minute minimum)');
       return false;
     }
 
@@ -147,7 +146,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check if we've exceeded max calls per window
     if (userTracker.callsInWindow.length >= MAX_CALLS_PER_WINDOW) {
-      console.log('Rate limit: Maximum calls per 5-minute window exceeded');
       return false;
     }
 
@@ -169,7 +167,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Apply rate limiting for API calls
     if (!canMakeSubscriptionCall(userId)) {
-      console.log('Subscription API call blocked due to rate limiting');
       return; // Skip API call due to rate limiting
     }
 
@@ -210,8 +207,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Real-time subscription update:', payload);
-
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setSubscription(payload.new as UserSubscription);
             setLastRefreshTime(Date.now());
@@ -220,9 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('Subscription channel status:', status);
-      });
+      .subscribe();
 
     return channel;
   };
@@ -290,7 +283,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check rate limiting even for forced calls
     if (force && !canMakeSubscriptionCall(user.id)) {
-      console.log('Forced subscription refresh blocked due to rate limiting');
       return;
     }
 
@@ -390,8 +382,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log('Auth state change event:', event); // Debug log
-      
       // Clean up existing real-time subscription on auth change
       if (realtimeChannel && event === 'SIGNED_OUT') {
         await supabase.removeChannel(realtimeChannel);
