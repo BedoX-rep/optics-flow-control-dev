@@ -212,6 +212,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         (payload) => {
           console.log('Real-time subscription update:', payload);
 
+          // Verify the event is for the current user before processing
+          const eventUserId = payload.new?.user_id || payload.old?.user_id;
+          if (eventUserId !== userId) {
+            console.log('Ignoring subscription event for different user:', eventUserId);
+            return;
+          }
+
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setSubscription(payload.new as UserSubscription);
             setLastRefreshTime(Date.now());
@@ -228,8 +235,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               });
             }
 
-            // Automatically refresh the page when subscription changes
-            console.log('Subscription changed - refreshing page in 2 seconds...');
+            // Automatically refresh the page when subscription changes for current user
+            console.log(`Subscription changed for user ${userId} - refreshing page in 2 seconds...`);
             setTimeout(() => {
               window.location.reload();
             }, 2000);
@@ -248,8 +255,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               });
             }
 
-            // Automatically refresh the page when subscription is deleted
-            console.log('Subscription deleted - refreshing page in 2 seconds...');
+            // Automatically refresh the page when subscription is deleted for current user
+            console.log(`Subscription deleted for user ${userId} - refreshing page in 2 seconds...`);
             setTimeout(() => {
               window.location.reload();
             }, 2000);
