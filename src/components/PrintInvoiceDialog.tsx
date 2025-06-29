@@ -56,7 +56,9 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const [printOptions, setPrintOptions] = useState({
     showAdvancePayment: false,
     showBalance: false,
-    showProductNames: false
+    showProductNames: false,
+    showClientPhone: false,
+    colorTheme: 'default'
   });
   
   // Category options for items
@@ -305,6 +307,38 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     const purchaseType = getPurchaseType();
     const isFrench = language === 'fr';
 
+    // Color theme styles
+    const getColorThemeStyles = () => {
+      switch (printOptions.colorTheme) {
+        case 'blue':
+          return {
+            primary: '#1e40af',
+            secondary: '#3b82f6',
+            background: '#eff6ff',
+            border: '#1e40af',
+            lightBg: '#dbeafe'
+          };
+        case 'green':
+          return {
+            primary: '#059669',
+            secondary: '#10b981',
+            background: '#ecfdf5',
+            border: '#059669',
+            lightBg: '#d1fae5'
+          };
+        default:
+          return {
+            primary: '#333',
+            secondary: '#666',
+            background: '#f8f9fa',
+            border: '#333',
+            lightBg: '#f0f0f0'
+          };
+      }
+    };
+
+    const colors = getColorThemeStyles();
+
     return `
       <!DOCTYPE html>
       <html>
@@ -312,32 +346,32 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           <title>Invoice ${invoiceData.invoice_number}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: #333; padding: 20px; background: white; }
-            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; page-break-inside: avoid; }
+            body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; color: ${colors.primary}; padding: 20px; background: white; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid ${colors.border}; padding-bottom: 20px; page-break-inside: avoid; }
             .logo { max-width: 120px; max-height: 80px; }
             .company-info { text-align: right; }
-            .company-info h1 { font-size: 24px; color: #333; margin-bottom: 5px; }
+            .company-info h1 { font-size: 24px; color: ${colors.primary}; margin-bottom: 5px; }
             .company-info p { margin-bottom: 3px; }
             .invoice-info { display: flex; justify-content: space-between; margin-bottom: 40px; }
-            .invoice-details, .client-details { width: 48%; padding: 20px; background: #f8f9fa; border-radius: 8px; }
-            .invoice-details h3, .client-details h3 { color: #333; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
+            .invoice-details, .client-details { width: 48%; padding: 20px; background: ${colors.background}; border-radius: 8px; }
+            .invoice-details h3, .client-details h3 { color: ${colors.primary}; margin-bottom: 15px; font-size: 20px; font-weight: bold; }
             .invoice-details p, .client-details p { font-size: 15px; margin-bottom: 8px; line-height: 1.6; }
             .invoice-details strong, .client-details strong { font-weight: bold; }
-            .prescription { margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; }
-            .prescription h3 { margin-bottom: 10px; }
+            .prescription { margin: 20px 0; padding: 15px; background: ${colors.background}; border: 1px solid ${colors.secondary}; }
+            .prescription h3 { margin-bottom: 10px; color: ${colors.primary}; }
             .prescription-table { width: 100%; border-collapse: collapse; }
-            .prescription-table th, .prescription-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-            .prescription-table th { background: #f0f0f0; }
+            .prescription-table th, .prescription-table td { border: 1px solid ${colors.secondary}; padding: 8px; text-align: center; }
+            .prescription-table th { background: ${colors.lightBg}; color: ${colors.primary}; }
             .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            .items-table th, .items-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-            .items-table th { background: #f0f0f0; font-weight: bold; }
+            .items-table th, .items-table td { border: 1px solid ${colors.secondary}; padding: 12px; text-align: left; }
+            .items-table th { background: ${colors.lightBg}; font-weight: bold; color: ${colors.primary}; }
             .items-table .number { text-align: center; }
             .items-table .price { text-align: right; }
             .total-section { margin-top: 20px; text-align: right; }
             .total-line { margin: 5px 0; }
-            .total-final { font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; margin-top: 10px; }
+            .total-final { font-size: 18px; font-weight: bold; border-top: 2px solid ${colors.border}; padding-top: 10px; margin-top: 10px; color: ${colors.primary}; }
             .notes { margin-top: 30px; }
-            .notes h3 { margin-bottom: 10px; }
+            .notes h3 { margin-bottom: 10px; color: ${colors.primary}; }
             @media print { 
               body { padding: 0; margin: 0; background: white !important; }
               .header { page-break-inside: avoid; }
@@ -369,7 +403,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <div class="client-details">
               <h3>${isFrench ? 'Détails du Client' : 'Client Details'}</h3>
               <p><strong>${isFrench ? 'Nom:' : 'Name:'}</strong> ${invoiceData.client_name}</p>
-              ${invoiceData.client_phone ? `<p><strong>${isFrench ? 'Téléphone:' : 'Phone:'}</strong> ${invoiceData.client_phone}</p>` : ''}
+              ${printOptions.showClientPhone && invoiceData.client_phone ? `<p><strong>${isFrench ? 'Téléphone:' : 'Phone:'}</strong> ${invoiceData.client_phone}</p>` : ''}
             </div>
           </div>
 
@@ -757,17 +791,61 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                         className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
                       />
                     </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="showClientPhone" className="text-sm font-medium text-teal-700">
+                        {isFrench ? 'Afficher le téléphone du client' : 'Show client phone number'}
+                      </Label>
+                      <input
+                        type="checkbox"
+                        id="showClientPhone"
+                        checked={printOptions.showClientPhone}
+                        onChange={(e) => setPrintOptions(prev => ({ ...prev, showClientPhone: e.target.checked }))}
+                        className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-teal-700">
+                        {isFrench ? 'Thème de couleur' : 'Color Theme'}
+                      </Label>
+                      <Select
+                        value={printOptions.colorTheme}
+                        onValueChange={(value) => setPrintOptions(prev => ({ ...prev, colorTheme: value }))}
+                      >
+                        <SelectTrigger className="border-teal-200 focus:border-teal-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="default">{isFrench ? 'Défaut (Noir)' : 'Default (Black)'}</SelectItem>
+                          <SelectItem value="blue">{isFrench ? 'Bleu' : 'Blue'}</SelectItem>
+                          <SelectItem value="green">{isFrench ? 'Vert' : 'Green'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
                     <h4 className="font-semibold text-teal-800 mb-2 text-sm">
-                      {isFrench ? 'Aperçu des articles' : 'Items Preview'}
+                      {isFrench ? 'Aperçu des options' : 'Options Preview'}
                     </h4>
-                    <div className="text-xs text-teal-600">
-                      {printOptions.showProductNames 
-                        ? (isFrench ? 'Les noms complets des produits seront affichés' : 'Full product names will be displayed')
-                        : (isFrench ? 'Seules les catégories des produits seront affichées' : 'Only product categories will be displayed')
-                      }
+                    <div className="text-xs text-teal-600 space-y-1">
+                      <div>
+                        {printOptions.showProductNames 
+                          ? (isFrench ? '✓ Noms complets des produits' : '✓ Full product names')
+                          : (isFrench ? '✗ Seules les catégories' : '✗ Categories only')
+                        }
+                      </div>
+                      <div>
+                        {printOptions.showClientPhone 
+                          ? (isFrench ? '✓ Téléphone du client' : '✓ Client phone number')
+                          : (isFrench ? '✗ Téléphone du client masqué' : '✗ Client phone hidden')
+                        }
+                      </div>
+                      <div>
+                        {isFrench ? `Thème: ${printOptions.colorTheme === 'default' ? 'Défaut' : printOptions.colorTheme === 'blue' ? 'Bleu' : 'Vert'}` 
+                                  : `Theme: ${printOptions.colorTheme === 'default' ? 'Default' : printOptions.colorTheme.charAt(0).toUpperCase() + printOptions.colorTheme.slice(1)}`}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
