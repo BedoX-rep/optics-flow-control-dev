@@ -76,7 +76,7 @@ const Personalisation = () => {
 
   // Fetch user personalisation data
   const { data: personalisationInfo, isLoading } = useQuery({
-    queryKey: ['user-personalisation', user?.id],
+    queryKey: ['user-information', user?.id],
     queryFn: async () => {
       if (!user) return null;
 
@@ -221,8 +221,7 @@ const Personalisation = () => {
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      // Invalidate both query keys to ensure all pages using personalisation data are updated
-      queryClient.invalidateQueries({ queryKey: ['user-personalisation', user?.id] });
+      // Invalidate the unified query key to ensure all pages using user information are updated
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
 
       // Force refetch of the user information query to ensure immediate update

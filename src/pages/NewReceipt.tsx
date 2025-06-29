@@ -132,7 +132,7 @@ const NewReceipt = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { translate: t } = useLanguage();
-  
+
   const [selectedClient, setSelectedClient] = useState('');
   const [items, setItems] = useState<ReceiptItem[]>([]);
   const [rightEye, setRightEye] = useState({ sph: '', cyl: '', axe: '' });
@@ -180,7 +180,7 @@ const NewReceipt = () => {
     ],
   });
 
-  
+
   const [orderType, setOrderType] = useState('Unspecified'); // Added order type state
   const [formData, setFormData] = useState({}); // Added formData state
   const [currentStep, setCurrentStep] = useState('details');
@@ -258,7 +258,8 @@ const NewReceipt = () => {
       if (!user) return null;
 
       try {
-        const { data, error } = await supabase
+        // First, try to get existing user information
+        const { data: existingInfo, error: fetchError } = await supabase
           .from('user_information')
           .select(`
             auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
@@ -272,47 +273,53 @@ const NewReceipt = () => {
           .eq('user_id', user.id)
           .single();
 
-        if (error) {
-          if (error.code === 'PGRST116') {
-            // No data found, initialize with defaults
-            await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-            
-            const { data: newData, error: newError } = await supabase
-              .from('user_information')
-              .select(`
-                auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-                markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-                markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-                markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-                markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-                markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-                markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-              `)
-              .eq('user_id', user.id)
-              .single();
+        if (existingInfo) {
+          return existingInfo;
+        }
 
-            if (newError) {
-              console.error('Error fetching new user information:', newError);
-              return null;
-            }
+        // If no user information exists, initialize it
+        if (fetchError && fetchError.code === 'PGRST116') {
+          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
 
-            return newData;
+          // Fetch the newly created record
+          const { data: newInfo, error: newError } = await supabase
+            .from('user_information')
+            .select(`
+              auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
+              markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
+              markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
+              markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
+              markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
+              markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
+              markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
+            `)
+            .eq('user_id', user.id)
+            .single();
+
+          if (newError) {
+            console.error('Error fetching new user information:', newError);
+            return null;
           }
-          console.error('Error fetching user information:', error);
+
+          return newInfo;
+        }
+
+        if (fetchError) {
+          console.error('Error fetching user information:', fetchError);
           return null;
         }
 
-        return data;
+        return existingInfo;
       } catch (error) {
-        console.error('Unexpected error fetching user information:', error);
+        console.error('Unexpected error:', error);
         return null;
       }
     },
     enabled: !!user,
     staleTime: 12 * 60 * 60 * 1000, // 12 hours
-    cacheTime: 24 * 60 * 60 * 1000, // 24 hours
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    cacheTime: 30 * 60 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
     refetchIntervalInBackground: true
   });
@@ -340,7 +347,7 @@ const NewReceipt = () => {
         progressive_lens_cost: personalisationData.progressive_lens_cost ?? 20.00,
         frames_cost: personalisationData.frames_cost ?? 10.00
       });
-      
+
       // Update markup settings when personalisation data is loaded
       setMarkupSettings({
         sph: [
@@ -516,7 +523,7 @@ const NewReceipt = () => {
   const totalCost = items.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0);
 
   let montageCosts = 0;
-  
+
   // Use manual additional costs if enabled
   if (manualAdditionalCostsEnabled) {
     montageCosts = manualAdditionalCostsAmount;
@@ -644,7 +651,7 @@ const NewReceipt = () => {
     try {
       // Invalidate and refetch the clients query
       await queryClient.invalidateQueries(['all-clients', user.id]);
-      
+
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
         .select('*')
@@ -1164,7 +1171,7 @@ const NewReceipt = () => {
             </div>
           </div>
         </div>
-        
+
         </CardContent>
       </Card>
     );
@@ -1273,7 +1280,7 @@ const NewReceipt = () => {
             right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
             left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
             left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
+            left_eye_axe: parseInt(leftEye.axe) ? parseInt(leftEye.axe) : null,
             Add: add ? parseFloat(add) : null,
             last_prescription_update: new Date().toISOString()
           })
@@ -1418,7 +1425,7 @@ const NewReceipt = () => {
         autoMontage={autoMontage}
         onAutoMontageChange={setAutoMontage}
       />
-      
+
     </div>
   );
 };
