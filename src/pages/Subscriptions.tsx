@@ -36,13 +36,40 @@ const SUBSCRIPTION_PRICES = {
 };
 
 const Subscriptions = () => {
-  const { user, subscription: userSubscription, refreshSubscription } = useAuth();
+  const { user, subscription: userSubscription } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // Use subscription data from AuthProvider instead of making separate API call
-  const currentSubscription = userSubscription;
-  const isLoading = false; // AuthProvider handles loading state
+  const { data: currentSubscription, isLoading } = useQuery({
+    queryKey: ['subscriptions', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw error;
+      }
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes stale time
+    enabled: !!user,
+    onError: (error) => {
+      console.error('Error fetching subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load subscription data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const contactAdmin = () => {
     toast({
@@ -86,8 +113,15 @@ const Subscriptions = () => {
         description: `${t('nowSubscribedTo')} ${type} ${t('plan')}`,
       });
 
-      // Refresh subscription data in AuthProvider
-      await refreshSubscription(true);
+      const { data, error: fetchError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      setCurrentSubscription(data);
 
     } catch (error) {
       console.error('Error updating subscription:', error);

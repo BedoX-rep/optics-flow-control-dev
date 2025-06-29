@@ -34,11 +34,10 @@ const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000,      // 5 minutes
       cacheTime: 30 * 60 * 1000,     // 30 minutes
       refetchOnWindowFocus: false,
-      refetchOnReconnect: false,     // Prevent refetch on reconnection events
       retry: false,
       networkMode: 'offlineFirst',
       refetchInterval: false,
-      refetchIntervalInBackground: false
+      refetchIntervalInBackground: true
     },
   },
 });

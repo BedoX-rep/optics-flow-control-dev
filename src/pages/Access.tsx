@@ -59,46 +59,16 @@ const Access = () => {
     queryFn: async () => {
       if (!isAdmin) return [];
 
-      // Use cached subscription data when available for current user
-      let subscriptionsData;
-      if (subscription && user) {
-        // For current user, use cached data and fetch others
-        const { data: otherSubscriptions, error: subscriptionsError } = await supabase
-          .from('subscriptions')
-          .select(`
-            user_id,
-            email,
-            display_name,
-            access_code
-          `)
-          .neq('user_id', user.id);
+      const { data: subscriptionsData, error: subscriptionsError } = await supabase
+        .from('subscriptions')
+        .select(`
+          user_id,
+          email,
+          display_name,
+          access_code
+        `);
 
-        if (subscriptionsError) throw subscriptionsError;
-
-        // Combine current user's cached data with others
-        subscriptionsData = [
-          {
-            user_id: user.id,
-            email: subscription.email || user.email,
-            display_name: subscription.display_name,
-            access_code: subscription.access_code
-          },
-          ...otherSubscriptions
-        ];
-      } else {
-        // Fallback to fetching all if no cached data
-        const { data, error: subscriptionsError } = await supabase
-          .from('subscriptions')
-          .select(`
-            user_id,
-            email,
-            display_name,
-            access_code
-          `);
-
-        if (subscriptionsError) throw subscriptionsError;
-        subscriptionsData = data;
-      }
+      if (subscriptionsError) throw subscriptionsError;
       
       // Get all user IDs
       const userIds = subscriptionsData.map(staff => staff.user_id);
