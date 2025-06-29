@@ -227,6 +227,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 exact: false 
               });
             }
+
+            // Automatically refresh the page when subscription changes
+            console.log('Subscription changed - refreshing page in 2 seconds...');
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           } else if (payload.eventType === 'DELETE') {
             setSubscription(null);
             
@@ -241,6 +247,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 exact: false 
               });
             }
+
+            // Automatically refresh the page when subscription is deleted
+            console.log('Subscription deleted - refreshing page in 2 seconds...');
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           }
         }
       )
