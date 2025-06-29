@@ -215,8 +215,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             setSubscription(payload.new as UserSubscription);
             setLastRefreshTime(Date.now());
+            
+            // Invalidate React Query cache for subscription-related queries
+            if (window.queryClient) {
+              window.queryClient.invalidateQueries({ 
+                queryKey: ['subscription', userId],
+                exact: false 
+              });
+              window.queryClient.invalidateQueries({ 
+                queryKey: ['user-subscription', userId],
+                exact: false 
+              });
+            }
           } else if (payload.eventType === 'DELETE') {
             setSubscription(null);
+            
+            // Invalidate React Query cache when subscription is deleted
+            if (window.queryClient) {
+              window.queryClient.invalidateQueries({ 
+                queryKey: ['subscription', userId],
+                exact: false 
+              });
+              window.queryClient.invalidateQueries({ 
+                queryKey: ['user-subscription', userId],
+                exact: false 
+              });
+            }
           }
         }
       )
