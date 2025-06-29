@@ -31,12 +31,14 @@ import Invoices from './pages/Invoices';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 30 * 60 * 1000,
+      staleTime: 5 * 60 * 1000,      // 5 minutes
+      cacheTime: 30 * 60 * 1000,     // 30 minutes
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,     // Prevent refetch on reconnection events
       retry: false,
       networkMode: 'offlineFirst',
-      refetchInterval: false
+      refetchInterval: false,
+      refetchIntervalInBackground: false
     },
   },
 });

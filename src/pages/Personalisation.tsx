@@ -75,8 +75,8 @@ const Personalisation = () => {
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
   // Fetch user personalisation data
-  const { data: userPersonalisation, isLoading } = useQuery({
-    queryKey: ['user-personalisation', user?.id],
+  const { data: personalisationInfo, isLoading } = useQuery({
+    queryKey: ['user-information', user?.id],
     queryFn: async () => {
       if (!user) return null;
 
@@ -139,44 +139,49 @@ const Personalisation = () => {
       }
     },
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true
   });
 
   // Update form data when user personalisation is loaded
   useEffect(() => {
-    if (userPersonalisation) {
+    if (personalisationInfo) {
       setFormData({
-        auto_additional_costs: userPersonalisation.auto_additional_costs ?? true,
-        sv_lens_cost: userPersonalisation.sv_lens_cost ?? 10.00,
-        progressive_lens_cost: userPersonalisation.progressive_lens_cost ?? 20.00,
-        frames_cost: userPersonalisation.frames_cost ?? 10.00,
-        markup_sph_range_1_min: userPersonalisation.markup_sph_range_1_min ?? 0,
-        markup_sph_range_1_max: userPersonalisation.markup_sph_range_1_max ?? 4,
-        markup_sph_range_1_markup: userPersonalisation.markup_sph_range_1_markup ?? 0,
-        markup_sph_range_2_min: userPersonalisation.markup_sph_range_2_min ?? 4,
-        markup_sph_range_2_max: userPersonalisation.markup_sph_range_2_max ?? 8,
-        markup_sph_range_2_markup: userPersonalisation.markup_sph_range_2_markup ?? 15,
-        markup_sph_range_3_min: userPersonalisation.markup_sph_range_3_min ?? 8,
-        markup_sph_range_3_max: userPersonalisation.markup_sph_range_3_max ?? 999,
-        markup_sph_range_3_markup: userPersonalisation.markup_sph_range_3_markup ?? 30,
-        markup_cyl_range_1_min: userPersonalisation.markup_cyl_range_1_min ?? 0,
-        markup_cyl_range_1_max: userPersonalisation.markup_cyl_range_1_max ?? 2,
-        markup_cyl_range_1_markup: userPersonalisation.markup_cyl_range_1_markup ?? 0,
-        markup_cyl_range_2_min: userPersonalisation.markup_cyl_range_2_min ?? 2,
-        markup_cyl_range_2_max: userPersonalisation.markup_cyl_range_2_max ?? 4,
-        markup_cyl_range_2_markup: userPersonalisation.markup_cyl_range_2_markup ?? 15,
-        markup_cyl_range_3_min: userPersonalisation.markup_cyl_range_3_min ?? 4,
-        markup_cyl_range_3_max: userPersonalisation.markup_cyl_range_3_max ?? 999,
-        markup_cyl_range_3_markup: userPersonalisation.markup_cyl_range_3_markup ?? 30
+        auto_additional_costs: personalisationInfo.auto_additional_costs ?? true,
+        sv_lens_cost: personalisationInfo.sv_lens_cost ?? 10.00,
+        progressive_lens_cost: personalisationInfo.progressive_lens_cost ?? 20.00,
+        frames_cost: personalisationInfo.frames_cost ?? 10.00,
+        markup_sph_range_1_min: personalisationInfo.markup_sph_range_1_min ?? 0,
+        markup_sph_range_1_max: personalisationInfo.markup_sph_range_1_max ?? 4,
+        markup_sph_range_1_markup: personalisationInfo.markup_sph_range_1_markup ?? 0,
+        markup_sph_range_2_min: personalisationInfo.markup_sph_range_2_min ?? 4,
+        markup_sph_range_2_max: personalisationInfo.markup_sph_range_2_max ?? 8,
+        markup_sph_range_2_markup: personalisationInfo.markup_sph_range_2_markup ?? 15,
+        markup_sph_range_3_min: personalisationInfo.markup_sph_range_3_min ?? 8,
+        markup_sph_range_3_max: personalisationInfo.markup_sph_range_3_max ?? 999,
+        markup_sph_range_3_markup: personalisationInfo.markup_sph_range_3_markup ?? 30,
+        markup_cyl_range_1_min: personalisationInfo.markup_cyl_range_1_min ?? 0,
+        markup_cyl_range_1_max: personalisationInfo.markup_cyl_range_1_max ?? 2,
+        markup_cyl_range_1_markup: personalisationInfo.markup_cyl_range_1_markup ?? 0,
+        markup_cyl_range_2_min: personalisationInfo.markup_cyl_range_2_min ?? 2,
+        markup_cyl_range_2_max: personalisationInfo.markup_cyl_range_2_max ?? 4,
+        markup_cyl_range_2_markup: personalisationInfo.markup_cyl_range_2_markup ?? 15,
+        markup_cyl_range_3_min: personalisationInfo.markup_cyl_range_3_min ?? 4,
+        markup_cyl_range_3_max: personalisationInfo.markup_cyl_range_3_max ?? 999,
+        markup_cyl_range_3_markup: personalisationInfo.markup_cyl_range_3_markup ?? 30
       });
     }
-  }, [userPersonalisation]);
+  }, [personalisationInfo]);
 
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async (data: PersonalisationData) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from('user_information')
         .upsert({
           user_id: user.id,
@@ -205,22 +210,25 @@ const Personalisation = () => {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      return updatedData;
     },
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
       toast({
         title: t('settingsUpdated'),
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      // Invalidate both query keys to ensure all pages using personalisation data are updated
-      queryClient.invalidateQueries({ queryKey: ['user-personalisation', user?.id] });
+      
+      // Update the query cache with the new data immediately
+      queryClient.setQueryData(['user-information', user?.id], updatedData);
+      
+      // Also invalidate to ensure consistency across all pages
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
-
-      // Force refetch of the user information query to ensure immediate update
-      queryClient.refetchQueries({ queryKey: ['user-information', user?.id] });
     },
     onError: (error) => {
       console.error('Error saving user personalisation:', error);

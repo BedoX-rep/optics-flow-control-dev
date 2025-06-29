@@ -660,6 +660,10 @@ const productTranslations: Translations = {
     en: 'Client Information',
     fr: 'Informations du Client'
   },
+  createdAt: {
+    en: 'Created At',
+    fr: 'Créé le'
+  },
   prescriptionDetails: {
     en: 'Prescription Details',
     fr: 'Détails de la Prescription'

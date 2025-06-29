@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Permissions cache
 interface PermissionsCache {
@@ -10,8 +11,29 @@ interface PermissionsCache {
   };
 }
 
+// Subscription cache
+interface SubscriptionCache {
+  [userId: string]: {
+    subscription: UserSubscription;
+    timestamp: number;
+  };
+}
+
+// Rate limiting for subscription API calls
+interface RateLimitTracker {
+  [userId: string]: {
+    lastCall: number;
+    callsInWindow: number[];
+  };
+}
+
 const permissionsCache: PermissionsCache = {};
+const subscriptionCache: SubscriptionCache = {};
+const rateLimitTracker: RateLimitTracker = {};
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+const MIN_CALL_INTERVAL = 60 * 1000; // 1 minute
+const MAX_CALLS_PER_WINDOW = 3; // 3 calls per 5 minutes
 
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
                          'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
@@ -65,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>(
     (typeof window !== 'undefined' && localStorage.getItem('sessionRole')) as 'Admin' | 'Store Staff' || 'Store Staff'
   );
+  const sessionRoleRef = useRef(sessionRole);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
@@ -98,8 +121,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchSubscription = async (userId: string) => {
+  // Rate limiting check for subscription API calls
+  const canMakeSubscriptionCall = (userId: string): boolean => {
+    const now = Date.now();
+    
+    if (!rateLimitTracker[userId]) {
+      rateLimitTracker[userId] = {
+        lastCall: 0,
+        callsInWindow: []
+      };
+    }
+
+    const userTracker = rateLimitTracker[userId];
+    
+    // Check minimum interval (1 call per minute)
+    if (now - userTracker.lastCall < MIN_CALL_INTERVAL) {
+      return false;
+    }
+
+    // Clean up old calls outside the 5-minute window
+    userTracker.callsInWindow = userTracker.callsInWindow.filter(
+      callTime => now - callTime < RATE_LIMIT_WINDOW
+    );
+
+    // Check if we've exceeded max calls per window
+    if (userTracker.callsInWindow.length >= MAX_CALLS_PER_WINDOW) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const fetchSubscription = async (userId: string, force: boolean = false) => {
+    const now = Date.now();
+
+    // Get current subscription state to avoid stale closure
+    const getCurrentSubscription = () => {
+      return subscription;
+    };
+
+    // Check if we have cached data and it's still fresh (unless forced)
+    if (!force && getCurrentSubscription() && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently fetched and not forced
+    }
+
+    // Apply rate limiting for API calls
+    if (!canMakeSubscriptionCall(userId)) {
+      return; // Skip API call due to rate limiting
+    }
+
     try {
+      // Update rate limit tracker
+      if (!rateLimitTracker[userId]) {
+        rateLimitTracker[userId] = { lastCall: 0, callsInWindow: [] };
+      }
+      rateLimitTracker[userId].lastCall = now;
+      rateLimitTracker[userId].callsInWindow.push(now);
+
       const { data: subscriptionData, error: subError } = await supabase
         .from('subscriptions')
         .select('*')
@@ -109,11 +187,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (subError) throw subError;
 
       setSubscription(subscriptionData);
-      setLastRefreshTime(Date.now());
+      setLastRefreshTime(now);
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
     }
+  };
+
+  // Real-time subscription handler
+  const setupRealtimeSubscription = (userId: string) => {
+    const channel = supabase
+      .channel(`subscription-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            setSubscription(payload.new as UserSubscription);
+            setLastRefreshTime(Date.now());
+          } else if (payload.eventType === 'DELETE') {
+            setSubscription(null);
+          }
+        }
+      )
+      .subscribe();
+
+    return channel;
   };
 
   const updatePermissionsForRole = (userId: string, role: 'Admin' | 'Store Staff') => {
@@ -169,12 +273,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSubscription = async (force: boolean = false) => {
     const now = Date.now();
-    if (!force && now - lastRefreshTime < REFRESH_INTERVAL) {
-      return; // Skip if recently refreshed
+
+    // With real-time subscriptions, only refresh if forced or very stale
+    if (!force && subscription && now - lastRefreshTime < REFRESH_INTERVAL) {
+      return; // Skip if recently refreshed and we have real-time data
     }
 
     if (!user) return;
-    await fetchSubscription(user.id);
+
+    // Check rate limiting even for forced calls
+    if (force && !canMakeSubscriptionCall(user.id)) {
+      return;
+    }
+
+    // Only make API call if forced or no subscription data exists
+    if (force || !subscription) {
+      await fetchSubscription(user.id, force);
+    }
   };
 
   const signOut = async () => {
@@ -225,49 +340,89 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // First set up auth state listener to catch changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+    let realtimeChannel: RealtimeChannel | null = null;
+    let sessionCheckTimeout: NodeJS.Timeout | null = null;
+    let hasInitialized = false;
 
-        // Clear subscription data on sign out
-        if (event === 'SIGNED_OUT') {
+    const debouncedSessionCheck = (currentSession: Session | null, isInitialCheck: boolean = false, forceSubscriptionFetch: boolean = false) => {
+      if (sessionCheckTimeout) {
+        clearTimeout(sessionCheckTimeout);
+      }
+
+      sessionCheckTimeout = setTimeout(() => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          // Only fetch subscription on initial load or force
+          if (isInitialCheck || forceSubscriptionFetch) {
+            fetchSubscription(currentSession.user.id, false);
+          }
+          updatePermissionsForRole(currentSession.user.id, sessionRoleRef.current);
+
+          // Set up real-time subscription for existing session if not already set up
+          if (!realtimeChannel) {
+            realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
+          }
+        } else {
           setSubscription(null);
           setPermissions(null);
-          localStorage.removeItem('sessionRole');
           setSessionRole('Store Staff');
-          setIsLoading(false);
-        } 
-        // Fetch subscription on sign in or token refresh
-        else if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession?.user) {
-          fetchSubscription(newSession.user!.id);
-          updatePermissionsForRole(newSession.user!.id, sessionRole);
-          setIsLoading(false);
+
+          // Clean up real-time subscription when logged out
+          if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+          }
         }
+        setIsLoading(false);
+      }, 100); // 100ms debounce
+    };
+
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      // Clean up existing real-time subscription on auth change
+      if (realtimeChannel && event === 'SIGNED_OUT') {
+        await supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
       }
-    );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-
-      if (currentSession?.user) {
-        fetchSubscription(currentSession.user.id);
-        updatePermissionsForRole(currentSession.user.id, sessionRole);
+      // Only handle specific auth events that actually require action
+      if (event === 'SIGNED_IN') {
+        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+      } else if (event === 'SIGNED_OUT') {
+        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
+      } else if (event === 'TOKEN_REFRESHED') {
+        // For token refresh, just update session without fetching subscription
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
       }
-
-      setIsLoading(false);
+      // Ignore all other events (INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED, etc.)
     });
+
+    // Check for existing session - only once on mount
+    if (!hasInitialized) {
+      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+        hasInitialized = true;
+        debouncedSessionCheck(currentSession, true, true);
+      });
+    }
 
     return () => {
       authSubscription.unsubscribe();
+      if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+      }
+      if (sessionCheckTimeout) {
+        clearTimeout(sessionCheckTimeout);
+      }
     };
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   // Handle instant permission updates when sessionRole changes
   useEffect(() => {
+    sessionRoleRef.current = sessionRole;
     if (user && !isLoading) {
       updatePermissionsForRole(user.id, sessionRole);
     }
@@ -275,6 +430,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
     setSessionRole(role);
+    sessionRoleRef.current = role;
     localStorage.setItem('sessionRole', role);
   };
 
@@ -303,10 +459,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

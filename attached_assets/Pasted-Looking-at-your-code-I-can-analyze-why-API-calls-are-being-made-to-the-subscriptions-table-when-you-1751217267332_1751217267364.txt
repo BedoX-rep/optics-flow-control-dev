@@ -1,0 +1,48 @@
+Looking at your code, I can analyze why API calls are being made to the subscriptions table when you switch windows and return to your app.
+
+The issue is in your AuthProvider.tsx component. Here's what's happening:
+
+Root Cause: Window Focus Refetch
+In your AuthProvider, you have this effect that sets up auth state changes:
+
+useEffect(() => {
+  // ... auth state listener setup
+  
+  // Then check for existing session
+  supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    setSession(currentSession);
+    setUser(currentSession?.user ?? null);
+    if (currentSession?.user) {
+      fetchSubscription(currentSession.user.id); // This gets called
+      updatePermissionsForRole(currentSession.user.id, sessionRole);
+      
+      // Set up real-time subscription for existing session
+      realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
+    }
+    setIsLoading(false);
+  });
+}, []);
+Multiple Contributing Factors:
+Query Client Default Behavior: In your App.tsx, your QueryClient is configured with:
+
+refetchOnWindowFocus: false,
+However, this only applies to React Query queries, not the direct Supabase calls in AuthProvider.
+
+Auth Session Check: When you switch back to the window, Supabase's auth system may be checking if the session is still valid, which triggers the getSession() call, which in turn calls fetchSubscription().
+
+Real-time Subscription Setup: Each time the auth state changes or is verified, a new real-time subscription channel is set up, which may trigger initial data fetching.
+
+Browser Tab Visibility: When you return to the tab, the browser's Page Visibility API may trigger React's effects to re-run or Supabase to refresh the session.
+
+The Specific API Call Flow:
+When you switch back to the window:
+
+Browser detects tab is now active
+Supabase auth may refresh/verify the session
+supabase.auth.getSession() is called
+fetchSubscription(currentSession.user.id) is executed
+This makes a direct API call to your subscriptions table
+Solution Approaches:
+The cleanest fix would be to add debouncing or caching to the fetchSubscription function in AuthProvider, or rely more heavily on the real-time subscriptions you've already set up rather than making fresh API calls on every session check.
+
+The calls you're seeing are coming from the direct Supabase calls in AuthProvider, not from React Query, which is why the refetchOnWindowFocus: false setting doesn't prevent them.
