@@ -111,14 +111,11 @@ serve(async (req) => {
         paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
 
         // Calculate values for the new purchase
-        const currentBalance = purchase.balance || 0
         const originalAmount = purchase.amount_ttc || purchase.amount
         const taxPercentage = purchase.tax_percentage || 20
         
-        // For recurring renewal:
-        // - If balance = 0 (fully paid), create new purchase with original amount
-        // - If balance > 0 (unpaid), create new purchase with original amount + remaining balance
-        const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance
+        // For recurring renewal: always use the original amount for the new purchase
+        const newTotalAmount = originalAmount
         
         // New purchase starts with 0 advance payment and full balance
         const newAdvancePayment = 0

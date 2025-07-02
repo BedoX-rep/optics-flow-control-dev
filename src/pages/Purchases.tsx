@@ -79,6 +79,7 @@ interface Purchase {
   link_date_to?: string;
   created_at: string;
   suppliers?: Supplier;
+  already_recurred?: boolean;
 }
 
 const Purchases = () => {
@@ -299,7 +300,8 @@ const PURCHASE_TYPES = [
         amount: newTotalAmount,
         balance: newBalance,
         advance_payment: newAdvancePayment,
-        payment_status: 'Unpaid'
+        payment_status: 'Unpaid',
+        already_recurred: true,
       };
 
       const { error } = await supabase
@@ -1397,6 +1399,9 @@ const PURCHASE_TYPES = [
                                 {purchase.next_recurring_date && (
                                   <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
                                     Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                    {purchase.already_recurred && (
+                                      <span className="text-xs text-gray-500 ml-1">(Already recurred and updated)</span>
+                                    )}
                                   </span>
                                 )}
                               </div>
@@ -1497,7 +1502,7 @@ const PURCHASE_TYPES = [
                                 </span>
                               )}
                             </div>
-                            {purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                            {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
                               <Button
                                 size="sm"
                                 onClick={() => handleRecurringRenewal(purchase)}
@@ -1689,7 +1694,7 @@ const PURCHASE_TYPES = [
                 <CardTitle className="text-lg">Montage Cost Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                {(() => {
+                {(() =>{
                   const montageData = calculateMontageData();
                   return (
                     <div className="grid grid-cols-4 gap-4">
