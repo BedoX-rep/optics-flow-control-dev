@@ -332,7 +332,7 @@ const PURCHASE_TYPES = [
 
     try {
       const currentTotalAmount = purchase.amount_ttc || purchase.amount;
-      
+
       const { error } = await supabase
         .from('purchases')
         .update({
@@ -943,7 +943,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-        user_id: user.id,
+user_id: user.id,
       };
 
       if (editingPurchase) {
@@ -1422,8 +1422,7 @@ const PURCHASE_TYPES = [
                                 <h3 className="text-base font-bold text-gray-900 truncate">
                                   {purchase.description}
                                 </h3>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
+                              </div>                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
                                 {purchase.payment_urgency && (
                                   <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
                                     Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
@@ -1432,11 +1431,6 @@ const PURCHASE_TYPES = [
                                 {purchase.next_recurring_date && !purchase.already_recurred && (
                                   <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
                                     Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.already_recurred && (
-                                  <span className="text-green-600 bg-green-50 px-2 py-1 rounded font-medium">
-                                    ✓ Recurring date passed & updated
                                   </span>
                                 )}
                               </div>
@@ -1451,6 +1445,11 @@ const PURCHASE_TYPES = [
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
+                                {purchase.already_recurred && (
+                                  <span className="text-green-600 bg-green-50 px-2 py-1 rounded font-medium ml-2">
+                                    ✓ Recurring date {purchase.next_recurring_date ? `(${format(new Date(purchase.next_recurring_date), 'MMM dd')})` : ''} passed & updated
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1481,7 +1480,7 @@ const PURCHASE_TYPES = [
                                 title="Mark as Paid"
                               >
                                 <DollarSign className="h-3 w-3" />
-                              </Button>
+                            </Button>
                             )}
                             <Button 
                               variant="ghost" 
