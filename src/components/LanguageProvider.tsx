@@ -5359,6 +5359,8 @@ const useTranslations = () => {
       accessories: language === 'fr' ? 'Accessoires' : 'Accessories',
       service: language === 'fr' ? 'Service' : 'Service',
       other: language === 'fr' ? 'Autre' : 'Other',
+    next: language === 'fr' ? 'Suivant' : 'Next',
+    alreadyPassed: language === 'fr' ? 'Déjà passé' : 'Already Passed',
 
       // Indexes
       index56: language === 'fr' ? '1.56' : '1.56',

@@ -1428,7 +1428,12 @@ user_id: user.id,
                                 )}
                                 {purchase.next_recurring_date && !purchase.already_recurred && (
                                   <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
-                                    Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                    {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                  </span>
+                                )}
+                                {purchase.next_recurring_date && purchase.already_recurred && (
+                                  <span className="text-gray-600 bg-gray-50 px-2 py-1 rounded font-medium">
+                                    {t('alreadyPassed')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
                                   </span>
                                 )}
                               </div>
@@ -1443,11 +1448,6 @@ user_id: user.id,
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
-                                {purchase.already_recurred && (
-                                  <span className="text-green-600 bg-green-50 px-2 py-1 rounded font-medium ml-2">
-                                    ✓ Recurring date {purchase.next_recurring_date ? `(${format(new Date(purchase.next_recurring_date), 'MMM dd')})` : ''} passed & updated
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </div>
