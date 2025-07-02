@@ -52,6 +52,7 @@ interface Purchase {
   next_recurring_date?: string;
   purchase_type?: string;
   tax_percentage?: number;
+  already_recurred?: boolean;
   created_at: string;
 }
 
