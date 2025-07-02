@@ -1434,6 +1434,11 @@ const PURCHASE_TYPES = [
                                     Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
                                   </span>
                                 )}
+                                {purchase.already_recurred && (
+                                  <span className="text-green-600 bg-green-50 px-2 py-1 rounded font-medium">
+                                    ✓ Recurring date passed & updated
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-gray-600">
@@ -1467,6 +1472,17 @@ const PURCHASE_TYPES = [
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
+                            {purchase.payment_status !== 'Paid' && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleMarkAsPaid(purchase)}
+                                className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
+                                title="Mark as Paid"
+                              >
+                                <DollarSign className="h-3 w-3" />
+                              </Button>
+                            )}
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -1533,15 +1549,6 @@ const PURCHASE_TYPES = [
                               )}
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
-                              {purchase.payment_status !== 'Paid' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleMarkAsPaid(purchase)}
-                                  className="bg-green-600 hover:bg-green-700 text-white text-xs h-6 px-3"
-                                >
-                                  {t('markAsPaid') || 'Mark as Paid'}
-                                </Button>
-                              )}
                               {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
                                 <Button
                                   size="sm"
