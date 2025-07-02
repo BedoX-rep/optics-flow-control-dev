@@ -129,7 +129,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: 'none',
-    purchase_type: 'Operational Expenses'
+    purchase_type: 'Operational Expenses',
+    next_recurring_date: '',
+    already_recurred: false
   });
 
   // Initialize form with editing purchase data
@@ -150,7 +152,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: editingPurchase.recurring_type || 'none',
-        purchase_type: editingPurchase.purchase_type || 'Operational Expenses'
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
+        next_recurring_date: editingPurchase.next_recurring_date ? format(new Date(editingPurchase.next_recurring_date), 'yyyy-MM-dd') : '',
+        already_recurred: editingPurchase.already_recurred || false
       });
     } else {
       resetForm();
@@ -173,7 +177,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: 'none',
-      purchase_type: 'Operational Expenses'
+      purchase_type: 'Operational Expenses',
+      next_recurring_date: '',
+      already_recurred: false
     });
   };
 
@@ -341,8 +347,9 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_status: paymentStatus,
         payment_urgency: formData.payment_urgency || null,
         recurring_type: formData.recurring_type === 'none' ? null : formData.recurring_type,
-        next_recurring_date: nextRecurringDate,
+        next_recurring_date: formData.next_recurring_date || nextRecurringDate,
         purchase_type: formData.purchase_type,
+        already_recurred: formData.already_recurred,
         is_deleted: false
       };
 
@@ -751,14 +758,42 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                   </div>
 
                   {formData.recurring_type !== 'none' && (
-                    <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
-                      <p className="text-sm text-teal-700">
-                        <strong>Next Occurrence:</strong>{' '}
-                        {formData.purchase_date && formData.recurring_type !== 'none' 
-                          ? calculateNextRecurringDate(formData.purchase_date, formData.recurring_type) || 'Invalid date'
-                          : 'Set purchase date first'
-                        }
-                      </p>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-teal-700 font-medium text-sm">Next Recurring Date</Label>
+                        <Input
+                          type="date"
+                          value={formData.next_recurring_date}
+                          onChange={(e) => setFormData(prev => ({ ...prev, next_recurring_date: e.target.value }))}
+                          disabled={isSubmitting}
+                          className="border-teal-200 focus:border-teal-500 h-9"
+                        />
+                        <p className="text-xs text-teal-600">
+                          Auto-calculated: {formData.purchase_date && formData.recurring_type !== 'none' 
+                            ? calculateNextRecurringDate(formData.purchase_date, formData.recurring_type) || 'Invalid date'
+                            : 'Set purchase date first'
+                          }
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="already_recurred"
+                            checked={formData.already_recurred}
+                            onChange={(e) => setFormData(prev => ({ ...prev, already_recurred: e.target.checked }))}
+                            disabled={isSubmitting}
+                            className="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500 focus:ring-2"
+                          />
+                          <Label htmlFor="already_recurred" className="text-teal-700 font-medium text-sm">
+                            Already Recurred
+                          </Label>
+                        </div>
+                        <p className="text-xs text-teal-600">
+                          Mark this if the recurring purchase has already been processed
+                        </p>
+                      </div>
                     </div>
                   )}
                 </CardContent>

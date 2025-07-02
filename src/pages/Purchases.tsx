@@ -80,6 +80,7 @@ interface Purchase {
   created_at: string;
   suppliers?: Supplier;
   already_recurred?: boolean;
+  tax_percentage?: number;
 }
 
 const Purchases = () => {
