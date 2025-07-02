@@ -3151,6 +3151,92 @@ const purchasesTranslations: Translations = {
     en: 'Loading purchases...',
     fr: 'Chargement des achats...'
   },
+  unknownSupplier: {
+    en: 'Unknown Supplier',
+    fr: 'Fournisseur Inconnu'
+  },
+  markAsPaid: {
+    en: 'Mark as Paid',
+    fr: 'Marquer comme Payé'
+  },
+  purchaseMarkedAsPaid: {
+    en: 'Purchase marked as paid successfully',
+    fr: 'Achat marqué comme payé avec succès'
+  },
+  failedToMarkAsPaid: {
+    en: 'Failed to mark purchase as paid',
+    fr: 'Échec du marquage de l\'achat comme payé'
+  },
+  alreadyRecurredUpdated: {
+    en: 'Already recurred and updated',
+    fr: 'Déjà récurrent et mis à jour'
+  },
+  recurringDatePassedUpdated: {
+    en: 'Recurring date passed & updated',
+    fr: 'Date de récurrence passée et mise à jour'
+  },
+  recurringPurchasesRenewed: {
+    en: 'Recurring Purchases Renewed',
+    fr: 'Achats Récurrents Renouvelés'
+  },
+  recurringPurchasesRenewedDesc: {
+    en: 'recurring purchase(s) have been automatically renewed.',
+    fr: 'achat(s) récurrent(s) ont été automatiquement renouvelés.'
+  },
+  failedToCheckRecurringPurchases: {
+    en: 'Failed to check recurring purchases',
+    fr: 'Échec de la vérification des achats récurrents'
+  },
+  recurringPurchaseRenewedSuccess: {
+    en: 'Recurring purchase renewed successfully',
+    fr: 'Achat récurrent renouvelé avec succès'
+  },
+  failedToRenewRecurringPurchase: {
+    en: 'Failed to renew recurring purchase',
+    fr: 'Échec du renouvellement de l\'achat récurrent'
+  },
+  authenticationRequired: {
+    en: 'Authentication required. Please login again.',
+    fr: 'Authentification requise. Veuillez vous reconnecter.'
+  },
+  viewBalanceHistory: {
+    en: 'View Balance History',
+    fr: 'Voir l\'Historique du Solde'
+  },
+  dateOfPurchase: {
+    en: 'Date of Purchase',
+    fr: 'Date d\'Achat'
+  },
+  contactInfo: {
+    en: 'Contact Info',
+    fr: 'Informations de Contact'
+  },
+  address: {
+    en: 'Address',
+    fr: 'Adresse'
+  },
+  enterPhone: {
+    en: 'Enter phone number',
+    fr: 'Entrer le numéro de téléphone'
+  },
+  enterEmail: {
+    en: 'Enter email address',
+    fr: 'Entrer l\'adresse email'
+  },
+  category: {
+    en: 'Category',
+    fr: 'Catégorie'
+  },
+  error: {
+    en: 'Error',
+    fr: 'Erreur'
+  },
+  success: {
+    en: 'Success',
+    fr: 'Succès'
+  },
+  loadingPurchasess achats...'
+  },
   recurringPurchasesRenewed: {
     en: 'Recurring Purchases Renewed',
     fr: 'Achats Récurrents Renouvelés'
