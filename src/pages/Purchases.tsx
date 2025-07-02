@@ -269,47 +269,45 @@ const PURCHASE_TYPES = [
     if (!user) return;
 
     try {
-      const currentDate = new Date();
-      const nextRecurringDate = calculateNextRecurringDate(
-        format(currentDate, 'yyyy-MM-dd'), 
-        purchase.recurring_type || ''
-      );
+      // Get the current session to pass the authorization header
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // Calculate new totals for renewal
-      const currentBalance = purchase.balance || 0;
-      const currentAdvancePayment = purchase.advance_payment || 0;
-      const originalAmount = purchase.amount_ttc || purchase.amount;
+      if (!session) {
+        console.error('No active session found');
+        toast({
+          title: "Error",
+          description: "Authentication required. Please login again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // For recurring renewal:
-      // - If balance = 0 (fully paid), reset to original amount
-      // - If balance > 0 (unpaid), add remaining balance to original amount
-      const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance;
-
-      // Reset advance payment to 0 for new cycle and calculate new balance
-      const newAdvancePayment = 0;
-      const newBalance = newTotalAmount - newAdvancePayment;
-
-      // Calculate HT amount from TTC amount using 20% tax
-      const newAmountHT = newTotalAmount / 1.2;
-
-      const renewalData = {
-        purchase_date: format(currentDate, 'yyyy-MM-dd'),
-        next_recurring_date: nextRecurringDate,
-        amount_ht: newAmountHT,
-        amount_ttc: newTotalAmount,
-        amount: newTotalAmount,
-        balance: newBalance,
-        advance_payment: newAdvancePayment,
-        payment_status: 'Unpaid',
-        already_recurred: true,
-      };
-
-      const { error } = await supabase
+      // First, mark the purchase as due for renewal by updating its next_recurring_date to today
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      const { error: updateError } = await supabase
         .from('purchases')
-        .update(renewalData)
+        .update({ next_recurring_date: today })
         .eq('id', purchase.id);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Error updating purchase date:', updateError);
+        throw updateError;
+      }
+
+      // Now call the edge function to process the renewal
+      const { data, error } = await supabase.functions.invoke('create-recurring-purchases', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error calling recurring purchases function:', error);
+        throw error;
+      }
+
+      console.log('Recurring purchase renewal result:', data);
 
       toast({
         title: "Success",
