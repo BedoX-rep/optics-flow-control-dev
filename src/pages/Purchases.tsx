@@ -327,6 +327,39 @@ const PURCHASE_TYPES = [
     }
   };
 
+  const handleMarkAsPaid = async (purchase: Purchase) => {
+    if (!user) return;
+
+    try {
+      const currentTotalAmount = purchase.amount_ttc || purchase.amount;
+      
+      const { error } = await supabase
+        .from('purchases')
+        .update({
+          advance_payment: currentTotalAmount,
+          balance: 0,
+          payment_status: 'Paid'
+        })
+        .eq('id', purchase.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Purchase marked as paid successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+    } catch (error) {
+      console.error('Error marking purchase as paid:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark purchase as paid",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Form states
   const [purchaseFormData, setPurchaseFormData] = useState({
     supplier_id: '',
@@ -1396,12 +1429,9 @@ const PURCHASE_TYPES = [
                                     Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
                                   </span>
                                 )}
-                                {purchase.next_recurring_date && (
+                                {purchase.next_recurring_date && !purchase.already_recurred && (
                                   <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
                                     Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                    {purchase.already_recurred && (
-                                      <span className="text-xs text-gray-500 ml-1">(Already recurred and updated)</span>
-                                    )}
                                   </span>
                                 )}
                               </div>
@@ -1502,15 +1532,26 @@ const PURCHASE_TYPES = [
                                 </span>
                               )}
                             </div>
-                            {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleRecurringRenewal(purchase)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
-                              >
-                                {t('renewNow')}
-                              </Button>
-                            )}
+                            <div className="flex gap-1 flex-shrink-0">
+                              {purchase.payment_status !== 'Paid' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleMarkAsPaid(purchase)}
+                                  className="bg-green-600 hover:bg-green-700 text-white text-xs h-6 px-3"
+                                >
+                                  {t('markAsPaid') || 'Mark as Paid'}
+                                </Button>
+                              )}
+                              {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecurringRenewal(purchase)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
+                                >
+                                  {t('renewNow')}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
