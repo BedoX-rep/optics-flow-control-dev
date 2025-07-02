@@ -224,7 +224,7 @@ const ItemCard = memo(({ item, index, onUpdateItem, onRemoveItem, t }: {
           </div>
 
           {/* Cost */}
-          <div className="col-span-2">
+          <div className="col-span-1">
             <Label className="text-xs text-teal-700 font-medium">{t('cost') || 'Cost'}</Label>
             <Input
               type="number"
@@ -232,6 +232,23 @@ const ItemCard = memo(({ item, index, onUpdateItem, onRemoveItem, t }: {
               step="0.01"
               value={item.cost}
               onChange={(e) => handleInputChange('cost', parseFloat(e.target.value) || 0)}
+              className="h-8 text-sm border-teal-200 focus:border-teal-500"
+            />
+          </div>
+
+          {/* Cost Total */}
+          <div className="col-span-1">
+            <Label className="text-xs text-teal-700 font-medium">{t('costTotal') || 'Cost Total'}</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={(item.cost * item.quantity).toFixed(2)}
+              onChange={(e) => {
+                const totalCost = parseFloat(e.target.value) || 0;
+                const unitCost = item.quantity > 0 ? totalCost / item.quantity : 0;
+                handleInputChange('cost', unitCost);
+              }}
               className="h-8 text-sm border-teal-200 focus:border-teal-500"
             />
           </div>
