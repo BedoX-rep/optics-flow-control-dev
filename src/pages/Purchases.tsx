@@ -79,6 +79,8 @@ interface Purchase {
   link_date_to?: string;
   created_at: string;
   suppliers?: Supplier;
+  already_recurred?: boolean;
+  tax_percentage?: number;
 }
 
 const Purchases = () => {
@@ -268,46 +270,45 @@ const PURCHASE_TYPES = [
     if (!user) return;
 
     try {
-      const currentDate = new Date();
-      const nextRecurringDate = calculateNextRecurringDate(
-        format(currentDate, 'yyyy-MM-dd'), 
-        purchase.recurring_type || ''
-      );
+      // Get the current session to pass the authorization header
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // Calculate new totals for renewal
-      const currentBalance = purchase.balance || 0;
-      const currentAdvancePayment = purchase.advance_payment || 0;
-      const originalAmount = purchase.amount_ttc || purchase.amount;
+      if (!session) {
+        console.error('No active session found');
+        toast({
+          title: "Error",
+          description: "Authentication required. Please login again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // For recurring renewal:
-      // - If balance = 0 (fully paid), reset to original amount
-      // - If balance > 0 (unpaid), add remaining balance to original amount
-      const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance;
-
-      // Reset advance payment to 0 for new cycle and calculate new balance
-      const newAdvancePayment = 0;
-      const newBalance = newTotalAmount - newAdvancePayment;
-
-      // Calculate HT amount from TTC amount using 20% tax
-      const newAmountHT = newTotalAmount / 1.2;
-
-      const renewalData = {
-        purchase_date: format(currentDate, 'yyyy-MM-dd'),
-        next_recurring_date: nextRecurringDate,
-        amount_ht: newAmountHT,
-        amount_ttc: newTotalAmount,
-        amount: newTotalAmount,
-        balance: newBalance,
-        advance_payment: newAdvancePayment,
-        payment_status: 'Unpaid'
-      };
-
-      const { error } = await supabase
+      // First, mark the purchase as due for renewal by updating its next_recurring_date to today
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      const { error: updateError } = await supabase
         .from('purchases')
-        .update(renewalData)
+        .update({ next_recurring_date: today })
         .eq('id', purchase.id);
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('Error updating purchase date:', updateError);
+        throw updateError;
+      }
+
+      // Now call the edge function to process the renewal
+      const { data, error } = await supabase.functions.invoke('create-recurring-purchases', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error calling recurring purchases function:', error);
+        throw error;
+      }
+
+      console.log('Recurring purchase renewal result:', data);
 
       toast({
         title: "Success",
@@ -320,6 +321,39 @@ const PURCHASE_TYPES = [
       toast({
         title: "Error",
         description: "Failed to renew recurring purchase",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMarkAsPaid = async (purchase: Purchase) => {
+    if (!user) return;
+
+    try {
+      const currentTotalAmount = purchase.amount_ttc || purchase.amount;
+
+      const { error } = await supabase
+        .from('purchases')
+        .update({
+          advance_payment: currentTotalAmount,
+          balance: 0,
+          payment_status: 'Paid'
+        })
+        .eq('id', purchase.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Purchase marked as paid successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+    } catch (error) {
+      console.error('Error marking purchase as paid:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark purchase as paid",
         variant: "destructive",
       });
     }
@@ -908,7 +942,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-        user_id: user.id,
+user_id: user.id,
       };
 
       if (editingPurchase) {
@@ -1387,16 +1421,20 @@ const PURCHASE_TYPES = [
                                 <h3 className="text-base font-bold text-gray-900 truncate">
                                   {purchase.description}
                                 </h3>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
+                              </div>                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
                                 {purchase.payment_urgency && (
                                   <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
                                     Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
                                   </span>
                                 )}
-                                {purchase.next_recurring_date && (
+                                {purchase.next_recurring_date && !purchase.already_recurred && (
                                   <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
-                                    Next: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                    {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+                                  </span>
+                                )}
+                                {purchase.next_recurring_date && purchase.already_recurred && (
+                                  <span className="text-gray-600 bg-gray-50 px-2 py-1 rounded font-medium">
+                                    {t('alreadyPassed')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
                                   </span>
                                 )}
                               </div>
@@ -1432,6 +1470,17 @@ const PURCHASE_TYPES = [
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
+                            {purchase.payment_status !== 'Paid' && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleMarkAsPaid(purchase)}
+                                className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
+                                title="Mark as Paid"
+                              >
+                                <DollarSign className="h-3 w-3" />
+                            </Button>
+                            )}
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -1497,15 +1546,17 @@ const PURCHASE_TYPES = [
                                 </span>
                               )}
                             </div>
-                            {purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleRecurringRenewal(purchase)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
-                              >
-                                {t('renewNow')}
-                              </Button>
-                            )}
+                            <div className="flex gap-1 flex-shrink-0">
+                              {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecurringRenewal(purchase)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
+                                >
+                                  {t('renewNow')}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -1689,7 +1740,7 @@ const PURCHASE_TYPES = [
                 <CardTitle className="text-lg">Montage Cost Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                {(() => {
+                {(() =>{
                   const montageData = calculateMontageData();
                   return (
                     <div className="grid grid-cols-4 gap-4">

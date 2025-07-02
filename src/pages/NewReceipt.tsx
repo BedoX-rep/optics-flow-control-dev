@@ -580,16 +580,16 @@ const NewReceipt = () => {
 
       if (clientData) {
         setRightEye({
-          sph: clientData.right_eye_sph !== null ? clientData.right_eye_sph.toString() : '0',
-          cyl: clientData.right_eye_cyl !== null ? clientData.right_eye_cyl.toString() : '0',
-          axe: clientData.right_eye_axe !== null ? clientData.right_eye_axe.toString() : '0'
+          sph: clientData.right_eye_sph !== null && clientData.right_eye_sph !== undefined ? clientData.right_eye_sph.toString() : '',
+          cyl: clientData.right_eye_cyl !== null && clientData.right_eye_cyl !== undefined ? clientData.right_eye_cyl.toString() : '',
+          axe: clientData.right_eye_axe !== null && clientData.right_eye_axe !== undefined ? clientData.right_eye_axe.toString() : ''
         });
         setLeftEye({
-          sph: clientData.left_eye_sph !== null ? clientData.left_eye_sph.toString() : '0',
-          cyl: clientData.left_eye_cyl !== null ? clientData.left_eye_cyl.toString() : '0',
-          axe: clientData.left_eye_axe !== null ? clientData.left_eye_axe.toString() : '0'
+          sph: clientData.left_eye_sph !== null && clientData.left_eye_sph !== undefined ? clientData.left_eye_sph.toString() : '',
+          cyl: clientData.left_eye_cyl !== null && clientData.left_eye_cyl !== undefined ? clientData.left_eye_cyl.toString() : '',
+          axe: clientData.left_eye_axe !== null && clientData.left_eye_axe !== undefined ? clientData.left_eye_axe.toString() : ''
         });
-        setAdd(clientData.Add !== null ? clientData.Add.toString() : '0');
+        setAdd(clientData.Add !== null && clientData.Add !== undefined ? clientData.Add.toString() : '');
         setPrescriptionOpen(true);
       }
     } catch (error) {
@@ -609,13 +609,13 @@ const NewReceipt = () => {
       const { error } = await supabase
         .from('clients')
         .update({
-          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-          Add: add ? parseFloat(add) : null,
+          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : 0,
+          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : 0,
+          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : 0,
+          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : 0,
+          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : 0,
+          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : 0,
+          Add: add ? parseFloat(add) : 0,
           last_prescription_update: new Date().toISOString()
         })
         .eq('id', selectedClient);
@@ -1236,13 +1236,13 @@ const NewReceipt = () => {
         .insert({
           user_id: user.id,
           client_id: selectedClient,
-          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : null,
-          add: add ? parseFloat(add) : null,
+          right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : 0,
+          right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : 0,
+          right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : 0,
+          left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : 0,
+          left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : 0,
+          left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : 0,
+          add: add ? parseFloat(add) : 0,
           subtotal,
           tax_base: tax > subtotal + montageCosts ? tax : subtotal + montageCosts,
           tax: taxAmount,
@@ -1275,13 +1275,13 @@ const NewReceipt = () => {
         const { error: prescriptionError } = await supabase
           .from('clients')
           .update({
-            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : null,
-            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : null,
-            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : null,
-            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : null,
-            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : null,
-            left_eye_axe: parseInt(leftEye.axe) ? parseInt(leftEye.axe) : null,
-            Add: add ? parseFloat(add) : null,
+            right_eye_sph: rightEye.sph ? parseFloat(rightEye.sph) : 0,
+            right_eye_cyl: rightEye.cyl ? parseFloat(rightEye.cyl) : 0,
+            right_eye_axe: rightEye.axe ? parseInt(rightEye.axe) : 0,
+            left_eye_sph: leftEye.sph ? parseFloat(leftEye.sph) : 0,
+            left_eye_cyl: leftEye.cyl ? parseFloat(leftEye.cyl) : 0,
+            left_eye_axe: leftEye.axe ? parseInt(leftEye.axe) : 0,
+            Add: add ? parseFloat(add) : 0,
             last_prescription_update: new Date().toISOString()
           })
           .eq('id', selectedClient);

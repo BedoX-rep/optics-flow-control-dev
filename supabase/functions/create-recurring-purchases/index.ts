@@ -43,7 +43,7 @@ serve(async (req) => {
       throw new Error('User not authenticated')
     }
 
-    // Get purchases that need to be renewed (where next_recurring_date <= today)
+    // Get purchases that need to be renewed (where next_recurring_date <= today and not already recurred)
     // RLS will automatically filter for the authenticated user
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
@@ -55,6 +55,7 @@ serve(async (req) => {
       .not('recurring_type', 'is', null)
       .not('next_recurring_date', 'is', null)
       .eq('is_deleted', false)
+      .eq('already_recurred', false)
 
     if (fetchError) {
       throw fetchError
@@ -109,53 +110,76 @@ serve(async (req) => {
         const paymentUrgencyDate = new Date(today)
         paymentUrgencyDate.setMonth(paymentUrgencyDate.getMonth() + 1)
 
-        // Calculate values for the renewal
-        const currentBalance = purchase.balance || 0
-        const currentAdvancePayment = purchase.advance_payment || 0
+        // Calculate values for the new purchase
         const originalAmount = purchase.amount_ttc || purchase.amount
         const taxPercentage = purchase.tax_percentage || 20
         
-        // For recurring renewal:
-        // - If balance = 0 (fully paid), reset to original amount
-        // - If balance > 0 (unpaid), add remaining balance to original amount
-        const newTotalAmount = currentBalance === 0 ? originalAmount : originalAmount + currentBalance
+        // For recurring renewal: always use the original amount for the new purchase
+        const newTotalAmount = originalAmount
         
-        // Reset advance payment to 0 for new cycle and calculate new balance
+        // New purchase starts with 0 advance payment and full balance
         const newAdvancePayment = 0
-        const newBalance = newTotalAmount - newAdvancePayment
+        const newBalance = newTotalAmount
         
         // Calculate HT amount from TTC amount using tax percentage
         const newAmountHT = newTotalAmount / (1 + taxPercentage / 100)
-        
-        // Balance history will be automatically recorded by the database trigger
 
-        // Update the purchase record with new recurring cycle
-        const updatedPurchaseData = {
-          purchase_date: today.toISOString().split('T')[0], // Set to current date
-          amount_ht: newAmountHT, // Update HT amount based on TTC and tax percentage
-          amount_ttc: newTotalAmount, // Update total amount
-          amount: newTotalAmount, // Keep for backward compatibility
-          tax_percentage: taxPercentage, // Keep existing tax percentage
-          balance: newBalance, // New balance after renewal
-          advance_payment: newAdvancePayment, // Reset advance payment to 0
-          payment_status: 'Unpaid', // Reset to unpaid for new cycle
-          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0], // Set payment urgency
-          next_recurring_date: nextRecurringDate.toISOString().split('T')[0] // Update to next recurring date
-        }
-
-        const { error: updateError } = await supabaseClient
+        // First, mark the original purchase as already_recurred
+        const { error: markRecurredError } = await supabaseClient
           .from('purchases')
-          .update(updatedPurchaseData)
+          .update({ already_recurred: true })
           .eq('id', purchase.id)
 
-        if (updateError) {
-          console.error(`Error updating recurring purchase for ID ${purchase.id}:`, updateError)
+        if (markRecurredError) {
+          console.error(`Error marking purchase ${purchase.id} as recurred:`, markRecurredError)
+          errorCount++
+          continue
+        }
+
+        // Create new purchase record
+        const newPurchaseData = {
+          user_id: user.id,
+          supplier_id: purchase.supplier_id,
+          description: purchase.description,
+          amount_ht: newAmountHT,
+          amount_ttc: newTotalAmount,
+          amount: newTotalAmount,
+          tax_percentage: taxPercentage,
+          category: purchase.category,
+          purchase_date: today.toISOString().split('T')[0],
+          payment_method: purchase.payment_method,
+          notes: purchase.notes,
+          advance_payment: newAdvancePayment,
+          balance: newBalance,
+          payment_status: 'Unpaid',
+          payment_urgency: paymentUrgencyDate.toISOString().split('T')[0],
+          recurring_type: purchase.recurring_type,
+          next_recurring_date: nextRecurringDate.toISOString().split('T')[0],
+          purchase_type: purchase.purchase_type,
+          linked_receipts: purchase.linked_receipts || null,
+          link_date_from: purchase.link_date_from || null,
+          link_date_to: purchase.link_date_to || null,
+          already_recurred: false,
+          is_deleted: false
+        }
+
+        const { error: insertError } = await supabaseClient
+          .from('purchases')
+          .insert(newPurchaseData)
+
+        if (insertError) {
+          console.error(`Error creating new recurring purchase for ID ${purchase.id}:`, insertError)
+          // Revert the already_recurred flag if new purchase creation failed
+          await supabaseClient
+            .from('purchases')
+            .update({ already_recurred: false })
+            .eq('id', purchase.id)
           errorCount++
           continue
         }
 
         processedCount++
-        console.log(`Successfully renewed recurring purchase for ID ${purchase.id}`)
+        console.log(`Successfully created new recurring purchase from original ID ${purchase.id}`)
 
       } catch (error) {
         console.error(`Error processing recurring purchase ID ${purchase.id}:`, error)

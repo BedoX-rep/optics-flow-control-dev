@@ -2892,10 +2892,14 @@ const purchasesTranslations: Translations = {
     fr: 'Échéance:'
   },
   next: {
-    en: 'Next:',
-    fr: 'Suivant:'
+    en: 'Next',
+    fr: 'Suivant'
   },
-  renewNow: {
+  alreadyPassed: {
+    en: 'Already Passed',
+    fr: 'Déjà Passé'
+  },
+   renewNow: {
     en: 'Renew Now',
     fr: 'Renouveler Maintenant'
   },
@@ -5359,6 +5363,7 @@ const useTranslations = () => {
       accessories: language === 'fr' ? 'Accessoires' : 'Accessories',
       service: language === 'fr' ? 'Service' : 'Service',
       other: language === 'fr' ? 'Autre' : 'Other',
+      alreadyPassed: language === 'fr' ? 'Déjà passé' : 'Already Passed',
 
       // Indexes
       index56: language === 'fr' ? '1.56' : '1.56',
