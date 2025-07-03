@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -23,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useQueryClient } from '@tanstack/react-query'
 import { useLanguage } from './LanguageProvider'
-import { User, Eye, Phone, FileText, Shield, X, Save } from 'lucide-react'
+import { User, Eye, Phone, FileText, Shield, X, Save, Calendar } from 'lucide-react'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -53,7 +52,12 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
   const { user } = useAuth()
   const { t } = useLanguage()
   const queryClient = useQueryClient()
-  
+
+  // Calculate default renewal date (today + 1.5 years)
+  const defaultRenewalDate = new Date();
+  defaultRenewalDate.setMonth(defaultRenewalDate.getMonth() + 18);
+  const defaultRenewalDateString = defaultRenewalDate.toISOString().split('T')[0];
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,7 +72,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       Add: 0,
       assurance: "",
       notes: "",
-      renewal_date: "",
+      renewal_date: defaultRenewalDateString,
       need_renewal: false,
       renewal_times: 0
     },
@@ -109,16 +113,16 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
         .single();
 
       if (error) throw error;
-      
+
       if (onClientAdded && client) {
         await onClientAdded(client);
       } else {
         await queryClient.invalidateQueries(['clients']);
       }
-      
+
       form.reset();
       onClose();
-      
+
       toast({
         title: "Success",
         description: "Client added successfully",
@@ -218,7 +222,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 <Eye className="h-4 w-4 text-teal-600" />
                 <h3 className="text-lg font-medium text-teal-800">Eye Prescription</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Right Eye */}
                 <div className="space-y-4">
@@ -484,7 +488,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
               </div>
             </div>
 
-            
+
           </form>
         </Form>
       </DialogContent>

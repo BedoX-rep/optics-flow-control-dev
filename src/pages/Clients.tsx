@@ -231,7 +231,7 @@ export default function Clients() {
           .map(client => client.phone)
           .filter(phone => phone && phone.trim() !== "")
       );
-      
+
       const newClients = importedClients.filter(client => {
         // If client has no phone or empty phone, always allow import
         if (!client.phone || client.phone.trim() === "") {
@@ -279,7 +279,7 @@ export default function Clients() {
       const phone = client.phone?.trim() || '';
       const name = client.name?.trim().toLowerCase() || '';
       const key = `${phone}_${name}`;
-      
+
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -371,7 +371,7 @@ export default function Clients() {
         const phone = client.phone?.trim() || '';
         const name = client.name?.trim().toLowerCase() || '';
         const key = `${phone}_${name}`;
-        
+
         if (!clientGroups[key]) {
           clientGroups[key] = [client];
         } else {
@@ -409,6 +409,55 @@ export default function Clients() {
       toast.error(`Error deleting duplicates: ${error.message}`);
     }
   };
+
+  // Check and process client renewals on page mount
+  useEffect(() => {
+    const checkClientRenewals = async () => {
+      if (!user) return;
+
+      try {
+        // Get the current session to pass the authorization header
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          console.error('No active session found');
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('check-client-renewals', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (error) {
+          console.error('Error checking client renewals:', error);
+          return;
+        }
+
+        console.log('Client renewals check result:', data);
+
+        if (data?.processed > 0) {
+          toast({
+            title: "Client Renewals Updated",
+            description: `${data.processed} client(s) have been marked for renewal.`,
+          });
+
+          // Refresh the clients list
+          queryClient.invalidateQueries(['all-clients', user.id]);
+        }
+      } catch (error) {
+        console.error('Error invoking check-client-renewals function:', error);
+        toast({
+          title: "Error",
+          description: "Failed to check client renewals",
+          variant: "destructive",
+        });
+      }
+    };
+
+    checkClientRenewals();
+  }, [user, toast, queryClient]);
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
