@@ -1,0 +1,28 @@
+chunk-W6L2VRDA.js?v=ce92206d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clients:1 Access to fetch at 'https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals' from origin 'https://3b21c81b-0942-4398-b7de-4a9b59b24c67-00-oa9an91z4oar.riker.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals:1 
+            
+            
+           Failed to load resource: net::ERR_FAILED
+Clients.tsx:434 Error checking client renewals: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=ce92206d:1388:17
+checkClientRenewals @ Clients.tsx:434
+Clients.tsx:434 Error checking client renewals: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=ce92206d:1388:17
+checkClientRenewals @ Clients.tsx:434
+clients:1 Access to fetch at 'https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals' from origin 'https://3b21c81b-0942-4398-b7de-4a9b59b24c67-00-oa9an91z4oar.riker.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals:1 
+            
+            
+           Failed to load resource: net::ERR_FAILED
+clients:1 Access to fetch at 'https://vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals' from origin 'https://3b21c81b-0942-4398-b7de-4a9b59b24c67-00-oa9an91z4oar.riker.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+ClientCard.tsx:289 Error renewing client: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=ce92206d:1388:17
+handleRenewal @ ClientCard.tsx:289
+ClientCard.tsx:298 Error renewing client: FunctionsFetchError: Failed to send a request to the Edge Function
+    at @supabase_supabase-js.js?v=ce92206d:1388:17
+handleRenewal @ ClientCard.tsx:298
+vbcdgubnvbilavetsjlr.supabase.co/functions/v1/check-client-renewals:1 
+            
+            
+           Failed to load resource: net::ERR_FAILED
