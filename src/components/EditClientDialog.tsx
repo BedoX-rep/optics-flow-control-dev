@@ -27,6 +27,8 @@ import { useQueryClient } from '@tanstack/react-query';
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().optional().nullable(),
+  renewal_date: z.string().optional().nullable(),
+  renewed: z.boolean().optional(),
   right_eye_sph: z.union([
     z.string().transform((val) => val === '' ? null : parseFloat(val)),
     z.number()
@@ -66,6 +68,8 @@ interface EditClientDialogProps {
     id: string;
     name: string;
     phone: string;
+    renewal_date?: string | null;
+    renewed?: boolean | null;
     right_eye_sph?: number | null;
     right_eye_cyl?: number | null;
     right_eye_axe?: number | null;
@@ -87,6 +91,8 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
     defaultValues: {
       name: client?.name || "",
       phone: client?.phone || "",
+      renewal_date: client?.renewal_date || "",
+      renewed: client?.renewed || false,
       right_eye_sph: client?.right_eye_sph !== undefined && client?.right_eye_sph !== null ? client.right_eye_sph : null,
       right_eye_cyl: client?.right_eye_cyl !== undefined && client?.right_eye_cyl !== null ? client.right_eye_cyl : null,
       right_eye_axe: client?.right_eye_axe !== undefined && client?.right_eye_axe !== null ? client.right_eye_axe : null,
@@ -104,6 +110,8 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       form.reset({
         name: client.name,
         phone: client.phone,
+        renewal_date: client.renewal_date || "",
+        renewed: client.renewed || false,
         right_eye_sph: client.right_eye_sph !== undefined && client.right_eye_sph !== null ? client.right_eye_sph : null,
         right_eye_cyl: client.right_eye_cyl !== undefined && client.right_eye_cyl !== null ? client.right_eye_cyl : null,
         right_eye_axe: client.right_eye_axe !== undefined && client.right_eye_axe !== null ? client.right_eye_axe : null,
@@ -133,6 +141,8 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       const clientData = {
         name: values.name,
         phone: values.phone,
+        renewal_date: values.renewal_date || null,
+        renewed: values.renewed || false,
         right_eye_sph: values.right_eye_sph,
         right_eye_cyl: values.right_eye_cyl,
         right_eye_axe: values.right_eye_axe,
@@ -442,6 +452,42 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="renewal_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Renewal Date</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="date" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="renewed"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input 
+                        type="checkbox" 
+                        checked={field.value || false}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Renewed
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
