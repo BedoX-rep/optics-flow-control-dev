@@ -269,30 +269,34 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   const handleRenewal = async () => {
     try {
-      // Get the current session to pass the authorization header
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        console.error('No active session found')
-        toast.error('Authentication required. Please login again.')
+      if (!client.need_renewal) {
+        toast.error('Client does not need renewal')
         return
       }
 
-      const { data, error } = await supabase.functions.invoke('check-client-renewals', {
-        body: { clientId: client.id },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      })
+      // Calculate new renewal date (today + 1.5 years)
+      const today = new Date()
+      const newRenewalDate = new Date(today)
+      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
+
+      // Update client: mark as not needing renewal, increment renewal times, set new renewal date
+      const { error } = await supabase
+        .from('clients')
+        .update({ 
+          need_renewal: false,
+          renewal_times: (client.renewal_times || 0) + 1,
+          renewal_date: newRenewalDate.toISOString().split('T')[0]
+        })
+        .eq('id', client.id)
 
       if (error) {
-        console.error('Error renewing client:', error)
+        console.error('Error updating client:', error)
         throw error
       }
 
-      console.log('Client renewal result:', data)
+      console.log(`Successfully renewed client ${client.name}. Next renewal date: ${newRenewalDate.toISOString().split('T')[0]}`)
 
-      toast.success(`Client renewed successfully! Next renewal: ${data.newRenewalDate}`)
+      toast.success(`Client renewed successfully! Next renewal: ${newRenewalDate.toISOString().split('T')[0]}`)
       await queryClient.invalidateQueries(['clients']);
     } catch (error) {
       console.error('Error renewing client:', error)
@@ -506,45 +510,47 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
 
-          {/* Renewal Information */}
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <h3 className="text-sm font-medium mb-3 text-center">Renewal Information</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 mb-1">Renewal Date</span>
-                <input 
-                  type="date"
-                  name="renewal_date"
-                  className="text-sm border rounded px-2 py-1 h-8"
-                  value={editedClient.renewal_date || ""}
-                  onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 mb-1">Need Renewal</span>
-                <div className="flex items-center h-8">
+          {/* Renewal Information - Only show if client needs renewal or is being edited */}
+          {(client.need_renewal || isEdited) && (
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <h3 className="text-sm font-medium mb-3 text-center">Renewal Information</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Renewal Date</span>
                   <input 
-                    type="checkbox"
-                    name="need_renewal"
-                    className="rounded border-gray-300"
-                    checked={editedClient.need_renewal || false}
-                    onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
+                    type="date"
+                    name="renewal_date"
+                    className="text-sm border rounded px-2 py-1 h-8"
+                    value={editedClient.renewal_date || ""}
+                    onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Need Renewal</span>
+                  <div className="flex items-center h-8">
+                    <input 
+                      type="checkbox"
+                      name="need_renewal"
+                      className="rounded border-gray-300"
+                      checked={editedClient.need_renewal || false}
+                      onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Renewal Times</span>
+                  <input 
+                    type="number"
+                    name="renewal_times"
+                    min="0"
+                    className="text-sm border rounded px-2 py-1 h-8"
+                    value={editedClient.renewal_times || 0}
+                    onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
                   />
                 </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 mb-1">Renewal Times</span>
-                <input 
-                  type="number"
-                  name="renewal_times"
-                  min="0"
-                  className="text-sm border rounded px-2 py-1 h-8"
-                  value={editedClient.renewal_times || 0}
-                  onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
-                />
-              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -559,7 +565,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             <Button
               onClick={handleRenewal}
               size="sm"
-              className="text-white bg-orange-500 hover:bg-orange-600 border-orange-500"
+              className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm"
             >
               <RefreshCw className="h-4 w-4 mr-1" />
               Renew Now

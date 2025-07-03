@@ -413,51 +413,53 @@ export default function Clients() {
   // Check and process client renewals on page mount
   useEffect(() => {
     const checkClientRenewals = async () => {
-      if (!user) return;
+      if (!user || !allClients.length) return;
 
       try {
-        // Get the current session to pass the authorization header
-        const { data: { session } } = await supabase.auth.getSession();
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+        
+        // Find clients that need renewal marking (renewal date has passed and not already marked)
+        const clientsToUpdate = allClients.filter(client => 
+          client.renewal_date && 
+          client.renewal_date <= todayString && 
+          !client.need_renewal
+        );
 
-        if (!session) {
-          console.error('No active session found');
+        if (clientsToUpdate.length === 0) {
           return;
         }
 
-        const { data, error } = await supabase.functions.invoke('check-client-renewals', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+        console.log(`Found ${clientsToUpdate.length} clients to mark for renewal`);
 
-        if (error) {
-          console.error('Error checking client renewals:', error);
-          return;
+        // Update clients to mark them as needing renewal
+        for (const client of clientsToUpdate) {
+          const { error } = await supabase
+            .from('clients')
+            .update({ need_renewal: true })
+            .eq('id', client.id)
+            .eq('user_id', user.id);
+
+          if (error) {
+            console.error(`Error updating client ${client.id}:`, error);
+          } else {
+            console.log(`Successfully marked client ${client.name} for renewal`);
+          }
         }
 
-        console.log('Client renewals check result:', data);
-
-        if (data?.processed > 0) {
-          toast({
-            title: "Client Renewals Updated",
-            description: `${data.processed} client(s) have been marked for renewal.`,
-          });
-
+        if (clientsToUpdate.length > 0) {
+          toast.success(`${clientsToUpdate.length} client(s) have been marked for renewal.`);
           // Refresh the clients list
           queryClient.invalidateQueries(['all-clients', user.id]);
         }
       } catch (error) {
-        console.error('Error invoking check-client-renewals function:', error);
-        toast({
-          title: "Error",
-          description: "Failed to check client renewals",
-          variant: "destructive",
-        });
+        console.error('Error checking client renewals:', error);
+        toast.error("Failed to check client renewals");
       }
     };
 
     checkClientRenewals();
-  }, [user, toast, queryClient]);
+  }, [user, allClients, toast, queryClient]);
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
