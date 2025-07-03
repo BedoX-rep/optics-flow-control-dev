@@ -25,8 +25,6 @@ export type Database = {
           name: string
           notes: string | null
           phone: string
-          renewal_date: string | null
-          renewed: boolean | null
           right_eye_axe: number
           right_eye_cyl: number
           right_eye_sph: number
@@ -47,8 +45,6 @@ export type Database = {
           name: string
           notes?: string | null
           phone: string
-          renewal_date?: string | null
-          renewed?: boolean | null
           right_eye_axe?: number
           right_eye_cyl?: number
           right_eye_sph?: number
@@ -69,8 +65,6 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string
-          renewal_date?: string | null
-          renewed?: boolean | null
           right_eye_axe?: number
           right_eye_cyl?: number
           right_eye_sph?: number

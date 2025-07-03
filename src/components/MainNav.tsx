@@ -25,7 +25,6 @@ import { useLanguage } from './LanguageProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { NotificationBadge } from "./NotificationBadge";
 
 const getNavigation = (t: any) => [
   { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },

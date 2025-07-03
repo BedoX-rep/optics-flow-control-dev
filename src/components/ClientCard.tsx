@@ -31,8 +31,6 @@ interface Client {
   phone: string;
   created_at: string;
   is_favorite?: boolean;
-  renewal_date?: string | null;
-  renewed?: boolean | null;
   right_eye_sph?: number | null;
   right_eye_cyl?: number | null;
   right_eye_axe?: number | null;
@@ -224,8 +222,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         .update({
           name: editedClient.name,
           phone: editedClient.phone,
-          renewal_date: editedClient.renewal_date || null,
-          renewed: editedClient.renewed || false,
           right_eye_sph: convertToNumber(editedClient.right_eye_sph),
           right_eye_cyl: convertToNumber(editedClient.right_eye_cyl),
           right_eye_axe: convertToNumber(editedClient.right_eye_axe),
@@ -468,32 +464,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 }}
                 placeholder="0.00"
               />
-            </div>
-          </div>
-          
-          {/* Renewal Information */}
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-500">Renewal Date</span>
-              <input 
-                type="date"
-                name="renewal_date"
-                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                value={editedClient.renewal_date || ""}
-                onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col justify-center">
-              <label className="flex items-center space-x-2">
-                <input 
-                  type="checkbox"
-                  name="renewed"
-                  checked={editedClient.renewed || false}
-                  onChange={(e) => handleFieldChange('renewed', e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium">Renewed</span>
-              </label>
             </div>
           </div>
         </div>

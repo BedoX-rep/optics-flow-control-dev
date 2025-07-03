@@ -231,7 +231,7 @@ export default function Clients() {
           .map(client => client.phone)
           .filter(phone => phone && phone.trim() !== "")
       );
-
+      
       const newClients = importedClients.filter(client => {
         // If client has no phone or empty phone, always allow import
         if (!client.phone || client.phone.trim() === "") {
@@ -279,7 +279,7 @@ export default function Clients() {
       const phone = client.phone?.trim() || '';
       const name = client.name?.trim().toLowerCase() || '';
       const key = `${phone}_${name}`;
-
+      
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -320,8 +320,6 @@ export default function Clients() {
           // Get input values directly from the card
           const nameInput = card.querySelector('input[name="name"]') as HTMLInputElement;
           const phoneInput = card.querySelector('input[name="phone"]') as HTMLInputElement;
-          const renewalDateInput = card.querySelector('input[name="renewal_date"]') as HTMLInputElement;
-          const renewedInput = card.querySelector('input[name="renewed"]') as HTMLInputElement;
           const rightSphInput = card.querySelector('input[name="right_eye_sph"]') as HTMLInputElement;
           const rightCylInput = card.querySelector('input[name="right_eye_cyl"]') as HTMLInputElement;
           const rightAxeInput = card.querySelector('input[name="right_eye_axe"]') as HTMLInputElement;
@@ -373,7 +371,7 @@ export default function Clients() {
         const phone = client.phone?.trim() || '';
         const name = client.name?.trim().toLowerCase() || '';
         const key = `${phone}_${name}`;
-
+        
         if (!clientGroups[key]) {
           clientGroups[key] = [client];
         } else {

@@ -28,8 +28,6 @@ import { User, Eye, Phone, FileText, Shield, X, Save } from 'lucide-react'
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().optional().nullable(),
-  renewal_date: z.string().optional().nullable(),
-  renewed: z.boolean().optional(),
   right_eye_sph: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   right_eye_cyl: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   right_eye_axe: z.union([z.string().transform(val => val === '' ? null : parseInt(val)), z.number()]).nullable(),
@@ -58,8 +56,6 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
     defaultValues: {
       name: "",
       phone: "",
-      renewal_date: "",
-      renewed: false,
       right_eye_sph: 0,
       right_eye_cyl: 0,
       right_eye_axe: 0,
@@ -89,8 +85,6 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
           user_id: user.id,
           name: values.name,
           phone: values.phone,
-          renewal_date: values.renewal_date || null,
-          renewed: values.renewed || false,
           right_eye_sph: values.right_eye_sph,
           right_eye_cyl: values.right_eye_cyl,
           right_eye_axe: values.right_eye_axe,
@@ -411,44 +405,6 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="renewal_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-teal-700 font-medium">Renewal Date</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="date" 
-                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="renewed"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <input 
-                          type="checkbox" 
-                          checked={field.value || false}
-                          onChange={field.onChange}
-                          className="h-4 w-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-teal-700 font-medium">
-                          Renewed
-                        </FormLabel>
-                      </div>
                     </FormItem>
                   )}
                 />
