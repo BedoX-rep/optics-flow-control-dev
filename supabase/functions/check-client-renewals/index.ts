@@ -39,7 +39,64 @@ serve(async (req) => {
       throw new Error('Authentication required')
     }
 
-    // Get clients that need renewal check (where renewal_date <= today and not marked as needing renewal)
+    // Check if this is a specific client renewal request
+    const requestBody = req.method === 'POST' ? await req.json() : null
+    const clientId = requestBody?.clientId
+
+    if (clientId) {
+      // Process specific client renewal
+      const { data: client, error: fetchError } = await supabaseClient
+        .from('clients')
+        .select('id, name, renewal_date, need_renewal, renewal_times')
+        .eq('id', clientId)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .single()
+
+      if (fetchError || !client) {
+        throw new Error('Client not found or unauthorized')
+      }
+
+      if (!client.need_renewal) {
+        throw new Error('Client does not need renewal')
+      }
+
+      // Calculate new renewal date (today + 1.5 years)
+      const today = new Date()
+      const newRenewalDate = new Date(today)
+      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
+
+      // Update client: mark as not needing renewal, increment renewal times, set new renewal date
+      const { error: updateError } = await supabaseClient
+        .from('clients')
+        .update({ 
+          need_renewal: false,
+          renewal_times: (client.renewal_times || 0) + 1,
+          renewal_date: newRenewalDate.toISOString().split('T')[0]
+        })
+        .eq('id', clientId)
+        .eq('user_id', user.id)
+
+      if (updateError) {
+        throw updateError
+      }
+
+      console.log(`Successfully renewed client ${client.name}. Next renewal date: ${newRenewalDate.toISOString().split('T')[0]}`)
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Client ${client.name} renewed successfully`,
+          newRenewalDate: newRenewalDate.toISOString().split('T')[0]
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    }
+
+    // Otherwise, check for clients that need renewal marking
     const today = new Date()
     const todayString = today.toISOString().split('T')[0]
     
@@ -74,23 +131,16 @@ serve(async (req) => {
     let processedCount = 0
     let errorCount = 0
 
-    // Process each client that needs renewal
+    // Process each client that needs renewal - only mark as needing renewal
     for (const client of clientsToCheck || []) {
       try {
         console.log(`Processing client ${client.name} (ID: ${client.id}) with renewal date ${client.renewal_date}`)
         
-        // Calculate next renewal date (current renewal_date + 1.5 years)
-        const currentRenewalDate = new Date(client.renewal_date)
-        const nextRenewalDate = new Date(currentRenewalDate)
-        nextRenewalDate.setMonth(nextRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
-        
-        // Update client: mark as needing renewal, increment renewal times, set next renewal date
+        // Update client: mark as needing renewal only
         const { error: updateError } = await supabaseClient
           .from('clients')
           .update({ 
-            need_renewal: true,
-            renewal_times: (client.renewal_times || 0) + 1,
-            renewal_date: nextRenewalDate.toISOString().split('T')[0]
+            need_renewal: true
           })
           .eq('id', client.id)
           .eq('user_id', user.id)
@@ -102,7 +152,7 @@ serve(async (req) => {
         }
 
         processedCount++
-        console.log(`Successfully marked client ${client.name} for renewal. Next renewal date: ${nextRenewalDate.toISOString().split('T')[0]}`)
+        console.log(`Successfully marked client ${client.name} for renewal`)
 
       } catch (error) {
         console.error(`Error processing client ${client.id}:`, error)

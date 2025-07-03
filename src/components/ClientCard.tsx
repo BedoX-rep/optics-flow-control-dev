@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
@@ -267,6 +267,39 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     }
   };
 
+  const handleRenewal = async () => {
+    try {
+      // Get the current session to pass the authorization header
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        console.error('No active session found')
+        toast.error('Authentication required. Please login again.')
+        return
+      }
+
+      const { data, error } = await supabase.functions.invoke('check-client-renewals', {
+        body: { clientId: client.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (error) {
+        console.error('Error renewing client:', error)
+        throw error
+      }
+
+      console.log('Client renewal result:', data)
+
+      toast.success(`Client renewed successfully! Next renewal: ${data.newRenewalDate}`)
+      await queryClient.invalidateQueries(['clients']);
+    } catch (error) {
+      console.error('Error renewing client:', error)
+      toast.error('Failed to renew client');
+    }
+  }
+
   return (
     <div 
       className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
@@ -451,7 +484,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               </div>
             </div>
           </div>
-          
+
           {/* Add field - centered horizontally */}
           <div className="flex justify-center">
             <div className="w-32 flex flex-col">
@@ -520,14 +553,27 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           <Calendar size={14} className="mr-1" />
           <span>{t('addedOn')} {formattedDate}</span>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={toggleExpanded}
-          className="text-gray-500 hover:text-teal-600 p-1 h-auto"
-        >
-          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {client.need_renewal && (
+            <Button
+              onClick={handleRenewal}
+              size="sm"
+              className="text-white bg-orange-500 hover:bg-orange-600 border-orange-500"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Renew Now
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleExpanded}
+            className="text-gray-500 hover:text-teal-600 p-1 h-auto"
+          >
+            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </Button>
+        </div>
       </div>
 
       {expanded && (
