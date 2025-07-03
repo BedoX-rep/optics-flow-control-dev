@@ -39,6 +39,9 @@ interface Client {
   left_eye_axe?: number | null;
   Add?: number | null;
   receipts?: Receipt[];
+  renewal_date?: string | null;
+  need_renewal?: boolean;
+  renewal_times?: number | null;
 }
 
 interface ClientCardProps {
@@ -228,7 +231,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           left_eye_sph: convertToNumber(editedClient.left_eye_sph),
           left_eye_cyl: convertToNumber(editedClient.left_eye_cyl),
           left_eye_axe: convertToNumber(editedClient.left_eye_axe),
-          Add: convertToNumber(editedClient.Add)
+          Add: convertToNumber(editedClient.Add),
+          renewal_date: editedClient.renewal_date,
+          need_renewal: editedClient.need_renewal,
+          renewal_times: editedClient.renewal_times
         })
         .eq('id', client.id);
 
@@ -464,6 +470,46 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 }}
                 placeholder="0.00"
               />
+            </div>
+          </div>
+
+          {/* Renewal Information */}
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <h3 className="text-sm font-medium mb-3 text-center">Renewal Information</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 mb-1">Renewal Date</span>
+                <input 
+                  type="date"
+                  name="renewal_date"
+                  className="text-sm border rounded px-2 py-1 h-8"
+                  value={editedClient.renewal_date || ""}
+                  onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 mb-1">Need Renewal</span>
+                <div className="flex items-center h-8">
+                  <input 
+                    type="checkbox"
+                    name="need_renewal"
+                    className="rounded border-gray-300"
+                    checked={editedClient.need_renewal || false}
+                    onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 mb-1">Renewal Times</span>
+                <input 
+                  type="number"
+                  name="renewal_times"
+                  min="0"
+                  className="text-sm border rounded px-2 py-1 h-8"
+                  value={editedClient.renewal_times || 0}
+                  onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
+                />
+              </div>
             </div>
           </div>
         </div>
