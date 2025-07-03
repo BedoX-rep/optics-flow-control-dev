@@ -524,7 +524,15 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           .from('clients')
           .update({
             name: formData.client_name,
-            phone: formData.client_phone
+            phone: formData.client_phone,
+            right_eye_sph: formData.right_eye_sph ? parseFloat(formData.right_eye_sph) : null,
+            right_eye_cyl: formData.right_eye_cyl ? parseFloat(formData.right_eye_cyl) : null,
+            right_eye_axe: formData.right_eye_axe ? parseInt(formData.right_eye_axe) : null,
+            left_eye_sph: formData.left_eye_sph ? parseFloat(formData.left_eye_sph) : null,
+            left_eye_cyl: formData.left_eye_cyl ? parseFloat(formData.left_eye_cyl) : null,
+            left_eye_axe: formData.left_eye_axe ? parseInt(formData.left_eye_axe) : null,
+            Add: formData.add ? parseFloat(formData.add) : null,
+            last_prescription_update: new Date().toISOString()
           })
           .eq('id', receipt.client_id);
 
@@ -584,6 +592,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       });
 
       queryClient.invalidateQueries(['receipts']);
+      queryClient.invalidateQueries(['all-clients']);
       onClose();
     } catch (error) {
       console.error('Error updating receipt:', error);
