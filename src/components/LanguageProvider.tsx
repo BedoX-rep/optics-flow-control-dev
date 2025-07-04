@@ -1349,8 +1349,8 @@ const productTranslations: Translations = {
     fr: 'Modifier le Client'
   },
   stored: {
-    en: 'Stored',
-    fr: 'Stocké'
+    en: 'Store Prescription',
+    fr: 'Optique Prescrit'
   },
   removedFromFavorites: {
     en: 'Removed from favorites',
