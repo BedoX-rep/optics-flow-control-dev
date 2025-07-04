@@ -62,13 +62,14 @@ export default function Clients() {
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [sortBy, setSortBy] = useState<string>('recent');
+  const [renewalFilter, setRenewalFilter] = useState<string>('all');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    setPage(0); // Reset to first page when search changes
-  }, [debouncedSearchTerm]);
+    setPage(0); // Reset to first page when search or filter changes
+  }, [debouncedSearchTerm, renewalFilter]);
 
   const fetchAllClients = async () => {
     if (!user) return [];
@@ -118,6 +119,13 @@ export default function Clients() {
       });
     }
 
+    // Apply renewal filter
+    if (renewalFilter === 'need_renewal') {
+      filtered = filtered.filter(client => client.need_renewal === true);
+    } else if (renewalFilter === 'no_renewal') {
+      filtered = filtered.filter(client => client.need_renewal === false);
+    }
+
     // Sort clients
     filtered.sort((a, b) => {
       if (sortBy === 'name') {
@@ -131,7 +139,7 @@ export default function Clients() {
     });
 
     return filtered;
-  }, [allClients, debouncedSearchTerm, sortBy]);
+  }, [allClients, debouncedSearchTerm, sortBy, renewalFilter]);
 
   // Client-side pagination
   const paginatedClients = useMemo(() => {
@@ -503,6 +511,17 @@ export default function Clients() {
                 <SelectItem value="name">{t('nameAZ')}</SelectItem>
                 <SelectItem value="recent">{t('recentlyAdded')}</SelectItem>
                 <SelectItem value="phone">{t('phoneNumber')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={renewalFilter} onValueChange={setRenewalFilter}>
+              <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
+                <SelectValue placeholder="Filter by renewal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clients</SelectItem>
+                <SelectItem value="need_renewal">Need Renewal</SelectItem>
+                <SelectItem value="no_renewal">No Renewal Needed</SelectItem>
               </SelectContent>
             </Select>
 
