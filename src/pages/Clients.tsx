@@ -9,7 +9,7 @@ import PageTitle from "@/components/PageTitle";
 import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
-import { UserPlus, Upload, ChevronDown, Save } from "lucide-react";
+import { UserPlus, Upload, ChevronDown, Save, Users, RefreshCw, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,6 +23,7 @@ interface Client {
   name: string;
   phone: string;
   created_at: string;
+  is_favorite?: boolean;
   right_eye_sph?: number | null;
   right_eye_cyl?: number | null;
   right_eye_axe?: number | null;
@@ -121,12 +122,12 @@ export default function Clients() {
     // Apply renewal filter
     if (renewalFilter === 'need_renewal') {
       filtered = filtered.filter(client => client.need_renewal === true);
-    } else if (renewalFilter === 'no_renewal') {
-      filtered = filtered.filter(client => client.need_renewal === false);
+    } else if (renewalFilter === 'favorites') {
+      filtered = filtered.filter(client => client.is_favorite === true);
     }
 
-    // Sort clients by name by default
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort clients by latest added (created_at desc)
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return filtered;
   }, [allClients, debouncedSearchTerm, renewalFilter]);
@@ -482,7 +483,7 @@ export default function Clients() {
       </div>
 
       <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="relative flex-1 min-w-[240px]">
             <SearchInput
               value={searchTerm}
@@ -492,32 +493,53 @@ export default function Clients() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
             <Select value={renewalFilter} onValueChange={setRenewalFilter}>
-              <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
-                <SelectValue placeholder="Filter by renewal" />
+              <SelectTrigger className={`w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200 min-w-0 flex-shrink-0 ${
+                renewalFilter !== 'all'
+                  ? 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200'
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}>
+                {renewalFilter === 'all' ? (
+                  <>
+                    <Users className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('allClients')}</span>
+                  </>
+                ) : renewalFilter === 'need_renewal' ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('needRenewal')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Star className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('favorites')}</span>
+                  </>
+                )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Clients</SelectItem>
-                <SelectItem value="need_renewal">Need Renewal</SelectItem>
-                <SelectItem value="no_renewal">No Renewal Needed</SelectItem>
+                <SelectItem value="all">{t('allClients')}</SelectItem>
+                <SelectItem value="need_renewal">{t('needRenewal')}</SelectItem>
+                <SelectItem value="favorites">{t('favorites')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={findDuplicateClients}
-              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
+              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
             >
-              {t('findDuplicates')}
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('findDuplicates')}</span>
             </Button>
+            
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setIsImportDialogOpen(true)}
-              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
+              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              {t('import')}
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('import')}</span>
             </Button>
           </div>
         </div>
