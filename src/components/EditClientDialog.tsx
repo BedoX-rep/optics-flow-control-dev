@@ -59,7 +59,9 @@ const formSchema = z.object({
   notes: z.string().nullable().optional(),
   renewal_date: z.string().nullable().optional(),
   need_renewal: z.boolean().optional(),
-  renewal_times: z.number().optional()
+  renewal_times: z.number().optional(),
+  store_prescription: z.boolean().optional(),
+  optician_prescribed_by: z.string().nullable().optional()
 })
 
 interface EditClientDialogProps {
@@ -81,6 +83,8 @@ interface EditClientDialogProps {
     renewal_date?: string | null;
     need_renewal?: boolean;
     renewal_times?: number | null;
+    store_prescription?: boolean;
+    optician_prescribed_by?: string | null;
   };
 }
 
@@ -104,7 +108,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       assurance: client?.assurance || "",
       renewal_date: client?.renewal_date || "",
       need_renewal: client?.need_renewal || false,
-      renewal_times: client?.renewal_times || 0
+      renewal_times: client?.renewal_times || 0,
+      store_prescription: client?.store_prescription || false,
+      optician_prescribed_by: client?.optician_prescribed_by || ""
     },
   })
 
@@ -124,7 +130,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         assurance: client.assurance || "",
         renewal_date: client.renewal_date || "",
         need_renewal: client.need_renewal || false,
-        renewal_times: client.renewal_times || 0
+        renewal_times: client.renewal_times || 0,
+        store_prescription: client.store_prescription || false,
+        optician_prescribed_by: client.optician_prescribed_by || ""
       });
     }
   }, [client, form]);
@@ -156,7 +164,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         notes: values.notes || null,
         renewal_date: values.renewal_date || null,
         need_renewal: values.need_renewal,
-        renewal_times: values.renewal_times
+        renewal_times: values.renewal_times,
+        store_prescription: values.store_prescription,
+        optician_prescribed_by: values.optician_prescribed_by || null
       }
 
       const { data, error } = await supabase
@@ -501,6 +511,41 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormLabel>Renewal Times</FormLabel>
                       <FormControl>
                         <Input {...field} type="number" min="0" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <FormField
+                  control={form.control}
+                  name="store_prescription"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-gray-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Store Prescription</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="optician_prescribed_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Optician Prescribed By</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

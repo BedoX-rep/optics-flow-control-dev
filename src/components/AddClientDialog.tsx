@@ -38,7 +38,9 @@ const formSchema = z.object({
   notes: z.string().nullable(),
   renewal_date: z.string().nullable(),
   need_renewal: z.boolean(),
-  renewal_times: z.number()
+  renewal_times: z.number(),
+  store_prescription: z.boolean(),
+  optician_prescribed_by: z.string().nullable()
 })
 
 interface AddClientDialogProps {
@@ -74,7 +76,9 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       notes: "",
       renewal_date: defaultRenewalDateString,
       need_renewal: false,
-      renewal_times: 0
+      renewal_times: 0,
+      store_prescription: false,
+      optician_prescribed_by: ""
     },
   })
 
@@ -107,6 +111,8 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
           renewal_date: values.renewal_date || null,
           need_renewal: values.need_renewal,
           renewal_times: values.renewal_times,
+          store_prescription: values.store_prescription,
+          optician_prescribed_by: values.optician_prescribed_by || null,
           is_deleted: false
         })
         .select()
@@ -479,6 +485,46 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                           type="number" 
                           min="0"
                           className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <FormField
+                  control={form.control}
+                  name="store_prescription"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-teal-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-teal-700 font-medium">Store Prescription</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="optician_prescribed_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium">Optician Prescribed By</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="text" 
+                          className="border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80"
+                          placeholder="Enter optician name"
                         />
                       </FormControl>
                       <FormMessage className="text-red-500" />

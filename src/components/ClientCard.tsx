@@ -42,6 +42,8 @@ interface Client {
   renewal_date?: string | null;
   need_renewal?: boolean;
   renewal_times?: number | null;
+  store_prescription?: boolean;
+  optician_prescribed_by?: string | null;
 }
 
 interface ClientCardProps {
@@ -234,7 +236,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           Add: convertToNumber(editedClient.Add),
           renewal_date: editedClient.renewal_date,
           need_renewal: editedClient.need_renewal,
-          renewal_times: editedClient.renewal_times
+          renewal_times: editedClient.renewal_times,
+          store_prescription: editedClient.store_prescription,
+          optician_prescribed_by: editedClient.optician_prescribed_by || null
         })
         .eq('id', client.id);
 
@@ -547,6 +551,36 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     value={editedClient.renewal_times || 0}
                     onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
                   />
+                </div>
+              </div>
+              
+              {/* Prescription Information */}
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <h3 className="text-sm font-medium mb-3 text-center">Prescription Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Store Prescription</span>
+                    <div className="flex items-center h-8">
+                      <input 
+                        type="checkbox"
+                        name="store_prescription"
+                        className="rounded border-gray-300"
+                        checked={editedClient.store_prescription || false}
+                        onChange={(e) => handleFieldChange('store_prescription', e.target.checked)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-500 mb-1">Optician Prescribed By</span>
+                    <input 
+                      type="text"
+                      name="optician_prescribed_by"
+                      className="text-sm border rounded px-2 py-1 h-8"
+                      value={editedClient.optician_prescribed_by || ""}
+                      onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
+                      placeholder="Enter optician name"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
