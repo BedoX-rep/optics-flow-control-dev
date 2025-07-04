@@ -202,7 +202,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[600px] p-6">
         <DialogHeader>
-          <DialogTitle>Edit Client</DialogTitle>
+          <DialogTitle>{t('editClient')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -212,7 +212,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{t('clientName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -225,7 +225,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('phoneNumber')}</FormLabel>
                     <FormControl>
                       <Input {...field} type="tel" />
                     </FormControl>
@@ -237,7 +237,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Right Eye</h3>
+                <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
@@ -326,7 +326,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Left Eye</h3>
+                <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
@@ -443,7 +443,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             />
             
             <div className="space-y-4 mt-6">
-              <h3 className="text-md font-medium">Prescription Storage</h3>
+              <h3 className="text-md font-medium">{t('prescriptionStorage')}</h3>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -459,7 +459,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Store Prescription</FormLabel>
+                        <FormLabel>{t('storePrescription')}</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -469,7 +469,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                   name="optician_prescribed_by"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Optician Prescribed By</FormLabel>
+                      <FormLabel>{t('opticianPrescribedBy')}</FormLabel>
                       <FormControl>
                         <Input {...field} type="text" />
                       </FormControl>
@@ -507,14 +507,14 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             />
             
             <div className="space-y-4 mt-6">
-              <h3 className="text-md font-medium">Renewal Information</h3>
+              <h3 className="text-md font-medium">{t('renewalInformation')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="renewal_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Renewal Date</FormLabel>
+                      <FormLabel>{t('renewalDate')}</FormLabel>
                       <FormControl>
                         <Input {...field} type="date" />
                       </FormControl>
@@ -536,7 +536,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Need Renewal</FormLabel>
+                        <FormLabel>{t('needRenewalField')}</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -546,7 +546,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                   name="renewal_times"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Renewal Times</FormLabel>
+                      <FormLabel>{t('renewalTimes')}</FormLabel>
                       <FormControl>
                         <Input {...field} type="number" min="0" />
                       </FormControl>
@@ -560,9 +560,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                {t('cancel')}
               </Button>
-              <Button type="submit">Update Client</Button>
+              <Button type="submit">{t('updateClient')}</Button>
             </div>
           </form>
         </Form>

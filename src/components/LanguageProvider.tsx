@@ -1272,6 +1272,94 @@ const productTranslations: Translations = {
     en: 'No purchase history available',
     fr: 'Aucun historique d\'achat disponible'
   },
+  allClients: {
+    en: 'All Clients',
+    fr: 'Tous les Clients'
+  },
+  needRenewal: {
+    en: 'Need Renewal',
+    fr: 'Besoin de Renouvellement'
+  },
+  favorites: {
+    en: 'Favorites',
+    fr: 'Favoris'
+  },
+  renewNow: {
+    en: 'Renew Now',
+    fr: 'Renouveler Maintenant'
+  },
+  basicInformation: {
+    en: 'Basic Information',
+    fr: 'Informations de Base'
+  },
+  eyePrescription: {
+    en: 'Eye Prescription',
+    fr: 'Prescription Oculaire'
+  },
+  additionalInformation: {
+    en: 'Additional Information',
+    fr: 'Informations Supplémentaires'
+  },
+  renewalInformation: {
+    en: 'Renewal Information',
+    fr: 'Informations de Renouvellement'
+  },
+  renewalDate: {
+    en: 'Renewal Date',
+    fr: 'Date de Renouvellement'
+  },
+  needRenewalField: {
+    en: 'Need Renewal',
+    fr: 'Besoin de Renouvellement'
+  },
+  renewalTimes: {
+    en: 'Renewal Times',
+    fr: 'Nombre de Renouvellements'
+  },
+  storePrescription: {
+    en: 'Store Prescription',
+    fr: 'Stocker la Prescription'
+  },
+  opticianPrescribedBy: {
+    en: 'Optician Prescribed By',
+    fr: 'Prescrit par l\'Opticien'
+  },
+  prescriptionInformation: {
+    en: 'Prescription Information',
+    fr: 'Informations de Prescription'
+  },
+  enterOpticianName: {
+    en: 'Enter optician name',
+    fr: 'Entrer le nom de l\'opticien'
+  },
+  addPower: {
+    en: 'Add Power',
+    fr: 'Addition'
+  },
+  prescriptionStorage: {
+    en: 'Prescription Storage',
+    fr: 'Stockage de Prescription'
+  },
+  updateClient: {
+    en: 'Update Client',
+    fr: 'Mettre à Jour le Client'
+  },
+  editClient: {
+    en: 'Edit Client',
+    fr: 'Modifier le Client'
+  },
+  stored: {
+    en: 'Stored',
+    fr: 'Stocké'
+  },
+  removedFromFavorites: {
+    en: 'Removed from favorites',
+    fr: 'Retiré des favoris'
+  },
+  addedToFavorites: {
+    en: 'Added to favorites',
+    fr: 'Ajouté aux favoris'
+  },
   // Invoice translations
   invoices: {
     en: 'Invoices',

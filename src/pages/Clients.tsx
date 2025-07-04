@@ -417,7 +417,7 @@ export default function Clients() {
       try {
         const today = new Date();
         const todayString = today.toISOString().split('T')[0];
-        
+
         // Find clients that need renewal marking (renewal date has passed and not already marked)
         const clientsToUpdate = allClients.filter(client => 
           client.renewal_date && 
@@ -532,7 +532,7 @@ export default function Clients() {
               <Filter className="h-4 w-4" />
               <span className="hidden sm:inline">{t('findDuplicates')}</span>
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={() => setIsImportDialogOpen(true)}

@@ -95,7 +95,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       // Invalidate clients query to refresh the list
       await queryClient.invalidateQueries(['clients']);
-      toast.success(client.is_favorite ? "Removed from favorites" : "Added to favorites");
+      toast.success(client.is_favorite ? t('removedFromFavorites') : t('addedToFavorites'));
     } catch (error: any) {
       toast.error("Failed to update favorite status");
     }
@@ -346,7 +346,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           <div className="flex items-center gap-2 flex-shrink-0">
             {client.store_prescription && (
               <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                📋 Stored
+                📋 {t('stored')}
               </div>
             )}
             <Button
@@ -522,10 +522,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           {/* Renewal Information - Only show if client needs renewal or is being edited */}
           {(client.need_renewal || isEdited) && (
             <div className="mt-4 pt-3 border-t border-gray-200">
-              <h3 className="text-sm font-medium mb-3 text-center">Renewal Information</h3>
+              <h3 className="text-sm font-medium mb-3 text-center">{t('renewalInformation')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">Renewal Date</span>
+                  <span className="text-xs text-gray-500 mb-1">{t('renewalDate')}</span>
                   <input 
                     type="date"
                     name="renewal_date"
@@ -535,7 +535,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">Need Renewal</span>
+                  <span className="text-xs text-gray-500 mb-1">{t('needRenewalField')}</span>
                   <div className="flex items-center h-8">
                     <input 
                       type="checkbox"
@@ -547,7 +547,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">Renewal Times</span>
+                  <span className="text-xs text-gray-500 mb-1">{t('renewalTimes')}</span>
                   <input 
                     type="number"
                     name="renewal_times"
@@ -561,10 +561,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               
               {/* Prescription Information */}
               <div className="mt-4 pt-3 border-t border-gray-200">
-                <h3 className="text-sm font-medium mb-3 text-center">Prescription Information</h3>
+                <h3 className="text-sm font-medium mb-3 text-center">{t('prescriptionInformation')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Store Prescription</span>
+                    <span className="text-xs text-gray-500 mb-1">{t('storePrescription')}</span>
                     <div className="flex items-center h-8">
                       <input 
                         type="checkbox"
@@ -576,14 +576,14 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">Optician Prescribed By</span>
+                    <span className="text-xs text-gray-500 mb-1">{t('opticianPrescribedBy')}</span>
                     <input 
                       type="text"
                       name="optician_prescribed_by"
                       className="text-sm border rounded px-2 py-1 h-8"
                       value={editedClient.optician_prescribed_by || ""}
                       onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
-                      placeholder="Enter optician name"
+                      placeholder={t('enterOpticianName')}
                     />
                   </div>
                 </div>
@@ -607,7 +607,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm"
             >
               <RefreshCw className="h-4 w-4 mr-1" />
-              Renew Now
+              {t('renewNow')}
             </Button>
           )}
           <Button 
@@ -623,7 +623,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       {expanded && (
         <div className="px-4 py-3 bg-white border-t border-gray-100 animate-accordion-down">
-          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">Purchase History</h4>
+          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">{t('purchaseHistory')}</h4>
           {client.receipts && client.receipts.length > 0 ? (
             <div className="space-y-2">
               {client.receipts
@@ -651,7 +651,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No purchase history available</p>
+            <p className="text-sm text-gray-500">{t('noPurchaseHistory')}</p>
           )}
         </div>
       )}
