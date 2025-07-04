@@ -344,6 +344,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {client.store_prescription && (
+              <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                📋 Stored
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"

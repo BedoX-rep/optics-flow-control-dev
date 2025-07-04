@@ -61,7 +61,6 @@ export default function Clients() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-  const [sortBy, setSortBy] = useState<string>('recent');
   const [renewalFilter, setRenewalFilter] = useState<string>('all');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
@@ -126,20 +125,11 @@ export default function Clients() {
       filtered = filtered.filter(client => client.need_renewal === false);
     }
 
-    // Sort clients
-    filtered.sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === 'recent') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else if (sortBy === 'phone') {
-        return a.phone.localeCompare(b.phone);
-      }
-      return 0;
-    });
+    // Sort clients by name by default
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
 
     return filtered;
-  }, [allClients, debouncedSearchTerm, sortBy, renewalFilter]);
+  }, [allClients, debouncedSearchTerm, renewalFilter]);
 
   // Client-side pagination
   const paginatedClients = useMemo(() => {
@@ -503,17 +493,6 @@ export default function Clients() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
-                <SelectValue placeholder={t('sortBy')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">{t('nameAZ')}</SelectItem>
-                <SelectItem value="recent">{t('recentlyAdded')}</SelectItem>
-                <SelectItem value="phone">{t('phoneNumber')}</SelectItem>
-              </SelectContent>
-            </Select>
-
             <Select value={renewalFilter} onValueChange={setRenewalFilter}>
               <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
                 <SelectValue placeholder="Filter by renewal" />

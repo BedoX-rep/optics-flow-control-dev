@@ -441,6 +441,44 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-4 mt-6">
+              <h3 className="text-md font-medium">Prescription Storage</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="store_prescription"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-gray-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Store Prescription</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="optician_prescribed_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Optician Prescribed By</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="assurance"
@@ -518,41 +556,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <FormField
-                  control={form.control}
-                  name="store_prescription"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="rounded border-gray-300"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Store Prescription</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="optician_prescribed_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Optician Prescribed By</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="text" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
-            </div>
             
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
