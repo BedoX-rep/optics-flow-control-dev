@@ -56,7 +56,10 @@ const formSchema = z.object({
     z.number()
   ]).nullable(),
   assurance: z.string().nullable().optional(),
-  notes: z.string().nullable().optional()
+  notes: z.string().nullable().optional(),
+  renewal_date: z.string().nullable().optional(),
+  need_renewal: z.boolean().optional(),
+  renewal_times: z.number().optional()
 })
 
 interface EditClientDialogProps {
@@ -75,6 +78,9 @@ interface EditClientDialogProps {
     notes?: string | null;
     Add?: number | null;
     assurance?: string | null;
+    renewal_date?: string | null;
+    need_renewal?: boolean;
+    renewal_times?: number | null;
   };
 }
 
@@ -95,7 +101,10 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       left_eye_axe: client?.left_eye_axe !== undefined && client?.left_eye_axe !== null ? client.left_eye_axe : null,
       Add: client?.Add !== undefined && client?.Add !== null ? client.Add : null,
       notes: client?.notes || "",
-      assurance: client?.assurance || ""
+      assurance: client?.assurance || "",
+      renewal_date: client?.renewal_date || "",
+      need_renewal: client?.need_renewal || false,
+      renewal_times: client?.renewal_times || 0
     },
   })
 
@@ -112,7 +121,10 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         left_eye_axe: client.left_eye_axe !== undefined && client.left_eye_axe !== null ? client.left_eye_axe : null,
         Add: client.Add !== undefined && client.Add !== null ? client.Add : null,
         notes: client.notes || "",
-        assurance: client.assurance || ""
+        assurance: client.assurance || "",
+        renewal_date: client.renewal_date || "",
+        need_renewal: client.need_renewal || false,
+        renewal_times: client.renewal_times || 0
       });
     }
   }, [client, form]);
@@ -141,7 +153,10 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         left_eye_axe: values.left_eye_axe,
         Add: values.Add,
         assurance: values.assurance || null,
-        notes: values.notes || null
+        notes: values.notes || null,
+        renewal_date: values.renewal_date || null,
+        need_renewal: values.need_renewal,
+        renewal_times: values.renewal_times
       }
 
       const { data, error } = await supabase
@@ -442,6 +457,58 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-4 mt-6">
+              <h3 className="text-md font-medium">Renewal Information</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="renewal_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Renewal Date</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="need_renewal"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-gray-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Need Renewal</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="renewal_times"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Renewal Times</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="number" min="0" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel

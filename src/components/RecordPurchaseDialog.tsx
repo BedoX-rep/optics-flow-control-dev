@@ -741,7 +741,11 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     <Label className="text-teal-700 font-medium text-sm">Recurring Type</Label>
                     <Select
                       value={formData.recurring_type}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, recurring_type: value }))}
+                      onValueChange={(value) => setFormData(prev => ({ 
+                        ...prev, 
+                        recurring_type: value,
+                        next_recurring_date: value === 'none' ? '' : prev.next_recurring_date
+                      }))}
                       disabled={isSubmitting}
                     >
                       <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">

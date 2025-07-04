@@ -246,6 +246,10 @@ const productTranslations: Translations = {
     en: 'Cost TTC',
     fr: 'Coût TTC'
   },
+  costTotal: {
+    en: 'Cost Total',
+    fr: 'Coût Total'
+  },
   stock: {
     en: 'Stock',
     fr: 'Stock'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
@@ -39,6 +39,9 @@ interface Client {
   left_eye_axe?: number | null;
   Add?: number | null;
   receipts?: Receipt[];
+  renewal_date?: string | null;
+  need_renewal?: boolean;
+  renewal_times?: number | null;
 }
 
 interface ClientCardProps {
@@ -228,7 +231,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           left_eye_sph: convertToNumber(editedClient.left_eye_sph),
           left_eye_cyl: convertToNumber(editedClient.left_eye_cyl),
           left_eye_axe: convertToNumber(editedClient.left_eye_axe),
-          Add: convertToNumber(editedClient.Add)
+          Add: convertToNumber(editedClient.Add),
+          renewal_date: editedClient.renewal_date,
+          need_renewal: editedClient.need_renewal,
+          renewal_times: editedClient.renewal_times
         })
         .eq('id', client.id);
 
@@ -260,6 +266,43 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       toast.error("Failed to delete client");
     }
   };
+
+  const handleRenewal = async () => {
+    try {
+      if (!client.need_renewal) {
+        toast.error('Client does not need renewal')
+        return
+      }
+
+      // Calculate new renewal date (today + 1.5 years)
+      const today = new Date()
+      const newRenewalDate = new Date(today)
+      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
+
+      // Update client: mark as not needing renewal, increment renewal times, set new renewal date
+      const { error } = await supabase
+        .from('clients')
+        .update({ 
+          need_renewal: false,
+          renewal_times: (client.renewal_times || 0) + 1,
+          renewal_date: newRenewalDate.toISOString().split('T')[0]
+        })
+        .eq('id', client.id)
+
+      if (error) {
+        console.error('Error updating client:', error)
+        throw error
+      }
+
+      console.log(`Successfully renewed client ${client.name}. Next renewal date: ${newRenewalDate.toISOString().split('T')[0]}`)
+
+      toast.success(`Client renewed successfully! Next renewal: ${newRenewalDate.toISOString().split('T')[0]}`)
+      await queryClient.invalidateQueries(['clients']);
+    } catch (error) {
+      console.error('Error renewing client:', error)
+      toast.error('Failed to renew client');
+    }
+  }
 
   return (
     <div 
@@ -445,7 +488,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               </div>
             </div>
           </div>
-          
+
           {/* Add field - centered horizontally */}
           <div className="flex justify-center">
             <div className="w-32 flex flex-col">
@@ -466,6 +509,48 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               />
             </div>
           </div>
+
+          {/* Renewal Information - Only show if client needs renewal or is being edited */}
+          {(client.need_renewal || isEdited) && (
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <h3 className="text-sm font-medium mb-3 text-center">Renewal Information</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Renewal Date</span>
+                  <input 
+                    type="date"
+                    name="renewal_date"
+                    className="text-sm border rounded px-2 py-1 h-8"
+                    value={editedClient.renewal_date || ""}
+                    onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Need Renewal</span>
+                  <div className="flex items-center h-8">
+                    <input 
+                      type="checkbox"
+                      name="need_renewal"
+                      className="rounded border-gray-300"
+                      checked={editedClient.need_renewal || false}
+                      onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 mb-1">Renewal Times</span>
+                  <input 
+                    type="number"
+                    name="renewal_times"
+                    min="0"
+                    className="text-sm border rounded px-2 py-1 h-8"
+                    value={editedClient.renewal_times || 0}
+                    onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -474,14 +559,27 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           <Calendar size={14} className="mr-1" />
           <span>{t('addedOn')} {formattedDate}</span>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={toggleExpanded}
-          className="text-gray-500 hover:text-teal-600 p-1 h-auto"
-        >
-          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {client.need_renewal && (
+            <Button
+              onClick={handleRenewal}
+              size="sm"
+              className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Renew Now
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleExpanded}
+            className="text-gray-500 hover:text-teal-600 p-1 h-auto"
+          >
+            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </Button>
+        </div>
       </div>
 
       {expanded && (

@@ -231,7 +231,7 @@ export default function Clients() {
           .map(client => client.phone)
           .filter(phone => phone && phone.trim() !== "")
       );
-      
+
       const newClients = importedClients.filter(client => {
         // If client has no phone or empty phone, always allow import
         if (!client.phone || client.phone.trim() === "") {
@@ -279,7 +279,7 @@ export default function Clients() {
       const phone = client.phone?.trim() || '';
       const name = client.name?.trim().toLowerCase() || '';
       const key = `${phone}_${name}`;
-      
+
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -371,7 +371,7 @@ export default function Clients() {
         const phone = client.phone?.trim() || '';
         const name = client.name?.trim().toLowerCase() || '';
         const key = `${phone}_${name}`;
-        
+
         if (!clientGroups[key]) {
           clientGroups[key] = [client];
         } else {
@@ -409,6 +409,57 @@ export default function Clients() {
       toast.error(`Error deleting duplicates: ${error.message}`);
     }
   };
+
+  // Check and process client renewals on page mount
+  useEffect(() => {
+    const checkClientRenewals = async () => {
+      if (!user || !allClients.length) return;
+
+      try {
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+        
+        // Find clients that need renewal marking (renewal date has passed and not already marked)
+        const clientsToUpdate = allClients.filter(client => 
+          client.renewal_date && 
+          client.renewal_date <= todayString && 
+          !client.need_renewal
+        );
+
+        if (clientsToUpdate.length === 0) {
+          return;
+        }
+
+        console.log(`Found ${clientsToUpdate.length} clients to mark for renewal`);
+
+        // Update clients to mark them as needing renewal
+        for (const client of clientsToUpdate) {
+          const { error } = await supabase
+            .from('clients')
+            .update({ need_renewal: true })
+            .eq('id', client.id)
+            .eq('user_id', user.id);
+
+          if (error) {
+            console.error(`Error updating client ${client.id}:`, error);
+          } else {
+            console.log(`Successfully marked client ${client.name} for renewal`);
+          }
+        }
+
+        if (clientsToUpdate.length > 0) {
+          toast.success(`${clientsToUpdate.length} client(s) have been marked for renewal.`);
+          // Refresh the clients list
+          queryClient.invalidateQueries(['all-clients', user.id]);
+        }
+      } catch (error) {
+        console.error('Error checking client renewals:', error);
+        toast.error("Failed to check client renewals");
+      }
+    };
+
+    checkClientRenewals();
+  }, [user, allClients, toast, queryClient]);
 
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">

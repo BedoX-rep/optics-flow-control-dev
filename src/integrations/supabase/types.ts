@@ -23,8 +23,11 @@ export type Database = {
           left_eye_cyl: number
           left_eye_sph: number
           name: string
+          need_renewal: boolean | null
           notes: string | null
           phone: string
+          renewal_date: string | null
+          renewal_times: number | null
           right_eye_axe: number
           right_eye_cyl: number
           right_eye_sph: number
@@ -39,15 +42,18 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           last_prescription_update?: string | null
-          left_eye_axe?: number
-          left_eye_cyl?: number
-          left_eye_sph?: number
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name: string
+          need_renewal?: boolean | null
           notes?: string | null
           phone: string
-          right_eye_axe?: number
-          right_eye_cyl?: number
-          right_eye_sph?: number
+          renewal_date?: string | null
+          renewal_times?: number | null
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id: string
         }
         Update: {
@@ -59,15 +65,18 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           last_prescription_update?: string | null
-          left_eye_axe?: number
-          left_eye_cyl?: number
-          left_eye_sph?: number
+          left_eye_axe?: number | null
+          left_eye_cyl?: number | null
+          left_eye_sph?: number | null
           name?: string
+          need_renewal?: boolean | null
           notes?: string | null
           phone?: string
-          right_eye_axe?: number
-          right_eye_cyl?: number
-          right_eye_sph?: number
+          renewal_date?: string | null
+          renewal_times?: number | null
+          right_eye_axe?: number | null
+          right_eye_cyl?: number | null
+          right_eye_sph?: number | null
           user_id?: string
         }
         Relationships: []
@@ -714,6 +723,9 @@ export interface Client {
   updated_at: string;
   last_prescription_update?: string;
   is_deleted?: boolean;
+  need_renewal: boolean | null
+  renewal_date: string | null
+  renewal_times: number | null
 }
 
 export interface Receipt {

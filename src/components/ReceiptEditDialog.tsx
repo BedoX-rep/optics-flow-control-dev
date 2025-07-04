@@ -29,9 +29,11 @@ interface ReceiptEditDialogProps {
 const ProductSelector = memo(() => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [companyFilter, setCompanyFilter] = useState('all');
 
   const { data: products = [] } = useQuery({
-    queryKey: ['products-for-linking', searchTerm],
+    queryKey: ['products-for-linking', searchTerm, categoryFilter, companyFilter],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -43,6 +45,14 @@ const ProductSelector = memo(() => {
         query = query.ilike('name', `%${searchTerm}%`);
       }
 
+      if (categoryFilter && categoryFilter !== 'all') {
+        query = query.eq('category', categoryFilter);
+      }
+
+      if (companyFilter && companyFilter !== 'all') {
+        query = query.eq('company', companyFilter);
+      }
+
       const { data, error } = await query.limit(50);
       if (error) throw error;
       return data || [];
@@ -51,52 +61,129 @@ const ProductSelector = memo(() => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies-for-filter'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('company')
+        .eq('is_deleted', false)
+        .not('company', 'is', null);
+      
+      if (error) throw error;
+      const uniqueCompanies = [...new Set(data.map(p => p.company).filter(Boolean))];
+      return uniqueCompanies.sort();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }, []);
 
+  const categories = [
+    { value: 'Single Vision Lenses', labelEn: 'Single Vision Lenses', labelFr: 'Verres unifocaux' },
+    { value: 'Progressive Lenses', labelEn: 'Progressive Lenses', labelFr: 'Verres progressifs' },
+    { value: 'Frames', labelEn: 'Frames', labelFr: 'Montures' },
+    { value: 'Sunglasses', labelEn: 'Sunglasses', labelFr: 'Lunettes de soleil' },
+    { value: 'Contact Lenses', labelEn: 'Contact Lenses', labelFr: 'Lentilles de contact' },
+    { value: 'Accessories', labelEn: 'Accessories', labelFr: 'Accessoires' },
+    { value: 'Service', labelEn: 'Service', labelFr: 'Service' },
+    { value: 'Other', labelEn: 'Other', labelFr: 'Autre' }
+  ];
+
+  const getCurrentLanguage = () => {
+    // Check if French is selected (you might need to adjust this based on your language provider)
+    return t('language') === 'fr' || localStorage.getItem('language') === 'fr' ? 'fr' : 'en';
+  };
+
   return (
     <>
-      <div className="p-2 border-b">
+      <div className="p-3 border-b space-y-3">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder={t('searchProducts')}
+            placeholder={t('searchProducts') || 'Search products...'}
             value={searchTerm}
             onChange={handleSearchChange}
             className="pl-8"
           />
         </div>
+        
+        {/* Category Filter */}
+        <div className="flex gap-2">
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue placeholder={getCurrentLanguage() === 'fr' ? 'Catégorie' : 'Category'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {getCurrentLanguage() === 'fr' ? 'Toutes catégories' : 'All Categories'}
+              </SelectItem>
+              {categories.map(cat => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {getCurrentLanguage() === 'fr' ? cat.labelFr : cat.labelEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Company Filter */}
+          <Select value={companyFilter} onValueChange={setCompanyFilter}>
+            <SelectTrigger className="w-[120px] h-8 text-xs">
+              <SelectValue placeholder={getCurrentLanguage() === 'fr' ? 'Marque' : 'Brand'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {getCurrentLanguage() === 'fr' ? 'Toutes marques' : 'All Brands'}
+              </SelectItem>
+              {companies.map(company => (
+                <SelectItem key={company} value={company}>
+                  {company}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      {products.map(product => (
-        <SelectItem key={product.id} value={product.id}>
-          <div className="flex justify-between items-center w-full gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{product.name}</div>
-              <div className="text-xs text-gray-500 truncate">
-                {product.category} • {product.company || 'No Company'}
+      
+      <div className="max-h-60 overflow-y-auto">
+        {products.map(product => (
+          <SelectItem key={product.id} value={product.id}>
+            <div className="flex justify-between items-center w-full gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{product.name}</div>
+                <div className="text-xs text-gray-500 truncate">
+                  {getCurrentLanguage() === 'fr' && product.category ? 
+                    categories.find(c => c.value === product.category)?.labelFr || product.category :
+                    product.category
+                  } • {product.company || (getCurrentLanguage() === 'fr' ? 'Aucune marque' : 'No Company')}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`text-xs px-2 py-1 rounded ${
+                  product.stock_status === 'inStock' ? 'bg-green-100 text-green-700' :
+                  product.stock_status === 'Out Of Stock' ? 'bg-red-100 text-red-700' :
+                  'bg-orange-100 text-orange-700'
+                }`}>
+                  {getCurrentLanguage() === 'fr' && product.stock_status === 'inStock' ? 'En stock' :
+                   getCurrentLanguage() === 'fr' && product.stock_status === 'Out Of Stock' ? 'Rupture' :
+                   getCurrentLanguage() === 'fr' && product.stock_status === 'Order' ? 'Commande' :
+                   product.stock_status}
+                </span>
+                <span className="text-sm font-medium text-blue-600">
+                  {product.price?.toFixed(2)} DH
+                </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={`text-xs px-2 py-1 rounded ${
-                product.stock_status === 'inStock' ? 'bg-green-100 text-green-700' :
-                product.stock_status === 'Out Of Stock' ? 'bg-red-100 text-red-700' :
-                'bg-orange-100 text-orange-700'
-              }`}>
-                {product.stock_status}
-              </span>
-              <span className="text-sm font-medium text-blue-600">
-                {product.price?.toFixed(2)} DH
-              </span>
-            </div>
+          </SelectItem>
+        ))}
+        {products.length === 0 && (
+          <div className="p-4 text-center text-gray-500 text-sm">
+            {getCurrentLanguage() === 'fr' ? 'Aucun produit trouvé' : 'No products found'}
           </div>
-        </SelectItem>
-      ))}
-      {products.length === 0 && (
-        <div className="p-4 text-center text-gray-500 text-sm">
-          {t('noProductsFound')}
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 });
@@ -256,9 +343,18 @@ const ItemCard = memo(({ item, index, onUpdateItem, onRemoveItem, t }: {
           {/* Total */}
           <div className="col-span-2">
             <Label className="text-xs text-teal-700 font-medium">{t('total') || 'Total'}</Label>
-            <div className="h-8 px-3 py-1 rounded-md bg-teal-50 font-medium flex items-center border border-teal-200 text-teal-800 text-sm">
-              {(item.price * item.quantity).toFixed(2)} DH
-            </div>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={(item.price * item.quantity).toFixed(2)}
+              onChange={(e) => {
+                const totalValue = parseFloat(e.target.value) || 0;
+                const unitPrice = item.quantity > 0 ? totalValue / item.quantity : 0;
+                handleInputChange('price', unitPrice);
+              }}
+              className="h-8 text-sm border-teal-200 focus:border-teal-500"
+            />
           </div>
 
           {/* Profit */}
@@ -524,7 +620,15 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           .from('clients')
           .update({
             name: formData.client_name,
-            phone: formData.client_phone
+            phone: formData.client_phone,
+            right_eye_sph: formData.right_eye_sph ? parseFloat(formData.right_eye_sph) : null,
+            right_eye_cyl: formData.right_eye_cyl ? parseFloat(formData.right_eye_cyl) : null,
+            right_eye_axe: formData.right_eye_axe ? parseInt(formData.right_eye_axe) : null,
+            left_eye_sph: formData.left_eye_sph ? parseFloat(formData.left_eye_sph) : null,
+            left_eye_cyl: formData.left_eye_cyl ? parseFloat(formData.left_eye_cyl) : null,
+            left_eye_axe: formData.left_eye_axe ? parseInt(formData.left_eye_axe) : null,
+            Add: formData.add ? parseFloat(formData.add) : null,
+            last_prescription_update: new Date().toISOString()
           })
           .eq('id', receipt.client_id);
 
@@ -584,6 +688,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       });
 
       queryClient.invalidateQueries(['receipts']);
+      queryClient.invalidateQueries(['all-clients']);
       onClose();
     } catch (error) {
       console.error('Error updating receipt:', error);
