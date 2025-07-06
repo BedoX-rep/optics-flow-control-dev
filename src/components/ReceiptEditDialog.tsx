@@ -788,8 +788,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   if (!receipt) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={onClose}>      <DialogContent className="max-w-7xl h-[90vh] overflow-hidden">
         <DialogHeader className="border-b border-teal-100 pb-4 mb-6">
           <DialogTitle className="text-3xl font-bold text-teal-800 flex items-center gap-3">
             <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
@@ -1089,6 +1088,23 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                     <Plus className="h-4 w-4 mr-2" />
                     {t('addItem') || 'Add Item'}
                   </Button>
+                   <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setIsDeleteConfirmationOpen(true)}
+                        disabled={loading}
+                        className="ml-4"
+                    >
+                        <Trash className="h-4 w-4 mr-2" />
+                        {t('deleteReceipt') || 'Delete Receipt'}
+                    </Button>
+                     <DeleteConfirmationDialog
+                        isOpen={isDeleteConfirmationOpen}
+                        onClose={() => setIsDeleteConfirmationOpen(false)}
+                        onConfirm={handleDelete}
+                        title={t('confirmDeleteReceipt') || 'Confirm Delete Receipt'}
+                        description={t('areYouSureDeleteReceipt') || 'Are you sure you want to delete this receipt?'}
+                    />
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -1130,24 +1146,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               </>
             )}
           </Button>
-           <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setIsDeleteConfirmationOpen(true)}
-                disabled={loading}
-                className="ml-4"
-            >
-                <Trash className="h-4 w-4 mr-2" />
-                {t('deleteReceipt') || 'Delete Receipt'}
-            </Button>
         </div>
-         <DeleteConfirmationDialog
-            isOpen={isDeleteConfirmationOpen}
-            onClose={() => setIsDeleteConfirmationOpen(false)}
-            onConfirm={handleDelete}
-            title={t('confirmDeleteReceipt') || 'Confirm Delete Receipt'}
-            description={t('areYouSureDeleteReceipt') || 'Are you sure you want to delete this receipt?'}
-        />
       </DialogContent>
     </Dialog>
   );
