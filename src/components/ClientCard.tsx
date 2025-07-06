@@ -253,22 +253,8 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from('clients')
-        .update({ is_deleted: true })
-        .eq('id', client.id);
-
-      if (error) throw error;
-
-      // Invalidate clients query to refresh the list
-      await queryClient.invalidateQueries(['clients']);
-      toast.success("Client deleted successfully");
-    } catch (error) {
-      console.error('Error deleting client:', error);
-      toast.error("Failed to delete client");
-    }
+  const handleDelete = () => {
+    onDelete(client);
   };
 
   const handleRenewal = async () => {

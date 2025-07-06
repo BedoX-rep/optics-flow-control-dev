@@ -47,7 +47,7 @@ const DeleteConfirmationDialog = ({
           <div className="mx-auto w-14 h-14 bg-gradient-to-br from-teal-100 to-teal-200 rounded-full flex items-center justify-center mb-4 shadow-md border-2 border-teal-300">
             <AlertTriangle className="h-6 w-6 text-teal-700" />
           </div>
-          <DialogTitle className="text-lg font-bold text-teal-800">
+          <DialogTitle className="text-lg font-bold text-teal-800 text-center">
             {defaultTitle}
           </DialogTitle>
         </DialogHeader>
