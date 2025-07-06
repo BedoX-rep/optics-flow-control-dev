@@ -28,6 +28,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/components/LanguageProvider';
 import { Textarea } from '@/components/ui/textarea';
+import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 
 
 interface Receipt {
@@ -400,6 +401,9 @@ const Receipts = () => {
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
 
@@ -610,12 +614,20 @@ const Receipts = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const openDeleteDialog = (receipt: Receipt) => {
+    setReceiptToDelete(receipt);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!receiptToDelete) return;
+
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('receipts')
         .update({ is_deleted: true })
-        .eq('id', id);
+        .eq('id', receiptToDelete.id);
 
       if (error) throw error;
 
@@ -624,6 +636,8 @@ const Receipts = () => {
         title: "Receipt Deleted",
         description: "Receipt has been successfully deleted.",
       });
+      setIsDeleteDialogOpen(false);
+      setReceiptToDelete(null);
     } catch (error) {
       console.error('Error deleting receipt:', error);
       toast({
@@ -631,6 +645,8 @@ const Receipts = () => {
         description: "Failed to update receipt. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -873,7 +889,7 @@ const Receipts = () => {
                   receipt={receipt}
                   onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
                   onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
-                  onDelete={() => handleDelete(receipt.id)}
+                  onDelete={() => openDeleteDialog(receipt)}
                   onView={() => setSelectedReceipt(receipt)}
                   onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
@@ -890,7 +906,7 @@ const Receipts = () => {
         onClose={() => setSelectedReceipt(null)}
         receipt={selectedReceipt}
         onEdit={setEditingReceipt}
-        onDelete={handleDelete}
+        onDelete={openDeleteDialog}
       />
 
       <ReceiptEditDialog
@@ -903,6 +919,19 @@ const Receipts = () => {
         isOpen={isStatsOpen}
         onClose={() => setIsStatsOpen(false)}
         receipts={receipts}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setReceiptToDelete(null);
+        }}
+        onConfirm={handleDelete}
+        title={t('deleteReceipt') || 'Delete Receipt'}
+        message={`Are you sure you want to delete the receipt for ${receiptToDelete?.client_name}? This action cannot be undone.`}
+        itemName={`Receipt for ${receiptToDelete?.client_name}`}
+        isDeleting={isDeleting}
       />
     </div>
   );

@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash, Plus, Save, Edit } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -432,6 +433,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{item: any, index: number} | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',
@@ -475,19 +479,38 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     }));
   }, []);
 
-  const handleRemoveItem = useCallback((index: number) => {
-    setFormData(prev => {
-      const itemToRemove = prev.items[index];
+  const openDeleteItemDialog = useCallback((index: number) => {
+    const item = formData.items[index];
+    setItemToDelete({ item, index });
+    setIsDeleteDialogOpen(true);
+  }, [formData.items]);
+
+  const handleRemoveItem = useCallback(async () => {
+    if (!itemToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { index } = itemToDelete;
+      const itemToRemove = formData.items[index];
+      
       // If the item has an ID (exists in database), track it for deletion
       if (itemToRemove?.id) {
         setDeletedItemIds(prevDeleted => [...prevDeleted, itemToRemove.id]);
       }
-      return {
+      
+      setFormData(prev => ({
         ...prev,
         items: prev.items.filter((_, i) => i !== index)
-      };
-    });
-  }, []);
+      }));
+
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error removing item:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [itemToDelete, formData.items]);
 
   const handleAddItem = useCallback(() => {
     setFormData(prev => ({
@@ -1040,7 +1063,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       item={item}
                       index={index}
                       onUpdateItem={handleUpdateItem}
-                      onRemoveItem={handleRemoveItem}
+                      onRemoveItem={openDeleteItemDialog}
                       t={t}
                     />
                   ))}
@@ -1072,6 +1095,19 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             )}
           </Button>
         </div>
+
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setItemToDelete(null);
+          }}
+          onConfirm={handleRemoveItem}
+          title={t('deleteItem') || 'Delete Item'}
+          message={`Are you sure you want to delete "${itemToDelete?.item?.custom_item_name || itemToDelete?.item?.product?.name || 'this item'}"? This action cannot be undone.`}
+          itemName={itemToDelete?.item?.custom_item_name || itemToDelete?.item?.product?.name}
+          isDeleting={isDeleting}
+        />
       </DialogContent>
     </Dialog>
   );
