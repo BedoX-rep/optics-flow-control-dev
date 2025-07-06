@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   Dialog,
@@ -14,11 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/components/LanguageProvider';
+import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash, Plus, Save, Edit } from "lucide-react";
-import { useLanguage } from "./LanguageProvider";
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -69,7 +69,7 @@ const ProductSelector = memo(() => {
         .select('company')
         .eq('is_deleted', false)
         .not('company', 'is', null);
-      
+
       if (error) throw error;
       const uniqueCompanies = [...new Set(data.map(p => p.company).filter(Boolean))];
       return uniqueCompanies.sort();
@@ -109,7 +109,7 @@ const ProductSelector = memo(() => {
             className="pl-8"
           />
         </div>
-        
+
         {/* Category Filter */}
         <div className="flex gap-2">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -146,7 +146,7 @@ const ProductSelector = memo(() => {
           </Select>
         </div>
       </div>
-      
+
       <div className="max-h-60 overflow-y-auto">
         {products.map(product => (
           <SelectItem key={product.id} value={product.id}>
@@ -454,6 +454,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     created_at: ''
   });
 
+  // State for delete confirmation dialog
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
+
   // Memoized calculations
   const itemsTotal = useMemo(() => {
     const subtotal = formData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -513,7 +516,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       if (receipt) {
         // Reset deleted items tracking when loading new receipt
         setDeletedItemIds([]);
-        
+
         // Fetch full receipt data with product information and client data
         const { data: fullReceipt, error } = await supabase
           .from('receipts')
@@ -726,6 +729,62 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     }
   }, [formData, receipt, t, toast, queryClient, onClose]);
 
+  const handleDelete = async () => {
+        setIsDeleteConfirmationOpen(false); // Close the confirmation dialog
+
+        if (!receipt?.id) {
+            toast({
+                title: t('error'),
+                description: t('noReceiptIdFound'),
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Delete associated receipt items
+            const { error: deleteItemsError } = await supabase
+                .from('receipt_items')
+                .delete()
+                .eq('receipt_id', receipt.id);
+
+            if (deleteItemsError) {
+                console.error('Error deleting receipt items:', deleteItemsError);
+                throw deleteItemsError;
+            }
+
+            // Then, delete the receipt itself
+            const { error: deleteReceiptError } = await supabase
+                .from('receipts')
+                .delete()
+                .eq('id', receipt.id);
+
+            if (deleteReceiptError) {
+                console.error('Error deleting receipt:', deleteReceiptError);
+                throw deleteReceiptError;
+            }
+
+            toast({
+                title: t('success'),
+                description: t('receiptDeletedSuccessfully'),
+            });
+
+            queryClient.invalidateQueries(['receipts']);
+            onClose(); // Close the dialog after successful deletion
+        } catch (error) {
+            console.error('Error deleting receipt:', error);
+            toast({
+                title: t('error'),
+                description: t('failedToDeleteReceipt'),
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
   if (!receipt) return null;
 
   return (
@@ -755,7 +814,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               Items
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-6">
             <div className="grid grid-cols-2 gap-6 h-full">
               {/* Client Information */}
@@ -1071,7 +1130,24 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               </>
             )}
           </Button>
+           <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsDeleteConfirmationOpen(true)}
+                disabled={loading}
+                className="ml-4"
+            >
+                <Trash className="h-4 w-4 mr-2" />
+                {t('deleteReceipt') || 'Delete Receipt'}
+            </Button>
         </div>
+         <DeleteConfirmationDialog
+            isOpen={isDeleteConfirmationOpen}
+            onClose={() => setIsDeleteConfirmationOpen(false)}
+            onConfirm={handleDelete}
+            title={t('confirmDeleteReceipt') || 'Confirm Delete Receipt'}
+            description={t('areYouSureDeleteReceipt') || 'Are you sure you want to delete this receipt?'}
+        />
       </DialogContent>
     </Dialog>
   );

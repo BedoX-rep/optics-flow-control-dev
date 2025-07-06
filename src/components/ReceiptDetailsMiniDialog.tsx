@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useLanguage } from "./LanguageProvider";
+import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 
 interface ReceiptDetailsMiniDialogProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ const ReceiptDetailsMiniDialog = ({
 }: ReceiptDetailsMiniDialogProps) => {
   const { t } = useLanguage();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
   if (!receipt) return null;
 
@@ -37,6 +39,7 @@ const ReceiptDetailsMiniDialog = ({
       console.error("Error deleting receipt:", error);
     } finally {
       setIsDeleting(false);
+      setIsDeleteConfirmationOpen(false);
     }
   };
 
@@ -60,9 +63,9 @@ const ReceiptDetailsMiniDialog = ({
                'bg-yellow-100 text-yellow-800';
       case 'montage':
         return status === 'Ready' ? 'bg-emerald-100 text-emerald-800' :
-               status === 'Ordered' ? 'bg-blue-100 text-blue-800' :
-               status === 'InStore' ? 'bg-orange-100 text-orange-800' :
-               status === 'InCutting' ? 'bg-amber-100 text-amber-800' :
+               'bg-blue-100 text-blue-800' :
+               'bg-orange-100 text-orange-800' :
+               'bg-amber-100 text-amber-800' :
                'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -236,13 +239,19 @@ const ReceiptDetailsMiniDialog = ({
           <Button 
             variant="destructive" 
             size="sm" 
-            onClick={handleDelete}
+            onClick={() => setIsDeleteConfirmationOpen(true)}
             disabled={isDeleting}
           >
             <Trash2 size={16} className="mr-1" /> {t('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
+      <DeleteConfirmationDialog
+        isOpen={isDeleteConfirmationOpen}
+        onClose={() => setIsDeleteConfirmationOpen(false)}
+        onConfirm={handleDelete}
+        itemName={receipt.clients?.name || receipt.client_name || "this receipt"}
+      />
     </Dialog>
   );
 };

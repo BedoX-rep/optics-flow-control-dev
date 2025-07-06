@@ -20,6 +20,7 @@ import InvoiceDetailsDialog from '@/components/InvoiceDetailsDialog';
 import PrintInvoiceDialog from '@/components/PrintInvoiceDialog';
 import { Invoice } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
+import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 
 const InvoiceCard = ({ 
   invoice, 
@@ -274,6 +275,9 @@ const Invoices = () => {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [printingInvoice, setPrintingInvoice] = useState<Invoice | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchInvoices = async () => {
     if (!user) return [];
@@ -379,21 +383,27 @@ const Invoices = () => {
       .reduce((sum, invoice) => sum + invoice.total, 0);
   }, [invoices]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('confirmDeleteInvoice') || 'Are you sure you want to delete this invoice?')) return;
+  const openDeleteDialog = (invoice: Invoice) => {
+    setInvoiceToDelete(invoice);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDelete = async () => {
+    if (!invoiceToDelete) return;
+
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('invoices')
         .update({ is_deleted: true })
-        .eq('id', id);
+        .eq('id', invoiceToDelete.id);
 
       if (error) throw error;
 
       // Optimistically update cache
       queryClient.setQueryData(['invoices', user?.id], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
-        return oldData.filter(invoice => invoice.id !== id);
+        return oldData.filter(invoice => invoice.id !== invoiceToDelete.id);
       });
 
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -401,6 +411,8 @@ const Invoices = () => {
         title: t('success') || "Success",
         description: t('invoiceDeletedSuccessfully') || "Invoice deleted successfully.",
       });
+      setDeleteDialogOpen(false);
+      setInvoiceToDelete(null);
     } catch (error) {
       console.error('Error deleting invoice:', error);
       // Revert optimistic update on error
@@ -410,6 +422,8 @@ const Invoices = () => {
         description: t('failedToDeleteInvoice') || "Failed to delete invoice. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -737,7 +751,7 @@ const Invoices = () => {
                 onView={() => setSelectedInvoice(invoice)}
                 onEdit={() => setEditingInvoice(invoice)}
                 onPrint={() => setPrintingInvoice(invoice)}
-                onDelete={() => handleDelete(invoice.id)}
+                onDelete={() => openDeleteDialog(invoice)}
                 onMarkAsPaid={() => handleMarkAsPaid(invoice)}
               />
             ))
@@ -768,6 +782,16 @@ const Invoices = () => {
         isOpen={!!printingInvoice}
         onClose={() => setPrintingInvoice(null)}
         invoice={printingInvoice}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        title={t('deleteInvoice') || 'Delete Invoice'}
+        description={t('deleteInvoiceConfirmation') || 'Are you sure you want to delete this invoice? This action cannot be undone.'}
+        itemName={invoiceToDelete?.invoice_number}
+        isLoading={isDeleting}
       />
     </div>
   );
