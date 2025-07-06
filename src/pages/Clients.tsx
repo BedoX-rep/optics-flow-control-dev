@@ -11,13 +11,12 @@ import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
 import { UserPlus, Upload, ChevronDown, Save, Users, RefreshCw, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from "@/hooks/useDebounce";
 import { useLanguage } from '@/components/LanguageProvider';
-import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 
 interface Client {
   id: string;
@@ -63,7 +62,6 @@ export default function Clients() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [renewalFilter, setRenewalFilter] = useState<string>('all');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
@@ -203,7 +201,6 @@ export default function Clients() {
   const handleDeleteClient = async () => {
     if (!clientToDelete) return;
 
-    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('clients')
@@ -220,8 +217,6 @@ export default function Clients() {
       setClientToDelete(null);
     } catch (error: any) {
       toast.error('Error deleting client: ' + error.message);
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -701,15 +696,22 @@ export default function Clients() {
       />
 
       {/* Delete confirmation dialog */}
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDeleteClient}
-        title={t('deleteClient') || 'Delete Client'}
-        description={t('deleteConfirmation') || 'Are you sure you want to delete this client? This action cannot be undone.'}
-        itemName={clientToDelete?.name}
-        isLoading={isDeleting}
-      />
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteClient')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteConfirmation', { clientName: clientToDelete?.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
+              {t('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Duplicates dialog */}
       <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>

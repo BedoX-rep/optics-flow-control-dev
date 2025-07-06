@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { format } from "date-fns";
 import { useLanguage } from "./LanguageProvider";
-import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 
 interface ReceiptDetailsMiniDialogProps {
   isOpen: boolean;
@@ -26,7 +25,6 @@ const ReceiptDetailsMiniDialog = ({
 }: ReceiptDetailsMiniDialogProps) => {
   const { t } = useLanguage();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
   if (!receipt) return null;
 
@@ -39,7 +37,6 @@ const ReceiptDetailsMiniDialog = ({
       console.error("Error deleting receipt:", error);
     } finally {
       setIsDeleting(false);
-      setIsDeleteConfirmationOpen(false);
     }
   };
 
@@ -239,19 +236,13 @@ const ReceiptDetailsMiniDialog = ({
           <Button 
             variant="destructive" 
             size="sm" 
-            onClick={() => setIsDeleteConfirmationOpen(true)}
+            onClick={handleDelete}
             disabled={isDeleting}
           >
             <Trash2 size={16} className="mr-1" /> {t('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
-      <DeleteConfirmationDialog
-        isOpen={isDeleteConfirmationOpen}
-        onClose={() => setIsDeleteConfirmationOpen(false)}
-        onConfirm={handleDelete}
-        itemName={receipt.clients?.name || receipt.client_name || "this receipt"}
-      />
     </Dialog>
   );
 };
