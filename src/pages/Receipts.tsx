@@ -943,7 +943,7 @@ const Receipts = () => {
         }}
         onConfirm={handleDelete}
         title={t('deleteReceipt') || 'Delete Receipt'}
-        message={`Are you sure you want to delete the receipt for ${receiptToDelete?.client_name}? This action cannot be undone.`}
+        message={t('deleteReceiptConfirmation') || `Are you sure you want to delete the receipt for ${receiptToDelete?.client_name}? This action cannot be undone.`}
         itemName={`Receipt for ${receiptToDelete?.client_name}`}
         isDeleting={isDeleting}
       />

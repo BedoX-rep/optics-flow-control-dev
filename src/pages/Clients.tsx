@@ -215,11 +215,11 @@ export default function Clients() {
       // Invalidate and refetch the cache to ensure consistency
       await queryClient.invalidateQueries(['all-clients', user?.id]);
 
-      toast.success('Client deleted successfully!');
+      toast.success(t('clientDeletedSuccessfully') || 'Client deleted successfully!');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
     } catch (error: any) {
-      toast.error('Error deleting client: ' + error.message);
+      toast.error(t('errorDeletingClient') || 'Error deleting client: ' + error.message);
     } finally {
       setIsDeleting(false);
     }

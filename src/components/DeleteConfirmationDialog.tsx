@@ -36,8 +36,8 @@ const DeleteConfirmationDialog = ({
 
   const defaultTitle = title || t('confirmDelete') || 'Confirm Delete';
   const defaultMessage = message || (itemName 
-    ? `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
-    : 'Are you sure you want to delete this item? This action cannot be undone.');
+    ? t('deleteConfirmationMessage')?.replace('{itemName}', itemName) || `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
+    : t('deleteConfirmationGeneric') || 'Are you sure you want to delete this item? This action cannot be undone.');
   const defaultDeleteButtonText = deleteButtonText || t('delete') || 'Delete';
 
   return (

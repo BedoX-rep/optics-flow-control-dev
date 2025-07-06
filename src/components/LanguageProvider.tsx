@@ -1224,6 +1224,22 @@ const productTranslations: Translations = {
     en: 'Are you sure you want to delete {clientName}? This action cannot be undone.',
     fr: 'Êtes-vous sûr de vouloir supprimer {clientName}? Cette action ne peut pas être annulée.'
   },
+  confirmDelete: {
+    en: 'Confirm Delete',
+    fr: 'Confirmer la Suppression'
+  },
+  deleteConfirmationMessage: {
+    en: 'Are you sure you want to delete "{itemName}"? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer "{itemName}" ? Cette action ne peut pas être annulée.'
+  },
+  deleteConfirmationGeneric: {
+    en: 'Are you sure you want to delete this item? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet élément ? Cette action ne peut pas être annulée.'
+  },
+  deleting: {
+    en: 'Deleting...',
+    fr: 'Suppression...'
+  },
   duplicateClientsFound: {
     en: 'Duplicate Clients Found',
     fr: 'Clients en Double Trouvés'
@@ -1235,6 +1251,30 @@ const productTranslations: Translations = {
   deleteDuplicates: {
     en: 'Delete Duplicates',
     fr: 'Supprimer les Doublons'
+  },
+  clientDeletedSuccessfully: {
+    en: 'Client deleted successfully!',
+    fr: 'Client supprimé avec succès !'
+  },
+  errorDeletingClient: {
+    en: 'Error deleting client:',
+    fr: 'Erreur lors de la suppression du client :'
+  },
+  deleteReceipt: {
+    en: 'Delete Receipt',
+    fr: 'Supprimer le Reçu'
+  },
+  deleteReceiptConfirmation: {
+    en: 'Are you sure you want to delete this receipt? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer ce reçu ? Cette action ne peut pas être annulée.'
+  },
+  deleteItem: {
+    en: 'Delete Item',
+    fr: 'Supprimer l\'Article'
+  },
+  deleteItemConfirmation: {
+    en: 'Are you sure you want to delete this item? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet article ? Cette action ne peut pas être annulée.'
   },
   enterClientName: {
     en: 'Enter client name',

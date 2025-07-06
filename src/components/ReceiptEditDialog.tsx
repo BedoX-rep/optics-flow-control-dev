@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   Dialog,
@@ -111,7 +110,7 @@ const ProductSelector = memo(() => {
         .select('company')
         .eq('is_deleted', false)
         .not('company', 'is', null);
-      
+
       if (error) throw error;
       const uniqueCompanies = [...new Set(data.map(p => p.company).filter(Boolean))];
       return uniqueCompanies.sort();
@@ -151,7 +150,7 @@ const ProductSelector = memo(() => {
             className="pl-8"
           />
         </div>
-        
+
         {/* Category Filter */}
         <div className="flex gap-2">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -188,7 +187,7 @@ const ProductSelector = memo(() => {
           </Select>
         </div>
       </div>
-      
+
       <div className="max-h-60 overflow-y-auto">
         {products.map(product => (
           <SelectItem key={product.id} value={product.id}>
@@ -533,12 +532,12 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     try {
       const { index } = itemToDelete;
       const itemToRemove = formData.items[index];
-      
+
       // If the item has an ID (exists in database), track it for deletion
       if (itemToRemove?.id) {
         setDeletedItemIds(prevDeleted => [...prevDeleted, itemToRemove.id]);
       }
-      
+
       setFormData(prev => ({
         ...prev,
         items: prev.items.filter((_, i) => i !== index)
@@ -577,7 +576,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
       if (receipt) {
         // Reset deleted items tracking when loading new receipt
         setDeletedItemIds([]);
-        
+
         // Fetch full receipt data with product information and client data
         const { data: fullReceipt, error } = await supabase
           .from('receipts')
@@ -819,7 +818,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               Items
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-6">
             <div className="grid grid-cols-2 gap-6 h-full">
               {/* Client Information */}
