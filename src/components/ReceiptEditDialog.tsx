@@ -431,6 +431,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+  const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',
@@ -475,10 +476,17 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   }, []);
 
   const handleRemoveItem = useCallback((index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => {
+      const itemToRemove = prev.items[index];
+      // If the item has an ID (exists in database), track it for deletion
+      if (itemToRemove?.id) {
+        setDeletedItemIds(prevDeleted => [...prevDeleted, itemToRemove.id]);
+      }
+      return {
+        ...prev,
+        items: prev.items.filter((_, i) => i !== index)
+      };
+    });
   }, []);
 
   const handleAddItem = useCallback(() => {
@@ -503,6 +511,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   useEffect(() => {
     const loadReceiptData = async () => {
       if (receipt) {
+        // Reset deleted items tracking when loading new receipt
+        setDeletedItemIds([]);
+        
         // Fetch full receipt data with product information and client data
         const { data: fullReceipt, error } = await supabase
           .from('receipts')
@@ -633,6 +644,19 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
           .eq('id', receipt.client_id);
 
         if (clientError) throw clientError;
+      }
+
+      // Delete removed items from database first
+      if (deletedItemIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('receipt_items')
+          .delete()
+          .in('id', deletedItemIds);
+
+        if (deleteError) {
+          console.error('Error deleting items:', deleteError);
+          throw deleteError;
+        }
       }
 
       // Prepare items for update. Differentiate between existing and new items.
