@@ -9,10 +9,11 @@ import PageTitle from "@/components/PageTitle";
 import EditClientDialog from "@/components/EditClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import AddClientDialog from "@/components/AddClientDialog";
-import { UserPlus, Upload, ChevronDown, Save } from "lucide-react";
+import { UserPlus, Upload, ChevronDown, Save, Users, RefreshCw, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from "@/hooks/useDebounce";
@@ -23,6 +24,7 @@ interface Client {
   name: string;
   phone: string;
   created_at: string;
+  is_favorite?: boolean;
   right_eye_sph?: number | null;
   right_eye_cyl?: number | null;
   right_eye_axe?: number | null;
@@ -59,16 +61,17 @@ export default function Clients() {
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-  const [sortBy, setSortBy] = useState<string>('recent');
+  const [renewalFilter, setRenewalFilter] = useState<string>('all');
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [duplicateClients, setDuplicateClients] = useState<any[]>([]);
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    setPage(0); // Reset to first page when search changes
-  }, [debouncedSearchTerm]);
+    setPage(0); // Reset to first page when search or filter changes
+  }, [debouncedSearchTerm, renewalFilter]);
 
   const fetchAllClients = async () => {
     if (!user) return [];
@@ -118,20 +121,18 @@ export default function Clients() {
       });
     }
 
-    // Sort clients
-    filtered.sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === 'recent') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      } else if (sortBy === 'phone') {
-        return a.phone.localeCompare(b.phone);
-      }
-      return 0;
-    });
+    // Apply renewal filter
+    if (renewalFilter === 'need_renewal') {
+      filtered = filtered.filter(client => client.need_renewal === true);
+    } else if (renewalFilter === 'favorites') {
+      filtered = filtered.filter(client => client.is_favorite === true);
+    }
+
+    // Sort clients by latest added (created_at desc)
+    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return filtered;
-  }, [allClients, debouncedSearchTerm, sortBy]);
+  }, [allClients, debouncedSearchTerm, renewalFilter]);
 
   // Client-side pagination
   const paginatedClients = useMemo(() => {
@@ -202,6 +203,7 @@ export default function Clients() {
   const handleDeleteClient = async () => {
     if (!clientToDelete) return;
 
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from('clients')
@@ -213,11 +215,13 @@ export default function Clients() {
       // Invalidate and refetch the cache to ensure consistency
       await queryClient.invalidateQueries(['all-clients', user?.id]);
 
-      toast.success('Client deleted successfully!');
+      toast.success(t('clientDeletedSuccessfully') || 'Client deleted successfully!');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
     } catch (error: any) {
-      toast.error('Error deleting client: ' + error.message);
+      toast.error(t('errorDeletingClient') || 'Error deleting client: ' + error.message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -418,7 +422,7 @@ export default function Clients() {
       try {
         const today = new Date();
         const todayString = today.toISOString().split('T')[0];
-        
+
         // Find clients that need renewal marking (renewal date has passed and not already marked)
         const clientsToUpdate = allClients.filter(client => 
           client.renewal_date && 
@@ -484,7 +488,7 @@ export default function Clients() {
       </div>
 
       <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="relative flex-1 min-w-[240px]">
             <SearchInput
               value={searchTerm}
@@ -494,32 +498,53 @@ export default function Clients() {
             />
           </div>
 
-          <div className="flex items-center gap-3">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 bg-white/5 border-white/10 rounded-xl">
-                <SelectValue placeholder={t('sortBy')} />
+          <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
+            <Select value={renewalFilter} onValueChange={setRenewalFilter}>
+              <SelectTrigger className={`w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200 min-w-0 flex-shrink-0 ${
+                renewalFilter !== 'all'
+                  ? 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200'
+                  : 'bg-white/10 hover:bg-white/20'
+              }`}>
+                {renewalFilter === 'all' ? (
+                  <>
+                    <Users className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('allClients')}</span>
+                  </>
+                ) : renewalFilter === 'need_renewal' ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('needRenewal')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Star className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{t('favorites')}</span>
+                  </>
+                )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="name">{t('nameAZ')}</SelectItem>
-                <SelectItem value="recent">{t('recentlyAdded')}</SelectItem>
-                <SelectItem value="phone">{t('phoneNumber')}</SelectItem>
+                <SelectItem value="all">{t('allClients')}</SelectItem>
+                <SelectItem value="need_renewal">{t('needRenewal')}</SelectItem>
+                <SelectItem value="favorites">{t('favorites')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={findDuplicateClients}
-              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
+              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
             >
-              {t('findDuplicates')}
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('findDuplicates')}</span>
             </Button>
+
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setIsImportDialogOpen(true)}
-              className="text-neutral-600 hover:text-neutral-900 rounded-xl"
+              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
             >
-              <Upload className="h-4 w-4 mr-2" />
-              {t('import')}
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('import')}</span>
             </Button>
           </div>
         </div>
@@ -676,22 +701,18 @@ export default function Clients() {
       />
 
       {/* Delete confirmation dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteClient')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('deleteConfirmation', { clientName: clientToDelete?.name })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteClient} className="bg-red-500 hover:bg-red-600">
-              {t('delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setClientToDelete(null);
+        }}
+        onConfirm={handleDeleteClient}
+        title={t('deleteClient')}
+        message={t('deleteConfirmation', { clientName: clientToDelete?.name }) || `Are you sure you want to delete "${clientToDelete?.name}"? This action cannot be undone.`}
+        itemName={clientToDelete?.name}
+        isDeleting={isDeleting}
+      />
 
       {/* Duplicates dialog */}
       <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   Dialog,
@@ -19,6 +18,48 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash, Plus, Save, Edit } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
+import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+
+interface Receipt {
+  id: string;
+  client_id: string | null;
+  client_name?: string;
+  client_phone?: string;
+  created_at: string;
+  total: number;
+  delivery_status: string;
+  montage_status: string;
+  balance: number;
+  advance_payment?: number;
+  cost?: number;
+  cost_ttc?: number;
+  profit?: number;
+  order_type?: string;
+  call_status: string;
+  time_called?: string;
+  note?: string;
+  user_id: string;
+  receipt_items?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    cost: number;
+    profit: number;
+    custom_item_name: string;
+    paid_at_delivery: boolean;
+    linked_eye?: string;
+    product_id?: string;
+    product?: {
+      id: string;
+      name: string;
+      category: string;
+      company?: string;
+      price?: number;
+      cost_ttc?: number;
+      stock_status?: string;
+    } | null;
+  }>;
+}
 
 interface ReceiptEditDialogProps {
   isOpen: boolean;
@@ -69,7 +110,7 @@ const ProductSelector = memo(() => {
         .select('company')
         .eq('is_deleted', false)
         .not('company', 'is', null);
-      
+
       if (error) throw error;
       const uniqueCompanies = [...new Set(data.map(p => p.company).filter(Boolean))];
       return uniqueCompanies.sort();
@@ -109,7 +150,7 @@ const ProductSelector = memo(() => {
             className="pl-8"
           />
         </div>
-        
+
         {/* Category Filter */}
         <div className="flex gap-2">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -146,7 +187,7 @@ const ProductSelector = memo(() => {
           </Select>
         </div>
       </div>
-      
+
       <div className="max-h-60 overflow-y-auto">
         {products.map(product => (
           <SelectItem key={product.id} value={product.id}>
@@ -431,6 +472,10 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+  const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{item: any, index: number} | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',
@@ -474,12 +519,38 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
     }));
   }, []);
 
-  const handleRemoveItem = useCallback((index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index)
-    }));
-  }, []);
+  const openDeleteItemDialog = useCallback((index: number) => {
+    const item = formData.items[index];
+    setItemToDelete({ item, index });
+    setIsDeleteDialogOpen(true);
+  }, [formData.items]);
+
+  const handleRemoveItem = useCallback(async () => {
+    if (!itemToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { index } = itemToDelete;
+      const itemToRemove = formData.items[index];
+
+      // If the item has an ID (exists in database), track it for deletion
+      if (itemToRemove?.id) {
+        setDeletedItemIds(prevDeleted => [...prevDeleted, itemToRemove.id]);
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.filter((_, i) => i !== index)
+      }));
+
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error removing item:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [itemToDelete, formData.items]);
 
   const handleAddItem = useCallback(() => {
     setFormData(prev => ({
@@ -503,6 +574,9 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
   useEffect(() => {
     const loadReceiptData = async () => {
       if (receipt) {
+        // Reset deleted items tracking when loading new receipt
+        setDeletedItemIds([]);
+
         // Fetch full receipt data with product information and client data
         const { data: fullReceipt, error } = await supabase
           .from('receipts')
@@ -635,6 +709,19 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
         if (clientError) throw clientError;
       }
 
+      // Delete removed items from database first
+      if (deletedItemIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('receipt_items')
+          .delete()
+          .in('id', deletedItemIds);
+
+        if (deleteError) {
+          console.error('Error deleting items:', deleteError);
+          throw deleteError;
+        }
+      }
+
       // Prepare items for update. Differentiate between existing and new items.
       const itemsToUpdate = formData.items.filter(item => item.id);
       const newItems = formData.items.filter(item => !item.id);
@@ -731,7 +818,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
               Items
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="client-prescription" className="flex-1 overflow-auto mt-6">
             <div className="grid grid-cols-2 gap-6 h-full">
               {/* Client Information */}
@@ -1016,7 +1103,7 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
                       item={item}
                       index={index}
                       onUpdateItem={handleUpdateItem}
-                      onRemoveItem={handleRemoveItem}
+                      onRemoveItem={openDeleteItemDialog}
                       t={t}
                     />
                   ))}
@@ -1048,6 +1135,19 @@ const ReceiptEditDialog = ({ isOpen, onClose, receipt }: ReceiptEditDialogProps)
             )}
           </Button>
         </div>
+
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setItemToDelete(null);
+          }}
+          onConfirm={handleRemoveItem}
+          title={t('deleteItem') || 'Delete Item'}
+          message={`Are you sure you want to delete "${itemToDelete?.item?.custom_item_name || itemToDelete?.item?.product?.name || 'this item'}"? This action cannot be undone.`}
+          itemName={itemToDelete?.item?.custom_item_name || itemToDelete?.item?.product?.name}
+          isDeleting={isDeleting}
+        />
       </DialogContent>
     </Dialog>
   );

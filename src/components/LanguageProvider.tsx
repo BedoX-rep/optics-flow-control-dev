@@ -1224,6 +1224,22 @@ const productTranslations: Translations = {
     en: 'Are you sure you want to delete {clientName}? This action cannot be undone.',
     fr: 'Êtes-vous sûr de vouloir supprimer {clientName}? Cette action ne peut pas être annulée.'
   },
+  confirmDelete: {
+    en: 'Confirm Delete',
+    fr: 'Confirmer la Suppression'
+  },
+  deleteConfirmationMessage: {
+    en: 'Are you sure you want to delete "{itemName}"? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer "{itemName}" ? Cette action ne peut pas être annulée.'
+  },
+  deleteConfirmationGeneric: {
+    en: 'Are you sure you want to delete this item? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet élément ? Cette action ne peut pas être annulée.'
+  },
+  deleting: {
+    en: 'Deleting...',
+    fr: 'Suppression...'
+  },
   duplicateClientsFound: {
     en: 'Duplicate Clients Found',
     fr: 'Clients en Double Trouvés'
@@ -1235,6 +1251,30 @@ const productTranslations: Translations = {
   deleteDuplicates: {
     en: 'Delete Duplicates',
     fr: 'Supprimer les Doublons'
+  },
+  clientDeletedSuccessfully: {
+    en: 'Client deleted successfully!',
+    fr: 'Client supprimé avec succès !'
+  },
+  errorDeletingClient: {
+    en: 'Error deleting client:',
+    fr: 'Erreur lors de la suppression du client :'
+  },
+  deleteReceipt: {
+    en: 'Delete Receipt',
+    fr: 'Supprimer le Reçu'
+  },
+  deleteReceiptConfirmation: {
+    en: 'Are you sure you want to delete this receipt? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer ce reçu ? Cette action ne peut pas être annulée.'
+  },
+  deleteItem: {
+    en: 'Delete Item',
+    fr: 'Supprimer l\'Article'
+  },
+  deleteItemConfirmation: {
+    en: 'Are you sure you want to delete this item? This action cannot be undone.',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet article ? Cette action ne peut pas être annulée.'
   },
   enterClientName: {
     en: 'Enter client name',
@@ -1271,6 +1311,94 @@ const productTranslations: Translations = {
   noPurchaseHistory: {
     en: 'No purchase history available',
     fr: 'Aucun historique d\'achat disponible'
+  },
+  allClients: {
+    en: 'All Clients',
+    fr: 'Tous les Clients'
+  },
+  needRenewal: {
+    en: 'Need Renewal',
+    fr: 'Besoin de Renouvellement'
+  },
+  favorites: {
+    en: 'Favorites',
+    fr: 'Favoris'
+  },
+  renewNow: {
+    en: 'Renew Now',
+    fr: 'Renouveler Maintenant'
+  },
+  basicInformation: {
+    en: 'Basic Information',
+    fr: 'Informations de Base'
+  },
+  eyePrescription: {
+    en: 'Eye Prescription',
+    fr: 'Prescription Oculaire'
+  },
+  additionalInformation: {
+    en: 'Additional Information',
+    fr: 'Informations Supplémentaires'
+  },
+  renewalInformation: {
+    en: 'Renewal Information',
+    fr: 'Informations de Renouvellement'
+  },
+  renewalDate: {
+    en: 'Renewal Date',
+    fr: 'Date de Renouvellement'
+  },
+  needRenewalField: {
+    en: 'Need Renewal',
+    fr: 'Besoin de Renouvellement'
+  },
+  renewalTimes: {
+    en: 'Renewal Times',
+    fr: 'Nombre de Renouvellements'
+  },
+  storePrescription: {
+    en: 'Store Prescription',
+    fr: 'Stocker la Prescription'
+  },
+  opticianPrescribedBy: {
+    en: 'Optician Prescribed By',
+    fr: 'Prescrit par l\'Opticien'
+  },
+  prescriptionInformation: {
+    en: 'Prescription Information',
+    fr: 'Informations de Prescription'
+  },
+  enterOpticianName: {
+    en: 'Enter optician name',
+    fr: 'Entrer le nom de l\'opticien'
+  },
+  addPower: {
+    en: 'Add Power',
+    fr: 'Addition'
+  },
+  prescriptionStorage: {
+    en: 'Prescription Storage',
+    fr: 'Stockage de Prescription'
+  },
+  updateClient: {
+    en: 'Update Client',
+    fr: 'Mettre à Jour le Client'
+  },
+  editClient: {
+    en: 'Edit Client',
+    fr: 'Modifier le Client'
+  },
+  stored: {
+    en: 'Store Prescription',
+    fr: 'Optique Prescrit'
+  },
+  removedFromFavorites: {
+    en: 'Removed from favorites',
+    fr: 'Retiré des favoris'
+  },
+  addedToFavorites: {
+    en: 'Added to favorites',
+    fr: 'Ajouté aux favoris'
   },
   // Invoice translations
   invoices: {

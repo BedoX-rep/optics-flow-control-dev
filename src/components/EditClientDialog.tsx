@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/components/AuthProvider"
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/components/LanguageProvider';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -59,7 +60,9 @@ const formSchema = z.object({
   notes: z.string().nullable().optional(),
   renewal_date: z.string().nullable().optional(),
   need_renewal: z.boolean().optional(),
-  renewal_times: z.number().optional()
+  renewal_times: z.number().optional(),
+  store_prescription: z.boolean().optional(),
+  optician_prescribed_by: z.string().nullable().optional()
 })
 
 interface EditClientDialogProps {
@@ -81,12 +84,15 @@ interface EditClientDialogProps {
     renewal_date?: string | null;
     need_renewal?: boolean;
     renewal_times?: number | null;
+    store_prescription?: boolean;
+    optician_prescribed_by?: string | null;
   };
 }
 
 const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) => {
   const { toast } = useToast()
   const { user } = useAuth()
+  const { t } = useLanguage()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -104,7 +110,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       assurance: client?.assurance || "",
       renewal_date: client?.renewal_date || "",
       need_renewal: client?.need_renewal || false,
-      renewal_times: client?.renewal_times || 0
+      renewal_times: client?.renewal_times || 0,
+      store_prescription: client?.store_prescription || false,
+      optician_prescribed_by: client?.optician_prescribed_by || ""
     },
   })
 
@@ -124,7 +132,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         assurance: client.assurance || "",
         renewal_date: client.renewal_date || "",
         need_renewal: client.need_renewal || false,
-        renewal_times: client.renewal_times || 0
+        renewal_times: client.renewal_times || 0,
+        store_prescription: client.store_prescription || false,
+        optician_prescribed_by: client.optician_prescribed_by || ""
       });
     }
   }, [client, form]);
@@ -156,7 +166,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         notes: values.notes || null,
         renewal_date: values.renewal_date || null,
         need_renewal: values.need_renewal,
-        renewal_times: values.renewal_times
+        renewal_times: values.renewal_times,
+        store_prescription: values.store_prescription,
+        optician_prescribed_by: values.optician_prescribed_by || null
       }
 
       const { data, error } = await supabase
@@ -192,7 +204,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[600px] p-6">
         <DialogHeader>
-          <DialogTitle>Edit Client</DialogTitle>
+          <DialogTitle>{t('editClient')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -202,7 +214,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{t('clientName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -215,7 +227,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('phoneNumber')}</FormLabel>
                     <FormControl>
                       <Input {...field} type="tel" />
                     </FormControl>
@@ -227,7 +239,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Right Eye</h3>
+                <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
@@ -316,7 +328,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Left Eye</h3>
+                <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <FormField
                     control={form.control}
@@ -431,6 +443,44 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-4 mt-6">
+              <h3 className="text-md font-medium">{t('prescriptionStorage')}</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="store_prescription"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="rounded border-gray-300"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>{t('storePrescription')}</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="optician_prescribed_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('opticianPrescribedBy')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="text" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="assurance"
@@ -459,14 +509,14 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
             />
             
             <div className="space-y-4 mt-6">
-              <h3 className="text-md font-medium">Renewal Information</h3>
+              <h3 className="text-md font-medium">{t('renewalInformation')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="renewal_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Renewal Date</FormLabel>
+                      <FormLabel>{t('renewalDate')}</FormLabel>
                       <FormControl>
                         <Input {...field} type="date" />
                       </FormControl>
@@ -488,7 +538,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Need Renewal</FormLabel>
+                        <FormLabel>{t('needRenewalField')}</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -498,7 +548,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                   name="renewal_times"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Renewal Times</FormLabel>
+                      <FormLabel>{t('renewalTimes')}</FormLabel>
                       <FormControl>
                         <Input {...field} type="number" min="0" />
                       </FormControl>
@@ -507,13 +557,14 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                   )}
                 />
               </div>
-            </div>
+              
+              </div>
             
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                {t('cancel')}
               </Button>
-              <Button type="submit">Update Client</Button>
+              <Button type="submit">{t('updateClient')}</Button>
             </div>
           </form>
         </Form>
