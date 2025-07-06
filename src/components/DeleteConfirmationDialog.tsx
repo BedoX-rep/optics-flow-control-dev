@@ -42,35 +42,37 @@ const DeleteConfirmationDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md border-teal-200 shadow-lg">
-        <DialogHeader className="text-center pb-4">
-          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-            <AlertTriangle className="h-8 w-8 text-red-600" />
+      <DialogContent className="max-w-md bg-white border-2 border-teal-200 shadow-2xl rounded-2xl overflow-hidden">
+        <DialogHeader className="text-center pb-6 pt-6">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-red-200 to-red-300 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+            </div>
           </div>
-          <DialogTitle className="text-xl font-bold text-teal-800">
+          <DialogTitle className="text-2xl font-bold text-teal-800 mb-2">
             {defaultTitle}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="text-center py-4">
-          <p className="text-gray-600 text-sm leading-relaxed">
+        <div className="text-center px-6 py-4">
+          <p className="text-gray-700 text-base leading-relaxed max-w-sm mx-auto">
             {defaultMessage}
           </p>
         </div>
 
-        <DialogFooter className="flex gap-3 pt-4 border-t border-teal-100">
+        <DialogFooter className="flex gap-4 p-6 bg-gradient-to-r from-teal-50 to-teal-100 border-t border-teal-200">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isDeleting}
-            className="flex-1 border-teal-200 text-teal-700 hover:bg-teal-50 hover:border-teal-300"
+            className="flex-1 border-2 border-teal-300 text-teal-700 hover:bg-teal-100 hover:border-teal-400 font-semibold py-2.5 rounded-xl transition-all duration-200"
           >
             {t('cancel') || 'Cancel'}
           </Button>
           <Button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none shadow-md hover:shadow-lg transition-all duration-200"
+            className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 font-semibold py-2.5 rounded-xl"
           >
             {isDeleting ? (
               <>
