@@ -49,6 +49,20 @@ interface Receipt {
   call_status: string;
   time_called?: string;
   note?: string;
+  user_id?: string;
+  receipt_items?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    cost: number;
+    profit: number;
+    custom_item_name: string;
+    paid_at_delivery: boolean;
+    product: {
+      name: string;
+      category: string;
+    } | null;
+  }>;
 }
 
 const ReceiptCard = ({ 

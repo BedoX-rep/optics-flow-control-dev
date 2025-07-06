@@ -13,6 +13,7 @@ import { UserPlus, Upload, ChevronDown, Save, Users, RefreshCw, Star, Filter } f
 import { Button } from "@/components/ui/button";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from "@/hooks/useDebounce";

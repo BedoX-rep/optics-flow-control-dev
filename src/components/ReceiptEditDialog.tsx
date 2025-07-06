@@ -21,6 +21,47 @@ import { User, Eye, Package2, Receipt, Banknote, FileText, Search, Trash, Plus, 
 import { useLanguage } from "./LanguageProvider";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 
+interface Receipt {
+  id: string;
+  client_id: string | null;
+  client_name?: string;
+  client_phone?: string;
+  created_at: string;
+  total: number;
+  delivery_status: string;
+  montage_status: string;
+  balance: number;
+  advance_payment?: number;
+  cost?: number;
+  cost_ttc?: number;
+  profit?: number;
+  order_type?: string;
+  call_status: string;
+  time_called?: string;
+  note?: string;
+  user_id: string;
+  receipt_items?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    cost: number;
+    profit: number;
+    custom_item_name: string;
+    paid_at_delivery: boolean;
+    linked_eye?: string;
+    product_id?: string;
+    product?: {
+      id: string;
+      name: string;
+      category: string;
+      company?: string;
+      price?: number;
+      cost_ttc?: number;
+      stock_status?: string;
+    } | null;
+  }>;
+}
+
 interface ReceiptEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
