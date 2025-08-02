@@ -123,9 +123,6 @@ const Layout = ({ children }: LayoutProps) => {
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
           isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-64'
         }`}
-        style={{
-          marginLeft: isMobile ? '0' : sidebarCollapsed ? '80px' : '256px'
-        }}
       >
         {/* Desktop Header */}
         {!isMobile && (

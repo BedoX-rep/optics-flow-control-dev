@@ -239,17 +239,17 @@ const MainNav = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-[20vh] right-4 z-50 bg-teal-600/90 text-white hover:bg-teal-600 backdrop-blur-sm shadow-lg rounded-full w-12 h-12"
+            className="fixed top-4 left-4 z-50 bg-teal-600 text-white hover:bg-teal-700 shadow-lg rounded-md w-10 h-10"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent 
           side="left" 
-          className="w-80 p-0 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 border-teal-600/20"
+          className="w-64 p-0 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 border-teal-600/20"
         >
           <div className="sidebar-gradient min-h-full">
-            <div className="p-4 flex items-center border-b border-teal-600/20">
+            <div className="p-4 flex items-center justify-between border-b border-teal-600/20">
               <h2 className="text-xl font-bold text-white">Lensly</h2>
             </div>
 
