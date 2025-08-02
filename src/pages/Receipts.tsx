@@ -29,6 +29,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/components/LanguageProvider';
 import { Textarea } from '@/components/ui/textarea';
 import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 interface Receipt {
@@ -194,71 +195,55 @@ const ReceiptCard = ({
               </div>
 
               <div className="flex flex-col gap-2 flex-shrink-0">
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onCallStatusChange(
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onCallStatusChange(
                       receipt.call_status === 'Not Called' ? 'Called' :
                       receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                    )}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      {receipt.call_status === 'Called' ? t('markUnresponsive') :
+                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+                    </DropdownMenuItem>
+                    {receipt.balance > 0 && (
+                      <DropdownMenuItem onClick={onPaid}>
+                        <Check className="h-4 w-4 mr-2" />
+                        {t('markPaid')}
+                      </DropdownMenuItem>
                     )}
-                    className={cn("h-8 w-8", 
-                      receipt.call_status === 'Called' ? "hover:bg-green-100" :
-                      receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
-                      "hover:bg-gray-100"
+                    <DropdownMenuItem onClick={onDelivered}>
+                      <Package className="h-4 w-4 mr-2" />
+                      {receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onView}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      {t('view')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onEdit}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      {t('edit')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onDelete}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('delete')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsAddingNote(true)}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      {t('addNote')}
+                    </DropdownMenuItem>
+                    {receipt.note && (
+                      <DropdownMenuItem onClick={() => setIsViewingNote(true)}>
+                        <StickyNote className="h-4 w-4 mr-2" />
+                        {t('viewNote')}
+                      </DropdownMenuItem>
                     )}
-                  >
-                    <Phone className={cn("h-4 w-4",
-                      receipt.call_status === 'Called' ? "text-green-600" :
-                      receipt.call_status === 'Unresponsive' ? "text-red-600" :
-                      "text-gray-600"
-                    )} />
-                  </Button>
-                  {receipt.balance > 0 && (
-                    <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
-                      <Check className="h-4 w-4 text-green-600" />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
-                    <Package className="h-4 w-4 text-blue-600" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-
-                {/* Note buttons positioned below edit and delete buttons */}
-                <div className="flex gap-1 justify-end">
-                  {/* Spacers to align with the edit and delete buttons above */}
-                  <div className="w-8"></div> {/* Phone button spacer */}
-                  {receipt.balance > 0 && <div className="w-8"></div>} {/* Paid button spacer (conditional) */}
-                  <div className="w-8"></div> {/* Delivered button spacer */}
-                  <div className="w-8"></div> {/* View button spacer */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsViewingNote(true)}
-                    className={cn("h-8 w-8", receipt.note ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : "invisible")}
-                    title={t('viewNote')}
-                  >
-                    <StickyNote className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsAddingNote(true)}
-                    className="h-8 w-8"
-                    title={t('addNote')}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 

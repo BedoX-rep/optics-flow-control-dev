@@ -83,7 +83,10 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
-      <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-20 lg:ml-64'}`}>
+      <div 
+        className="flex-1 flex flex-col transition-all duration-300 ease-in-out"
+        style={{ marginLeft: 'var(--sidebar-width, 0px)' }}
+      >
         {/* Desktop Header */}
         {!isMobile && (
           <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
