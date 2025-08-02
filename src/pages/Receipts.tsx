@@ -813,9 +813,6 @@ const Receipts = () => {
   };
 
   return (
-    This commit enhances the receipts page by replacing the three-dot menu with a wand icon for a cleaner look, repositioning action buttons to the top-right corner of cards for better usability, and ensuring action buttons don't obstruct card content.
-```
-```python
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
