@@ -322,150 +322,168 @@ const ReceiptCard = ({
               })}
             </div>
 
-            {/* Action Buttons */}
+            {/* Floating Action Buttons */}
             <AnimatePresence>
               {showActions && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-lg flex items-center justify-center z-10"
                 >
-                  <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-200 mt-3">
+                  <div className="flex items-center gap-3 p-4">
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={() => onCallStatusChange(
                           receipt.call_status === 'Not Called' ? 'Called' :
                           receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
                         )}
-                        className="text-xs"
+                        className={cn(
+                          "w-10 h-10 rounded-full shadow-lg",
+                          receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600" :
+                          receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600" :
+                          "bg-gray-500 hover:bg-gray-600"
+                        )}
+                        title={receipt.call_status === 'Called' ? t('markUnresponsive') :
+                               receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
                       >
-                        <Phone className="h-3 w-3 mr-1" />
-                        {receipt.call_status === 'Called' ? t('markUnresponsive') :
-                         receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+                        <Phone className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
 
                     {receipt.balance > 0 && (
                       <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.15 }}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
                       >
                         <Button
-                          variant="outline"
-                          size="sm"
+                          size="icon"
                           onClick={onPaid}
-                          className="text-xs text-green-600 border-green-300 hover:bg-green-50"
+                          className="w-10 h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 shadow-lg"
+                          title={t('markPaid')}
                         >
-                          <Check className="h-3 w-3 mr-1" />
-                          {t('markPaid')}
+                          <Check className="h-4 w-4 text-white" />
                         </Button>
                       </motion.div>
                     )}
 
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={onDelivered}
-                        className="text-xs"
+                        className={cn(
+                          "w-10 h-10 rounded-full shadow-lg",
+                          receipt.delivery_status === 'Completed' 
+                            ? "bg-orange-500 hover:bg-orange-600" 
+                            : "bg-blue-500 hover:bg-blue-600"
+                        )}
+                        title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
                       >
-                        <Package className="h-3 w-3 mr-1" />
-                        {receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+                        <Package className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
 
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.25 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.25, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={onView}
-                        className="text-xs text-blue-600 border-blue-300 hover:bg-blue-50"
+                        className="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 shadow-lg"
+                        title={t('view')}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
-                        {t('view')}
+                        <Eye className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
 
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.3 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={onEdit}
-                        className="text-xs text-purple-600 border-purple-300 hover:bg-purple-50"
+                        className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 shadow-lg"
+                        title={t('edit')}
                       >
-                        <Edit className="h-3 w-3 mr-1" />
-                        {t('edit')}
+                        <Edit className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
 
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.35 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.35, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={() => setIsAddingNote(true)}
-                        className="text-xs text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+                        className="w-10 h-10 rounded-full bg-yellow-500 hover:bg-yellow-600 shadow-lg"
+                        title={t('addNote')}
                       >
-                        <Pencil className="h-3 w-3 mr-1" />
-                        {t('addNote')}
+                        <Pencil className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
 
                     {receipt.note && (
                       <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.4 }}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
                       >
                         <Button
-                          variant="outline"
-                          size="sm"
+                          size="icon"
                           onClick={() => setIsViewingNote(true)}
-                          className="text-xs text-amber-600 border-amber-300 hover:bg-amber-50"
+                          className="w-10 h-10 rounded-full bg-amber-500 hover:bg-amber-600 shadow-lg"
+                          title={t('viewNote')}
                         >
-                          <StickyNote className="h-3 w-3 mr-1" />
-                          {t('viewNote')}
+                          <StickyNote className="h-4 w-4 text-white" />
                         </Button>
                       </motion.div>
                     )}
 
                     <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.45 }}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.45, type: "spring", stiffness: 200 }}
                     >
                       <Button
-                        variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={onDelete}
-                        className="text-xs text-red-600 border-red-300 hover:bg-red-50"
+                        className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 shadow-lg"
+                        title={t('delete')}
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        {t('delete')}
+                        <Trash2 className="h-4 w-4 text-white" />
+                      </Button>
+                    </motion.div>
+
+                    {/* Close button */}
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                    >
+                      <Button
+                        size="icon"
+                        onClick={() => setShowActions(false)}
+                        className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-800 shadow-lg"
+                        title={t('close')}
+                      >
+                        <X className="h-4 w-4 text-white" />
                       </Button>
                     </motion.div>
                   </div>

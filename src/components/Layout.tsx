@@ -50,9 +50,9 @@ const Layout = ({ children }: LayoutProps) => {
   // Listen for sidebar state changes
   useEffect(() => {
     const handleSidebarChange = () => {
-      const sidebarElement = document.querySelector('[data-sidebar="sidebar"]');
+      const sidebarElement = document.querySelector('[data-sidebar-collapsed]');
       if (sidebarElement) {
-        const isCollapsed = sidebarElement.classList.contains('group-data-[collapsible=icon]');
+        const isCollapsed = sidebarElement.getAttribute('data-sidebar-collapsed') === 'true';
         setSidebarCollapsed(isCollapsed);
       }
     };
@@ -60,11 +60,23 @@ const Layout = ({ children }: LayoutProps) => {
     // Initial check
     handleSidebarChange();
 
-    // Listen for clicks that might change sidebar state
+    // Create a MutationObserver to watch for attribute changes
+    const observer = new MutationObserver(handleSidebarChange);
+    const sidebarElement = document.querySelector('[data-sidebar-collapsed]');
+    
+    if (sidebarElement) {
+      observer.observe(sidebarElement, {
+        attributes: true,
+        attributeFilter: ['data-sidebar-collapsed']
+      });
+    }
+
+    // Listen for clicks and resize as fallback
     document.addEventListener('click', handleSidebarChange);
     window.addEventListener('resize', handleSidebarChange);
 
     return () => {
+      observer.disconnect();
       document.removeEventListener('click', handleSidebarChange);
       window.removeEventListener('resize', handleSidebarChange);
     };
@@ -109,8 +121,11 @@ const Layout = ({ children }: LayoutProps) => {
       <MainNav />
       <div 
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-          isMobile ? '' : sidebarCollapsed ? 'ml-20' : 'ml-64'
+          isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-64'
         }`}
+        style={{
+          marginLeft: isMobile ? '0' : sidebarCollapsed ? '80px' : '256px'
+        }}
       >
         {/* Desktop Header */}
         {!isMobile && (

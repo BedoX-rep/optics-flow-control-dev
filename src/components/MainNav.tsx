@@ -277,6 +277,7 @@ const MainNav = () => {
         "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
         collapsed ? "w-20" : "w-64"
       )}
+      data-sidebar-collapsed={collapsed}
     >
       <div className="p-4 flex items-center justify-between border-b border-teal-600/20">
         <div className={cn("flex items-center", collapsed && "justify-center w-full")}>
