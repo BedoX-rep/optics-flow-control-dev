@@ -239,7 +239,7 @@ const MainNav = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-4 left-4 z-50 bg-teal-600 text-white hover:bg-teal-700 shadow-lg rounded-md w-10 h-10"
+            className="fixed top-1/2 right-4 z-50 bg-teal-600 text-white hover:bg-teal-700 shadow-lg rounded-md w-10 h-10 transform -translate-y-1/2"
           >
             <Menu className="h-5 w-5" />
           </Button>
