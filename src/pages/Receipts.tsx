@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote, Pencil } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote, Pencil, MoreHorizontal } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,7 @@ const ReceiptCard = ({
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isViewingNote, setIsViewingNote] = useState(false);
   const [noteText, setNoteText] = useState(receipt.note || '');
+  const [showActions, setShowActions] = useState(false);
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
 
@@ -195,55 +196,19 @@ const ReceiptCard = ({
               </div>
 
               <div className="flex flex-col gap-2 flex-shrink-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onCallStatusChange(
-                      receipt.call_status === 'Not Called' ? 'Called' :
-                      receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                    )}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      {receipt.call_status === 'Called' ? t('markUnresponsive') :
-                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
-                    </DropdownMenuItem>
-                    {receipt.balance > 0 && (
-                      <DropdownMenuItem onClick={onPaid}>
-                        <Check className="h-4 w-4 mr-2" />
-                        {t('markPaid')}
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={onDelivered}>
-                      <Package className="h-4 w-4 mr-2" />
-                      {receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onView}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      {t('view')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onEdit}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      {t('edit')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onDelete}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      {t('delete')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setIsAddingNote(true)}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      {t('addNote')}
-                    </DropdownMenuItem>
-                    {receipt.note && (
-                      <DropdownMenuItem onClick={() => setIsViewingNote(true)}>
-                        <StickyNote className="h-4 w-4 mr-2" />
-                        {t('viewNote')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8"
+                  onClick={() => setShowActions(!showActions)}
+                >
+                  <motion.div
+                    animate={{ rotate: showActions ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </motion.div>
+                </Button>
               </div>
             </div>
 
@@ -356,6 +321,157 @@ const ReceiptCard = ({
                 );
               })}
             </div>
+
+            {/* Action Buttons */}
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-200 mt-3">
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onCallStatusChange(
+                          receipt.call_status === 'Not Called' ? 'Called' :
+                          receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                        )}
+                        className="text-xs"
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        {receipt.call_status === 'Called' ? t('markUnresponsive') :
+                         receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+                      </Button>
+                    </motion.div>
+
+                    {receipt.balance > 0 && (
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.15 }}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={onPaid}
+                          className="text-xs text-green-600 border-green-300 hover:bg-green-50"
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          {t('markPaid')}
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onDelivered}
+                        className="text-xs"
+                      >
+                        <Package className="h-3 w-3 mr-1" />
+                        {receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+                      </Button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onView}
+                        className="text-xs text-blue-600 border-blue-300 hover:bg-blue-50"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        {t('view')}
+                      </Button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onEdit}
+                        className="text-xs text-purple-600 border-purple-300 hover:bg-purple-50"
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        {t('edit')}
+                      </Button>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.35 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddingNote(true)}
+                        className="text-xs text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+                      >
+                        <Pencil className="h-3 w-3 mr-1" />
+                        {t('addNote')}
+                      </Button>
+                    </motion.div>
+
+                    {receipt.note && (
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsViewingNote(true)}
+                          className="text-xs text-amber-600 border-amber-300 hover:bg-amber-50"
+                        >
+                          <StickyNote className="h-3 w-3 mr-1" />
+                          {t('viewNote')}
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.45 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onDelete}
+                        className="text-xs text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        {t('delete')}
+                      </Button>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </CardContent>
       </Card>

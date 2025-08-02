@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainNav from './MainNav';
 import { Button } from '@/components/ui/button';
 import { Bell, LogOut, ChevronDown, Users, Copy, Shield, User } from 'lucide-react';
@@ -45,6 +45,30 @@ const Layout = ({ children }: LayoutProps) => {
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Listen for sidebar state changes
+  useEffect(() => {
+    const handleSidebarChange = () => {
+      const sidebarElement = document.querySelector('[data-sidebar="sidebar"]');
+      if (sidebarElement) {
+        const isCollapsed = sidebarElement.classList.contains('group-data-[collapsible=icon]');
+        setSidebarCollapsed(isCollapsed);
+      }
+    };
+
+    // Initial check
+    handleSidebarChange();
+
+    // Listen for clicks that might change sidebar state
+    document.addEventListener('click', handleSidebarChange);
+    window.addEventListener('resize', handleSidebarChange);
+
+    return () => {
+      document.removeEventListener('click', handleSidebarChange);
+      window.removeEventListener('resize', handleSidebarChange);
+    };
+  }, []);
 
   const copyReferralCode = () => {
     if (subscription?.referral_code) {
@@ -84,8 +108,9 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
       <div 
-        className="flex-1 flex flex-col transition-all duration-300 ease-in-out"
-        style={{ marginLeft: 'var(--sidebar-width, 0px)' }}
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
+          isMobile ? '' : sidebarCollapsed ? 'ml-20' : 'ml-64'
+        }`}
       >
         {/* Desktop Header */}
         {!isMobile && (
