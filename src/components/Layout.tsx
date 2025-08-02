@@ -83,7 +83,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
-      <div className={`flex-1 flex flex-col transition-all duration-200 ease-linear ${isMobile ? 'ml-0' : 'ml-20 lg:ml-64'}`}>
+      <div className={`flex-1 flex flex-col ${isMobile ? 'ml-0' : 'ml-20 lg:ml-64'}`}>
         {/* Desktop Header */}
         {!isMobile && (
           <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
@@ -267,8 +267,8 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
           </header>
         )}
-        <main className="flex-1 overflow-y-auto peer">
-          <div className="h-full animate-fade-in w-full max-w-none">
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full animate-fade-in">
             <Routes>
               <Route path="/optician-settings" element={<OpticianSettings />} />
               <Route path="/personalisation" element={<Personalisation />} />
