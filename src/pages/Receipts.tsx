@@ -213,108 +213,110 @@ const ReceiptCard = ({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute top-0 right-0 z-40"
+                      className="absolute top-10 right-2 z-40 max-w-[50%]"
                     >
-                      <div className="flex flex-col gap-2 mt-10 mr-2 animate-in slide-in-from-top-2 duration-200">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onCallStatusChange(
-                            receipt.call_status === 'Not Called' ? 'Called' :
-                            receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                          )}
-                          className={cn(
-                            "w-10 h-10 rounded-full shadow-lg",
-                            receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600" :
-                            receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600" :
-                            "bg-gray-500 hover:bg-gray-600"
-                          )}
-                          title={receipt.call_status === 'Called' ? t('markUnresponsive') :
-                                 receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
-                        >
-                          <Phone className="h-4 w-4 text-white" />
-                        </Button>
+                      <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-gray-200/50">
+                        <div className="flex flex-wrap gap-1.5 justify-end max-w-full">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onCallStatusChange(
+                              receipt.call_status === 'Not Called' ? 'Called' :
+                              receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                            )}
+                            className={cn(
+                              "w-7 h-7 rounded-full shadow-md flex-shrink-0",
+                              receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600" :
+                              receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600" :
+                              "bg-gray-500 hover:bg-gray-600"
+                            )}
+                            title={receipt.call_status === 'Called' ? t('markUnresponsive') :
+                                   receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+                          >
+                            <Phone className="h-3 w-3 text-white" />
+                          </Button>
 
-                        {receipt.balance > 0 && (
+                          {receipt.balance > 0 && (
+                            <Button
+                              size="icon"
+                              onClick={onPaid}
+                              className="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-600 shadow-md flex-shrink-0"
+                              title={t('markPaid')}
+                            >
+                              <Check className="h-3 w-3 text-white" />
+                            </Button>
+                          )}
+
                           <Button
                             size="icon"
-                            onClick={onPaid}
-                            className="w-10 h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 shadow-lg"
-                            title={t('markPaid')}
+                            onClick={onDelivered}
+                            className={cn(
+                              "w-7 h-7 rounded-full shadow-md flex-shrink-0",
+                              receipt.delivery_status === 'Completed' 
+                                ? "bg-orange-500 hover:bg-orange-600" 
+                                : "bg-blue-500 hover:bg-blue-600"
+                            )}
+                            title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
                           >
-                            <Check className="h-4 w-4 text-white" />
+                            <Package className="h-3 w-3 text-white" />
                           </Button>
-                        )}
 
-                        <Button
-                          size="icon"
-                          onClick={onDelivered}
-                          className={cn(
-                            "w-10 h-10 rounded-full shadow-lg",
-                            receipt.delivery_status === 'Completed' 
-                              ? "bg-orange-500 hover:bg-orange-600" 
-                              : "bg-blue-500 hover:bg-blue-600"
-                          )}
-                          title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
-                        >
-                          <Package className="h-4 w-4 text-white" />
-                        </Button>
-
-                        <Button
-                          size="icon"
-                          onClick={onView}
-                          className="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 shadow-lg"
-                          title={t('view')}
-                        >
-                          <Eye className="h-4 w-4 text-white" />
-                        </Button>
-
-                        <Button
-                          size="icon"
-                          onClick={onEdit}
-                          className="w-10 h-10 rounded-full bg-purple-500 hover:bg-purple-600 shadow-lg"
-                          title={t('edit')}
-                        >
-                          <Edit className="h-4 w-4 text-white" />
-                        </Button>
-
-                        <Button
-                          size="icon"
-                          onClick={() => setIsAddingNote(true)}
-                          className="w-10 h-10 rounded-full bg-yellow-500 hover:bg-yellow-600 shadow-lg"
-                          title={t('addNote')}
-                        >
-                          <Pencil className="h-4 w-4 text-white" />
-                        </Button>
-
-                        {receipt.note && (
                           <Button
                             size="icon"
-                            onClick={() => setIsViewingNote(true)}
-                            className="w-10 h-10 rounded-full bg-amber-500 hover:bg-amber-600 shadow-lg"
-                            title={t('viewNote')}
+                            onClick={onView}
+                            className="w-7 h-7 rounded-full bg-indigo-500 hover:bg-indigo-600 shadow-md flex-shrink-0"
+                            title={t('view')}
                           >
-                            <StickyNote className="h-4 w-4 text-white" />
+                            <Eye className="h-3 w-3 text-white" />
                           </Button>
-                        )}
 
-                        <Button
-                          size="icon"
-                          onClick={onDelete}
-                          className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 shadow-lg"
-                          title={t('delete')}
-                        >
-                          <Trash2 className="h-4 w-4 text-white" />
-                        </Button>
-                                                
-                        <Button
-                          size="icon"
-                          onClick={() => setShowActions(false)}
-                          className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-800 shadow-lg"
-                          title={t('close')}
-                        >
-                          <X className="h-4 w-4 text-white" />
-                        </Button>
+                          <Button
+                            size="icon"
+                            onClick={onEdit}
+                            className="w-7 h-7 rounded-full bg-purple-500 hover:bg-purple-600 shadow-md flex-shrink-0"
+                            title={t('edit')}
+                          >
+                            <Edit className="h-3 w-3 text-white" />
+                          </Button>
+
+                          <Button
+                            size="icon"
+                            onClick={() => setIsAddingNote(true)}
+                            className="w-7 h-7 rounded-full bg-yellow-500 hover:bg-yellow-600 shadow-md flex-shrink-0"
+                            title={t('addNote')}
+                          >
+                            <Pencil className="h-3 w-3 text-white" />
+                          </Button>
+
+                          {receipt.note && (
+                            <Button
+                              size="icon"
+                              onClick={() => setIsViewingNote(true)}
+                              className="w-7 h-7 rounded-full bg-amber-500 hover:bg-amber-600 shadow-md flex-shrink-0"
+                              title={t('viewNote')}
+                            >
+                              <StickyNote className="h-3 w-3 text-white" />
+                            </Button>
+                          )}
+
+                          <Button
+                            size="icon"
+                            onClick={onDelete}
+                            className="w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 shadow-md flex-shrink-0"
+                            title={t('delete')}
+                          >
+                            <Trash2 className="h-3 w-3 text-white" />
+                          </Button>
+                                                  
+                          <Button
+                            size="icon"
+                            onClick={() => setShowActions(false)}
+                            className="w-7 h-7 rounded-full bg-gray-700 hover:bg-gray-800 shadow-md flex-shrink-0"
+                            title={t('close')}
+                          >
+                            <X className="h-3 w-3 text-white" />
+                          </Button>
+                        </div>
                       </div>
                     </motion.div>
                   )}
