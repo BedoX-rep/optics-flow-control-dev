@@ -153,19 +153,19 @@ const ReceiptCard = ({
             </div>
           ) : null;
         })()}
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-3">
+        <CardContent className="p-3 sm:p-4 lg:p-5">
+          <div className="flex flex-col gap-2 sm:gap-3">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                    <h3 className="text-sm sm:text-base font-semibold truncate">{receipt.client_name}</h3>
                     <div className="flex items-center justify-between mt-0.5">
-                      <div className="flex items-center gap-1.5 text-blue-600">
-                        <Phone className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">{receipt.client_phone}</span>
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-blue-600">
+                        <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        <span className="text-xs font-medium truncate max-w-[100px] sm:max-w-none">{receipt.client_phone}</span>
                       </div>
-                      <span className="text-xs text-gray-500">{getTimeDisplay(receipt.created_at)}</span>
+                      <span className="text-xs text-gray-500 hidden sm:block">{getTimeDisplay(receipt.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ const ReceiptCard = ({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 flex-shrink-0">
+              <div className="flex flex-col gap-1 sm:gap-2 flex-shrink-0">
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"
@@ -202,92 +202,92 @@ const ReceiptCard = ({
                       receipt.call_status === 'Not Called' ? 'Called' :
                       receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
                     )}
-                    className={cn("h-8 w-8", 
+                    className={cn("h-6 w-6 sm:h-8 sm:w-8", 
                       receipt.call_status === 'Called' ? "hover:bg-green-100" :
                       receipt.call_status === 'Unresponsive' ? "hover:bg-red-100" :
                       "hover:bg-gray-100"
                     )}
                   >
-                    <Phone className={cn("h-4 w-4",
+                    <Phone className={cn("h-3 w-3 sm:h-4 sm:w-4",
                       receipt.call_status === 'Called' ? "text-green-600" :
                       receipt.call_status === 'Unresponsive' ? "text-red-600" :
                       "text-gray-600"
                     )} />
                   </Button>
                   {receipt.balance > 0 && (
-                    <Button variant="ghost" size="icon" onClick={onPaid} className="h-8 w-8 hover:bg-green-100">
-                      <Check className="h-4 w-4 text-green-600" />
+                    <Button variant="ghost" size="icon" onClick={onPaid} className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-green-100">
+                      <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" onClick={onDelivered} className="h-8 w-8 hover:bg-blue-100">
-                    <Package className="h-4 w-4 text-blue-600" />
+                  <Button variant="ghost" size="icon" onClick={onDelivered} className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-100">
+                    <Package className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={onView} className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={onView} className="h-6 w-6 sm:h-8 sm:w-8">
+                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
-                    <Edit className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={onEdit} className="h-6 w-6 sm:h-8 sm:w-8">
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={onDelete} className="h-8 w-8 hover:bg-red-100">
-                    <Trash2 className="h-4 w-4 text-red-600" />
+                  <Button variant="ghost" size="icon" onClick={onDelete} className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-red-100">
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                   </Button>
                 </div>
 
                 {/* Note buttons positioned below edit and delete buttons */}
                 <div className="flex gap-1 justify-end">
                   {/* Spacers to align with the edit and delete buttons above */}
-                  <div className="w-8"></div> {/* Phone button spacer */}
-                  {receipt.balance > 0 && <div className="w-8"></div>} {/* Paid button spacer (conditional) */}
-                  <div className="w-8"></div> {/* Delivered button spacer */}
-                  <div className="w-8"></div> {/* View button spacer */}
+                  <div className="w-6 sm:w-8"></div> {/* Phone button spacer */}
+                  {receipt.balance > 0 && <div className="w-6 sm:w-8"></div>} {/* Paid button spacer (conditional) */}
+                  <div className="w-6 sm:w-8"></div> {/* Delivered button spacer */}
+                  <div className="w-6 sm:w-8"></div> {/* View button spacer */}
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsViewingNote(true)}
-                    className={cn("h-8 w-8", receipt.note ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : "invisible")}
+                    className={cn("h-6 w-6 sm:h-8 sm:w-8", receipt.note ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : "invisible")}
                     title={t('viewNote')}
                   >
-                    <StickyNote className="h-4 w-4" />
+                    <StickyNote className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsAddingNote(true)}
-                    className="h-8 w-8"
+                    className="h-6 w-6 sm:h-8 sm:w-8"
                     title={t('addNote')}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-              <div className="bg-gray-50 rounded-lg p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-2">
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">{t('total')}</p>
-                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
+                    <p className="font-medium text-blue-600 text-sm">{receipt.total.toFixed(2)} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">{t('advance')}</p>
-                    <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-gray-600 text-sm">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
                 <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
-                <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
+                <p className="font-medium text-red-600 text-sm">{receipt.balance.toFixed(2)} DH</p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 sm:col-span-2">
                 <div className="flex justify-between items-baseline">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">{t('cost')}</p>
-                    <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+                    <p className="font-medium text-orange-600 text-sm">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5">{t('profit')}</p>
-                    <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+                    <p className="font-medium text-emerald-600 text-sm">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
                   </div>
                 </div>
               </div>
@@ -753,7 +753,7 @@ const Receipts = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px] transition-all duration-200 ease-linear peer-data-[state=collapsed]:max-w-none peer-data-[state=expanded]:max-w-[1600px]">
+    <div className="w-full px-2 sm:px-4 md:px-6 py-4 sm:py-6 min-w-[320px] transition-all duration-200 ease-linear">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
           <Link to="/new-receipt">
@@ -880,7 +880,7 @@ const Receipts = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4 pb-6">
           <AnimatePresence>
             {isLoading ? (
               Array(6).fill(0).map((_, i) => (
