@@ -159,14 +159,14 @@ const ReceiptCard = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                    <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
+                    <div className="flex items-center justify-between mt-0.5">
                       <div className="flex items-center gap-1.5 text-blue-600">
                         <Phone className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">{receipt.client_phone}</span>
                       </div>
+                      <span className="text-xs text-gray-500">{getTimeDisplay(receipt.created_at)}</span>
                     </div>
-                    <span className="text-xs text-gray-500 mt-0.5 block">{getTimeDisplay(receipt.created_at)}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -753,7 +753,7 @@ const Receipts = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px] transition-all duration-200 ease-linear peer-data-[state=collapsed]:max-w-none peer-data-[state=expanded]:max-w-[1600px]">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
           <Link to="/new-receipt">
