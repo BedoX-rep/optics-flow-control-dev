@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, X, StickyNote, Pencil, MoreHorizontal, Wand2 } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, StickyNote, Pencil, MoreHorizontal } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -91,7 +91,6 @@ const ReceiptCard = ({
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isViewingNote, setIsViewingNote] = useState(false);
   const [noteText, setNoteText] = useState(receipt.note || '');
-  const [showActions, setShowActions] = useState(false);
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
 
@@ -139,6 +138,8 @@ const ReceiptCard = ({
     }
   };
 
+  const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -146,295 +147,263 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full relative">
-        {(() => {
-          const itemsWithoutCost = (receipt.receipt_items || []).filter(item => !item.cost || item.cost === 0).length;
-          return itemsWithoutCost > 0 ? (
-            <div className="absolute top-0 right-0 z-10 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg" style={{ top: '4px', right: '4px' }}>
-              {itemsWithoutCost}
-            </div>
-          ) : null;
-        })()}
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-start justify-between">
+      <Card className="h-[420px] border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden">
+        {/* Header Section */}
+        <div className="p-4 pb-0">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center border-2 border-teal-200">
+                  <div className="text-teal-700 font-poppins font-semibold text-lg">
+                    {receipt.client_name?.charAt(0) || 'C'}
+                  </div>
+                </div>
+                {itemsWithoutCost > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    {itemsWithoutCost}
+                  </div>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base font-semibold truncate">{receipt.client_name}</h3>
-                      <div className="flex items-center gap-1.5 text-blue-600">
-                        <Phone className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">{receipt.client_phone}</span>
-                      </div>
-                    </div>
-                    <span className="text-xs text-gray-500 mt-0.5 block">{getTimeDisplay(receipt.created_at)}</span>
-                  </div>
+                <h3 className="font-poppins font-semibold text-base text-teal-800 truncate">{receipt.client_name}</h3>
+                <div className="flex items-center gap-1.5 text-teal-600 mt-1">
+                  <Phone className="h-3.5 w-3.5" />
+                  <span className="text-xs font-medium">{receipt.client_phone}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} className="text-xs">
-                      {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
-                    </Badge>
-                    <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} className="text-xs">
-                      {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
-                    </Badge>
-
-                    <div className="flex items-center gap-1">
-                      <div className={cn("w-2 h-2 rounded-full",
-                        receipt.call_status === 'Called' ? "bg-green-500" :
-                        receipt.call_status === 'Unresponsive' ? "bg-red-500" :
-                        "bg-gray-400"
-                      )} />
-                      <span className="text-xs font-medium">
-                        {receipt.call_status === 'Called' ? t('called') : 
-                         receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Menu */}
-              <div className="absolute top-2 right-2 z-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowActions(!showActions)}
-                  className="h-8 w-8 p-0 hover:bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-full shadow-sm transition-all duration-200 hover:shadow-md"
-                >
-                  <Wand2 className="h-4 w-4 text-gray-600" />
-                </Button>
-
-                <AnimatePresence>
-                  {showActions && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute top-10 right-2 z-40 max-w-[50%]"
-                    >
-                      <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-gray-200/50">
-                        <div className="flex flex-wrap gap-1.5 justify-end max-w-full">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onCallStatusChange(
-                              receipt.call_status === 'Not Called' ? 'Called' :
-                              receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                            )}
-                            className={cn(
-                              "w-7 h-7 rounded-full shadow-md flex-shrink-0",
-                              receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600" :
-                              receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600" :
-                              "bg-gray-500 hover:bg-gray-600"
-                            )}
-                            title={receipt.call_status === 'Called' ? t('markUnresponsive') :
-                                   receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
-                          >
-                            <Phone className="h-3 w-3 text-white" />
-                          </Button>
-
-                          {receipt.balance > 0 && (
-                            <Button
-                              size="icon"
-                              onClick={onPaid}
-                              className="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-600 shadow-md flex-shrink-0"
-                              title={t('markPaid')}
-                            >
-                              <Check className="h-3 w-3 text-white" />
-                            </Button>
-                          )}
-
-                          <Button
-                            size="icon"
-                            onClick={onDelivered}
-                            className={cn(
-                              "w-7 h-7 rounded-full shadow-md flex-shrink-0",
-                              receipt.delivery_status === 'Completed' 
-                                ? "bg-orange-500 hover:bg-orange-600" 
-                                : "bg-blue-500 hover:bg-blue-600"
-                            )}
-                            title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
-                          >
-                            <Package className="h-3 w-3 text-white" />
-                          </Button>
-
-                          <Button
-                            size="icon"
-                            onClick={onView}
-                            className="w-7 h-7 rounded-full bg-indigo-500 hover:bg-indigo-600 shadow-md flex-shrink-0"
-                            title={t('view')}
-                          >
-                            <Eye className="h-3 w-3 text-white" />
-                          </Button>
-
-                          <Button
-                            size="icon"
-                            onClick={onEdit}
-                            className="w-7 h-7 rounded-full bg-purple-500 hover:bg-purple-600 shadow-md flex-shrink-0"
-                            title={t('edit')}
-                          >
-                            <Edit className="h-3 w-3 text-white" />
-                          </Button>
-
-                          <Button
-                            size="icon"
-                            onClick={() => setIsAddingNote(true)}
-                            className="w-7 h-7 rounded-full bg-yellow-500 hover:bg-yellow-600 shadow-md flex-shrink-0"
-                            title={t('addNote')}
-                          >
-                            <Pencil className="h-3 w-3 text-white" />
-                          </Button>
-
-                          {receipt.note && (
-                            <Button
-                              size="icon"
-                              onClick={() => setIsViewingNote(true)}
-                              className="w-7 h-7 rounded-full bg-amber-500 hover:bg-amber-600 shadow-md flex-shrink-0"
-                              title={t('viewNote')}
-                            >
-                              <StickyNote className="h-3 w-3 text-white" />
-                            </Button>
-                          )}
-
-                          <Button
-                            size="icon"
-                            onClick={onDelete}
-                            className="w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 shadow-md flex-shrink-0"
-                            title={t('delete')}
-                          >
-                            <Trash2 className="h-3 w-3 text-white" />
-                          </Button>
-                                                  
-                          <Button
-                            size="icon"
-                            onClick={() => setShowActions(false)}
-                            className="w-7 h-7 rounded-full bg-gray-700 hover:bg-gray-800 shadow-md flex-shrink-0"
-                            title={t('close')}
-                          >
-                            <X className="h-3 w-3 text-white" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <span className="text-xs text-gray-500 mt-0.5 block">{getTimeDisplay(receipt.created_at)}</span>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('total')}</p>
-                    <p className="font-medium text-blue-600">{receipt.total.toFixed(2)} DH</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('advance')}</p>
-                    <p className="font-medium text-gray-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-0.5">{t('balance')}</p>
-                <p className="font-medium text-red-600">{receipt.balance.toFixed(2)} DH</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('cost')}</p>
-                    <p className="font-medium text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">{t('profit')}</p>
-                    <p className="font-medium text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
-                  </div>
-                </div>
-              </div>
+            <div className="text-right">
+              <div className="text-lg font-poppins font-semibold text-teal-700">{receipt.total.toFixed(2)} DH</div>
+              <div className="text-xs text-gray-500">{t('total')}</div>
             </div>
+          </div>
 
-            {/* Note Section */}
-            <div className="mb-2">
-              {/* Add Note Dialog */}
-              {isAddingNote && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-                  <Textarea
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    placeholder={t('enterNote')}
-                    className="mb-2 text-sm"
-                    rows={2}
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveNote} className="text-xs">
-                      {t('save')}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleCancelNote} className="text-xs">
-                      {t('cancel')}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* View Note Dialog */}
-              {isViewingNote && (
-                <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-gray-700 mb-2">{receipt.note}</p>
-                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} className="text-xs">
-                    {t('close')}
-                  </Button>
-                </div>
-              )}
+          {/* Status Badges */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} 
+                   className="text-xs bg-teal-100 text-teal-700 border-teal-200">
+              {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
+            </Badge>
+            <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} 
+                   className="text-xs bg-teal-50 text-teal-600 border-teal-200">
+              {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
+            </Badge>
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-teal-50 border border-teal-200">
+              <div className={cn("w-2 h-2 rounded-full",
+                receipt.call_status === 'Called' ? "bg-green-500" :
+                receipt.call_status === 'Unresponsive' ? "bg-red-500" :
+                "bg-gray-400"
+              )} />
+              <span className="text-xs font-medium text-teal-700">
+                {receipt.call_status === 'Called' ? t('called') : 
+                 receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
+              </span>
             </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-6 gap-1 w-full relative">
+        {/* Content Section */}
+        <div className="flex-1 px-4 py-2">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('advance')}</p>
+              <p className="font-inter font-semibold text-teal-600">{receipt.advance_payment?.toFixed(2) || '0.00'} DH</p>
+            </div>
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('balance')}</p>
+              <p className="font-inter font-semibold text-red-600">{receipt.balance.toFixed(2)} DH</p>
+            </div>
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('cost')}</p>
+              <p className="font-inter font-semibold text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+            </div>
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('profit')}</p>
+              <p className="font-inter font-semibold text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+            </div>
+          </div>
+
+          {/* Montage Progress */}
+          <div className="mb-4">
+            <p className="text-xs text-teal-700 font-poppins font-medium mb-2">{t('montageLabel')}</p>
+            <div className="grid grid-cols-6 gap-1 relative">
               {MONTAGE_STATUSES.map((status, index) => {
-                const isCompleted = currentMontageIndex >= index;
                 const isCurrent = currentMontageIndex === index;
                 return (
                   <motion.button
                     key={status}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.05 }}
                     className={`relative h-2 rounded-full cursor-pointer transition-all ${
-                      receipt.montage_status === 'UnOrdered' ? 'bg-gray-500' :
-                      receipt.montage_status === 'Ordered' ? 'bg-blue-500' :
-                      receipt.montage_status === 'InStore' ? 'bg-orange-500' :
-                      receipt.montage_status === 'InCutting' ? 'bg-purple-500' :
-                      receipt.montage_status === 'Ready' ? 'bg-pink-500' :
-                      receipt.montage_status === 'Paid costs' ? 'bg-teal-500' : 'bg-gray-200'
+                      isCurrent ? 'bg-teal-500' : 'bg-teal-200'
                     }`}
                     onClick={() => onMontageChange(status)}
                   >
-                    <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium whitespace-nowrap ${
-                      isCurrent ? 'text-teal-600' : 'text-gray-500'
-                    }`}>
-                      {getMontageStatusTranslation(status)}
-                    </div>
                     {isCurrent && (
                       <motion.div
                         initial={false}
-                        layoutId="progressCircle"
+                        layoutId={`progressCircle-${receipt.id}`}
                         transition={{ type: "spring", duration: 0.5 }}
-                        className={`absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 ${
-                          status === 'UnOrdered' ? 'border-gray-500'
-                          : status === 'Ordered' ? 'border-blue-500'
-                          : status === 'InStore' ? 'border-orange-500'
-                          : status === 'InCutting' ? 'border-red-500'
-                          : status === 'Ready' ? 'border-purple-500'
-                          : status === 'Paid costs' ? 'border-green-500'
-                          : 'border-gray-500'
-                        }`}
-                        layoutId="currentStep"
+                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
                       />
                     )}
                   </motion.button>
                 );
               })}
             </div>
+            <div className="text-xs text-center text-teal-600 font-medium mt-1">
+              {getMontageStatusTranslation(receipt.montage_status)}
+            </div>
           </div>
-        </CardContent>
+
+          {/* Note Section */}
+          {(isAddingNote || isViewingNote || receipt.note) && (
+            <div className="mb-3">
+              {isAddingNote && (
+                <div className="p-3 bg-teal-50/30 border border-teal-200 rounded-lg">
+                  <Textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    placeholder={t('enterNote')}
+                    className="mb-2 text-sm border-teal-200 bg-white focus:border-teal-500"
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleSaveNote} className="text-xs bg-teal-600 hover:bg-teal-700">
+                      {t('save')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleCancelNote} 
+                            className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
+                      {t('cancel')}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {isViewingNote && (
+                <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-gray-700 mb-2">{receipt.note}</p>
+                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} 
+                          className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
+                    {t('close')}
+                  </Button>
+                </div>
+              )}
+
+              {receipt.note && !isViewingNote && !isAddingNote && (
+                <div className="text-xs text-teal-600 bg-teal-50/30 p-2 rounded border border-teal-200 truncate">
+                  {t('note')}: {receipt.note}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer Section */}
+        <div className="p-4 pt-0">
+          <div className="border-t-2 border-teal-100 pt-3">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onCallStatusChange(
+                  receipt.call_status === 'Not Called' ? 'Called' :
+                  receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                )}
+                className={cn(
+                  "h-8 px-3 rounded-full shadow-sm transition-all duration-200",
+                  receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
+                  receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
+                  "bg-teal-100 hover:bg-teal-200 text-teal-700"
+                )}
+                title={receipt.call_status === 'Called' ? t('markUnresponsive') :
+                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+              >
+                <Phone className="h-3 w-3 mr-1" />
+                <span className="text-xs">{t('call')}</span>
+              </Button>
+
+              {receipt.balance > 0 && (
+                <Button
+                  size="sm"
+                  onClick={onPaid}
+                  className="h-8 px-3 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                  title={t('markPaid')}
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  <span className="text-xs">{t('pay')}</span>
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                onClick={onDelivered}
+                className={cn(
+                  "h-8 px-3 rounded-full shadow-sm text-white",
+                  receipt.delivery_status === 'Completed' 
+                    ? "bg-orange-500 hover:bg-orange-600" 
+                    : "bg-blue-500 hover:bg-blue-600"
+                )}
+                title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+              >
+                <Package className="h-3 w-3 mr-1" />
+                <span className="text-xs">{receipt.delivery_status === 'Completed' ? t('undeliver') : t('deliver')}</span>
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={onView}
+                className="h-8 px-3 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+                title={t('view')}
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                <span className="text-xs">{t('view')}</span>
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={onEdit}
+                className="h-8 px-3 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
+                title={t('edit')}
+              >
+                <Edit className="h-3 w-3 mr-1" />
+                <span className="text-xs">{t('edit')}</span>
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={() => setIsAddingNote(true)}
+                className="h-8 px-3 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
+                title={t('addNote')}
+              >
+                <Pencil className="h-3 w-3 mr-1" />
+                <span className="text-xs">{t('note')}</span>
+              </Button>
+
+              {receipt.note && (
+                <Button
+                  size="sm"
+                  onClick={() => setIsViewingNote(true)}
+                  className="h-8 px-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+                  title={t('viewNote')}
+                >
+                  <StickyNote className="h-3 w-3 mr-1" />
+                  <span className="text-xs">{t('viewNote')}</span>
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                onClick={onDelete}
+                className="h-8 px-3 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
+                title={t('delete')}
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                <span className="text-xs">{t('delete')}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
       </Card>
     </motion.div>
   );
@@ -942,7 +911,7 @@ const Receipts = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
           <AnimatePresence>
             {isLoading ? (
               Array(6).fill(0).map((_, i) => (
