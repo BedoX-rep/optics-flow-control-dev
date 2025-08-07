@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
@@ -101,25 +102,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     }
   };
 
-  // Get color scheme based on favorite status
-  const getColorScheme = () => {
-    if (client.is_favorite) {
-      return {
-        card: 'bg-amber-50 text-amber-700 border-amber-200',
-        avatar: 'bg-amber-50 text-amber-700 border-amber-200'
-      };
-    }
-
-    // Alternate between blue and green for non-favorites
-    const isEven = client.id.charCodeAt(0) % 2 === 0;
-    return {
-      card: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200',
-      avatar: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'
-    };
-  };
-
-  const { card: cardColor, avatar: avatarColor } = getColorScheme();
-
   const handleViewReceipt = async (receipt: Receipt) => {
     try {
       const { data: fullReceipt, error } = await supabase
@@ -155,7 +137,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   };
 
   const handleEditReceipt = (receipt: Receipt) => {
-    // In a real app, you would navigate to or open a dialog for editing the receipt
     toast.info("Receipt edit functionality to be implemented");
     setIsReceiptDialogOpen(false);
   };
@@ -188,13 +169,12 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       if (error) throw error;
 
-      // Update the selected receipt if it matches
       if (selectedReceipt?.id === receipt.id) {
         setSelectedReceipt(updatedReceipt);
       }
 
       toast.success("Receipt deleted successfully");
-      onRefresh(); // Refresh the client list to update the UI
+      onRefresh();
     } catch (error) {
       console.error("Error deleting receipt:", error);
       toast.error("Failed to delete receipt");
@@ -210,10 +190,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     });
   };
 
-  // Save all edited fields - UPDATED to use name attributes from input fields
+  // Save all edited fields
   const handleSaveChanges = async () => {
     try {
-      // Convert string values to numbers for database storage, handle commas as decimal separators
       const convertToNumber = (value: any) => {
         if (value === null || value === undefined || value === "") return null;
         if (typeof value === "number") return value;
@@ -246,7 +225,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       toast.success("Client updated successfully");
       setIsEdited(false);
-      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
+      await queryClient.invalidateQueries(['clients']);
     } catch (error) {
       console.error("Error updating client:", error);
       toast.error("Failed to update client");
@@ -264,12 +243,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         return
       }
 
-      // Calculate new renewal date (today + 1.5 years)
       const today = new Date()
       const newRenewalDate = new Date(today)
-      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
+      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18)
 
-      // Update client: mark as not needing renewal, increment renewal times, set new renewal date
       const { error } = await supabase
         .from('clients')
         .update({ 
@@ -284,8 +261,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         throw error
       }
 
-      console.log(`Successfully renewed client ${client.name}. Next renewal date: ${newRenewalDate.toISOString().split('T')[0]}`)
-
       toast.success(`Client renewed successfully! Next renewal: ${newRenewalDate.toISOString().split('T')[0]}`)
       await queryClient.invalidateQueries(['clients']);
     } catch (error) {
@@ -296,32 +271,36 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   return (
     <div 
-      className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
+      className="h-[420px] w-full flex flex-col bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 rounded-lg border-l-4 border-l-teal-500 border border-teal-200 shadow-sm hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 overflow-hidden"
       data-client-id={client.id}
       data-is-edited={isEdited}
     >
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${avatarColor}`}>
-              {nameInitial}
+      {/* Header Section - Fixed Height */}
+      <div className="h-20 px-4 py-3 flex-shrink-0">
+        <div className="flex items-center justify-between h-full">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-14 h-14 rounded-full bg-teal-100 border-2 border-teal-300 flex-shrink-0 flex items-center justify-center relative">
+              <span className="font-poppins font-semibold text-teal-700 text-lg">{nameInitial}</span>
+              {client.store_prescription && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+                  <span className="text-xs">📋</span>
+                </div>
+              )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center">
+              <input 
+                type="text" 
+                name="name"
+                className="font-poppins font-semibold text-teal-800 text-lg bg-transparent border-b border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none w-full truncate"
+                value={editedClient.name}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
+              />
+              <div className="flex items-center text-teal-600 text-sm mt-1">
+                <Phone size={12} className="mr-1 flex-shrink-0" />
                 <input 
                   type="text" 
-                  name="name" // Added name attribute
-                  className="font-medium text-gray-900 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
-                  value={editedClient.name}
-                  onChange={(e) => handleFieldChange('name', e.target.value)}
-                />
-              </div>
-              <div className="flex items-center text-gray-500 text-sm">
-                <Phone size={14} className="mr-1" />
-                <input 
-                  type="text" 
-                  name="phone" // Added name attribute
-                  className="bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
+                  name="phone"
+                  className="font-inter bg-transparent border-b border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none flex-1 min-w-0"
                   value={editedClient.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
                 />
@@ -330,16 +309,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {client.store_prescription && (
-              <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                📋 {t('stored')}
-              </div>
-            )}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleFavorite}
-              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors h-8 w-8`}
+              className={`${client.is_favorite ? 'text-amber-500 hover:bg-amber-50' : 'text-teal-400 hover:bg-teal-50'} transition-colors h-8 w-8`}
             >
               <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
             </Button>
@@ -348,7 +322,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 variant="ghost" 
                 size="icon"
                 onClick={handleSaveChanges}
-                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors h-8 w-8"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 transition-colors h-8 w-8"
               >
                 <Save size={16} />
               </Button>
@@ -357,7 +331,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="icon"
               onClick={() => onEdit(client)}
-              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors h-8 w-8"
+              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 transition-colors h-8 w-8"
             >
               <Edit size={16} />
             </Button>
@@ -365,43 +339,45 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="icon"
               onClick={handleDelete}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
+              className="text-teal-400 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
             >
               <Trash2 size={16} />
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Editable prescription data */}
-        <div className="mt-3 space-y-3">
-          <div className="grid grid-cols-2 gap-4">
+      {/* Content Section - Flexible */}
+      <div className="flex-1 px-4 overflow-y-auto">
+        <div className="space-y-4">
+          {/* Prescription Fields */}
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('sph')}</span>
+              <h3 className="font-poppins font-medium text-teal-700 text-sm">{t('rightEyeShort')}</h3>
+              <div className="grid grid-cols-3 gap-1">
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('sph')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="right_eye_sph"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
-                      // Allow empty string, numbers, decimal point, comma, and minus sign
                       if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
                         handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
                       }
                     }}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('cyl')}</span>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('cyl')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="right_eye_cyl"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -411,13 +387,13 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     }}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('axe')}</span>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('axe')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="right_eye_axe"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -430,15 +406,15 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               </div>
             </div>
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('sph')}</span>
+              <h3 className="font-poppins font-medium text-teal-700 text-sm">{t('leftEyeShort')}</h3>
+              <div className="grid grid-cols-3 gap-1">
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('sph')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="left_eye_sph"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -448,13 +424,13 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     }}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('cyl')}</span>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('cyl')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="left_eye_cyl"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -464,13 +440,13 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     }}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('axe')}</span>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('axe')}</span>
                   <input 
                     type="text"
                     inputMode="decimal"
                     name="left_eye_axe"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -484,15 +460,15 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
 
-          {/* Add field - centered horizontally */}
+          {/* ADD field */}
           <div className="flex justify-center">
-            <div className="w-32 flex flex-col">
-              <span className="text-xs text-gray-500 text-center">{t('add') || 'ADD'}</span>
+            <div className="w-24">
+              <span className="text-xs text-teal-600 font-inter text-center block">{t('add') || 'ADD'}</span>
               <input 
                 type="text"
                 inputMode="decimal"
                 name="add"
-                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
+                className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 text-center hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                 value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
                 onChange={(e) => {
                   const inputValue = e.target.value;
@@ -505,40 +481,40 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           </div>
 
-          {/* Renewal Information - Only show if client needs renewal or is being edited */}
+          {/* Renewal Information */}
           {(client.need_renewal || isEdited) && (
-            <div className="mt-4 pt-3 border-t border-gray-200">
-              <h3 className="text-sm font-medium mb-3 text-center">{t('renewalInformation')}</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('renewalDate')}</span>
+            <div className="pt-3 border-t-2 border-teal-100 space-y-3">
+              <h3 className="font-poppins font-medium text-teal-700 text-sm text-center">{t('renewalInformation')}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('renewalDate')}</span>
                   <input 
                     type="date"
                     name="renewal_date"
-                    className="text-sm border rounded px-2 py-1 h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.renewal_date || ""}
                     onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
                   />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('needRenewalField')}</span>
-                  <div className="flex items-center h-8">
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('needRenewalField')}</span>
+                  <div className="flex items-center justify-center h-8">
                     <input 
                       type="checkbox"
                       name="need_renewal"
-                      className="rounded border-gray-300"
+                      className="rounded border-teal-300 text-teal-600 focus:ring-teal-500"
                       checked={editedClient.need_renewal || false}
                       onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
                     />
                   </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('renewalTimes')}</span>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('renewalTimes')}</span>
                   <input 
                     type="number"
                     name="renewal_times"
                     min="0"
-                    className="text-sm border rounded px-2 py-1 h-8"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
                     value={editedClient.renewal_times || 0}
                     onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
                   />
@@ -546,101 +522,100 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               </div>
               
               {/* Prescription Information */}
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <h3 className="text-sm font-medium mb-3 text-center">{t('prescriptionInformation')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">{t('storePrescription')}</span>
-                    <div className="flex items-center h-8">
-                      <input 
-                        type="checkbox"
-                        name="store_prescription"
-                        className="rounded border-gray-300"
-                        checked={editedClient.store_prescription || false}
-                        onChange={(e) => handleFieldChange('store_prescription', e.target.checked)}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">{t('opticianPrescribedBy')}</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('storePrescription')}</span>
+                  <div className="flex items-center h-8">
                     <input 
-                      type="text"
-                      name="optician_prescribed_by"
-                      className="text-sm border rounded px-2 py-1 h-8"
-                      value={editedClient.optician_prescribed_by || ""}
-                      onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
-                      placeholder={t('enterOpticianName')}
+                      type="checkbox"
+                      name="store_prescription"
+                      className="rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                      checked={editedClient.store_prescription || false}
+                      onChange={(e) => handleFieldChange('store_prescription', e.target.checked)}
                     />
                   </div>
+                </div>
+                <div>
+                  <span className="text-xs text-teal-600 font-inter">{t('opticianPrescribedBy')}</span>
+                  <input 
+                    type="text"
+                    name="optician_prescribed_by"
+                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
+                    value={editedClient.optician_prescribed_by || ""}
+                    onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
+                    placeholder={t('enterOpticianName')}
+                  />
                 </div>
               </div>
             </div>
           )}
-        </div>
-      </div>
 
-      <div className="bg-white bg-opacity-30 px-4 py-2 flex justify-between items-center">
-        <div className="flex items-center text-xs text-gray-500">
-          <Calendar size={14} className="mr-1" />
-          <span>{t('addedOn')} {formattedDate}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {client.need_renewal && (
-            <Button
-              onClick={handleRenewal}
-              size="sm"
-              className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm"
-            >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              {t('renewNow')}
-            </Button>
-          )}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleExpanded}
-            className="text-gray-500 hover:text-teal-600 p-1 h-auto"
-          >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </Button>
-        </div>
-      </div>
-
-      {expanded && (
-        <div className="px-4 py-3 bg-white border-t border-gray-100 animate-accordion-down">
-          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">{t('purchaseHistory')}</h4>
-          {client.receipts && client.receipts.length > 0 ? (
-            <div className="space-y-2">
-              {client.receipts
-                .filter(receipt => !receipt.is_deleted)
-                .map(receipt => (
-                <div key={receipt.id} className="text-sm p-2 bg-white rounded border border-gray-100 flex justify-between items-center">
-                  <div>
-                    <div className="font-medium">Receipt #{receipt.id.substring(0, 8)}</div>
-                    <div className="text-xs text-gray-500">{receipt.created_at 
-                      ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
-                      : 'Unknown date'}
+          {/* Purchase History (when expanded) */}
+          {expanded && (
+            <div className="pt-3 border-t-2 border-teal-100">
+              <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase mb-2">{t('purchaseHistory')}</h4>
+              {client.receipts && client.receipts.length > 0 ? (
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {client.receipts
+                    .filter(receipt => !receipt.is_deleted)
+                    .map(receipt => (
+                    <div key={receipt.id} className="text-sm p-2 bg-white/60 rounded border border-teal-200 flex justify-between items-center">
+                      <div>
+                        <div className="font-poppins font-medium text-teal-800">Receipt #{receipt.id.substring(0, 8)}</div>
+                        <div className="text-xs text-teal-600 font-inter">{receipt.created_at 
+                          ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
+                          : 'Unknown date'}
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
+                        onClick={() => handleViewReceipt(receipt)}
+                      >
+                        <Eye size={16} />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
-                      onClick={() => handleViewReceipt(receipt)}
-                    >
-                      <Eye size={16} />
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <p className="text-sm text-teal-500 font-inter">{t('noPurchaseHistory')}</p>
+              )}
             </div>
-          ) : (
-            <p className="text-sm text-gray-500">{t('noPurchaseHistory')}</p>
           )}
         </div>
-      )}
+      </div>
+
+      {/* Footer Section - Fixed Height */}
+      <div className="h-16 bg-white/50 border-t-2 border-teal-100 px-4 py-2 flex-shrink-0">
+        <div className="flex justify-between items-center h-full">
+          <div className="flex items-center text-xs text-teal-600 font-inter">
+            <Calendar size={12} className="mr-1" />
+            <span>{t('addedOn')} {formattedDate}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {client.need_renewal && (
+              <Button
+                onClick={handleRenewal}
+                size="sm"
+                className="bg-teal-600 hover:bg-teal-700 text-white font-poppins font-medium px-3 py-1 h-8 text-xs"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                {t('renewNow')}
+              </Button>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleExpanded}
+              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 p-1 h-8 w-8"
+            >
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <ReceiptDetailsMiniDialog
         isOpen={isReceiptDialogOpen}
