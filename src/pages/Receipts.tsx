@@ -244,7 +244,7 @@ const ReceiptCard = ({
                 "h-8 w-8 p-0 rounded-full shadow-sm transition-all duration-200",
                 receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
                 receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
-                "bg-teal-100 hover:bg-teal-200 text-teal-700"
+                "bg-gray-100 hover:bg-gray-200 text-gray-700"
               )}
               title={receipt.call_status === 'Called' ? t('markUnresponsive') :
                      receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
@@ -280,7 +280,7 @@ const ReceiptCard = ({
             <Button
               size="sm"
               onClick={onView}
-              className="h-8 w-8 p-0 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+              className="h-8 w-8 p-0 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-sm"
               title={t('view')}
             >
               <Eye className="h-3.5 w-3.5" />
@@ -289,7 +289,7 @@ const ReceiptCard = ({
             <Button
               size="sm"
               onClick={onEdit}
-              className="h-8 w-8 p-0 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
+              className="h-8 w-8 p-0 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-sm"
               title={t('edit')}
             >
               <Edit className="h-3.5 w-3.5" />
@@ -299,7 +299,7 @@ const ReceiptCard = ({
             <Button
               size="sm"
               onClick={handleEditNote}
-              className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
+              className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
               title={receipt.note ? t('editNote') : t('addNote')}
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -310,7 +310,7 @@ const ReceiptCard = ({
               <Button
                 size="sm"
                 onClick={handleViewNote}
-                className="h-8 w-8 p-0 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+                className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
                 title={t('viewNote')}
               >
                 <StickyNote className="h-3.5 w-3.5" />
@@ -354,14 +354,56 @@ const ReceiptCard = ({
                 {MONTAGE_STATUSES.map((status, index) => {
                   const isCurrent = currentMontageIndex === index;
                   const isPassed = currentMontageIndex > index;
+                  
+                  // Define colors for each step
+                  const getStepColor = () => {
+                    if (isCurrent) {
+                      switch (index) {
+                        case 0: return 'bg-gray-500'; // UnOrdered
+                        case 1: return 'bg-blue-500'; // Ordered
+                        case 2: return 'bg-orange-500'; // InStore
+                        case 3: return 'bg-yellow-500'; // InCutting
+                        case 4: return 'bg-purple-500'; // Ready
+                        case 5: return 'bg-green-500'; // Paid costs
+                        default: return 'bg-teal-500';
+                      }
+                    } else if (isPassed) {
+                      switch (index) {
+                        case 0: return 'bg-gray-400'; // UnOrdered
+                        case 1: return 'bg-blue-400'; // Ordered
+                        case 2: return 'bg-orange-400'; // InStore
+                        case 3: return 'bg-yellow-400'; // InCutting
+                        case 4: return 'bg-purple-400'; // Ready
+                        case 5: return 'bg-green-400'; // Paid costs
+                        default: return 'bg-teal-400';
+                      }
+                    } else {
+                      return 'bg-gray-200';
+                    }
+                  };
+                  
+                  const getBorderColor = () => {
+                    if (isCurrent) {
+                      switch (index) {
+                        case 0: return 'border-gray-500'; // UnOrdered
+                        case 1: return 'border-blue-500'; // Ordered
+                        case 2: return 'border-orange-500'; // InStore
+                        case 3: return 'border-yellow-500'; // InCutting
+                        case 4: return 'border-purple-500'; // Ready
+                        case 5: return 'border-green-500'; // Paid costs
+                        default: return 'border-teal-500';
+                      }
+                    }
+                    return 'border-gray-300';
+                  };
+                  
                   return (
                     <motion.button
                       key={status}
                       whileHover={{ scale: 1.05 }}
                       className={cn(
                         "relative h-2 rounded-full cursor-pointer transition-all",
-                        isCurrent ? 'bg-teal-500' : 
-                        isPassed ? 'bg-teal-400' : 'bg-teal-200'
+                        getStepColor()
                       )}
                       onClick={() => onMontageChange(status)}
                     >
@@ -370,7 +412,10 @@ const ReceiptCard = ({
                           initial={false}
                           layoutId={`progressCircle-${receipt.id}`}
                           transition={{ type: "spring", duration: 0.5 }}
-                          className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
+                          className={cn(
+                            "absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2",
+                            getBorderColor()
+                          )}
                         />
                       )}
                     </motion.button>
@@ -380,11 +425,27 @@ const ReceiptCard = ({
               <div className="grid grid-cols-6 gap-1 text-xs">
                 {MONTAGE_STATUSES.map((status, index) => {
                   const isCurrent = currentMontageIndex === index;
+                  
+                  const getTextColor = () => {
+                    if (isCurrent) {
+                      switch (index) {
+                        case 0: return "text-gray-700"; // UnOrdered
+                        case 1: return "text-blue-700"; // Ordered
+                        case 2: return "text-orange-700"; // InStore
+                        case 3: return "text-yellow-700"; // InCutting
+                        case 4: return "text-purple-700"; // Ready
+                        case 5: return "text-green-700"; // Paid costs
+                        default: return "text-teal-700";
+                      }
+                    }
+                    return "text-gray-600";
+                  };
+                  
                   return (
                     <div key={status} className="text-center">
                       <span className={cn(
                         "text-xs font-medium leading-tight block",
-                        isCurrent ? "text-teal-700 font-semibold" : "text-teal-600"
+                        isCurrent ? `${getTextColor()} font-semibold` : "text-gray-600"
                       )}>
                         {getMontageStatusTranslation(status).slice(0, 8)}
                       </span>
