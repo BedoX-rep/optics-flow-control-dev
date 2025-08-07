@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
@@ -24,6 +23,7 @@ interface Receipt {
   payment_status?: string;
   receipt_items?: Array<any>;
   discount_amount?: number;
+  is_deleted?: boolean;
 }
 
 interface Client {
@@ -541,7 +541,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 {/* Purchase History View */}
                 <div className="w-full flex-shrink-0 pl-4">
                   {client.receipts && client.receipts.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2">
                       {client.receipts
                         .filter(receipt => !receipt.is_deleted)
                         .slice(0, expanded ? undefined : 3)
@@ -648,7 +648,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                   />
                 </div>
               </div>
-              
+
               {/* Enhanced Prescription Information */}
               <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-amber-100">
                 <div>
@@ -678,7 +678,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           )}
 
-          
+
         </div>
       </div>
 
@@ -689,7 +689,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             <Calendar size={12} className="mr-2" />
             <span>{t('addedOn')} {formattedDate}</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {client.need_renewal && (
               <Button
