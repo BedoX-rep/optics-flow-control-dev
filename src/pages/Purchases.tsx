@@ -32,6 +32,7 @@ import AddSupplierDialog from '@/components/AddSupplierDialog';
 import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import PurchaseCard from '@/components/PurchaseCard';
 
 interface Supplier {
   id: string;
@@ -1410,157 +1411,15 @@ user_id: user.id,
                     exit={{ opacity: 0, y: -20 }}
                     className="w-full"
                   >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
-                      <CardContent className="p-4">
-                        {/* Header Section with Description, Dates, and Actions */}
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <Receipt className="h-4 w-4 text-primary flex-shrink-0" />
-                                <h3 className="text-base font-bold text-gray-900 truncate">
-                                  {purchase.description}
-                                </h3>
-                              </div>                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
-                                {purchase.payment_urgency && (
-                                  <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
-                                    Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && !purchase.already_recurred && (
-                                  <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
-                                    {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && purchase.already_recurred && (
-                                  <span className="text-gray-600 bg-gray-50 px-2 py-1 rounded font-medium">
-                                    {t('alreadyPassed')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Building2 className="h-3 w-3" />
-                                <span className="truncate max-w-[150px]">
-                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-1 flex-shrink-0 ml-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleOpenBalanceHistoryDialog(purchase)}
-                              className="h-7 w-7 hover:bg-purple-50 hover:text-purple-600"
-                              title="View Balance History"
-                            >
-                              <History className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleEditPurchase(purchase)}
-                              className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            {purchase.payment_status !== 'Paid' && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleMarkAsPaid(purchase)}
-                                className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
-                                title="Mark as Paid"
-                              >
-                                <DollarSign className="h-3 w-3" />
-                            </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleDeletePurchase(purchase.id)}
-                              className="h-7 w-7 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Main TTC Amount - Prominent Display */}
-                        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-3 mb-3 border-l-4 border-primary">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-gray-600">{t('totalAmountTTC')}</p>
-                              <p className="text-xl font-bold text-primary">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
-                            </div>
-                            <DollarSign className="h-5 w-5 text-primary/60" />
-                          </div>
-                        </div>
-
-                        {/* Compact Financial Details */}
-                        <div className="grid grid-cols-2 gap-2 mb-3 flex-1">
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('advance')}</p>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('balance')}</p>
-                            <p className="text-sm font-semibold text-red-600">
-                              {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Status Row */}
-                        <div className="border-t border-gray-100 pt-2 mt-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-start gap-2 flex-wrap min-w-0 flex-1">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                purchase.payment_status === 'Paid' 
-                                  ? 'bg-green-100 text-green-800'
-                                  : purchase.payment_status === 'Partially Paid'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {purchase.payment_status === 'Paid' ? t('paid') : 
-                                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                                 purchase.payment_status === 'Unpaid' ? t('unpaid') : t('unpaid')}
-                              </span>
-                              {purchase.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex-shrink-0 whitespace-nowrap">
-                                  {getTranslatedCategory(purchase.category)}
-                                </span>
-                              )}
-                              {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
-                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-                                  <Link className="h-3 w-3" />
-                                  {purchase.linked_receipts.length} {t('receipts')}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-1 flex-shrink-0">
-                              {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleRecurringRenewal(purchase)}
-                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
-                                >
-                                  {t('renewNow')}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <PurchaseCard
+                      purchase={purchase}
+                      suppliers={suppliers}
+                      onEdit={handleEditPurchase}
+                      onDelete={handleDeletePurchase}
+                      onMarkAsPaid={handleMarkAsPaid}
+                      onViewBalanceHistory={handleOpenBalanceHistoryDialog}
+                      onRecurringRenewal={handleRecurringRenewal}
+                    />
                   </motion.div>
                 ))
               )}
