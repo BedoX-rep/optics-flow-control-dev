@@ -93,60 +93,50 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
   return (
     <Card className="h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30 font-inter relative">
       <CardContent className="p-5 h-full flex flex-col">
-        {/* Creation Date and Action Buttons - Top Right */}
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-          {/* Creation Date */}
-          {purchase.created_at && (
-            <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
-              {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
-            </span>
+        {/* Action Buttons - Top Right */}
+        <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewBalanceHistory(purchase)}
+            className="text-teal-600 hover:text-white hover:bg-teal-600 h-7 w-7 p-0 rounded-lg border border-teal-200 transition-all duration-200"
+            title={t('viewBalanceHistory')}
+          >
+            <History size={12} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(purchase)}
+            className="text-blue-600 hover:text-white hover:bg-blue-600 h-7 w-7 p-0 rounded-lg border border-blue-200 transition-all duration-200"
+            title={t('editPurchase')}
+          >
+            <Edit size={12} />
+          </Button>
+          {purchase.payment_status !== 'Paid' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onMarkAsPaid(purchase)}
+              className="text-green-600 hover:text-white hover:bg-green-600 h-7 w-7 p-0 rounded-lg border border-green-200 transition-all duration-200"
+              title={t('markAsPaid')}
+            >
+              <DollarSign size={12} />
+            </Button>
           )}
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onViewBalanceHistory(purchase)}
-              className="text-teal-600 hover:text-white hover:bg-teal-600 h-7 w-7 p-0 rounded-lg border border-teal-200 transition-all duration-200"
-              title={t('viewBalanceHistory')}
-            >
-              <History size={12} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(purchase)}
-              className="text-blue-600 hover:text-white hover:bg-blue-600 h-7 w-7 p-0 rounded-lg border border-blue-200 transition-all duration-200"
-              title={t('editPurchase')}
-            >
-              <Edit size={12} />
-            </Button>
-            {purchase.payment_status !== 'Paid' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onMarkAsPaid(purchase)}
-                className="text-green-600 hover:text-white hover:bg-green-600 h-7 w-7 p-0 rounded-lg border border-green-200 transition-all duration-200"
-                title={t('markAsPaid')}
-              >
-                <DollarSign size={12} />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(purchase.id)}
-              className="text-red-600 hover:text-white hover:bg-red-600 h-7 w-7 p-0 rounded-lg border border-red-200 transition-all duration-200"
-              title={t('deletePurchase')}
-            >
-              <Trash2 size={12} />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(purchase.id)}
+            className="text-red-600 hover:text-white hover:bg-red-600 h-7 w-7 p-0 rounded-lg border border-red-200 transition-all duration-200"
+            title={t('deletePurchase')}
+          >
+            <Trash2 size={12} />
+          </Button>
         </div>
 
         {/* Header Section */}
-        <div className="flex items-start gap-4 mb-4 pr-32">
+        <div className="flex items-start gap-4 mb-4 pr-20">
           <div className="relative">
             <div className="w-14 h-14 rounded-xl bg-teal-100 border-2 border-teal-200 shadow-sm flex items-center justify-center">
               <Receipt className="h-6 w-6 text-teal-600" />
@@ -168,7 +158,18 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
           </div>
         </div>
 
-        {/* Status Information - Below Header */}
+        {/* Creation Date - Below Header */}
+        <div className="mb-3">
+          {purchase.created_at && (
+            <div className="flex justify-end">
+              <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
+                {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Status Information - Below Creation Date */}
         <div className="mb-4 space-y-2">
           {/* Payment Status, Due Date, Next Date */}
           <div className="flex items-center gap-2 flex-wrap">
