@@ -1,4 +1,3 @@
-
 # Card Uniformity Design System Implementation Guide
 
 ## Overview
