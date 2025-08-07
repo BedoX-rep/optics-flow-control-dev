@@ -286,12 +286,26 @@ const ReceiptCard = ({
               <Pencil className="h-3.5 w-3.5" />
             </Button>
 
-            {receipt.note && (
+            {receipt.note && !isAddingNote && (
               <Button
                 size="sm"
-                onClick={() => setIsViewingNote(true)}
+                onClick={() => {
+                  setNoteText(receipt.note || '');
+                  setIsAddingNote(true);
+                }}
                 className="h-8 w-8 p-0 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
-                title={t('viewNote')}
+                title={t('editNote')}
+              >
+                <StickyNote className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            {!receipt.note && !isAddingNote && (
+              <Button
+                size="sm"
+                onClick={() => setIsAddingNote(true)}
+                className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
+                title={t('addNote')}
               >
                 <StickyNote className="h-3.5 w-3.5" />
               </Button>
@@ -410,8 +424,17 @@ const ReceiptCard = ({
               )}
 
               {receipt.note && !isViewingNote && !isAddingNote && (
-                <div className="text-xs text-teal-600 bg-teal-50/30 p-2 rounded border border-teal-200 truncate">
-                  {t('note')}: {receipt.note}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 text-xs text-teal-600 bg-teal-50/30 p-2 rounded border border-teal-200 truncate">
+                    {t('note')}: {receipt.note}
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsViewingNote(true)}
+                    className="h-7 px-2 text-xs bg-teal-600 hover:bg-teal-700 text-white"
+                  >
+                    {t('read')}
+                  </Button>
                 </div>
               )}
             </div>
