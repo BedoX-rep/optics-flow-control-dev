@@ -103,6 +103,16 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     }
   };
 
+  // Calculate payment status dynamically based on balance and advance_payment
+  const calculatePaymentStatus = (receipt: Receipt) => {
+    const balance = Number(receipt.balance || 0);
+    const advancePayment = Number(receipt.advance_payment || 0);
+    
+    if (balance === 0) return 'Paid';
+    if (advancePayment > 0) return 'Partially Paid';
+    return 'Unpaid';
+  };
+
   const handleViewReceipt = async (receipt: Receipt) => {
     try {
       const { data: fullReceipt, error } = await supabase
@@ -563,19 +573,22 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                               )}
                             </div>
                             <div className="flex flex-col items-end gap-1">
-                              {receipt.payment_status && (
-                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                  receipt.payment_status === 'Paid' 
-                                    ? 'bg-green-100 text-green-700'
-                                    : receipt.payment_status === 'Partially Paid'
-                                    ? 'bg-yellow-100 text-yellow-700'
-                                    : 'bg-red-100 text-red-700'
-                                }`}>
-                                  {receipt.payment_status === 'Paid' ? t('paid') : 
-                                   receipt.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                                   t('unpaid')}
-                                </span>
-                              )}
+                              {(() => {
+                                const paymentStatus = calculatePaymentStatus(receipt);
+                                return (
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    paymentStatus === 'Paid' 
+                                      ? 'bg-green-100 text-green-700'
+                                      : paymentStatus === 'Partially Paid'
+                                      ? 'bg-yellow-100 text-yellow-700'
+                                      : 'bg-red-100 text-red-700'
+                                  }`}>
+                                    {paymentStatus === 'Paid' ? t('paid') : 
+                                     paymentStatus === 'Partially Paid' ? t('partiallyPaid') : 
+                                     t('unpaid')}
+                                  </span>
+                                );
+                              })()}
                               {receipt.balance && receipt.balance > 0 && (
                                 <div className="text-xs text-red-600 font-medium">
                                   Balance: {receipt.balance.toFixed(2)} DH
