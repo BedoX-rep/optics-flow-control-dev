@@ -361,47 +361,37 @@ const ReceiptCard = ({
                   const isCurrent = currentMontageIndex === index;
                   const isPassed = currentMontageIndex > index;
                   
-                  // Define colors for each step - current step uses full opacity of step color
+                  // Get the current step's color theme
+                  const getCurrentStepColorTheme = () => {
+                    switch (currentMontageIndex) {
+                      case 0: return { main: 'bg-gray-500', light: 'bg-gray-400', border: 'border-gray-500' }; // UnOrdered
+                      case 1: return { main: 'bg-blue-500', light: 'bg-blue-400', border: 'border-blue-500' }; // Ordered
+                      case 2: return { main: 'bg-orange-500', light: 'bg-orange-400', border: 'border-orange-500' }; // InStore
+                      case 3: return { main: 'bg-yellow-500', light: 'bg-yellow-400', border: 'border-yellow-500' }; // InCutting
+                      case 4: return { main: 'bg-purple-500', light: 'bg-purple-400', border: 'border-purple-500' }; // Ready
+                      case 5: return { main: 'bg-green-500', light: 'bg-green-400', border: 'border-green-500' }; // Paid costs
+                      default: return { main: 'bg-teal-500', light: 'bg-teal-400', border: 'border-teal-500' };
+                    }
+                  };
+                  
+                  const colorTheme = getCurrentStepColorTheme();
+                  
+                  // All bars use the current step's color theme
                   const getStepColor = () => {
                     if (isCurrent) {
-                      switch (index) {
-                        case 0: return 'bg-gray-500'; // UnOrdered
-                        case 1: return 'bg-blue-500'; // Ordered
-                        case 2: return 'bg-orange-500'; // InStore
-                        case 3: return 'bg-yellow-500'; // InCutting
-                        case 4: return 'bg-purple-500'; // Ready
-                        case 5: return 'bg-green-500'; // Paid costs
-                        default: return 'bg-teal-500';
-                      }
+                      return colorTheme.main;
                     } else if (isPassed) {
-                      // Passed steps use same color as current but more muted
-                      switch (index) {
-                        case 0: return 'bg-gray-400'; // UnOrdered
-                        case 1: return 'bg-blue-400'; // Ordered
-                        case 2: return 'bg-orange-400'; // InStore
-                        case 3: return 'bg-yellow-400'; // InCutting
-                        case 4: return 'bg-purple-400'; // Ready
-                        case 5: return 'bg-green-400'; // Paid costs
-                        default: return 'bg-teal-400';
-                      }
+                      return colorTheme.light;
                     } else {
                       // Future steps use light gray
                       return 'bg-gray-200';
                     }
                   };
                   
-                  // Border color matches the step color when current
+                  // Border color matches the current step's color when current
                   const getBorderColor = () => {
                     if (isCurrent) {
-                      switch (index) {
-                        case 0: return 'border-gray-500'; // UnOrdered
-                        case 1: return 'border-blue-500'; // Ordered
-                        case 2: return 'border-orange-500'; // InStore
-                        case 3: return 'border-yellow-500'; // InCutting
-                        case 4: return 'border-purple-500'; // Ready
-                        case 5: return 'border-green-500'; // Paid costs
-                        default: return 'border-teal-500';
-                      }
+                      return colorTheme.border;
                     }
                     return 'border-gray-300';
                   };
