@@ -56,10 +56,6 @@ const formSchema = z.object({
     z.string().transform((val) => val === '' ? null : parseFloat(val)),
     z.number()
   ]).nullable(),
-  pd_distance: z.union([
-    z.string().transform((val) => val === '' ? null : parseFloat(val)),
-    z.number()
-  ]).nullable(),
   assurance: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   renewal_date: z.string().nullable().optional(),
@@ -84,7 +80,6 @@ interface EditClientDialogProps {
     left_eye_axe?: number | null;
     notes?: string | null;
     Add?: number | null;
-    pd_distance?: number | null;
     assurance?: string | null;
     renewal_date?: string | null;
     need_renewal?: boolean;
@@ -111,7 +106,6 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
       left_eye_cyl: client?.left_eye_cyl !== undefined && client?.left_eye_cyl !== null ? client.left_eye_cyl : null,
       left_eye_axe: client?.left_eye_axe !== undefined && client?.left_eye_axe !== null ? client.left_eye_axe : null,
       Add: client?.Add !== undefined && client?.Add !== null ? client.Add : null,
-      pd_distance: client?.pd_distance !== undefined && client?.pd_distance !== null ? client.pd_distance : null,
       notes: client?.notes || "",
       assurance: client?.assurance || "",
       renewal_date: client?.renewal_date || "",
@@ -134,7 +128,6 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         left_eye_cyl: client.left_eye_cyl !== undefined && client.left_eye_cyl !== null ? client.left_eye_cyl : null,
         left_eye_axe: client.left_eye_axe !== undefined && client.left_eye_axe !== null ? client.left_eye_axe : null,
         Add: client.Add !== undefined && client.Add !== null ? client.Add : null,
-        pd_distance: client.pd_distance !== undefined && client.pd_distance !== null ? client.pd_distance : null,
         notes: client.notes || "",
         assurance: client.assurance || "",
         renewal_date: client.renewal_date || "",
@@ -169,7 +162,6 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         left_eye_cyl: values.left_eye_cyl,
         left_eye_axe: values.left_eye_axe,
         Add: values.Add,
-        pd_distance: values.pd_distance,
         assurance: values.assurance || null,
         notes: values.notes || null,
         renewal_date: values.renewal_date || null,
@@ -424,62 +416,33 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="Add"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Add</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text"
-                        value={field.value !== null ? field.value : ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === '') {
-                            field.onChange(null);
-                            return;
-                          }
-                          if (/^-?\d*\.?\d*$/.test(value)) {
-                            field.onChange(value);
-                          }
-                        }}
-                        className="h-8"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pd_distance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('pdDistance') || 'PD Distance'}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text"
-                        value={field.value !== null ? field.value : ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === '') {
-                            field.onChange(null);
-                            return;
-                          }
-                          if (/^-?\d*\.?\d*$/.test(value)) {
-                            field.onChange(value);
-                          }
-                        }}
-                        className="h-8"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="Add"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Add</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="text"
+                      value={field.value !== null ? field.value : ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          field.onChange(null);
+                          return;
+                        }
+                        if (/^-?\d*\.?\d*$/.test(value)) {
+                          field.onChange(value);
+                        }
+                      }}
+                      className="h-8"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <div className="space-y-4 mt-6">
               <h3 className="text-md font-medium">{t('prescriptionStorage')}</h3>
