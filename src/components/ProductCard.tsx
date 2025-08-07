@@ -56,21 +56,21 @@ const TREATMENT_OPTIONS = [
   { value: "UV protection", labelKey: "uvProtection" },
   { value: "Tint", labelKey: "tint" }
 ];
-const ProductCard = React.memo<ProductCardProps>(({ 
-  product, 
-  onFieldChange, 
-  onSave, 
-  onEdit, 
-  onDelete, 
-  isSubmitting 
+const ProductCard = React.memo<ProductCardProps>(({
+  product,
+  onFieldChange,
+  onSave,
+  onEdit,
+  onDelete,
+  isSubmitting
 }) => {
   const { t } = useLanguage();
   const { allCompanies } = useCompanies();
   return (
-    <Card 
+    <Card
       className={`h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 font-inter ${
-        product.isEdited 
-          ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl' 
+        product.isEdited
+          ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl'
           : 'border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30'
       }`}
     >
@@ -228,7 +228,7 @@ const ProductCard = React.memo<ProductCardProps>(({
               <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('stockStatus')}</label>
               <Select
                 value={product.stock_status || 'Order'}
-                onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
+                onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') =>
                   onFieldChange(product.id, 'stock_status', value)
                 }
               >
@@ -263,7 +263,7 @@ const ProductCard = React.memo<ProductCardProps>(({
         {/* Footer Section */}
         <div className="border-t-2 border-teal-100 pt-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Switch
                 checked={product.automated_name}
                 onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
@@ -271,32 +271,33 @@ const ProductCard = React.memo<ProductCardProps>(({
               />
               <span className="text-xs text-teal-600 font-inter font-medium">{t('auto')}</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(product.id)}
-              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-3 text-xs font-inter rounded-lg"
-            >
-              <Trash2 size={14} />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(product)}
+                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-3 text-xs font-inter rounded-lg"
+              >
+                <Edit size={14} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(product.id)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-3 text-xs font-inter rounded-lg"
+              >
+                <Trash2 size={14} />
+              </Button>
+            </div>
           </div>
-          
+
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(product)}
-              className="flex-1 border-teal-200 text-teal-700 hover:text-teal-800 hover:bg-teal-50 hover:border-teal-300 h-9 px-3 text-xs font-poppins font-medium rounded-lg"
-            >
-              <Edit size={14} className="mr-2" />
-              {t('edit')}
-            </Button>
             {product.isEdited && (
               <Button
                 size="sm"
                 onClick={() => onSave(product.id)}
                 disabled={isSubmitting}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
               >
                 <Save size={14} className="mr-2" />
                 {t('saveButton')}
