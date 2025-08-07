@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw, MapPin, Clock } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
@@ -62,6 +62,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
   const [editedClient, setEditedClient] = useState<Client>({...client});
   const [isEdited, setIsEdited] = useState(false);
+  const [currentView, setCurrentView] = useState<'prescription' | 'history'>('prescription');
 
   // Reset edited client when client changes
   useEffect(() => {
@@ -362,139 +363,245 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       {/* Content Section - Enhanced with better visual organization */}
       <div className="flex-1 px-5 py-4 overflow-y-auto">
         <div className="space-y-5">
-          {/* Enhanced Prescription Fields with better visual grouping */}
-          <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
-            <h3 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-              Prescription Details
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('rightEyeShort')}</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="right_eye_sph"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="right_eye_cyl"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="right_eye_axe"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('leftEyeShort')}</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="left_eye_sph"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="left_eye_cyl"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
-                    <input 
-                      type="text"
-                      inputMode="decimal"
-                      name="left_eye_axe"
-                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                      value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                          handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+          {/* Toggle between Prescription and Purchase History */}
+          <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm relative overflow-hidden">
+            {/* Navigation Header */}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-poppins font-semibold text-teal-700 text-sm flex items-center gap-2">
+                <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+                {currentView === 'prescription' ? 'Prescription Details' : t('purchaseHistory')}
+              </h3>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView('prescription')}
+                  className={`h-8 w-8 rounded-full transition-all duration-200 ${
+                    currentView === 'prescription' 
+                      ? 'bg-teal-100 text-teal-700' 
+                      : 'text-teal-400 hover:bg-teal-50'
+                  }`}
+                >
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView('history')}
+                  className={`h-8 w-8 rounded-full transition-all duration-200 ${
+                    currentView === 'history' 
+                      ? 'bg-teal-100 text-teal-700' 
+                      : 'text-teal-400 hover:bg-teal-50'
+                  }`}
+                >
+                  <ChevronRight size={14} />
+                </Button>
               </div>
             </div>
 
-            {/* Enhanced ADD field */}
-            <div className="flex justify-center mt-4 pt-3 border-t border-teal-100">
-              <div className="w-28">
-                <span className="text-xs text-teal-600 font-inter text-center block mb-1 font-medium">{t('add') || 'ADD'}</span>
-                <input 
-                  type="text"
-                  inputMode="decimal"
-                  name="add"
-                  className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 text-center hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
-                  value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                      handleFieldChange('Add', inputValue === "" ? null : inputValue);
-                    }
-                  }}
-                  placeholder="0.00"
-                />
+            {/* Content Container with Slide Animation */}
+            <div className="relative w-full overflow-hidden">
+              <div 
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(${currentView === 'prescription' ? '0%' : '-100%'})` }}
+              >
+                {/* Prescription Details View */}
+                <div className="w-full flex-shrink-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('rightEyeShort')}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="right_eye_sph"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="right_eye_cyl"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="right_eye_axe"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('leftEyeShort')}</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="left_eye_sph"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="left_eye_cyl"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
+                          <input 
+                            type="text"
+                            inputMode="decimal"
+                            name="left_eye_axe"
+                            className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                            value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                                handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced ADD field */}
+                  <div className="flex justify-center mt-4 pt-3 border-t border-teal-100">
+                    <div className="w-28">
+                      <span className="text-xs text-teal-600 font-inter text-center block mb-1 font-medium">{t('add') || 'ADD'}</span>
+                      <input 
+                        type="text"
+                        inputMode="decimal"
+                        name="add"
+                        className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 text-center hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                        value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                            handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                          }
+                        }}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Purchase History View */}
+                <div className="w-full flex-shrink-0 pl-4">
+                  {client.receipts && client.receipts.length > 0 ? (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {client.receipts
+                        .filter(receipt => !receipt.is_deleted)
+                        .slice(0, expanded ? undefined : 3)
+                        .map(receipt => (
+                        <div key={receipt.id} className="text-sm p-3 bg-white/80 rounded-lg border border-teal-200 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => handleViewReceipt(receipt)}>
+                          <div className="flex justify-between items-center">
+                            <div className="flex-1">
+                              <div className="font-poppins font-medium text-teal-800">Receipt #{receipt.id.substring(0, 8)}</div>
+                              <div className="text-xs text-teal-600 font-inter flex items-center gap-2">
+                                <Calendar size={10} />
+                                {receipt.created_at 
+                                  ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
+                                  : 'Unknown date'}
+                              </div>
+                              {receipt.total && (
+                                <div className="text-xs text-emerald-600 font-medium mt-1">
+                                  {receipt.total.toFixed(2)} DH
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              {receipt.payment_status && (
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                  receipt.payment_status === 'Paid' 
+                                    ? 'bg-green-100 text-green-700'
+                                    : receipt.payment_status === 'Partially Paid'
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {receipt.payment_status === 'Paid' ? t('paid') : 
+                                   receipt.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
+                                   t('unpaid')}
+                                </span>
+                              )}
+                              {receipt.balance && receipt.balance > 0 && (
+                                <div className="text-xs text-red-600 font-medium">
+                                  Balance: {receipt.balance.toFixed(2)} DH
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {!expanded && client.receipts.filter(receipt => !receipt.is_deleted).length > 3 && (
+                        <div className="text-center">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={toggleExpanded}
+                            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 text-xs"
+                          >
+                            +{client.receipts.filter(receipt => !receipt.is_deleted).length - 3} more receipts
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-teal-500 font-inter">{t('noPurchaseHistory')}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -571,74 +678,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           )}
 
-          {/* Enhanced Purchase History - Always Visible */}
-          <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
-            <h4 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-              {t('purchaseHistory')}
-            </h4>
-            {client.receipts && client.receipts.length > 0 ? (
-              <div className="space-y-2 max-h-28 overflow-y-auto">
-                {client.receipts
-                  .filter(receipt => !receipt.is_deleted)
-                  .slice(0, expanded ? undefined : 2)
-                  .map(receipt => (
-                  <div key={receipt.id} className="text-sm p-3 bg-white/80 rounded-lg border border-teal-200 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => handleViewReceipt(receipt)}>
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="font-poppins font-medium text-teal-800">Receipt #{receipt.id.substring(0, 8)}</div>
-                        <div className="text-xs text-teal-600 font-inter flex items-center gap-2">
-                          <Calendar size={10} />
-                          {receipt.created_at 
-                            ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
-                            : 'Unknown date'}
-                        </div>
-                        {receipt.total && (
-                          <div className="text-xs text-emerald-600 font-medium mt-1">
-                            {receipt.total.toFixed(2)} DH
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        {receipt.payment_status && (
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            receipt.payment_status === 'Paid' 
-                              ? 'bg-green-100 text-green-700'
-                              : receipt.payment_status === 'Partially Paid'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {receipt.payment_status === 'Paid' ? t('paid') : 
-                             receipt.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                             t('unpaid')}
-                          </span>
-                        )}
-                        {receipt.balance && receipt.balance > 0 && (
-                          <div className="text-xs text-red-600 font-medium">
-                            Balance: {receipt.balance.toFixed(2)} DH
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {!expanded && client.receipts.filter(receipt => !receipt.is_deleted).length > 2 && (
-                  <div className="text-center">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={toggleExpanded}
-                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 text-xs"
-                    >
-                      +{client.receipts.filter(receipt => !receipt.is_deleted).length - 2} more receipts
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-teal-500 font-inter">{t('noPurchaseHistory')}</p>
-            )}
-          </div>
+          
         </div>
       </div>
 
