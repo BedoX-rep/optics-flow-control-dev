@@ -219,12 +219,13 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
         {/* Footer Section */}
         <div className="border-t-2 border-teal-100 pt-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onViewBalanceHistory(purchase)}
-                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2 text-xs font-inter rounded-lg"
+                className="text-teal-600 hover:text-white hover:bg-teal-600 h-8 px-3 text-xs font-inter rounded-lg border border-teal-200 transition-all duration-200"
+                title={t('viewBalanceHistory')}
               >
                 <History size={14} className="mr-1" />
                 {t('history')}
@@ -233,29 +234,35 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(purchase)}
-                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2 text-xs font-inter rounded-lg"
+                className="text-blue-600 hover:text-white hover:bg-blue-600 h-8 px-3 text-xs font-inter rounded-lg border border-blue-200 transition-all duration-200"
+                title={t('editPurchase')}
               >
-                <Edit size={14} />
+                <Edit size={14} className="mr-1" />
+                {t('edit')}
               </Button>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {purchase.payment_status !== 'Paid' && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onMarkAsPaid(purchase)}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2 text-xs font-inter rounded-lg"
+                  className="text-green-600 hover:text-white hover:bg-green-600 h-8 px-3 text-xs font-inter rounded-lg border border-green-200 transition-all duration-200"
+                  title={t('markAsPaid')}
                 >
-                  <DollarSign size={14} />
+                  <DollarSign size={14} className="mr-1" />
+                  {t('pay')}
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onDelete(purchase.id)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2 text-xs font-inter rounded-lg"
+                className="text-red-600 hover:text-white hover:bg-red-600 h-8 px-3 text-xs font-inter rounded-lg border border-red-200 transition-all duration-200"
+                title={t('deletePurchase')}
               >
-                <Trash2 size={14} />
+                <Trash2 size={14} className="mr-1" />
+                {t('delete')}
               </Button>
             </div>
           </div>
