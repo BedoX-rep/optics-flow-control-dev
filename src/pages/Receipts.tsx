@@ -232,99 +232,105 @@ const ReceiptCard = ({
           (isEditingNote || isViewingNote) ? "flex-none" : "flex-1"
         )}>
           {/* Action Buttons Row */}
-          <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onCallStatusChange(
-                receipt.call_status === 'Not Called' ? 'Called' :
-                receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-              )}
-              className={cn(
-                "h-8 w-8 p-0 rounded-full shadow-sm transition-all duration-200",
-                receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
-                receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
-                "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              )}
-              title={receipt.call_status === 'Called' ? t('markUnresponsive') :
-                     receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
-            >
-              <Phone className="h-3.5 w-3.5" />
-            </Button>
-
-            {receipt.balance > 0 && (
+          <div className="flex justify-between items-center gap-2 mb-4">
+            {/* Left side - Call, Paid, Delivery buttons */}
+            <div className="flex gap-1.5">
               <Button
+                variant="ghost"
                 size="sm"
-                onClick={onPaid}
-                className="h-8 w-8 p-0 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
-                title={t('markPaid')}
+                onClick={() => onCallStatusChange(
+                  receipt.call_status === 'Not Called' ? 'Called' :
+                  receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                )}
+                className={cn(
+                  "h-8 w-8 p-0 rounded-full shadow-sm transition-all duration-200",
+                  receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
+                  receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
+                  "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                )}
+                title={receipt.call_status === 'Called' ? t('markUnresponsive') :
+                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
               >
-                <Check className="h-3.5 w-3.5" />
+                <Phone className="h-3.5 w-3.5" />
               </Button>
-            )}
 
-            <Button
-              size="sm"
-              onClick={onDelivered}
-              className={cn(
-                "h-8 w-8 p-0 rounded-full shadow-sm text-white",
-                receipt.delivery_status === 'Completed' 
-                  ? "bg-orange-500 hover:bg-orange-600" 
-                  : "bg-blue-500 hover:bg-blue-600"
+              {receipt.balance > 0 && (
+                <Button
+                  size="sm"
+                  onClick={onPaid}
+                  className="h-8 w-8 p-0 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                  title={t('markPaid')}
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </Button>
               )}
-              title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
-            >
-              <Package className="h-3.5 w-3.5" />
-            </Button>
 
-            <Button
-              size="sm"
-              onClick={onView}
-              className="h-8 w-8 p-0 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-sm"
-              title={t('view')}
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </Button>
-
-            <Button
-              size="sm"
-              onClick={onEdit}
-              className="h-8 w-8 p-0 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-sm"
-              title={t('edit')}
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* Pencil icon for adding/editing notes */}
-            <Button
-              size="sm"
-              onClick={handleEditNote}
-              className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
-              title={receipt.note ? t('editNote') : t('addNote')}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-
-            {/* View note button - only shown when there's a note and not editing */}
-            {receipt.note && !isEditingNote && (
               <Button
                 size="sm"
-                onClick={handleViewNote}
+                onClick={onDelivered}
+                className={cn(
+                  "h-8 w-8 p-0 rounded-full shadow-sm text-white",
+                  receipt.delivery_status === 'Completed' 
+                    ? "bg-orange-500 hover:bg-orange-600" 
+                    : "bg-blue-500 hover:bg-blue-600"
+                )}
+                title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+              >
+                <Package className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            {/* Right side - View, Edit, Delete, Note buttons */}
+            <div className="flex gap-1.5">
+              <Button
+                size="sm"
+                onClick={onView}
                 className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
-                title={t('viewNote')}
+                title={t('view')}
               >
-                <StickyNote className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </Button>
-            )}
 
-            <Button
-              size="sm"
-              onClick={onDelete}
-              className="h-8 w-8 p-0 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
-              title={t('delete')}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+              <Button
+                size="sm"
+                onClick={onEdit}
+                className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
+                title={t('edit')}
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+
+              {/* Pencil icon for adding/editing notes */}
+              <Button
+                size="sm"
+                onClick={handleEditNote}
+                className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
+                title={receipt.note ? t('editNote') : t('addNote')}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+
+              {/* View note button - only shown when there's a note and not editing */}
+              {receipt.note && !isEditingNote && (
+                <Button
+                  size="sm"
+                  onClick={handleViewNote}
+                  className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
+                  title={t('viewNote')}
+                >
+                  <StickyNote className="h-3.5 w-3.5" />
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                onClick={onDelete}
+                className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
+                title={t('delete')}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -355,7 +361,7 @@ const ReceiptCard = ({
                   const isCurrent = currentMontageIndex === index;
                   const isPassed = currentMontageIndex > index;
                   
-                  // Define colors for each step
+                  // Define colors for each step - current step uses full opacity of step color
                   const getStepColor = () => {
                     if (isCurrent) {
                       switch (index) {
@@ -368,6 +374,7 @@ const ReceiptCard = ({
                         default: return 'bg-teal-500';
                       }
                     } else if (isPassed) {
+                      // Passed steps use same color as current but more muted
                       switch (index) {
                         case 0: return 'bg-gray-400'; // UnOrdered
                         case 1: return 'bg-blue-400'; // Ordered
@@ -378,10 +385,12 @@ const ReceiptCard = ({
                         default: return 'bg-teal-400';
                       }
                     } else {
+                      // Future steps use light gray
                       return 'bg-gray-200';
                     }
                   };
                   
+                  // Border color matches the step color when current
                   const getBorderColor = () => {
                     if (isCurrent) {
                       switch (index) {
@@ -426,26 +435,11 @@ const ReceiptCard = ({
                 {MONTAGE_STATUSES.map((status, index) => {
                   const isCurrent = currentMontageIndex === index;
                   
-                  const getTextColor = () => {
-                    if (isCurrent) {
-                      switch (index) {
-                        case 0: return "text-gray-700"; // UnOrdered
-                        case 1: return "text-blue-700"; // Ordered
-                        case 2: return "text-orange-700"; // InStore
-                        case 3: return "text-yellow-700"; // InCutting
-                        case 4: return "text-purple-700"; // Ready
-                        case 5: return "text-green-700"; // Paid costs
-                        default: return "text-teal-700";
-                      }
-                    }
-                    return "text-gray-600";
-                  };
-                  
                   return (
                     <div key={status} className="text-center">
                       <span className={cn(
                         "text-xs font-medium leading-tight block",
-                        isCurrent ? `${getTextColor()} font-semibold` : "text-gray-600"
+                        isCurrent ? "text-teal-700 font-semibold" : "text-gray-600"
                       )}>
                         {getMontageStatusTranslation(status).slice(0, 8)}
                       </span>
