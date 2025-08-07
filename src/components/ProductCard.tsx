@@ -282,6 +282,15 @@ const ProductCard = React.memo<ProductCardProps>(({
           </div>
           
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(product)}
+              className="flex-1 border-teal-200 text-teal-700 hover:text-teal-800 hover:bg-teal-50 hover:border-teal-300 h-9 px-3 text-xs font-poppins font-medium rounded-lg"
+            >
+              <Edit size={14} className="mr-2" />
+              {t('edit')}
+            </Button>
             {product.isEdited && (
               <Button
                 size="sm"
@@ -293,15 +302,6 @@ const ProductCard = React.memo<ProductCardProps>(({
                 {t('saveButton')}
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(product)}
-              className={`${product.isEdited ? 'flex-1' : 'w-full'} border-teal-200 text-teal-700 hover:text-teal-800 hover:bg-teal-50 hover:border-teal-300 h-9 px-3 text-xs font-poppins font-medium rounded-lg`}
-            >
-              <Edit size={14} className="mr-2" />
-              {t('edit')}
-            </Button>
           </div>
         </div>
       </div>
