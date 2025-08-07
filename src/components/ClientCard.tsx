@@ -1,7 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Switch } from "./ui/switch";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -38,6 +41,7 @@ interface Client {
   left_eye_cyl?: number | null;
   left_eye_axe?: number | null;
   Add?: number | null;
+  pd_distance?: number | null;
   receipts?: Receipt[];
   renewal_date?: string | null;
   need_renewal?: boolean;
@@ -68,11 +72,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     setIsEdited(false);
   }, [client]);
 
-  // Get the latest receipt if available
-  const latestReceipt = client.receipts && client.receipts.length > 0 
-    ? client.receipts[0] 
-    : null;
-
   // Format the date
   const formattedDate = client.created_at ? format(new Date(client.created_at), 'MMM d, yyyy') : '';
 
@@ -93,32 +92,12 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       if (error) throw error;
 
-      // Invalidate clients query to refresh the list
       await queryClient.invalidateQueries(['clients']);
       toast.success(client.is_favorite ? t('removedFromFavorites') : t('addedToFavorites'));
     } catch (error: any) {
       toast.error("Failed to update favorite status");
     }
   };
-
-  // Get color scheme based on favorite status
-  const getColorScheme = () => {
-    if (client.is_favorite) {
-      return {
-        card: 'bg-amber-50 text-amber-700 border-amber-200',
-        avatar: 'bg-amber-50 text-amber-700 border-amber-200'
-      };
-    }
-
-    // Alternate between blue and green for non-favorites
-    const isEven = client.id.charCodeAt(0) % 2 === 0;
-    return {
-      card: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200',
-      avatar: isEven ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-green-50 text-green-700 border-green-200'
-    };
-  };
-
-  const { card: cardColor, avatar: avatarColor } = getColorScheme();
 
   const handleViewReceipt = async (receipt: Receipt) => {
     try {
@@ -155,7 +134,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   };
 
   const handleEditReceipt = (receipt: Receipt) => {
-    // In a real app, you would navigate to or open a dialog for editing the receipt
     toast.info("Receipt edit functionality to be implemented");
     setIsReceiptDialogOpen(false);
   };
@@ -188,13 +166,12 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       if (error) throw error;
 
-      // Update the selected receipt if it matches
       if (selectedReceipt?.id === receipt.id) {
         setSelectedReceipt(updatedReceipt);
       }
 
       toast.success("Receipt deleted successfully");
-      onRefresh(); // Refresh the client list to update the UI
+      onRefresh();
     } catch (error) {
       console.error("Error deleting receipt:", error);
       toast.error("Failed to delete receipt");
@@ -210,10 +187,9 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
     });
   };
 
-  // Save all edited fields - UPDATED to use name attributes from input fields
+  // Save all edited fields
   const handleSaveChanges = async () => {
     try {
-      // Convert string values to numbers for database storage, handle commas as decimal separators
       const convertToNumber = (value: any) => {
         if (value === null || value === undefined || value === "") return null;
         if (typeof value === "number") return value;
@@ -234,6 +210,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           left_eye_cyl: convertToNumber(editedClient.left_eye_cyl),
           left_eye_axe: convertToNumber(editedClient.left_eye_axe),
           Add: convertToNumber(editedClient.Add),
+          pd_distance: convertToNumber(editedClient.pd_distance),
           renewal_date: editedClient.renewal_date,
           need_renewal: editedClient.need_renewal,
           renewal_times: editedClient.renewal_times,
@@ -246,7 +223,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
       toast.success("Client updated successfully");
       setIsEdited(false);
-      await queryClient.invalidateQueries(['clients']); // Invalidate clients query
+      await queryClient.invalidateQueries(['clients']);
     } catch (error) {
       console.error("Error updating client:", error);
       toast.error("Failed to update client");
@@ -264,12 +241,10 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         return
       }
 
-      // Calculate new renewal date (today + 1.5 years)
       const today = new Date()
       const newRenewalDate = new Date(today)
-      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18) // Add 1.5 years (18 months)
+      newRenewalDate.setMonth(newRenewalDate.getMonth() + 18)
 
-      // Update client: mark as not needing renewal, increment renewal times, set new renewal date
       const { error } = await supabase
         .from('clients')
         .update({ 
@@ -284,8 +259,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         throw error
       }
 
-      console.log(`Successfully renewed client ${client.name}. Next renewal date: ${newRenewalDate.toISOString().split('T')[0]}`)
-
       toast.success(`Client renewed successfully! Next renewal: ${newRenewalDate.toISOString().split('T')[0]}`)
       await queryClient.invalidateQueries(['clients']);
     } catch (error) {
@@ -295,330 +268,268 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
   }
 
   return (
-    <div 
-      className={`rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border ${cardColor}`}
+    <Card 
+      className={`h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 font-inter ${
+        isEdited 
+          ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl' 
+          : 'border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30'
+      }`}
       data-client-id={client.id}
       data-is-edited={isEdited}
     >
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${avatarColor}`}>
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-teal-500/10 to-teal-600/10 p-4 border-b border-teal-100">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-poppins font-semibold text-lg">
               {nameInitial}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center">
+              <input 
+                type="text" 
+                className="text-lg font-poppins font-semibold text-teal-800 bg-transparent border-none focus:outline-none focus:ring-0 w-full"
+                value={editedClient.name}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
+              />
+              <div className="flex items-center text-teal-600 text-sm font-inter">
+                <Phone size={12} className="mr-1" />
                 <input 
                   type="text" 
-                  name="name" // Added name attribute
-                  className="font-medium text-gray-900 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
-                  value={editedClient.name}
-                  onChange={(e) => handleFieldChange('name', e.target.value)}
-                />
-              </div>
-              <div className="flex items-center text-gray-500 text-sm">
-                <Phone size={14} className="mr-1" />
-                <input 
-                  type="text" 
-                  name="phone" // Added name attribute
-                  className="bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
+                  className="bg-transparent border-none focus:outline-none focus:ring-0 text-sm"
                   value={editedClient.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
                 />
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {client.store_prescription && (
-              <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                📋 {t('stored')}
-              </div>
-            )}
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={toggleFavorite}
-              className={`${client.is_favorite ? 'text-amber-500' : 'text-gray-400'} hover:text-amber-600 hover:bg-amber-50 transition-colors h-8 w-8`}
+              className={`${client.is_favorite ? 'text-amber-500' : 'text-teal-400'} hover:text-amber-600 hover:bg-amber-50 h-8 px-3 text-xs font-inter rounded-lg`}
             >
-              <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
+              <Star size={14} className={client.is_favorite ? 'fill-current' : ''} />
             </Button>
-            {isEdited && (
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleSaveChanges}
-                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors h-8 w-8"
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(client)}
+              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-3 text-xs font-inter rounded-lg"
+            >
+              <Edit size={14} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-3 text-xs font-inter rounded-lg"
+            >
+              <Trash2 size={14} />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+        {/* Eye Prescription Section */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <label className="text-xs text-teal-700 font-poppins font-medium block">{t('rightEyeShort')}</label>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-xs text-teal-700 font-poppins font-medium block">{t('leftEyeShort')}</label>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</label>
+                <input 
+                  type="text"
+                  className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+                  value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Add and PD Distance Section */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('add') || 'ADD'}</label>
+            <input 
+              type="text"
+              className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+              value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                  handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                }
+              }}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('pdDistance') || 'PD Distance'}</label>
+            <input 
+              type="text"
+              className="w-full h-8 px-2 text-xs font-inter border border-teal-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400 bg-white/70"
+              value={editedClient.pd_distance !== undefined && editedClient.pd_distance !== null ? editedClient.pd_distance : ""}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                  handleFieldChange('pd_distance', inputValue === "" ? null : inputValue);
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Additional Information */}
+        {client.store_prescription && (
+          <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-xs text-teal-700 font-poppins font-medium">
+              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              {t('prescriptionStored')}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Section */}
+      <div className="border-t-2 border-teal-100 pt-4 pb-4 px-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center text-xs text-teal-600 font-inter">
+            <Calendar size={12} className="mr-1" />
+            <span>{t('addedOn')} {formattedDate}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {client.need_renewal && (
+              <Button
+                onClick={handleRenewal}
+                size="sm"
+                className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm h-7 px-2 text-xs font-inter rounded-lg"
               >
-                <Save size={16} />
+                <RefreshCw className="h-3 w-3 mr-1" />
+                {t('renewNow')}
               </Button>
             )}
             <Button 
               variant="ghost" 
-              size="icon"
-              onClick={() => onEdit(client)}
-              className="text-gray-500 hover:text-teal-600 hover:bg-teal-50 transition-colors h-8 w-8"
+              size="sm" 
+              onClick={toggleExpanded}
+              className="text-teal-500 hover:text-teal-700 hover:bg-teal-50 h-7 px-2 text-xs font-inter rounded-lg"
             >
-              <Edit size={16} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleDelete}
-              className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
-            >
-              <Trash2 size={16} />
+              {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </Button>
           </div>
-        </div>
-
-        {/* Editable prescription data */}
-        <div className="mt-3 space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('sph')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_sph"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      // Allow empty string, numbers, decimal point, comma, and minus sign
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('cyl')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_cyl"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('axe')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_axe"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('leftEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('sph')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_sph"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('cyl')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_cyl"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">{t('axe')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_axe"
-                    className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8"
-                    value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Add field - centered horizontally */}
-          <div className="flex justify-center">
-            <div className="w-32 flex flex-col">
-              <span className="text-xs text-gray-500 text-center">{t('add') || 'ADD'}</span>
-              <input 
-                type="text"
-                inputMode="decimal"
-                name="add"
-                className="text-sm font-medium border rounded px-1 py-0.5 w-full h-8 text-center"
-                value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                    handleFieldChange('Add', inputValue === "" ? null : inputValue);
-                  }
-                }}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          {/* Renewal Information - Only show if client needs renewal or is being edited */}
-          {(client.need_renewal || isEdited) && (
-            <div className="mt-4 pt-3 border-t border-gray-200">
-              <h3 className="text-sm font-medium mb-3 text-center">{t('renewalInformation')}</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('renewalDate')}</span>
-                  <input 
-                    type="date"
-                    name="renewal_date"
-                    className="text-sm border rounded px-2 py-1 h-8"
-                    value={editedClient.renewal_date || ""}
-                    onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('needRenewalField')}</span>
-                  <div className="flex items-center h-8">
-                    <input 
-                      type="checkbox"
-                      name="need_renewal"
-                      className="rounded border-gray-300"
-                      checked={editedClient.need_renewal || false}
-                      onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 mb-1">{t('renewalTimes')}</span>
-                  <input 
-                    type="number"
-                    name="renewal_times"
-                    min="0"
-                    className="text-sm border rounded px-2 py-1 h-8"
-                    value={editedClient.renewal_times || 0}
-                    onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
-                  />
-                </div>
-              </div>
-              
-              {/* Prescription Information */}
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <h3 className="text-sm font-medium mb-3 text-center">{t('prescriptionInformation')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">{t('storePrescription')}</span>
-                    <div className="flex items-center h-8">
-                      <input 
-                        type="checkbox"
-                        name="store_prescription"
-                        className="rounded border-gray-300"
-                        checked={editedClient.store_prescription || false}
-                        onChange={(e) => handleFieldChange('store_prescription', e.target.checked)}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 mb-1">{t('opticianPrescribedBy')}</span>
-                    <input 
-                      type="text"
-                      name="optician_prescribed_by"
-                      className="text-sm border rounded px-2 py-1 h-8"
-                      value={editedClient.optician_prescribed_by || ""}
-                      onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
-                      placeholder={t('enterOpticianName')}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-white bg-opacity-30 px-4 py-2 flex justify-between items-center">
-        <div className="flex items-center text-xs text-gray-500">
-          <Calendar size={14} className="mr-1" />
-          <span>{t('addedOn')} {formattedDate}</span>
         </div>
         
-        <div className="flex items-center gap-2">
-          {client.need_renewal && (
+        <div className="flex gap-2">
+          {isEdited && (
             <Button
-              onClick={handleRenewal}
               size="sm"
-              className="text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border-orange-500 shadow-sm"
+              onClick={handleSaveChanges}
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
             >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              {t('renewNow')}
+              <Save size={14} className="mr-2" />
+              {t('saveButton')}
             </Button>
           )}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={toggleExpanded}
-            className="text-gray-500 hover:text-teal-600 p-1 h-auto"
-          >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </Button>
         </div>
       </div>
 
       {expanded && (
-        <div className="px-4 py-3 bg-white border-t border-gray-100 animate-accordion-down">
-          <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">{t('purchaseHistory')}</h4>
+        <div className="px-4 py-3 bg-white border-t border-teal-100">
+          <h4 className="text-xs font-medium uppercase text-teal-600 mb-2 font-poppins">{t('purchaseHistory')}</h4>
           {client.receipts && client.receipts.length > 0 ? (
             <div className="space-y-2">
               {client.receipts
                 .filter(receipt => !receipt.is_deleted)
                 .map(receipt => (
-                <div key={receipt.id} className="text-sm p-2 bg-white rounded border border-gray-100 flex justify-between items-center">
+                <div key={receipt.id} className="text-sm p-2 bg-teal-50 rounded border border-teal-100 flex justify-between items-center">
                   <div>
-                    <div className="font-medium">Receipt #{receipt.id.substring(0, 8)}</div>
-                    <div className="text-xs text-gray-500">{receipt.created_at 
+                    <div className="font-medium text-teal-800 font-poppins">Receipt #{receipt.id.substring(0, 8)}</div>
+                    <div className="text-xs text-teal-600 font-inter">{receipt.created_at 
                       ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
                       : 'Unknown date'}
                     </div>
@@ -627,7 +538,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
+                      className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-100"
                       onClick={() => handleViewReceipt(receipt)}
                     >
                       <Eye size={16} />
@@ -637,7 +548,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">{t('noPurchaseHistory')}</p>
+            <p className="text-sm text-teal-600 font-inter">{t('noPurchaseHistory')}</p>
           )}
         </div>
       )}
@@ -655,6 +566,6 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
           setIsReceiptDialogOpen(false);
         }}
       />
-    </div>
+    </Card>
   );
 };

@@ -34,6 +34,7 @@ const formSchema = z.object({
   left_eye_cyl: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   left_eye_axe: z.union([z.string().transform(val => val === '' ? null : parseInt(val)), z.number()]).nullable(),
   Add: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
+  pd_distance: z.union([z.string().transform(val => val === '' ? null : parseFloat(val)), z.number()]).nullable(),
   assurance: z.string().nullable(),
   notes: z.string().nullable(),
   renewal_date: z.string().nullable(),
@@ -72,6 +73,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
       left_eye_cyl: 0,
       left_eye_axe: 0,
       Add: 0,
+      pd_distance: 0,
       assurance: "",
       notes: "",
       renewal_date: defaultRenewalDateString,
@@ -106,6 +108,7 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
           left_eye_cyl: values.left_eye_cyl,
           left_eye_axe: values.left_eye_axe,
           Add: values.Add,
+          pd_distance: values.pd_distance,
           assurance: values.assurance || null,
           notes: values.notes || null,
           renewal_date: values.renewal_date || null,
@@ -361,14 +364,31 @@ const AddClientDialog = ({ isOpen, onClose, onClientAdded }: AddClientDialogProp
                 </div>
               </div>
 
-              {/* Add Power */}
-              <div className="mt-4 max-w-xs">
+              {/* Add Power and PD Distance */}
+              <div className="mt-4 grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="Add"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-teal-700 font-medium">{t('addPower')}</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="text" 
+                          className="h-8 border-teal-200 focus:border-teal-400 focus:ring-teal-200 bg-white/80" 
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pd_distance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-teal-700 font-medium">{t('pdDistance') || 'PD Distance'}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
