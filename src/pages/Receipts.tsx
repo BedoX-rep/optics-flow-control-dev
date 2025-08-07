@@ -88,20 +88,32 @@ const ReceiptCard = ({
   onNoteChange: (note: string) => void;
 }) => {
   const { t } = useLanguage();
-  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [isEditingNote, setIsEditingNote] = useState(false);
   const [isViewingNote, setIsViewingNote] = useState(false);
   const [noteText, setNoteText] = useState(receipt.note || '');
   const MONTAGE_STATUSES = ['UnOrdered', 'Ordered', 'InStore', 'InCutting', 'Ready', 'Paid costs'];
   const currentMontageIndex = MONTAGE_STATUSES.indexOf(receipt.montage_status);
 
+  const handleEditNote = () => {
+    setNoteText(receipt.note || '');
+    setIsEditingNote(true);
+    setIsViewingNote(false);
+  };
+
   const handleSaveNote = () => {
-    onNoteChange(noteText);
-    setIsAddingNote(false);
+    const trimmedNote = noteText.trim();
+    onNoteChange(trimmedNote);
+    setIsEditingNote(false);
   };
 
   const handleCancelNote = () => {
     setNoteText(receipt.note || '');
-    setIsAddingNote(false);
+    setIsEditingNote(false);
+  };
+
+  const handleViewNote = () => {
+    setIsViewingNote(true);
+    setIsEditingNote(false);
   };
 
   const getTimeDisplay = (dateString: string) => {
@@ -280,21 +292,18 @@ const ReceiptCard = ({
             {/* Pencil icon for adding/editing notes */}
             <Button
               size="sm"
-              onClick={() => {
-                setNoteText(receipt.note || '');
-                setIsAddingNote(true);
-              }}
+              onClick={handleEditNote}
               className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
               title={receipt.note ? t('editNote') : t('addNote')}
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
 
-            {/* Yellow note icon only shown when there's a note and not editing */}
-            {receipt.note && !isAddingNote && (
+            {/* View note button - only shown when there's a note and not editing */}
+            {receipt.note && !isEditingNote && (
               <Button
                 size="sm"
-                onClick={() => setIsViewingNote(true)}
+                onClick={handleViewNote}
                 className="h-8 w-8 p-0 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                 title={t('viewNote')}
               >
@@ -381,9 +390,10 @@ const ReceiptCard = ({
           </div>
 
           {/* Note Section */}
-          {(isAddingNote || isViewingNote || receipt.note) && (
+          {(isEditingNote || isViewingNote) && (
             <div className="mb-3">
-              {isAddingNote && (
+              {/* Edit Note */}
+              {isEditingNote && (
                 <div className="p-3 bg-teal-50/30 border border-teal-200 rounded-lg">
                   <Textarea
                     value={noteText}
@@ -391,6 +401,7 @@ const ReceiptCard = ({
                     placeholder={t('enterNote')}
                     className="mb-2 text-sm border-teal-200 bg-white focus:border-teal-500"
                     rows={2}
+                    autoFocus
                   />
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveNote} className="text-xs bg-teal-600 hover:bg-teal-700">
@@ -404,27 +415,13 @@ const ReceiptCard = ({
                 </div>
               )}
 
-              {isViewingNote && (
+              {/* View Note */}
+              {isViewingNote && receipt.note && (
                 <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-gray-700 mb-2">{receipt.note}</p>
+                  <p className="text-sm text-gray-700 mb-2 whitespace-pre-wrap">{receipt.note}</p>
                   <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} 
                           className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
                     {t('close')}
-                  </Button>
-                </div>
-              )}
-
-              {receipt.note && !isViewingNote && !isAddingNote && (
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 text-xs text-teal-600 bg-teal-50/30 p-2 rounded border border-teal-200 truncate">
-                    {t('note')}: {receipt.note}
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsViewingNote(true)}
-                    className="h-7 px-2 text-xs bg-teal-600 hover:bg-teal-700 text-white"
-                  >
-                    {t('read')}
                   </Button>
                 </div>
               )}
