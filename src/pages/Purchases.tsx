@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link, Eye, BarChart2, Truck, ArrowUpDown, CheckCircle, AlertCircle, Clock, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -32,6 +32,9 @@ import AddSupplierDialog from '@/components/AddSupplierDialog';
 import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 
 interface Supplier {
   id: string;
@@ -52,6 +55,7 @@ interface Receipt {
   clients?: {
     name: string;
   };
+  is_deleted?: boolean;
 }
 
 interface Purchase {
@@ -81,11 +85,293 @@ interface Purchase {
   suppliers?: Supplier;
   already_recurred?: boolean;
   tax_percentage?: number;
+  // New fields for the card redesign
+  supplier_name?: string;
+  supplier_contact?: string;
+  total_amount: number;
+  paid_amount: number;
+  purchase_type_new: 'One-time' | 'Recurring';
+  status: 'Pending' | 'Partially Paid' | 'Paid' | 'Overdue';
+  due_date?: string;
+  user_id?: string;
 }
 
+const PurchaseCard = ({ 
+  purchase, 
+  onView, 
+  onEdit, 
+  onDelete,
+  onPayment
+}: {
+  purchase: Purchase;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onPayment: () => void;
+}) => {
+  const { t } = useLanguage();
+
+  const getTimeDisplay = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.abs(now.getTime() - date.getTime()) / (1000 * 60);
+    const diffInHours = diffInMinutes / 60;
+
+    if (diffInMinutes < 60) {
+      return `${Math.floor(diffInMinutes)} ${t('minutesAgoShort') || 'min ago'}`;
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)} ${t('hoursAgoShort') || 'h ago'}`;
+    } else {
+      return format(date, 'MMM dd, yyyy');
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Paid':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'Partially Paid':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'Overdue':
+        return 'bg-red-100 text-red-700 border-red-200';
+      default:
+        return 'bg-orange-100 text-orange-700 border-orange-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'Paid':
+        return <CheckCircle className="h-3.5 w-3.5" />;
+      case 'Overdue':
+        return <AlertCircle className="h-3.5 w-3.5" />;
+      case 'Pending':
+        return <Clock className="h-3.5 w-3.5" />;
+      default:
+        return <Clock className="h-3.5 w-3.5" />;
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="w-full"
+    >
+      <Card className="h-[420px] border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col">
+        {/* Header Section */}
+        <div className="p-4 pb-0">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center border-2 border-teal-200">
+                  <Building2 className="h-6 w-6 text-teal-700" />
+                </div>
+                {purchase.purchase_type_new === 'Recurring' && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                    <ArrowUpDown className="h-3 w-3" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-poppins font-semibold text-base text-teal-800 truncate">
+                  {purchase.supplier_name || 'Unknown Supplier'}
+                </h3>
+                <div className="flex items-center gap-1.5 text-teal-600 mt-1">
+                  <Package className="h-3.5 w-3.5" />
+                  <span className="text-xs font-medium">{purchase.purchase_type_new}</span>
+                </div>
+                <span className="text-xs text-gray-500 mt-0.5 block">
+                  {getTimeDisplay(purchase.purchase_date)}
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-poppins font-semibold text-teal-700">
+                {(purchase.amount_ttc || purchase.amount || 0).toFixed(2)} DH
+              </div>
+              <div className="text-xs text-gray-500">{t('total') || 'Total'}</div>
+            </div>
+          </div>
+
+          {/* Status Badges */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <div className={cn("text-xs border flex items-center gap-1 px-2 py-1 rounded-full", getStatusColor(purchase.status))}>
+              {getStatusIcon(purchase.status)}
+              {purchase.status === 'Paid' ? t('paid') : 
+               purchase.status === 'Partially Paid' ? t('partial') :
+               purchase.status === 'Overdue' ? t('overdue') : t('pending')}
+            </div>
+
+            {purchase.due_date && (
+              <div className="text-xs border bg-blue-50 text-blue-700 border-blue-200 px-2 py-1 rounded-full flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {format(new Date(purchase.due_date), 'MMM dd')}
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-teal-50 border border-teal-200">
+              <Truck className="h-3 w-3 text-teal-600" />
+              <span className="text-xs font-medium text-teal-700">
+                {t('supplier') || 'Supplier'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 px-4 py-2">
+          {/* Action Buttons Row */}
+          <div className="flex flex-wrap gap-1.5 justify-center mb-4">
+            {purchase.balance > 0 && (
+              <Button
+                size="sm"
+                onClick={onPayment}
+                className="h-8 w-8 p-0 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                title={t('recordPayment') || 'Record Payment'}
+              >
+                <DollarSign className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              onClick={onView}
+              className="h-8 w-8 p-0 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+              title={t('view') || 'View'}
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={onEdit}
+              className="h-8 w-8 p-0 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
+              title={t('edit') || 'Edit'}
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={onDelete}
+              className="h-8 w-8 p-0 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
+              title={t('delete') || 'Delete'}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          {/* Financial Information Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">
+                {t('paidAmount') || 'Paid'}
+              </p>
+              <p className="font-inter font-semibold text-emerald-600">
+                {(purchase.paid_amount || 0).toFixed(2)} DH
+              </p>
+            </div>
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">
+                {t('balance') || 'Balance'}
+              </p>
+              <p className="font-inter font-semibold text-red-600">
+                {(purchase.balance || 0).toFixed(2)} DH
+              </p>
+            </div>
+          </div>
+
+          {/* Description */}
+          {purchase.description && (
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3 mb-4">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-2">
+                {t('description') || 'Description'}
+              </p>
+              <p className="text-sm text-gray-700 font-inter line-clamp-2">
+                {purchase.description}
+              </p>
+            </div>
+          )}
+
+          {/* Payment Progress Bar */}
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-teal-700 font-poppins font-medium">
+                {t('paymentProgress') || 'Payment Progress'}
+              </span>
+              <span className="text-xs text-teal-600 font-medium">
+                {purchase.total_amount > 0 ? Math.round((purchase.paid_amount / purchase.total_amount) * 100) : 0}%
+              </span>
+            </div>
+            <div className="w-full bg-teal-100 rounded-full h-2">
+              <div 
+                className="bg-teal-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${purchase.total_amount > 0 ? (purchase.paid_amount / purchase.total_amount) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          {purchase.supplier_contact && (
+            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
+              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">
+                {t('contact') || 'Contact'}
+              </p>
+              <p className="text-xs text-gray-600 font-inter truncate">
+                {purchase.supplier_contact}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Section */}
+        <div className="p-4 pt-0 border-t-2 border-teal-100">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-gray-500">
+              {purchase.due_date && (
+                <span>
+                  {t('dueDate') || 'Due'}: {format(new Date(purchase.due_date), 'MMM dd, yyyy')}
+                </span>
+              )}
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onView}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  {t('view') || 'View'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onEdit}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  {t('edit') || 'Edit'}
+                </DropdownMenuItem>
+                {purchase.balance > 0 && (
+                  <DropdownMenuItem onClick={onPayment}>
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    {t('recordPayment') || 'Record Payment'}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t('delete') || 'Delete'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+};
+
 const Purchases = () => {
-  const { toast } = useToast();
-  const { user } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -405,7 +691,7 @@ const PURCHASE_TYPES = [
   });
 
   // Fetch receipts
-  const { data: receipts = [] } = useQuery({
+  const { data: receipts = [], isLoading: receiptsLoading } = useQuery({
     queryKey: ['receipts', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -418,7 +704,8 @@ const PURCHASE_TYPES = [
           montage_status,
           clients (
             name
-          )
+          ),
+          is_deleted
         `)
         .eq('user_id', user.id)
         .eq('is_deleted', false)
@@ -462,7 +749,22 @@ const PURCHASE_TYPES = [
         throw error;
       }
       console.log('Fetched purchases count:', data?.length || 0);
-      return data || [];
+      
+      // Map to the new interface structure for PurchaseCard
+      return (data || []).map(purchase => ({
+        ...purchase,
+        supplier_name: purchase.suppliers?.name || 'Unknown Supplier',
+        supplier_contact: purchase.suppliers?.contact_info || purchase.suppliers?.email || purchase.suppliers?.phone || '',
+        total_amount: purchase.amount_ttc || purchase.amount || 0,
+        paid_amount: purchase.advance_payment || 0,
+        purchase_type_new: purchase.purchase_type === 'Recurring' ? 'Recurring' : 'One-time',
+        status: purchase.payment_status === 'Paid' ? 'Paid' :
+                purchase.payment_status === 'Partially Paid' ? 'Partially Paid' :
+                purchase.payment_urgency && new Date(purchase.payment_urgency) < new Date() && purchase.payment_status !== 'Paid' ? 'Overdue' :
+                'Pending',
+        due_date: purchase.payment_urgency,
+        user_id: purchase.user_id,
+      }));
     },
     enabled: !!user,
     staleTime: 0, // Ensure fresh data
@@ -473,7 +775,7 @@ const PURCHASE_TYPES = [
   // Calculate purchase linking when purchases and receipts are loaded
   useEffect(() => {
     const updateLinkedPurchases = async () => {
-      if (!purchases || !Array.isArray(purchases) || purchases.length === 0 || !receipts || !Array.isArray(receipts) || receipts.length === 0 || !user) {
+      if (!purchases || !Array.isArray(purchases) || purchases.length === 0 || !receipts || !Array.isArray(receipts) || !user) {
         return;
       }
 
@@ -504,16 +806,16 @@ const PURCHASE_TYPES = [
   }, [purchases, receipts, user, queryClient]);
 
   // Filter purchases
-  const filteredPurchases = useMemo(() => {
+  const filteredPurchases = React.useMemo(() => {
     if (!purchases) return [];
     let filtered = [...purchases];
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(purchase => 
-        purchase.description.toLowerCase().includes(search) ||
-        purchase.suppliers?.name.toLowerCase().includes(search) ||
-        purchase.receipt_number?.toLowerCase().includes(search)
+        (purchase.description || '').toLowerCase().includes(search) ||
+        (purchase.suppliers?.name || '').toLowerCase().includes(search) ||
+        (purchase.receipt_number || '').toLowerCase().includes(search)
       );
     }
 
@@ -560,7 +862,7 @@ const PURCHASE_TYPES = [
       if (startDate) {
         filtered = filtered.filter(purchase => {
           const purchaseDate = new Date(purchase.purchase_date);
-          return purchaseDate >= startDate;
+          return purchaseDate >= startDate!;
         });
       }
     }
@@ -569,23 +871,23 @@ const PURCHASE_TYPES = [
   }, [purchases, searchTerm, categoryFilter, supplierFilter, purchaseTypeFilter, dateRange, dateFilter]);
 
   // Filter suppliers
-  const filteredSuppliers = useMemo(() => {
+  const filteredSuppliers = React.useMemo(() => {
     if (!searchTerm) return suppliers;
     const search = searchTerm.toLowerCase();
     return suppliers.filter(supplier => 
       supplier.name.toLowerCase().includes(search) ||
-      supplier.contact_person?.toLowerCase().includes(search) ||
-      supplier.email?.toLowerCase().includes(search)
+      (supplier.contact_person || '').toLowerCase().includes(search) ||
+      (supplier.email || '').toLowerCase().includes(search)
     );
   }, [suppliers, searchTerm]);
 
   // Calculate total expenses
-  const totalExpenses = useMemo(() => {
-    return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
+  const totalExpenses = React.useMemo(() => {
+    return filteredPurchases.reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount || 0), 0);
   }, [filteredPurchases]);
 
   // Calculate monthly total
-  const monthlyTotal = useMemo(() => {
+  const monthlyTotal = React.useMemo(() => {
     if (!purchases) return 0;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -594,7 +896,7 @@ const PURCHASE_TYPES = [
         const purchaseDate = new Date(purchase.purchase_date);
         return purchaseDate.getMonth() === currentMonth && purchaseDate.getFullYear() === currentYear;
       })
-      .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
+      .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount || 0), 0);
   }, [purchases]);
 
   // Function to calculate and update purchase linking
@@ -942,7 +1244,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-user_id: user.id,
+        user_id: user.id,
       };
 
       if (editingPurchase) {
@@ -977,7 +1279,7 @@ user_id: user.id,
     }
   };
 
-
+  
 
   const handleDeletePurchase = async (id: string) => {
     if (!user || !confirm("Are you sure you want to delete this purchase?")) return;
@@ -1185,21 +1487,64 @@ user_id: user.id,
     );
   }
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [purchaseToDelete, setPurchaseToDelete] = useState<Purchase | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
+
+  const openDeleteDialog = (purchase: Purchase) => {
+    setPurchaseToDelete(purchase);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!purchaseToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('purchases')
+        .delete()
+        .eq('id', purchaseToDelete.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries(['purchases']);
+      toast({
+        title: "Purchase Deleted",
+        description: "Purchase has been successfully deleted.",
+      });
+      setIsDeleteDialogOpen(false);
+      setPurchaseToDelete(null);
+    } catch (error) {
+      console.error('Error deleting purchase:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete purchase. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+
   return (
     <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={handleRecordNewPurchase}
+          <Button 
+            onClick={() => setIsRecordDialogOpen(true)}
             className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
-            {t('recordPurchase')}
+            {t('recordPurchase') || 'Record Purchase'}
           </Button>
           <Button
             onClick={() => handleOpenSupplierDialog()}
             variant="outline"
-            className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
+            className="rounded-xl border-2 bg-teal-500 text-white hover:bg-teal-600 border-teal-400 hover:border-teal-500 transition-all duration-200 shadow-lg hover:shadow-teal-500/20"
           >
             <Plus className="h-4 w-4 mr-2" />
             {t('addSupplier')}
@@ -1207,455 +1552,83 @@ user_id: user.id,
         </div>
       </div>
 
-      {/* Search Section */}
-      <div className="mb-4 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder={t('searchPurchasesSuppliers')} 
-            className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {/* Filters */}
+      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder={t('searchPurchasesSuppliers') || 'Search purchases and suppliers...'} 
+              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] border-2 shadow-md rounded-xl">
+                <SelectValue placeholder={t('status') || 'Status'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('allStatuses') || 'All Statuses'}</SelectItem>
+                <SelectItem value="Paid">{t('paid') || 'Paid'}</SelectItem>
+                <SelectItem value="Partially Paid">{t('partial') || 'Partial'}</SelectItem>
+                <SelectItem value="Pending">{t('pending') || 'Pending'}</SelectItem>
+                <SelectItem value="Overdue">{t('overdue') || 'Overdue'}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Type Filter */}
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[140px] border-2 shadow-md rounded-xl">
+                <SelectValue placeholder={t('type') || 'Type'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('allTypes') || 'All Types'}</SelectItem>
+                <SelectItem value="One-time">{t('oneTime') || 'One-time'}</SelectItem>
+                <SelectItem value="Recurring">{t('recurring') || 'Recurring'}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      {/* Compact Inline Filters */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        {/* Quick Stats Row */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-            <span className="font-medium">{filteredPurchases.length} {t('purchasesCount')}</span>
-            <span className="text-gray-400">•</span>
-            <span className="font-semibold text-blue-600">{totalExpenses.toFixed(2)} DH</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar className="h-4 w-4 text-green-600" />
-            <span className="text-sm">{t('thisMonth')} <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
-          </div>
-        </div>
-
-        {/* Compact Filter Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Date Filter Buttons */}
-          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
-            {[
-              { value: 'all', label: t('all') },
-              { value: 'today', label: t('today') },
-              { value: 'week', label: t('week') },
-              { value: 'month', label: t('month') },
-              { value: 'year', label: t('year') }
-            ].map((option) => (
-              <Button
-                key={option.value}
-                variant={dateFilter === option.value ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDateFilter(option.value)}
-                className={cn(
-                  "h-7 px-2 text-xs font-medium transition-all duration-200 rounded-md",
-                  dateFilter === option.value
-                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                )}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Category Filters */}
-          <Select
-            value={supplierFilter}
-            onValueChange={(value) => setSupplierFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[110px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              supplierFilter !== 'all'
-                ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Building2 className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {supplierFilter === 'all' ? t('supplier') : 
-                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || t('unknownSupplier')}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allSuppliers')}</SelectItem>
-              {suppliers.map(supplier => (
-                <SelectItem key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={purchaseTypeFilter}
-            onValueChange={(value) => setPurchaseTypeFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              purchaseTypeFilter !== 'all'
-                ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {purchaseTypeFilter === 'all' ? t('type') : 
-                 purchaseTypeFilter === t('operationalExpenses') ? 'Ops' : 'Cap'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allTypes')}</SelectItem>
-              {PURCHASE_TYPES.map(type => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              categoryFilter !== 'all'
-                ? "bg-orange-50 text-orange-700 border-orange-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Package className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {categoryFilter === 'all' ? t('category') : categoryFilter.slice(0, 6) + '...'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allCategories')}</SelectItem>
-              {EXPENSE_CATEGORIES.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Purchases Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
+        <AnimatePresence>
+          {purchasesLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <Card key={i} className="h-[420px] p-6 animate-pulse bg-gray-50 border border-gray-200">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                <div className="space-y-3">
+                  <div className="h-3 bg-gray-200 rounded" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              </Card>
+            ))
+          ) : filteredPurchases.length === 0 ? (
+            <div className="col-span-full text-center py-10 text-gray-500">
+              {t('noPurchasesFound') || 'No purchases found'}
+            </div>
+          ) : (
+            filteredPurchases.map((purchase) => (
+              <PurchaseCard
+                key={purchase.id}
+                purchase={purchase}
+                onView={() => {/* TODO: Implement view */}}
+                onEdit={() => handleOpenPurchaseDialog(purchase)}
+                onDelete={() => openDeleteDialog(purchase)}
+                onPayment={() => {/* TODO: Implement payment */}}
+              />
+            ))
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Active Filters Tags - Only show when filters are active */}
-      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all') && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-500">Active:</span>
-          {dateFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
-              {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : 'This Year'}
-              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateFilter('all')} />
-            </span>
-          )}
-          {supplierFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-md text-xs border border-green-200">
-              {suppliers.find(s => s.id === supplierFilter)?.name}
-              <X className="h-3 w-3 cursor-pointer hover:text-green-900" onClick={() => setSupplierFilter('all')} />
-            </span>
-          )}
-          {categoryFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100/80 backdrop-blur-sm text-orange-700 rounded-md text-xs border border-orange-200">
-              {categoryFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-orange-900" onClick={() => setCategoryFilter('all')} />
-            </span>
-          )}
-          {purchaseTypeFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
-              {purchaseTypeFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setPurchaseTypeFilter('all')} />
-            </span>
-          )}
-        </div>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
-          <TabsTrigger 
-            value="purchases" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Package className="h-4 w-4 mr-2" />
-            {t('purchases')} ({filteredPurchases.length})
-          </TabsTrigger>
-          <TabsTrigger 
-            value="suppliers" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Building2 className="h-4 w-4 mr-2" />
-            {t('suppliers')} ({suppliers.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="purchases" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {filteredPurchases.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noPurchasesFound')}
-                </div>
-              ) : (
-                filteredPurchases.map((purchase) => (
-                  <motion.div
-                    key={purchase.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
-                      <CardContent className="p-4">
-                        {/* Header Section with Description, Dates, and Actions */}
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <Receipt className="h-4 w-4 text-primary flex-shrink-0" />
-                                <h3 className="text-base font-bold text-gray-900 truncate">
-                                  {purchase.description}
-                                </h3>
-                              </div>                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
-                                {purchase.payment_urgency && (
-                                  <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
-                                    Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && !purchase.already_recurred && (
-                                  <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
-                                    {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && purchase.already_recurred && (
-                                  <span className="text-gray-600 bg-gray-50 px-2 py-1 rounded font-medium">
-                                    {t('alreadyPassed')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Building2 className="h-3 w-3" />
-                                <span className="truncate max-w-[150px]">
-                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-1 flex-shrink-0 ml-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleOpenBalanceHistoryDialog(purchase)}
-                              className="h-7 w-7 hover:bg-purple-50 hover:text-purple-600"
-                              title="View Balance History"
-                            >
-                              <History className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleEditPurchase(purchase)}
-                              className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            {purchase.payment_status !== 'Paid' && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleMarkAsPaid(purchase)}
-                                className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
-                                title="Mark as Paid"
-                              >
-                                <DollarSign className="h-3 w-3" />
-                            </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleDeletePurchase(purchase.id)}
-                              className="h-7 w-7 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Main TTC Amount - Prominent Display */}
-                        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-3 mb-3 border-l-4 border-primary">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-gray-600">{t('totalAmountTTC')}</p>
-                              <p className="text-xl font-bold text-primary">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
-                            </div>
-                            <DollarSign className="h-5 w-5 text-primary/60" />
-                          </div>
-                        </div>
-
-                        {/* Compact Financial Details */}
-                        <div className="grid grid-cols-2 gap-2 mb-3 flex-1">
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('advance')}</p>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('balance')}</p>
-                            <p className="text-sm font-semibold text-red-600">
-                              {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Status Row */}
-                        <div className="border-t border-gray-100 pt-2 mt-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-start gap-2 flex-wrap min-w-0 flex-1">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                purchase.payment_status === 'Paid' 
-                                  ? 'bg-green-100 text-green-800'
-                                  : purchase.payment_status === 'Partially Paid'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {purchase.payment_status === 'Paid' ? t('paid') : 
-                                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                                 purchase.payment_status === 'Unpaid' ? t('unpaid') : t('unpaid')}
-                              </span>
-                              {purchase.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex-shrink-0 whitespace-nowrap">
-                                  {getTranslatedCategory(purchase.category)}
-                                </span>
-                              )}
-                              {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
-                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-                                  <Link className="h-3 w-3" />
-                                  {purchase.linked_receipts.length} {t('receipts')}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-1 flex-shrink-0">
-                              {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleRecurringRenewal(purchase)}
-                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
-                                >
-                                  {t('renewNow')}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="suppliers" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {suppliers.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noSuppliersFound')}
-                </div>
-              ) : (
-                filteredSuppliers.map((supplier) => (
-                  <motion.div
-                    key={supplier.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-base font-semibold truncate">{supplier.name}</h3>
-                                  {supplier.phone && (
-                                    <div className="flex items-center gap-1.5 text-blue-600">
-                                      <Phone className="h-3.5 w-3.5" />
-                                      <span className="text-xs font-medium">{supplier.phone}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              {supplier.address && (
-                                <p className="text-sm text-gray-600 mb-2">{supplier.address}</p>
-                              )}
-                            </div>
-
-                            <div className="flex gap-1 flex-shrink-0">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleOpenSupplierDialog(supplier)}
-                                className="h-8 w-8"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleDeleteSupplier(supplier.id)}
-                                className="h-8 w-8 hover:bg-red-100"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex justify-between items-baseline">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalPurchases')}</p>
-                                <p className="font-medium text-emerald-600">
-                                  {purchases.filter(p => p.supplier_id === supplier.id).length}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalAmount')}</p>
-                                <p className="font-medium text-orange-600">
-                                  {purchases
-                                    .filter(p => p.supplier_id === supplier.id)
-                                    .reduce((sum, p) => sum + (p.amount_ttc || p.amount), 0)
-                                    .toFixed(2)} DH
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Record/Edit Purchase Dialog */}
+      {/* Dialogs */}
       <RecordPurchaseDialog
         isOpen={isPurchaseDialogOpen}
         onClose={() => {
@@ -1667,7 +1640,6 @@ user_id: user.id,
         editingPurchase={editingPurchase}
       />
 
-      {/* Add/Edit Supplier Dialog */}
       <AddSupplierDialog
         isOpen={isSupplierDialogOpen}
         onClose={() => setIsSupplierDialogOpen(false)}
@@ -1784,7 +1756,7 @@ user_id: user.id,
                             <p className="text-sm text-gray-600">{format(new Date(receipt.created_at), 'MMM dd, yyyy')}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">{receipt.montage_costs.toFixed(2)} DH</p>
+                            <p className="font-semibold">{receipt.montage_costs?.toFixed(2)} DH</p>
                             <span className={`text-xs px-2 py-1 rounded ${
                               receipt.montage_status === 'Paid costs' 
                                 ? 'bg-green-100 text-green-800' 
@@ -1819,6 +1791,19 @@ user_id: user.id,
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setPurchaseToDelete(null);
+        }}
+        onConfirm={handleDelete}
+        title={t('deletePurchase') || 'Delete Purchase'}
+        message={t('deletePurchaseConfirmation') || `Are you sure you want to delete this purchase? This action cannot be undone.`}
+        itemName={`Purchase from ${purchaseToDelete?.supplier_name}`}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };
