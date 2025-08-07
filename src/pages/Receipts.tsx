@@ -216,7 +216,7 @@ const ReceiptCard = ({
                       className="absolute top-10 right-2 z-40 max-w-[50%]"
                     >
                       <div className="bg-white/95 backdrop-blur-sm rounded-xl p-2 shadow-xl border border-gray-200/50">
-                        <div className="flex flex-wrap gap-1.5 justify-end max-w-full">
+                        <div className="flex flex-row gap-1.5 justify-end max-w-full overflow-x-auto">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -475,6 +475,7 @@ const Receipts = () => {
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
+  const [isLoadingReceiptDetails, setIsLoadingReceiptDetails] = useState(false);
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -799,6 +800,57 @@ const Receipts = () => {
     });
   }, [receipts, searchTerm, paymentFilter, deliveryFilter, dateFilter]);
 
+  const handleViewReceipt = async (receiptId: string) => {
+    setIsLoadingReceiptDetails(true);
+    try {
+      const { data: fullReceipt, error } = await supabase
+        .from('receipts')
+        .select(`
+          *,
+          clients (
+            name,
+            phone
+          ),
+          receipt_items (
+            id,
+            quantity,
+            price,
+            cost,
+            profit,
+            custom_item_name,
+            paid_at_delivery,
+            product:product_id (
+              name,
+              category
+            )
+          )
+        `)
+        .eq('id', receiptId)
+        .single();
+
+      if (error) throw error;
+      
+      // Calculate balance for the fresh data
+      const receiptWithBalance = {
+        ...fullReceipt,
+        client_name: fullReceipt.clients?.name || 'No Client',
+        client_phone: fullReceipt.clients?.phone || 'N/A',
+        balance: fullReceipt.total - (fullReceipt.advance_payment || 0)
+      };
+      
+      setSelectedReceipt(receiptWithBalance);
+    } catch (error) {
+      console.error('Error fetching receipt details:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load receipt details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingReceiptDetails(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -966,7 +1018,7 @@ const Receipts = () => {
                   onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
                   onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
                   onDelete={() => openDeleteDialog(receipt)}
-                  onView={() => setSelectedReceipt(receipt)}
+                  onView={() => handleViewReceipt(receipt.id)}
                   onEdit={() => setEditingReceipt(receipt)}
                   onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
                   onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
@@ -978,11 +1030,15 @@ const Receipts = () => {
         </div>
 
       <ReceiptDetailsMiniDialog
-        isOpen={!!selectedReceipt}
-        onClose={() => setSelectedReceipt(null)}
+        isOpen={!!selectedReceipt || isLoadingReceiptDetails}
+        onClose={() => {
+          setSelectedReceipt(null);
+          setIsLoadingReceiptDetails(false);
+        }}
         receipt={selectedReceipt}
         onEdit={setEditingReceipt}
         onDelete={openDeleteDialog}
+        isLoading={isLoadingReceiptDetails}
       />
 
       <ReceiptEditDialog
