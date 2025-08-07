@@ -334,7 +334,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 variant="ghost" 
                 size="icon"
                 onClick={handleSaveChanges}
-                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 bg-emerald-50/50 transition-all duration-200 h-9 w-9 rounded-lg shadow-sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-red-50/50 transition-all duration-200 h-9 w-9 rounded-lg shadow-sm"
               >
                 <Save size={16} />
               </Button>
@@ -571,42 +571,74 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           )}
 
-          {/* Enhanced Purchase History */}
-          {expanded && (
-            <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
-              <h4 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-                {t('purchaseHistory')}
-              </h4>
-              {client.receipts && client.receipts.length > 0 ? (
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {client.receipts
-                    .filter(receipt => !receipt.is_deleted)
-                    .map(receipt => (
-                    <div key={receipt.id} className="text-sm p-3 bg-white/80 rounded-lg border border-teal-200 flex justify-between items-center hover:shadow-md transition-all duration-200">
-                      <div>
+          {/* Enhanced Purchase History - Always Visible */}
+          <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
+            <h4 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+              {t('purchaseHistory')}
+            </h4>
+            {client.receipts && client.receipts.length > 0 ? (
+              <div className="space-y-2 max-h-28 overflow-y-auto">
+                {client.receipts
+                  .filter(receipt => !receipt.is_deleted)
+                  .slice(0, expanded ? undefined : 2)
+                  .map(receipt => (
+                  <div key={receipt.id} className="text-sm p-3 bg-white/80 rounded-lg border border-teal-200 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => handleViewReceipt(receipt)}>
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
                         <div className="font-poppins font-medium text-teal-800">Receipt #{receipt.id.substring(0, 8)}</div>
-                        <div className="text-xs text-teal-600 font-inter">{receipt.created_at 
-                          ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
-                          : 'Unknown date'}
+                        <div className="text-xs text-teal-600 font-inter flex items-center gap-2">
+                          <Calendar size={10} />
+                          {receipt.created_at 
+                            ? format(new Date(receipt.created_at), 'MMM d, yyyy') 
+                            : 'Unknown date'}
                         </div>
+                        {receipt.total && (
+                          <div className="text-xs text-emerald-600 font-medium mt-1">
+                            {receipt.total.toFixed(2)} DH
+                          </div>
+                        )}
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50 hover:shadow-sm transition-all duration-200"
-                        onClick={() => handleViewReceipt(receipt)}
-                      >
-                        <Eye size={16} />
-                      </Button>
+                      <div className="flex flex-col items-end gap-1">
+                        {receipt.payment_status && (
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            receipt.payment_status === 'Paid' 
+                              ? 'bg-green-100 text-green-700'
+                              : receipt.payment_status === 'Partially Paid'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {receipt.payment_status === 'Paid' ? t('paid') : 
+                             receipt.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
+                             t('unpaid')}
+                          </span>
+                        )}
+                        {receipt.balance && receipt.balance > 0 && (
+                          <div className="text-xs text-red-600 font-medium">
+                            Balance: {receipt.balance.toFixed(2)} DH
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-teal-500 font-inter">{t('noPurchaseHistory')}</p>
-              )}
-            </div>
-          )}
+                  </div>
+                ))}
+                {!expanded && client.receipts.filter(receipt => !receipt.is_deleted).length > 2 && (
+                  <div className="text-center">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={toggleExpanded}
+                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 text-xs"
+                    >
+                      +{client.receipts.filter(receipt => !receipt.is_deleted).length - 2} more receipts
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-teal-500 font-inter">{t('noPurchaseHistory')}</p>
+            )}
+          </div>
         </div>
       </div>
 
