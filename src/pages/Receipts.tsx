@@ -277,35 +277,26 @@ const ReceiptCard = ({
               <Edit className="h-3.5 w-3.5" />
             </Button>
 
+            {/* Pencil icon for adding/editing notes */}
             <Button
               size="sm"
-              onClick={() => setIsAddingNote(true)}
+              onClick={() => {
+                setNoteText(receipt.note || '');
+                setIsAddingNote(true);
+              }}
               className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
-              title={t('addNote')}
+              title={receipt.note ? t('editNote') : t('addNote')}
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
 
+            {/* Yellow note icon only shown when there's a note and not editing */}
             {receipt.note && !isAddingNote && (
               <Button
                 size="sm"
-                onClick={() => {
-                  setNoteText(receipt.note || '');
-                  setIsAddingNote(true);
-                }}
+                onClick={() => setIsViewingNote(true)}
                 className="h-8 w-8 p-0 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
-                title={t('editNote')}
-              >
-                <StickyNote className="h-3.5 w-3.5" />
-              </Button>
-            )}
-
-            {!receipt.note && !isAddingNote && (
-              <Button
-                size="sm"
-                onClick={() => setIsAddingNote(true)}
-                className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
-                title={t('addNote')}
+                title={t('viewNote')}
               >
                 <StickyNote className="h-3.5 w-3.5" />
               </Button>
