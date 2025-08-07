@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw } from "lucide-react";
+import { UserCircle, ChevronDown, ChevronUp, Phone, Calendar, Edit, Trash2, Eye, Save, Star, RefreshCw, MapPin, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "./ui/button";
 import ReceiptDetailsMiniDialog from "./ReceiptDetailsMiniDialog";
@@ -271,49 +271,61 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
 
   return (
     <div 
-      className="h-[420px] w-full flex flex-col bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 rounded-lg border-l-4 border-l-teal-500 border border-teal-200 shadow-sm hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 overflow-hidden"
+      className="h-[420px] w-full flex flex-col bg-gradient-to-br from-teal-50/40 to-seafoam-50/30 rounded-xl border-l-4 border-l-teal-500 border border-teal-200/60 shadow-lg hover:border-l-teal-600 hover:shadow-xl hover:shadow-teal-100/20 transition-all duration-300 overflow-hidden backdrop-blur-sm"
       data-client-id={client.id}
       data-is-edited={isEdited}
     >
-      {/* Header Section - Fixed Height */}
-      <div className="h-20 px-4 py-3 flex-shrink-0">
+      {/* Header Section - Enhanced with better spacing and visual hierarchy */}
+      <div className="h-20 px-5 py-4 flex-shrink-0 bg-white/40 backdrop-blur-sm border-b border-teal-100/50">
         <div className="flex items-center justify-between h-full">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-teal-100 border-2 border-teal-300 flex-shrink-0 flex items-center justify-center relative">
-              <span className="font-poppins font-semibold text-teal-700 text-lg">{nameInitial}</span>
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            {/* Enhanced Avatar with better styling */}
+            <div className="relative">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-100 to-teal-200 border-2 border-teal-300 flex-shrink-0 flex items-center justify-center shadow-md">
+                <span className="font-poppins font-bold text-teal-700 text-lg">{nameInitial}</span>
+              </div>
               {client.store_prescription && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center shadow-sm">
                   <span className="text-xs">📋</span>
                 </div>
               )}
+              {client.need_renewal && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 border-2 border-white rounded-full flex items-center justify-center shadow-sm">
+                  <Clock size={10} className="text-white" />
+                </div>
+              )}
             </div>
+
             <div className="min-w-0 flex-1">
               <input 
                 type="text" 
                 name="name"
-                className="font-poppins font-semibold text-teal-800 text-lg bg-transparent border-b border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none w-full truncate"
+                className="font-poppins font-semibold text-teal-800 text-lg bg-transparent border-b-2 border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none w-full truncate transition-colors duration-200"
                 value={editedClient.name}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
+                placeholder="Client Name"
               />
               <div className="flex items-center text-teal-600 text-sm mt-1">
-                <Phone size={12} className="mr-1 flex-shrink-0" />
+                <Phone size={12} className="mr-2 flex-shrink-0" />
                 <input 
                   type="text" 
                   name="phone"
-                  className="font-inter bg-transparent border-b border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none flex-1 min-w-0"
+                  className="font-inter bg-transparent border-b border-transparent hover:border-teal-300 focus:border-teal-500 focus:outline-none flex-1 min-w-0 transition-colors duration-200"
                   value={editedClient.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
+                  placeholder="Phone number"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Enhanced Action Buttons */}
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleFavorite}
-              className={`${client.is_favorite ? 'text-amber-500 hover:bg-amber-50' : 'text-teal-400 hover:bg-teal-50'} transition-colors h-8 w-8`}
+              className={`${client.is_favorite ? 'text-amber-500 hover:bg-amber-50 bg-amber-50/50' : 'text-teal-400 hover:bg-teal-50'} transition-all duration-200 h-9 w-9 rounded-lg shadow-sm`}
             >
               <Star size={16} className={client.is_favorite ? 'fill-current' : ''} />
             </Button>
@@ -322,7 +334,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 variant="ghost" 
                 size="icon"
                 onClick={handleSaveChanges}
-                className="text-green-600 hover:text-green-700 hover:bg-green-50 transition-colors h-8 w-8"
+                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 bg-emerald-50/50 transition-all duration-200 h-9 w-9 rounded-lg shadow-sm"
               >
                 <Save size={16} />
               </Button>
@@ -331,7 +343,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="icon"
               onClick={() => onEdit(client)}
-              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 transition-colors h-8 w-8"
+              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 transition-all duration-200 h-9 w-9 rounded-lg shadow-sm"
             >
               <Edit size={16} />
             </Button>
@@ -339,7 +351,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="icon"
               onClick={handleDelete}
-              className="text-teal-400 hover:text-red-600 hover:bg-red-50 transition-colors h-8 w-8"
+              className="text-teal-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200 h-9 w-9 rounded-lg shadow-sm"
             >
               <Trash2 size={16} />
             </Button>
@@ -347,200 +359,209 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
       </div>
 
-      {/* Content Section - Flexible */}
-      <div className="flex-1 px-4 overflow-y-auto">
-        <div className="space-y-4">
-          {/* Prescription Fields */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <h3 className="font-poppins font-medium text-teal-700 text-sm">{t('rightEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-1">
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('sph')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_sph"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
+      {/* Content Section - Enhanced with better visual organization */}
+      <div className="flex-1 px-5 py-4 overflow-y-auto">
+        <div className="space-y-5">
+          {/* Enhanced Prescription Fields with better visual grouping */}
+          <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
+            <h3 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+              Prescription Details
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('rightEyeShort')}</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="right_eye_sph"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.right_eye_sph !== undefined && editedClient.right_eye_sph !== null ? editedClient.right_eye_sph : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('right_eye_sph', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="right_eye_cyl"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="right_eye_axe"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('cyl')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_cyl"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.right_eye_cyl !== undefined && editedClient.right_eye_cyl !== null ? editedClient.right_eye_cyl : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_cyl', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('axe')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="right_eye_axe"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.right_eye_axe !== undefined && editedClient.right_eye_axe !== null ? editedClient.right_eye_axe : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('right_eye_axe', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase tracking-wide">{t('leftEyeShort')}</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('sph')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="left_eye_sph"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('cyl')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="left_eye_cyl"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-teal-600 font-inter block mb-1">{t('axe')}</span>
+                    <input 
+                      type="text"
+                      inputMode="decimal"
+                      name="left_eye_axe"
+                      className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                      value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                          handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="font-poppins font-medium text-teal-700 text-sm">{t('leftEyeShort')}</h3>
-              <div className="grid grid-cols-3 gap-1">
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('sph')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_sph"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.left_eye_sph !== undefined && editedClient.left_eye_sph !== null ? editedClient.left_eye_sph : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_sph', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('cyl')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_cyl"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.left_eye_cyl !== undefined && editedClient.left_eye_cyl !== null ? editedClient.left_eye_cyl : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^-?\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_cyl', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('axe')}</span>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    name="left_eye_axe"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                    value={editedClient.left_eye_axe !== undefined && editedClient.left_eye_axe !== null ? editedClient.left_eye_axe : ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                        handleFieldChange('left_eye_axe', inputValue === "" ? null : inputValue);
-                      }
-                    }}
-                  />
-                </div>
+
+            {/* Enhanced ADD field */}
+            <div className="flex justify-center mt-4 pt-3 border-t border-teal-100">
+              <div className="w-28">
+                <span className="text-xs text-teal-600 font-inter text-center block mb-1 font-medium">{t('add') || 'ADD'}</span>
+                <input 
+                  type="text"
+                  inputMode="decimal"
+                  name="add"
+                  className="text-sm font-inter border border-teal-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 text-center hover:border-teal-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 transition-all duration-200"
+                  value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
+                      handleFieldChange('Add', inputValue === "" ? null : inputValue);
+                    }
+                  }}
+                  placeholder="0.00"
+                />
               </div>
             </div>
           </div>
 
-          {/* ADD field */}
-          <div className="flex justify-center">
-            <div className="w-24">
-              <span className="text-xs text-teal-600 font-inter text-center block">{t('add') || 'ADD'}</span>
-              <input 
-                type="text"
-                inputMode="decimal"
-                name="add"
-                className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 text-center hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
-                value={editedClient.Add !== undefined && editedClient.Add !== null ? editedClient.Add : ""}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  if (inputValue === "" || /^\d*[.,]?\d*$/.test(inputValue)) {
-                    handleFieldChange('Add', inputValue === "" ? null : inputValue);
-                  }
-                }}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          {/* Renewal Information */}
+          {/* Enhanced Renewal Information */}
           {(client.need_renewal || isEdited) && (
-            <div className="pt-3 border-t-2 border-teal-100 space-y-3">
-              <h3 className="font-poppins font-medium text-teal-700 text-sm text-center">{t('renewalInformation')}</h3>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white/60 rounded-lg p-4 border border-amber-200 shadow-sm">
+              <h3 className="font-poppins font-semibold text-amber-700 text-sm mb-3 flex items-center gap-2">
+                <Clock size={14} />
+                {t('renewalInformation')}
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('renewalDate')}</span>
+                  <span className="text-xs text-amber-600 font-inter block mb-1">{t('renewalDate')}</span>
                   <input 
                     type="date"
                     name="renewal_date"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
+                    className="text-sm font-inter border border-amber-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-amber-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 transition-all duration-200"
                     value={editedClient.renewal_date || ""}
                     onChange={(e) => handleFieldChange('renewal_date', e.target.value)}
                   />
                 </div>
                 <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('needRenewalField')}</span>
-                  <div className="flex items-center justify-center h-8">
+                  <span className="text-xs text-amber-600 font-inter block mb-1">{t('needRenewalField')}</span>
+                  <div className="flex items-center justify-center h-9">
                     <input 
                       type="checkbox"
                       name="need_renewal"
-                      className="rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                      className="rounded border-amber-300 text-amber-600 focus:ring-amber-500 scale-110"
                       checked={editedClient.need_renewal || false}
                       onChange={(e) => handleFieldChange('need_renewal', e.target.checked)}
                     />
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('renewalTimes')}</span>
+                  <span className="text-xs text-amber-600 font-inter block mb-1">{t('renewalTimes')}</span>
                   <input 
                     type="number"
                     name="renewal_times"
                     min="0"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
+                    className="text-sm font-inter border border-amber-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-amber-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 transition-all duration-200"
                     value={editedClient.renewal_times || 0}
                     onChange={(e) => handleFieldChange('renewal_times', parseInt(e.target.value) || 0)}
                   />
                 </div>
               </div>
               
-              {/* Prescription Information */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Enhanced Prescription Information */}
+              <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-amber-100">
                 <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('storePrescription')}</span>
-                  <div className="flex items-center h-8">
+                  <span className="text-xs text-amber-600 font-inter block mb-2">{t('storePrescription')}</span>
+                  <div className="flex items-center h-9">
                     <input 
                       type="checkbox"
                       name="store_prescription"
-                      className="rounded border-teal-300 text-teal-600 focus:ring-teal-500"
+                      className="rounded border-amber-300 text-amber-600 focus:ring-amber-500 scale-110"
                       checked={editedClient.store_prescription || false}
                       onChange={(e) => handleFieldChange('store_prescription', e.target.checked)}
                     />
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs text-teal-600 font-inter">{t('opticianPrescribedBy')}</span>
+                  <span className="text-xs text-amber-600 font-inter block mb-1">{t('opticianPrescribedBy')}</span>
                   <input 
                     type="text"
                     name="optician_prescribed_by"
-                    className="text-sm font-inter border border-teal-200 bg-teal-50/30 rounded px-2 py-1 w-full h-8 hover:border-teal-400 focus:border-teal-500 focus:outline-none transition-colors"
+                    className="text-sm font-inter border border-amber-200 bg-white/60 rounded-md px-3 py-2 w-full h-9 hover:border-amber-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 transition-all duration-200"
                     value={editedClient.optician_prescribed_by || ""}
                     onChange={(e) => handleFieldChange('optician_prescribed_by', e.target.value)}
                     placeholder={t('enterOpticianName')}
@@ -550,16 +571,19 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
             </div>
           )}
 
-          {/* Purchase History (when expanded) */}
+          {/* Enhanced Purchase History */}
           {expanded && (
-            <div className="pt-3 border-t-2 border-teal-100">
-              <h4 className="font-poppins font-medium text-teal-700 text-xs uppercase mb-2">{t('purchaseHistory')}</h4>
+            <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm">
+              <h4 className="font-poppins font-semibold text-teal-700 text-sm mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+                {t('purchaseHistory')}
+              </h4>
               {client.receipts && client.receipts.length > 0 ? (
                 <div className="space-y-2 max-h-32 overflow-y-auto">
                   {client.receipts
                     .filter(receipt => !receipt.is_deleted)
                     .map(receipt => (
-                    <div key={receipt.id} className="text-sm p-2 bg-white/60 rounded border border-teal-200 flex justify-between items-center">
+                    <div key={receipt.id} className="text-sm p-3 bg-white/80 rounded-lg border border-teal-200 flex justify-between items-center hover:shadow-md transition-all duration-200">
                       <div>
                         <div className="font-poppins font-medium text-teal-800">Receipt #{receipt.id.substring(0, 8)}</div>
                         <div className="text-xs text-teal-600 font-inter">{receipt.created_at 
@@ -570,7 +594,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50"
+                        className="h-8 w-8 p-0 rounded-full text-teal-600 hover:bg-teal-50 hover:shadow-sm transition-all duration-200"
                         onClick={() => handleViewReceipt(receipt)}
                       >
                         <Eye size={16} />
@@ -586,11 +610,11 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
         </div>
       </div>
 
-      {/* Footer Section - Fixed Height */}
-      <div className="h-16 bg-white/50 border-t-2 border-teal-100 px-4 py-2 flex-shrink-0">
+      {/* Enhanced Footer Section */}
+      <div className="h-16 bg-white/50 backdrop-blur-sm border-t-2 border-teal-100 px-5 py-3 flex-shrink-0">
         <div className="flex justify-between items-center h-full">
           <div className="flex items-center text-xs text-teal-600 font-inter">
-            <Calendar size={12} className="mr-1" />
+            <Calendar size={12} className="mr-2" />
             <span>{t('addedOn')} {formattedDate}</span>
           </div>
           
@@ -599,7 +623,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               <Button
                 onClick={handleRenewal}
                 size="sm"
-                className="bg-teal-600 hover:bg-teal-700 text-white font-poppins font-medium px-3 py-1 h-8 text-xs"
+                className="bg-teal-600 hover:bg-teal-700 text-white font-poppins font-medium px-3 py-1 h-8 text-xs rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 <RefreshCw className="h-3 w-3 mr-1" />
                 {t('renewNow')}
@@ -609,7 +633,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
               variant="ghost" 
               size="sm" 
               onClick={toggleExpanded}
-              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 p-1 h-8 w-8"
+              className="text-teal-500 hover:text-teal-600 hover:bg-teal-50 p-1 h-8 w-8 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
             >
               {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </Button>
