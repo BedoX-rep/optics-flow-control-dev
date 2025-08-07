@@ -541,7 +541,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
                 {/* Purchase History View */}
                 <div className="w-full flex-shrink-0 pl-4">
                   {client.receipts && client.receipts.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2">
                       {client.receipts
                         .filter(receipt => !receipt.is_deleted)
                         .slice(0, expanded ? undefined : 3)
