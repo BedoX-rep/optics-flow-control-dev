@@ -91,10 +91,52 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
   const balance = purchase.balance || 0;
 
   return (
-    <Card className="h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30 font-inter">
+    <Card className="h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30 font-inter relative">
       <CardContent className="p-5 h-full flex flex-col">
+        {/* Action Buttons - Top Right */}
+        <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewBalanceHistory(purchase)}
+            className="text-teal-600 hover:text-white hover:bg-teal-600 h-7 w-7 p-0 rounded-lg border border-teal-200 transition-all duration-200"
+            title={t('viewBalanceHistory')}
+          >
+            <History size={12} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(purchase)}
+            className="text-blue-600 hover:text-white hover:bg-blue-600 h-7 w-7 p-0 rounded-lg border border-blue-200 transition-all duration-200"
+            title={t('editPurchase')}
+          >
+            <Edit size={12} />
+          </Button>
+          {purchase.payment_status !== 'Paid' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onMarkAsPaid(purchase)}
+              className="text-green-600 hover:text-white hover:bg-green-600 h-7 w-7 p-0 rounded-lg border border-green-200 transition-all duration-200"
+              title={t('markAsPaid')}
+            >
+              <DollarSign size={12} />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(purchase.id)}
+            className="text-red-600 hover:text-white hover:bg-red-600 h-7 w-7 p-0 rounded-lg border border-red-200 transition-all duration-200"
+            title={t('deletePurchase')}
+          >
+            <Trash2 size={12} />
+          </Button>
+        </div>
+
         {/* Header Section */}
-        <div className="flex items-start gap-4 mb-5">
+        <div className="flex items-start gap-4 mb-4 pr-32">
           <div className="relative">
             <div className="w-14 h-14 rounded-xl bg-teal-100 border-2 border-teal-200 shadow-sm flex items-center justify-center">
               <Receipt className="h-6 w-6 text-teal-600" />
@@ -105,7 +147,7 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
             <h3 className="font-poppins font-semibold text-base text-gray-800 mb-2 line-clamp-2">
               {purchase.description}
             </h3>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="font-poppins font-bold text-teal-700 text-lg">
                   {totalAmount.toFixed(2)}
@@ -113,42 +155,46 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
                 <span className="text-sm text-teal-600 font-medium">DH</span>
               </div>
             </div>
-            
-            {/* Status and Special Indicators */}
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                purchase.payment_status === 'Paid' 
-                  ? 'bg-green-100 text-green-800'
-                  : purchase.payment_status === 'Partially Paid'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {purchase.payment_status === 'Paid' ? t('paid') : 
-                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                 t('unpaid')}
+          </div>
+        </div>
+
+        {/* Status Information - Below Header */}
+        <div className="mb-4 space-y-2">
+          {/* Payment Status, Due Date, Next Date */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              purchase.payment_status === 'Paid' 
+                ? 'bg-green-100 text-green-800'
+                : purchase.payment_status === 'Partially Paid'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {purchase.payment_status === 'Paid' ? t('paid') : 
+               purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
+               t('unpaid')}
+            </span>
+
+            {purchase.payment_urgency && (
+              <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded text-xs font-medium">
+                Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
               </span>
+            )}
 
-              {purchase.payment_urgency && (
-                <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded text-xs font-medium">
-                  Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                </span>
-              )}
-
-              {purchase.next_recurring_date && !purchase.already_recurred && (
-                <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded text-xs font-medium">
-                  {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                </span>
-              )}
-            </div>
-            
-            {purchase.created_at && (
-              <div className="text-right">
-                <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
-                  {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
-                </span>
-              </div>
+            {purchase.next_recurring_date && !purchase.already_recurred && (
+              <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded text-xs font-medium">
+                {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
+              </span>
             )}
           </div>
+          
+          {/* Purchase Date */}
+          {purchase.created_at && (
+            <div className="text-right">
+              <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
+                {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Content Section */}
@@ -212,62 +258,11 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
               </div>
             </div>
           </div>
-
-          
         </div>
 
-        {/* Footer Section */}
-        <div className="border-t-2 border-teal-100 pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onViewBalanceHistory(purchase)}
-                className="text-teal-600 hover:text-white hover:bg-teal-600 h-8 px-3 text-xs font-inter rounded-lg border border-teal-200 transition-all duration-200"
-                title={t('viewBalanceHistory')}
-              >
-                <History size={14} className="mr-1" />
-                {t('history')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(purchase)}
-                className="text-blue-600 hover:text-white hover:bg-blue-600 h-8 px-3 text-xs font-inter rounded-lg border border-blue-200 transition-all duration-200"
-                title={t('editPurchase')}
-              >
-                <Edit size={14} className="mr-1" />
-                {t('edit')}
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              {purchase.payment_status !== 'Paid' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onMarkAsPaid(purchase)}
-                  className="text-green-600 hover:text-white hover:bg-green-600 h-8 px-3 text-xs font-inter rounded-lg border border-green-200 transition-all duration-200"
-                  title={t('markAsPaid')}
-                >
-                  <DollarSign size={14} className="mr-1" />
-                  {t('pay')}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(purchase.id)}
-                className="text-red-600 hover:text-white hover:bg-red-600 h-8 px-3 text-xs font-inter rounded-lg border border-red-200 transition-all duration-200"
-                title={t('deletePurchase')}
-              >
-                <Trash2 size={14} className="mr-1" />
-                {t('delete')}
-              </Button>
-            </div>
-          </div>
-
-          {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+        {/* Footer Section - Only for Recurring Renewal Button */}
+        {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
+          <div className="border-t-2 border-teal-100 pt-4">
             <Button
               size="sm"
               onClick={() => onRecurringRenewal(purchase)}
@@ -276,8 +271,8 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
               <TrendingUp size={14} className="mr-2" />
               {t('renewNow')}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
