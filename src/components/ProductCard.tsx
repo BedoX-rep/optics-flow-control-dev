@@ -68,41 +68,46 @@ const ProductCard = React.memo<ProductCardProps>(({
   const { allCompanies } = useCompanies();
   return (
     <Card 
-      className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
+      className={`h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 font-inter ${
         product.isEdited 
-          ? 'border-l-amber-400 shadow-md bg-amber-50/30' 
-          : 'border-l-blue-400 hover:border-l-blue-500'
+          ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl' 
+          : 'border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30'
       }`}
     >
-      <div className="p-4">
-        <div className="flex items-start gap-3 mb-4">
-          <ProductImage
-            src={product.image}
-            alt={product.category}
-            className="w-12 h-12 rounded-lg object-cover border border-gray-100"
-          />
+      <div className="p-5 h-full flex flex-col">
+        {/* Header Section */}
+        <div className="flex items-start gap-4 mb-5">
+          <div className="relative">
+            <ProductImage
+              src={product.image}
+              alt={product.category}
+              className="w-14 h-14 rounded-xl object-cover border-2 border-teal-100 shadow-sm"
+            />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-teal-500 rounded-full border-2 border-white"></div>
+          </div>
           <div className="flex-1 min-w-0">
             <input
               type="text"
               value={product.name}
               onChange={(e) => onFieldChange(product.id, 'name', e.target.value)}
               disabled={product.automated_name}
-              className="font-semibold text-sm w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-1"
+              className="font-poppins font-semibold text-base w-full bg-transparent border-b-2 border-transparent hover:border-teal-200 focus:border-teal-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-2 text-gray-800 placeholder-gray-400"
+              placeholder="Product name..."
             />
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={product.price}
                   onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
-                  className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
+                  className="font-poppins font-bold text-teal-700 bg-teal-50/50 border border-teal-200 rounded-lg px-2 py-1 hover:border-teal-400 focus:border-teal-500 focus:outline-none w-20 text-sm"
                   min={0}
                   step={0.01}
                 />
-                <span className="text-xs text-gray-500">DH</span>
+                <span className="text-sm text-teal-600 font-medium">DH</span>
               </div>
               {product.created_at && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
                   {new Date(product.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -114,14 +119,16 @@ const ProductCard = React.memo<ProductCardProps>(({
           </div>
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="grid grid-cols-2 gap-2">
+        {/* Form Fields Section */}
+        <div className="flex-1 space-y-3 mb-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('category')}</label>
               <Select
                 value={product.category || ""}
                 onValueChange={(value) => onFieldChange(product.id, 'category', value === "none" ? null : value)}
               >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
+                <SelectTrigger className="h-8 text-xs border-teal-200 bg-teal-50/30 hover:border-teal-400 focus:border-teal-500 font-inter">
                   <SelectValue placeholder={t('category')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -134,11 +141,12 @@ const ProductCard = React.memo<ProductCardProps>(({
             </div>
 
             <div>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('index')}</label>
               <Select
                 value={product.index || ""}
                 onValueChange={(value) => onFieldChange(product.id, 'index', value === "none" ? null : value)}
               >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
+                <SelectTrigger className="h-8 text-xs border-teal-200 bg-teal-50/30 hover:border-teal-400 focus:border-teal-500 font-inter">
                   <SelectValue placeholder={t('index')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,13 +159,14 @@ const ProductCard = React.memo<ProductCardProps>(({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('treatment')}</label>
               <Select
                 value={product.treatment || ""}
                 onValueChange={(value) => onFieldChange(product.id, 'treatment', value === "none" ? null : value)}
               >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
+                <SelectTrigger className="h-8 text-xs border-teal-200 bg-teal-50/30 hover:border-teal-400 focus:border-teal-500 font-inter">
                   <SelectValue placeholder={t('treatment')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -170,11 +179,12 @@ const ProductCard = React.memo<ProductCardProps>(({
             </div>
 
             <div>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('company')}</label>
               <Select
                 value={product.company || ""}
                 onValueChange={(value) => onFieldChange(product.id, 'company', value === "none" ? null : value)}
               >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
+                <SelectTrigger className="h-8 text-xs border-teal-200 bg-teal-50/30 hover:border-teal-400 focus:border-teal-500 font-inter">
                   <SelectValue placeholder={t('company')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -187,25 +197,25 @@ const ProductCard = React.memo<ProductCardProps>(({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('gamma')}</label>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('gamma')}</label>
               <input
                 type="text"
                 value={product.gamma || ""}
                 onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                className="h-8 px-3 text-xs border border-teal-200 bg-teal-50/30 rounded-lg hover:border-teal-400 focus:border-teal-500 focus:outline-none w-full font-inter placeholder-teal-400"
                 placeholder={t('gamma')}
               />
             </div>
 
             <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('costTTC')} (DH)</label>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('costTTC')} (DH)</label>
               <input
                 type="number"
                 value={product.cost_ttc || 0}
                 onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                className="h-8 px-3 text-xs border border-teal-200 bg-teal-50/30 rounded-lg hover:border-teal-400 focus:border-teal-500 focus:outline-none w-full font-inter placeholder-teal-400"
                 placeholder="0.00"
                 min={0}
                 step={0.01}
@@ -213,16 +223,16 @@ const ProductCard = React.memo<ProductCardProps>(({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('stockStatus')}</label>
+              <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('stockStatus')}</label>
               <Select
                 value={product.stock_status || 'Order'}
                 onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
                   onFieldChange(product.id, 'stock_status', value)
                 }
               >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
+                <SelectTrigger className="h-8 text-xs border-teal-200 bg-teal-50/30 hover:border-teal-400 focus:border-teal-500 font-inter">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -236,32 +246,50 @@ const ProductCard = React.memo<ProductCardProps>(({
 
             {product.stock_status === 'inStock' && (
               <div>
-                <label className="text-xs text-gray-600 font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
+                <label className="text-xs text-teal-700 font-poppins font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
                 <input
                   type="number"
                   value={product.stock || 0}
                   onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
-                  className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
+                  className="h-8 px-3 text-xs border border-teal-200 bg-teal-50/30 rounded-lg hover:border-teal-400 focus:border-teal-500 focus:outline-none w-full font-inter placeholder-teal-400"
                   placeholder="0"
                   min={0}
                 />
               </div>
             )}
           </div>
-
-          
         </div>
 
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-          <div className="flex gap-1">
+        {/* Footer Section */}
+        <div className="border-t-2 border-teal-100 pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={product.automated_name}
+                onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
+                className="data-[state=checked]:bg-teal-600"
+              />
+              <span className="text-xs text-teal-600 font-inter font-medium">{t('auto')}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(product.id)}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-3 text-xs font-inter rounded-lg"
+            >
+              <Trash2 size={14} />
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
             {product.isEdited && (
               <Button
                 size="sm"
                 onClick={() => onSave(product.id)}
                 disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
               >
-                <Save size={12} className="mr-1" />
+                <Save size={14} className="mr-2" />
                 {t('saveButton')}
               </Button>
             )}
@@ -269,29 +297,12 @@ const ProductCard = React.memo<ProductCardProps>(({
               variant="outline"
               size="sm"
               onClick={() => onEdit(product)}
-              className="text-gray-600 hover:text-blue-600 h-7 px-2 text-xs"
+              className={`${product.isEdited ? 'flex-1' : 'w-full'} border-teal-200 text-teal-700 hover:text-teal-800 hover:bg-teal-50 hover:border-teal-300 h-9 px-3 text-xs font-poppins font-medium rounded-lg`}
             >
-              <Edit size={12} className="mr-1" />
+              <Edit size={14} className="mr-2" />
               {t('edit')}
             </Button>
-            <div className="flex items-center gap-1 ml-2">
-              <Switch
-                checked={product.automated_name}
-                onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
-                className="scale-75"
-              />
-              <span className="text-xs text-gray-500">{t('auto')}</span>
-            </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(product.id)}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2 text-xs"
-          >
-            <Trash2 size={12} />
-          </Button>
         </div>
       </div>
     </Card>
