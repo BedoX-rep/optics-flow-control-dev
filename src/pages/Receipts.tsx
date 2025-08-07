@@ -159,7 +159,10 @@ const ReceiptCard = ({
       exit={{ opacity: 0, y: -20 }}
       className="w-full"
     >
-      <Card className="h-[420px] border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden">
+      <Card className={cn(
+        "border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col",
+        (isEditingNote || isViewingNote) ? "min-h-[420px]" : "h-[420px]"
+      )}>
         {/* Header Section */}
         <div className="p-4 pb-0">
           <div className="flex items-start justify-between mb-3">
@@ -224,7 +227,10 @@ const ReceiptCard = ({
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 px-4 py-2">
+        <div className={cn(
+          "px-4 py-2",
+          (isEditingNote || isViewingNote) ? "flex-none" : "flex-1"
+        )}>
           {/* Action Buttons Row */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-4">
             <Button
@@ -391,7 +397,7 @@ const ReceiptCard = ({
 
           {/* Note Section */}
           {(isEditingNote || isViewingNote) && (
-            <div className="mb-3">
+            <div className="mt-4">
               {/* Edit Note */}
               {isEditingNote && (
                 <div className="p-3 bg-teal-50/30 border border-teal-200 rounded-lg">
@@ -399,8 +405,8 @@ const ReceiptCard = ({
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
                     placeholder={t('enterNote')}
-                    className="mb-2 text-sm border-teal-200 bg-white focus:border-teal-500"
-                    rows={2}
+                    className="mb-3 text-sm border-teal-200 bg-white focus:border-teal-500 resize-none"
+                    rows={3}
                     autoFocus
                   />
                   <div className="flex gap-2">
@@ -418,7 +424,9 @@ const ReceiptCard = ({
               {/* View Note */}
               {isViewingNote && receipt.note && (
                 <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-gray-700 mb-2 whitespace-pre-wrap">{receipt.note}</p>
+                  <div className="max-h-24 overflow-y-auto mb-3">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{receipt.note}</p>
+                  </div>
                   <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} 
                           className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
                     {t('close')}
@@ -430,8 +438,10 @@ const ReceiptCard = ({
         </div>
 
         {/* Footer Section */}
-        <div className="p-4 pt-0">
-        </div>
+        {!(isEditingNote || isViewingNote) && (
+          <div className="p-4 pt-0 flex-shrink-0">
+          </div>
+        )}
       </Card>
     </motion.div>
   );
