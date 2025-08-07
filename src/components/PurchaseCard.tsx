@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, History, DollarSign, Calendar, Building2, Receipt, Link, TrendingUp } from 'lucide-react';
+import { Edit, Trash2, History, DollarSign, Calendar, Building2, Receipt, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from './LanguageProvider';
 
@@ -53,7 +53,6 @@ interface PurchaseCardProps {
   onMarkAsPaid: (purchase: Purchase) => void;
   onViewBalanceHistory: (purchase: Purchase) => void;
   onRecurringRenewal: (purchase: Purchase) => void;
-  onLinkToReceipts?: (purchase: Purchase) => void;
 }
 
 const PurchaseCard = React.memo<PurchaseCardProps>(({
@@ -63,8 +62,7 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
   onDelete,
   onMarkAsPaid,
   onViewBalanceHistory,
-  onRecurringRenewal,
-  onLinkToReceipts
+  onRecurringRenewal
 }) => {
   const { t } = useLanguage();
 
@@ -114,12 +112,42 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
                 </span>
                 <span className="text-sm text-teal-600 font-medium">DH</span>
               </div>
-              {purchase.created_at && (
-                <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
-                  {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
+            </div>
+            
+            {/* Status and Special Indicators */}
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                purchase.payment_status === 'Paid' 
+                  ? 'bg-green-100 text-green-800'
+                  : purchase.payment_status === 'Partially Paid'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {purchase.payment_status === 'Paid' ? t('paid') : 
+                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
+                 t('unpaid')}
+              </span>
+
+              {purchase.payment_urgency && (
+                <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded text-xs font-medium">
+                  Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
+                </span>
+              )}
+
+              {purchase.next_recurring_date && !purchase.already_recurred && (
+                <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded text-xs font-medium">
+                  {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
                 </span>
               )}
             </div>
+            
+            {purchase.created_at && (
+              <div className="text-right">
+                <span className="text-xs text-gray-500 font-inter bg-gray-100/80 px-2 py-1 rounded-full">
+                  {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -185,39 +213,7 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
             </div>
           </div>
 
-          {/* Status and Special Indicators */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              purchase.payment_status === 'Paid' 
-                ? 'bg-green-100 text-green-800'
-                : purchase.payment_status === 'Partially Paid'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {purchase.payment_status === 'Paid' ? t('paid') : 
-               purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-               t('unpaid')}
-            </span>
-
-            {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
-              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex items-center gap-1">
-                <Link className="h-3 w-3" />
-                {purchase.linked_receipts.length} {t('receipts')}
-              </span>
-            )}
-
-            {purchase.payment_urgency && (
-              <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded text-xs font-medium">
-                Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-              </span>
-            )}
-
-            {purchase.next_recurring_date && !purchase.already_recurred && (
-              <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded text-xs font-medium">
-                {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-              </span>
-            )}
-          </div>
+          
         </div>
 
         {/* Footer Section */}
@@ -264,29 +260,16 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
             </div>
           </div>
 
-          <div className="flex gap-2">
-            {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-              <Button
-                size="sm"
-                onClick={() => onRecurringRenewal(purchase)}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
-              >
-                <TrendingUp size={14} className="mr-2" />
-                {t('renewNow')}
-              </Button>
-            )}
-            
-            {/* Link to Receipts Button */}
+          {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
             <Button
               size="sm"
-              variant="outline"
-              onClick={() => onLinkToReceipts && onLinkToReceipts(purchase)}
-              className="flex-1 border-2 border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 h-9 px-3 text-xs font-poppins font-medium rounded-lg"
+              onClick={() => onRecurringRenewal(purchase)}
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
             >
-              <Link size={14} className="mr-2" />
-              {t('linkToReceipts')}
+              <TrendingUp size={14} className="mr-2" />
+              {t('renewNow')}
             </Button>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

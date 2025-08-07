@@ -21,7 +21,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -165,16 +165,10 @@ const PURCHASE_TYPES = [
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isBalanceHistoryDialogOpen, setIsBalanceHistoryDialogOpen] = useState(false);
-  const [isLinkingDialogOpen, setIsLinkingDialogOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
-  const [selectedPurchaseForLinking, setSelectedPurchaseForLinking] = useState<Purchase | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Linking states
-  const [linkDateFrom, setLinkDateFrom] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
-  const [linkDateTo, setLinkDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -471,39 +465,6 @@ const PURCHASE_TYPES = [
     refetchOnWindowFocus: false,
   });
 
-  // Calculate purchase linking when purchases and receipts are loaded
-  useEffect(() => {
-    const updateLinkedPurchases = async () => {
-      if (!purchases || !Array.isArray(purchases) || purchases.length === 0 || !receipts || !Array.isArray(receipts) || receipts.length === 0 || !user) {
-        return;
-      }
-
-      // Find purchases with linking configurations that need updating
-      const linkedPurchases = purchases.filter(p => 
-        p.linking_category === 'montage_costs' && p.link_date_from && p.link_date_to
-      );
-
-      if (linkedPurchases.length === 0) return;
-
-      let hasUpdates = false;
-
-      for (const purchase of linkedPurchases) {
-        const shouldUpdate = await calculatePurchaseLinking(purchase);
-        if (shouldUpdate) hasUpdates = true;
-      }
-
-      // Only refresh if there were actual updates
-      if (hasUpdates) {
-        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-      }
-    };
-
-    // Only run when both purchases and receipts are loaded and user is available
-    if (purchases.length > 0 && receipts.length >= 0 && user) {
-      updateLinkedPurchases();
-    }
-  }, [purchases, receipts, user, queryClient]);
-
   // Filter purchases
   const filteredPurchases = useMemo(() => {
     if (!purchases) return [];
@@ -598,93 +559,7 @@ const PURCHASE_TYPES = [
       .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [purchases]);
 
-  // Function to calculate and update purchase linking
-  const calculatePurchaseLinking = async (purchase: Purchase): Promise<boolean> => {
-    if (!purchase.linking_category || purchase.linking_category !== 'montage_costs' || !purchase.link_date_from || !purchase.link_date_to) {
-      return false;
-    }
-
-    // Get receipts in the date range using cached data, excluding deleted receipts
-    const linkedReceipts = receipts.filter(receipt => {
-      // First check if receipt is deleted
-      if (receipt.is_deleted) {
-        return false;
-      }
-
-      const receiptDate = new Date(receipt.created_at);
-      const fromDate = new Date(purchase.link_date_from!);
-      const toDate = new Date(purchase.link_date_to!);
-
-      // Set time to start/end of day for accurate comparison
-      fromDate.setHours(0, 0, 0, 0);
-      toDate.setHours(23, 59, 59, 999);
-
-      return receiptDate >= fromDate && receiptDate <= toDate;
-    });
-
-    let totalAmount = 0;
-    let paidAmount = 0;
-
-    linkedReceipts.forEach(receipt => {
-      const montageCost = receipt.montage_costs || 0;
-
-      // Only include receipts in InCutting, Ready, or Paid costs phases
-      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
-      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
-        totalAmount += montageCost;
-
-        // Only count as paid if status is specifically 'Paid costs'
-        if (receipt.montage_status === 'Paid costs') {
-          paidAmount += montageCost;
-        }
-      }
-    });
-
-    const balance = totalAmount - paidAmount;
-    const linkedReceiptIds = linkedReceipts.map(r => r.id);
-
-    // Check if values have actually changed to avoid unnecessary updates
-    const currentAmountTTC = purchase.amount_ttc || purchase.amount || 0;
-    const currentAdvancePayment = purchase.advance_payment || 0;
-    const currentBalance = purchase.balance || 0;
-    const currentLinkedReceipts = purchase.linked_receipts || [];
-
-    const hasChanges = 
-      Math.abs(currentAmountTTC - totalAmount) > 0.01 ||
-      Math.abs(currentAdvancePayment - paidAmount) > 0.01 ||
-      Math.abs(currentBalance - balance) > 0.01 ||
-      JSON.stringify(currentLinkedReceipts.sort()) !== JSON.stringify(linkedReceiptIds.sort());
-
-    if (!hasChanges) {
-      return false;
-    }
-
-    try {
-      // Update the purchase record
-      const { error } = await supabase
-        .from('purchases')
-        .update({
-          linked_receipts: linkedReceiptIds,
-          amount_ttc: totalAmount,
-          amount_ht: totalAmount / 1.2,
-          amount: totalAmount,
-          advance_payment: paidAmount,
-          balance: balance,
-          payment_status: balance === 0 && totalAmount > 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
-        })
-        .eq('id', purchase.id);
-
-      if (error) {
-        console.error('Error updating purchase linking:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error in calculatePurchaseLinking:', error);
-      return false;
-    }
-  };
+  
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({
@@ -770,111 +645,7 @@ const PURCHASE_TYPES = [
     setIsBalanceHistoryDialogOpen(true);
   };
 
-  const handleOpenLinkingDialog = (purchase: Purchase) => {
-    setSelectedPurchaseForLinking(purchase);
-    setLinkDateFrom(purchase.link_date_from || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
-    setLinkDateTo(purchase.link_date_to || format(new Date(), 'yyyy-MM-dd'));
-    setIsLinkingDialogOpen(true);
-  };
-
-  const getFilteredReceipts = () => {
-    return receipts.filter(receipt => {
-      // Exclude deleted receipts
-      if (receipt.is_deleted) {
-        return false;
-      }
-
-      const receiptDate = new Date(receipt.created_at);
-      const fromDate = new Date(linkDateFrom);
-      const toDate = new Date(linkDateTo);
-      // Include all receipts within the date range, regardless of when they were created
-      return receiptDate >= fromDate && receiptDate <= toDate;
-    });
-  };
-
-  const calculateMontageData = () => {
-    const filteredReceipts = getFilteredReceipts();
-    let totalMontage = 0;
-    let paidMontage = 0;
-
-    filteredReceipts.forEach(receipt => {
-      const montageCost = receipt.montage_costs || 0;
-
-      // Only include receipts in InCutting, Ready, or Paid costs phases
-      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
-      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
-        totalMontage += montageCost;
-
-        // Only count as paid if status is 'Paid costs'
-        if (receipt.montage_status === 'Paid costs') {
-          paidMontage += montageCost;
-        }
-      }
-    });
-
-    const unpaidMontage = totalMontage - paidMontage;
-
-    return {
-      totalMontage,
-      paidMontage,
-      unpaidMontage,
-      receiptCount: filteredReceipts.length
-    };
-  };
-
-  const handleLinkMontageToReceipt = async () => {
-    if (!selectedPurchaseForLinking || !user) return;
-
-    try {
-      setIsSubmitting(true);
-      const filteredReceipts = getFilteredReceipts();
-      const montageData = calculateMontageData();
-
-      const linkedReceiptIds = filteredReceipts.map(r => r.id);
-
-      // Store the date range for future receipt matching
-      // This will allow the system to automatically include receipts created in the future
-      // that fall within this date range
-      const { error } = await supabase
-        .from('purchases')
-        .update({
-          linked_receipts: linkedReceiptIds,
-          link_date_from: linkDateFrom,
-          link_date_to: linkDateTo,
-          linking_category: 'montage_costs', // Set the linking category
-          amount_ttc: montageData.totalMontage,
-          amount_ht: montageData.totalMontage / 1.2, // Assuming 20% tax
-          amount: montageData.totalMontage,
-          advance_payment: montageData.paidMontage,
-          balance: montageData.unpaidMontage,
-          payment_status: montageData.unpaidMontage === 0 && montageData.totalMontage > 0 ? 'Paid' : montageData.paidMontage > 0 ? 'Partially Paid' : 'Unpaid'
-        })
-        .eq('id', selectedPurchaseForLinking.id);
-
-      if (error) throw error;
-
-      const dateRangeText = linkDateFrom === linkDateTo 
-        ? `for ${format(new Date(linkDateFrom), 'MMM dd, yyyy')}`
-        : `from ${format(new Date(linkDateFrom), 'MMM dd, yyyy')} to ${format(new Date(linkDateTo), 'MMM dd, yyyy')}`;
-
-      toast({
-        title: "Success",
-        description: `Linked ${montageData.receiptCount} current receipts ${dateRangeText}. Future receipts in this date range will be automatically included.`,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-      setIsLinkingDialogOpen(false);
-    } catch (error) {
-      console.error('Error linking receipts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to link receipts to purchase",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  
 
   const handleSupplierAdded = (supplier: any) => {
     queryClient.invalidateQueries({ queryKey: ['suppliers', user?.id] });
@@ -1419,7 +1190,6 @@ user_id: user.id,
                       onMarkAsPaid={handleMarkAsPaid}
                       onViewBalanceHistory={handleOpenBalanceHistoryDialog}
                       onRecurringRenewal={handleRecurringRenewal}
-                      onLinkToReceipts={handleOpenLinkingDialog}
                     />
                   </motion.div>
                 ))
@@ -1552,133 +1322,7 @@ user_id: user.id,
         </DialogContent>
       </Dialog>
 
-      {/* Receipt Linking Dialog */}
-      <Dialog open={isLinkingDialogOpen} onOpenChange={setIsLinkingDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Link className="h-5 w-5" />
-              Link Receipts to Purchase - {selectedPurchaseForLinking?.description}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            {/* Date Range Selection */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Select Date Range</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="link_date_from">From Date</Label>
-                    <Input
-                      id="link_date_from"
-                      type="date"
-                      value={linkDateFrom}
-                      onChange={(e) => setLinkDateFrom(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="link_date_to">To Date</Label>
-                    <Input
-                      id="link_date_to"
-                      type="date"
-                      value={linkDateTo}
-                      onChange={(e) => setLinkDateTo(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Montage Summary */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Montage Cost Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {(() =>{
-                  const montageData = calculateMontageData();
-                  return (
-                    <div className="grid grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total Receipts</p>
-                        <p className="text-xl font-bold text-blue-600">{montageData.receiptCount}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total Montage</p>
-                        <p className="text-xl font-bold text-primary">{montageData.totalMontage.toFixed(2)} DH</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Paid Montage</p>
-                        <p className="text-xl font-bold text-green-600">{montageData.paidMontage.toFixed(2)} DH</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Unpaid Balance</p>
-                        <p className="text-xl font-bold text-red-600">{montageData.unpaidMontage.toFixed(2)} DH</p>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-
-            {/* Receipt List */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Filtered Receipts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-60 overflow-y-auto">
-                  {getFilteredReceipts().length === 0 ? (
-                    <p className="text-center text-gray-500 py-4">No receipts found in selected date range</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {getFilteredReceipts().map((receipt) => (
-                        <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{receipt.customer_name}</p>
-                            <p className="text-sm text-gray-600">{format(new Date(receipt.created_at), 'MMM dd, yyyy')}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">{receipt.montage_costs.toFixed(2)} DH</p>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              receipt.montage_status === 'Paid costs' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {receipt.montage_status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <DialogFooter className="pt-6 border-t">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsLinkingDialogOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleLinkMontageToReceipt}
-              disabled={isSubmitting || getFilteredReceipts().length === 0}
-            >
-              {isSubmitting ? 'Linking...' : 'Link to Purchase'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      
     </div>
   );
 };
