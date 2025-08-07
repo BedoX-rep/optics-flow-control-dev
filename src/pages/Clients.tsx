@@ -96,7 +96,12 @@ export default function Clients() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return allClients || [];
+    
+    // Filter out deleted receipts from the client data
+    return (allClients || []).map(client => ({
+      ...client,
+      receipts: (client.receipts || []).filter(receipt => !receipt.is_deleted)
+    }));
   };
 
   const { data: allClients = [], isLoading } = useQuery({
