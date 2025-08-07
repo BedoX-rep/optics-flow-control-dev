@@ -182,11 +182,19 @@ const ReceiptCard = ({
           {/* Status Badges */}
           <div className="flex flex-wrap gap-2 mb-3">
             <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} 
-                   className="text-xs bg-teal-100 text-teal-700 border-teal-200">
+                   className={cn("text-xs border",
+                     receipt.balance === 0 ? "bg-green-100 text-green-700 border-green-200" :
+                     receipt.advance_payment > 0 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                     "bg-red-100 text-red-700 border-red-200"
+                   )}>
               {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
             </Badge>
             <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} 
-                   className="text-xs bg-teal-50 text-teal-600 border-teal-200">
+                   className={cn("text-xs border",
+                     receipt.delivery_status === 'Completed' ? 
+                     "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                     "bg-orange-100 text-orange-700 border-orange-200"
+                   )}>
               {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
             </Badge>
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-teal-50 border border-teal-200">
@@ -205,6 +213,100 @@ const ReceiptCard = ({
 
         {/* Content Section */}
         <div className="flex-1 px-4 py-2">
+          {/* Action Buttons Row */}
+          <div className="flex flex-wrap gap-1.5 justify-center mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onCallStatusChange(
+                receipt.call_status === 'Not Called' ? 'Called' :
+                receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+              )}
+              className={cn(
+                "h-8 w-8 p-0 rounded-full shadow-sm transition-all duration-200",
+                receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
+                receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
+                "bg-teal-100 hover:bg-teal-200 text-teal-700"
+              )}
+              title={receipt.call_status === 'Called' ? t('markUnresponsive') :
+                     receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+            >
+              <Phone className="h-3.5 w-3.5" />
+            </Button>
+
+            {receipt.balance > 0 && (
+              <Button
+                size="sm"
+                onClick={onPaid}
+                className="h-8 w-8 p-0 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+                title={t('markPaid')}
+              >
+                <Check className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              onClick={onDelivered}
+              className={cn(
+                "h-8 w-8 p-0 rounded-full shadow-sm text-white",
+                receipt.delivery_status === 'Completed' 
+                  ? "bg-orange-500 hover:bg-orange-600" 
+                  : "bg-blue-500 hover:bg-blue-600"
+              )}
+              title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
+            >
+              <Package className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={onView}
+              className="h-8 w-8 p-0 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+              title={t('view')}
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={onEdit}
+              className="h-8 w-8 p-0 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
+              title={t('edit')}
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setIsAddingNote(true)}
+              className="h-8 w-8 p-0 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
+              title={t('addNote')}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+
+            {receipt.note && (
+              <Button
+                size="sm"
+                onClick={() => setIsViewingNote(true)}
+                className="h-8 w-8 p-0 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+                title={t('viewNote')}
+              >
+                <StickyNote className="h-3.5 w-3.5" />
+              </Button>
+            )}
+
+            <Button
+              size="sm"
+              onClick={onDelete}
+              className="h-8 w-8 p-0 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
+              title={t('delete')}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('advance')}</p>
@@ -226,33 +328,50 @@ const ReceiptCard = ({
 
           {/* Montage Progress */}
           <div className="mb-4">
-            <p className="text-xs text-teal-700 font-poppins font-medium mb-2">{t('montageLabel')}</p>
-            <div className="grid grid-cols-6 gap-1 relative">
-              {MONTAGE_STATUSES.map((status, index) => {
-                const isCurrent = currentMontageIndex === index;
-                return (
-                  <motion.button
-                    key={status}
-                    whileHover={{ scale: 1.05 }}
-                    className={`relative h-2 rounded-full cursor-pointer transition-all ${
-                      isCurrent ? 'bg-teal-500' : 'bg-teal-200'
-                    }`}
-                    onClick={() => onMontageChange(status)}
-                  >
-                    {isCurrent && (
-                      <motion.div
-                        initial={false}
-                        layoutId={`progressCircle-${receipt.id}`}
-                        transition={{ type: "spring", duration: 0.5 }}
-                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
-                      />
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-            <div className="text-xs text-center text-teal-600 font-medium mt-1">
-              {getMontageStatusTranslation(receipt.montage_status)}
+            <p className="text-xs text-teal-700 font-poppins font-medium mb-3">{t('montageLabel')}</p>
+            <div className="space-y-2">
+              <div className="grid grid-cols-6 gap-1">
+                {MONTAGE_STATUSES.map((status, index) => {
+                  const isCurrent = currentMontageIndex === index;
+                  const isPassed = currentMontageIndex > index;
+                  return (
+                    <motion.button
+                      key={status}
+                      whileHover={{ scale: 1.05 }}
+                      className={cn(
+                        "relative h-2 rounded-full cursor-pointer transition-all",
+                        isCurrent ? 'bg-teal-500' : 
+                        isPassed ? 'bg-teal-400' : 'bg-teal-200'
+                      )}
+                      onClick={() => onMontageChange(status)}
+                    >
+                      {isCurrent && (
+                        <motion.div
+                          initial={false}
+                          layoutId={`progressCircle-${receipt.id}`}
+                          transition={{ type: "spring", duration: 0.5 }}
+                          className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full border-2 border-teal-500"
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-6 gap-1 text-xs">
+                {MONTAGE_STATUSES.map((status, index) => {
+                  const isCurrent = currentMontageIndex === index;
+                  return (
+                    <div key={status} className="text-center">
+                      <span className={cn(
+                        "text-xs font-medium leading-tight block",
+                        isCurrent ? "text-teal-700 font-semibold" : "text-teal-600"
+                      )}>
+                        {getMontageStatusTranslation(status).slice(0, 8)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -301,108 +420,6 @@ const ReceiptCard = ({
 
         {/* Footer Section */}
         <div className="p-4 pt-0">
-          <div className="border-t-2 border-teal-100 pt-3">
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onCallStatusChange(
-                  receipt.call_status === 'Not Called' ? 'Called' :
-                  receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
-                )}
-                className={cn(
-                  "h-8 px-3 rounded-full shadow-sm transition-all duration-200",
-                  receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
-                  receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
-                  "bg-teal-100 hover:bg-teal-200 text-teal-700"
-                )}
-                title={receipt.call_status === 'Called' ? t('markUnresponsive') :
-                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
-              >
-                <Phone className="h-3 w-3 mr-1" />
-                <span className="text-xs">{t('call')}</span>
-              </Button>
-
-              {receipt.balance > 0 && (
-                <Button
-                  size="sm"
-                  onClick={onPaid}
-                  className="h-8 px-3 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
-                  title={t('markPaid')}
-                >
-                  <Check className="h-3 w-3 mr-1" />
-                  <span className="text-xs">{t('pay')}</span>
-                </Button>
-              )}
-
-              <Button
-                size="sm"
-                onClick={onDelivered}
-                className={cn(
-                  "h-8 px-3 rounded-full shadow-sm text-white",
-                  receipt.delivery_status === 'Completed' 
-                    ? "bg-orange-500 hover:bg-orange-600" 
-                    : "bg-blue-500 hover:bg-blue-600"
-                )}
-                title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
-              >
-                <Package className="h-3 w-3 mr-1" />
-                <span className="text-xs">{receipt.delivery_status === 'Completed' ? t('undeliver') : t('deliver')}</span>
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={onView}
-                className="h-8 px-3 rounded-full bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
-                title={t('view')}
-              >
-                <Eye className="h-3 w-3 mr-1" />
-                <span className="text-xs">{t('view')}</span>
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={onEdit}
-                className="h-8 px-3 rounded-full bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
-                title={t('edit')}
-              >
-                <Edit className="h-3 w-3 mr-1" />
-                <span className="text-xs">{t('edit')}</span>
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={() => setIsAddingNote(true)}
-                className="h-8 px-3 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
-                title={t('addNote')}
-              >
-                <Pencil className="h-3 w-3 mr-1" />
-                <span className="text-xs">{t('note')}</span>
-              </Button>
-
-              {receipt.note && (
-                <Button
-                  size="sm"
-                  onClick={() => setIsViewingNote(true)}
-                  className="h-8 px-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
-                  title={t('viewNote')}
-                >
-                  <StickyNote className="h-3 w-3 mr-1" />
-                  <span className="text-xs">{t('viewNote')}</span>
-                </Button>
-              )}
-
-              <Button
-                size="sm"
-                onClick={onDelete}
-                className="h-8 px-3 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
-                title={t('delete')}
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                <span className="text-xs">{t('delete')}</span>
-              </Button>
-            </div>
-          </div>
         </div>
       </Card>
     </motion.div>
