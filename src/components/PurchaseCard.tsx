@@ -53,6 +53,7 @@ interface PurchaseCardProps {
   onMarkAsPaid: (purchase: Purchase) => void;
   onViewBalanceHistory: (purchase: Purchase) => void;
   onRecurringRenewal: (purchase: Purchase) => void;
+  onLinkToReceipts?: (purchase: Purchase) => void;
 }
 
 const PurchaseCard = React.memo<PurchaseCardProps>(({
@@ -62,7 +63,8 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
   onDelete,
   onMarkAsPaid,
   onViewBalanceHistory,
-  onRecurringRenewal
+  onRecurringRenewal,
+  onLinkToReceipts
 }) => {
   const { t } = useLanguage();
 
@@ -221,12 +223,12 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
         {/* Footer Section */}
         <div className="border-t-2 border-teal-100 pt-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onViewBalanceHistory(purchase)}
-                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-3 text-xs font-inter rounded-lg"
+                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2 text-xs font-inter rounded-lg"
               >
                 <History size={14} className="mr-1" />
                 {t('history')}
@@ -235,18 +237,18 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(purchase)}
-                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-3 text-xs font-inter rounded-lg"
+                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8 px-2 text-xs font-inter rounded-lg"
               >
                 <Edit size={14} />
               </Button>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {purchase.payment_status !== 'Paid' && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onMarkAsPaid(purchase)}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-3 text-xs font-inter rounded-lg"
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2 text-xs font-inter rounded-lg"
                 >
                   <DollarSign size={14} />
                 </Button>
@@ -255,7 +257,7 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
                 variant="ghost"
                 size="sm"
                 onClick={() => onDelete(purchase.id)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-3 text-xs font-inter rounded-lg"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2 text-xs font-inter rounded-lg"
               >
                 <Trash2 size={14} />
               </Button>
@@ -267,12 +269,23 @@ const PurchaseCard = React.memo<PurchaseCardProps>(({
               <Button
                 size="sm"
                 onClick={() => onRecurringRenewal(purchase)}
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white h-9 px-3 text-xs font-poppins font-medium rounded-lg shadow-sm"
               >
                 <TrendingUp size={14} className="mr-2" />
                 {t('renewNow')}
               </Button>
             )}
+            
+            {/* Link to Receipts Button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onLinkToReceipts && onLinkToReceipts(purchase)}
+              className="flex-1 border-2 border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 h-9 px-3 text-xs font-poppins font-medium rounded-lg"
+            >
+              <Link size={14} className="mr-2" />
+              {t('linkToReceipts')}
+            </Button>
           </div>
         </div>
       </CardContent>

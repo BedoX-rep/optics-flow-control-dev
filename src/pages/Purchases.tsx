@@ -1419,6 +1419,7 @@ user_id: user.id,
                       onMarkAsPaid={handleMarkAsPaid}
                       onViewBalanceHistory={handleOpenBalanceHistoryDialog}
                       onRecurringRenewal={handleRecurringRenewal}
+                      onLinkToReceipts={handleOpenLinkingDialog}
                     />
                   </motion.div>
                 ))
