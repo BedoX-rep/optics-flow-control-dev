@@ -361,7 +361,7 @@ export const ClientCard = ({ client, onEdit, onDelete, onRefresh }: ClientCardPr
       </div>
 
       {/* Content Section - Enhanced with better visual organization */}
-      <div className="flex-1 px-5 py-4 overflow-y-auto">
+      <div className="flex-1 px-5 py-4 overflow-hidden"></div>
         <div className="space-y-5">
           {/* Toggle between Prescription and Purchase History */}
           <div className="bg-white/60 rounded-lg p-4 border border-teal-100 shadow-sm relative overflow-hidden">
