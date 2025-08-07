@@ -72,6 +72,18 @@ const ReceiptDetailsMiniDialog = ({
 
   if (!displayReceipt) return null;
 
+  // Calculate payment status dynamically based on balance and advance_payment
+  const calculatePaymentStatus = (receipt: any) => {
+    const balance = Number(receipt.balance || 0);
+    const advancePayment = Number(receipt.advance_payment || 0);
+    
+    if (balance === 0) return 'Paid';
+    if (advancePayment > 0) return 'Partially Paid';
+    return 'Unpaid';
+  };
+
+  const paymentStatus = calculatePaymentStatus(displayReceipt);
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -155,9 +167,9 @@ const ReceiptDetailsMiniDialog = ({
             <div>
               <h3 className="text-sm font-medium text-gray-500">Status</h3>
               <div className="flex flex-col gap-1.5 mt-1">
-                <Badge variant="outline" className={getStatusColor('payment', displayReceipt.payment_status)}>
-                  {t('paymentStatus')} {displayReceipt.payment_status === 'Paid' ? t('paid') : 
-                   displayReceipt.payment_status === 'Partially Paid' ? t('partial') : t('unpaid')}
+                <Badge variant="outline" className={getStatusColor('payment', paymentStatus)}>
+                  {t('paymentStatus')} {paymentStatus === 'Paid' ? t('paid') : 
+                   paymentStatus === 'Partially Paid' ? t('partial') : t('unpaid')}
                 </Badge>
                 <Badge variant="outline" className={getStatusColor('delivery', displayReceipt.delivery_status)}>
                   {t('deliveryLabel')} {displayReceipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
