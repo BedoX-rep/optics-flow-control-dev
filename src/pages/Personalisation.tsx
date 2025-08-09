@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Save, Settings, DollarSign, Building2, Plus, Trash2, Edit } from 'lucide-react';
@@ -74,77 +75,8 @@ const Personalisation = () => {
 
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
-  // Fetch user personalisation data
-  const { data: personalisationInfo, isLoading } = useQuery({
-    queryKey: ['user-information', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-
-      try {
-        // Try to get existing user information
-        const { data: existingInfo, error: fetchError } = await supabase
-          .from('user_information')
-          .select(`
-            auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-            markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-            markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-            markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-            markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-            markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-            markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-          `)
-          .eq('user_id', user.id)
-          .single();
-
-        if (existingInfo) {
-          return existingInfo;
-        }
-
-        // If no user information exists, initialize it
-        if (fetchError && fetchError.code === 'PGRST116') {
-          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-          // Fetch the newly created/updated record
-          const { data: newInfo, error: newError } = await supabase
-            .from('user_information')
-            .select(`
-              auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-              markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-              markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-              markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-              markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-              markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-              markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-            `)
-            .eq('user_id', user.id)
-            .single();
-
-          if (newError) {
-            console.error('Error fetching new user personalisation:', newError);
-            return null;
-          }
-
-          return newInfo;
-        }
-
-        if (fetchError) {
-          console.error('Error fetching user personalisation:', fetchError);
-          return null;
-        }
-
-        return existingInfo;
-      } catch (error) {
-        console.error('Unexpected error:', error);
-        return null;
-      }
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true
-  });
+  // Fetch user personalisation data using custom hook
+  const { data: personalisationInfo, isLoading } = useUserInformation();
 
   // Update form data when user personalisation is loaded
   useEffect(() => {

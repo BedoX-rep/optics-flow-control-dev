@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import AddClientDialog from '@/components/AddClientDialog';
 import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 import OrderItems from '@/components/receipt/OrderItems';
@@ -252,77 +253,7 @@ const NewReceipt = () => {
   });
 
   // Fetch user information including personalization settings with caching
-  const { data: personalisationData } = useQuery({
-    queryKey: ['user-information', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-
-      try {
-        // First, try to get existing user information
-        const { data: existingInfo, error: fetchError } = await supabase
-          .from('user_information')
-          .select(`
-            auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-            markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-            markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-            markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-            markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-            markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-            markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-          `)
-          .eq('user_id', user.id)
-          .single();
-
-        if (existingInfo) {
-          return existingInfo;
-        }
-
-        // If no user information exists, initialize it
-        if (fetchError && fetchError.code === 'PGRST116') {
-          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-          // Fetch the newly created record
-          const { data: newInfo, error: newError } = await supabase
-            .from('user_information')
-            .select(`
-              auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-              markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-              markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-              markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-              markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-              markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-              markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-            `)
-            .eq('user_id', user.id)
-            .single();
-
-          if (newError) {
-            console.error('Error fetching new user information:', newError);
-            return null;
-          }
-
-          return newInfo;
-        }
-
-        if (fetchError) {
-          console.error('Error fetching user information:', fetchError);
-          return null;
-        }
-
-        return existingInfo;
-      } catch (error) {
-        console.error('Unexpected error:', error);
-        return null;
-      }
-    },
-    enabled: !!user,
-    staleTime: 12 * 60 * 60 * 1000, // 12 hours
-    cacheTime: 30 * 60 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchInterval: 12 * 60 * 60 * 1000, // Refetch every 12 hours
-    refetchIntervalInBackground: true
-  });
+  const { data: personalisationData } = useUserInformation();
 
   useEffect(() => {
     if (!user) {

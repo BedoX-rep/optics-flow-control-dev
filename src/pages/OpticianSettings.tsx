@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, Save, Building2, User, MapPin, FileText, Globe, Phone, Mail } from 'lucide-react';
 
@@ -64,61 +65,8 @@ const OpticianSettings = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Fetch user information
-  const { data: userInfo, isLoading } = useQuery({
-    queryKey: ['user-information', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-
-      try {
-        // First, try to get existing user information
-        const { data: existingInfo, error: fetchError } = await supabase
-          .from('user_information')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (existingInfo) {
-          return existingInfo;
-        }
-
-        // If no user information exists, initialize from subscription data
-        if (fetchError && fetchError.code === 'PGRST116') {
-          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-          // Fetch the newly created record
-          const { data: newInfo, error: newError } = await supabase
-            .from('user_information')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-
-          if (newError) {
-            console.error('Error fetching new user information:', newError);
-            return null;
-          }
-
-          return newInfo;
-        }
-
-        if (fetchError) {
-          console.error('Error fetching user information:', fetchError);
-          return null;
-        }
-
-        return existingInfo;
-      } catch (error) {
-        console.error('Unexpected error:', error);
-        return null;
-      }
-    },
-    enabled: !!user,
-    staleTime: 25 * 60 * 1000, // Keep data fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true
-  });
+  // Fetch user information using custom hook
+  const { data: userInfo, isLoading } = useUserInformation();
 
   // Update form data when user info is loaded
   useEffect(() => {
