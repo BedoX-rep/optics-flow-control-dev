@@ -9,8 +9,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { useLanguage } from "./LanguageProvider";
 import { useAuth } from "./AuthProvider";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ReceiptDetailsMiniDialogProps {
   isOpen: boolean;
@@ -32,43 +31,8 @@ const ReceiptDetailsMiniDialog = ({
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Use React Query to fetch detailed receipt data from cache or server
-  const { data: detailedReceipt, isLoading } = useQuery({
-    queryKey: ['receipt-details', receipt?.id],
-    queryFn: async () => {
-      if (!receipt?.id || !user) return null;
-      
-      const { data, error } = await supabase
-        .from('receipts')
-        .select(`
-          *,
-          clients!client_id (
-            name,
-            phone
-          ),
-          receipt_items (
-            *,
-            product:product_id (
-              name,
-              category,
-              company
-            )
-          )
-        `)
-        .eq('id', receipt.id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!receipt?.id && !!user && isOpen,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
-  });
-
-  // Use the detailed receipt data if available, otherwise fallback to the passed receipt
-  const displayReceipt = detailedReceipt || receipt;
+  // Use the receipt data passed from parent (already contains all needed data from Receipts page cache)
+  const displayReceipt = receipt;
 
   if (!displayReceipt) return null;
 
@@ -88,9 +52,8 @@ const ReceiptDetailsMiniDialog = ({
     setIsDeleting(true);
     try {
       await onDelete(displayReceipt);
-      // Invalidate related queries after deletion
+      // Invalidate the receipts query to refresh the cache
       queryClient.invalidateQueries({ queryKey: ['receipts'] });
-      queryClient.invalidateQueries({ queryKey: ['receipt-details'] });
       onClose();
     } catch (error) {
       console.error("Error deleting receipt:", error);
@@ -130,20 +93,7 @@ const ReceiptDetailsMiniDialog = ({
     }
   };
 
-  if (isLoading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px]">
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
-              <p className="text-gray-500">Loading receipt details...</p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
