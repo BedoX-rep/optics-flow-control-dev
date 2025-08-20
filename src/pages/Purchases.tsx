@@ -714,7 +714,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-user_id: user.id,
+        user_id: user.id,
       };
 
       if (editingPurchase) {
