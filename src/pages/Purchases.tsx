@@ -717,8 +717,6 @@ const PURCHASE_TYPES = [
         user_id: user.id,
       };
 
-      if (editingPurchase) {</old_str>
-
       if (editingPurchase) {
         const { error } = await supabase
           .from('purchases')
