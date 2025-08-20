@@ -3526,6 +3526,18 @@ const purchasesTranslations: Translations = {
   viewNote: {
     en: 'View Note',
     fr: 'Voir la Note'
+  },
+  noCategory: {
+    en: 'No Category',
+    fr: 'Aucune Catégorie'
+  },
+  markAsPaid: {
+    en: 'Mark as Paid',
+    fr: 'Marquer comme Payé'
+  },
+  deletePurchase: {
+    en: 'Delete Purchase',
+    fr: 'Supprimer l\'Achat'
   }
 };
 
