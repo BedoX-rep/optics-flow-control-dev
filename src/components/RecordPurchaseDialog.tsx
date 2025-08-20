@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -128,7 +129,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
     payment_status: 'Unpaid',
     payment_urgency: '',
     recurring_type: 'none',
-    purchase_type: t('operationalExpenses'),
+    purchase_type: 'Operational Expenses',
     next_recurring_date: '',
     already_recurred: false
   });
@@ -151,7 +152,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         payment_status: editingPurchase.payment_status || 'Unpaid',
         payment_urgency: editingPurchase.payment_urgency ? format(new Date(editingPurchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: editingPurchase.recurring_type || 'none',
-        purchase_type: editingPurchase.purchase_type || t('operationalExpenses'),
+        purchase_type: editingPurchase.purchase_type || 'Operational Expenses',
         next_recurring_date: editingPurchase.next_recurring_date ? format(new Date(editingPurchase.next_recurring_date), 'yyyy-MM-dd') : '',
         already_recurred: editingPurchase.already_recurred || false
       });
@@ -176,7 +177,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: 'none',
-      purchase_type: t('operationalExpenses'),
+      purchase_type: 'Operational Expenses',
       next_recurring_date: '',
       already_recurred: false
     });

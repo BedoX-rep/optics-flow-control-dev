@@ -569,14 +569,14 @@ const PURCHASE_TYPES = [
       amount_ttc: '',
       category: '',
       purchase_date: format(new Date(), 'yyyy-MM-dd'),
-      payment_method: t('cash'),
+      payment_method: 'Cash',
       notes: '',
       advance_payment: '',
       balance: '',
       payment_status: 'Unpaid',
       payment_urgency: '',
       recurring_type: '',
-      purchase_type: t('operationalExpenses'),
+      purchase_type: 'Operational Expenses',
     });
     setEditingPurchase(null);
   };
@@ -610,7 +610,7 @@ const PURCHASE_TYPES = [
         payment_status: purchase.payment_status || 'Unpaid',
         payment_urgency: purchase.payment_urgency ? format(new Date(purchase.payment_urgency), 'yyyy-MM-dd') : '',
         recurring_type: purchase.recurring_type || '',
-        purchase_type: purchase.purchase_type || t('operationalExpenses'),
+        purchase_type: purchase.purchase_type || 'Operational Expenses',
       });
     } else {
       resetPurchaseForm();
@@ -714,7 +714,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-        user_id: user.id,
+user_id: user.id,
       };
 
       if (editingPurchase) {
@@ -866,7 +866,6 @@ const PURCHASE_TYPES = [
         payment_urgency: purchaseFormData.payment_urgency || null,
         recurring_type: purchaseFormData.recurring_type || null,
         next_recurring_date: nextRecurringDate,
-        purchase_type: purchaseFormData.purchase_type,
       };
 
       const { error } = await supabase
