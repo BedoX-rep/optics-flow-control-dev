@@ -715,7 +715,9 @@ const PURCHASE_TYPES = [
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
         user_id: user.id,
-      };</old_str>
+      };
+
+      if (editingPurchase) {</old_str>
 
       if (editingPurchase) {
         const { error } = await supabase
