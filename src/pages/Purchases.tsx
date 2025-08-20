@@ -690,7 +690,6 @@ const PURCHASE_TYPES = [
 
     const amountHt = parseFloat(purchaseFormData.amount_ht);
     const amountTtc = parseFloat(purchaseFormData.amount_ttc);
-    const advancePayment = parseFloat(purchaseFormData.advance_payment) || 0;
 
     if (amountTtc < amountHt) {
       toast({
@@ -701,20 +700,8 @@ const PURCHASE_TYPES = [
       return;
     }
 
-    if (advancePayment > amountTtc) {
-      toast({
-        title: "Error",
-        description: "Advance payment cannot be more than TTC amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsSubmitting(true);
-
-      const balance = amountTtc - advancePayment;
-      const nextRecurringDate = calculateNextRecurringDate(purchaseFormData.purchase_date, purchaseFormData.recurring_type);
 
       const purchaseData = {
         supplier_id: purchaseFormData.supplier_id || null,
@@ -726,31 +713,22 @@ const PURCHASE_TYPES = [
         purchase_date: purchaseFormData.purchase_date,
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
-        advance_payment: advancePayment,
-        balance: balance,
-        payment_status: purchaseFormData.payment_status,
-        payment_urgency: purchaseFormData.payment_urgency || null,
-        recurring_type: purchaseFormData.recurring_type || null,
-        next_recurring_date: nextRecurringDate,
         purchase_type: purchaseFormData.purchase_type,
+user_id: user.id,
       };
 
       if (editingPurchase) {
         const { error } = await supabase
           .from('purchases')
           .update(purchaseData)
-          .eq('id', editingPurchase.id)
-          .eq('user_id', user.id);
+          .eq('id', editingPurchase.id);
 
         if (error) throw error;
         toast({ title: "Success", description: "Purchase updated successfully" });
       } else {
         const { error } = await supabase
           .from('purchases')
-          .insert({
-            ...purchaseData,
-            user_id: user.id,
-          });
+          .insert(purchaseData);
 
         if (error) throw error;
         toast({ title: "Success", description: "Purchase recorded successfully" });
@@ -830,7 +808,90 @@ const PURCHASE_TYPES = [
     setIsPurchaseDialogOpen(true);
   };
 
-  
+  const handleUpdatePurchase = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user || !editingPurchase) return;
+
+    if (!purchaseFormData.description.trim() || !purchaseFormData.amount_ht || !purchaseFormData.amount_ttc) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amountHt = parseFloat(purchaseFormData.amount_ht);
+    const amountTtc = parseFloat(purchaseFormData.amount_ttc);
+    const advancePayment = parseFloat(purchaseFormData.advance_payment) || 0;
+
+    if (amountTtc < amountHt) {
+      toast({
+        title: "Error",
+        description: "TTC amount cannot be less than HT amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (advancePayment > amountTtc) {
+      toast({
+        title: "Error",
+        description: "Advance payment cannot be more than TTC amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const balance = amountTtc - advancePayment;
+      const nextRecurringDate = calculateNextRecurringDate(purchaseFormData.purchase_date, purchaseFormData.recurring_type);
+
+      const purchaseData = {
+        supplier_id: purchaseFormData.supplier_id || null,
+        description: purchaseFormData.description.trim(),
+        amount_ht: amountHt,
+        amount_ttc: amountTtc,
+        amount: amountTtc,
+        category: purchaseFormData.category || null,
+        purchase_date: purchaseFormData.purchase_date,
+        payment_method: purchaseFormData.payment_method,
+        notes: purchaseFormData.notes || null,
+        advance_payment: advancePayment,
+        balance: balance,
+        payment_status: purchaseFormData.payment_status,
+        payment_urgency: purchaseFormData.payment_urgency || null,
+        recurring_type: purchaseFormData.recurring_type || null,
+        next_recurring_date: nextRecurringDate,
+      };
+
+      const { error } = await supabase
+        .from('purchases')
+        .update(purchaseData)
+        .eq('id', editingPurchase.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Purchase updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      setEditingPurchase(null);
+      resetPurchaseForm();
+
+    } catch (error) {
+      console.error('Error updating purchase:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update purchase",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSupplierSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
