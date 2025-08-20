@@ -110,8 +110,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
   ];
 
   const PURCHASE_TYPES = [
-    t('operationalExpenses'),
-    t('capitalExpenditure')
+    { value: 'Operational Expenses', label: t('operationalExpenses') },
+    { value: 'Capital Expenditure', label: t('capitalExpenditure') }
   ];
 
   const [formData, setFormData] = useState({
@@ -507,8 +507,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                       </SelectTrigger>
                       <SelectContent>
                         {PURCHASE_TYPES.map(type => (
-                          <SelectItem key={type} value={type}>
-                            {type}
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
