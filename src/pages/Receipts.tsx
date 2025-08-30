@@ -353,7 +353,7 @@ const ReceiptCard = ({
                 <p className="font-inter font-semibold text-orange-600">{((receipt.cost_ttc || 0) + (receipt.montage_costs || 0)).toFixed(2)} DH</p>
                 {(receipt.montage_costs || 0) > 0 && (
                   <p className="text-xs text-gray-500">
-                    {t('products')}: {(receipt.cost_ttc || 0).toFixed(2)} DH + {t('montage')}: {(receipt.montage_costs || 0).toFixed(2)} DH
+                    {t('products')}: {(receipt.cost_ttc || 0).toFixed(2)} DH + ADC: {(receipt.montage_costs || 0).toFixed(2)} DH
                   </p>
                 )}
               </div>
