@@ -212,10 +212,11 @@ const NewReceipt = () => {
   }, [autoMontage]);
 
   const { data: productsData } = useQuery({
-    queryKey: ['products', user?.id],
+    queryKey: ['all-products', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+
+      const { data: allProducts, error } = await supabase
         .from('products')
         .select('*')
         .eq('user_id', user.id)
@@ -223,15 +224,31 @@ const NewReceipt = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+
+      // After fetching, check if stock is 0 and update stock status if necessary
+      if (allProducts) {
+        allProducts.forEach(async (product) => {
+          if (product.stock === 0 && product.stock_status === 'inStock') {
+            await supabase
+              .from('products')
+              .update({ stock_status: 'Out Of Stock' })
+              .eq('id', product.id)
+              .eq('user_id', user.id);
+          }
+        });
+      }
+
+      return allProducts || [];
     },
-    enabled: !!user
+    enabled: !!user,
+    staleTime: Infinity, // Never consider this data stale
+    cacheTime: Infinity, // Keep in cache indefinitely
   });
 
   // Function to refresh products list
   const refreshProducts = async () => {
     if (user) {
-      await queryClient.invalidateQueries(['products', user.id]);
+      await queryClient.invalidateQueries(['all-products', user.id]);
     }
   };
 
