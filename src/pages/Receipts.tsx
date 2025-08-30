@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import {
   Select,
   SelectContent,
@@ -1007,39 +1007,39 @@ const Receipts = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
-          <AnimatePresence>
-            {isLoading ? (
-              Array(6).fill(0).map((_, i) => (
-                <Card key={i} className="p-6 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
-                  <div className="space-y-3">
-                    <div className="h-3 bg-gray-200 rounded" />
-                    <div className="h-3 bg-gray-200 rounded w-5/6" />
-                  </div>
-                </Card>
-              ))
-            ) : filteredReceipts.length === 0 ? (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                {t('noReceiptsFound')}
-              </div>
-            ) : (
-              filteredReceipts.map((receipt) => (
-                <ReceiptCard
-                  key={receipt.id}
-                  receipt={receipt}
-                  onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
-                  onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
-                  onDelete={() => openDeleteDialog(receipt)}
-                  onView={() => setSelectedReceipt(receipt)}
-                  onEdit={() => setEditingReceipt(receipt)}
-                  onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
-                  onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
-                  onNoteChange={(note) => handleNoteChange(receipt.id, note)}
-                />
-              ))
-            )}
-          </AnimatePresence>
-        </div>
+        <AnimatePresence>
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <Card key={i} className="p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                <div className="space-y-3">
+                  <div className="h-3 bg-gray-200 rounded" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              </Card>
+            ))
+          ) : filteredReceipts.length === 0 ? (
+            <div className="col-span-full text-center py-10 text-gray-500">
+              {t('noReceiptsFound')}
+            </div>
+          ) : (
+            filteredReceipts.map((receipt) => (
+              <ReceiptCard
+                key={receipt.id}
+                receipt={receipt}
+                onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
+                onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
+                onDelete={() => openDeleteDialog(receipt)}
+                onView={() => setSelectedReceipt(receipt)}
+                onEdit={() => setEditingReceipt(receipt)}
+                onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
+                onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
+                onNoteChange={(note) => handleNoteChange(receipt.id, note)}
+              />
+            ))
+          )}
+        </AnimatePresence>
+      </div>
 
       <ReceiptDetailsMiniDialog
         isOpen={!!selectedReceipt}
