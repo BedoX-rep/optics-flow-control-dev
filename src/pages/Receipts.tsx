@@ -212,6 +212,11 @@ const ReceiptCard = ({
                    )}>
               {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
             </Badge>
+            {receipt.order_type && (
+              <Badge className="text-xs border bg-purple-100 text-purple-700 border-purple-200">
+                {t(receipt.order_type.toLowerCase())}
+              </Badge>
+            )}
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-teal-50 border border-teal-200">
               <div className={cn("w-2 h-2 rounded-full",
                 receipt.call_status === 'Called' ? "bg-green-500" :
@@ -271,8 +276,8 @@ const ReceiptCard = ({
                 className={cn(
                   "h-8 w-8 p-0 rounded-full shadow-sm text-white",
                   receipt.delivery_status === 'Completed' 
-                    ? "bg-orange-500 hover:bg-orange-600" 
-                    : "bg-blue-500 hover:bg-blue-600"
+                    ? "bg-blue-500 hover:bg-blue-600" 
+                    : "bg-orange-500 hover:bg-orange-600"
                 )}
                 title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
               >
@@ -315,7 +320,7 @@ const ReceiptCard = ({
                 <Button
                   size="sm"
                   onClick={handleViewNote}
-                  className="h-8 w-8 p-0 rounded-full bg-teal-500 hover:bg-teal-600 text-white shadow-sm"
+                  className="h-8 w-8 p-0 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
                   title={t('viewNote')}
                 >
                   <StickyNote className="h-3.5 w-3.5" />
@@ -344,11 +349,11 @@ const ReceiptCard = ({
             </div>
             <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('cost')}</p>
-              <p className="font-inter font-semibold text-orange-600">{receipt.cost_ttc?.toFixed(2) || '0.00'} DH</p>
+              <p className="font-inter font-semibold text-orange-600">{((receipt.cost_ttc || 0) + (receipt.montage_costs || 0)).toFixed(2)} DH</p>
             </div>
             <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('profit')}</p>
-              <p className="font-inter font-semibold text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0)).toFixed(2)} DH</p>
+              <p className="font-inter font-semibold text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0) - (receipt.montage_costs || 0)).toFixed(2)} DH</p>
             </div>
           </div>
 
