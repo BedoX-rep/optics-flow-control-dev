@@ -160,8 +160,7 @@ const ReceiptCard = ({
       className="w-full"
     >
       <Card className={cn(
-        "border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col",
-        (isEditingNote || isViewingNote) ? "min-h-[420px]" : "h-[420px]"
+        "border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col"
       )}>
         {/* Header Section */}
         <div className="p-4 pb-0">
@@ -879,7 +878,7 @@ const Receipts = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
+    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
         <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
           <Link to="/new-receipt">
