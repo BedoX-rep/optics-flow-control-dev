@@ -349,7 +349,14 @@ const ReceiptCard = ({
             </div>
             <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('cost')}</p>
-              <p className="font-inter font-semibold text-orange-600">{((receipt.cost_ttc || 0) + (receipt.montage_costs || 0)).toFixed(2)} DH</p>
+              <div className="space-y-0.5">
+                <p className="font-inter font-semibold text-orange-600">{((receipt.cost_ttc || 0) + (receipt.montage_costs || 0)).toFixed(2)} DH</p>
+                {(receipt.montage_costs || 0) > 0 && (
+                  <p className="text-xs text-gray-500">
+                    {t('products')}: {(receipt.cost_ttc || 0).toFixed(2)} DH + {t('montage')}: {(receipt.montage_costs || 0).toFixed(2)} DH
+                  </p>
+                )}
+              </div>
             </div>
             <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('profit')}</p>
