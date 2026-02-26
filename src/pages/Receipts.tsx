@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, StickyNote, Pencil, MoreHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, StickyNote, Pencil, MoreHorizontal, X, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,9 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { Textarea } from '@/components/ui/textarea';
 import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import ReceiptsHero from '@/components/receipts/ReceiptsHero';
+import ReceiptFilters from '@/components/receipts/ReceiptFilters';
+import { useNavigate } from 'react-router-dom';
 
 
 interface ReceiptData {
@@ -514,6 +517,7 @@ const ReceiptCard = ({
 const Receipts = () => {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const [page, setPage] = useState(0);
@@ -915,310 +919,196 @@ const Receipts = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Link to="/new-receipt">
-            <Button className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200">
-              <Plus className="h-4 w-4 mr-2" />
-              {t('newReceipt')}
-            </Button>
-          </Link>
-          <ReceiptStatsSummary receipts={receipts} />
-        </div>
-        <Button
-          variant="outline"
-          size="lg"
-          className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
-          onClick={() => setIsStatsOpen(true)}
-        >
-          <BarChart2 className="h-5 w-5 mr-2" />
-          {t('statistics')}
-        </Button>
-      </div>
-
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder={t('searchReceipts')}
-              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Date Filter */}
-            <Select
-              value={dateFilter}
-              onValueChange={(value) => setDateFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                dateFilter !== 'all'
-                  ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
-                  : "bg-white/10 hover:bg-white/20"
-              )}>
-                <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue placeholder={t('date')}>
-                  {dateFilter === 'all' ? t('date') :
-                    dateFilter === 'today' ? t('today') :
-                      dateFilter === 'week' ? t('thisWeek') :
-                        dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
-                </SelectValue>
-                {dateFilter !== 'all' && (
-                  <X
-                    className="h-3 w-3 ml-auto hover:text-blue-900 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDateFilter('all');
-                    }}
-                  />
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('allDates')}</SelectItem>
-                <SelectItem value="today">{t('today')}</SelectItem>
-                <SelectItem value="week">{t('thisWeek')}</SelectItem>
-                <SelectItem value="month">{t('thisMonth')}</SelectItem>
-                <SelectItem value="year">{t('thisYear')}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Payment Filter */}
-            <Select
-              value={paymentFilter}
-              onValueChange={(value) => setPaymentFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                paymentFilter === 'paid' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
-                  paymentFilter === 'partial' ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" :
-                    paymentFilter === 'unpaid' ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200" :
-                      "bg-white/10 hover:bg-white/20"
-              )}>
-                <Wallet className="h-4 w-4 mr-2" />
-                <SelectValue placeholder={t('payment')}>
-                  {paymentFilter === 'all' ? t('payment') :
-                    paymentFilter === 'paid' ? t('paid') :
-                      paymentFilter === 'partial' ? t('partial') : t('unpaid')}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-gray-600">{t('allPayments')}</SelectItem>
-                <SelectItem value="paid" className="text-green-600">{t('paid')}</SelectItem>
-                <SelectItem value="partial" className="text-yellow-600">{t('partial')}</SelectItem>
-                <SelectItem value="unpaid" className="text-red-600">{t('unpaid')}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Delivery Filter */}
-            <Select
-              value={deliveryFilter}
-              onValueChange={(value) => setDeliveryFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                deliveryFilter === 'Completed' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
-                  deliveryFilter === 'Undelivered' ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200" :
-                    "bg-white/10 hover:bg-white/20"
-              )}>
-                <Package className="h-4 w-4 mr-2" />
-                <SelectValue placeholder={t('deliveryLabel')}>
-                  {deliveryFilter === 'all' ? t('deliveryLabel') :
-                    deliveryFilter === 'Completed' ? t('delivered') : t('undelivered')}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-gray-600">{t('allDeliveries')}</SelectItem>
-                <SelectItem value="Completed" className="text-green-600">{t('delivered')}</SelectItem>
-                <SelectItem value="Undelivered" className="text-orange-600">{t('undelivered')}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Montage Status Filter */}
-            <Select
-              value={montageFilter}
-              onValueChange={(value) => setMontageFilter(value)}
-            >
-              <SelectTrigger className={cn(
-                "w-[160px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
-                montageFilter !== 'all' ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200" :
-                  "bg-white/10 hover:bg-white/20"
-              )}>
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder={t('montageLabel')}>
-                  {montageFilter === 'all' ? t('montageLabel') : (
-                    montageFilter === 'UnOrdered' ? t('unOrdered') :
-                      montageFilter === 'Ordered' ? t('ordered') :
-                        montageFilter === 'InStore' ? t('inStore') :
-                          montageFilter === 'InCutting' ? t('inCutting') :
-                            montageFilter === 'Ready' ? t('ready') : t('paidCosts')
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-gray-600 font-medium">{t('allMontageStatuses') || 'All Statuses'}</SelectItem>
-                <SelectItem value="UnOrdered" className="text-gray-600">{t('unOrdered')}</SelectItem>
-                <SelectItem value="Ordered" className="text-blue-600">{t('ordered')}</SelectItem>
-                <SelectItem value="InStore" className="text-orange-600">{t('inStore')}</SelectItem>
-                <SelectItem value="InCutting" className="text-yellow-600">{t('inCutting')}</SelectItem>
-                <SelectItem value="Ready" className="text-purple-600">{t('ready')}</SelectItem>
-                <SelectItem value="Paid costs" className="text-green-600">{t('paidCosts')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-6">
-        <AnimatePresence>
-          {isLoading ? (
-            Array(6).fill(0).map((_, i) => (
-              <Card key={i} className="p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
-                <div className="space-y-3">
-                  <div className="h-3 bg-gray-200 rounded" />
-                  <div className="h-3 bg-gray-200 rounded w-5/6" />
-                </div>
-              </Card>
-            ))
-          ) : filteredReceipts.length === 0 ? (
-            <div className="col-span-full text-center py-10 text-gray-500">
-              {t('noReceiptsFound')}
-            </div>
-          ) : (
-            paginatedReceipts.map((receipt) => (
-              <ReceiptCard
-                key={receipt.id}
-                receipt={receipt}
-                onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
-                onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
-                onDelete={() => openDeleteDialog(receipt)}
-                onView={() => setSelectedReceipt(receipt)}
-                onEdit={() => setEditingReceipt(receipt)}
-                onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
-                onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
-                onNoteChange={(note) => handleNoteChange(receipt.id, note)}
-              />
-            ))
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex flex-col items-center gap-4 mt-8 mb-12">
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(Math.max(0, page - 1))}
-              disabled={page === 0 || isLoading}
-              className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
-            >
-              <ChevronDown className="h-4 w-4 rotate-90" />
-              {t('previous')}
-            </Button>
-
-            <div className="flex items-center gap-1.5 mx-2">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i;
-                } else if (page < 3) {
-                  pageNum = i;
-                } else if (page > totalPages - 4) {
-                  pageNum = totalPages - 5 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
-
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={page === pageNum ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setPage(pageNum)}
-                    disabled={isLoading}
-                    className={cn(
-                      "w-10 h-10 rounded-xl font-bold transition-all",
-                      page === pageNum
-                        ? "bg-teal-600 text-white shadow-md shadow-teal-200"
-                        : "bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
-                    )}
-                  >
-                    {pageNum + 1}
-                  </Button>
-                );
-              })}
-
-              {totalPages > 5 && (page < totalPages - 3) && <span className="text-slate-400 mx-1">...</span>}
-              {totalPages > 5 && (page < totalPages - 3) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(totalPages - 1)}
-                  className="w-10 h-10 rounded-xl font-bold bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
-                >
-                  {totalPages}
-                </Button>
-              )}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-              disabled={page >= totalPages - 1 || isLoading}
-              className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
-            >
-              {t('next')}
-              <ChevronDown className="h-4 w-4 -rotate-90" />
-            </Button>
-          </div>
-
-          <div className="text-sm font-medium text-slate-500 bg-slate-100/50 px-4 py-1.5 rounded-full">
-            {t('showing')} <span className="text-teal-700 font-bold">{page * ITEMS_PER_PAGE + 1}</span> {t('to')} <span className="text-teal-700 font-bold">{Math.min((page + 1) * ITEMS_PER_PAGE, filteredReceipts.length)}</span> {t('of')} <span className="text-teal-700 font-bold">{filteredReceipts.length}</span> {t('receipts')}
-          </div>
-        </div>
-      )}
-
-      <ReceiptDetailsMiniDialog
-        isOpen={!!selectedReceipt}
-        onClose={() => setSelectedReceipt(null)}
-        receipt={selectedReceipt}
-        onEdit={setEditingReceipt}
-        onDelete={openDeleteDialog}
-      />
-
-      <ReceiptEditDialog
-        isOpen={!!editingReceipt}
-        onClose={() => setEditingReceipt(null)}
-        receipt={editingReceipt as any}
-      />
-
-      <ReceiptStatistics
-        isOpen={isStatsOpen}
-        onClose={() => setIsStatsOpen(false)}
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
+      <ReceiptsHero
+        onNewReceipt={() => navigate('/new-receipt')}
+        onViewStats={() => setIsStatsOpen(true)}
         receipts={receipts}
       />
 
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setReceiptToDelete(null);
-        }}
-        onConfirm={handleDelete}
-        title={t('deleteReceipt') || 'Delete Receipt'}
-        message={t('deleteReceiptConfirmation') || `Are you sure you want to delete the receipt for ${receiptToDelete?.client_name}? This action cannot be undone.`}
-        itemName={`Receipt for ${receiptToDelete?.client_name}`}
-        isDeleting={isDeleting}
-      />
+      <div className="w-full px-6 lg:px-10 relative z-20">
+        <div className="mb-10 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-sm">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center flex-1 min-w-[300px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 group focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+              <Search className="h-5 w-5 text-teal-600 mr-3 transition-transform group-focus-within:scale-110" />
+              <input
+                type="text"
+                placeholder={t('searchReceipts')}
+                className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="hidden lg:block h-10 w-px bg-slate-200/60" />
+
+            <div className="flex items-center gap-3">
+              <ReceiptFilters
+                dateFilter={dateFilter}
+                paymentFilter={paymentFilter}
+                deliveryFilter={deliveryFilter}
+                montageFilter={montageFilter}
+                onFilterChange={(key, value) => {
+                  if (key === 'date') setDateFilter(value);
+                  if (key === 'payment') setPaymentFilter(value);
+                  if (key === 'delivery') setDeliveryFilter(value);
+                  if (key === 'montage') setMontageFilter(value);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6 lg:pb-10">
+          <AnimatePresence>
+            {isLoading ? (
+              Array(6).fill(0).map((_, i) => (
+                <Card key={i} className="p-6 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                  <div className="space-y-3">
+                    <div className="h-3 bg-gray-200 rounded" />
+                    <div className="h-3 bg-gray-200 rounded w-5/6" />
+                  </div>
+                </Card>
+              ))
+            ) : filteredReceipts.length === 0 ? (
+              <div className="col-span-full text-center py-20 bg-white/50 backdrop-blur-sm rounded-[32px] border border-slate-100">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-10 w-10 text-slate-300" />
+                </div>
+                <h3 className="text-xl font-black text-slate-800 mb-2">{t('noReceiptsFound')}</h3>
+                <p className="text-slate-500 font-medium">{t('noReceiptsFoundDesc') || 'Try adjusting your filters or search term'}</p>
+              </div>
+            ) : (
+              paginatedReceipts.map((receipt) => (
+                <ReceiptCard
+                  key={receipt.id}
+                  receipt={receipt}
+                  onPaid={() => handleMarkAsPaid(receipt.id, receipt.total)}
+                  onDelivered={() => handleMarkAsDelivered(receipt.id, receipt.delivery_status)}
+                  onDelete={() => openDeleteDialog(receipt)}
+                  onView={() => setSelectedReceipt(receipt)}
+                  onEdit={() => setEditingReceipt(receipt)}
+                  onMontageChange={(status) => handleMontageStatusChange(receipt.id, status)}
+                  onCallStatusChange={(status) => handleCallStatusChange(receipt.id, status)}
+                  onNoteChange={(note) => handleNoteChange(receipt.id, note)}
+                />
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col items-center gap-4 mt-8 mb-12">
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0 || isLoading}
+                className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
+              >
+                <ChevronDown className="h-4 w-4 rotate-90" />
+                {t('previous')}
+              </Button>
+
+              <div className="flex items-center gap-1.5 mx-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i;
+                  } else if (page < 3) {
+                    pageNum = i;
+                  } else if (page > totalPages - 4) {
+                    pageNum = totalPages - 5 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      disabled={isLoading}
+                      className={cn(
+                        "w-10 h-10 rounded-xl font-bold transition-all",
+                        page === pageNum
+                          ? "bg-teal-600 text-white shadow-md shadow-teal-200"
+                          : "bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
+                      )}
+                    >
+                      {pageNum + 1}
+                    </Button>
+                  );
+                })}
+
+                {totalPages > 5 && (page < totalPages - 3) && <span className="text-slate-400 mx-1">...</span>}
+                {totalPages > 5 && (page < totalPages - 3) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(totalPages - 1)}
+                    className="w-10 h-10 rounded-xl font-bold bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
+                  >
+                    {totalPages}
+                  </Button>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || isLoading}
+                className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
+              >
+                {t('next')}
+                <ChevronDown className="h-4 w-4 -rotate-90" />
+              </Button>
+            </div>
+
+            <div className="text-sm font-medium text-slate-500 bg-slate-100/50 px-4 py-1.5 rounded-full">
+              {t('showing')} <span className="text-teal-700 font-bold">{page * ITEMS_PER_PAGE + 1}</span> {t('to')} <span className="text-teal-700 font-bold">{Math.min((page + 1) * ITEMS_PER_PAGE, filteredReceipts.length)}</span> {t('of')} <span className="text-teal-700 font-bold">{filteredReceipts.length}</span> {t('receipts')}
+            </div>
+          </div>
+        )}
+
+        <ReceiptDetailsMiniDialog
+          isOpen={!!selectedReceipt}
+          onClose={() => setSelectedReceipt(null)}
+          receipt={selectedReceipt}
+          onEdit={setEditingReceipt}
+          onDelete={openDeleteDialog}
+        />
+
+        <ReceiptEditDialog
+          isOpen={!!editingReceipt}
+          onClose={() => setEditingReceipt(null)}
+          receipt={editingReceipt as any}
+        />
+
+        <ReceiptStatistics
+          isOpen={isStatsOpen}
+          onClose={() => setIsStatsOpen(false)}
+          receipts={receipts}
+        />
+
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setReceiptToDelete(null);
+          }}
+          onConfirm={handleDelete}
+          title={t('deleteReceipt') || 'Delete Receipt'}
+          message={t('deleteReceiptConfirmation') || `Are you sure you want to delete the receipt for ${receiptToDelete?.client_name}? This action cannot be undone.`}
+          itemName={`Receipt for ${receiptToDelete?.client_name}`}
+          isDeleting={isDeleting}
+        />
+      </div>
     </div>
   );
 };

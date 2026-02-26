@@ -1198,6 +1198,30 @@ const productTranslations: Translations = {
     en: 'Recently Added',
     fr: 'Ajouté Récemment'
   },
+  receiptsOverview: {
+    en: 'Receipts Overview',
+    fr: 'Aperçu des Reçus'
+  },
+  manageOrders: {
+    en: 'Manage and track all customer orders',
+    fr: 'Gérez et suivez toutes les commandes clients'
+  },
+  clientsOverview: {
+    en: 'Clients Overview',
+    fr: 'Aperçu des Clients'
+  },
+  manageClients: {
+    en: 'Manage your customer base',
+    fr: 'Gérez votre base de clients'
+  },
+  searchClients: {
+    en: 'Search clients...',
+    fr: 'Rechercher des clients...'
+  },
+  newClient: {
+    en: 'New Client',
+    fr: 'Nouveau Client'
+  },
   findDuplicates: {
     en: 'Find Duplicates',
     fr: 'Trouver les Doublons'
