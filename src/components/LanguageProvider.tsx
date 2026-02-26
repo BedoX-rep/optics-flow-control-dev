@@ -320,6 +320,10 @@ const dashboardTranslations: Translations = {
   financialData: {
     en: "FINANCIAL DATA",
     fr: "DONNÉES FINANCIÈRES"
+  },
+  productsOverview: {
+    en: 'PRODUCTS OVERVIEW',
+    fr: 'APERÇU DES PRODUITS'
   }
 };
 const productTranslations: Translations = {

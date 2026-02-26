@@ -30,7 +30,7 @@ export interface ProductFiltersProps {
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) => {
   const { allCompanies } = useCompanies();
   const { t } = useLanguage();
-  
+
   return (
     <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
       {/* Category Filter */}

@@ -68,11 +68,10 @@ const ProductCard = React.memo<ProductCardProps>(({
   const { allCompanies } = useCompanies();
   return (
     <Card
-      className={`h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 font-inter ${
-        product.isEdited
-          ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl'
-          : 'border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30'
-      }`}
+      className={`h-[420px] w-full overflow-hidden transition-all duration-300 border-l-4 font-inter ${product.isEdited
+        ? 'border-l-amber-400 shadow-lg bg-gradient-to-br from-amber-50/40 to-amber-100/20 hover:shadow-xl'
+        : 'border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg hover:from-teal-50/50 hover:to-seafoam-50/30'
+        }`}
     >
       <div className="p-5 h-full flex flex-col">
         {/* Header Section */}
