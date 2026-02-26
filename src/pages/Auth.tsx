@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -124,7 +123,7 @@ const Auth = () => {
         userData.referred_by = referralCode;
       }
 
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -133,6 +132,10 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      console.log('Signup successful, user data:', data);
+
+      // The subscription will be created automatically by the database trigger
 
       toast({
         title: t('success'),

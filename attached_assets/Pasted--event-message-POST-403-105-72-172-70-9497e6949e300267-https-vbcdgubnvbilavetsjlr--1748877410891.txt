@@ -1,0 +1,181 @@
+{
+  "event_message": "POST | 403 | 105.72.172.70 | 9497e6949e300267 | https://vbcdgubnvbilavetsjlr.supabase.co/rest/v1/subscriptions | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+  "id": "866c2305-de57-4a16-a9ad-e7ac5c48799d",
+  "metadata": [
+    {
+      "load_balancer_experimental_routing": null,
+      "load_balancer_geo_aware_info": [],
+      "load_balancer_redirect_identifier": null,
+      "logflare_worker": [
+        {
+          "worker_id": "3JVQXI"
+        }
+      ],
+      "request": [
+        {
+          "cf": [
+            {
+              "asOrganization": "inwi",
+              "asn": 36884,
+              "botManagement": [
+                {
+                  "corporateProxy": false,
+                  "detectionIds": [],
+                  "ja3Hash": "1584935b4e870fc40e2aab8cc6499494",
+                  "jsDetection": [
+                    {
+                      "passed": false
+                    }
+                  ],
+                  "score": 99,
+                  "staticResource": false,
+                  "verifiedBot": false
+                }
+              ],
+              "city": "Casablanca",
+              "clientAcceptEncoding": "gzip, deflate, br, zstd",
+              "clientTcpRtt": null,
+              "clientTrustScore": 99,
+              "colo": "MAD",
+              "continent": "AF",
+              "country": "MA",
+              "edgeRequestKeepAliveStatus": 1,
+              "httpProtocol": "HTTP/3",
+              "isEUCountry": null,
+              "latitude": "33.59220",
+              "longitude": "-7.61840",
+              "metroCode": null,
+              "postalCode": null,
+              "region": "Casablanca-Settat",
+              "regionCode": "06",
+              "requestPriority": null,
+              "timezone": "Africa/Casablanca",
+              "tlsCipher": "AEAD-CHACHA20-POLY1305-SHA256",
+              "tlsClientAuth": [
+                {
+                  "certPresented": "0",
+                  "certRevoked": "0",
+                  "certVerified": "NONE"
+                }
+              ],
+              "tlsClientExtensionsSha1": "Xnd6DDCqVo4YUpKtVFOTU4YZRzc=",
+              "tlsClientHelloLength": "1798",
+              "tlsClientRandom": "f0oTBMv77TU44Sa/OvCp7ZK4iBmnGzor+XUXZvXQXRE=",
+              "tlsExportedAuthenticator": [
+                {
+                  "clientFinished": "78928dc7762bfb0677533f9d5bb95fe4572e4125a6687800cef9bf660174e44c",
+                  "clientHandshake": "8f916f9dc673273d4f4071727e005d077d8eccfd310e53ba7611d2694751750e",
+                  "serverFinished": "213bbfe1c1ad66da546ea55aeb0780473ba173b779661f9294d4f0119b605376",
+                  "serverHandshake": "29b0df9e556e85782dbb36f1150db280d2e8408a67b752ddb4a10caaeeffc5af"
+                }
+              ],
+              "tlsVersion": "TLSv1.3",
+              "verifiedBotCategory": null
+            }
+          ],
+          "headers": [
+            {
+              "accept": "*/*",
+              "cf_cache_status": null,
+              "cf_connecting_ip": "105.72.172.70",
+              "cf_ipcountry": "MA",
+              "cf_ray": "9497e6949e300267",
+              "content_length": "306",
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json",
+              "date": null,
+              "host": "vbcdgubnvbilavetsjlr.supabase.co",
+              "prefer": null,
+              "range": null,
+              "referer": "https://2a02547f-543c-40cb-b27b-99a63c0da1fd-00-22s3gbcvyd8q.kirk.replit.dev/",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": null,
+              "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+              "x_client_info": "supabase-js-web/2.49.4",
+              "x_forwarded_host": null,
+              "x_forwarded_proto": "https",
+              "x_forwarded_user_agent": null,
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_real_ip": "105.72.172.70"
+            }
+          ],
+          "host": "vbcdgubnvbilavetsjlr.supabase.co",
+          "method": "POST",
+          "path": "/rest/v1/subscriptions",
+          "port": null,
+          "protocol": "https:",
+          "sb": [
+            {
+              "apikey": [],
+              "auth_user": "99702ab8-ca40-4056-a0bf-b9cbecfa41d2",
+              "jwt": [
+                {
+                  "apikey": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 2060667806,
+                          "issuer": "supabase",
+                          "role": "anon",
+                          "signature_prefix": "aNeLdg",
+                          "subject": null
+                        }
+                      ]
+                    }
+                  ],
+                  "authorization": [
+                    {
+                      "invalid": null,
+                      "payload": [
+                        {
+                          "algorithm": "HS256",
+                          "expires_at": 1748880866,
+                          "issuer": "https://vbcdgubnvbilavetsjlr.supabase.co/auth/v1",
+                          "key_id": "UOEerVTa+W5Uj89/",
+                          "role": "authenticated",
+                          "session_id": "06f977da-633c-49d2-bcc0-655ae3cc30fe",
+                          "signature_prefix": "ULu5fa",
+                          "subject": "99702ab8-ca40-4056-a0bf-b9cbecfa41d2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "search": null,
+          "url": "https://vbcdgubnvbilavetsjlr.supabase.co/rest/v1/subscriptions"
+        }
+      ],
+      "response": [
+        {
+          "headers": [
+            {
+              "cf_cache_status": "DYNAMIC",
+              "cf_ray": "9497e694a1700267-MAD",
+              "content_length": null,
+              "content_location": null,
+              "content_range": null,
+              "content_type": "application/json; charset=utf-8",
+              "date": "Mon, 02 Jun 2025 15:14:29 GMT",
+              "sb_gateway_mode": null,
+              "sb_gateway_version": "1",
+              "transfer_encoding": "chunked",
+              "x_kong_proxy_latency": null,
+              "x_kong_upstream_latency": null,
+              "x_sb_error_code": null
+            }
+          ],
+          "origin_time": 45,
+          "status_code": 403
+        }
+      ]
+    }
+  ],
+  "timestamp": 1748877269270000
+}

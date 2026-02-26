@@ -1,0 +1,136 @@
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  _display_name TEXT;
+  _store_name TEXT;
+  _referred_by TEXT;
+  _access_code VARCHAR(5);
+  _referral_code VARCHAR(4);
+  _error_message TEXT;
+  detail TEXT;
+  hint TEXT;
+BEGIN
+  -- Log incoming data
+  RAISE NOTICE 'Creating subscription for user: %, email: %', NEW.id, NEW.email;
+
+  -- Extract metadata with defaults
+  _display_name := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'display_name'), ''),
+    SPLIT_PART(NEW.email, '@', 1)
+  );
+
+  _store_name := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'store_name'), ''),
+    'Optique'
+  );
+
+  _referred_by := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'referred_by', '')), '');
+
+  -- Handle access code: use provided or generate a new one
+  _access_code := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'access_code', '')), '');
+  
+  IF _access_code IS NULL THEN
+    LOOP
+      _access_code := UPPER(LEFT(MD5(RANDOM()::text), 5));
+      EXIT WHEN NOT EXISTS (
+        SELECT 1 FROM public.subscriptions WHERE access_code = _access_code
+      );
+    END LOOP;
+  END IF;
+
+  -- Generate referral code if referred
+  IF _referred_by IS NOT NULL THEN
+    _referral_code := UPPER(LEFT(MD5(RANDOM()::text), 4));
+  ELSE
+    _referral_code := NULL;
+  END IF;
+
+  RAISE NOTICE 'Processed values: display_name: %, store_name: %, referred_by: %, access_code: %', 
+               COALESCE(_display_name, 'null'), 
+               COALESCE(_store_name, 'null'), 
+               COALESCE(_referred_by, 'null'),
+               COALESCE(_access_code, 'null');
+
+  -- Insert or update into subscriptions table (explicit schema)
+  INSERT INTO public.subscriptions (
+    user_id,
+    email,
+    display_name,
+    start_date,
+    end_date,
+    subscription_type,
+    subscription_status,
+    trial_used,
+    access_code,
+    store_name,
+    referral_code,
+    referred_by
+  )
+  VALUES (
+    NEW.id,
+    NEW.email,
+    _display_name,
+    NOW(),
+    NOW() + INTERVAL '7 days',
+    'Trial',
+    'Active',
+    TRUE,
+    _access_code,
+    _store_name,
+    _referral_code,
+    _referred_by
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    email = EXCLUDED.email,
+    display_name = EXCLUDED.display_name,
+    store_name = EXCLUDED.store_name,
+    access_code = EXCLUDED.access_code,
+    referral_code = EXCLUDED.referral_code,
+    referred_by = EXCLUDED.referred_by;
+
+  RAISE NOTICE 'Subscription created/updated successfully';
+
+  -- Insert or update permissions (explicit schema)
+  INSERT INTO public.permissions (
+    user_id,
+    can_manage_products,
+    can_manage_clients, 
+    can_manage_receipts,
+    can_view_financial,
+    can_manage_purchases,
+    can_access_dashboard
+  )
+  VALUES (
+    NEW.id,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    can_manage_products = EXCLUDED.can_manage_products,
+    can_manage_clients = EXCLUDED.can_manage_clients,
+    can_manage_receipts = EXCLUDED.can_manage_receipts,
+    can_view_financial = EXCLUDED.can_view_financial,
+    can_manage_purchases = EXCLUDED.can_manage_purchases,
+    can_access_dashboard = EXCLUDED.can_access_dashboard,
+    updated_at = NOW();
+
+  RAISE NOTICE 'Permissions created/updated successfully';
+  RETURN NEW;
+
+-- Handle unexpected errors with detailed output
+EXCEPTION WHEN OTHERS THEN
+  GET STACKED DIAGNOSTICS 
+    _error_message = MESSAGE_TEXT,
+    detail = PG_EXCEPTION_DETAIL,
+    hint = PG_EXCEPTION_HINT;
+
+  RAISE WARNING 'Error in handle_new_user trigger: %, Detail: %, Hint: %', 
+                _error_message, detail, hint;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_catalog;
