@@ -19,12 +19,12 @@ interface ReceiptDetailsMiniDialogProps {
   onDelete: (receipt: any) => void;
 }
 
-const ReceiptDetailsMiniDialog = ({ 
-  isOpen, 
-  onClose, 
-  receipt, 
+const ReceiptDetailsMiniDialog = ({
+  isOpen,
+  onClose,
+  receipt,
   onEdit,
-  onDelete 
+  onDelete
 }: ReceiptDetailsMiniDialogProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -40,7 +40,7 @@ const ReceiptDetailsMiniDialog = ({
   const calculatePaymentStatus = (receipt: any) => {
     const balance = Number(receipt.balance || 0);
     const advancePayment = Number(receipt.advance_payment || 0);
-    
+
     if (balance === 0) return 'Paid';
     if (advancePayment > 0) return 'Partially Paid';
     return 'Unpaid';
@@ -75,25 +75,25 @@ const ReceiptDetailsMiniDialog = ({
     switch (type) {
       case 'payment':
         return status === 'Paid' ? 'bg-green-100 text-green-800' :
-               status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-               'bg-red-100 text-red-800';
+          status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-red-100 text-red-800';
       case 'delivery':
         return status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
-               'bg-yellow-100 text-yellow-800';
+          'bg-red-100 text-red-800';
       case 'montage':
         return status === 'Paid costs' ? 'bg-teal-100 text-teal-800' :
-               status === 'Ready' ? 'bg-emerald-100 text-emerald-800' :
-               status === 'Ordered' ? 'bg-blue-100 text-blue-800' :
-               status === 'InStore' ? 'bg-orange-100 text-orange-800' :
-               status === 'InCutting' ? 'bg-amber-100 text-amber-800' :
-               status === 'UnOrdered' ? 'bg-gray-100 text-gray-800' :
-               'bg-purple-100 text-purple-800';
+          status === 'Ready' ? 'bg-emerald-100 text-emerald-800' :
+            status === 'Ordered' ? 'bg-blue-100 text-blue-800' :
+              status === 'InStore' ? 'bg-orange-100 text-orange-800' :
+                status === 'InCutting' ? 'bg-amber-100 text-amber-800' :
+                  status === 'UnOrdered' ? 'bg-gray-100 text-gray-800' :
+                    'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -118,19 +118,19 @@ const ReceiptDetailsMiniDialog = ({
               <h3 className="text-sm font-medium text-gray-500">Status</h3>
               <div className="flex flex-col gap-1.5 mt-1">
                 <Badge variant="outline" className={getStatusColor('payment', paymentStatus)}>
-                  {t('paymentStatus')} {paymentStatus === 'Paid' ? t('paid') : 
-                   paymentStatus === 'Partially Paid' ? t('partial') : t('unpaid')}
+                  {t('paymentStatus')} {paymentStatus === 'Paid' ? t('paid') :
+                    paymentStatus === 'Partially Paid' ? t('partial') : t('unpaid')}
                 </Badge>
                 <Badge variant="outline" className={getStatusColor('delivery', displayReceipt.delivery_status)}>
                   {t('deliveryLabel')} {displayReceipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
                 </Badge>
                 <Badge variant="outline" className={getStatusColor('montage', displayReceipt.montage_status)}>
                   {t('montageLabel')} {displayReceipt.montage_status === 'UnOrdered' ? t('unOrdered') :
-                   displayReceipt.montage_status === 'Ordered' ? t('ordered') :
-                   displayReceipt.montage_status === 'InStore' ? t('inStore') :
-                   displayReceipt.montage_status === 'InCutting' ? t('inCutting') :
-                   displayReceipt.montage_status === 'Ready' ? t('ready') :
-                   displayReceipt.montage_status === 'Paid costs' ? t('paidCosts') : displayReceipt.montage_status || t('unOrdered')}
+                    displayReceipt.montage_status === 'Ordered' ? t('ordered') :
+                      displayReceipt.montage_status === 'InStore' ? t('inStore') :
+                        displayReceipt.montage_status === 'InCutting' ? t('inCutting') :
+                          displayReceipt.montage_status === 'Ready' ? t('ready') :
+                            displayReceipt.montage_status === 'Paid costs' ? t('paidCosts') : displayReceipt.montage_status || t('unOrdered')}
                 </Badge>
               </div>
             </div>
@@ -199,7 +199,7 @@ const ReceiptDetailsMiniDialog = ({
                     {t('totalDiscountLabel')}
                     {Number(displayReceipt.discount_percentage || 0) > 0 && <> ({displayReceipt.discount_percentage}%)</>}
                     {Number(displayReceipt.discount_amount || 0) > 0 && Number(displayReceipt.discount_percentage || 0) > 0 && " + "}
-                    {Number(displayReceipt.discount_amount || 0) > 0 && `${displayReceipt.discount_amount} DH`}: 
+                    {Number(displayReceipt.discount_amount || 0) > 0 && `${displayReceipt.discount_amount} DH`}:
                     <span className="font-medium text-red-600"> -{Number(displayReceipt.total_discount || 0).toFixed(2)} DH</span>
                   </p>
                 )}
@@ -252,16 +252,16 @@ const ReceiptDetailsMiniDialog = ({
         </div>
 
         <DialogFooter className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onEdit(displayReceipt)}
           >
             <Edit size={16} className="mr-1" /> {t('edit')}
           </Button>
-          <Button 
-            variant="destructive" 
-            size="sm" 
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={handleDelete}
             disabled={isDeleting}
           >

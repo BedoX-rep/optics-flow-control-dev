@@ -171,7 +171,10 @@ const ReceiptCard = ({
       className="w-full"
     >
       <Card className={cn(
-        "border-l-4 border-l-teal-500 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:border-l-teal-600 hover:shadow-lg transition-all duration-200 flex flex-col"
+        "border-l-4 bg-gradient-to-br from-teal-50/30 to-seafoam-50/20 hover:shadow-lg transition-all duration-200 flex flex-col",
+        receipt.delivery_status === 'Completed'
+          ? "border-l-teal-500 hover:border-l-teal-600"
+          : "border-l-red-500 hover:border-l-red-600"
       )}>
         {/* Header Section */}
         <div className="p-4 pb-0">
@@ -218,7 +221,7 @@ const ReceiptCard = ({
               className={cn("text-xs border",
                 receipt.delivery_status === 'Completed' ?
                   "bg-emerald-100 text-emerald-700 border-emerald-200" :
-                  "bg-orange-100 text-orange-700 border-orange-200"
+                  "bg-red-100 text-red-700 border-red-200"
               )}>
               {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
             </Badge>
@@ -287,7 +290,7 @@ const ReceiptCard = ({
                   "h-8 w-8 p-0 rounded-full shadow-sm text-white",
                   receipt.delivery_status === 'Completed'
                     ? "bg-blue-500 hover:bg-blue-600"
-                    : "bg-orange-500 hover:bg-orange-600"
+                    : "bg-red-500 hover:bg-red-600"
                 )}
                 title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
               >
@@ -357,21 +360,7 @@ const ReceiptCard = ({
               <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('balance')}</p>
               <p className="font-inter font-semibold text-red-600">{receipt.balance.toFixed(2)} DH</p>
             </div>
-            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
-              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('cost')}</p>
-              <div className="space-y-0.5">
-                <p className="font-inter font-semibold text-orange-600">{((receipt.cost_ttc || 0) + (receipt.montage_costs || 0)).toFixed(2)} DH</p>
-                {(receipt.montage_costs || 0) > 0 && (
-                  <p className="text-xs text-gray-500">
-                    {t('products')}: {(receipt.cost_ttc || 0).toFixed(2)} DH + ADC: {(receipt.montage_costs || 0).toFixed(2)} DH
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="bg-teal-50/30 border border-teal-200 rounded-lg p-3">
-              <p className="text-xs text-teal-700 font-poppins font-medium mb-1">{t('profit')}</p>
-              <p className="font-inter font-semibold text-emerald-600">{(receipt.total - (receipt.cost_ttc || 0) - (receipt.montage_costs || 0)).toFixed(2)} DH</p>
-            </div>
+
           </div>
 
           {/* Montage Progress */}
