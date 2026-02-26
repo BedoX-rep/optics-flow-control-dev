@@ -173,7 +173,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen bg-[#F7FAFC]">
       <MainNav />
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-64'
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-72'
           }`}
       >
         {/* Desktop Header */}
