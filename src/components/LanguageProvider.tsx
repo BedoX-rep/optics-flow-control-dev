@@ -1,15 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-type Language = 'en' | 'fr' | 'ar';
-
+type Language = 'en' | 'fr';
 type Translations = {
   [key: string]: {
     en: string;
     fr: string;
-    ar?: string;
   };
 };
-
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -18,7 +14,6 @@ interface LanguageContextType {
   translations: Translations;
   direction: 'ltr';
 }
-
 const homeTranslations: Translations = {
   heroTitle: {
     en: 'Optical Software For All Your Eye Care Needs',
@@ -125,7 +120,6 @@ const homeTranslations: Translations = {
     fr: 'Rejoignez des centaines d\'opticiens à travers le Maroc et l\'Afrique qui rationalisent leur pratique avec notre système de gestion complet.'
   },
 };
-
 const dashboardTranslations: Translations = {
   dashboard: {
     en: 'Dashboard',
@@ -328,7 +322,6 @@ const dashboardTranslations: Translations = {
     fr: "DONNÉES FINANCIÈRES"
   }
 };
-
 const productTranslations: Translations = {
   // Product page UI
   newProduct: {
@@ -1596,7 +1589,6 @@ const productTranslations: Translations = {
     fr: 'Détails du Produit'
   }
 };
-
 const receiptTranslations: Translations = {
   // Receipts page UI
   receipts: {
@@ -2322,7 +2314,6 @@ const receiptTranslations: Translations = {
     fr: 'Suivant'
   },
 };
-
 const clientsTranslations: Translations = {
   // Clients page UI
   clients: {
@@ -2510,7 +2501,6 @@ const clientsTranslations: Translations = {
     fr: 'Jamais'
   }
 };
-
 const pricingTranslations: Translations = {
   pricingTitle: {
     en: 'Pricing Plans',
@@ -2849,7 +2839,6 @@ const pricingTranslations: Translations = {
     fr: 'Acheter maintenant'
   },
 };
-
 // Combine all translations
 const purchasesTranslations: Translations = {
   // Purchases page UI
@@ -3426,7 +3415,6 @@ const purchasesTranslations: Translations = {
     fr: 'Supprimer l\'Achat'
   }
 };
-
 const subscriptionsTranslations: Translations = {
   // Subscriptions page UI
   currentPlan: {
@@ -3582,7 +3570,6 @@ const subscriptionsTranslations: Translations = {
     fr: 'Offre Limitée!'
   }
 };
-
 const settingsTranslations: Translations = {
   // Settings page UI
   opticianSettings: {
@@ -3770,7 +3757,6 @@ const settingsTranslations: Translations = {
     fr: 'Entrer l\'URL du site web'
   }
 };
-
 const navigationTranslations: Translations = {
   // Navigation menu items
   dashboard: {
@@ -3850,7 +3836,6 @@ const navigationTranslations: Translations = {
     fr: 'Élever l\'Accès'
   }
 };
-
 const accessTranslations: Translations = {
   // Access page UI
   accessManagement: {
@@ -3946,7 +3931,6 @@ const accessTranslations: Translations = {
     fr: 'Personnel du Magasin'
   }
 };
-
 const financialTranslations: Translations = {
   financial: { en: 'Financial', fr: 'Financier' },
   availableCash: { en: 'Available Cash', fr: 'Liquidités Disponibles' },
@@ -4106,7 +4090,6 @@ const financialTranslations: Translations = {
   financialOverviewDescription: { en: 'Overview of your store\'s financial performance', fr: 'Aperçu de la performance financière de votre magasin' },
   expenditureAnalysis: { en: 'Expenditure Analysis', fr: 'Analyse des Dépenses' },
 };
-
 const authTranslations: Translations = {
   // Auth page UI
   welcomeBack: {
@@ -4359,7 +4342,6 @@ const authTranslations: Translations = {
     fr: 'Une erreur s\'est produite lors de l\'inscription.'
   }
 };
-
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
@@ -4406,147 +4388,118 @@ const allTranslations: Translations = {
   copyFromReceipt: {
     en: 'Copy from Receipt',
     fr: 'Copier du Reçu',
-    ar: 'نسخ من الوصل'
   },
   optional: {
     en: 'Optional',
     fr: 'Optionnel',
-    ar: 'اختياري'
   },
   selectReceipt: {
     en: 'Select Receipt',
     fr: 'Sélectionner Reçu',
-    ar: 'اختر وصل'
   },
   noReceipt: {
     en: 'No Receipt',
     fr: 'Aucun Reçu',
-    ar: 'لا يوجد وصل'
   },
   invoiceNumber: {
     en: 'Invoice Number',
     fr: 'Numéro de Facture',
-    ar: 'رقم الفاتورة'
   },
   clientPhone: {
     en: 'Client Phone',
     fr: 'Téléphone Client',
-    ar: 'هاتف العميل'
   },
   clientAddress: {
     en: 'Client Address',
     fr: 'Adresse Client',
-    ar: 'عنوان العميل'
   },
   invoiceDate: {
     en: 'Invoice Date',
     fr: 'Date de Facture',
-    ar: 'تاريخ الفاتورة'
   },
   dueDate: {
     en: 'Due Date',
     fr: 'Date d\'Échéance',
-    ar: 'تاريخ الاستحقاق'
   },
   items: {
     en: 'Items',
     fr: 'Articles',
-    ar: 'العناصر'
   },
   addItem: {
     en: 'Add Item',
     fr: 'Ajouter Article',
-    ar: 'إضافة عنصر'
   },
   productName: {
     en: 'Product Name',
     fr: 'Nom du Produit',
-    ar: 'اسم المنتج'
   },
   description: {
     en: 'Description',
     fr: 'Description',
-    ar: 'الوصف'
   },
   quantity: {
     en: 'Quantity',
     fr: 'Quantité',
-    ar: 'الكمية'
   },
   unitPrice: {
     en: 'Unit Price',
     fr: 'Prix Unitaire',
-    ar: 'السعر للوحدة'
   },
   subtotal: {
     en: 'Subtotal',
     fr: 'Sous-total',
-    ar: 'المجموع الفرعي'
   },
   tax: {
     en: 'Tax',
     fr: 'TVA',
-    ar: 'الضريبة'
   },
   notes: {
     en: 'Notes',
     fr: 'Notes',
-    ar: 'ملاحظات'
   },
   createInvoice: {
     en: 'Create Invoice',
     fr: 'Créer Facture',
-    ar: 'إنشاء فاتورة'
   },
   saving: {
     en: 'Saving',
     fr: 'Sauvegarde...',
-    ar: 'جاري الحفظ'
   },
   advancePayment: {
     en: 'Advance Payment',
     fr: 'Acompte',
-    ar: 'دفعة مقدمة'
   },
   balance: {
     en: 'Balance',
     fr: 'Solde',
-    ar: 'الرصيد'
   },
   draft: {
     en: 'Draft',
     fr: 'Brouillon',
-    ar: 'مسودة'
   },
   pending: {
     en: 'Pending',
     fr: 'En Attente',
-    ar: 'في الانتظار'
   },
   paid: {
     en: 'Paid',
     fr: 'Payé',
-    ar: 'مدفوع'
   },
   overdue: {
     en: 'Overdue',
     fr: 'En Retard',
-    ar: 'متأخر'
   },
   selectDateRange: {
     en: 'Select date range',
     fr: 'Sélectionner une plage de dates',
-    ar: 'اختر نطاق التاريخ'
   },
   last7Days: {
     en: 'Last 7 days',
     fr: '7 derniers jours',
-    ar: 'آخر 7 أيام'
   },
   last30Days: {
     en: 'Last 30 days',
     fr: '30 derniers jours',
-    ar: 'آخر 30 يوماً'
   },
   totalInvoices: {
     en: 'Total Invoices',
@@ -4584,7 +4537,6 @@ const allTranslations: Translations = {
     en: 'Items Total',
     fr: 'Total Articles'
   },
-
   balanceDue: {
     en: 'Balance Due',
     fr: 'Solde Dû'
@@ -4614,10 +4566,8 @@ const allTranslations: Translations = {
     fr: 'Aucun article ajouté'
   }
 };
-
 const useTranslations = () => {
   const { language } = useLanguage();
-
   return React.useMemo(
     () => ({
       // Products
@@ -4656,7 +4606,6 @@ const useTranslations = () => {
       service: language === 'fr' ? 'Service' : 'Service',
       other: language === 'fr' ? 'Autre' : 'Other',
       alreadyPassed: language === 'fr' ? 'Déjà passé' : 'Already Passed',
-
       // Indexes
       index56: language === 'fr' ? '1.56' : '1.56',
       index6: language === 'fr' ? '1.6' : '1.6',
@@ -4664,7 +4613,6 @@ const useTranslations = () => {
       index74: language === 'fr' ? '1.74' : '1.74',
       index50: language === 'fr' ? '1.50' : '1.50',
       index59: language === 'fr' ? '1.59' : '1.59',
-
       // Treatments
       ar: language === 'fr' ? 'Anti-reflet' : 'AR',
       blue: language === 'fr' ? 'Bleu' : 'Blue',
@@ -4673,7 +4621,6 @@ const useTranslations = () => {
       polarized: language === 'fr' ? 'Polarisé' : 'Polarized',
       uvProtection: language === 'fr' ? 'Protection UV' : 'UV Protection',
       tint: language === 'fr' ? 'Teinte' : 'Tint',
-
       // Companies
       indo: language === 'fr' ? 'Indo' : 'Indo',
       abLens: language === 'fr' ? 'ABlens' : 'ABlens',
@@ -4684,7 +4631,6 @@ const useTranslations = () => {
     [language]
   );
 };
-
 const LanguageContext = createContext<LanguageContextType>({
   language: 'en',
   setLanguage: () => { },
@@ -4693,24 +4639,19 @@ const LanguageContext = createContext<LanguageContextType>({
   translations: allTranslations,
   direction: 'ltr',
 });
-
 export const useLanguage = () => useContext(LanguageContext);
-
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
     // Try to get language from localStorage if available
     const savedLanguage = localStorage.getItem('language');
     return (savedLanguage as Language) || 'fr';
   });
-
   useEffect(() => {
     // Save language preference to localStorage
     localStorage.setItem('language', language);
-
     // Set html lang attribute
     document.documentElement.lang = language;
   }, [language]);
-
   const t = (key: string): string => {
     if (!allTranslations[key]) {
       console.warn(`Translation key not found: ${key}`);
@@ -4718,13 +4659,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     return allTranslations[key][language];
   };
-
   const translate = (key: string): string => {
     return t(key);
   };
-
   const direction = 'ltr';
-
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, translate, translations: allTranslations, direction }}>
       {children}
