@@ -6,22 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History, Link } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -32,6 +32,10 @@ import AddSupplierDialog from '@/components/AddSupplierDialog';
 import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import PurchaseCard from '@/components/PurchaseCard';
+import PurchasesHero from '@/components/purchases/PurchasesHero';
+import PurchaseFilters from '@/components/purchases/PurchaseFilters';
+import SupplierCard from '@/components/purchases/SupplierCard';
 
 interface Supplier {
   id: string;
@@ -128,26 +132,26 @@ const Purchases = () => {
     return categoryMap[category] || category;
   };
 
-const PAYMENT_METHODS = [
-  t('cash'),
-  t('creditCard'),
-  t('debitCard'),
-  t('bankTransfer'),
-  t('check'),
-  t('digitalWallet')
-];
+  const PAYMENT_METHODS = [
+    t('cash'),
+    t('creditCard'),
+    t('debitCard'),
+    t('bankTransfer'),
+    t('check'),
+    t('digitalWallet')
+  ];
 
-const RECURRING_TYPES = [
-  { value: '1_month', label: t('oneMonth') },
-  { value: '3_months', label: t('threeMonths') },
-  { value: '6_months', label: t('sixMonths') },
-  { value: '1_year', label: t('oneYear') }
-];
+  const RECURRING_TYPES = [
+    { value: '1_month', label: t('oneMonth') },
+    { value: '3_months', label: t('threeMonths') },
+    { value: '6_months', label: t('sixMonths') },
+    { value: '1_year', label: t('oneYear') }
+  ];
 
-const PURCHASE_TYPES = [
-  t('operationalExpenses'),
-  t('capitalExpenditure')
-];
+  const PURCHASE_TYPES = [
+    t('operationalExpenses'),
+    t('capitalExpenditure')
+  ];
 
   // Consolidated search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -155,25 +159,19 @@ const PURCHASE_TYPES = [
   const [supplierFilter, setSupplierFilter] = useState('all');
   const [purchaseTypeFilter, setPurchaseTypeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({
-    from: '',
-    to: ''
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined
   });
 
   // Dialog states
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
   const [isBalanceHistoryDialogOpen, setIsBalanceHistoryDialogOpen] = useState(false);
-  const [isLinkingDialogOpen, setIsLinkingDialogOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState<Purchase | null>(null);
-  const [selectedPurchaseForLinking, setSelectedPurchaseForLinking] = useState<Purchase | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Linking states
-  const [linkDateFrom, setLinkDateFrom] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
-  const [linkDateTo, setLinkDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -247,13 +245,16 @@ const PURCHASE_TYPES = [
           },
           (payload) => {
             // Only invalidate if the change affects montage_costs or montage_status
-            if (payload.eventType === 'UPDATE' && 
-                (payload.new?.montage_costs !== payload.old?.montage_costs || 
-                 payload.new?.montage_status !== payload.old?.montage_status)) {
+            if (payload.eventType === 'UPDATE' &&
+              (payload.new?.montage_costs !== payload.old?.montage_costs ||
+                payload.new?.montage_status !== payload.old?.montage_status)) {
+              // bump both caches
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
               queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
             } else if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
               queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
             }
           }
@@ -285,7 +286,7 @@ const PURCHASE_TYPES = [
 
       // First, mark the purchase as due for renewal by updating its next_recurring_date to today
       const today = format(new Date(), 'yyyy-MM-dd');
-      
+
       const { error: updateError } = await supabase
         .from('purchases')
         .update({ next_recurring_date: today })
@@ -404,9 +405,13 @@ const PURCHASE_TYPES = [
     enabled: !!user,
   });
 
-  // Fetch receipts
+  // Fetch a light version of receipts for purchase linking.  The query key is intentionally
+  // different from the full receipts list so we don't pollute the cache with objects that
+  // don't contain all of the fields needed by the receipts page.  When you navigate from
+  // Purchases → Receipts the cached data will no longer be reused, which avoids the empty
+  // list bug.
   const { data: receipts = [] } = useQuery({
-    queryKey: ['receipts', user?.id],
+    queryKey: ['receipts', user?.id, 'light'],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
@@ -470,39 +475,6 @@ const PURCHASE_TYPES = [
     refetchOnWindowFocus: false,
   });
 
-  // Calculate purchase linking when purchases and receipts are loaded
-  useEffect(() => {
-    const updateLinkedPurchases = async () => {
-      if (!purchases || !Array.isArray(purchases) || purchases.length === 0 || !receipts || !Array.isArray(receipts) || receipts.length === 0 || !user) {
-        return;
-      }
-
-      // Find purchases with linking configurations that need updating
-      const linkedPurchases = purchases.filter(p => 
-        p.linking_category === 'montage_costs' && p.link_date_from && p.link_date_to
-      );
-
-      if (linkedPurchases.length === 0) return;
-
-      let hasUpdates = false;
-
-      for (const purchase of linkedPurchases) {
-        const shouldUpdate = await calculatePurchaseLinking(purchase);
-        if (shouldUpdate) hasUpdates = true;
-      }
-
-      // Only refresh if there were actual updates
-      if (hasUpdates) {
-        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-      }
-    };
-
-    // Only run when both purchases and receipts are loaded and user is available
-    if (purchases.length > 0 && receipts.length >= 0 && user) {
-      updateLinkedPurchases();
-    }
-  }, [purchases, receipts, user, queryClient]);
-
   // Filter purchases
   const filteredPurchases = useMemo(() => {
     if (!purchases) return [];
@@ -510,7 +482,7 @@ const PURCHASE_TYPES = [
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(purchase => 
+      filtered = filtered.filter(purchase =>
         purchase.description.toLowerCase().includes(search) ||
         purchase.suppliers?.name.toLowerCase().includes(search) ||
         purchase.receipt_number?.toLowerCase().includes(search)
@@ -529,15 +501,15 @@ const PURCHASE_TYPES = [
       filtered = filtered.filter(purchase => purchase.purchase_type === purchaseTypeFilter);
     }
 
-    if (dateRange.from) {
-      filtered = filtered.filter(purchase => 
-        new Date(purchase.purchase_date) >= new Date(dateRange.from)
+    if (dateRange.from && dateFilter === 'custom') {
+      filtered = filtered.filter(purchase =>
+        new Date(purchase.purchase_date) >= dateRange.from!
       );
     }
 
-    if (dateRange.to) {
-      filtered = filtered.filter(purchase => 
-        new Date(purchase.purchase_date) <= new Date(dateRange.to)
+    if (dateRange.to && dateFilter === 'custom') {
+      filtered = filtered.filter(purchase =>
+        new Date(purchase.purchase_date) <= dateRange.to!
       );
     }
 
@@ -572,7 +544,7 @@ const PURCHASE_TYPES = [
   const filteredSuppliers = useMemo(() => {
     if (!searchTerm) return suppliers;
     const search = searchTerm.toLowerCase();
-    return suppliers.filter(supplier => 
+    return suppliers.filter(supplier =>
       supplier.name.toLowerCase().includes(search) ||
       supplier.contact_person?.toLowerCase().includes(search) ||
       supplier.email?.toLowerCase().includes(search)
@@ -597,93 +569,7 @@ const PURCHASE_TYPES = [
       .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [purchases]);
 
-  // Function to calculate and update purchase linking
-  const calculatePurchaseLinking = async (purchase: Purchase): Promise<boolean> => {
-    if (!purchase.linking_category || purchase.linking_category !== 'montage_costs' || !purchase.link_date_from || !purchase.link_date_to) {
-      return false;
-    }
 
-    // Get receipts in the date range using cached data, excluding deleted receipts
-    const linkedReceipts = receipts.filter(receipt => {
-      // First check if receipt is deleted
-      if (receipt.is_deleted) {
-        return false;
-      }
-
-      const receiptDate = new Date(receipt.created_at);
-      const fromDate = new Date(purchase.link_date_from!);
-      const toDate = new Date(purchase.link_date_to!);
-
-      // Set time to start/end of day for accurate comparison
-      fromDate.setHours(0, 0, 0, 0);
-      toDate.setHours(23, 59, 59, 999);
-
-      return receiptDate >= fromDate && receiptDate <= toDate;
-    });
-
-    let totalAmount = 0;
-    let paidAmount = 0;
-
-    linkedReceipts.forEach(receipt => {
-      const montageCost = receipt.montage_costs || 0;
-
-      // Only include receipts in InCutting, Ready, or Paid costs phases
-      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
-      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
-        totalAmount += montageCost;
-
-        // Only count as paid if status is specifically 'Paid costs'
-        if (receipt.montage_status === 'Paid costs') {
-          paidAmount += montageCost;
-        }
-      }
-    });
-
-    const balance = totalAmount - paidAmount;
-    const linkedReceiptIds = linkedReceipts.map(r => r.id);
-
-    // Check if values have actually changed to avoid unnecessary updates
-    const currentAmountTTC = purchase.amount_ttc || purchase.amount || 0;
-    const currentAdvancePayment = purchase.advance_payment || 0;
-    const currentBalance = purchase.balance || 0;
-    const currentLinkedReceipts = purchase.linked_receipts || [];
-
-    const hasChanges = 
-      Math.abs(currentAmountTTC - totalAmount) > 0.01 ||
-      Math.abs(currentAdvancePayment - paidAmount) > 0.01 ||
-      Math.abs(currentBalance - balance) > 0.01 ||
-      JSON.stringify(currentLinkedReceipts.sort()) !== JSON.stringify(linkedReceiptIds.sort());
-
-    if (!hasChanges) {
-      return false;
-    }
-
-    try {
-      // Update the purchase record
-      const { error } = await supabase
-        .from('purchases')
-        .update({
-          linked_receipts: linkedReceiptIds,
-          amount_ttc: totalAmount,
-          amount_ht: totalAmount / 1.2,
-          amount: totalAmount,
-          advance_payment: paidAmount,
-          balance: balance,
-          payment_status: balance === 0 && totalAmount > 0 ? 'Paid' : paidAmount > 0 ? 'Partially Paid' : 'Unpaid'
-        })
-        .eq('id', purchase.id);
-
-      if (error) {
-        console.error('Error updating purchase linking:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error in calculatePurchaseLinking:', error);
-      return false;
-    }
-  };
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({
@@ -769,111 +655,7 @@ const PURCHASE_TYPES = [
     setIsBalanceHistoryDialogOpen(true);
   };
 
-  const handleOpenLinkingDialog = (purchase: Purchase) => {
-    setSelectedPurchaseForLinking(purchase);
-    setLinkDateFrom(purchase.link_date_from || format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
-    setLinkDateTo(purchase.link_date_to || format(new Date(), 'yyyy-MM-dd'));
-    setIsLinkingDialogOpen(true);
-  };
 
-  const getFilteredReceipts = () => {
-    return receipts.filter(receipt => {
-      // Exclude deleted receipts
-      if (receipt.is_deleted) {
-        return false;
-      }
-
-      const receiptDate = new Date(receipt.created_at);
-      const fromDate = new Date(linkDateFrom);
-      const toDate = new Date(linkDateTo);
-      // Include all receipts within the date range, regardless of when they were created
-      return receiptDate >= fromDate && receiptDate <= toDate;
-    });
-  };
-
-  const calculateMontageData = () => {
-    const filteredReceipts = getFilteredReceipts();
-    let totalMontage = 0;
-    let paidMontage = 0;
-
-    filteredReceipts.forEach(receipt => {
-      const montageCost = receipt.montage_costs || 0;
-
-      // Only include receipts in InCutting, Ready, or Paid costs phases
-      const validMontageStatuses = ['InCutting', 'Ready', 'Paid costs'];
-      if (montageCost > 0 && validMontageStatuses.includes(receipt.montage_status)) {
-        totalMontage += montageCost;
-
-        // Only count as paid if status is 'Paid costs'
-        if (receipt.montage_status === 'Paid costs') {
-          paidMontage += montageCost;
-        }
-      }
-    });
-
-    const unpaidMontage = totalMontage - paidMontage;
-
-    return {
-      totalMontage,
-      paidMontage,
-      unpaidMontage,
-      receiptCount: filteredReceipts.length
-    };
-  };
-
-  const handleLinkMontageToReceipt = async () => {
-    if (!selectedPurchaseForLinking || !user) return;
-
-    try {
-      setIsSubmitting(true);
-      const filteredReceipts = getFilteredReceipts();
-      const montageData = calculateMontageData();
-
-      const linkedReceiptIds = filteredReceipts.map(r => r.id);
-
-      // Store the date range for future receipt matching
-      // This will allow the system to automatically include receipts created in the future
-      // that fall within this date range
-      const { error } = await supabase
-        .from('purchases')
-        .update({
-          linked_receipts: linkedReceiptIds,
-          link_date_from: linkDateFrom,
-          link_date_to: linkDateTo,
-          linking_category: 'montage_costs', // Set the linking category
-          amount_ttc: montageData.totalMontage,
-          amount_ht: montageData.totalMontage / 1.2, // Assuming 20% tax
-          amount: montageData.totalMontage,
-          advance_payment: montageData.paidMontage,
-          balance: montageData.unpaidMontage,
-          payment_status: montageData.unpaidMontage === 0 && montageData.totalMontage > 0 ? 'Paid' : montageData.paidMontage > 0 ? 'Partially Paid' : 'Unpaid'
-        })
-        .eq('id', selectedPurchaseForLinking.id);
-
-      if (error) throw error;
-
-      const dateRangeText = linkDateFrom === linkDateTo 
-        ? `for ${format(new Date(linkDateFrom), 'MMM dd, yyyy')}`
-        : `from ${format(new Date(linkDateFrom), 'MMM dd, yyyy')} to ${format(new Date(linkDateTo), 'MMM dd, yyyy')}`;
-
-      toast({
-        title: "Success",
-        description: `Linked ${montageData.receiptCount} current receipts ${dateRangeText}. Future receipts in this date range will be automatically included.`,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-      setIsLinkingDialogOpen(false);
-    } catch (error) {
-      console.error('Error linking receipts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to link receipts to purchase",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleSupplierAdded = (supplier: any) => {
     queryClient.invalidateQueries({ queryKey: ['suppliers', user?.id] });
@@ -942,7 +724,7 @@ const PURCHASE_TYPES = [
         payment_method: purchaseFormData.payment_method,
         notes: purchaseFormData.notes || null,
         purchase_type: purchaseFormData.purchase_type,
-user_id: user.id,
+        user_id: user.id,
       };
 
       if (editingPurchase) {
@@ -1186,639 +968,171 @@ user_id: user.id,
   }
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={handleRecordNewPurchase}
-            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('recordPurchase')}
-          </Button>
-          <Button
-            onClick={() => handleOpenSupplierDialog()}
-            variant="outline"
-            className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('addSupplier')}
-          </Button>
-        </div>
-      </div>
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
+      <PurchasesHero
+        onNewPurchase={handleRecordNewPurchase}
+        onAddSupplier={() => handleOpenSupplierDialog()}
+        purchases={purchases || []}
+      />
 
-      {/* Search Section */}
-      <div className="mb-4 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder={t('searchPurchasesSuppliers')} 
-            className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+      <div className="w-full px-6 lg:px-10 relative z-20">
+        <div className="mb-10 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-sm">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center flex-1 min-w-[300px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 group focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+              <Search className="h-5 w-5 text-indigo-600 mr-3 transition-transform group-focus-within:scale-110" />
+              <input
+                type="text"
+                placeholder={t('searchPurchasesSuppliers')}
+                className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-      {/* Compact Inline Filters */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        {/* Quick Stats Row */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-            <span className="font-medium">{filteredPurchases.length} {t('purchasesCount')}</span>
-            <span className="text-gray-400">•</span>
-            <span className="font-semibold text-blue-600">{totalExpenses.toFixed(2)} DH</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar className="h-4 w-4 text-green-600" />
-            <span className="text-sm">{t('thisMonth')} <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
+            <div className="hidden lg:block h-10 w-px bg-slate-200/60" />
+
+            <div className="flex items-center gap-3">
+              <PurchaseFilters
+                dateFilter={dateFilter}
+                dateRange={dateRange}
+                categoryFilter={categoryFilter}
+                supplierFilter={supplierFilter}
+                purchaseTypeFilter={purchaseTypeFilter}
+                categories={EXPENSE_CATEGORIES}
+                suppliers={suppliers}
+                onFilterChange={(key, value) => {
+                  if (key === 'date') setDateFilter(value);
+                  else if (key === 'dateRange') setDateRange(value);
+                  else if (key === 'category') setCategoryFilter(value);
+                  else if (key === 'supplier') setSupplierFilter(value);
+                  else if (key === 'purchaseType') setPurchaseTypeFilter(value);
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Compact Filter Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Date Filter Buttons */}
-          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
-            {[
-              { value: 'all', label: t('all') },
-              { value: 'today', label: t('today') },
-              { value: 'week', label: t('week') },
-              { value: 'month', label: t('month') },
-              { value: 'year', label: t('year') }
-            ].map((option) => (
-              <Button
-                key={option.value}
-                variant={dateFilter === option.value ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDateFilter(option.value)}
-                className={cn(
-                  "h-7 px-2 text-xs font-medium transition-all duration-200 rounded-md",
-                  dateFilter === option.value
-                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
+            <TabsTrigger
+              value="purchases"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+            >
+              <Package className="h-4 w-4 mr-2" />
+              {t('purchases')} ({filteredPurchases.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="suppliers"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              {t('suppliers')} ({suppliers.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="purchases" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+              <AnimatePresence>
+                {filteredPurchases.length === 0 ? (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    {t('noPurchasesFound')}
+                  </div>
+                ) : (
+                  filteredPurchases.map((purchase) => (
+                    <motion.div
+                      key={purchase.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="w-full"
+                    >
+                      <PurchaseCard
+                        purchase={purchase}
+                        suppliers={suppliers}
+                        onEdit={handleEditPurchase}
+                        onDelete={handleDeletePurchase}
+                        onMarkAsPaid={handleMarkAsPaid}
+                        onViewBalanceHistory={handleOpenBalanceHistoryDialog}
+                        onRecurringRenewal={handleRecurringRenewal}
+                      />
+                    </motion.div>
+                  ))
                 )}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
+              </AnimatePresence>
+            </div>
+          </TabsContent>
 
-          {/* Category Filters */}
-          <Select
-            value={supplierFilter}
-            onValueChange={(value) => setSupplierFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[110px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              supplierFilter !== 'all'
-                ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Building2 className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {supplierFilter === 'all' ? t('supplier') : 
-                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || t('unknownSupplier')}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allSuppliers')}</SelectItem>
-              {suppliers.map(supplier => (
-                <SelectItem key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TabsContent value="suppliers" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+              <AnimatePresence>
+                {suppliers.length === 0 ? (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    {t('noSuppliersFound')}
+                  </div>
+                ) : (
+                  filteredSuppliers.map((supplier) => (
+                    <motion.div
+                      key={supplier.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="w-full"
+                    >
+                      <SupplierCard
+                        supplier={supplier}
+                        purchases={purchases || []}
+                        onEdit={handleOpenSupplierDialog}
+                        onDelete={handleDeleteSupplier}
+                        t={t}
+                      />
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </TabsContent>
+        </Tabs>
 
-          <Select
-            value={purchaseTypeFilter}
-            onValueChange={(value) => setPurchaseTypeFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              purchaseTypeFilter !== 'all'
-                ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {purchaseTypeFilter === 'all' ? t('type') : 
-                 purchaseTypeFilter === t('operationalExpenses') ? 'Ops' : 'Cap'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allTypes')}</SelectItem>
-              {PURCHASE_TYPES.map(type => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Record/Edit Purchase Dialog */}
+        <RecordPurchaseDialog
+          isOpen={isPurchaseDialogOpen}
+          onClose={() => {
+            setIsPurchaseDialogOpen(false);
+            setEditingPurchase(null);
+          }}
+          suppliers={suppliers}
+          onSuccess={handlePurchaseSuccess}
+          editingPurchase={editingPurchase}
+        />
 
-          <Select
-            value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              categoryFilter !== 'all'
-                ? "bg-orange-50 text-orange-700 border-orange-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Package className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {categoryFilter === 'all' ? t('category') : categoryFilter.slice(0, 6) + '...'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allCategories')}</SelectItem>
-              {EXPENSE_CATEGORIES.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Add/Edit Supplier Dialog */}
+        <AddSupplierDialog
+          isOpen={isSupplierDialogOpen}
+          onClose={() => setIsSupplierDialogOpen(false)}
+          onSupplierAdded={handleSupplierAdded}
+        />
+
+        {/* Balance History Dialog */}
+        <Dialog open={isBalanceHistoryDialogOpen} onOpenChange={setIsBalanceHistoryDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Balance History - {selectedPurchaseForHistory?.description}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedPurchaseForHistory && user && (
+              <PurchaseBalanceHistory
+                purchaseId={selectedPurchaseForHistory.id}
+                userId={user.id}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+
       </div>
-
-      {/* Active Filters Tags - Only show when filters are active */}
-      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all') && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-500">Active:</span>
-          {dateFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
-              {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : 'This Year'}
-              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateFilter('all')} />
-            </span>
-          )}
-          {supplierFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-md text-xs border border-green-200">
-              {suppliers.find(s => s.id === supplierFilter)?.name}
-              <X className="h-3 w-3 cursor-pointer hover:text-green-900" onClick={() => setSupplierFilter('all')} />
-            </span>
-          )}
-          {categoryFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100/80 backdrop-blur-sm text-orange-700 rounded-md text-xs border border-orange-200">
-              {categoryFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-orange-900" onClick={() => setCategoryFilter('all')} />
-            </span>
-          )}
-          {purchaseTypeFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
-              {purchaseTypeFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setPurchaseTypeFilter('all')} />
-            </span>
-          )}
-        </div>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
-          <TabsTrigger 
-            value="purchases" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Package className="h-4 w-4 mr-2" />
-            {t('purchases')} ({filteredPurchases.length})
-          </TabsTrigger>
-          <TabsTrigger 
-            value="suppliers" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Building2 className="h-4 w-4 mr-2" />
-            {t('suppliers')} ({suppliers.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="purchases" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {filteredPurchases.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noPurchasesFound')}
-                </div>
-              ) : (
-                filteredPurchases.map((purchase) => (
-                  <motion.div
-                    key={purchase.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white border border-gray-200 w-full">
-                      <CardContent className="p-4">
-                        {/* Header Section with Description, Dates, and Actions */}
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <Receipt className="h-4 w-4 text-primary flex-shrink-0" />
-                                <h3 className="text-base font-bold text-gray-900 truncate">
-                                  {purchase.description}
-                                </h3>
-                              </div>                              <div className="flex items-center gap-2 text-xs flex-shrink-0 ml-2">
-                                {purchase.payment_urgency && (
-                                  <span className="text-orange-600 bg-orange-50 px-2 py-1 rounded font-medium">
-                                    Due: {format(new Date(purchase.payment_urgency), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && !purchase.already_recurred && (
-                                  <span className="text-purple-600 bg-purple-50 px-2 py-1 rounded font-medium">
-                                    {t('next')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                                {purchase.next_recurring_date && purchase.already_recurred && (
-                                  <span className="text-gray-600 bg-gray-50 px-2 py-1 rounded font-medium">
-                                    {t('alreadyPassed')}: {format(new Date(purchase.next_recurring_date), 'MMM dd')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Building2 className="h-3 w-3" />
-                                <span className="truncate max-w-[150px]">
-                                  {suppliers.find(s => s.id === purchase.supplier_id)?.name || t('noSupplier')}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{format(new Date(purchase.purchase_date), 'MMM dd, yyyy')}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-1 flex-shrink-0 ml-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleOpenBalanceHistoryDialog(purchase)}
-                              className="h-7 w-7 hover:bg-purple-50 hover:text-purple-600"
-                              title="View Balance History"
-                            >
-                              <History className="h-3 w-3" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleEditPurchase(purchase)}
-                              className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            {purchase.payment_status !== 'Paid' && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleMarkAsPaid(purchase)}
-                                className="h-7 w-7 hover:bg-green-50 hover:text-green-600"
-                                title="Mark as Paid"
-                              >
-                                <DollarSign className="h-3 w-3" />
-                            </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleDeletePurchase(purchase.id)}
-                              className="h-7 w-7 hover:bg-red-50 hover:text-red-600"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Main TTC Amount - Prominent Display */}
-                        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-3 mb-3 border-l-4 border-primary">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-gray-600">{t('totalAmountTTC')}</p>
-                              <p className="text-xl font-bold text-primary">{(purchase.amount_ttc || purchase.amount).toFixed(2)} DH</p>
-                            </div>
-                            <DollarSign className="h-5 w-5 text-primary/60" />
-                          </div>
-                        </div>
-
-                        {/* Compact Financial Details */}
-                        <div className="grid grid-cols-2 gap-2 mb-3 flex-1">
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('advance')}</p>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {purchase.advance_payment ? `${purchase.advance_payment.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-xs text-gray-500">{t('balance')}</p>
-                            <p className="text-sm font-semibold text-red-600">
-                              {purchase.balance ? `${purchase.balance.toFixed(2)} DH` : '0.00 DH'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Status Row */}
-                        <div className="border-t border-gray-100 pt-2 mt-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-start gap-2 flex-wrap min-w-0 flex-1">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                purchase.payment_status === 'Paid' 
-                                  ? 'bg-green-100 text-green-800'
-                                  : purchase.payment_status === 'Partially Paid'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {purchase.payment_status === 'Paid' ? t('paid') : 
-                                 purchase.payment_status === 'Partially Paid' ? t('partiallyPaid') : 
-                                 purchase.payment_status === 'Unpaid' ? t('unpaid') : t('unpaid')}
-                              </span>
-                              {purchase.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex-shrink-0 whitespace-nowrap">
-                                  {getTranslatedCategory(purchase.category)}
-                                </span>
-                              )}
-                              {purchase.linked_receipts && purchase.linked_receipts.length > 0 && (
-                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-                                  <Link className="h-3 w-3" />
-                                  {purchase.linked_receipts.length} {t('receipts')}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex gap-1 flex-shrink-0">
-                              {!purchase.already_recurred && purchase.recurring_type && purchase.next_recurring_date && new Date(purchase.next_recurring_date) <= new Date() && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleRecurringRenewal(purchase)}
-                                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-6 px-3"
-                                >
-                                  {t('renewNow')}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="suppliers" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {suppliers.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noSuppliersFound')}
-                </div>
-              ) : (
-                filteredSuppliers.map((supplier) => (
-                  <motion.div
-                    key={supplier.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-base font-semibold truncate">{supplier.name}</h3>
-                                  {supplier.phone && (
-                                    <div className="flex items-center gap-1.5 text-blue-600">
-                                      <Phone className="h-3.5 w-3.5" />
-                                      <span className="text-xs font-medium">{supplier.phone}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              {supplier.address && (
-                                <p className="text-sm text-gray-600 mb-2">{supplier.address}</p>
-                              )}
-                            </div>
-
-                            <div className="flex gap-1 flex-shrink-0">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleOpenSupplierDialog(supplier)}
-                                className="h-8 w-8"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleDeleteSupplier(supplier.id)}
-                                className="h-8 w-8 hover:bg-red-100"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex justify-between items-baseline">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalPurchases')}</p>
-                                <p className="font-medium text-emerald-600">
-                                  {purchases.filter(p => p.supplier_id === supplier.id).length}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalAmount')}</p>
-                                <p className="font-medium text-orange-600">
-                                  {purchases
-                                    .filter(p => p.supplier_id === supplier.id)
-                                    .reduce((sum, p) => sum + (p.amount_ttc || p.amount), 0)
-                                    .toFixed(2)} DH
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Record/Edit Purchase Dialog */}
-      <RecordPurchaseDialog
-        isOpen={isPurchaseDialogOpen}
-        onClose={() => {
-          setIsPurchaseDialogOpen(false);
-          setEditingPurchase(null);
-        }}
-        suppliers={suppliers}
-        onSuccess={handlePurchaseSuccess}
-        editingPurchase={editingPurchase}
-      />
-
-      {/* Add/Edit Supplier Dialog */}
-      <AddSupplierDialog
-        isOpen={isSupplierDialogOpen}
-        onClose={() => setIsSupplierDialogOpen(false)}
-        onSupplierAdded={handleSupplierAdded}
-      />
-
-      {/* Balance History Dialog */}
-      <Dialog open={isBalanceHistoryDialogOpen} onOpenChange={setIsBalanceHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Balance History - {selectedPurchaseForHistory?.description}
-            </DialogTitle>
-          </DialogHeader>
-          {selectedPurchaseForHistory && user && (
-            <PurchaseBalanceHistory
-              purchaseId={selectedPurchaseForHistory.id}
-              userId={user.id}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Receipt Linking Dialog */}
-      <Dialog open={isLinkingDialogOpen} onOpenChange={setIsLinkingDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Link className="h-5 w-5" />
-              Link Receipts to Purchase - {selectedPurchaseForLinking?.description}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            {/* Date Range Selection */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Select Date Range</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="link_date_from">From Date</Label>
-                    <Input
-                      id="link_date_from"
-                      type="date"
-                      value={linkDateFrom}
-                      onChange={(e) => setLinkDateFrom(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="link_date_to">To Date</Label>
-                    <Input
-                      id="link_date_to"
-                      type="date"
-                      value={linkDateTo}
-                      onChange={(e) => setLinkDateTo(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Montage Summary */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Montage Cost Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {(() =>{
-                  const montageData = calculateMontageData();
-                  return (
-                    <div className="grid grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total Receipts</p>
-                        <p className="text-xl font-bold text-blue-600">{montageData.receiptCount}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total Montage</p>
-                        <p className="text-xl font-bold text-primary">{montageData.totalMontage.toFixed(2)} DH</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Paid Montage</p>
-                        <p className="text-xl font-bold text-green-600">{montageData.paidMontage.toFixed(2)} DH</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Unpaid Balance</p>
-                        <p className="text-xl font-bold text-red-600">{montageData.unpaidMontage.toFixed(2)} DH</p>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-
-            {/* Receipt List */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Filtered Receipts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-60 overflow-y-auto">
-                  {getFilteredReceipts().length === 0 ? (
-                    <p className="text-center text-gray-500 py-4">No receipts found in selected date range</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {getFilteredReceipts().map((receipt) => (
-                        <div key={receipt.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">{receipt.customer_name}</p>
-                            <p className="text-sm text-gray-600">{format(new Date(receipt.created_at), 'MMM dd, yyyy')}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">{receipt.montage_costs.toFixed(2)} DH</p>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              receipt.montage_status === 'Paid costs' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {receipt.montage_status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <DialogFooter className="pt-6 border-t">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsLinkingDialogOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleLinkMontageToReceipt}
-              disabled={isSubmitting || getFilteredReceipts().length === 0}
-            >
-              {isSubmitting ? 'Linking...' : 'Link to Purchase'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

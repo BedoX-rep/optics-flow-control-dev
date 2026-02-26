@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,      // 5 minutes
-      cacheTime: 30 * 60 * 1000,     // 30 minutes
+      gcTime: 30 * 60 * 1000,     // 30 minutes
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,     // Prevent refetch on reconnection events
       retry: false,
@@ -44,11 +44,11 @@ const queryClient = new QueryClient({
 });
 
 // Protected route wrapper
-const ProtectedRoute = ({ 
-  children, 
+const ProtectedRoute = ({
+  children,
   requiresActiveSubscription = true,
   requiredPermission
-}: { 
+}: {
   children: React.ReactNode;
   requiresActiveSubscription?: boolean;
   requiredPermission?: string;
@@ -71,7 +71,10 @@ const ProtectedRoute = ({
       }
       // Check regular permissions for non-admin sessions
       else if (sessionRole !== 'Admin') {
-        if (!permissions || !permissions[requiredPermission as keyof typeof permissions]) {
+        // Wait for permissions to be loaded before making a redirection decision
+        if (!permissions) return;
+
+        if (!permissions[requiredPermission as keyof typeof permissions]) {
           setShouldRedirect('/dashboard');
           return;
         }
@@ -91,8 +94,10 @@ const ProtectedRoute = ({
     setShouldRedirect(null);
   }, [sessionRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
 
-  // Show loading state while initial auth check is happening
-  if (isLoading) {
+  // Show loading state while initial auth check or required data (permissions/subscription) is loading
+  const isDataLoading = isLoading || (user && sessionRole !== 'Admin' && requiredPermission && !permissions);
+
+  if (isDataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFC]">
         <div className="animate-pulse flex flex-col items-center">
@@ -122,10 +127,10 @@ const AppRoutes = () => (
     <Route path="/" element={<Index />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/pricing" element={<Pricing />} />
-	  <Route path="/how-to-use" element={<HowToUse />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="*" element={<NotFound />} />
+    <Route path="/how-to-use" element={<HowToUse />} />
+    <Route path="/terms-of-service" element={<TermsOfService />} />
+    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+    <Route path="*" element={<NotFound />} />
 
     <Route path="/dashboard/*" element={
       <ProtectedRoute>
@@ -134,35 +139,35 @@ const AppRoutes = () => (
     } />
 
     <Route path="/products/*" element={
-              <ProtectedRoute requiredPermission="can_manage_products">
-                <Layout><Products /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/clients/*" element={
-              <ProtectedRoute requiredPermission="can_manage_clients">
-                <Layout><Clients /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/receipts/*" element={
-              <ProtectedRoute requiredPermission="can_manage_receipts">
-                <Layout><Receipts /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/financial/*" element={
-              <ProtectedRoute requiredPermission="can_view_financial">
-                <Layout><Financial /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/purchases/*" element={
-              <ProtectedRoute requiredPermission="can_manage_purchases">
-                <Layout><Purchases /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/access/*" element={
-              <ProtectedRoute requiredPermission="admin_session">
-                <Layout><Access /></Layout>
-              </ProtectedRoute>
-            } />
+      <ProtectedRoute requiredPermission="can_manage_products">
+        <Layout><Products /></Layout>
+      </ProtectedRoute>
+    } />
+    <Route path="/clients/*" element={
+      <ProtectedRoute requiredPermission="can_manage_clients">
+        <Layout><Clients /></Layout>
+      </ProtectedRoute>
+    } />
+    <Route path="/receipts/*" element={
+      <ProtectedRoute requiredPermission="can_manage_receipts">
+        <Layout><Receipts /></Layout>
+      </ProtectedRoute>
+    } />
+    <Route path="/financial/*" element={
+      <ProtectedRoute requiredPermission="can_view_financial">
+        <Layout><Financial /></Layout>
+      </ProtectedRoute>
+    } />
+    <Route path="/purchases/*" element={
+      <ProtectedRoute requiredPermission="can_manage_purchases">
+        <Layout><Purchases /></Layout>
+      </ProtectedRoute>
+    } />
+    <Route path="/access/*" element={
+      <ProtectedRoute requiredPermission="admin_session">
+        <Layout><Access /></Layout>
+      </ProtectedRoute>
+    } />
 
     <Route path="/new-receipt/*" element={
       <ProtectedRoute>
@@ -171,16 +176,16 @@ const AppRoutes = () => (
     } />
 
     <Route path="/optician-settings/*" element={
-              <ProtectedRoute requiredPermission="admin_session">
-                <Layout><OpticianSettings /></Layout>
-              </ProtectedRoute>
-            } />
+      <ProtectedRoute requiredPermission="admin_session">
+        <Layout><OpticianSettings /></Layout>
+      </ProtectedRoute>
+    } />
 
     <Route path="/personalisation/*" element={
-              <ProtectedRoute requiredPermission="admin_session">
-                <Layout><Personalisation /></Layout>
-              </ProtectedRoute>
-            } />
+      <ProtectedRoute requiredPermission="admin_session">
+        <Layout><Personalisation /></Layout>
+      </ProtectedRoute>
+    } />
 
     <Route path="/subscriptions/*" element={
       <ProtectedRoute requiresActiveSubscription={false}>
@@ -189,10 +194,10 @@ const AppRoutes = () => (
     } />
 
     <Route path="/invoices/*" element={
-              <ProtectedRoute requiredPermission="can_manage_invoices">
-                <Layout><Invoices /></Layout>
-              </ProtectedRoute>
-            } />
+      <ProtectedRoute requiredPermission="can_manage_invoices">
+        <Layout><Invoices /></Layout>
+      </ProtectedRoute>
+    } />
 
     <Route path="*" element={<NotFound />} />
   </Routes>

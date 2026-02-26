@@ -12,15 +12,16 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 
 interface Receipt {
-  montage_costs: number;
+  montage_costs?: number;
+  products_cost?: number;
   montage_status: string;
-  cost_ttc: number;
+  cost_ttc?: number;
   total: number;
   balance: number;
   advance_payment: number;
   delivery_status: string;
   created_at: string;
-  receipt_items: Array<{
+  receipt_items?: Array<{
     product?: {
       category?: string;
     };
@@ -84,7 +85,7 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
         const totalItemCost = cost * quantity;
         const category = item.product?.category || 'Unknown';
 
-        switch(category) {
+        switch (category) {
           case 'Single Vision Lenses':
             acc.singleVision += totalItemRevenue;
             acc.singleVisionCost += totalItemCost;
@@ -114,10 +115,10 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
       });
     }
     return acc;
-  }, { 
+  }, {
     singleVision: 0, progressive: 0, frames: 0, sunglasses: 0, accessories: 0,
     singleVisionCost: 0, progressiveCost: 0, framesCost: 0, sunglassesCost: 0, accessoriesCost: 0,
-    singleVisionCount: 0, progressiveCount: 0, framesCount: 0, sunglassesCount: 0, accessoriesCount: 0 
+    singleVisionCount: 0, progressiveCount: 0, framesCount: 0, sunglassesCount: 0, accessoriesCount: 0
   });
 
   const totalRevenue = filteredReceipts.reduce((sum, receipt) => sum + (receipt.total || 0), 0);
@@ -126,15 +127,15 @@ const ReceiptStatistics: React.FC<ReceiptStatisticsProps> = ({ isOpen, onClose, 
   const averageProfit = filteredReceipts.length > 0 ? totalProfit / filteredReceipts.length : 0;
   const averageTicket = filteredReceipts.length > 0 ? totalRevenue / filteredReceipts.length : 0;
 
-  const outstandingBalance = filteredReceipts.reduce((sum, receipt) => 
+  const outstandingBalance = filteredReceipts.reduce((sum, receipt) =>
     sum + (receipt.balance || 0), 0
   );
-  const collectionRate = totalRevenue > 0 
+  const collectionRate = totalRevenue > 0
     ? ((totalRevenue - outstandingBalance) / totalRevenue * 100)
     : 0;
 
   const deliveredCount = filteredReceipts.filter(r => r.delivery_status === 'Completed').length;
-  const deliveryRate = filteredReceipts.length > 0 
+  const deliveryRate = filteredReceipts.length > 0
     ? (deliveredCount / filteredReceipts.length * 100)
     : 0;
 

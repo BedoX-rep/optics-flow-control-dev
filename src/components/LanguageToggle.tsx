@@ -23,29 +23,37 @@ const LanguageToggle = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="ghost"
           size="sm"
-          className="bg-white/50 border-gray-200 hover:bg-white/70 px-3 py-1.5 text-xs font-medium"
+          className="h-9 bg-white border-none hover:bg-slate-50 px-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm transition-all active:scale-95 flex items-center gap-2"
         >
-          <Globe className="h-3 w-3 mr-1" />
-          <span className="mr-1">{currentLanguage.flag}</span>
-          {currentLanguage.code.toUpperCase()}
+          <Globe className="h-3.5 w-3.5 text-slate-400" />
+          <span className="text-slate-900 border-l border-slate-200 pl-2 ml-1">{currentLanguage.code.toUpperCase()}</span>
+          {currentLanguage.flag}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-36">
+      <DropdownMenuContent align="end" className="w-44 p-1 rounded-xl border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Select Language</p>
+        </div>
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code as 'en' | 'fr')}
-            className={`cursor-pointer flex items-center gap-2 ${
-              language === lang.code ? 'bg-teal-50 text-teal-700' : ''
-            }`}
+            className={`cursor-pointer h-10 rounded-lg flex items-center justify-between px-3 transition-colors ${language === lang.code
+                ? 'bg-teal-50 text-teal-700 font-bold'
+                : 'text-slate-600 hover:bg-slate-50'
+              }`}
           >
-            <span>{lang.flag}</span>
-            <span className="text-sm">{lang.name}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{lang.flag}</span>
+              <span className="text-xs font-bold uppercase tracking-wider">{lang.name}</span>
+            </div>
             {language === lang.code && (
-              <span className="ml-auto text-teal-600">✓</span>
+              <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center">
+                <span className="text-[10px] text-white">✓</span>
+              </div>
             )}
           </DropdownMenuItem>
         ))}

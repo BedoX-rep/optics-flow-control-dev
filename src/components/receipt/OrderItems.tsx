@@ -38,11 +38,11 @@ interface OrderItemsProps {
   productSearchTerms: Record<string, string>;
   filters: Record<string, string>;
   setOrderType: (value: string) => void;
-  setItems: (items: any[]) => void;
+  setItems: React.Dispatch<React.SetStateAction<any[]>>;
   updateItem: (id: string, field: string, value: any) => void;
   removeItem: (id: string) => void;
-  setProductSearchTerms: (terms: Record<string, string>) => void;
-  setFilters: (filters: Record<string, string>) => void;
+  setProductSearchTerms: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   getFilteredProducts: (searchTerm: string) => any[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
@@ -88,9 +88,9 @@ const OrderItems: React.FC<OrderItemsProps> = ({
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
-      setItems([...items, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
+      setItems(prevItems => [...prevItems, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
     } else {
-      setItems([...items, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
+      setItems(prevItems => [...prevItems, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
     }
   };
 
@@ -252,11 +252,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">{t('orderType')}:</Label>
             <Select value={orderType} onValueChange={setOrderType}>
-              <SelectTrigger className={`w-full ${
-                orderType === 'Unspecified' 
-                  ? 'bg-red-50 border-red-300 text-red-700' 
-                  : 'bg-white border-gray-300'
-              }`}>
+              <SelectTrigger className={`w-full ${orderType === 'Unspecified'
+                ? 'bg-red-50 border-red-300 text-red-700'
+                : 'bg-white border-gray-300'
+                }`}>
                 <SelectValue placeholder={t('selectOrderType')}>
                   <div className="flex items-center gap-2">
                     {orderType === 'Unspecified' && (
@@ -352,11 +351,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({
               <div className="flex items-center gap-2">
                 <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('orderType')}:</Label>
                 <Select value={orderType} onValueChange={setOrderType}>
-                  <SelectTrigger className={`w-[140px] ${
-                    orderType === 'Unspecified' 
-                      ? 'bg-red-50 border-red-300 text-red-700' 
-                      : 'bg-white border-gray-300'
-                  }`}>
+                  <SelectTrigger className={`w-[140px] ${orderType === 'Unspecified'
+                    ? 'bg-red-50 border-red-300 text-red-700'
+                    : 'bg-white border-gray-300'
+                    }`}>
                     <SelectValue placeholder={t('selectOrderType')}>
                       <div className="flex items-center gap-1">
                         {orderType === 'Unspecified' && (
@@ -472,16 +470,15 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                           {t('stock')}: {product.stock || 0}
                                         </span>
                                       ) : (
-                                        <span className={`${
-                                          product.stock_status === 'Out Of Stock' ? 'text-red-600' : 
-                                          product.stock_status === 'Order' ? 'text-orange-600' : 
-                                          'text-blue-600'
-                                        }`}>
-                                          {product.stock_status === 'inStock' ? t('inStock') : 
-                                           product.stock_status === 'Out Of Stock' ? t('outOfStock') :
-                                           product.stock_status === 'Order' ? t('order') :
-                                           product.stock_status === 'Fabrication' ? t('fabrication') :
-                                           product.stock_status}
+                                        <span className={`${product.stock_status === 'Out Of Stock' ? 'text-red-600' :
+                                          product.stock_status === 'Order' ? 'text-orange-600' :
+                                            'text-blue-600'
+                                          }`}>
+                                          {product.stock_status === 'inStock' ? t('inStock') :
+                                            product.stock_status === 'Out Of Stock' ? t('outOfStock') :
+                                              product.stock_status === 'Order' ? t('order') :
+                                                product.stock_status === 'Fabrication' ? t('fabrication') :
+                                                  product.stock_status}
                                         </span>
                                       )}
                                       <span className="text-blue-600">{product.price.toFixed(2)} DH</span>
@@ -613,16 +610,15 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                           {t('stock')}: {product.stock || 0}
                                         </span>
                                       ) : (
-                                        <span className={`text-xs whitespace-nowrap ${
-                                          product.stock_status === 'Out Of Stock' ? 'text-red-600' : 
-                                          product.stock_status === 'Order' ? 'text-orange-600' : 
-                                          'text-blue-600'
-                                        }`}>
-                                          {product.stock_status === 'inStock' ? t('inStock') : 
-                                           product.stock_status === 'Out Of Stock' ? t('outOfStock') :
-                                           product.stock_status === 'Order' ? t('order') :
-                                           product.stock_status === 'Fabrication' ? t('fabrication') :
-                                           product.stock_status}
+                                        <span className={`text-xs whitespace-nowrap ${product.stock_status === 'Out Of Stock' ? 'text-red-600' :
+                                          product.stock_status === 'Order' ? 'text-orange-600' :
+                                            'text-blue-600'
+                                          }`}>
+                                          {product.stock_status === 'inStock' ? t('inStock') :
+                                            product.stock_status === 'Out Of Stock' ? t('outOfStock') :
+                                              product.stock_status === 'Order' ? t('order') :
+                                                product.stock_status === 'Fabrication' ? t('fabrication') :
+                                                  product.stock_status}
                                         </span>
                                       )}
                                       <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
@@ -751,7 +747,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                     }
                                   }
 
-                                  setItems(prevItems => 
+                                  setItems(prevItems =>
                                     prevItems.map(i => i.id === item.id ? updatedItem : i)
                                   );
                                 }}
@@ -784,7 +780,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                                     }
                                   }
 
-                                  setItems(prevItems => 
+                                  setItems(prevItems =>
                                     prevItems.map(i => i.id === item.id ? updatedItem : i)
                                   );
                                 }}
@@ -793,25 +789,25 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                               </Button>
                             </div>
                           </div>
-                          
+
                           {/* Paid at Delivery checkbox for Order/Fabrication items - aligned horizontally */}
                           {(() => {
                             const product = products.find(p => p.id === item.productId);
                             return product && (product.stock_status === 'Order' || product.stock_status === 'Fabrication');
                           })() && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 rounded border border-yellow-200">
-                              <input
-                                type="checkbox"
-                                id={`paid-delivery-${item.id}`}
-                                checked={item.paid_at_delivery || false}
-                                onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
-                                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                              />
-                              <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
-                                {t('paidAtDelivery')}
-                              </Label>
-                            </div>
-                          )}
+                              <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 rounded border border-yellow-200">
+                                <input
+                                  type="checkbox"
+                                  id={`paid-delivery-${item.id}`}
+                                  checked={item.paid_at_delivery || false}
+                                  onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
+                                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                                />
+                                <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
+                                  {t('paidAtDelivery')}
+                                </Label>
+                              </div>
+                            )}
                         </div>
                         {item.appliedMarkup > 0 && (
                           <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
@@ -826,19 +822,19 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                       const product = products.find(p => p.id === item.productId);
                       return product && (product.stock_status === 'Order' || product.stock_status === 'Fabrication');
                     })() && (
-                      <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-                        <input
-                          type="checkbox"
-                          id={`paid-delivery-${item.id}`}
-                          checked={item.paid_at_delivery || false}
-                          onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
-                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                        />
-                        <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
-                          {t('paidAtDelivery')}
-                        </Label>
-                      </div>
-                    )}
+                        <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded border border-yellow-200">
+                          <input
+                            type="checkbox"
+                            id={`paid-delivery-${item.id}`}
+                            checked={item.paid_at_delivery || false}
+                            onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
+                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          />
+                          <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
+                            {t('paidAtDelivery')}
+                          </Label>
+                        </div>
+                      )}
                   </div>
                 </div>
               </CardContent>
@@ -872,7 +868,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
             <AlertDialogCancel onClick={() => setShowOutOfStockWarning(false)}>
               {t('cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={() => {
                 setShowOutOfStockWarning(false);
                 onProceedWithOutOfStock?.();

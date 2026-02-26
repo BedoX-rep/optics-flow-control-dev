@@ -239,6 +239,9 @@ export type Database = {
           total: number
           user_id: string
           order_type: string | null
+          note: string | null
+          call_status: string | null
+          time_called: string | null
         }
         Insert: {
           add?: number | null
@@ -305,6 +308,9 @@ export type Database = {
           total?: number
           user_id?: string
           order_type?: string | null
+          note?: string | null
+          call_status?: string | null
+          time_called?: string | null
         }
         Relationships: [
           {
@@ -399,6 +405,8 @@ export type Database = {
           supplier_id: string | null
           description: string
           amount: number
+          amount_ht: number
+          amount_ttc: number
           category: string | null
           purchase_date: string | null
           receipt_number: string | null
@@ -408,36 +416,73 @@ export type Database = {
           created_at: string | null
           user_id: string
           purchase_type: string | null
+          advance_payment: number | null
+          balance: number | null
+          payment_status: string | null
+          payment_urgency: string | null
+          recurring_type: string | null
+          next_recurring_date: string | null
+          linked_receipts: string[] | null
+          link_date_from: string | null
+          link_date_to: string | null
+          already_recurred: boolean | null
+          tax_percentage: number | null
         }
         Insert: {
           id?: string
           supplier_id?: string | null
           description: string
           amount: number
+          amount_ht?: number
+          amount_ttc?: number
           category?: string | null
           purchase_date?: string | null
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
-          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id: string
+          purchase_type?: string | null
+          advance_payment?: number | null
+          balance?: number | null
+          payment_status?: string | null
+          payment_urgency?: string | null
+          recurring_type?: string | null
+          next_recurring_date?: string | null
+          linked_receipts?: string[] | null
+          link_date_from?: string | null
+          link_date_to?: string | null
+          already_recurred?: boolean | null
+          tax_percentage?: number | null
         }
         Update: {
           id?: string
           supplier_id?: string | null
           description?: string
           amount?: number
+          amount_ht?: number
+          amount_ttc?: number
           category?: string | null
           purchase_date?: string | null
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
-          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id?: string
+          purchase_type?: string | null
+          advance_payment?: number | null
+          balance?: number | null
+          payment_status?: string | null
+          payment_urgency?: string | null
+          recurring_type?: string | null
+          next_recurring_date?: string | null
+          linked_receipts?: string[] | null
+          link_date_from?: string | null
+          link_date_to?: string | null
+          already_recurred?: boolean | null
+          tax_percentage?: number | null
         }
         Relationships: [
           {
@@ -445,6 +490,47 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_balance_history: {
+        Row: {
+          id: string
+          purchase_id: string
+          old_balance: number
+          new_balance: number
+          change_amount: number
+          change_reason: string | null
+          change_date: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          purchase_id: string
+          old_balance: number
+          new_balance: number
+          change_amount: number
+          change_reason?: string | null
+          change_date?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          purchase_id?: string
+          old_balance?: number
+          new_balance?: number
+          change_amount?: number
+          change_reason?: string | null
+          change_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_balance_history_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
             referencedColumns: ["id"]
           }
         ]
@@ -464,11 +550,11 @@ export type Database = {
           start_date: string | null
           store_name: string
           subscription_status:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          | Database["public"]["Enums"]["subscription_status"]
+          | null
           subscription_type:
-            | Database["public"]["Enums"]["subscription_type"]
-            | null
+          | Database["public"]["Enums"]["subscription_type"]
+          | null
           trial_used: boolean | null
           user_id: string
         }
@@ -486,11 +572,11 @@ export type Database = {
           start_date?: string | null
           store_name?: string
           subscription_status?:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          | Database["public"]["Enums"]["subscription_status"]
+          | null
           subscription_type?:
-            | Database["public"]["Enums"]["subscription_type"]
-            | null
+          | Database["public"]["Enums"]["subscription_type"]
+          | null
           trial_used?: boolean | null
           user_id: string
         }
@@ -508,21 +594,332 @@ export type Database = {
           start_date?: string | null
           store_name?: string
           subscription_status?:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          | Database["public"]["Enums"]["subscription_status"]
+          | null
           subscription_type?:
-            | Database["public"]["Enums"]["subscription_type"]
-            | null
+          | Database["public"]["Enums"]["subscription_type"]
+          | null
           trial_used?: boolean | null
           user_id?: string
         }
         Relationships: []
+      }
+      user_information: {
+        Row: {
+          address: string | null
+          company_legal_status: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          ice: string | null
+          inpe: string | null
+          logo_url: string | null
+          phone: string | null
+          store_name: string | null
+          updated_at: string
+          user_id: string
+          vat_number: string | null
+          website: string | null
+          auto_additional_costs: boolean | null
+          sv_lens_cost: number | null
+          progressive_lens_cost: number | null
+          frames_cost: number | null
+          markup_sph_range_1_min: number | null
+          markup_sph_range_1_max: number | null
+          markup_sph_range_1_markup: number | null
+          markup_sph_range_2_min: number | null
+          markup_sph_range_2_max: number | null
+          markup_sph_range_2_markup: number | null
+          markup_sph_range_3_min: number | null
+          markup_sph_range_3_max: number | null
+          markup_sph_range_3_markup: number | null
+          markup_cyl_range_1_min: number | null
+          markup_cyl_range_1_max: number | null
+          markup_cyl_range_1_markup: number | null
+          markup_cyl_range_2_min: number | null
+          markup_cyl_range_2_max: number | null
+          markup_cyl_range_2_markup: number | null
+          markup_cyl_range_3_min: number | null
+          markup_cyl_range_3_max: number | null
+          markup_cyl_range_3_markup: number | null
+        }
+        Insert: {
+          address?: string | null
+          company_legal_status?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          ice?: string | null
+          inpe?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          store_name?: string | null
+          updated_at?: string
+          user_id: string
+          vat_number?: string | null
+          website?: string | null
+          auto_additional_costs?: boolean | null
+          sv_lens_cost?: number | null
+          progressive_lens_cost?: number | null
+          frames_cost?: number | null
+          markup_sph_range_1_min?: number | null
+          markup_sph_range_1_max?: number | null
+          markup_sph_range_1_markup?: number | null
+          markup_sph_range_2_min?: number | null
+          markup_sph_range_2_max?: number | null
+          markup_sph_range_2_markup?: number | null
+          markup_sph_range_3_min?: number | null
+          markup_sph_range_3_max?: number | null
+          markup_sph_range_3_markup?: number | null
+          markup_cyl_range_1_min?: number | null
+          markup_cyl_range_1_max?: number | null
+          markup_cyl_range_1_markup?: number | null
+          markup_cyl_range_2_min?: number | null
+          markup_cyl_range_2_max?: number | null
+          markup_cyl_range_2_markup?: number | null
+          markup_cyl_range_3_min?: number | null
+          markup_cyl_range_3_max?: number | null
+          markup_cyl_range_3_markup?: number | null
+        }
+        Update: {
+          address?: string | null
+          company_legal_status?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          ice?: string | null
+          inpe?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          store_name?: string | null
+          updated_at?: string
+          user_id?: string
+          vat_number?: string | null
+          website?: string | null
+          auto_additional_costs?: boolean | null
+          sv_lens_cost?: number | null
+          progressive_lens_cost?: number | null
+          frames_cost?: number | null
+          markup_sph_range_1_min?: number | null
+          markup_sph_range_1_max?: number | null
+          markup_sph_range_1_markup?: number | null
+          markup_sph_range_2_min?: number | null
+          markup_sph_range_2_max?: number | null
+          markup_sph_range_2_markup?: number | null
+          markup_sph_range_3_min?: number | null
+          markup_sph_range_3_max?: number | null
+          markup_sph_range_3_markup?: number | null
+          markup_cyl_range_1_min?: number | null
+          markup_cyl_range_1_max?: number | null
+          markup_cyl_range_1_markup?: number | null
+          markup_cyl_range_2_min?: number | null
+          markup_cyl_range_2_max?: number | null
+          markup_cyl_range_2_markup?: number | null
+          markup_cyl_range_3_min?: number | null
+          markup_cyl_range_3_max?: number | null
+          markup_cyl_range_3_markup?: number | null
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          advance_payment: number | null
+          balance: number | null
+          client_address: string | null
+          client_assurance: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted: boolean | null
+          notes: string | null
+          status: string | null
+          subtotal: number
+          tax_amount: number | null
+          tax_percentage: number | null
+          total: number
+          updated_at: string | null
+          user_id: string
+          right_eye_sph: number | null
+          right_eye_cyl: number | null
+          right_eye_axe: number | null
+          left_eye_sph: number | null
+          left_eye_cyl: number | null
+          left_eye_axe: number | null
+          add_value: number | null
+        }
+        Insert: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_assurance?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total: number
+          updated_at?: string | null
+          user_id: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+        }
+        Update: {
+          advance_payment?: number | null
+          balance?: number | null
+          client_address?: string | null
+          client_assurance?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          is_deleted?: boolean | null
+          notes?: string | null
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          tax_percentage?: number | null
+          total?: number
+          updated_at?: string | null
+          user_id?: string
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+        }
+        Relationships: []
+      }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          invoice_id: string
+          is_deleted: boolean | null
+          product_name: string
+          quantity: number
+          total_price: number
+          unit_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id: string
+          is_deleted?: boolean | null
+          product_name: string
+          quantity: number
+          total_price: number
+          unit_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string
+          is_deleted?: boolean | null
+          product_name?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          id: string
+          user_id: string
+          can_manage_products: boolean
+          can_manage_clients: boolean
+          can_manage_receipts: boolean
+          can_view_financial: boolean
+          can_manage_purchases: boolean
+          can_access_dashboard: boolean
+          can_manage_invoices: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          can_manage_products?: boolean
+          can_manage_clients?: boolean
+          can_manage_receipts?: boolean
+          can_view_financial?: boolean
+          can_manage_purchases?: boolean
+          can_access_dashboard?: boolean
+          can_manage_invoices?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          can_manage_products?: boolean
+          can_manage_clients?: boolean
+          can_manage_receipts?: boolean
+          can_view_financial?: boolean
+          can_manage_purchases?: boolean
+          can_access_dashboard?: boolean
+          can_manage_invoices?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_access_code: {
+        Args: {
+          input_access_code: string
+        }
+        Returns: {
+          valid: boolean
+          message: string
+        }[]
+      }
       check_and_renew_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -530,6 +927,17 @@ export type Database = {
       generate_unique_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_admin_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          can_manage_products: boolean
+          can_manage_clients: boolean
+          can_manage_receipts: boolean
+          can_view_financial: boolean
+          can_manage_purchases: boolean
+          can_access_dashboard: boolean
+        }[]
       }
       get_subscription_stats: {
         Args: Record<PropertyKey, never>
@@ -542,6 +950,12 @@ export type Database = {
           trial_count: number
         }[]
       }
+      initialize_user_information: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: undefined
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -549,11 +963,11 @@ export type Database = {
     }
     Enums: {
       subscription_status:
-        | "Active"
-        | "Suspended"
-        | "Cancelled"
-        | "inActive"
-        | "Expired"
+      | "Active"
+      | "Suspended"
+      | "Cancelled"
+      | "inActive"
+      | "Expired"
       subscription_type: "Trial" | "Monthly" | "Quarterly" | "Lifetime"
     }
     CompositeTypes: {
@@ -566,106 +980,106 @@ type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
@@ -798,6 +1212,28 @@ export interface UserInformation {
   website?: string;
   created_at: string;
   updated_at: string;
+  auto_additional_costs?: boolean;
+  sv_lens_cost?: number;
+  progressive_lens_cost?: number;
+  frames_cost?: number;
+  markup_sph_range_1_min?: number;
+  markup_sph_range_1_max?: number;
+  markup_sph_range_1_markup?: number;
+  markup_sph_range_2_min?: number;
+  markup_sph_range_2_max?: number;
+  markup_sph_range_2_markup?: number;
+  markup_sph_range_3_min?: number;
+  markup_sph_range_3_max?: number;
+  markup_sph_range_3_markup?: number;
+  markup_cyl_range_1_min?: number;
+  markup_cyl_range_1_max?: number;
+  markup_cyl_range_1_markup?: number;
+  markup_cyl_range_2_min?: number;
+  markup_cyl_range_2_max?: number;
+  markup_cyl_range_2_markup?: number;
+  markup_cyl_range_3_min?: number;
+  markup_cyl_range_3_max?: number;
+  markup_cyl_range_3_markup?: number;
 }
 
 export interface Invoice {
@@ -807,6 +1243,7 @@ export interface Invoice {
   client_name: string;
   client_phone?: string;
   client_address?: string;
+  client_assurance?: string;
   subtotal: number;
   tax_percentage: number;
   tax_amount: number;
@@ -837,109 +1274,3 @@ export interface InvoiceItem {
   updated_at: string;
 }
 
-export interface Database {
-  public: {
-    Tables: {
-      user_information: {
-        Row: UserInformation;
-        Insert: Omit<UserInformation, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<UserInformation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
-      };
-      invoices: {
-        Row: {
-          advance_payment: number | null
-          balance: number | null
-          client_address: string | null
-          client_assurance: string | null
-          client_name: string
-          client_phone: string | null
-          created_at: string | null
-          due_date: string | null
-          id: string
-          invoice_date: string
-          invoice_number: string
-          is_deleted: boolean | null
-          notes: string | null
-          status: string | null
-          subtotal: number
-          tax_amount: number | null
-          tax_percentage: number | null
-          total: number
-          updated_at: string | null
-          user_id: string
-          right_eye_sph: number | null
-          right_eye_cyl: number | null
-          right_eye_axe: number | null
-          left_eye_sph: number | null
-          left_eye_cyl: number | null
-          left_eye_axe: number | null
-          add_value: number | null
-        }
-        Insert: {
-          advance_payment?: number | null
-          balance?: number | null
-          client_address?: string | null
-          client_assurance?: string | null
-          client_name: string
-          client_phone?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: string
-          invoice_date: string
-          invoice_number: string
-          is_deleted?: boolean | null
-          notes?: string | null
-          status?: string | null
-          subtotal: number
-          tax_amount?: number | null
-          tax_percentage?: number | null
-          total: number
-          updated_at?: string | null
-          user_id: string
-          right_eye_sph?: number | null
-          right_eye_cyl?: number | null
-          right_eye_axe?: number | null
-          left_eye_sph?: number | null
-          left_eye_cyl?: number | null
-          left_eye_axe?: number | null
-          add_value?: number | null
-        }
-        Update: {
-          advance_payment?: number | null
-          balance?: number | null
-          client_address?: string | null
-          client_assurance?: string | null
-          client_name?: string
-          client_phone?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: string
-          invoice_date?: string
-          invoice_number?: string
-          is_deleted?: boolean | null
-          notes?: string | null
-          status?: string | null
-          subtotal?: number
-          tax_amount?: number | null
-          tax_percentage?: number | null
-          total?: number
-          updated_at?: string | null
-          user_id?: string
-          right_eye_sph?: number | null
-          right_eye_cyl?: number | null
-          right_eye_axe?: number | null
-          left_eye_sph?: number | null
-          left_eye_cyl?: number | null
-          left_eye_axe?: number | null
-          add_value?: number | null
-        }
-      };
-      invoice_items: {
-        Row: InvoiceItem;
-        Insert: Omit<InvoiceItem, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<InvoiceItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
-      };
-      // ... other existing tables
-    };
-  };
-}

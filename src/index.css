@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
@@ -86,7 +85,12 @@
     @apply bg-background text-foreground font-inter;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-poppins font-semibold tracking-tight;
   }
 
@@ -107,29 +111,29 @@
   .status-badge {
     @apply px-2 py-1 text-xs font-medium rounded-full;
   }
-  
+
   .status-active {
     @apply bg-emerald-100 text-emerald-800;
   }
-  
+
   .status-inactive {
     @apply bg-gray-100 text-gray-800;
   }
-  
+
   .status-suspended {
     @apply bg-yellow-100 text-yellow-800;
   }
-  
+
   .status-expired {
     @apply bg-red-100 text-red-800;
   }
-  
+
   .status-cancelled {
     @apply bg-red-100 text-red-800;
   }
 
   .card-shadow {
-    @apply shadow-[0_8px_30px_rgba(0,0,0,0.04)];
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
   }
 
   .glass-effect {
@@ -152,23 +156,112 @@
     @apply transition-transform duration-200 hover:scale-105;
   }
 
+  /* Custom Scrollbar for a more premium feel */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-50/50 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+
+  /* Refined Focus States */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none transition-all;
+  }
+
+  /* Animation utilities */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
+
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes scan {
+
+    0%,
+    100% {
+      bottom: 0;
+      opacity: 0;
+    }
+
+    10%,
+    90% {
+      opacity: 1;
+    }
+
+    50% {
+      bottom: 80px;
+    }
+  }
+
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
   /* Mobile viewport optimization */
   @media screen and (max-width: 768px) {
     html {
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
     }
-    
+
     body {
       -webkit-overflow-scrolling: touch;
       overflow-x: hidden;
     }
-    
+
     /* Ensure products page elements don't cause horizontal scroll */
     .container {
       max-width: 100vw;
       overflow-x: hidden;
     }
   }
-}
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .teal-gradient {
+    @apply bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600;
+  }
+}

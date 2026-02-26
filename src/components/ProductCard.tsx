@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Edit, Trash2, Save } from 'lucide-react';
+import { Edit, Trash2, Save, Album, Filter, Building2, Layers, Coins, Zap } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { useLanguage } from './LanguageProvider';
 import { useCompanies } from '@/hooks/useCompanies';
+import { cn } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -31,7 +32,7 @@ interface ProductCardProps {
   onFieldChange: (productId: string, field: keyof Product, value: any) => void;
   onSave: (productId: string) => void;
   onEdit: (product: Product) => void;
-  onDelete: (productId: string) => void;
+  onDelete: (product: Product) => void;
   isSubmitting: boolean;
 }
 
@@ -56,248 +57,176 @@ const TREATMENT_OPTIONS = [
   { value: "UV protection", labelKey: "uvProtection" },
   { value: "Tint", labelKey: "tint" }
 ];
-const ProductCard = React.memo<ProductCardProps>(({ 
-  product, 
-  onFieldChange, 
-  onSave, 
-  onEdit, 
-  onDelete, 
-  isSubmitting 
+const DetailItem = ({ label, value, icon: Icon }: { label: string; value: string; icon: any }) => {
+  return (
+    <div className="flex flex-col gap-1 min-w-0">
+      <div className="flex items-center gap-1.5 text-slate-400">
+        <Icon size={12} />
+        <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
+      </div>
+      <span className="text-xs font-bold text-slate-700 truncate pl-4.5 border-l border-slate-100">
+        {value}
+      </span>
+    </div>
+  );
+};
+
+const ProductCard = React.memo<ProductCardProps>(({
+  product,
+  onFieldChange,
+  onSave,
+  onEdit,
+  onDelete,
+  isSubmitting
 }) => {
   const { t } = useLanguage();
   const { allCompanies } = useCompanies();
+
   return (
-    <Card 
-      className={`overflow-hidden hover:shadow-lg transition-all duration-300 border-l-4 ${
-        product.isEdited 
-          ? 'border-l-amber-400 shadow-md bg-amber-50/30' 
-          : 'border-l-blue-400 hover:border-l-blue-500'
-      }`}
+    <Card
+      className={`h-[500px] w-full overflow-hidden transition-all duration-500 flex flex-col group relative ${product.isEdited
+        ? 'ring-2 ring-amber-400 border-l-4 border-l-amber-400 shadow-2xl bg-white scale-[1.02]'
+        : 'hover:shadow-2xl hover:scale-[1.02] bg-white border border-teal-100/50 border-l-4 border-l-teal-500 shadow-sm'
+        }`}
     >
-      <div className="p-4">
-        <div className="flex items-start gap-3 mb-4">
-          <ProductImage
-            src={product.image}
-            alt={product.category}
-            className="w-12 h-12 rounded-lg object-cover border border-gray-100"
-          />
-          <div className="flex-1 min-w-0">
-            <input
-              type="text"
-              value={product.name}
-              onChange={(e) => onFieldChange(product.id, 'name', e.target.value)}
-              disabled={product.automated_name}
-              className="font-semibold text-sm w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed mb-1"
+      {/* Background patterns */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-50 rounded-full -ml-12 -mb-12 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity" />
+
+      <div className="p-6 h-full flex flex-col relative z-10">
+        {/* Header: Name + Image */}
+        <div className="flex items-start gap-5 mb-6">
+          <div className="relative group/img flex-shrink-0">
+            <ProductImage
+              src={product.image}
+              alt={product.category || ''}
+              className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md transition-transform group-hover/img:scale-110"
             />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  value={product.price}
-                  onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
-                  className="font-medium text-blue-600 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none w-16 text-sm"
-                  min={0}
-                  step={0.01}
-                />
-                <span className="text-xs text-gray-500">DH</span>
-              </div>
+            <div className={cn(
+              "absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm",
+              product.stock_status === 'inStock' ? 'bg-emerald-500' :
+                product.stock_status === 'Out Of Stock' ? 'bg-rose-500' : 'bg-amber-500'
+            )}></div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md">
+                {product.category ? t(product.category.replace(/\s+/g, '').toLowerCase()) : t('noCategory')}
+              </span>
               {product.created_at && (
-                <span className="text-xs text-gray-400">
-                  {new Date(product.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
+                <span className="text-[9px] text-slate-400 font-bold uppercase ml-auto">
+                  {new Date(product.created_at).toLocaleDateString()}
                 </span>
               )}
             </div>
+            <textarea
+              value={product.name}
+              onChange={(e) => onFieldChange(product.id, 'name', e.target.value)}
+              disabled={product.automated_name}
+              rows={2}
+              className="font-poppins font-black text-lg w-full bg-transparent border-0 focus:ring-0 resize-none leading-tight py-0 disabled:opacity-80 text-slate-800 placeholder-slate-300 transition-colors focus:text-teal-700"
+              placeholder="Product name..."
+            />
           </div>
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Select
-                value={product.category || ""}
-                onValueChange={(value) => onFieldChange(product.id, 'category', value === "none" ? null : value)}
-              >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder={t('category')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t('none')}</SelectItem>
-                  {CATEGORY_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Select
-                value={product.index || ""}
-                onValueChange={(value) => onFieldChange(product.id, 'index', value === "none" ? null : value)}
-              >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder={t('index')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t('none')}</SelectItem>
-                  {INDEX_OPTIONS.map(option => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Select
-                value={product.treatment || ""}
-                onValueChange={(value) => onFieldChange(product.id, 'treatment', value === "none" ? null : value)}
-              >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder={t('treatment')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t('none')}</SelectItem>
-                  {TREATMENT_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>{t(option.labelKey)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Select
-                value={product.company || ""}
-                onValueChange={(value) => onFieldChange(product.id, 'company', value === "none" ? null : value)}
-              >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue placeholder={t('company')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t('none')}</SelectItem>
-                  {allCompanies.map(option => (
-                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('gamma')}</label>
-              <input
-                type="text"
-                value={product.gamma || ""}
-                onChange={(e) => onFieldChange(product.id, 'gamma', e.target.value || null)}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
-                placeholder={t('gamma')}
-              />
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('costTTC')} (DH)</label>
+        {/* Price Section - Highlighted Label */}
+        <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100/50 flex items-center justify-between group-hover:bg-teal-50/30 transition-colors">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Sale Price</span>
+            <div className="flex items-center gap-1.5">
               <input
                 type="number"
-                value={product.cost_ttc || 0}
-                onChange={(e) => onFieldChange(product.id, 'cost_ttc', Number(e.target.value))}
-                className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
-                placeholder="0.00"
+                value={product.price}
+                onChange={(e) => onFieldChange(product.id, 'price', Number(e.target.value))}
+                className="font-poppins font-black text-2xl text-teal-600 bg-transparent border-0 p-0 w-28 focus:ring-0"
                 min={0}
                 step={0.01}
               />
+              <span className="text-sm font-black text-teal-600/50">DH</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-gray-600 font-medium block mb-1">{t('stockStatus')}</label>
-              <Select
-                value={product.stock_status || 'Order'}
-                onValueChange={(value: 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock') => 
-                  onFieldChange(product.id, 'stock_status', value)
-                }
-              >
-                <SelectTrigger className="h-7 text-xs border-gray-200">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Order">{t('order')}</SelectItem>
-                  <SelectItem value="inStock">{t('inStock')}</SelectItem>
-                  <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
-                  <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="h-10 w-px bg-slate-200" />
+
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Stock status</span>
+            <div className={cn(
+              "text-xs font-black px-3 py-1 rounded-lg uppercase tracking-tight",
+              product.stock_status === 'inStock' ? 'bg-emerald-100 text-emerald-700' :
+                product.stock_status === 'Out Of Stock' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+            )}>
+              {product.stock_status === 'inStock' ? `${t('inStock')} (${product.stock || 0})` : t(product.stock_status?.replace(/\s+/g, '').toLowerCase() || 'order')}
             </div>
-
-            {product.stock_status === 'inStock' && (
-              <div>
-                <label className="text-xs text-gray-600 font-medium block mb-1">{t('stock')} {t('quantity') || 'Qty'}</label>
-                <input
-                  type="number"
-                  value={product.stock || 0}
-                  onChange={(e) => onFieldChange(product.id, 'stock', Number(e.target.value))}
-                  className="h-7 px-2 text-xs border border-gray-200 rounded focus:border-blue-500 focus:outline-none w-full"
-                  placeholder="0"
-                  min={0}
-                />
-              </div>
-            )}
           </div>
-
-          
         </div>
 
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-          <div className="flex gap-1">
+        {/* All Product Values - Information Grid */}
+        <div className="flex-1 grid grid-cols-2 gap-y-4 gap-x-6">
+          <DetailItem
+            label={t('index')}
+            value={["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(product.category || "") ? (product.index || "—") : "Ø"}
+            icon={Album}
+          />
+          <DetailItem
+            label={t('treatment')}
+            value={["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(product.category || "") ? (product.treatment ? t(product.treatment.toLowerCase()) : "—") : "Ø"}
+            icon={Filter}
+          />
+          <DetailItem label={t('company')} value={product.company || "—"} icon={Building2} />
+          <DetailItem label={t('gamma')} value={product.gamma || "—"} icon={Layers} />
+          <DetailItem label={t('costTTC')} value={product.cost_ttc ? `${product.cost_ttc} DH` : "—"} icon={Coins} />
+          <DetailItem label="Auto Name" value={product.automated_name ? "Enabled" : "Disabled"} icon={Zap} />
+        </div>
+
+        {/* Footer Actions */}
+        <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(product)}
+              className="h-10 w-10 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-all"
+            >
+              <Edit size={18} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(product)}
+              className="h-10 w-10 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+            >
+              <Trash2 size={18} />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3">
             {product.isEdited && (
               <Button
-                size="sm"
                 onClick={() => onSave(product.id)}
                 disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
+                className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl px-6 h-10 font-bold shadow-lg shadow-teal-500/20 active:scale-95 transition-all"
               >
-                <Save size={12} className="mr-1" />
+                <Save size={16} className="mr-2" />
                 {t('saveButton')}
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(product)}
-              className="text-gray-600 hover:text-blue-600 h-7 px-2 text-xs"
-            >
-              <Edit size={12} className="mr-1" />
-              {t('edit')}
-            </Button>
-            <div className="flex items-center gap-1 ml-2">
+
+            <div className="flex items-center gap-2">
               <Switch
                 checked={product.automated_name}
                 onCheckedChange={(checked) => onFieldChange(product.id, 'automated_name', checked)}
-                className="scale-75"
+                className="scale-75 data-[state=checked]:bg-teal-600"
               />
-              <span className="text-xs text-gray-500">{t('auto')}</span>
+              <span className="text-[10px] font-black uppercase text-slate-400 tabular-nums">Auto</span>
             </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(product.id)}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2 text-xs"
-          >
-            <Trash2 size={12} />
-          </Button>
         </div>
       </div>
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for better performance
   return (
     prevProps.product.id === nextProps.product.id &&
     prevProps.product.name === nextProps.product.name &&

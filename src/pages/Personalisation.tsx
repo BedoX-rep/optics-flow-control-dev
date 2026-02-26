@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import PageTitle from '@/components/PageTitle';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Save, Settings, DollarSign, Building2, Plus, Trash2, Edit } from 'lucide-react';
+import { Database } from '@/integrations/supabase/types';
+
+type UserInformationRow = Database['public']['Tables']['user_information']['Row'];
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
@@ -74,77 +78,9 @@ const Personalisation = () => {
 
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
-  // Fetch user personalisation data
-  const { data: personalisationInfo, isLoading } = useQuery({
-    queryKey: ['user-information', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-
-      try {
-        // Try to get existing user information
-        const { data: existingInfo, error: fetchError } = await supabase
-          .from('user_information')
-          .select(`
-            auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-            markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-            markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-            markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-            markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-            markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-            markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-          `)
-          .eq('user_id', user.id)
-          .single();
-
-        if (existingInfo) {
-          return existingInfo;
-        }
-
-        // If no user information exists, initialize it
-        if (fetchError && fetchError.code === 'PGRST116') {
-          await supabase.rpc('initialize_user_information', { user_uuid: user.id });
-
-          // Fetch the newly created/updated record
-          const { data: newInfo, error: newError } = await supabase
-            .from('user_information')
-            .select(`
-              auto_additional_costs, sv_lens_cost, progressive_lens_cost, frames_cost,
-              markup_sph_range_1_min, markup_sph_range_1_max, markup_sph_range_1_markup,
-              markup_sph_range_2_min, markup_sph_range_2_max, markup_sph_range_2_markup,
-              markup_sph_range_3_min, markup_sph_range_3_max, markup_sph_range_3_markup,
-              markup_cyl_range_1_min, markup_cyl_range_1_max, markup_cyl_range_1_markup,
-              markup_cyl_range_2_min, markup_cyl_range_2_max, markup_cyl_range_2_markup,
-              markup_cyl_range_3_min, markup_cyl_range_3_max, markup_cyl_range_3_markup
-            `)
-            .eq('user_id', user.id)
-            .single();
-
-          if (newError) {
-            console.error('Error fetching new user personalisation:', newError);
-            return null;
-          }
-
-          return newInfo;
-        }
-
-        if (fetchError) {
-          console.error('Error fetching user personalisation:', fetchError);
-          return null;
-        }
-
-        return existingInfo;
-      } catch (error) {
-        console.error('Unexpected error:', error);
-        return null;
-      }
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (previously cacheTime)
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true
-  });
+  // Fetch user personalisation data using custom hook
+  const { data: rawPersonalisationInfo, isLoading } = useUserInformation();
+  const personalisationInfo = rawPersonalisationInfo as UserInformationRow | null;
 
   // Update form data when user personalisation is loaded
   useEffect(() => {
@@ -223,10 +159,10 @@ const Personalisation = () => {
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      
+
       // Update the query cache with the new data immediately
       queryClient.setQueryData(['user-information', user?.id], updatedData);
-      
+
       // Also invalidate to ensure consistency across all pages
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
     },
@@ -329,23 +265,37 @@ const Personalisation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <PageTitle 
-          title={t('personalisation')} 
-          subtitle={t('managePersonalPreferences')}
-        />
+    <div className="flex-1 w-full max-w-none px-4 md:px-8 pt-6 pb-20 space-y-8 animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t('personalisation')}</h2>
+          <p className="text-sm font-medium text-slate-500 mt-1">{t('managePersonalPreferences')}</p>
+        </div>
+        <div className="flex justify-end hidden md:flex">
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || saveMutation.isPending}
+            className="bg-teal-600 hover:bg-teal-700 h-10 px-6 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saveMutation.isPending ? t('saving') : t('saveChanges')}
+          </Button>
+        </div>
+      </div>
 
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="space-y-8">
           {/* Companies Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden h-full hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-blue-100/80 text-blue-600 rounded-xl shadow-sm">
+                  <Building2 className="h-5 w-5" />
+                </div>
                 {t('companiesManagement')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                   <Building2 className="h-5 w-5 text-teal-600" />
@@ -447,14 +397,16 @@ const Personalisation = () => {
           </Card>
 
           {/* Additional Costs Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden h-full hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-emerald-100/80 text-emerald-600 rounded-xl shadow-sm">
+                  <Settings className="h-5 w-5" />
+                </div>
                 {t('additionalCosts')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="auto_additional_costs" className="text-base font-medium">
@@ -544,16 +496,20 @@ const Personalisation = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        <div className="space-y-8">
           {/* Eyes Linking Markup Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden h-full hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-purple-100/80 text-purple-600 rounded-xl shadow-sm">
+                  <Settings className="h-5 w-5" />
+                </div>
                 {t('eyesLinkingMarkupSettings')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="bg-blue-50/50 rounded-lg p-4 space-y-6">
                 <h4 className="font-medium text-blue-900">{t('markupRangesConfiguration')}</h4>
 
@@ -793,19 +749,19 @@ const Personalisation = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Save Button */}
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || saveMutation.isPending}
-              className="bg-teal-600 hover:bg-teal-700"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveMutation.isPending ? t('saving') : t('saveChanges')}
-            </Button>
-          </div>
         </div>
+      </div>
+
+      {/* Floating Mobile Save Button */}
+      <div className="fixed bottom-6 right-6 md:hidden z-50">
+        <Button
+          onClick={handleSave}
+          disabled={!hasChanges || saveMutation.isPending}
+          size="icon"
+          className="h-14 w-14 rounded-full bg-teal-600 hover:bg-teal-700 shadow-xl shadow-teal-500/30 transition-all active:scale-95"
+        >
+          <Save className="h-6 w-6" />
+        </Button>
       </div>
     </div>
   );

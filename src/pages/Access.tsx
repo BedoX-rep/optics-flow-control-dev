@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import { Navigate } from 'react-router-dom';
 
 interface StaffMember {
@@ -99,20 +100,22 @@ const Access = () => {
         if (subscriptionsError) throw subscriptionsError;
         subscriptionsData = data;
       }
-      
+
       // Get all user IDs
       const userIds = subscriptionsData.map(staff => staff.user_id);
-      
+
       // Fetch all permissions in a single query
-      const { data: permissionsData, error: permissionsError } = await supabase
+      const { data: rawPermissions, error: permissionsError } = await supabase
         .from('permissions')
         .select('*')
         .in('user_id', userIds);
 
+      const permissionsData = (rawPermissions || []) as Database['public']['Tables']['permissions']['Row'][];
+
       if (permissionsError) {
         console.error('Error fetching permissions:', permissionsError);
       }
-      
+
       // Create a map of permissions by user_id for quick lookup
       const permissionsMap = new Map();
       if (permissionsData) {
@@ -120,7 +123,7 @@ const Access = () => {
           permissionsMap.set(perm.user_id, perm);
         });
       }
-      
+
       // Combine staff data with permissions
       const staffWithPermissions = subscriptionsData.map(staff => ({
         ...staff,
@@ -134,17 +137,17 @@ const Access = () => {
           can_manage_invoices: true,
         }
       }));
-      
+
       return staffWithPermissions as StaffMember[];
     },
     enabled: isAdmin,
     staleTime: 30 * 60 * 1000, // Cache for 30 minutes
-    cacheTime: 60 * 60 * 1000, // Keep in cache for 60 minutes
+    gcTime: 60 * 60 * 1000, // Keep in cache for 60 minutes
   });
 
   // Update own permissions mutation
   const updateOwnPermissionsMutation = useMutation({
-    mutationFn: async (newPermissions: Partial<typeof userPermissions>) => {
+    mutationFn: async (newPermissions: Partial<Database['public']['Tables']['permissions']['Update']>) => {
       const { error } = await supabase
         .from('permissions')
         .update(newPermissions)
@@ -245,110 +248,79 @@ const Access = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{t('accessManagement')}</h1>
+    <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 w-full max-w-none animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t('accessManagement')}</h2>
+          <p className="text-sm font-medium text-slate-500 mt-1">Manage staff privileges and permissions</p>
+        </div>
       </div>
 
       {/* Current User Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yourAccessInformation')}</CardTitle>
+      <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+        <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50">
+          <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{t('yourAccessInformation')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>{t('currentSessionRole')}</Label>
-            <div className="flex items-center gap-2">
-              <p className="text-lg font-medium">{sessionRole === 'Admin' ? t('admin') : t('storeStaff')}</p>
-              {sessionRole === 'Admin' && (
-                <Badge variant="secondary">{t('sessionElevated')}</Badge>
-              )}
+        <CardContent className="space-y-6 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{t('currentSessionRole')}</Label>
+              <div className="flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
+                <p className="text-base font-black text-slate-800">{sessionRole === 'Admin' ? t('admin') : t('storeStaff')}</p>
+                {sessionRole === 'Admin' && (
+                  <Badge className="bg-teal-500 hover:bg-teal-600 text-white border-none text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">{t('sessionElevated')}</Badge>
+                )}
+              </div>
             </div>
-          </div>
-          <div>
-            <Label>{t('accessCode')}</Label>
-            <p className="text-lg font-mono">{subscription?.access_code}</p>
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{t('accessCode')}</Label>
+              <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-sm">
+                <p className="text-base font-mono font-bold tracking-widest text-teal-400">{subscription?.access_code}</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* User's Own Permissions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yourPermissions')}</CardTitle>
-          <CardDescription>{t('manageOwnPermissions')}</CardDescription>
+      <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+        <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50">
+          <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{t('yourPermissions')}</CardTitle>
+          <CardDescription className="text-sm font-medium text-slate-500 mt-1">{t('manageOwnPermissions')}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-8 pb-8 px-6 md:px-8">
           {userPermissionsLoading ? (
-            <p>{t('loadingPermissions')}</p>
+            <div className="flex items-center justify-center p-8">
+              <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+            </div>
           ) : userPermissions ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_manage_products}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_manage_products', checked)
-                  }
-                />
-                <Label>{t('manageProducts')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_manage_clients}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_manage_clients', checked)
-                  }
-                />
-                <Label>{t('manageClients')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_manage_receipts}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_manage_receipts', checked)
-                  }
-                />
-                <Label>{t('manageReceipts')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_view_financial}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_view_financial', checked)
-                  }
-                />
-                <Label>{t('viewFinancial')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_manage_purchases}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_manage_purchases', checked)
-                  }
-                />
-                <Label>{t('managePurchases')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_access_dashboard}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_access_dashboard', checked)
-                  }
-                />
-                <Label>{t('accessDashboard')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={userPermissions.can_manage_invoices}
-                  onCheckedChange={(checked) => 
-                    handleOwnPermissionChange('can_manage_invoices', checked)
-                  }
-                />
-                <Label>{t('manageInvoices')}</Label>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { id: 'can_manage_products', label: t('manageProducts') },
+                { id: 'can_manage_clients', label: t('manageClients') },
+                { id: 'can_manage_receipts', label: t('manageReceipts') },
+                { id: 'can_view_financial', label: t('viewFinancial') },
+                { id: 'can_manage_purchases', label: t('managePurchases') },
+                { id: 'can_access_dashboard', label: t('accessDashboard') },
+                { id: 'can_manage_invoices', label: t('manageInvoices') }
+              ].map((perm) => (
+                <div key={perm.id} className="flex items-center justify-between p-5 bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:border-teal-300 hover:shadow-md transition-all group">
+                  <Label htmlFor={perm.id} className="text-sm font-bold text-slate-800 cursor-pointer group-hover:text-teal-700 transition-colors">{perm.label}</Label>
+                  <Switch
+                    id={perm.id}
+                    checked={!!userPermissions[perm.id as keyof typeof userPermissions]}
+                    onCheckedChange={(checked) =>
+                      handleOwnPermissionChange(perm.id, checked)
+                    }
+                    className="data-[state=checked]:bg-teal-500"
+                  />
+                </div>
+              ))}
             </div>
           ) : (
-            <p>{t('noPermissionsFound')}</p>
+            <div className="text-center p-8 text-slate-500 font-medium bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              {t('noPermissionsFound')}
+            </div>
           )}
         </CardContent>
       </Card>
