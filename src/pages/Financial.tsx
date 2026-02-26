@@ -210,6 +210,12 @@ const Financial = () => {
       acc.total += t; acc.paid += pa; return acc;
     }, { total: 0, paid: 0 });
 
+    const capitalExpenditure = filteredPurchases.filter(p => p.purchase_type === 'Capital Expenditure').reduce((acc, p) => {
+      const t = p.amount_ttc || p.amount || 0;
+      const pa = p.advance_payment || 0;
+      acc.total += t; acc.paid += pa; return acc;
+    }, { total: 0, paid: 0 });
+
     const montageMetrics = filteredReceipts.reduce((acc, r) => {
       const cost = r.montage_costs || 0;
       if (cost > 0 && ['InCutting', 'Ready', 'Paid costs'].includes(r.montage_status)) {
@@ -242,7 +248,7 @@ const Financial = () => {
 
     return {
       availableCash, totalRevenue, netProfitAfterAllExpenses, totalReceived, totalOutstanding, totalProductCosts,
-      operationalExpenses, montageMetrics, netMarginTotal, grossProfit, productAnalysis
+      operationalExpenses, capitalExpenditure, montageMetrics, netMarginTotal, grossProfit, productAnalysis
     };
   }, [filteredReceipts, filteredPurchases]);
 

@@ -235,6 +235,10 @@ const dashboardTranslations: Translations = {
     en: "FINANCIAL OVERVIEW",
     fr: "APERÇU FINANCIER"
   },
+  expenditureAndProductCosts: {
+    en: "Expenditure & Product Costs",
+    fr: "Dépenses et Coûts des Produits"
+  },
   revenuePerformance: {
     en: "REVENUE PERFORMANCE",
     fr: "PERFORMANCE DES REVENUS"

@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Package, ShoppingCart, Filter, ChevronDown, ChevronUp, User, Calendar, DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { ChevronDown, ChevronUp, Search, Calendar, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/components/LanguageProvider';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface OrderItem {
     id: string;
@@ -20,14 +19,6 @@ interface OrderItem {
     paidAtDelivery: boolean;
     stockStatus: string;
     company: string;
-}
-
-interface Order {
-    id: string;
-    createdAt: string;
-    total: number;
-    customerName?: string;
-    items: OrderItem[];
 }
 
 interface OrdersAnalysisSectionProps {
@@ -52,7 +43,7 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
     const [selectedCompany, setSelectedCompany] = useState('all');
     const [selectedProduct, setSelectedProduct] = useState('all');
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [searchItem, setSearchItem] = useState('');
 
     const allFilteredItems = useMemo(() => {
@@ -125,188 +116,239 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
         };
     }).filter((order: any) => order.items.length > 0);
 
+    const filteredTotalAmount = processedOrders.reduce((sum, order) => sum + order.total, 0);
+    const filteredTotalItems = processedOrders.reduce((sum, order) => sum + order.items.length, 0);
+
     return (
-        <Card className="border-none shadow-sm bg-white overflow-hidden mb-10 rounded-3xl">
-            <CardHeader
-                className="border-b border-slate-50 px-8 py-6 bg-slate-50/30 cursor-pointer hover:bg-slate-100/30 transition-colors"
-                onClick={() => setIsCollapsed(!isCollapsed)}
+        <div className="mb-12">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full flex items-center justify-between group mb-4"
             >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <ShoppingCart className="h-5 w-5 text-teal-600" />
-                            {t('comprehensiveOrdersAnalysis')}
-                        </CardTitle>
-                        <p className="text-sm text-slate-500 mt-1 font-medium italic">
-                            {t('detailedAnalysisAllOrders')}
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIncludePaidAtDelivery(!includePaidAtDelivery);
-                            }}
-                            className="flex items-center space-x-2 px-4 py-2 bg-white rounded-xl border border-slate-100 transition-all hover:bg-slate-50 cursor-pointer shadow-sm group"
-                        >
-                            <div className={cn(
-                                "w-4 h-4 rounded border flex items-center justify-center transition-colors",
-                                includePaidAtDelivery ? "bg-teal-600 border-teal-600" : "border-slate-300"
-                            )}>
-                                {includePaidAtDelivery && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                            </div>
-                            <Label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest cursor-pointer select-none">
-                                {t('includePaidAtDelivery')}
-                            </Label>
-                        </div>
-                        <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 transition-colors ml-2">
-                            {isCollapsed ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronUp className="h-4 w-4 text-teal-600" />}
-                        </div>
-                    </div>
+                <div className="flex items-center gap-4">
+                    <div className="h-1.5 w-10 bg-gradient-to-r from-teal-500 to-blue-600 rounded-full transition-all group-hover:w-16 shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                        {t('comprehensiveOrdersAnalysis')}
+                    </h3>
                 </div>
-            </CardHeader>
+                <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-5 py-2 group-hover:bg-slate-900 group-hover:border-slate-900 transition-all shadow-sm">
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest group-hover:text-white transition-colors">
+                        {isExpanded ? t('collapse') || 'Minimize' : t('expand') || 'Review'}
+                    </span>
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-600 group-hover:text-white" /> : <ChevronDown className="w-4 h-4 text-teal-600" />}
+                </div>
+            </button>
 
-            {!isCollapsed && (
-                <CardContent className="px-8 py-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div className="space-y-1.5">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('category')}</Label>
-                            <Select value={selectedCategory} onValueChange={(val) => {
-                                setSelectedCategory(val);
-                                setSelectedCompany('all');
-                                setSelectedProduct('all');
-                            }}>
-                                <SelectTrigger className="bg-slate-50/50 border-slate-100 rounded-2xl text-xs font-poppins font-bold h-11 focus:ring-teal-500">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-slate-100 font-poppins">
-                                    <SelectItem value="all">{t('all')}</SelectItem>
-                                    {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('company')}</Label>
-                            <Select value={selectedCompany} onValueChange={(val) => {
-                                setSelectedCompany(val);
-                                setSelectedProduct('all');
-                            }}>
-                                <SelectTrigger className="bg-slate-50/50 border-slate-100 rounded-2xl text-xs font-poppins font-bold h-11 focus:ring-teal-500">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-slate-100 font-poppins">
-                                    <SelectItem value="all">{t('all')}</SelectItem>
-                                    {dynamicCompanies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('product')}</Label>
-                            <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                                <SelectTrigger className="bg-slate-50/50 border-slate-100 rounded-2xl text-xs font-poppins font-bold h-11 focus:ring-teal-500">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-2xl border-slate-100 font-poppins">
-                                    <SelectItem value="all">{t('all')}</SelectItem>
-                                    {dynamicProducts.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                        exit={{ opacity: 0, y: -20, height: 0 }}
+                        transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+                        className="overflow-hidden"
+                    >
+                        <div className="pb-6">
+                            <div className="bg-white border-2 border-slate-900/10 rounded-[32px] overflow-hidden shadow-2xl shadow-slate-200/50">
 
-                    <div className="mb-8">
-                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('itemName') || 'Item Name'}</Label>
-                        <input
-                            type="text"
-                            value={searchItem}
-                            onChange={(e) => setSearchItem(e.target.value)}
-                            placeholder="Search for a specific product inside orders..."
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl text-xs font-bold h-11 px-4 focus:ring-2 focus:ring-teal-500 outline-none transition-all placeholder:font-medium placeholder:text-slate-400"
-                        />
-                    </div>
-
-                    <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
-                        {processedOrders.length > 0 ? (
-                            processedOrders.map((order: any) => (
-                                <div key={order.id} className="border border-slate-100 rounded-3xl overflow-hidden bg-slate-50/30">
-                                    <div
-                                        onClick={() => toggleOrder(order.id)}
-                                        className="p-5 flex items-center justify-between cursor-pointer hover:bg-white transition-colors group"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600">
-                                                <Package className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                                                    {order.customerName}
-                                                    <span className="text-[10px] font-medium text-slate-400 font-mono">#{order.id.substring(0, 8)}</span>
-                                                </h4>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                    {format(new Date(order.createdAt), 'MMM dd, yyyy • HH:mm')}
-                                                </p>
-                                            </div>
+                                {/* Smarter, Inline Filters Bar */}
+                                <div className="p-6 md:p-8 border-b border-slate-100 bg-white flex flex-col xl:flex-row items-center justify-between gap-6">
+                                    <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 hide-scrollbar">
+                                        <div className="p-2 bg-slate-50 rounded-full hidden md:flex items-center justify-center shrink-0">
+                                            <Filter className="w-4 h-4 text-teal-600" />
                                         </div>
 
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-right">
-                                                <p className="text-lg font-black text-slate-900 group-hover:text-teal-600 transition-colors">
-                                                    {order.total.toLocaleString()} <span className="text-xs font-medium opacity-50">DH</span>
-                                                </p>
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                    {order.items.length} {t('items')}
+                                        <Select value={selectedCategory} onValueChange={(val) => {
+                                            setSelectedCategory(val);
+                                            setSelectedCompany('all');
+                                            setSelectedProduct('all');
+                                        }}>
+                                            <SelectTrigger className="w-auto min-w-[140px] bg-slate-50 border-slate-200 rounded-2xl h-10 text-xs font-black transition-all hover:border-teal-500 focus:ring-teal-500">
+                                                <SelectValue placeholder={t('category')} />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-2xl border-slate-200">
+                                                <SelectItem value="all">{t('allCategories') || 'All Categories'}</SelectItem>
+                                                {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Select value={selectedCompany} onValueChange={(val) => {
+                                            setSelectedCompany(val);
+                                            setSelectedProduct('all');
+                                        }}>
+                                            <SelectTrigger className="w-auto min-w-[130px] bg-slate-50 border-slate-200 rounded-2xl h-10 text-xs font-black transition-all hover:border-teal-500 focus:ring-teal-500">
+                                                <SelectValue placeholder={t('company')} />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-2xl border-slate-200">
+                                                <SelectItem value="all">{t('allCompanies') || 'All'}</SelectItem>
+                                                {dynamicCompanies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                                            <SelectTrigger className="w-auto min-w-[140px] bg-slate-50 border-slate-200 rounded-2xl h-10 text-xs font-black transition-all hover:border-teal-500 focus:ring-teal-500">
+                                                <SelectValue placeholder={t('product')} />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-2xl border-slate-200">
+                                                <SelectItem value="all">{t('allProducts') || 'All'}</SelectItem>
+                                                {dynamicProducts.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 w-full xl:w-auto">
+                                        <div className="relative w-full xl:w-64">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                value={searchItem}
+                                                onChange={(e) => setSearchItem(e.target.value)}
+                                                placeholder={t('itemName') || 'Search Product...'}
+                                                className="w-full pl-9 pr-4 h-10 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black text-slate-900 outline-none hover:border-teal-500 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all placeholder:text-slate-400"
+                                            />
+                                        </div>
+                                        <div className="inline-flex items-center px-4 py-2 bg-teal-50 border border-teal-100 text-teal-700 text-[10px] font-black uppercase tracking-widest rounded-2xl shrink-0">
+                                            {processedOrders.length} {t('orders')}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* List Container */}
+                                <div className="p-8 md:p-10 bg-slate-50/50">
+                                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {processedOrders.length > 0 ? (
+                                            processedOrders.map((order: any) => (
+                                                <div key={order.id} className="flex flex-col p-6 rounded-3xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-xl hover:shadow-teal-900/10 transition-all group overflow-hidden">
+                                                    <div
+                                                        onClick={() => toggleOrder(order.id)}
+                                                        className="flex flex-col md:flex-row justify-between gap-6 cursor-pointer"
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-[10px] font-black text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-all">
+                                                                #{order.id.substring(0, 3)}
+                                                            </div>
+                                                            <div>
+                                                                <h5 className="font-black text-slate-900 tracking-tight text-lg leading-none mb-2">{order.customerName}</h5>
+                                                                <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                                                    <span className="bg-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                                        <Calendar className="w-3 h-3" />
+                                                                        {format(new Date(order.createdAt), 'MMM dd, yyyy')}
+                                                                    </span>
+                                                                    <span className="bg-slate-100 px-2 py-0.5 rounded-md text-teal-600">
+                                                                        {order.items.length} {order.items.length === 1 ? 'ITEM' : 'ITEMS'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-right flex items-center justify-between md:flex-col md:items-end md:justify-start">
+                                                            <p className="text-2xl font-black text-slate-900 tracking-tighter">
+                                                                {order.total.toLocaleString()} <span className="text-sm font-bold text-slate-500 ml-1">DH</span>
+                                                            </p>
+                                                            <div className="mt-2 text-slate-400 group-hover:text-teal-600 transition-colors p-2 bg-slate-50 rounded-full md:bg-transparent md:p-0">
+                                                                {expandedOrders.has(order.id) ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <AnimatePresence>
+                                                        {expandedOrders.has(order.id) && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                className="overflow-hidden mt-6 pt-6 border-t border-slate-100"
+                                                            >
+                                                                <div className="grid grid-cols-12 gap-4 px-4 pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100/50 mb-3">
+                                                                    <div className="col-span-6">{t('product')}</div>
+                                                                    <div className="col-span-2 text-center">{t('qty')}</div>
+                                                                    <div className="col-span-2 text-right">{t('price')}</div>
+                                                                    <div className="col-span-2 text-right">{t('total')}</div>
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    {order.items.map((item: any) => (
+                                                                        <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-3 bg-slate-50/50 rounded-2xl items-center hover:bg-slate-100/80 transition-all group/item border border-transparent hover:border-slate-200">
+                                                                            <div className="col-span-6 group/progress relative">
+                                                                                <div className="absolute left-[-16px] top-0 bottom-0 w-1 bg-teal-100 group-hover/item:bg-teal-600 transition-colors rounded-full" />
+                                                                                <p className="text-sm font-black text-slate-900">{item.productName}</p>
+                                                                                <div className="flex items-center gap-2 mt-1.5">
+                                                                                    <span className="text-[9px] font-black uppercase tracking-widest bg-white text-slate-900 px-2 py-0.5 rounded-md border border-slate-200">{t(item.category)}</span>
+                                                                                    {item.company !== 'None' && (
+                                                                                        <span className="text-[9px] font-black uppercase tracking-widest bg-white text-slate-500 px-2 py-0.5 rounded-md border border-slate-200">{item.company}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="col-span-2 text-center text-sm font-black text-slate-900">
+                                                                                ×{item.quantity}
+                                                                            </div>
+                                                                            <div className="col-span-2 text-right text-sm font-bold text-slate-600">
+                                                                                {item.price.toLocaleString()}
+                                                                            </div>
+                                                                            <div className="col-span-2 text-right text-sm font-black text-teal-600">
+                                                                                {item.totalRevenue.toLocaleString()}
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="h-40 flex items-center justify-center bg-white border-2 border-dashed border-slate-300 rounded-[24px]">
+                                                <span className="text-[12px] font-black text-slate-900 uppercase tracking-widest">{t('noOrdersFound')}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Total Footer */}
+                                    <div className="mt-10 bg-slate-900 rounded-[32px] p-8 md:p-10 text-white relative overflow-hidden group shadow-2xl">
+                                        <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/40 rounded-full -mr-24 -mt-24 blur-3xl transition-all" />
+                                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/20 rounded-full -ml-20 -mb-20 blur-3xl transition-all" />
+
+                                        <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-8">
+                                            <div>
+                                                <span className="text-[10px] font-black text-teal-400 uppercase tracking-[0.2em] block mb-2">
+                                                    {t('totalAmount')}
+                                                </span>
+                                                <p className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                                                    {filteredTotalAmount.toLocaleString()} <span className="text-lg font-bold text-slate-500 ml-1">DH</span>
                                                 </p>
                                             </div>
-                                            <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 group-hover:bg-teal-50 transition-colors">
-                                                {expandedOrders.has(order.id) ? <ChevronUp className="h-4 w-4 text-teal-600" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+
+                                            <div className="flex items-center gap-12">
+                                                <div className="relative pl-6">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-full" />
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">
+                                                        {t('items')}
+                                                    </span>
+                                                    <p className="text-2xl font-black text-emerald-400">
+                                                        {filteredTotalItems} <span className="text-sm font-bold text-slate-500">{t('items')}</span>
+                                                    </p>
+                                                </div>
+                                                <div className="relative pl-6">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-full" />
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">
+                                                        {t('orders')}
+                                                    </span>
+                                                    <p className="text-2xl font-black text-cyan-400">
+                                                        {processedOrders.length} <span className="text-sm font-bold text-slate-500">{t('orders')}</span>
+                                                    </p>
+                                                </div>
+                                                <div className="hidden md:block h-5 w-5 bg-teal-500 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.8)] animate-pulse ml-4" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    {expandedOrders.has(order.id) && (
-                                        <div className="px-5 pb-5 space-y-3">
-                                            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                                                <div className="col-span-6">{t('product')}</div>
-                                                <div className="col-span-2 text-center">{t('qty')}</div>
-                                                <div className="col-span-2 text-right">{t('price')}</div>
-                                                <div className="col-span-2 text-right">{t('total')}</div>
-                                            </div>
-                                            {order.items.map((item: any) => (
-                                                <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-3 bg-white rounded-2xl border border-slate-50 items-center hover:border-teal-100 transition-colors group/item">
-                                                    <div className="col-span-6">
-                                                        <p className="text-xs font-bold text-slate-700">{item.productName}</p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className="text-[8px] font-bold uppercase tracking-tight bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded-md">{item.category}</span>
-                                                            <span className="text-[8px] font-bold uppercase tracking-tight bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md">{item.company}</span>
-                                                            {item.paidAtDelivery && <span className="text-[8px] font-bold uppercase tracking-tight bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md">Paid at Delivery</span>}
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-span-2 text-center">
-                                                        <span className="text-xs font-black text-slate-400">×{item.quantity}</span>
-                                                    </div>
-                                                    <div className="col-span-2 text-right text-xs font-bold text-slate-600">
-                                                        {item.price.toLocaleString()}
-                                                    </div>
-                                                    <div className="col-span-2 text-right text-xs font-black text-teal-600">
-                                                        {item.totalRevenue.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </div>
-                            ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-24 bg-slate-50/50 rounded-[40px] border-2 border-dashed border-slate-200">
-                                <Package className="h-16 w-16 text-slate-200 mb-4" />
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('noOrdersFound')}</p>
                             </div>
-                        )}
-                    </div>
-                </CardContent>
-            )}
-        </Card>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 
