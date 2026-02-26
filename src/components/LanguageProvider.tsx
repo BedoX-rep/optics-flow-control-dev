@@ -2774,6 +2774,22 @@ const pricingTranslations: Translations = {
     en: 'Track purchases from suppliers and manage your business expenses',
     fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
   },
+  Purcahseoverview: {
+    en: 'Purchase overview',
+    fr: 'Aperçu des achats'
+  },
+  PurcahseoverviewDesc: {
+    en: 'Track purchases from suppliers and manage your business expenses',
+    fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
+  },
+  manageexpanses: {
+    en: 'Manage expenses',
+    fr: 'Gérer les dépenses'
+  },
+  manageexpansesDesc: {
+    en: 'Track purchases from suppliers and manage your business expenses',
+    fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
+  },
   howToUseStep5Sub1: {
     en: 'Add suppliers with complete contact and payment information',
     fr: 'Ajoutez des fournisseurs avec des informations de contact et de paiement complètes'
@@ -2901,6 +2917,18 @@ const purchasesTranslations: Translations = {
   purchases: {
     en: 'Purchases',
     fr: 'Achats'
+  },
+  purchasesOverview: {
+    en: 'Purchase overview',
+    fr: 'Aperçu des achats'
+  },
+  purchasesOverviewDesc: {
+    en: 'Track purchases from suppliers and manage your business expenses',
+    fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
+  },
+  manageexpanses: {
+    en: 'Manage expenses',
+    fr: 'Gérer les dépenses'
   },
   recordPurchase: {
     en: 'Record Purchase',

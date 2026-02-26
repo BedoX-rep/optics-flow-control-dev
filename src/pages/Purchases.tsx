@@ -6,19 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Search, Building2, Receipt, Calendar, DollarSign, Phone, Mail, MapPin, Filter, X, TrendingUp, Package, History } from 'lucide-react';
@@ -33,6 +33,9 @@ import PurchaseBalanceHistory from '@/components/PurchaseBalanceHistory';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import PurchaseCard from '@/components/PurchaseCard';
+import PurchasesHero from '@/components/purchases/PurchasesHero';
+import PurchaseFilters from '@/components/purchases/PurchaseFilters';
+import SupplierCard from '@/components/purchases/SupplierCard';
 
 interface Supplier {
   id: string;
@@ -129,26 +132,26 @@ const Purchases = () => {
     return categoryMap[category] || category;
   };
 
-const PAYMENT_METHODS = [
-  t('cash'),
-  t('creditCard'),
-  t('debitCard'),
-  t('bankTransfer'),
-  t('check'),
-  t('digitalWallet')
-];
+  const PAYMENT_METHODS = [
+    t('cash'),
+    t('creditCard'),
+    t('debitCard'),
+    t('bankTransfer'),
+    t('check'),
+    t('digitalWallet')
+  ];
 
-const RECURRING_TYPES = [
-  { value: '1_month', label: t('oneMonth') },
-  { value: '3_months', label: t('threeMonths') },
-  { value: '6_months', label: t('sixMonths') },
-  { value: '1_year', label: t('oneYear') }
-];
+  const RECURRING_TYPES = [
+    { value: '1_month', label: t('oneMonth') },
+    { value: '3_months', label: t('threeMonths') },
+    { value: '6_months', label: t('sixMonths') },
+    { value: '1_year', label: t('oneYear') }
+  ];
 
-const PURCHASE_TYPES = [
-  t('operationalExpenses'),
-  t('capitalExpenditure')
-];
+  const PURCHASE_TYPES = [
+    t('operationalExpenses'),
+    t('capitalExpenditure')
+  ];
 
   // Consolidated search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -242,9 +245,9 @@ const PURCHASE_TYPES = [
           },
           (payload) => {
             // Only invalidate if the change affects montage_costs or montage_status
-            if (payload.eventType === 'UPDATE' && 
-                (payload.new?.montage_costs !== payload.old?.montage_costs || 
-                 payload.new?.montage_status !== payload.old?.montage_status)) {
+            if (payload.eventType === 'UPDATE' &&
+              (payload.new?.montage_costs !== payload.old?.montage_costs ||
+                payload.new?.montage_status !== payload.old?.montage_status)) {
               // bump both caches
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
@@ -283,7 +286,7 @@ const PURCHASE_TYPES = [
 
       // First, mark the purchase as due for renewal by updating its next_recurring_date to today
       const today = format(new Date(), 'yyyy-MM-dd');
-      
+
       const { error: updateError } = await supabase
         .from('purchases')
         .update({ next_recurring_date: today })
@@ -479,7 +482,7 @@ const PURCHASE_TYPES = [
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(purchase => 
+      filtered = filtered.filter(purchase =>
         purchase.description.toLowerCase().includes(search) ||
         purchase.suppliers?.name.toLowerCase().includes(search) ||
         purchase.receipt_number?.toLowerCase().includes(search)
@@ -499,13 +502,13 @@ const PURCHASE_TYPES = [
     }
 
     if (dateRange.from) {
-      filtered = filtered.filter(purchase => 
+      filtered = filtered.filter(purchase =>
         new Date(purchase.purchase_date) >= new Date(dateRange.from)
       );
     }
 
     if (dateRange.to) {
-      filtered = filtered.filter(purchase => 
+      filtered = filtered.filter(purchase =>
         new Date(purchase.purchase_date) <= new Date(dateRange.to)
       );
     }
@@ -541,7 +544,7 @@ const PURCHASE_TYPES = [
   const filteredSuppliers = useMemo(() => {
     if (!searchTerm) return suppliers;
     const search = searchTerm.toLowerCase();
-    return suppliers.filter(supplier => 
+    return suppliers.filter(supplier =>
       supplier.name.toLowerCase().includes(search) ||
       supplier.contact_person?.toLowerCase().includes(search) ||
       supplier.email?.toLowerCase().includes(search)
@@ -566,7 +569,7 @@ const PURCHASE_TYPES = [
       .reduce((sum, purchase) => sum + (purchase.amount_ttc || purchase.amount), 0);
   }, [purchases]);
 
-  
+
 
   const resetPurchaseForm = () => {
     setPurchaseFormData({
@@ -652,7 +655,7 @@ const PURCHASE_TYPES = [
     setIsBalanceHistoryDialogOpen(true);
   };
 
-  
+
 
   const handleSupplierAdded = (supplier: any) => {
     queryClient.invalidateQueries({ queryKey: ['suppliers', user?.id] });
@@ -965,371 +968,169 @@ const PURCHASE_TYPES = [
   }
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={handleRecordNewPurchase}
-            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('recordPurchase')}
-          </Button>
-          <Button
-            onClick={() => handleOpenSupplierDialog()}
-            variant="outline"
-            className="rounded-xl border-2 bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-400 hover:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('addSupplier')}
-          </Button>
-        </div>
-      </div>
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
+      <PurchasesHero
+        onNewPurchase={handleRecordNewPurchase}
+        onAddSupplier={() => handleOpenSupplierDialog()}
+        purchases={purchases || []}
+      />
 
-      {/* Search Section */}
-      <div className="mb-4 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder={t('searchPurchasesSuppliers')} 
-            className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+      <div className="w-full px-6 lg:px-10 relative z-20">
+        <div className="mb-10 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-sm">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center flex-1 min-w-[300px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 group focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+              <Search className="h-5 w-5 text-indigo-600 mr-3 transition-transform group-focus-within:scale-110" />
+              <input
+                type="text"
+                placeholder={t('searchPurchasesSuppliers')}
+                className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-      {/* Compact Inline Filters */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        {/* Quick Stats Row */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-            <span className="font-medium">{filteredPurchases.length} {t('purchasesCount')}</span>
-            <span className="text-gray-400">•</span>
-            <span className="font-semibold text-blue-600">{totalExpenses.toFixed(2)} DH</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar className="h-4 w-4 text-green-600" />
-            <span className="text-sm">{t('thisMonth')} <span className="font-semibold text-green-600">{monthlyTotal.toFixed(2)} DH</span></span>
+            <div className="hidden lg:block h-10 w-px bg-slate-200/60" />
+
+            <div className="flex items-center gap-3">
+              <PurchaseFilters
+                dateFilter={dateFilter}
+                categoryFilter={categoryFilter}
+                supplierFilter={supplierFilter}
+                purchaseTypeFilter={purchaseTypeFilter}
+                categories={EXPENSE_CATEGORIES}
+                suppliers={suppliers}
+                onFilterChange={(key, value) => {
+                  if (key === 'date') setDateFilter(value);
+                  else if (key === 'category') setCategoryFilter(value);
+                  else if (key === 'supplier') setSupplierFilter(value);
+                  else if (key === 'purchaseType') setPurchaseTypeFilter(value);
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Compact Filter Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Date Filter Buttons */}
-          <div className="flex items-center gap-1 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-lg p-1">
-            {[
-              { value: 'all', label: t('all') },
-              { value: 'today', label: t('today') },
-              { value: 'week', label: t('week') },
-              { value: 'month', label: t('month') },
-              { value: 'year', label: t('year') }
-            ].map((option) => (
-              <Button
-                key={option.value}
-                variant={dateFilter === option.value ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDateFilter(option.value)}
-                className={cn(
-                  "h-7 px-2 text-xs font-medium transition-all duration-200 rounded-md",
-                  dateFilter === option.value
-                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
+            <TabsTrigger
+              value="purchases"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+            >
+              <Package className="h-4 w-4 mr-2" />
+              {t('purchases')} ({filteredPurchases.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="suppliers"
+              className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              {t('suppliers')} ({suppliers.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="purchases" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+              <AnimatePresence>
+                {filteredPurchases.length === 0 ? (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    {t('noPurchasesFound')}
+                  </div>
+                ) : (
+                  filteredPurchases.map((purchase) => (
+                    <motion.div
+                      key={purchase.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="w-full"
+                    >
+                      <PurchaseCard
+                        purchase={purchase}
+                        suppliers={suppliers}
+                        onEdit={handleEditPurchase}
+                        onDelete={handleDeletePurchase}
+                        onMarkAsPaid={handleMarkAsPaid}
+                        onViewBalanceHistory={handleOpenBalanceHistoryDialog}
+                        onRecurringRenewal={handleRecurringRenewal}
+                      />
+                    </motion.div>
+                  ))
                 )}
-              >
-                {option.label}
-              </Button>
-            ))}
-          </div>
+              </AnimatePresence>
+            </div>
+          </TabsContent>
 
-          {/* Category Filters */}
-          <Select
-            value={supplierFilter}
-            onValueChange={(value) => setSupplierFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[110px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              supplierFilter !== 'all'
-                ? "bg-green-50 text-green-700 border-green-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Building2 className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {supplierFilter === 'all' ? t('supplier') : 
-                 suppliers.find(s => s.id === supplierFilter)?.name?.slice(0, 6) + '...' || t('unknownSupplier')}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allSuppliers')}</SelectItem>
-              {suppliers.map(supplier => (
-                <SelectItem key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TabsContent value="suppliers" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
+              <AnimatePresence>
+                {suppliers.length === 0 ? (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    {t('noSuppliersFound')}
+                  </div>
+                ) : (
+                  filteredSuppliers.map((supplier) => (
+                    <motion.div
+                      key={supplier.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="w-full"
+                    >
+                      <SupplierCard
+                        supplier={supplier}
+                        purchases={purchases || []}
+                        onEdit={handleOpenSupplierDialog}
+                        onDelete={handleDeleteSupplier}
+                        t={t}
+                      />
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </TabsContent>
+        </Tabs>
 
-          <Select
-            value={purchaseTypeFilter}
-            onValueChange={(value) => setPurchaseTypeFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              purchaseTypeFilter !== 'all'
-                ? "bg-purple-50 text-purple-700 border-purple-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {purchaseTypeFilter === 'all' ? t('type') : 
-                 purchaseTypeFilter === t('operationalExpenses') ? 'Ops' : 'Cap'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allTypes')}</SelectItem>
-              {PURCHASE_TYPES.map(type => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Record/Edit Purchase Dialog */}
+        <RecordPurchaseDialog
+          isOpen={isPurchaseDialogOpen}
+          onClose={() => {
+            setIsPurchaseDialogOpen(false);
+            setEditingPurchase(null);
+          }}
+          suppliers={suppliers}
+          onSuccess={handlePurchaseSuccess}
+          editingPurchase={editingPurchase}
+        />
 
-          <Select
-            value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value)}
-          >
-            <SelectTrigger className={cn(
-              "w-[100px] h-9 border transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm",
-              categoryFilter !== 'all'
-                ? "bg-orange-50 text-orange-700 border-orange-200 shadow-sm"
-                : "border-gray-200 hover:border-gray-300"
-            )}>
-              <Package className="h-4 w-4 mr-1" />
-              <SelectValue>
-                {categoryFilter === 'all' ? t('category') : categoryFilter.slice(0, 6) + '...'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allCategories')}</SelectItem>
-              {EXPENSE_CATEGORIES.map(category => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Add/Edit Supplier Dialog */}
+        <AddSupplierDialog
+          isOpen={isSupplierDialogOpen}
+          onClose={() => setIsSupplierDialogOpen(false)}
+          onSupplierAdded={handleSupplierAdded}
+        />
+
+        {/* Balance History Dialog */}
+        <Dialog open={isBalanceHistoryDialogOpen} onOpenChange={setIsBalanceHistoryDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Balance History - {selectedPurchaseForHistory?.description}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedPurchaseForHistory && user && (
+              <PurchaseBalanceHistory
+                purchaseId={selectedPurchaseForHistory.id}
+                userId={user.id}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+
       </div>
-
-      {/* Active Filters Tags - Only show when filters are active */}
-      {(dateFilter !== 'all' || supplierFilter !== 'all' || categoryFilter !== 'all' || purchaseTypeFilter !== 'all') && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-medium text-gray-500">Active:</span>
-          {dateFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-md text-xs border border-blue-200">
-              {dateFilter === 'today' ? 'Today' : dateFilter === 'week' ? 'This Week' : dateFilter === 'month' ? 'This Month' : 'This Year'}
-              <X className="h-3 w-3 cursor-pointer hover:text-blue-900" onClick={() => setDateFilter('all')} />
-            </span>
-          )}
-          {supplierFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100/80 backdrop-blur-sm text-green-700 rounded-md text-xs border border-green-200">
-              {suppliers.find(s => s.id === supplierFilter)?.name}
-              <X className="h-3 w-3 cursor-pointer hover:text-green-900" onClick={() => setSupplierFilter('all')} />
-            </span>
-          )}
-          {categoryFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100/80 backdrop-blur-sm text-orange-700 rounded-md text-xs border border-orange-200">
-              {categoryFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-orange-900" onClick={() => setCategoryFilter('all')} />
-            </span>
-          )}
-          {purchaseTypeFilter !== 'all' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
-              {purchaseTypeFilter}
-              <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setPurchaseTypeFilter('all')} />
-            </span>
-          )}
-        </div>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10">
-          <TabsTrigger 
-            value="purchases" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Package className="h-4 w-4 mr-2" />
-            {t('purchases')} ({filteredPurchases.length})
-          </TabsTrigger>
-          <TabsTrigger 
-            value="suppliers" 
-            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all duration-200"
-          >
-            <Building2 className="h-4 w-4 mr-2" />
-            {t('suppliers')} ({suppliers.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="purchases" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {filteredPurchases.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noPurchasesFound')}
-                </div>
-              ) : (
-                filteredPurchases.map((purchase) => (
-                  <motion.div
-                    key={purchase.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <PurchaseCard
-                      purchase={purchase}
-                      suppliers={suppliers}
-                      onEdit={handleEditPurchase}
-                      onDelete={handleDeletePurchase}
-                      onMarkAsPaid={handleMarkAsPaid}
-                      onViewBalanceHistory={handleOpenBalanceHistoryDialog}
-                      onRecurringRenewal={handleRecurringRenewal}
-                    />
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="suppliers" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 pb-6">
-            <AnimatePresence>
-              {suppliers.length === 0 ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
-                  {t('noSuppliersFound')}
-                </div>
-              ) : (
-                filteredSuppliers.map((supplier) => (
-                  <motion.div
-                    key={supplier.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="w-full"
-                  >
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200 bg-[#f2f4f8] w-full">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col gap-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-base font-semibold truncate">{supplier.name}</h3>
-                                  {supplier.phone && (
-                                    <div className="flex items-center gap-1.5 text-blue-600">
-                                      <Phone className="h-3.5 w-3.5" />
-                                      <span className="text-xs font-medium">{supplier.phone}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              {supplier.address && (
-                                <p className="text-sm text-gray-600 mb-2">{supplier.address}</p>
-                              )}
-                            </div>
-
-                            <div className="flex gap-1 flex-shrink-0">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleOpenSupplierDialog(supplier)}
-                                className="h-8 w-8"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleDeleteSupplier(supplier.id)}
-                                className="h-8 w-8 hover:bg-red-100"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex justify-between items-baseline">
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalPurchases')}</p>
-                                <p className="font-medium text-emerald-600">
-                                  {purchases.filter(p => p.supplier_id === supplier.id).length}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-gray-500 mb-0.5">{t('totalAmount')}</p>
-                                <p className="font-medium text-orange-600">
-                                  {purchases
-                                    .filter(p => p.supplier_id === supplier.id)
-                                    .reduce((sum, p) => sum + (p.amount_ttc || p.amount), 0)
-                                    .toFixed(2)} DH
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Record/Edit Purchase Dialog */}
-      <RecordPurchaseDialog
-        isOpen={isPurchaseDialogOpen}
-        onClose={() => {
-          setIsPurchaseDialogOpen(false);
-          setEditingPurchase(null);
-        }}
-        suppliers={suppliers}
-        onSuccess={handlePurchaseSuccess}
-        editingPurchase={editingPurchase}
-      />
-
-      {/* Add/Edit Supplier Dialog */}
-      <AddSupplierDialog
-        isOpen={isSupplierDialogOpen}
-        onClose={() => setIsSupplierDialogOpen(false)}
-        onSupplierAdded={handleSupplierAdded}
-      />
-
-      {/* Balance History Dialog */}
-      <Dialog open={isBalanceHistoryDialogOpen} onOpenChange={setIsBalanceHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Balance History - {selectedPurchaseForHistory?.description}
-            </DialogTitle>
-          </DialogHeader>
-          {selectedPurchaseForHistory && user && (
-            <PurchaseBalanceHistory
-              purchaseId={selectedPurchaseForHistory.id}
-              userId={user.id}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      
     </div>
   );
 };

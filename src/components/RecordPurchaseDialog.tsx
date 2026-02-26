@@ -11,12 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -604,8 +604,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                             } else if (advancePayment > 0) {
                               paymentStatus = t('partiallyPaid');
                             }
-                            return { 
-                              ...prev, 
+                            return {
+                              ...prev,
                               advance_payment: newAdvancePayment,
                               balance: balance.toString(),
                               payment_status: paymentStatus
@@ -702,7 +702,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     <Select
                       value={formData.payment_status}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, payment_status: value }))}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !!editingPurchase}
                     >
                       <SelectTrigger className="border-teal-200 focus:border-teal-500 h-9">
                         <SelectValue placeholder={t('selectPaymentStatus')} />
@@ -741,8 +741,8 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                     <Label className="text-teal-700 font-medium text-sm">Recurring Type</Label>
                     <Select
                       value={formData.recurring_type}
-                      onValueChange={(value) => setFormData(prev => ({ 
-                        ...prev, 
+                      onValueChange={(value) => setFormData(prev => ({
+                        ...prev,
                         recurring_type: value,
                         next_recurring_date: value === 'none' ? '' : prev.next_recurring_date
                       }))}
@@ -773,7 +773,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
                           className="border-teal-200 focus:border-teal-500 h-9"
                         />
                         <p className="text-xs text-teal-600">
-                          Auto-calculated: {formData.purchase_date && formData.recurring_type !== 'none' 
+                          Auto-calculated: {formData.purchase_date && formData.recurring_type !== 'none'
                             ? calculateNextRecurringDate(formData.purchase_date, formData.recurring_type) || 'Invalid date'
                             : 'Set purchase date first'
                           }
@@ -809,16 +809,16 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         {/* Save Button */}
         <div className="flex justify-end pt-4 border-t border-teal-100 mt-auto">
           <div className="flex gap-3">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
               className="px-6 border-teal-300 text-teal-700 hover:bg-teal-50"
             >
               {t('cancel')}
             </Button>
-            <Button 
+            <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !formData.description.trim() || !formData.amount_ht || !formData.amount_ttc}
               className="px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium"
