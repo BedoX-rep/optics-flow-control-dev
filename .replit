@@ -1,16 +1,20 @@
 modules = ["nodejs-20", "web"]
-run = "npm run dev"
-
+# run = "npm run dev"
 [nix]
 channel = "stable-24_05"
-
 [deployment]
 run = ["sh", "-c", "npm run dev"]
-
 [[ports]]
 localPort = 8080
 externalPort = 80
-
 [[ports]]
 localPort = 8081
 externalPort = 8081
+[workflows]
+runButton = "Start"
+[[workflows.workflow]]
+name = "Start"
+author = "replit"
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo 'Click Start to run the project'"

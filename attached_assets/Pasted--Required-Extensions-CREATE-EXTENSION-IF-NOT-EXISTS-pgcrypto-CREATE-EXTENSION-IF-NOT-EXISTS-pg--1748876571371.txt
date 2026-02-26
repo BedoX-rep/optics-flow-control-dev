@@ -1,0 +1,209 @@
+-- Required Extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- ENUM TYPES
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_type') THEN
+    CREATE TYPE subscription_type AS ENUM ('Trial', 'Monthly', 'Quarterly', 'Lifetime');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_status') THEN
+    CREATE TYPE subscription_status AS ENUM ('Active', 'Suspended', 'Cancelled', 'inActive', 'Expired');
+  END IF;
+END $$;
+
+-- SAFELY REMOVE `role` IF EXISTS
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'role') THEN
+    ALTER TABLE public.subscriptions DROP COLUMN role;
+  END IF;
+END $$;
+
+-- ADD COLUMNS TO subscriptions IF NOT EXISTS
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'access_code') THEN
+    ALTER TABLE public.subscriptions ADD COLUMN access_code VARCHAR(5);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'store_name') THEN
+    ALTER TABLE public.subscriptions ADD COLUMN store_name TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'referral_code') THEN
+    ALTER TABLE public.subscriptions ADD COLUMN referral_code VARCHAR(4);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'referred_by') THEN
+    ALTER TABLE public.subscriptions ADD COLUMN referred_by TEXT;
+  END IF;
+END $$;
+
+-- Ensure access_code has values and is unique
+UPDATE public.subscriptions
+SET access_code = UPPER(LEFT(MD5(RANDOM()::text), 5))
+WHERE access_code IS NULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'subscriptions_access_code_key') THEN
+    ALTER TABLE public.subscriptions ADD CONSTRAINT subscriptions_access_code_key UNIQUE (access_code);
+  END IF;
+END $$;
+
+ALTER TABLE public.subscriptions
+ALTER COLUMN access_code SET NOT NULL;
+
+-- CREATE TABLES (products, clients, receipts, receipt_items, subscriptions, subscription_logs)
+-- (Same as your original schema – keep these unchanged)
+
+-- PERMISSIONS TABLE
+CREATE TABLE IF NOT EXISTS public.permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL UNIQUE,
+  can_manage_products BOOLEAN DEFAULT true,
+  can_manage_clients BOOLEAN DEFAULT true,
+  can_manage_receipts BOOLEAN DEFAULT true,
+  can_view_financial BOOLEAN DEFAULT false,
+  can_manage_purchases BOOLEAN DEFAULT false,
+  can_access_dashboard BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receipts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receipt_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscription_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.permissions ENABLE ROW LEVEL SECURITY;
+
+-- RLS POLICIES
+-- Drop old policies
+DROP POLICY IF EXISTS "Users can CRUD their own products" ON products;
+DROP POLICY IF EXISTS "Users can CRUD their own clients" ON clients;
+DROP POLICY IF EXISTS "Users can CRUD their own receipts" ON receipts;
+DROP POLICY IF EXISTS "Users can CRUD their own receipt items" ON receipt_items;
+DROP POLICY IF EXISTS "Users can read their own subscription" ON subscriptions;
+DROP POLICY IF EXISTS "Users can view their own permissions" ON permissions;
+DROP POLICY IF EXISTS "Admins can manage all permissions" ON permissions;
+
+-- Create updated RLS policies
+CREATE POLICY "Users can CRUD their own products" ON products FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can CRUD their own clients" ON clients FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can CRUD their own receipts" ON receipts FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can CRUD their own receipt items" ON receipt_items FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can read their own subscription" ON subscriptions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can view their own permissions" ON permissions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage their own permissions" ON permissions FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Admins can access all subscription logs" ON subscription_logs FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM subscriptions WHERE user_id = auth.uid() AND is_admin = TRUE
+  ));
+
+-- DEFAULT PERMISSIONS FOR EXISTING USERS
+INSERT INTO public.permissions (user_id, can_view_financial, can_manage_purchases)
+SELECT user_id, false, false
+FROM public.subscriptions
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.permissions WHERE permissions.user_id = subscriptions.user_id
+);
+
+-- USER CREATION FUNCTION (overrides original)
+DROP TRIGGER IF EXISTS handle_new_user_trigger ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  _display_name TEXT;
+  _store_name TEXT;
+  _referred_by TEXT;
+  _access_code VARCHAR(5);
+  _referral_code VARCHAR(4);
+  _error_message TEXT;
+  detail TEXT;
+  hint TEXT;
+BEGIN
+  -- Extract metadata
+  _display_name := COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'display_name'), ''), SPLIT_PART(NEW.email, '@', 1));
+  _store_name := COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'store_name'), ''), 'Optique');
+  _referred_by := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'referred_by', '')), '');
+  _access_code := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'access_code', '')), '');
+
+  -- Generate access code if missing
+  IF _access_code IS NULL THEN
+    LOOP
+      _access_code := UPPER(LEFT(MD5(RANDOM()::text), 5));
+      EXIT WHEN NOT EXISTS (SELECT 1 FROM subscriptions WHERE access_code = _access_code);
+    END LOOP;
+  END IF;
+
+  IF _referred_by IS NOT NULL THEN
+    _referral_code := UPPER(LEFT(MD5(RANDOM()::text), 4));
+  ELSE
+    _referral_code := NULL;
+  END IF;
+
+  -- Insert subscription
+  INSERT INTO public.subscriptions (
+    user_id, email, display_name, start_date, end_date,
+    subscription_type, subscription_status, trial_used,
+    access_code, store_name, referral_code, referred_by
+  )
+  VALUES (
+    NEW.id, NEW.email, _display_name, NOW(), NOW() + INTERVAL '7 days',
+    'Trial', 'Active', TRUE,
+    _access_code, _store_name, _referral_code, _referred_by
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    email = EXCLUDED.email,
+    display_name = EXCLUDED.display_name,
+    store_name = EXCLUDED.store_name,
+    access_code = EXCLUDED.access_code,
+    referral_code = EXCLUDED.referral_code,
+    referred_by = EXCLUDED.referred_by;
+
+  -- Insert default permissions
+  INSERT INTO public.permissions (
+    user_id, can_manage_products, can_manage_clients, can_manage_receipts,
+    can_view_financial, can_manage_purchases, can_access_dashboard
+  )
+  VALUES (
+    NEW.id, true, true, true,
+    false, false, true
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    can_manage_products = EXCLUDED.can_manage_products,
+    can_manage_clients = EXCLUDED.can_manage_clients,
+    can_manage_receipts = EXCLUDED.can_manage_receipts,
+    can_view_financial = EXCLUDED.can_view_financial,
+    can_manage_purchases = EXCLUDED.can_manage_purchases,
+    can_access_dashboard = EXCLUDED.can_access_dashboard,
+    updated_at = NOW();
+
+  RETURN NEW;
+
+EXCEPTION WHEN OTHERS THEN
+  GET STACKED DIAGNOSTICS
+    _error_message = MESSAGE_TEXT,
+    detail = PG_EXCEPTION_DETAIL,
+    hint = PG_EXCEPTION_HINT;
+
+  RAISE WARNING 'Error in handle_new_user trigger: %, Detail: %, Hint: %',
+    _error_message, detail, hint;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER handle_new_user_trigger
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- (Keep remaining triggers/functions like set_subscription_price, update_subscription_status, log_subscription_changes, get_subscription_stats, and cron job scheduling)
+-- These remain unchanged unless you want further enhancement to include new fields in logs/stats.
+
