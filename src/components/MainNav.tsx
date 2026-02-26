@@ -44,16 +44,16 @@ const getAdministrationNavigation = (t: any) => [
   { name: t('personalisation'), href: '/personalisation', icon: Palette, permission: 'admin_session' },
 ];
 
-const NavigationContent = ({ 
-  filteredNavigation, 
-  filteredAdministrationNavigation, 
+const NavigationContent = ({
+  filteredNavigation,
+  filteredAdministrationNavigation,
   isAdministrationActive,
   administrationOpen,
   toggleAdministration,
   collapsed,
   location,
   t,
-  onNavigate 
+  onNavigate
 }: {
   filteredNavigation: any[],
   filteredAdministrationNavigation: any[],
@@ -239,13 +239,13 @@ const MainNav = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-1/2 right-4 z-50 bg-teal-600 text-white hover:bg-teal-700 shadow-lg rounded-md w-10 h-10 transform -translate-y-1/2"
+            className="fixed top-4 right-4 z-50 bg-teal-600 text-white hover:bg-teal-700 shadow-xl rounded-2xl w-12 h-12 shadow-teal-900/20 active:scale-95 transition-all"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent 
-          side="left" 
+        <SheetContent
+          side="left"
           className="w-64 p-0 bg-gradient-to-br from-teal-600 via-teal-700 to-teal-800 border-teal-600/20"
         >
           <div className="sidebar-gradient min-h-full">
@@ -272,7 +272,7 @@ const MainNav = () => {
 
   // Desktop Navigation
   return (
-    <div 
+    <div
       className={cn(
         "sidebar-gradient min-h-screen border-r border-teal-600/20 transition-all duration-300 fixed top-0 left-0 z-40",
         collapsed ? "w-20" : "w-64"
@@ -288,7 +288,7 @@ const MainNav = () => {
             <h2 className="text-xl font-bold text-white">L</h2>
           )}
         </div>
-        <button 
+        <button
           onClick={toggleSidebar}
           className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-teal-600/20"
         >

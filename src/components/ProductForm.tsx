@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useCompanies } from "@/hooks/useCompanies";
@@ -98,8 +100,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   useEffect(() => {
     if (autoName) {
       let abbr = getCategoryAbbr(form.category);
-
-      // Only include index/treatment for SV/PG
       let parts = [abbr];
 
       if (["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "")) {
@@ -119,26 +119,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
         automated_name: true
       }));
     } else {
-      setForm(f => ({
-        ...f,
-        automated_name: false
-      }));
+      setForm(f => ({ ...f, automated_name: false }));
     }
   }, [form.category, form.index, form.treatment, form.company, form.gamma, form.stock_status, autoName]);
 
-  // Update autoName state when form.automated_name changes from external source
   useEffect(() => {
     setAutoName(form.automated_name ?? true);
   }, [form.automated_name]);
 
-  // Determine which extra fields should show
   const showIndexTreatment = ["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(form.category ?? "");
 
-  // Image handling (upload to Supabase Storage or base64 preview instead for now)
   const handleImageUpload = async () => {
     if (!imageFile) return "";
     setUploading(true);
-    // Use Supabase Storage if available. For now, base64 preview:
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -152,358 +145,295 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
 
   const onFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!form.name.trim()) {
-      return;
-    }
+    if (!form.name.trim()) return;
 
     let imageUrl = form.image;
-    if (imageFile) {
-      imageUrl = await handleImageUpload();
-    }
+    if (imageFile) imageUrl = await handleImageUpload();
 
-    // Ensure proper data types and clean up the form data
-    const submissionData = {
+    onSubmit({
+      ...form,
       name: form.name.trim(),
       price: Number(form.price) || 0,
       cost_ttc: Number(form.cost_ttc) || 0,
       stock: form.stock_status === 'inStock' ? (Number(form.stock) || 0) : undefined,
-      stock_status: form.stock_status,
-      category: form.category || undefined,
-      index: form.index || undefined,
-      treatment: form.treatment || undefined,
-      company: form.company || undefined,
-      gamma: form.gamma || undefined,
       automated_name: autoName,
       image: imageUrl || undefined
-    };
-
-    console.log('Submitting form data:', submissionData); // Debug log
-    onSubmit(submissionData);
+    });
   };
-
-  const handleAutoNameToggle = (checked: boolean) => {
-    setAutoName(checked);
-    // If turning off auto-naming, keep the current name but allow editing
-    if (!checked) {
-      setForm(f => ({
-        ...f,
-        automated_name: false
-      }));
-    }
-  };
-
-  const selectedCategory = CATEGORY_OPTIONS.find(cat => cat.value === form.category);
-  const IconComponent = selectedCategory?.icon || Package;
 
   return (
-    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-      <DialogHeader className="space-y-2 pb-4 border-b">
-        <DialogTitle className="text-2xl font-semibold text-gray-900">
-          {initialValues.name ? t('editProduct') : t('addProduct')}
-        </DialogTitle>
-      </DialogHeader>
+    <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-white rounded-[32px] shadow-2xl animate-in zoom-in-95 duration-300">
+      <form onSubmit={onFormSubmit} className="flex flex-col h-full bg-slate-50/30">
+        {/* Top Header Section */}
+        <div className="relative p-8 bg-gradient-to-r from-teal-600 to-emerald-600 overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-500/20 rounded-full -ml-24 -mb-24 blur-2xl" />
 
-      <form id="product-form" className="space-y-6 p-4" onSubmit={onFormSubmit}>
-        {/* Auto Name Generation */}
-        <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-          <Checkbox
-            checked={autoName}
-            onCheckedChange={handleAutoNameToggle}
-            id="auto-name"
-            className="border-gray-400"
-          />
-          <Label htmlFor="auto-name" className="cursor-pointer font-medium text-gray-700">
-            {t('generateNameAuto')}
-          </Label>
-          {autoName && (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {t('auto')}
-            </Badge>
-          )}
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
+                <Package className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-3xl font-black text-white tracking-tight">
+                  {initialValues.name ? t('editProduct') : t('addProduct')}
+                </DialogTitle>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                  <p className="text-teal-50 text-[10px] font-black uppercase tracking-[0.2em]">
+                    Product Configuration Suite
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-2xl px-5 py-2.5 border border-white/20">
+                <Switch
+                  checked={autoName}
+                  onCheckedChange={setAutoName}
+                  className="data-[state=checked]:bg-emerald-400"
+                />
+                <span className="text-[10px] font-black text-white uppercase tracking-wider">Auto-Naming</span>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={disabled || uploading}
+                className="bg-white text-teal-700 hover:bg-teal-50 rounded-2xl px-8 h-12 font-black shadow-xl shadow-black/10 transition-all active:scale-95 group"
+              >
+                <Save className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
+                {t('save')}
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Product Classification */}
-          <div className="space-y-4">
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <Tag className="h-4 w-4" />
-                  {t('productClassification') || 'Product Classification'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Category */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('category')}
-                  </Label>
+        {/* Form Body */}
+        <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column - Core Attributes */}
+          <div className="space-y-8">
+            <FormSection title="Classification" icon={Tag}>
+              <div className="grid grid-cols-1 gap-6">
+                <FormGroup label={t('category')}>
                   <Select
                     value={form.category ?? ""}
                     onValueChange={v => setForm(f => ({ ...f, category: v === "none_selected" ? undefined : v }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="premium-input">
                       <SelectValue placeholder={t('selectCategory')} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border-slate-200">
                       <SelectItem value="none_selected">{t('none')}</SelectItem>
                       {CATEGORY_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {t(opt.labelKey)}
-                        </SelectItem>
+                        <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </FormGroup>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormGroup label={t('company')}>
+                    <Select
+                      value={form.company ?? ""}
+                      onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
+                    >
+                      <SelectTrigger className="premium-input">
+                        <SelectValue placeholder={t('selectCompany')} />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        <SelectItem value="none_selected">{t('none')}</SelectItem>
+                        {allCompanies.map(opt => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormGroup>
+
+                  <FormGroup label={t('gamma')}>
+                    <Input
+                      value={form.gamma ?? ""}
+                      onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
+                      className="premium-input"
+                      placeholder={t('enterGamma')}
+                    />
+                  </FormGroup>
                 </div>
+              </div>
+            </FormSection>
 
-                {/* Company */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('company')}
-                  </Label>
-                  <Select
-                    value={form.company ?? ""}
-                    onValueChange={v => setForm(f => ({ ...f, company: v === "none_selected" ? undefined : v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectCompany')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none_selected">{t('none')}</SelectItem>
-                      {allCompanies.map(opt => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Gamma */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('gamma')}
-                  </Label>
-                  <Input
-                    value={form.gamma ?? ""}
-                    onChange={e => setForm(f => ({ ...f, gamma: e.target.value || undefined }))}
-                    placeholder={t('enterGamma')}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-
-
-            {/* Lens Specifications - Only for lenses */}
             {showIndexTreatment && (
-              <Card className="border-gray-200">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                    <Eye className="h-4 w-4" />
-                    {t('lensSpecifications') || 'Lens Specifications'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('index')}
-                    </Label>
+              <FormSection title="Technical Specs" icon={Wrench} variant="indigo">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormGroup label={t('index')}>
                     <Select
                       value={form.index ?? ""}
                       onValueChange={v => setForm(f => ({ ...f, index: v === "none_selected" ? undefined : v }))}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectIndex')} />
+                      <SelectTrigger className="premium-input">
+                        <SelectValue placeholder={t('index')} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-2xl">
                         <SelectItem value="none_selected">{t('none')}</SelectItem>
                         {INDEX_OPTIONS.map(opt => (
                           <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
+                  </FormGroup>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('treatment')}
-                    </Label>
+                  <FormGroup label={t('treatment')}>
                     <Select
                       value={form.treatment ?? ""}
                       onValueChange={v => setForm(f => ({ ...f, treatment: v === "none_selected" ? undefined : v }))}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectTreatment')} />
+                      <SelectTrigger className="premium-input">
+                        <SelectValue placeholder={t('treatment')} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-2xl">
                         <SelectItem value="none_selected">{t('none')}</SelectItem>
                         {TREATMENT_OPTIONS.map(opt => (
                           <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                </CardContent>
-              </Card>
+                  </FormGroup>
+                </div>
+              </FormSection>
             )}
           </div>
 
-          {/* Right Column - Pricing & Details */}
-          <div className="space-y-4">
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <DollarSign className="h-4 w-4" />
-                  {t('pricingFinancial') || 'Pricing & Financial'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('price')} (DH)
-                  </Label>
-                  <Input
-                    type="number"
-                    value={form.price}
-                    onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
-                    min={0}
-                    required
-                    placeholder="0.00"
-                  />
-                </div>
+          {/* Right Column - Commercial & Media */}
+          <div className="space-y-8">
+            <FormSection title="Financials" icon={DollarSign} variant="amber">
+              <div className="grid grid-cols-2 gap-4">
+                <FormGroup label={`${t('price')} (DH)`}>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      value={form.price}
+                      onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
+                      className="premium-input border-teal-100 focus:border-teal-500 font-black text-teal-700 bg-teal-50/30"
+                    />
+                  </div>
+                </FormGroup>
 
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('costTTC')} (DH)
-                  </Label>
+                <FormGroup label={`${t('costTTC')} (DH)`}>
                   <Input
                     type="number"
                     value={form.cost_ttc ?? 0}
                     onChange={e => setForm(f => ({ ...f, cost_ttc: Number(e.target.value) }))}
-                    min={0}
-                    placeholder="0.00"
+                    className="premium-input border-rose-100 focus:border-rose-500 font-black text-rose-600 bg-rose-50/30"
                   />
-                </div>
+                </FormGroup>
 
-                {/* Profit Margin Display */}
                 {form.price > 0 && (form.cost_ttc ?? 0) > 0 && (
-                  <div className="p-3 bg-gray-50 rounded border">
-                    <div className="flex justify-between text-sm">
-                      <span>{t('profitMargin') || 'Profit Margin'}:</span>
-                      <span className="font-semibold">
+                  <div className="col-span-2 p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-lg flex items-center justify-between overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calculated Margin</p>
+                      <p className="text-2xl font-black text-white tracking-tight">
                         {(((form.price - (form.cost_ttc ?? 0)) / form.price) * 100).toFixed(1)}%
-                      </span>
+                      </p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                      <Sparkles className="h-5 w-5 text-emerald-400" />
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Save Button positioned between cards */}
-            <div className="relative flex justify-center -my-2">
-              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 z-10">
-                <Button
-                  type="submit"
-                  form="product-form"
-                  disabled={disabled || uploading}
-                  className="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                  size="sm"
-                >
-                  <Save className="h-6 w-6" />
-                </Button>
               </div>
-            </div>
+            </FormSection>
 
-            {/* Product Name */}
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-gray-800 text-lg">
-                  <Package className="h-4 w-4" />
-                  {t('productDetails') || 'Product Details'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('productName')}
-                  </Label>
+            <FormSection title="Inventory & Media" icon={Archive}>
+              <div className="space-y-6">
+                <FormGroup label={t('productName')}>
                   <Input
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     disabled={autoName}
-                    required
-                    placeholder={autoName ? t('autoGenerated') || 'Auto-generated' : t('enterProductName') || 'Enter product name'}
+                    className="premium-input font-bold"
                   />
-                </div>
+                </FormGroup>
 
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('stockStatus')}
-                  </Label>
-                  <Select
-                    value={form.stock_status}
-                    onValueChange={v => setForm(f => ({ ...f, stock_status: v as 'Order' | 'inStock' | 'Fabrication' | 'Out Of Stock', stock: v !== 'inStock' ? undefined : f.stock }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectStockStatus')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Order">{t('order')}</SelectItem>
-                      <SelectItem value="inStock">{t('inStock')}</SelectItem>
-                      <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
-                      <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="grid grid-cols-2 gap-4 items-center">
+                  <FormGroup label={t('stockStatus')}>
+                    <Select
+                      value={form.stock_status}
+                      onValueChange={v => setForm(f => ({ ...f, stock_status: v as any, stock: v !== 'inStock' ? undefined : f.stock }))}
+                    >
+                      <SelectTrigger className="premium-input">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        <SelectItem value="Order">{t('order')}</SelectItem>
+                        <SelectItem value="inStock">{t('inStock')}</SelectItem>
+                        <SelectItem value="Fabrication">{t('fabrication')}</SelectItem>
+                        <SelectItem value="Out Of Stock">{t('outOfStock')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormGroup>
 
-                {form.stock_status === 'inStock' && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('stock')} {t('quantity') || 'Quantity'}
-                    </Label>
-                    <Input
-                      type="number"
-                      value={form.stock ?? 0}
-                      onChange={e => setForm(f => ({ ...f, stock: Number(e.target.value) }))}
-                      min={0}
-                      placeholder="0"
+                  <div className="relative group/media h-24 w-full rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center transition-all hover:shadow-md cursor-pointer overflow-hidden border-dashed">
+                    {form.image ? (
+                      <img src={form.image} alt="Preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1">
+                        <UploadIcon className="h-5 w-5 text-slate-400 group-hover/media:text-teal-600 transition-colors" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Media</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={e => e.target.files?.[0] && setImageFile(e.target.files[0])}
                     />
                   </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">
-                    {t('image')}
-                  </Label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        setImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  {form.image && typeof form.image === "string" && (
-                    <img 
-                      src={form.image} 
-                      alt="product preview" 
-                      className="w-24 h-24 object-cover rounded border" 
-                    />
-                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </FormSection>
           </div>
         </div>
-
-
       </form>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .premium-input {
+          @apply bg-white border-slate-200 rounded-2xl h-12 shadow-sm transition-all focus:ring-teal-500/20 focus:border-teal-500 !important;
+        }
+      `}} />
     </DialogContent>
   );
 };
+
+const FormSection = ({ title, icon: Icon, children, variant = 'teal' }: any) => {
+  const themes: any = {
+    teal: 'bg-teal-50 text-teal-600 border-teal-100',
+    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    amber: 'bg-amber-50 text-amber-600 border-amber-100'
+  };
+
+  return (
+    <div className="group space-y-4">
+      <div className="flex items-center gap-3">
+        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border transition-all group-hover:scale-110 shadow-sm", themes[variant])}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <h3 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">{title}</h3>
+      </div>
+      <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm shadow-slate-200/50 hover:shadow-lg hover:shadow-slate-200 transition-all duration-500">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+const FormGroup = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="space-y-2.5">
+    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">{label}</Label>
+    {children}
+  </div>
+);
 
 export default ProductForm;
