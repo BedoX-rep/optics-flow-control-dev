@@ -12,6 +12,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { CreditCard as CardIcon } from 'lucide-react'; // avoid conflict
 
 type SubscriptionStatus = 'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
@@ -66,6 +67,7 @@ const Subscriptions = () => {
         endDate.setFullYear(endDate.getFullYear() + 100);
       }
 
+      // If adding an ID property or Price property is an issue, they come from the Supabase record directly, not the UserSubscription subset
       const { error } = await supabase
         .from('subscriptions')
         .update({
@@ -75,9 +77,9 @@ const Subscriptions = () => {
           end_date: endDate.toISOString(),
           subscription_status: 'Active',
           trial_used: true,
-          price: SUBSCRIPTION_PRICES[type]
+          price: SUBSCRIPTION_PRICES[type as keyof typeof SUBSCRIPTION_PRICES]
         })
-        .eq('id', currentSubscription.id);
+        .eq('user_id', user.id); // Update by user_id since we don't have id on UserSubscription
 
       if (error) throw error;
 
@@ -99,192 +101,195 @@ const Subscriptions = () => {
     }
   };
 
+  const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = React.useState(false);
+
+  const renderSubscriptionPlans = () => {
+    return (
+      <>
+        <BankTransferDialog
+          isOpen={bankTransferDialogOpen}
+          onClose={() => setBankTransferDialogOpen(false)}
+        />
+
+        <ContactSubscriptionDialog
+          isOpen={contactDialogOpen}
+          onClose={() => setContactDialogOpen(false)}
+        />
 
 
-
-const [bankTransferDialogOpen, setBankTransferDialogOpen] = React.useState(false);
-const [contactDialogOpen, setContactDialogOpen] = React.useState(false);
-
-const renderSubscriptionPlans = () => {
-  return (
-    <>
-      <BankTransferDialog 
-        isOpen={bankTransferDialogOpen}
-        onClose={() => setBankTransferDialogOpen(false)}
-      />
-      
-      <ContactSubscriptionDialog
-        isOpen={contactDialogOpen}
-        onClose={() => setContactDialogOpen(false)}
-      />
-      
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {['Monthly', 'Quarterly', 'Lifetime'].map((type) => (
-          <motion.div
-            key={type}
-            whileHover={{ y: -8 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className={`
-              relative overflow-hidden h-full transition-all duration-300
-              ${currentSubscription?.subscription_type === type ? 
-                'border-2 border-teal-500 shadow-xl' : 
-                'hover:shadow-lg hover:border-teal-300'
-              }
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {['Monthly', 'Quarterly', 'Lifetime'].map((type) => (
+            <motion.div
+              key={type}
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className={`
+              relative overflow-hidden h-full transition-all duration-500 rounded-[32px] border-2
+              ${currentSubscription?.subscription_type === type ?
+                  'border-teal-500 shadow-2xl shadow-teal-500/20 bg-white' :
+                  'border-transparent hover:border-teal-200 shadow-xl shadow-slate-200/50 bg-white/60 backdrop-blur-xl hover:bg-white'
+                }
             `}>
-              
-              {/* Limited Offer Badge */}
-              <div className="absolute -right-12 top-6 rotate-[45deg] bg-red-500 text-white px-12 py-1 text-sm font-bold">
-                {t('limitedOffer')}
-              </div>
-              <CardHeader className={`
-                ${type === 'Quarterly' ? 'bg-gradient-to-br from-teal-50 via-teal-100/50 to-teal-50' : ''}
-                ${currentSubscription?.subscription_type === type ? 'bg-teal-50' : ''}
-                pb-4
-              `}>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-gray-800">
-                      {type === 'Monthly' ? t('monthly') : 
-                       type === 'Quarterly' ? t('quarterly') : 
-                       type === 'Lifetime' ? t('lifetime') : type}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {type === 'Lifetime' ? t('oneTimePayment') : 
-                       type === 'Monthly' ? t('billedMonthly') : 
-                       type === 'Quarterly' ? t('billedQuarterly') : `Billed ${type.toLowerCase()}`}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {SUBSCRIPTION_PRICES[type as keyof typeof SUBSCRIPTION_PRICES]}
-                    </span>
-                    <span className="ml-1 text-gray-600">DH</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <ul className="space-y-3">
-                  {[
-                    t('clientManagementSystem'),
-                    t('receiptGeneration'),
-                    t('productInventory'),
-                    t('salesAnalytics'),
-                    t('prescriptionManagement'),
-                    type === 'Quarterly' && t('prioritySupport'),
-                    type === 'Lifetime' && t('lifetimeUpdates'),
-                    type === 'Lifetime' && t('noRecurringPayments')
-                  ].filter(Boolean).map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                        <Check className="h-3 w-3 text-teal-600" />
-                      </div>
-                      <span className="text-gray-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter className="pt-6 flex flex-col gap-3">
-                <Button 
-                  onClick={() => setContactDialogOpen(true)}
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-2 border-teal-200 hover:bg-teal-50 h-11"
-                >
-                  <Phone className="h-4 w-4" />
-                  {t('payViaBankTransfer')}
-                </Button>
 
-                <Button 
-                  onClick={() => setContactDialogOpen(true)}
-                  disabled={currentSubscription?.subscription_type === type}
-                  className={`
-                    w-full h-11 ${type === 'Quarterly' ? 
-                    'bg-teal-600 hover:bg-teal-700' : 
-                    'bg-gray-800 hover:bg-gray-900'}
+                {/* Limited Offer Badge */}
+                <div className="absolute -right-12 top-6 rotate-[45deg] bg-gradient-to-r from-red-500 to-rose-600 shadow-md text-white px-12 py-1.5 text-xs font-black tracking-widest uppercase">
+                  {t('limitedOffer')}
+                </div>
+                <CardHeader className={`
+                ${type === 'Quarterly' ? 'bg-gradient-to-br from-teal-50/50 via-teal-100/30 to-transparent' : ''}
+                ${currentSubscription?.subscription_type === type ? 'bg-teal-50/50' : ''}
+                pb-6 pt-8 px-8
+              `}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">
+                        {type === 'Monthly' ? t('monthly') :
+                          type === 'Quarterly' ? t('quarterly') :
+                            type === 'Lifetime' ? t('lifetime') : type}
+                      </CardTitle>
+                      <p className="text-sm font-medium text-slate-500 mt-2">
+                        {type === 'Lifetime' ? t('oneTimePayment') :
+                          type === 'Monthly' ? t('billedMonthly') :
+                            type === 'Quarterly' ? t('billedQuarterly') : `Billed ${type.toLowerCase()}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <div className="flex items-baseline">
+                      <span className="text-5xl font-black text-slate-900 tracking-tighter">
+                        {SUBSCRIPTION_PRICES[type as keyof typeof SUBSCRIPTION_PRICES]}
+                      </span>
+                      <span className="ml-2 text-lg font-bold text-slate-400">DH</span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6 px-8">
+                  <ul className="space-y-4">
+                    {[
+                      t('clientManagementSystem'),
+                      t('receiptGeneration'),
+                      t('productInventory'),
+                      t('salesAnalytics'),
+                      t('prescriptionManagement'),
+                      type === 'Quarterly' && t('prioritySupport'),
+                      type === 'Lifetime' && t('lifetimeUpdates'),
+                      type === 'Lifetime' && t('noRecurringPayments')
+                    ].filter(Boolean).map((feature, index) => (
+                      <li key={index} className="flex items-center gap-3 text-sm font-medium">
+                        <div className="h-6 w-6 rounded-full bg-teal-100/50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <Check className="h-3.5 w-3.5 text-teal-600" />
+                        </div>
+                        <span className="text-slate-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter className="pt-8 pb-8 px-8 flex flex-col gap-3">
+                  <Button
+                    onClick={() => setContactDialogOpen(true)}
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2 border-teal-200/60 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 h-12 rounded-2xl font-bold transition-all"
+                  >
+                    <Phone className="h-4 w-4" />
+                    {t('payViaBankTransfer')}
+                  </Button>
+
+                  <Button
+                    onClick={() => setContactDialogOpen(true)}
+                    disabled={currentSubscription?.subscription_type === type}
+                    className={`
+                    w-full h-12 rounded-2xl font-bold transition-all shadow-lg active:scale-95
+                    ${type === 'Quarterly' ?
+                        'bg-teal-600 hover:bg-teal-700 shadow-teal-500/25' :
+                        'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20'}
                   `}
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  {currentSubscription?.subscription_type === type ? 
-                    t('currentPlan') : 
-                    t('payWithCardPayPal')}
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </>
-  );
-};
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    {currentSubscription?.subscription_type === type ?
+                      t('currentPlan') :
+                      t('payWithCardPayPal')}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {!isLoading && currentSubscription && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">{t('currentPlan')}</p>
-                    <h3 className="text-xl font-bold mt-1">{currentSubscription.subscription_type}</h3>
-                    <p className="text-sm mt-1">
-                      {currentSubscription.price || SUBSCRIPTION_PRICES[currentSubscription.subscription_type]} DH
-                      {currentSubscription.is_recurring ? 
-                        ` / ${currentSubscription.subscription_type.toLowerCase()}` : 
-                        ` (${t('oneTimePayment')})`}
-                    </p>
-                  </div>
-                  <SubscriptionBadge status={currentSubscription.subscription_status} />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">{t('startDate')}</p>
-                    <h3 className="text-xl font-bold mt-1">
-                      {currentSubscription.start_date ? 
-                        new Date(currentSubscription.start_date).toLocaleDateString() : 
-                        t('notStarted')}
-                    </h3>
-                  </div>
-                  <div className="p-2 rounded-full bg-teal-100 text-teal-600">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500">{t('expirationDate')}</p>
-                    <h3 className="text-xl font-bold mt-1">
-                      {currentSubscription.subscription_type === 'Lifetime' ? 
-                        t('never') : 
-                        currentSubscription.end_date ? 
-                          new Date(currentSubscription.end_date).toLocaleDateString() : 
-                          t('notSet')}
-                    </h3>
-                  </div>
-                  <div className="p-2 rounded-full bg-teal-100 text-teal-600">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {renderSubscriptionPlans()}
+    <div className="flex-1 space-y-8 p-4 md:p-8 pt-6 w-full max-w-none">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t('subscriptions')}</h2>
+          <p className="text-sm font-medium text-slate-500 mt-1">Manage your plan and billing</p>
+        </div>
       </div>
+
+      {!isLoading && currentSubscription && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl hover:bg-white/80 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('currentPlan')}</p>
+                  <h3 className="text-2xl font-black mt-1 text-slate-900 tracking-tight">{currentSubscription.subscription_type}</h3>
+                  <p className="text-sm font-medium text-slate-500 mt-1">
+                    {(currentSubscription as any).price || SUBSCRIPTION_PRICES[currentSubscription.subscription_type as keyof typeof SUBSCRIPTION_PRICES]} DH
+                    {currentSubscription.is_recurring ?
+                      ` / ${currentSubscription.subscription_type.toLowerCase()}` :
+                      ` (${t('oneTimePayment')})`}
+                  </p>
+                </div>
+                <SubscriptionBadge status={currentSubscription.subscription_status} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl hover:bg-white/80 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('startDate')}</p>
+                  <h3 className="text-2xl font-black mt-1 text-slate-900 tracking-tight">
+                    {currentSubscription.start_date ?
+                      new Date(currentSubscription.start_date).toLocaleDateString() :
+                      t('notStarted')}
+                  </h3>
+                </div>
+                <div className="p-4 rounded-2xl bg-teal-50 border border-teal-100/50 text-teal-600 shadow-inner">
+                  <Calendar className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl hover:bg-white/80 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('expirationDate')}</p>
+                  <h3 className="text-2xl font-black mt-1 text-slate-900 tracking-tight">
+                    {currentSubscription.subscription_type === 'Lifetime' ?
+                      t('never') :
+                      currentSubscription.end_date ?
+                        new Date(currentSubscription.end_date).toLocaleDateString() :
+                        t('notSet')}
+                  </h3>
+                </div>
+                <div className="p-4 rounded-2xl bg-teal-50 border border-teal-100/50 text-teal-600 shadow-inner">
+                  <Calendar className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {renderSubscriptionPlans()}
     </div>
   );
 };

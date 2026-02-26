@@ -112,10 +112,10 @@ const OpticianSettings = () => {
         description: t('opticianInfoUpdated'),
       });
       setHasChanges(false);
-      
+
       // Update the query cache with the new data immediately
       queryClient.setQueryData(['user-information', user?.id], updatedData);
-      
+
       // Also invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
     },
@@ -197,25 +197,38 @@ const OpticianSettings = () => {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <PageTitle 
-          title={t('opticianSettings')} 
-          subtitle={t('manageBusinessInfo')}
-        />
+    <div className="flex-1 w-full max-w-none px-4 md:px-8 pt-6 pb-20 space-y-8 animate-fade-in">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t('opticianSettings')}</h2>
+          <p className="text-sm font-medium text-slate-500 mt-1">{t('manageBusinessInfo')}</p>
+        </div>
+        <div className="flex justify-end hidden md:flex">
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || saveMutation.isPending || uploading}
+            className="bg-teal-600 hover:bg-teal-700 h-10 px-6 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      </div>
 
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-8">
           {/* Business Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-blue-100/80 text-blue-600 rounded-xl shadow-sm">
+                  <Building2 className="h-5 w-5" />
+                </div>
                 {t('businessInformation')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="store_name">{t('storeName')}</Label>
@@ -270,14 +283,16 @@ const OpticianSettings = () => {
           </Card>
 
           {/* Tax & Legal Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-purple-100/80 text-purple-600 rounded-xl shadow-sm">
+                  <FileText className="h-5 w-5" />
+                </div>
                 Tax & Legal Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="vat_number">VAT Number</Label>
@@ -311,14 +326,16 @@ const OpticianSettings = () => {
           </Card>
 
           {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-rose-100/80 text-rose-600 rounded-xl shadow-sm">
+                  <User className="h-5 w-5" />
+                </div>
                 Contact Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
@@ -351,16 +368,20 @@ const OpticianSettings = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        <div className="space-y-8">
           {/* Logo Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
+          <Card className="bg-white/60 backdrop-blur-xl border-slate-200/60 shadow-lg shadow-slate-200/40 rounded-3xl overflow-hidden hover:bg-white/80 transition-all duration-300">
+            <CardHeader className="border-b border-slate-100/60 pb-5 bg-slate-50/50 pt-6 px-6 md:px-8">
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-slate-900 tracking-tight">
+                <div className="p-2.5 bg-teal-100/80 text-teal-600 rounded-xl shadow-sm">
+                  <Upload className="h-5 w-5" />
+                </div>
                 Business Logo
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-8 pb-8 px-6 md:px-8">
               {formData.logo_url && (
                 <div className="flex justify-center">
                   <img
@@ -386,18 +407,18 @@ const OpticianSettings = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Save Button */}
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || saveMutation.isPending || uploading}
-              className="bg-teal-600 hover:bg-teal-700"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
+        {/* Floating Mobile Save Button */}
+        <div className="fixed bottom-6 right-6 md:hidden z-50">
+          <Button
+            onClick={handleSave}
+            disabled={!hasChanges || saveMutation.isPending || uploading}
+            size="icon"
+            className="h-14 w-14 rounded-full bg-teal-600 hover:bg-teal-700 shadow-xl shadow-teal-500/30 transition-all active:scale-95"
+          >
+            <Save className="h-6 w-6" />
+          </Button>
         </div>
       </div>
     </div>
