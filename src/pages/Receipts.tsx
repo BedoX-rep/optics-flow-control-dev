@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, StickyNote, Pencil, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Filter, Eye, BarChart2, Check, Package, Trash2, Edit, ChevronRight, Phone, Calendar, Wallet, StickyNote, Pencil, MoreHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
@@ -32,17 +32,17 @@ import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
-interface Receipt {
+interface ReceiptData {
   id: string;
   client_id: string | null;
-  client_name?: string;
-  client_phone?: string;
+  client_name: string;
+  client_phone: string;
   created_at: string;
   total: number;
   delivery_status: string;
   montage_status: string;
   balance: number;
-  advance_payment?: number;
+  advance_payment: number;
   cost?: number;
   cost_ttc?: number;
   profit?: number;
@@ -50,7 +50,8 @@ interface Receipt {
   call_status: string;
   time_called?: string;
   note?: string;
-  user_id?: string;
+  user_id: string;
+  montage_costs?: number;
   receipt_items?: Array<{
     id: string;
     quantity: number;
@@ -60,24 +61,31 @@ interface Receipt {
     custom_item_name: string;
     paid_at_delivery: boolean;
     product: {
+      id: string;
       name: string;
       category: string;
+      company?: string;
+      price?: number;
+      cost_ttc?: number;
+      stock_status?: string;
     } | null;
   }>;
 }
 
-const ReceiptCard = ({ 
-  receipt, 
-  onPaid, 
-  onDelivered, 
-  onDelete, 
-  onView, 
-  onEdit, 
+const ITEMS_PER_PAGE = 20;
+
+const ReceiptCard = ({
+  receipt,
+  onPaid,
+  onDelivered,
+  onDelete,
+  onView,
+  onEdit,
   onMontageChange,
   onCallStatusChange,
-  onNoteChange 
+  onNoteChange
 }: {
-  receipt: Receipt;
+  receipt: ReceiptData;
   onPaid: () => void;
   onDelivered: () => void;
   onDelete: () => void;
@@ -195,20 +203,20 @@ const ReceiptCard = ({
 
           {/* Status Badges */}
           <div className="flex flex-wrap gap-2 mb-3">
-            <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'} 
-                   className={cn("text-xs border",
-                     receipt.balance === 0 ? "bg-green-100 text-green-700 border-green-200" :
-                     receipt.advance_payment > 0 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
-                     "bg-red-100 text-red-700 border-red-200"
-                   )}>
+            <Badge variant={receipt.balance === 0 ? 'default' : receipt.advance_payment > 0 ? 'secondary' : 'destructive'}
+              className={cn("text-xs border",
+                receipt.balance === 0 ? "bg-green-100 text-green-700 border-green-200" :
+                  receipt.advance_payment > 0 ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                    "bg-red-100 text-red-700 border-red-200"
+              )}>
               {receipt.balance === 0 ? t('paid') : receipt.advance_payment > 0 ? t('partial') : t('unpaid')}
             </Badge>
-            <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'} 
-                   className={cn("text-xs border",
-                     receipt.delivery_status === 'Completed' ? 
-                     "bg-emerald-100 text-emerald-700 border-emerald-200" :
-                     "bg-orange-100 text-orange-700 border-orange-200"
-                   )}>
+            <Badge variant={receipt.delivery_status === 'Completed' ? 'default' : 'secondary'}
+              className={cn("text-xs border",
+                receipt.delivery_status === 'Completed' ?
+                  "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                  "bg-orange-100 text-orange-700 border-orange-200"
+              )}>
               {receipt.delivery_status === 'Completed' ? t('completed') : t('undelivered')}
             </Badge>
             {receipt.order_type && (
@@ -219,12 +227,12 @@ const ReceiptCard = ({
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-teal-50 border border-teal-200">
               <div className={cn("w-2 h-2 rounded-full",
                 receipt.call_status === 'Called' ? "bg-green-500" :
-                receipt.call_status === 'Unresponsive' ? "bg-red-500" :
-                "bg-gray-400"
+                  receipt.call_status === 'Unresponsive' ? "bg-red-500" :
+                    "bg-gray-400"
               )} />
               <span className="text-xs font-medium text-teal-700">
-                {receipt.call_status === 'Called' ? t('called') : 
-                 receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
+                {receipt.call_status === 'Called' ? t('called') :
+                  receipt.call_status === 'Unresponsive' ? t('unresponsive') : t('notCalled')}
               </span>
             </div>
           </div>
@@ -244,16 +252,16 @@ const ReceiptCard = ({
                 size="sm"
                 onClick={() => onCallStatusChange(
                   receipt.call_status === 'Not Called' ? 'Called' :
-                  receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
+                    receipt.call_status === 'Called' ? 'Unresponsive' : 'Not Called'
                 )}
                 className={cn(
                   "h-8 w-8 p-0 rounded-full shadow-sm transition-all duration-200",
                   receipt.call_status === 'Called' ? "bg-green-500 hover:bg-green-600 text-white" :
-                  receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
-                  "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    receipt.call_status === 'Unresponsive' ? "bg-red-500 hover:bg-red-600 text-white" :
+                      "bg-gray-100 hover:bg-gray-200 text-gray-700"
                 )}
                 title={receipt.call_status === 'Called' ? t('markUnresponsive') :
-                       receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
+                  receipt.call_status === 'Unresponsive' ? t('markNotCalled') : t('markCalled')}
               >
                 <Phone className="h-3.5 w-3.5" />
               </Button>
@@ -274,8 +282,8 @@ const ReceiptCard = ({
                 onClick={onDelivered}
                 className={cn(
                   "h-8 w-8 p-0 rounded-full shadow-sm text-white",
-                  receipt.delivery_status === 'Completed' 
-                    ? "bg-blue-500 hover:bg-blue-600" 
+                  receipt.delivery_status === 'Completed'
+                    ? "bg-blue-500 hover:bg-blue-600"
                     : "bg-orange-500 hover:bg-orange-600"
                 )}
                 title={receipt.delivery_status === 'Completed' ? t('markUndelivered') : t('markDelivered')}
@@ -371,7 +379,7 @@ const ReceiptCard = ({
                 {MONTAGE_STATUSES.map((status, index) => {
                   const isCurrent = currentMontageIndex === index;
                   const isPassed = currentMontageIndex > index;
-                  
+
                   // Get the current step's color theme
                   const getCurrentStepColorTheme = () => {
                     switch (currentMontageIndex) {
@@ -384,9 +392,9 @@ const ReceiptCard = ({
                       default: return { main: 'bg-teal-500', light: 'bg-teal-400', border: 'border-teal-500' };
                     }
                   };
-                  
+
                   const colorTheme = getCurrentStepColorTheme();
-                  
+
                   // All bars use the current step's color theme
                   const getStepColor = () => {
                     if (isCurrent) {
@@ -398,7 +406,7 @@ const ReceiptCard = ({
                       return 'bg-gray-200';
                     }
                   };
-                  
+
                   // Border color matches the current step's color when current
                   const getBorderColor = () => {
                     if (isCurrent) {
@@ -406,7 +414,7 @@ const ReceiptCard = ({
                     }
                     return 'border-gray-300';
                   };
-                  
+
                   return (
                     <motion.button
                       key={status}
@@ -435,7 +443,7 @@ const ReceiptCard = ({
               <div className="grid grid-cols-6 gap-1 text-xs">
                 {MONTAGE_STATUSES.map((status, index) => {
                   const isCurrent = currentMontageIndex === index;
-                  
+
                   return (
                     <div key={status} className="text-center">
                       <span className={cn(
@@ -469,8 +477,8 @@ const ReceiptCard = ({
                     <Button size="sm" onClick={handleSaveNote} className="text-xs bg-teal-600 hover:bg-teal-700">
                       {t('save')}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleCancelNote} 
-                            className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
+                    <Button variant="outline" size="sm" onClick={handleCancelNote}
+                      className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
                       {t('cancel')}
                     </Button>
                   </div>
@@ -483,8 +491,8 @@ const ReceiptCard = ({
                   <div className="max-h-24 overflow-y-auto mb-3">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{receipt.note}</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)} 
-                          className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
+                  <Button variant="outline" size="sm" onClick={() => setIsViewingNote(false)}
+                    className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50">
                     {t('close')}
                   </Button>
                 </div>
@@ -508,8 +516,13 @@ const Receipts = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [page, setPage] = useState(0);
 
-  const isReceiptInDateRange = (receipt: Receipt) => {
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm, dateFilter]);
+
+  const isReceiptInDateRange = (receipt: ReceiptData) => {
     const receiptDate = new Date(receipt.created_at);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -526,8 +539,8 @@ const Receipts = () => {
         return receiptDate >= weekStart;
       }
       case 'month': {
-        return receiptDate.getMonth() === today.getMonth() && 
-               receiptDate.getFullYear() === today.getFullYear();
+        return receiptDate.getMonth() === today.getMonth() &&
+          receiptDate.getFullYear() === today.getFullYear();
       }
       case 'year':
         return receiptDate.getFullYear() === today.getFullYear();
@@ -537,41 +550,45 @@ const Receipts = () => {
   };
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
-  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
-  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
+
+  useEffect(() => {
+    setPage(0);
+  }, [paymentFilter, deliveryFilter]);
+  const [selectedReceipt, setSelectedReceipt] = useState<ReceiptData | null>(null);
+  const [editingReceipt, setEditingReceipt] = useState<ReceiptData | null>(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [receiptToDelete, setReceiptToDelete] = useState<Receipt | null>(null);
+  const [receiptToDelete, setReceiptToDelete] = useState<ReceiptData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [editingCell, setEditingCell] = useState<{id: string; field: string} | null>(null);
+  const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null);
   const [cellEditValue, setCellEditValue] = useState<string>('');
 
-  const startInlineEdit = (receipt: Receipt, field: string) => {
+  const startInlineEdit = (receipt: ReceiptData, field: string) => {
     setEditingCell({ id: receipt.id, field });
-    setCellEditValue(String(receipt[field as keyof Receipt] || ''));
+    setCellEditValue(String(receipt[field as keyof ReceiptData] || ''));
   };
 
-  const endInlineEdit = async (receipt: Receipt) => {
+  const endInlineEdit = async (receipt: ReceiptData) => {
     if (!editingCell) return;
 
     try {
       const value = cellEditValue.trim();
-      if (value === String(receipt[editingCell.field as keyof Receipt])) {
+      if (value === String(receipt[editingCell.field as keyof ReceiptData])) {
         setEditingCell(null);
         return;
       }
 
       const updates: any = {
-        [editingCell.field]: editingCell.field.includes('phone') ? value : 
-                             isNaN(Number(value)) ? value : Number(value)
+        [editingCell.field]: editingCell.field.includes('phone') ? value :
+          isNaN(Number(value)) ? value : Number(value)
       };
 
-      await queryClient.cancelQueries(['receipts']);
+      await queryClient.cancelQueries({ queryKey: ['receipts'] });
 
       const previousReceipts = queryClient.getQueryData(['receipts']);
 
-      queryClient.setQueryData(['receipts'], (old: any) => {
-        return old?.map((r: Receipt) => 
+      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
+        return old?.map((r: ReceiptData) =>
           r.id === receipt.id ? { ...r, [editingCell.field]: updates[editingCell.field] } : r
         );
       });
@@ -607,15 +624,15 @@ const Receipts = () => {
   const handleMarkAsPaid = async (id: string, total: number) => {
     try {
       const updates = { balance: 0, advance_payment: total };
-      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
         if (!old) return old;
-        return old.map((r: Receipt) => r.id === id ? { ...r, ...updates } : r);
+        return old.map((r: ReceiptData) => r.id === id ? { ...r, ...updates } : r);
       });
       const { error } = await supabase
         .from('receipts')
-        .update({ 
+        .update({
           balance: 0,
-          advance_payment: total 
+          advance_payment: total
         })
         .eq('id', id);
 
@@ -637,18 +654,18 @@ const Receipts = () => {
 
   const handleCallStatusChange = async (id: string, newStatus: string) => {
     try {
-      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
         if (!old) return old;
-        return old.map((r: Receipt) => r.id === id ? { 
-          ...r, 
+        return old.map((r: ReceiptData) => r.id === id ? {
+          ...r,
           call_status: newStatus,
-          time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
+          time_called: newStatus === 'Not Called' ? undefined : new Date().toISOString()
         } : r);
       });
 
       const { error } = await supabase
         .from('receipts')
-        .update({ 
+        .update({
           call_status: newStatus,
           time_called: newStatus === 'Not Called' ? null : new Date().toISOString()
         })
@@ -672,9 +689,9 @@ const Receipts = () => {
 
   const handleNoteChange = async (id: string, note: string) => {
     try {
-      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+      queryClient.setQueryData(['receipts'], (old: any) => {
         if (!old) return old;
-        return old.map((r: Receipt) => r.id === id ? { ...r, note } : r);
+        return old.map((r: any) => r.id === id ? { ...r, note } : r);
       });
 
       const { error } = await supabase
@@ -700,9 +717,9 @@ const Receipts = () => {
 
   const handleMontageStatusChange = async (id: string, newStatus: string) => {
     try {
-      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+      queryClient.setQueryData(['receipts'], (old: any) => {
         if (!old) return old;
-        return old.map((r: Receipt) => r.id === id ? { ...r, montage_status: newStatus } : r);
+        return old.map((r: any) => r.id === id ? { ...r, montage_status: newStatus } : r);
       });
       const { error } = await supabase
         .from('receipts')
@@ -728,9 +745,9 @@ const Receipts = () => {
   const handleMarkAsDelivered = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'Completed' ? 'Undelivered' : 'Completed';
-      queryClient.setQueryData(['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter], (old: any) => {
+      queryClient.setQueryData(['receipts'], (old: any) => {
         if (!old) return old;
-        return old.map((r: Receipt) => r.id === id ? { ...r, delivery_status: newStatus } : r);
+        return old.map((r: any) => r.id === id ? { ...r, delivery_status: newStatus } : r);
       });
       const { error } = await supabase
         .from('receipts')
@@ -753,7 +770,7 @@ const Receipts = () => {
     }
   };
 
-  const openDeleteDialog = (receipt: Receipt) => {
+  const openDeleteDialog = (receipt: ReceiptData) => {
     setReceiptToDelete(receipt);
     setIsDeleteDialogOpen(true);
   };
@@ -770,7 +787,7 @@ const Receipts = () => {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries(['receipts']);
+      queryClient.invalidateQueries({ queryKey: ['receipts'] });
       toast({
         title: "Receipt Deleted",
         description: "Receipt has been successfully deleted.",
@@ -809,8 +826,13 @@ const Receipts = () => {
           custom_item_name,
           paid_at_delivery,
           product:product_id (
+            id,
             name,
-            category
+            category,
+            company,
+            price,
+            cost_ttc,
+            stock_status
           )
         )
       `)
@@ -824,11 +846,14 @@ const Receipts = () => {
       ...receipt,
       client_name: receipt.clients?.name || 'No Client',
       client_phone: receipt.clients?.phone || 'N/A',
-      balance: receipt.total - (receipt.advance_payment || 0)
-    }));
+      balance: receipt.total - (receipt.advance_payment || 0),
+      advance_payment: receipt.advance_payment || 0,
+      call_status: receipt.call_status || 'Not Called',
+      user_id: receipt.user_id || '',
+    })) as ReceiptData[];
   };
 
-  const { data: receipts = [], isLoading } = useQuery({
+  const { data: receipts = [], isLoading } = useQuery<ReceiptData[]>({
     queryKey: ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter],
     queryFn: fetchReceipts,
     enabled: !!user,
@@ -840,27 +865,34 @@ const Receipts = () => {
     retry: 1
   });
 
-  const filteredReceipts = React.useMemo(() => {
+  const filteredReceipts = useMemo(() => {
     return receipts.filter(receipt => {
-      const matchesSearch = 
+      const matchesSearch =
         (receipt.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
+          receipt.client_phone?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesPayment = 
+      const matchesPayment =
         paymentFilter === 'all' ? true :
-        paymentFilter === 'paid' ? receipt.balance === 0 :
-        paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
-        receipt.balance === receipt.total;
+          paymentFilter === 'paid' ? receipt.balance === 0 :
+            paymentFilter === 'partial' ? (receipt.balance > 0 && receipt.advance_payment > 0) :
+              receipt.balance === receipt.total;
 
-      const matchesDelivery = 
+      const matchesDelivery =
         deliveryFilter === 'all' ? true :
-        receipt.delivery_status === deliveryFilter;
+          receipt.delivery_status === deliveryFilter;
 
       const matchesDate = isReceiptInDateRange(receipt);
 
       return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
     });
   }, [receipts, searchTerm, paymentFilter, deliveryFilter, dateFilter]);
+
+  const paginatedReceipts = useMemo(() => {
+    const startIndex = page * ITEMS_PER_PAGE;
+    return filteredReceipts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredReceipts, page]);
+
+  const totalPages = Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -904,9 +936,9 @@ const Receipts = () => {
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input 
-              type="text" 
-              placeholder={t('searchReceipts')} 
+            <Input
+              type="text"
+              placeholder={t('searchReceipts')}
               className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -928,9 +960,9 @@ const Receipts = () => {
                 <Calendar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder={t('date')}>
                   {dateFilter === 'all' ? t('date') :
-                   dateFilter === 'today' ? t('today') :
-                   dateFilter === 'week' ? t('thisWeek') :
-                   dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
+                    dateFilter === 'today' ? t('today') :
+                      dateFilter === 'week' ? t('thisWeek') :
+                        dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
                 </SelectValue>
                 {dateFilter !== 'all' && (
                   <X
@@ -959,15 +991,15 @@ const Receipts = () => {
               <SelectTrigger className={cn(
                 "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
                 paymentFilter === 'paid' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
-                paymentFilter === 'partial' ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" :
-                paymentFilter === 'unpaid' ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200" :
-                "bg-white/10 hover:bg-white/20"
+                  paymentFilter === 'partial' ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200" :
+                    paymentFilter === 'unpaid' ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200" :
+                      "bg-white/10 hover:bg-white/20"
               )}>
                 <Wallet className="h-4 w-4 mr-2" />
                 <SelectValue placeholder={t('payment')}>
                   {paymentFilter === 'all' ? t('payment') :
-                   paymentFilter === 'paid' ? t('paid') :
-                   paymentFilter === 'partial' ? t('partial') : t('unpaid')}
+                    paymentFilter === 'paid' ? t('paid') :
+                      paymentFilter === 'partial' ? t('partial') : t('unpaid')}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -986,13 +1018,13 @@ const Receipts = () => {
               <SelectTrigger className={cn(
                 "w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
                 deliveryFilter === 'Completed' ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" :
-                deliveryFilter === 'Undelivered' ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200" :
-                "bg-white/10 hover:bg-white/20"
+                  deliveryFilter === 'Undelivered' ? "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200" :
+                    "bg-white/10 hover:bg-white/20"
               )}>
                 <Package className="h-4 w-4 mr-2" />
                 <SelectValue placeholder={t('deliveryLabel')}>
                   {deliveryFilter === 'all' ? t('deliveryLabel') :
-                   deliveryFilter === 'Completed' ? t('delivered') : t('undelivered')}
+                    deliveryFilter === 'Completed' ? t('delivered') : t('undelivered')}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -1022,7 +1054,7 @@ const Receipts = () => {
               {t('noReceiptsFound')}
             </div>
           ) : (
-            filteredReceipts.map((receipt) => (
+            paginatedReceipts.map((receipt) => (
               <ReceiptCard
                 key={receipt.id}
                 receipt={receipt}
@@ -1040,6 +1072,84 @@ const Receipts = () => {
         </AnimatePresence>
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col items-center gap-4 mt-8 mb-12">
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0 || isLoading}
+              className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
+            >
+              <ChevronDown className="h-4 w-4 rotate-90" />
+              {t('previous')}
+            </Button>
+
+            <div className="flex items-center gap-1.5 mx-2">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i;
+                } else if (page < 3) {
+                  pageNum = i;
+                } else if (page > totalPages - 4) {
+                  pageNum = totalPages - 5 + i;
+                } else {
+                  pageNum = page - 2 + i;
+                }
+
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={page === pageNum ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPage(pageNum)}
+                    disabled={isLoading}
+                    className={cn(
+                      "w-10 h-10 rounded-xl font-bold transition-all",
+                      page === pageNum
+                        ? "bg-teal-600 text-white shadow-md shadow-teal-200"
+                        : "bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
+                    )}
+                  >
+                    {pageNum + 1}
+                  </Button>
+                );
+              })}
+
+              {totalPages > 5 && (page < totalPages - 3) && <span className="text-slate-400 mx-1">...</span>}
+              {totalPages > 5 && (page < totalPages - 3) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(totalPages - 1)}
+                  className="w-10 h-10 rounded-xl font-bold bg-white text-slate-600 border-slate-100 hover:bg-teal-50 hover:text-teal-700"
+                >
+                  {totalPages}
+                </Button>
+              )}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+              disabled={page >= totalPages - 1 || isLoading}
+              className="flex items-center gap-1 bg-white hover:bg-teal-50 text-teal-700 border-teal-100 h-10 px-4 rounded-xl shadow-sm transition-all"
+            >
+              {t('next')}
+              <ChevronDown className="h-4 w-4 -rotate-90" />
+            </Button>
+          </div>
+
+          <div className="text-sm font-medium text-slate-500 bg-slate-100/50 px-4 py-1.5 rounded-full">
+            {t('showing')} <span className="text-teal-700 font-bold">{page * ITEMS_PER_PAGE + 1}</span> {t('to')} <span className="text-teal-700 font-bold">{Math.min((page + 1) * ITEMS_PER_PAGE, filteredReceipts.length)}</span> {t('of')} <span className="text-teal-700 font-bold">{filteredReceipts.length}</span> {t('receipts')}
+          </div>
+        </div>
+      )}
+
       <ReceiptDetailsMiniDialog
         isOpen={!!selectedReceipt}
         onClose={() => setSelectedReceipt(null)}
@@ -1051,7 +1161,7 @@ const Receipts = () => {
       <ReceiptEditDialog
         isOpen={!!editingReceipt}
         onClose={() => setEditingReceipt(null)}
-        receipt={editingReceipt}
+        receipt={editingReceipt as any}
       />
 
       <ReceiptStatistics
