@@ -3,19 +3,22 @@ import { Filter, Calendar, Tag, Truck, ShoppingBag, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/LanguageProvider";
+import DateRangeFilter from "@/components/ui/DateRangeFilter";
 
 export interface PurchaseFiltersProps {
     dateFilter: string;
+    dateRange: { from: Date | undefined; to: Date | undefined };
     categoryFilter: string;
     supplierFilter: string;
     purchaseTypeFilter: string;
     categories: string[];
     suppliers: Array<{ id: string; name: string }>;
-    onFilterChange: (key: string, value: string) => void;
+    onFilterChange: (key: string, value: any) => void;
 }
 
 const PurchaseFilters: React.FC<PurchaseFiltersProps> = ({
     dateFilter,
+    dateRange,
     categoryFilter,
     supplierFilter,
     purchaseTypeFilter,
@@ -28,31 +31,12 @@ const PurchaseFilters: React.FC<PurchaseFiltersProps> = ({
     return (
         <div className="flex flex-wrap items-center gap-3 overflow-x-auto pb-1 no-scrollbar mb-6">
             {/* Date Filter */}
-            <Select value={dateFilter} onValueChange={(v) => onFilterChange('date', v)}>
-                <SelectTrigger className={cn(
-                    "h-12 w-[140px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
-                    dateFilter !== 'all'
-                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 shadow-indigo-100/50"
-                        : "bg-slate-50/50 hover:bg-white hover:border-indigo-200 hover:shadow-md text-slate-600"
-                )}>
-                    <div className="flex items-center gap-2 truncate">
-                        <Calendar className={cn("h-4 w-4 flex-shrink-0", dateFilter !== 'all' ? "text-indigo-600" : "text-slate-400")} />
-                        <span className="truncate">
-                            {dateFilter === 'all' ? t('date') :
-                                dateFilter === 'today' ? t('today') :
-                                    dateFilter === 'week' ? t('thisWeek') :
-                                        dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
-                        </span>
-                    </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
-                    <SelectItem value="all">{t('allDates')}</SelectItem>
-                    <SelectItem value="today">{t('today')}</SelectItem>
-                    <SelectItem value="week">{t('thisWeek')}</SelectItem>
-                    <SelectItem value="month">{t('thisMonth')}</SelectItem>
-                    <SelectItem value="year">{t('thisYear')}</SelectItem>
-                </SelectContent>
-            </Select>
+            <DateRangeFilter
+                dateFilter={dateFilter}
+                dateRange={dateRange}
+                onFilterChange={onFilterChange}
+                accentColor="indigo"
+            />
 
             {/* Category Filter */}
             <Select value={categoryFilter} onValueChange={(v) => onFilterChange('category', v)}>

@@ -4,17 +4,20 @@ import { Filter, Calendar, Wallet, Package, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/LanguageProvider";
+import DateRangeFilter from "@/components/ui/DateRangeFilter";
 
 export interface ReceiptFiltersProps {
     dateFilter: string;
+    dateRange: { from: Date | undefined; to: Date | undefined };
     paymentFilter: string;
     deliveryFilter: string;
     montageFilter: string;
-    onFilterChange: (key: string, value: string) => void;
+    onFilterChange: (key: string, value: any) => void;
 }
 
 const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
     dateFilter,
+    dateRange,
     paymentFilter,
     deliveryFilter,
     montageFilter,
@@ -25,56 +28,12 @@ const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
     return (
         <div className="flex flex-wrap items-center gap-3 overflow-x-auto pb-1 no-scrollbar">
             {/* Date Filter */}
-            <Select value={dateFilter} onValueChange={(v) => onFilterChange('date', v)}>
-                <SelectTrigger className={cn(
-                    "h-12 w-[140px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
-                    dateFilter !== 'all'
-                        ? "bg-blue-50 text-blue-700 border-blue-200 shadow-blue-100/50"
-                        : "bg-slate-50/50 hover:bg-white hover:border-blue-200 hover:shadow-md text-slate-600"
-                )}>
-                    <div className="flex items-center gap-2 truncate">
-                        <Calendar className={cn("h-4 w-4 flex-shrink-0", dateFilter !== 'all' ? "text-blue-600" : "text-slate-400")} />
-                        <span className="truncate">
-                            {dateFilter === 'all' ? t('date') :
-                                dateFilter === 'today' ? t('today') :
-                                    dateFilter === 'week' ? t('thisWeek') :
-                                        dateFilter === 'month' ? t('thisMonth') : t('thisYear')}
-                        </span>
-                    </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
-                    <SelectItem value="all">
-                        <div className="flex items-center gap-2 py-0.5">
-                            <Calendar className="h-4 w-4 text-slate-400" />
-                            <span>{t('allDates')}</span>
-                        </div>
-                    </SelectItem>
-                    <SelectItem value="today">
-                        <div className="flex items-center gap-2 py-0.5">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span>{t('today')}</span>
-                        </div>
-                    </SelectItem>
-                    <SelectItem value="week">
-                        <div className="flex items-center gap-2 py-0.5">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span>{t('thisWeek')}</span>
-                        </div>
-                    </SelectItem>
-                    <SelectItem value="month">
-                        <div className="flex items-center gap-2 py-0.5">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span>{t('thisMonth')}</span>
-                        </div>
-                    </SelectItem>
-                    <SelectItem value="year">
-                        <div className="flex items-center gap-2 py-0.5">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span>{t('thisYear')}</span>
-                        </div>
-                    </SelectItem>
-                </SelectContent>
-            </Select>
+            <DateRangeFilter
+                dateFilter={dateFilter}
+                dateRange={dateRange}
+                onFilterChange={onFilterChange}
+                accentColor="blue"
+            />
 
             {/* Payment Filter */}
             <Select value={paymentFilter} onValueChange={(v) => onFilterChange('payment', v)}>

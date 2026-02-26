@@ -159,9 +159,9 @@ const Purchases = () => {
   const [supplierFilter, setSupplierFilter] = useState('all');
   const [purchaseTypeFilter, setPurchaseTypeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({
-    from: '',
-    to: ''
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined
   });
 
   // Dialog states
@@ -501,15 +501,15 @@ const Purchases = () => {
       filtered = filtered.filter(purchase => purchase.purchase_type === purchaseTypeFilter);
     }
 
-    if (dateRange.from) {
+    if (dateRange.from && dateFilter === 'custom') {
       filtered = filtered.filter(purchase =>
-        new Date(purchase.purchase_date) >= new Date(dateRange.from)
+        new Date(purchase.purchase_date) >= dateRange.from!
       );
     }
 
-    if (dateRange.to) {
+    if (dateRange.to && dateFilter === 'custom') {
       filtered = filtered.filter(purchase =>
-        new Date(purchase.purchase_date) <= new Date(dateRange.to)
+        new Date(purchase.purchase_date) <= dateRange.to!
       );
     }
 
@@ -994,6 +994,7 @@ const Purchases = () => {
             <div className="flex items-center gap-3">
               <PurchaseFilters
                 dateFilter={dateFilter}
+                dateRange={dateRange}
                 categoryFilter={categoryFilter}
                 supplierFilter={supplierFilter}
                 purchaseTypeFilter={purchaseTypeFilter}
@@ -1001,6 +1002,7 @@ const Purchases = () => {
                 suppliers={suppliers}
                 onFilterChange={(key, value) => {
                   if (key === 'date') setDateFilter(value);
+                  else if (key === 'dateRange') setDateRange(value);
                   else if (key === 'category') setCategoryFilter(value);
                   else if (key === 'supplier') setSupplierFilter(value);
                   else if (key === 'purchaseType') setPurchaseTypeFilter(value);

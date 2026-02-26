@@ -2926,6 +2926,14 @@ const purchasesTranslations: Translations = {
     en: 'Track purchases from suppliers and manage your business expenses',
     fr: 'Suivez les achats auprès des fournisseurs et gérez les dépenses de votre entreprise'
   },
+  invoicesOverview: {
+    en: 'Invoices overview',
+    fr: 'Aperçu des factures'
+  },
+  invoicesOverviewDesc: {
+    en: 'Track and manage your customer invoices and payments',
+    fr: 'Suivez et gérez vos factures clients et vos paiements'
+  },
   manageexpanses: {
     en: 'Manage expenses',
     fr: 'Gérer les dépenses'
@@ -2933,6 +2941,42 @@ const purchasesTranslations: Translations = {
   recordPurchase: {
     en: 'Record Purchase',
     fr: 'Enregistrer un Achat'
+  },
+  addInvoice: {
+    en: 'Add Invoice',
+    fr: 'Ajouter une Facture'
+  },
+  searchInvoices: {
+    en: 'Search invoices...',
+    fr: 'Rechercher des factures...'
+  },
+  noInvoicesFound: {
+    en: 'No invoices found',
+    fr: 'Aucune facture trouvée'
+  },
+  allDates: {
+    en: 'All Dates',
+    fr: 'Toutes les Dates'
+  },
+  allStatuses: {
+    en: 'All Statuses',
+    fr: 'Tous les Statuts'
+  },
+  pendingPayments: {
+    en: 'Pending',
+    fr: 'En Attente'
+  },
+  from: {
+    en: 'From',
+    fr: 'Du'
+  },
+  to: {
+    en: 'To',
+    fr: 'Au'
+  },
+  apply: {
+    en: 'Apply',
+    fr: 'Appliquer'
   },
   addSupplier: {
     en: 'Add Supplier',

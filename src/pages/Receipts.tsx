@@ -509,11 +509,15 @@ const Receipts = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined
+  });
   const [page, setPage] = useState(0);
 
   useEffect(() => {
     setPage(0);
-  }, [searchTerm, dateFilter]);
+  }, [searchTerm, dateFilter, dateRange]);
 
   const isReceiptInDateRange = (receipt: ReceiptData) => {
     const receiptDate = new Date(receipt.created_at);
@@ -537,6 +541,13 @@ const Receipts = () => {
       }
       case 'year':
         return receiptDate.getFullYear() === today.getFullYear();
+      case 'custom':
+        if (dateRange.from && dateRange.to) {
+          return receiptDay.getTime() >= dateRange.from.getTime() && receiptDay.getTime() <= dateRange.to.getTime();
+        } else if (dateRange.from) {
+          return receiptDay.getTime() >= dateRange.from.getTime();
+        }
+        return true;
       default:
         return true;
     }
@@ -883,7 +894,7 @@ const Receipts = () => {
 
       return matchesSearch && matchesPayment && matchesDelivery && matchesMontage && matchesDate;
     });
-  }, [receipts, searchTerm, paymentFilter, deliveryFilter, montageFilter, dateFilter]);
+  }, [receipts, searchTerm, paymentFilter, deliveryFilter, montageFilter, dateFilter, dateRange]);
 
   const paginatedReceipts = useMemo(() => {
     const startIndex = page * ITEMS_PER_PAGE;
@@ -934,11 +945,13 @@ const Receipts = () => {
             <div className="flex items-center gap-3">
               <ReceiptFilters
                 dateFilter={dateFilter}
+                dateRange={dateRange}
                 paymentFilter={paymentFilter}
                 deliveryFilter={deliveryFilter}
                 montageFilter={montageFilter}
                 onFilterChange={(key, value) => {
                   if (key === 'date') setDateFilter(value);
+                  if (key === 'dateRange') setDateRange(value);
                   if (key === 'payment') setPaymentFilter(value);
                   if (key === 'delivery') setDeliveryFilter(value);
                   if (key === 'montage') setMontageFilter(value);
