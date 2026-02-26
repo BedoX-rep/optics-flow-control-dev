@@ -251,4 +251,17 @@
       overflow-x: hidden;
     }
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .teal-gradient {
+    @apply bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600;
+  }
 }

@@ -28,10 +28,10 @@ const ProductsHero = ({
 
     return (
         <div className="w-full px-4 lg:px-6 pt-6 relative z-10">
-            <div className="w-full bg-gradient-to-br from-indigo-700 via-indigo-600 to-teal-600 text-white rounded-[32px] py-10 px-8 md:px-12 shadow-xl relative overflow-hidden mb-8">
-                {/* Decorative circles */}
+            <div className="w-full bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600 text-white rounded-[32px] py-10 px-8 md:px-12 shadow-xl relative overflow-hidden mb-8">
+                {/* Decorative elements */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl opacity-50" />
-                <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-400/20 rounded-full -ml-40 -mb-40 blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full -ml-40 -mb-40 blur-3xl" />
 
                 <div className="w-full relative z-10">
                     <motion.div

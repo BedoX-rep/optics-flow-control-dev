@@ -589,21 +589,20 @@ const Products = () => {
         products={allProducts || []}
       />
 
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
+      <div className="mb-10 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-sm">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+          <div className="flex items-center flex-1 min-w-[300px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 group focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+            <Search className="h-5 w-5 text-teal-600 mr-3 transition-transform group-focus-within:scale-110" />
+            <input
               type="text"
               placeholder={t('searchProducts')}
-              className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
+              className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                // Page reset will happen automatically when debouncedSearchTerm changes
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+
+          <div className="hidden lg:block h-10 w-px bg-slate-200/60" />
 
           <div className="flex items-center gap-3">
             <ProductFilters filters={filters} onChange={handleFilterChange} />
