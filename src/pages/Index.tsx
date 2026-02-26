@@ -26,6 +26,14 @@ const IndexPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 2) % 6);
+    }, 4000); // 4 seconds interval for swapping images
+    return () => clearInterval(timer);
+  }, []);
 
   // We'll keep these for the highlights but remove the "Features" section component
   const highlights = [
@@ -191,12 +199,55 @@ const IndexPage = () => {
             </div>
 
             <div className="mt-12 md:mt-24 relative max-w-6xl mx-auto animate-in fade-in zoom-in duration-1000 delay-300 px-2 md:px-0">
-              <div className="relative z-10 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200 border-2 md:border-8 border-white bg-white max-h-[400px] md:max-h-[65vh]">
-                <img
-                  src="/lovable-uploads/Secondsectionimage.png"
-                  alt="Optical Software Interface Showcase"
-                  className="w-full h-auto object-cover object-top"
-                />
+              <div className="relative z-10 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200 border-2 md:border-8 border-white bg-gray-50 h-[400px] md:h-[65vh] w-full flex">
+                <div className="w-1/2 h-full relative border-r-2 md:border-r-8 border-white overflow-hidden bg-white/50 backdrop-blur-sm">
+                  {[1, 2, 3, 4, 5, 6].map((num, idx) => {
+                    const isActive = idx === currentImageIndex % 6;
+                    const isPrev = idx === (currentImageIndex - 2 + 6) % 6;
+
+                    return (
+                      <div
+                        key={`left-${num}`}
+                        className={`absolute inset-0 w-full h-full p-4 transition-all duration-[1200ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${isActive
+                            ? 'opacity-100 translate-y-0 scale-100 z-10'
+                            : isPrev
+                              ? 'opacity-0 -translate-y-8 scale-95 z-0'
+                              : 'opacity-0 translate-y-8 scale-105 z-0'
+                          }`}
+                      >
+                        <img
+                          src={`/lovable-uploads/${num}.png`}
+                          alt={`Optical Software Interface Showcase ${num}`}
+                          className="w-full h-full object-contain object-center drop-shadow-xl rounded-xl"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="w-1/2 h-full relative overflow-hidden bg-white/50 backdrop-blur-sm">
+                  {[1, 2, 3, 4, 5, 6].map((num, idx) => {
+                    const isActive = idx === (currentImageIndex + 1) % 6;
+                    const isPrev = idx === (currentImageIndex - 1 + 6) % 6;
+
+                    return (
+                      <div
+                        key={`right-${num}`}
+                        className={`absolute inset-0 w-full h-full p-4 transition-all duration-[1200ms] ease-[cubic-bezier(0.4,0,0.2,1)] delay-100 ${isActive
+                            ? 'opacity-100 translate-y-0 scale-100 z-10'
+                            : isPrev
+                              ? 'opacity-0 -translate-y-8 scale-95 z-0'
+                              : 'opacity-0 translate-y-8 scale-105 z-0'
+                          }`}
+                      >
+                        <img
+                          src={`/lovable-uploads/${num}.png`}
+                          alt={`Optical Software Interface Showcase ${num}`}
+                          className="w-full h-full object-contain object-center drop-shadow-xl rounded-xl"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
