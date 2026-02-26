@@ -76,7 +76,7 @@ const Auth = () => {
         description: t('loggedInSuccessfully'),
       });
 
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -111,19 +111,19 @@ const Auth = () => {
 
     try {
       setIsLoading(true);
-      
+
       // Create user metadata with display name and store name
       const userData: any = {
         display_name: displayName || email.split('@')[0],
         store_name: storeName || 'Optique',
         access_code: accessCode.toUpperCase()
       };
-      
+
       // Add referral code to metadata if provided
       if (referralCode) {
         userData.referred_by = referralCode;
       }
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -164,7 +164,7 @@ const Auth = () => {
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Lensly</h1>
             <p className="text-gray-600 mt-2">{t('opticalStoreManagement')}</p>
-            
+
             {/* Language Switcher for Mobile */}
             <div className="mt-4 flex justify-center">
               <LanguageSwitcher />
@@ -177,29 +177,29 @@ const Auth = () => {
                 {activeTab === 'login' ? t('welcomeBack') : t('createAccount')}
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {activeTab === 'login' 
-                  ? t('signInToAccessDashboard') 
+                {activeTab === 'login'
+                  ? t('signInToAccessDashboard')
                   : t('startManagingOpticalStore')
                 }
               </CardDescription>
             </CardHeader>
 
             <CardContent className="pt-6">
-              <Tabs 
-                defaultValue="login" 
-                value={activeTab} 
+              <Tabs
+                defaultValue="login"
+                value={activeTab}
                 onValueChange={setActiveTab}
                 className="w-full"
               >
                 <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-gray-100/80 p-1">
-                  <TabsTrigger 
-                    value="login" 
+                  <TabsTrigger
+                    value="login"
                     className="h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
                   >
                     {t('signIn')}
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="signup" 
+                  <TabsTrigger
+                    value="signup"
                     className="h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
                   >
                     {t('signUp')}
@@ -213,9 +213,9 @@ const Auth = () => {
                         <Label htmlFor="email" className="text-gray-700 font-medium text-sm">
                           {t('emailAddress')}
                         </Label>
-                        <Input 
-                          id="email" 
-                          type="email" 
+                        <Input
+                          id="email"
+                          type="email"
                           placeholder={t('enterEmailPlaceholder')}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -236,9 +236,9 @@ const Auth = () => {
                           </button>
                         </div>
                         <div className="relative">
-                          <Input 
-                            id="password" 
-                            type={showPassword ? "text" : "password"} 
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder={t('enterPasswordPlaceholder')}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -255,9 +255,9 @@ const Auth = () => {
                         </div>
                       </div>
                     </div>
-                    
-                    <Button 
-                      type="submit" 
+
+                    <Button
+                      type="submit"
                       className="w-full h-14 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/35 transition-all duration-200 text-lg"
                       disabled={isLoading}
                     >
@@ -284,15 +284,15 @@ const Auth = () => {
                         <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('personalInformation')}</h3>
                         <p className="text-xs text-gray-500">{t('basicDetailsAboutYou')}</p>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="email-signup" className="text-gray-700 font-medium text-sm flex items-center">
                             {t('emailAddress')}*
                           </Label>
-                          <Input 
-                            id="email-signup" 
-                            type="email" 
+                          <Input
+                            id="email-signup"
+                            type="email"
                             placeholder={t('enterEmailPlaceholder')}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -304,9 +304,9 @@ const Auth = () => {
                           <Label htmlFor="display-name" className="text-gray-700 font-medium text-sm">
                             {t('fullName')}
                           </Label>
-                          <Input 
-                            id="display-name" 
-                            type="text" 
+                          <Input
+                            id="display-name"
+                            type="text"
                             placeholder={t('fullNamePlaceholder')}
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
@@ -319,9 +319,9 @@ const Auth = () => {
                         <Label htmlFor="store-name" className="text-gray-700 font-medium text-sm">
                           {t('storeName')}
                         </Label>
-                        <Input 
-                          id="store-name" 
-                          type="text" 
+                        <Input
+                          id="store-name"
+                          type="text"
                           placeholder={t('storeNamePlaceholder')}
                           value={storeName}
                           onChange={(e) => setStoreName(e.target.value)}
@@ -337,16 +337,16 @@ const Auth = () => {
                         <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('accessAndReferral')}</h3>
                         <p className="text-xs text-gray-500">{t('requiredCodesVerification')}</p>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="access-code" className="text-gray-700 font-medium text-sm flex items-center">
                             {t('accessCode')}*
                             <span className="ml-1 text-red-500">*</span>
                           </Label>
-                          <Input 
-                            id="access-code" 
-                            type="text" 
+                          <Input
+                            id="access-code"
+                            type="text"
                             placeholder={t('accessCodePlaceholder')}
                             maxLength={5}
                             value={accessCode}
@@ -365,9 +365,9 @@ const Auth = () => {
                             {t('referralCode')}
                             <span className="ml-1 text-gray-400">{t('referralCodeOptional')}</span>
                           </Label>
-                          <Input 
-                            id="referral-code" 
-                            type="text" 
+                          <Input
+                            id="referral-code"
+                            type="text"
                             placeholder={t('referralCodePlaceholder')}
                             maxLength={4}
                             value={referralCode}
@@ -389,16 +389,16 @@ const Auth = () => {
                         <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('security')}</h3>
                         <p className="text-xs text-gray-500">{t('createSecurePassword')}</p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="password-signup" className="text-gray-700 font-medium text-sm">
                             {t('passwordRequired')}
                           </Label>
                           <div className="relative">
-                            <Input 
-                              id="password-signup" 
-                              type={showPassword ? "text" : "password"} 
+                            <Input
+                              id="password-signup"
+                              type={showPassword ? "text" : "password"}
                               placeholder={t('createStrongPasswordPlaceholder')}
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
@@ -420,9 +420,9 @@ const Auth = () => {
                             {t('confirmPassword')}
                           </Label>
                           <div className="relative">
-                            <Input 
-                              id="confirm-password" 
-                              type={showConfirmPassword ? "text" : "password"} 
+                            <Input
+                              id="confirm-password"
+                              type={showConfirmPassword ? "text" : "password"}
                               placeholder={t('confirmPasswordPlaceholder')}
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -441,8 +441,8 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full h-14 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/35 transition-all duration-200 text-lg"
                       disabled={isLoading}
                     >
@@ -466,14 +466,14 @@ const Auth = () => {
               <div className="text-center mt-8 pt-6 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
                   {t('byContinuing')}{' '}
-                  <span 
+                  <span
                     className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium"
                     onClick={() => navigate('/terms-of-service')}
                   >
                     {t('termsOfService')}
                   </span>{' '}
                   {t('and')}{' '}
-                  <span 
+                  <span
                     className="text-teal-600 hover:text-teal-700 cursor-pointer font-medium"
                     onClick={() => navigate('/privacy-policy')}
                   >
@@ -505,7 +505,7 @@ const Auth = () => {
         <div className="absolute top-6 right-6 z-20">
           <LanguageSwitcher />
         </div>
-        
+
         <div className="relative z-10 text-center text-white">
           <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
             <Glasses className="w-10 h-10" />
@@ -514,7 +514,7 @@ const Auth = () => {
           <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-md">
             {t('modernOpticalDescription')}
           </p>
-          
+
           {/* Feature highlights */}
           <div className="space-y-6 text-left">
             <div className="flex items-center space-x-4">
