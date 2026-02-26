@@ -550,10 +550,11 @@ const Receipts = () => {
   };
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deliveryFilter, setDeliveryFilter] = useState('all');
+  const [montageFilter, setMontageFilter] = useState('all');
 
   useEffect(() => {
     setPage(0);
-  }, [paymentFilter, deliveryFilter]);
+  }, [paymentFilter, deliveryFilter, montageFilter]);
   const [selectedReceipt, setSelectedReceipt] = useState<ReceiptData | null>(null);
   const [editingReceipt, setEditingReceipt] = useState<ReceiptData | null>(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
@@ -583,11 +584,11 @@ const Receipts = () => {
           isNaN(Number(value)) ? value : Number(value)
       };
 
-      await queryClient.cancelQueries({ queryKey: ['receipts'] });
+      await queryClient.cancelQueries({ queryKey: ['receipts', user?.id] });
 
-      const previousReceipts = queryClient.getQueryData(['receipts']);
+      const previousReceipts = queryClient.getQueryData(['receipts', user?.id]);
 
-      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: ReceiptData[] | undefined) => {
         return old?.map((r: ReceiptData) =>
           r.id === receipt.id ? { ...r, [editingCell.field]: updates[editingCell.field] } : r
         );
@@ -624,7 +625,7 @@ const Receipts = () => {
   const handleMarkAsPaid = async (id: string, total: number) => {
     try {
       const updates = { balance: 0, advance_payment: total };
-      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: ReceiptData[] | undefined) => {
         if (!old) return old;
         return old.map((r: ReceiptData) => r.id === id ? { ...r, ...updates } : r);
       });
@@ -654,7 +655,7 @@ const Receipts = () => {
 
   const handleCallStatusChange = async (id: string, newStatus: string) => {
     try {
-      queryClient.setQueryData(['receipts'], (old: ReceiptData[] | undefined) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: ReceiptData[] | undefined) => {
         if (!old) return old;
         return old.map((r: ReceiptData) => r.id === id ? {
           ...r,
@@ -689,7 +690,7 @@ const Receipts = () => {
 
   const handleNoteChange = async (id: string, note: string) => {
     try {
-      queryClient.setQueryData(['receipts'], (old: any) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: any) => {
         if (!old) return old;
         return old.map((r: any) => r.id === id ? { ...r, note } : r);
       });
@@ -717,7 +718,7 @@ const Receipts = () => {
 
   const handleMontageStatusChange = async (id: string, newStatus: string) => {
     try {
-      queryClient.setQueryData(['receipts'], (old: any) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: any) => {
         if (!old) return old;
         return old.map((r: any) => r.id === id ? { ...r, montage_status: newStatus } : r);
       });
@@ -745,7 +746,7 @@ const Receipts = () => {
   const handleMarkAsDelivered = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'Completed' ? 'Undelivered' : 'Completed';
-      queryClient.setQueryData(['receipts'], (old: any) => {
+      queryClient.setQueryData(['receipts', user?.id], (old: any) => {
         if (!old) return old;
         return old.map((r: any) => r.id === id ? { ...r, delivery_status: newStatus } : r);
       });
@@ -854,7 +855,7 @@ const Receipts = () => {
   };
 
   const { data: receipts = [], isLoading } = useQuery<ReceiptData[]>({
-    queryKey: ['receipts', user?.id, searchTerm, paymentFilter, deliveryFilter, dateFilter],
+    queryKey: ['receipts', user?.id],
     queryFn: fetchReceipts,
     enabled: !!user,
     staleTime: 1000 * 60 * 3, // 3 minutes
@@ -881,11 +882,15 @@ const Receipts = () => {
         deliveryFilter === 'all' ? true :
           receipt.delivery_status === deliveryFilter;
 
+      const matchesMontage =
+        montageFilter === 'all' ? true :
+          receipt.montage_status === montageFilter;
+
       const matchesDate = isReceiptInDateRange(receipt);
 
-      return matchesSearch && matchesPayment && matchesDelivery && matchesDate;
+      return matchesSearch && matchesPayment && matchesDelivery && matchesMontage && matchesDate;
     });
-  }, [receipts, searchTerm, paymentFilter, deliveryFilter, dateFilter]);
+  }, [receipts, searchTerm, paymentFilter, deliveryFilter, montageFilter, dateFilter]);
 
   const paginatedReceipts = useMemo(() => {
     const startIndex = page * ITEMS_PER_PAGE;
@@ -1031,6 +1036,38 @@ const Receipts = () => {
                 <SelectItem value="all" className="text-gray-600">{t('allDeliveries')}</SelectItem>
                 <SelectItem value="Completed" className="text-green-600">{t('delivered')}</SelectItem>
                 <SelectItem value="Undelivered" className="text-orange-600">{t('undelivered')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Montage Status Filter */}
+            <Select
+              value={montageFilter}
+              onValueChange={(value) => setMontageFilter(value)}
+            >
+              <SelectTrigger className={cn(
+                "w-[160px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200",
+                montageFilter !== 'all' ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200" :
+                  "bg-white/10 hover:bg-white/20"
+              )}>
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder={t('montageLabel')}>
+                  {montageFilter === 'all' ? t('montageLabel') : (
+                    montageFilter === 'UnOrdered' ? t('unOrdered') :
+                      montageFilter === 'Ordered' ? t('ordered') :
+                        montageFilter === 'InStore' ? t('inStore') :
+                          montageFilter === 'InCutting' ? t('inCutting') :
+                            montageFilter === 'Ready' ? t('ready') : t('paidCosts')
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-gray-600 font-medium">{t('allMontageStatuses') || 'All Statuses'}</SelectItem>
+                <SelectItem value="UnOrdered" className="text-gray-600">{t('unOrdered')}</SelectItem>
+                <SelectItem value="Ordered" className="text-blue-600">{t('ordered')}</SelectItem>
+                <SelectItem value="InStore" className="text-orange-600">{t('inStore')}</SelectItem>
+                <SelectItem value="InCutting" className="text-yellow-600">{t('inCutting')}</SelectItem>
+                <SelectItem value="Ready" className="text-purple-600">{t('ready')}</SelectItem>
+                <SelectItem value="Paid costs" className="text-green-600">{t('paidCosts')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
