@@ -5,39 +5,20 @@ import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import {
   CheckCircle,
-  Package,
-  Receipt,
-  FileText,
   ArrowRight,
   Mail,
   Phone,
-  ChartBar,
-  Database,
   Menu,
-  X,
-  Users,
-  Shield
+  X
 } from 'lucide-react';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import ContactMenu from '@/components/ContactMenu';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-// Unique gradient colors per feature to break the "same icon" monotony
-const featureColors = [
-  'bg-teal-500',
-  'bg-blue-500',
-  'bg-violet-500',
-  'bg-amber-500',
-  'bg-rose-500',
-  'bg-indigo-500',
-];
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 
 const IndexPage = () => {
   const { user } = useAuth();
@@ -46,39 +27,7 @@ const IndexPage = () => {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const features = [
-    {
-      title: t('clientManagement'),
-      description: t('clientManagementDesc'),
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      title: t('inventoryControl'),
-      description: t('inventoryControlDesc'),
-      icon: <Package className="h-5 w-5" />,
-    },
-    {
-      title: t('simplifiedBilling'),
-      description: t('simplifiedBillingDesc'),
-      icon: <Receipt className="h-5 w-5" />,
-    },
-    {
-      title: t('prescriptionManagement'),
-      description: t('prescriptionManagementDesc'),
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      title: t('statistics'),
-      description: t('statisticsDesc'),
-      icon: <ChartBar className="h-5 w-5" />,
-    },
-    {
-      title: t('accessControl'),
-      description: t('accessControlDesc'),
-      icon: <Shield className="h-5 w-5" />,
-    }
-  ];
-
+  // We'll keep these for the highlights but remove the "Features" section component
   const highlights = [
     t('clientManagementDesc'),
     t('inventoryControlDesc'),
@@ -86,315 +35,286 @@ const IndexPage = () => {
     t('prescriptionManagementDesc'),
   ];
 
-  return (
-    <div className="flex flex-col min-h-screen text-left">
-      {/* ───── Hero Section ───── */}
-      <div className="w-full min-h-screen md:h-screen relative overflow-hidden">
-        {/* Gradient background with subtle radial accent */}
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-700 via-teal-600 to-emerald-600" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-teal-400/20 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-400/15 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4" />
+  // Lock scroll when mobile menu is open
+  React.useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [mobileMenuOpen]);
 
-        {/* Content */}
-        <div className="relative z-10 text-white">
-          <header className="container mx-auto py-5 px-6 md:px-8 lg:px-0">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl md:text-3xl font-bold cursor-pointer tracking-tight" onClick={() => navigate('/')}>
+  const menuItems = [
+    { label: t('pricing'), onClick: () => navigate("/pricing") },
+    { label: t('howToUse'), onClick: () => navigate("/how-to-use") },
+  ];
+
+  return (
+    <div className="flex flex-col min-h-screen bg-white font-sans selection:bg-teal-100 selection:text-teal-900">
+      {/* Fullscreen Mobile Menu - Totally Opaque Blocking */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center p-6 md:hidden animate-in fade-in duration-200">
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute top-6 right-8 p-3 text-gray-900 bg-gray-50 rounded-full border border-gray-100 shadow-sm"
+            aria-label="Close menu"
+          >
+            <X className="h-8 w-8" />
+          </button>
+
+          <div className="flex flex-col items-center space-y-12 w-full max-w-sm">
+            <h1 className="text-5xl font-black text-teal-700 mb-4 tracking-tighter">Lensly</h1>
+
+            <nav className="flex flex-col items-center space-y-8 w-full">
+              {menuItems.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => { item.onClick(); setMobileMenuOpen(false); }}
+                  className="text-4xl font-black text-gray-900 tracking-tighter hover:text-teal-600 transition-colors uppercase"
+                >
+                  {item.label}
+                </button>
+              ))}
+
+              <ContactMenu modalMode={true} onClose={() => setMobileMenuOpen(false)} />
+            </nav>
+
+            <div className="pt-8 w-full text-center">
+              <button
+                onClick={() => { navigate(user ? "/dashboard" : "/auth"); setMobileMenuOpen(false); }}
+                className="w-full bg-teal-600 text-white py-6 rounded-3xl font-black text-2xl shadow-xl shadow-teal-100 uppercase tracking-widest"
+              >
+                {user ? t('goToDashboard') : t('signInRegister')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={mobileMenuOpen ? "hidden md:flex flex-col flex-1" : "flex flex-col flex-1"}>
+        {/* ───── Modern Header ───── */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+          <div className="container mx-auto px-6 h-20 md:h-24 flex items-center justify-between">
+            <div className="flex items-center gap-12">
+              <h1
+                className="text-3xl md:text-4xl font-black text-teal-700 cursor-pointer tracking-tighter"
+                onClick={() => navigate('/')}
+              >
                 Lensly
               </h1>
 
               {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center space-x-4">
+              <nav className="hidden md:flex items-center gap-8">
                 <NavigationMenu>
-                  <NavigationMenuList>
-                    <NavigationMenuItem>
-                      <NavigationMenuTrigger className="bg-transparent hover:bg-white/10 text-white">
-                        {t('features')}
-                      </NavigationMenuTrigger>
-                      <NavigationMenuContent>
-                        <ul className="grid w-[560px] gap-2 p-4 md:grid-cols-2">
-                          {features.map((feature, idx) => (
-                            <li key={feature.title}>
-                              <div className="flex items-start gap-3 rounded-lg p-3 hover:bg-accent transition-colors">
-                                <div className={`w-8 h-8 ${featureColors[idx]} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 text-white`}>
-                                  {React.cloneElement(feature.icon, { className: "h-4 w-4" })}
-                                </div>
-                                <div>
-                                  <div className="text-sm font-medium leading-none text-foreground">{feature.title}</div>
-                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{feature.description}</p>
-                                </div>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </NavigationMenuContent>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <button
-                        onClick={() => navigate("/pricing")}
-                        className="inline-flex h-10 items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white cursor-pointer"
-                      >
-                        {t('pricing')}
-                      </button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <button
-                        onClick={() => navigate("/how-to-use")}
-                        className="inline-flex h-10 items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10 text-white cursor-pointer"
-                      >
-                        {t('howToUse')}
-                      </button>
-                    </NavigationMenuItem>
+                  <NavigationMenuList className="gap-8">
+                    {menuItems.map((item) => (
+                      <NavigationMenuItem key={item.label}>
+                        <button
+                          onClick={item.onClick}
+                          className="text-base font-semibold text-gray-600 hover:text-teal-600 transition-colors uppercase tracking-wider bg-transparent"
+                        >
+                          {item.label}
+                        </button>
+                      </NavigationMenuItem>
+                    ))}
                     <ContactMenu />
                   </NavigationMenuList>
                 </NavigationMenu>
-
-                <div className="mx-2 z-20">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                  className="inline-flex items-center px-5 py-2.5 bg-white hover:bg-white/90 rounded-lg text-teal-700 font-semibold text-sm transition-all hover:shadow-lg cursor-pointer"
-                >
-                  {user ? t('goToDashboard') : t('signInRegister')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Mobile */}
-              <div className="md:hidden flex items-center gap-2">
-                <div className="z-20">
-                  <LanguageSwitcher />
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="p-2 rounded-md hover:bg-white/10 z-20"
-                >
-                  {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                </button>
-              </div>
+              </nav>
             </div>
 
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-              <div className="md:hidden fixed inset-0 top-16 bg-teal-700/98 backdrop-blur-sm z-50 px-6 py-5 shadow-lg animate-in fade-in slide-in-from-top overflow-auto">
-                <div className="flex flex-col space-y-6">
-                  <button onClick={() => { navigate("/pricing"); setMobileMenuOpen(false); }}
-                    className="text-white py-3 text-xl font-medium text-left">
-                    {t('pricing')}
-                  </button>
-                  <button onClick={() => { navigate("/how-to-use"); setMobileMenuOpen(false); }}
-                    className="text-white py-3 text-xl font-medium text-left">
-                    {t('howToUse')}
-                  </button>
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-white/80">{t('features')}</h3>
-                    <div className="grid grid-cols-1 gap-2">
-                      {features.map((feature, i) => (
-                        <div key={i} className="flex items-center gap-3 bg-white/5 p-3 rounded-lg">
-                          <div className={`w-8 h-8 ${featureColors[i]} rounded-lg flex items-center justify-center flex-shrink-0 text-white`}>
-                            {feature.icon}
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-sm">{feature.title}</h4>
-                            <p className="text-xs text-white/60">{feature.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => { navigate(user ? "/dashboard" : "/auth"); setMobileMenuOpen(false); }}
-                    className="bg-white text-teal-700 py-3 px-4 rounded-lg font-semibold mt-4 text-center"
-                  >
-                    {user ? t('goToDashboard') : t('signInRegister')}
-                  </button>
-                </div>
-              </div>
-            )}
-          </header>
-
-          {/* Hero Content */}
-          <section className="container mx-auto pt-12 pb-20 md:py-20 px-6 md:px-8 lg:px-0 text-center relative">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1] max-w-3xl mx-auto">
-              {t('heroTitle')}
-            </h1>
-            <p className="text-base md:text-lg mb-10 text-white/80 max-w-xl mx-auto leading-relaxed font-light">
-              {t('heroSubtitle')}
-            </p>
-            <div className="relative z-[1] flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={() => navigate("/auth")}
-                className="inline-flex items-center px-7 py-4 text-base md:text-lg bg-white hover:bg-white/95 text-teal-700 rounded-xl font-semibold transition-all cursor-pointer shadow-xl shadow-black/10 hover:shadow-2xl hover:shadow-black/15 active:scale-[0.98]"
-              >
-                {t('startFreeTrial')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </button>
-              <button
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center px-6 py-3.5 text-sm bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all border border-white/20 cursor-pointer"
-              >
-                {t('features')}
-              </button>
-            </div>
-          </section>
-        </div>
-
-        {/* Wave transition instead of harsh diagonal */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full" preserveAspectRatio="none">
-            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white" />
-          </svg>
-        </div>
-      </div>
-
-      {/* ───── Product Showcase ───── */}
-      <section className="pt-8 pb-16 md:pt-12 md:pb-24 px-6 md:px-8 lg:px-0 bg-white relative z-10">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-            {/* Text side */}
-            <div className="order-2 md:order-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-50 text-teal-700 rounded-full text-xs font-medium mb-5 border border-teal-100">
-                <CheckCircle className="h-3.5 w-3.5" />
-                {t('effortlessTitle')}
-              </div>
-
-              <h2 className="text-2xl md:text-3xl font-bold mb-5 text-gray-900 leading-tight">
-                {t('effortlessTitle')}
-              </h2>
-              <p className="text-gray-500 mb-8 text-sm md:text-base leading-relaxed">
-                {t('effortlessDesc')}
-              </p>
-
-              <div className="space-y-3 mb-8">
-                {highlights.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="h-3 w-3 text-teal-600" />
-                    </div>
-                    <span className="text-gray-600 text-sm">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                size="lg"
-                onClick={() => navigate("/how-to-use")}
-                className="bg-teal-600 text-white hover:bg-teal-700 px-6 py-3 text-sm rounded-xl shadow-sm hover:shadow-md transition-all"
-              >
-                {t('howToUse')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Screenshot side */}
-            <div className="relative order-1 md:order-2">
-              <div className="rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/10 border border-gray-200/60">
-                <img
-                  src="/lovable-uploads/2e06dd1e-f886-4184-8b53-def6765f32d3.png"
-                  alt="Lensly software interface"
-                  className="w-full h-auto"
-                />
-              </div>
-              {/* Subtle decorative blobs */}
-              <div className="absolute -z-10 -bottom-8 -right-8 w-40 h-40 md:w-56 md:h-56 bg-teal-50 rounded-full blur-xl" />
-              <div className="absolute -z-10 -top-6 -left-6 w-32 h-32 md:w-40 md:h-40 bg-blue-50 rounded-full blur-xl" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ───── Features Section ───── */}
-      <section id="features" className="py-16 md:py-24 px-6 md:px-8 lg:px-0 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-10 md:mb-16">
-            <p className="text-sm font-semibold text-teal-600 uppercase tracking-wider mb-3">{t('features')}</p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-gray-900">{t('powerfulFeatures')}</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto text-base md:text-lg">{t('featuresSubtitle')}</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {features.map((feature, idx) => (
-              <div
-                key={idx}
-                className="group bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <div className={`w-11 h-11 ${featureColors[idx]} text-white flex items-center justify-center rounded-xl mb-4 shadow-sm`}>
-                  {feature.icon}
-                </div>
-                <h3 className="text-base md:text-lg font-semibold mb-2 text-gray-900">{feature.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ───── CTA Section ───── */}
-      <section className="py-16 md:py-24 px-6 md:px-8 lg:px-0">
-        <div className="container mx-auto">
-          <div className="relative rounded-3xl bg-gradient-to-br from-teal-700 via-teal-600 to-emerald-600 px-8 py-14 md:px-16 md:py-20 text-center overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-400/20 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-teal-300/15 rounded-full blur-[80px]" />
-
-            <div className="relative z-10">
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-5">{t('ctaTitle')}</h2>
-              <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed">
-                {t('ctaDesc')}
-              </p>
-              <button
-                onClick={() => navigate("/auth")}
-                className="inline-flex items-center px-8 py-4 md:px-10 md:py-5 text-base md:text-lg bg-white hover:bg-white/95 text-teal-700 rounded-xl font-semibold transition-all shadow-xl shadow-black/10 hover:shadow-2xl active:scale-[0.98]"
-              >
-                {t('freeTrialCta')}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ───── Footer ───── */}
-      <footer className="bg-gray-900 text-gray-400 py-10 md:py-14 px-6 md:px-8 lg:px-0">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-10">
-            <div>
-              <h3 className="text-white text-lg font-bold mb-3 tracking-tight">Lensly</h3>
-              <p className="text-sm leading-relaxed max-w-xs">
-                The comprehensive management solution designed specifically for opticians in Morocco and across Africa.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2.5">
-                <li><button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-gray-400 hover:text-white transition-colors">{t('features')}</button></li>
-                <li><button onClick={() => navigate("/pricing")} className="text-sm text-gray-400 hover:text-white transition-colors">{t('pricing')}</button></li>
-                <li><button onClick={() => navigate("/auth")} className="text-sm text-gray-400 hover:text-white transition-colors">{t('signInRegister')}</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white text-sm font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2.5">
-                <li className="flex items-center gap-2.5 text-sm">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span>support@lensly.com</span>
-                </li>
-                <li className="flex items-center gap-2.5 text-sm">
-                  <Phone className="h-4 w-4 text-gray-500" />
-                  <span>0627026249</span>
-                </li>
-              </ul>
-              <div className="mt-5">
+            <div className="flex items-center gap-4">
+              <div className="hidden md:block">
                 <LanguageSwitcher />
               </div>
+
+              <button
+                onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                className="hidden md:inline-flex items-center px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+              >
+                {user ? t('goToDashboard') : t('signInRegister')}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+
+              {/* Mobile Toggle */}
+              <div className="md:hidden flex items-center gap-3">
+                <LanguageSwitcher />
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="p-2 text-gray-900"
+                >
+                  {mobileMenuOpen ? <X className="h-8 w-8" /> : <Menu className="h-8 w-8" />}
+                </button>
+              </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-10 pt-6 text-center">
-            <p className="text-xs text-gray-500">© {new Date().getFullYear()} Lensly. All rights reserved.</p>
+
+        </header>
+
+        {/* ───── Refined Hero Section ───── */}
+        <section className="relative pt-20 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-white">
+          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] md:w-[800px] h-[600px] md:h-[800px] bg-teal-50 rounded-full blur-3xl opacity-50 -z-10" />
+
+          <div className="container mx-auto px-6">
+            <div className="max-w-5xl mx-auto text-center space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom duration-1000">
+
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter">
+                {t('heroTitle').split(' ').map((word, i) => (
+                  <span key={i} className={i > 2 ? "text-teal-600 block md:inline" : "inline-block"}>
+                    {word}{' '}
+                  </span>
+                ))}
+              </h1>
+
+              <p className="text-lg md:text-2xl text-gray-600 leading-relaxed max-w-2xl mx-auto font-medium px-4">
+                {t('heroSubtitle')}
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 px-4 font-sans">
+                <button
+                  onClick={() => navigate("/auth")}
+                  className="w-full sm:w-auto px-10 py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-bold text-xl transition-all shadow-xl shadow-teal-200 hover:scale-105 active:scale-95"
+                >
+                  {t('startFreeTrial')}
+                </button>
+                <button
+                  onClick={() => document.getElementById('effortless')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="w-full sm:w-auto px-10 py-5 bg-white hover:bg-gray-50 text-gray-900 border-x-2 border-y-2 border-gray-100 rounded-2xl font-bold text-xl transition-all"
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-16 md:mt-24 relative max-w-6xl mx-auto animate-in fade-in zoom-in duration-1000 delay-300 px-2 md:px-0">
+              <div className="relative z-10 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200 border-4 md:border-8 border-white bg-white max-h-[550px] md:max-h-[70vh]">
+                <img
+                  src="/lovable-uploads/Secondsectionimage.png"
+                  alt="Optical Software Interface Showcase"
+                  className="w-full h-auto object-cover object-top"
+                />
+
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
+        </section>
+
+        {/* ───── Effortless Section ───── */}
+        <section id="effortless" className="py-24 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col lg:flex-row items-center gap-16">
+                <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                  <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-tight">
+                    {t('effortlessTitle')}
+                  </h2>
+                  <p className="text-xl text-gray-600 leading-relaxed font-medium">
+                    {t('effortlessDesc')}
+                  </p>
+
+                  <div className="pt-4 hidden md:block">
+                    <Button
+                      size="lg"
+                      onClick={() => navigate("/how-to-use")}
+                      className="bg-gray-900 text-white hover:bg-black px-12 py-8 text-xl rounded-2xl transition-all shadow-xl"
+                    >
+                      Explore Guide
+                      <ArrowRight className="ml-2 h-6 w-6" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="w-full lg:w-1/2 grid sm:grid-cols-2 gap-4">
+                  {highlights.map((item, i) => (
+                    <div key={i} className="flex items-start gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm transition-all hover:shadow-md hover:scale-[1.02]">
+                      <div className="mt-1 bg-teal-100 p-2 rounded-xl flex-shrink-0">
+                        <CheckCircle className="h-5 w-5 text-teal-600" />
+                      </div>
+                      <span className="text-gray-800 font-bold text-lg leading-tight text-left">{item}</span>
+                    </div>
+                  ))}
+                  <div className="pt-6 sm:hidden w-full px-4">
+                    <Button
+                      size="lg"
+                      onClick={() => navigate("/how-to-use")}
+                      className="w-full bg-gray-900 text-white hover:bg-black py-6 text-lg rounded-2xl transition-all shadow-xl"
+                    >
+                      Explore Guide
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── CTA Section ───── */}
+        <section className="py-24 px-6">
+          <div className="container mx-auto">
+            <div className="relative rounded-[3rem] bg-teal-600 px-8 py-20 text-center overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+
+              <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none">
+                  {t('ctaTitle')}
+                </h2>
+                <p className="text-xl text-teal-50 max-w-2xl mx-auto leading-relaxed font-medium">
+                  {t('ctaDesc')}
+                </p>
+                <button
+                  onClick={() => navigate("/auth")}
+                  className="inline-flex items-center px-10 py-5 bg-white hover:bg-teal-50 text-teal-700 rounded-2xl font-black text-xl transition-all shadow-2xl shadow-black/20 hover:scale-105 active:scale-95"
+                >
+                  {t('freeTrialCta')}
+                  <ArrowRight className="ml-2 h-6 w-6" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── Footer ───── */}
+        <footer className="bg-white border-t border-gray-100 pt-20 pb-10">
+          <div className="container mx-auto px-6">
+            <div className="grid md:grid-cols-4 gap-12 mb-16">
+              <div className="col-span-1 md:col-span-2 space-y-6">
+                <h3 className="text-3xl font-black text-teal-700 tracking-tighter">Lensly</h3>
+                <p className="text-gray-500 text-lg leading-relaxed max-w-sm font-medium">
+                  The comprehensive management solution designed specifically for opticians in Morocco and across Africa.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-gray-900 font-bold uppercase tracking-widest text-sm mb-6">Explore</h4>
+                <ul className="space-y-4">
+                  <li><button onClick={() => navigate("/pricing")} className="text-gray-500 hover:text-teal-600 font-bold">Pricing</button></li>
+                  <li><button onClick={() => navigate("/auth")} className="text-gray-500 hover:text-teal-600 font-bold">Sign In</button></li>
+                  <li><button onClick={() => navigate("/how-to-use")} className="text-gray-500 hover:text-teal-600 font-bold">Guide</button></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-gray-900 font-bold uppercase tracking-widest text-sm mb-6">Support</h4>
+                <ul className="space-y-4">
+                  <li className="flex items-center gap-3 text-gray-500 font-bold">
+                    <Mail className="h-5 w-5 text-teal-600" />
+                    support@lensly.com
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-500 font-bold">
+                    <Phone className="h-5 w-5 text-teal-600" />
+                    0627026249
+                  </li>
+                  <li className="pt-2"><LanguageSwitcher /></li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-gray-100 pt-8 flex flex-col md:row items-center justify-between gap-4">
+              <p className="text-sm text-gray-400 font-bold">© {new Date().getFullYear()} Lensly. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 };
