@@ -48,10 +48,20 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-          <SelectItem value="all_categories">{t('allCategories')}</SelectItem>
+        <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+          <SelectItem value="all_categories">
+            <div className="flex items-center gap-2 py-0.5">
+              <Glasses className="h-4 w-4 text-slate-400" />
+              <span>{t('allCategories')}</span>
+            </div>
+          </SelectItem>
           {CATEGORY_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{t(opt.replace(/\s+/g, '').toLowerCase())}</SelectItem>
+            <SelectItem key={opt} value={opt}>
+              <div className="flex items-center gap-2 py-0.5">
+                <Glasses className="h-4 w-4 text-teal-500" />
+                <span>{t(opt.replace(/\s+/g, '').toLowerCase())}</span>
+              </div>
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -71,10 +81,20 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-          <SelectItem value="all_indexes">{t('allIndexes')}</SelectItem>
+        <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+          <SelectItem value="all_indexes">
+            <div className="flex items-center gap-2 py-0.5">
+              <Album className="h-4 w-4 text-slate-400" />
+              <span>{t('allIndexes')}</span>
+            </div>
+          </SelectItem>
           {INDEX_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            <SelectItem key={opt} value={opt}>
+              <div className="flex items-center gap-2 py-0.5">
+                <Album className="h-4 w-4 text-indigo-500" />
+                <span>{opt}</span>
+              </div>
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -94,10 +114,20 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-          <SelectItem value="all_treatments">{t('allTreatments')}</SelectItem>
+        <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+          <SelectItem value="all_treatments">
+            <div className="flex items-center gap-2 py-0.5">
+              <Filter className="h-4 w-4 text-slate-400" />
+              <span>{t('allTreatments')}</span>
+            </div>
+          </SelectItem>
           {TREATMENT_OPTIONS.map(opt => (
-            <SelectItem key={opt} value={opt}>{t(opt.toLowerCase())}</SelectItem>
+            <SelectItem key={opt} value={opt}>
+              <div className="flex items-center gap-2 py-0.5">
+                <Filter className="h-4 w-4 text-purple-500" />
+                <span>{t(opt.toLowerCase())}</span>
+              </div>
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -117,10 +147,20 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-          <SelectItem value="all_companies">{t('allCompanies')}</SelectItem>
+        <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+          <SelectItem value="all_companies">
+            <div className="flex items-center gap-2 py-0.5">
+              <Building2 className="h-4 w-4 text-slate-400" />
+              <span>{t('allCompanies')}</span>
+            </div>
+          </SelectItem>
           {allCompanies.map(opt => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+            <SelectItem key={opt} value={opt}>
+              <div className="flex items-center gap-2 py-0.5">
+                <Building2 className="h-4 w-4 text-amber-500" />
+                <span>{opt}</span>
+              </div>
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -140,11 +180,19 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
             </span>
           </div>
         </SelectTrigger>
-        <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-          <SelectItem value="all_stock_statuses">{t('allStockStatuses')}</SelectItem>
+        <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+          <SelectItem value="all_stock_statuses">
+            <div className="flex items-center gap-2 py-0.5">
+              <Package className="h-4 w-4 text-slate-400" />
+              <span>{t('allStockStatuses')}</span>
+            </div>
+          </SelectItem>
           {STOCK_STATUS_OPTIONS.map(opt => (
             <SelectItem key={opt} value={opt}>
-              {opt === 'inStock' ? t('inStock') : opt}
+              <div className="flex items-center gap-2 py-0.5">
+                <Package className={cn("h-4 w-4", opt === 'inStock' ? "text-emerald-500" : "text-rose-500")} />
+                <span>{opt === 'inStock' ? t('inStock') : opt}</span>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>

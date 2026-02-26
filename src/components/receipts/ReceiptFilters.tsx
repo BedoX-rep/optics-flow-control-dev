@@ -42,12 +42,37 @@ const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
                         </span>
                     </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-                    <SelectItem value="all">{t('allDates')}</SelectItem>
-                    <SelectItem value="today">{t('today')}</SelectItem>
-                    <SelectItem value="week">{t('thisWeek')}</SelectItem>
-                    <SelectItem value="month">{t('thisMonth')}</SelectItem>
-                    <SelectItem value="year">{t('thisYear')}</SelectItem>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Calendar className="h-4 w-4 text-slate-400" />
+                            <span>{t('allDates')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="today">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Calendar className="h-4 w-4 text-blue-500" />
+                            <span>{t('today')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="week">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Calendar className="h-4 w-4 text-blue-500" />
+                            <span>{t('thisWeek')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="month">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Calendar className="h-4 w-4 text-blue-500" />
+                            <span>{t('thisMonth')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="year">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Calendar className="h-4 w-4 text-blue-500" />
+                            <span>{t('thisYear')}</span>
+                        </div>
+                    </SelectItem>
                 </SelectContent>
             </Select>
 
@@ -70,11 +95,31 @@ const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
                         </span>
                     </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-                    <SelectItem value="all">{t('allPayments')}</SelectItem>
-                    <SelectItem value="paid">{t('paid')}</SelectItem>
-                    <SelectItem value="partial">{t('partial')}</SelectItem>
-                    <SelectItem value="unpaid">{t('unpaid')}</SelectItem>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Wallet className="h-4 w-4 text-slate-400" />
+                            <span>{t('allPayments')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="paid">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Wallet className="h-4 w-4 text-emerald-500" />
+                            <span>{t('paid')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="partial">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Wallet className="h-4 w-4 text-amber-500" />
+                            <span>{t('partial')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="unpaid">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Wallet className="h-4 w-4 text-rose-500" />
+                            <span>{t('unpaid')}</span>
+                        </div>
+                    </SelectItem>
                 </SelectContent>
             </Select>
 
@@ -94,10 +139,25 @@ const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
                         </span>
                     </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-                    <SelectItem value="all">{t('allDeliveries')}</SelectItem>
-                    <SelectItem value="Completed">{t('delivered')}</SelectItem>
-                    <SelectItem value="Undelivered">{t('undelivered')}</SelectItem>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Package className="h-4 w-4 text-slate-400" />
+                            <span>{t('allDeliveries')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="Completed">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Package className="h-4 w-4 text-indigo-500" />
+                            <span>{t('delivered')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="Undelivered">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Package className="h-4 w-4 text-rose-500" />
+                            <span>{t('undelivered')}</span>
+                        </div>
+                    </SelectItem>
                 </SelectContent>
             </Select>
 
@@ -122,14 +182,49 @@ const ReceiptFilters: React.FC<ReceiptFiltersProps> = ({
                         </span>
                     </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-                    <SelectItem value="all">{t('allMontageStatuses') || 'All Statuses'}</SelectItem>
-                    <SelectItem value="UnOrdered">{t('unOrdered')}</SelectItem>
-                    <SelectItem value="Ordered">{t('ordered')}</SelectItem>
-                    <SelectItem value="InStore">{t('inStore')}</SelectItem>
-                    <SelectItem value="InCutting">{t('inCutting')}</SelectItem>
-                    <SelectItem value="Ready">{t('ready')}</SelectItem>
-                    <SelectItem value="Paid costs">{t('paidCosts')}</SelectItem>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-slate-400" />
+                            <span>{t('allMontageStatuses') || 'All Statuses'}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="UnOrdered">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('unOrdered')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="Ordered">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('ordered')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="InStore">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('inStore')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="InCutting">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('inCutting')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="Ready">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('ready')}</span>
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="Paid costs">
+                        <div className="flex items-center gap-2 py-0.5">
+                            <Filter className="h-4 w-4 text-purple-500" />
+                            <span>{t('paidCosts')}</span>
+                        </div>
+                    </SelectItem>
                 </SelectContent>
             </Select>
         </div>
