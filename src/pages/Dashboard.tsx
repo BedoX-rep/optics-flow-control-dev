@@ -67,7 +67,12 @@ const Dashboard = () => {
     queryKey: ['clients-dashboard', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase.from('clients').select('*').eq('user_id', user.id);
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
       if (error) throw error;
       return data || [];
     },
@@ -89,7 +94,13 @@ const Dashboard = () => {
     queryKey: ['purchases-dashboard-brief', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase.from('purchases').select(`*, supplier:supplier_id(name)`).eq('user_id', user.id).eq('is_deleted', false).limit(10);
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`*, supplier:supplier_id(name)`)
+        .eq('user_id', user.id)
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false })
+        .limit(10);
       if (error) throw error;
       return data || [];
     },
@@ -152,18 +163,41 @@ const Dashboard = () => {
   const revenueData = useMemo(() => {
     const dFrom = new Date(dateFrom);
     const dTo = new Date(dateTo);
-    const diff = Math.ceil((dTo.getTime() - dFrom.getTime()) / (1000 * 3600 * 24)) + 1;
+    const diffDays = Math.ceil((dTo.getTime() - dFrom.getTime()) / (1000 * 3600 * 24)) + 1;
 
-    // Limit to last 31 days if range is too large to keep chart performant
-    const daysToShow = Math.min(diff, 31);
+    // If range is more than 30 days, group by month
+    if (diffDays > 31) {
+      const months: { name: string; value: number }[] = [];
+      let current = new Date(dFrom.getFullYear(), dFrom.getMonth(), 1);
+      const end = new Date(dTo.getFullYear(), dTo.getMonth(), 1);
 
-    return [...Array(daysToShow)].map((_, i) => {
+      while (current <= end) {
+        const monthStart = current;
+        const monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        const val = filteredReceipts.filter(r => {
+          const d = new Date(r.created_at);
+          return d >= monthStart && d <= monthEnd;
+        }).reduce((s, r) => s + (r.total || 0), 0);
+
+        months.push({
+          name: format(current, 'MMM yyyy'),
+          value: val
+        });
+
+        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      }
+      return months;
+    }
+
+    // Daily view for ranges <= 31 days
+    return [...Array(diffDays)].map((_, i) => {
       const d = new Date(dFrom);
       d.setDate(dFrom.getDate() + i);
       const val = filteredReceipts.filter(r => new Date(r.created_at).toDateString() === d.toDateString())
         .reduce((s, r) => s + (r.total || 0), 0);
       return {
-        name: format(d, diff <= 7 ? 'EEE' : 'MMM dd'),
+        name: format(d, diffDays <= 7 ? 'EEE' : 'MMM dd'),
         value: val
       };
     });
@@ -179,16 +213,19 @@ const Dashboard = () => {
     }, {});
 
     return Object.entries(cats)
-      .map(([name, value]) => ({ name, value: value as number }))
+      .map(([name, value]) => ({
+        name: t(name) || name, // Apply translation
+        value: value as number
+      }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
-  }, [filteredReceipts]);
+  }, [filteredReceipts, t]);
 
   const recentActivity = useMemo(() => {
     return [
-      ...clients.slice(0, 3).map(c => ({ id: `c-${c.id}`, type: 'client' as const, title: t('newClientRegistered'), description: c.name, timestamp: c.created_at })),
-      ...receipts.slice(0, 5).map(r => ({ id: `r-${r.id}`, type: 'receipt' as const, title: t('newReceiptCreated'), description: r.clients?.name || t('unknownClient'), timestamp: r.created_at, amount: r.total })),
-      ...purchases.slice(0, 2).map(p => ({ id: `p-${p.id}`, type: 'purchase' as const, title: t('newPurchaseRecorded'), description: p.supplier?.name || t('unknownSupplier'), timestamp: p.purchase_date, amount: p.amount }))
+      ...clients.map(c => ({ id: `c-${c.id}`, type: 'client' as const, title: t('newClientRegistered'), description: c.name, timestamp: c.created_at })),
+      ...receipts.map(r => ({ id: `r-${r.id}`, type: 'receipt' as const, title: t('newReceiptCreated'), description: r.clients?.name || t('unknownClient'), timestamp: r.created_at, amount: r.total })),
+      ...purchases.map(p => ({ id: `p-${p.id}`, type: 'purchase' as const, title: t('newPurchaseRecorded'), description: p.supplier?.name || t('unknownSupplier'), timestamp: p.created_at || p.purchase_date, amount: p.amount }))
     ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 8);
   }, [clients, receipts, purchases, t]);
 
