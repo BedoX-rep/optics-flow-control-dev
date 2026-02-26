@@ -47,6 +47,9 @@ interface Product {
   price: number;
   cost_ttc: number;
   category: string;
+  index?: string;
+  treatment?: string;
+  company?: string;
   stock?: number | null;
   stock_status?: string | null;
 }
@@ -83,16 +86,19 @@ interface OrderItemsProps {
   productSearchTerms: Record<string, string>;
   filters: Record<string, string>;
   setOrderType: (value: string) => void;
-  setItems: (items: ReceiptItem[]) => void;
+  setItems: React.Dispatch<React.SetStateAction<ReceiptItem[]>>;
   updateItem: (id: string, field: string, value: string | number) => void;
   removeItem: (id: string) => void;
-  setProductSearchTerms: (terms: Record<string, string>) => void;
-  setFilters: (filters: Record<string, string>) => void;
+  setProductSearchTerms: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   getFilteredProducts: (searchTerm: string) => Product[];
   getEyeValues: (eye: 'RE' | 'LE') => { sph: number | null; cyl: number | null };
   calculateMarkup: (sph: number | null, cyl: number | null) => number;
-  checkOutOfStock: () => boolean;
-  setCheckOutOfStock: (checkOutOfStock: () => boolean) => void;
+  manualAdditionalCostsEnabled: boolean;
+  setManualAdditionalCostsEnabled: (enabled: boolean) => void;
+  manualAdditionalCostsAmount: number;
+  setManualAdditionalCostsAmount: (amount: number) => void;
+  refreshProducts?: () => void;
 }
 
 interface OrderSummaryProps {
@@ -151,9 +157,9 @@ const NewReceipt = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [productSearchTerms, setProductSearchTerms] = useState<Record<string, string>>({});
-    const [filters, setFilters] = useState<Record<string, string>>({
+  const [filters, setFilters] = useState<Record<string, string>>({
     category: "all_categories",
-    index: "all_indexes", 
+    index: "all_indexes",
     treatment: "all_treatments",
     company: "all_companies",
     stock_status: "all_stock_statuses"
@@ -242,13 +248,13 @@ const NewReceipt = () => {
     },
     enabled: !!user,
     staleTime: Infinity, // Never consider this data stale
-    cacheTime: Infinity, // Keep in cache indefinitely
+    gcTime: Infinity, // Keep in cache indefinitely
   });
 
   // Function to refresh products list
   const refreshProducts = async () => {
     if (user) {
-      await queryClient.invalidateQueries(['all-products', user.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-products', user.id] });
     }
   };
 
@@ -279,8 +285,8 @@ const NewReceipt = () => {
     }
 
     if (productsData) {
-      setProducts(productsData);
-      setFilteredProducts(productsData);
+      setProducts(productsData as Product[]);
+      setFilteredProducts(productsData as Product[]);
     }
 
     if (clientsData) {
@@ -289,47 +295,48 @@ const NewReceipt = () => {
     }
 
     if (personalisationData) {
+      const pData = personalisationData as any;
       setPersonalisation({
-        auto_additional_costs: personalisationData.auto_additional_costs ?? true,
-        sv_lens_cost: personalisationData.sv_lens_cost ?? 10.00,
-        progressive_lens_cost: personalisationData.progressive_lens_cost ?? 20.00,
-        frames_cost: personalisationData.frames_cost ?? 10.00
+        auto_additional_costs: pData.auto_additional_costs ?? true,
+        sv_lens_cost: pData.sv_lens_cost ?? 10.00,
+        progressive_lens_cost: pData.progressive_lens_cost ?? 20.00,
+        frames_cost: pData.frames_cost ?? 10.00
       });
 
       // Update markup settings when personalisation data is loaded
       setMarkupSettings({
         sph: [
-          { 
-            min: personalisationData.markup_sph_range_1_min ?? 0, 
-            max: personalisationData.markup_sph_range_1_max ?? 4, 
-            markup: personalisationData.markup_sph_range_1_markup ?? 0 
+          {
+            min: pData.markup_sph_range_1_min ?? 0,
+            max: pData.markup_sph_range_1_max ?? 4,
+            markup: pData.markup_sph_range_1_markup ?? 0
           },
-          { 
-            min: personalisationData.markup_sph_range_2_min ?? 4, 
-            max: personalisationData.markup_sph_range_2_max ?? 8, 
-            markup: personalisationData.markup_sph_range_2_markup ?? 15 
+          {
+            min: pData.markup_sph_range_2_min ?? 4,
+            max: pData.markup_sph_range_2_max ?? 8,
+            markup: pData.markup_sph_range_2_markup ?? 15
           },
-          { 
-            min: personalisationData.markup_sph_range_3_min ?? 8, 
-            max: personalisationData.markup_sph_range_3_max === 999 ? Infinity : (personalisationData.markup_sph_range_3_max ?? Infinity), 
-            markup: personalisationData.markup_sph_range_3_markup ?? 30 
+          {
+            min: pData.markup_sph_range_3_min ?? 8,
+            max: pData.markup_sph_range_3_max === 999 ? Infinity : (pData.markup_sph_range_3_max ?? Infinity),
+            markup: pData.markup_sph_range_3_markup ?? 30
           },
         ],
         cyl: [
-          { 
-            min: personalisationData.markup_cyl_range_1_min ?? 0, 
-            max: personalisationData.markup_cyl_range_1_max ?? 2, 
-            markup: personalisationData.markup_cyl_range_1_markup ?? 0 
+          {
+            min: pData.markup_cyl_range_1_min ?? 0,
+            max: pData.markup_cyl_range_1_max ?? 2,
+            markup: pData.markup_cyl_range_1_markup ?? 0
           },
-          { 
-            min: personalisationData.markup_cyl_range_2_min ?? 2, 
-            max: personalisationData.markup_cyl_range_2_max ?? 4, 
-            markup: personalisationData.markup_cyl_range_2_markup ?? 15 
+          {
+            min: pData.markup_cyl_range_2_min ?? 2,
+            max: pData.markup_cyl_range_2_max ?? 4,
+            markup: pData.markup_cyl_range_2_markup ?? 15
           },
-          { 
-            min: personalisationData.markup_cyl_range_3_min ?? 4, 
-            max: personalisationData.markup_cyl_range_3_max === 999 ? Infinity : (personalisationData.markup_cyl_range_3_max ?? Infinity), 
-            markup: personalisationData.markup_cyl_range_3_markup ?? 30 
+          {
+            min: pData.markup_cyl_range_3_min ?? 4,
+            max: pData.markup_cyl_range_3_max === 999 ? Infinity : (pData.markup_cyl_range_3_max ?? Infinity),
+            markup: pData.markup_cyl_range_3_markup ?? 30
           },
         ],
       });
@@ -598,7 +605,7 @@ const NewReceipt = () => {
     if (!user) return;
     try {
       // Invalidate and refetch the clients query
-      await queryClient.invalidateQueries(['all-clients', user.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user.id] });
 
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
@@ -628,296 +635,325 @@ const NewReceipt = () => {
   };
 
   const renderStepIndicator = () => (
-    <div className="w-full max-w-4xl mx-auto mb-8">
-      <div className="flex justify-between mb-6">
+    <div className="w-full mb-8">
+      <div className="flex flex-col sm:flex-row items-stretch gap-3">
         {steps.map((step, index) => {
           const StepIcon = step.icon;
           const isActive = currentTab === step.id;
           const isCompleted = index < currentStepIndex;
-
-          // Add validation checks
-          const hasError = (step.id === 'client' && !selectedClient) || 
-                          (step.id === 'order' && items.length === 0);
+          const hasError = (step.id === 'client' && !selectedClient) ||
+            (step.id === 'order' && items.length === 0);
           const showError = hasError && index < currentStepIndex;
 
           return (
-            <div key={step.id} className="flex-1 relative">
-              <div className={`flex flex-col items-center ${index < steps.length - 1 ? 'after:content-[""] after:absolute after:w-full after:h-[2px] after:bg-gray-200 after:top-5 after:left-1/2 after:-z-10' : ''}`}>
-                <div className="relative">
-                  <button
-                    onClick={() => {
-                      if (currentStepIndex === 1 && step.id === 'finalize') {
-                        updateClientPrescription();
-                      }
-                      setCurrentTab(step.id);
-                    }}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                      isActive ? 'bg-primary text-white scale-110' :
-                      showError ? 'bg-red-500 text-white hover:bg-red-600' :
-                      isCompleted ? 'bg-green-500 text-white hover:bg-green-600' :
-                      'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                    }`}
-                  >
-                    {showError ? <AlertCircle className="w-5 h-5" /> :
-                     isCompleted ? <Check className="w-5 h-5" /> : 
-                     <StepIcon className="w-5 h-5" />}
-                  </button>
-                  {showError && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs">!</span>
-                    </div>
-                  )}
+            <React.Fragment key={step.id}>
+              <button
+                onClick={() => {
+                  if (currentStepIndex === 1 && step.id === 'finalize') {
+                    updateClientPrescription();
+                  }
+                  setCurrentTab(step.id);
+                }}
+                className={`group flex-1 flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${isActive
+                  ? 'bg-gradient-to-r from-teal-600 to-teal-500 border-teal-400 text-white shadow-lg shadow-teal-500/25 scale-[1.02]'
+                  : showError
+                    ? 'bg-red-50 border-red-200 text-red-700 hover:border-red-300 hover:shadow-md'
+                    : isCompleted
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:shadow-md'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-teal-200 hover:shadow-md hover:bg-teal-50/30'
+                  }`}
+              >
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all ${isActive ? 'bg-white/20 backdrop-blur-sm' :
+                  showError ? 'bg-red-100' :
+                    isCompleted ? 'bg-emerald-100' :
+                      'bg-slate-100 group-hover:bg-teal-100'
+                  }`}>
+                  {showError ? <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" /> :
+                    isCompleted ? <Check className="w-5 h-5 sm:w-6 sm:h-6" /> :
+                      <StepIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                 </div>
-                <span className={`mt-2 text-sm font-medium ${isActive ? 'text-primary' : showError ? 'text-red-500' : 'text-gray-500'}`}>
-                  {step.label}
-                </span>
-              </div>
-            </div>
+                <div className="flex flex-col items-start min-w-0">
+                  <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${isActive ? 'text-white/70' : showError ? 'text-red-400' : isCompleted ? 'text-emerald-500' : 'text-slate-400'
+                    }`}>
+                    {t('step')} {index + 1}
+                  </span>
+                  <span className={`text-sm sm:text-base font-bold truncate ${isActive ? 'text-white' : ''
+                    }`}>
+                    {step.label}
+                  </span>
+                </div>
+                {showError && (
+                  <div className="ml-auto w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-white text-[10px] font-bold">!</span>
+                  </div>
+                )}
+                {isCompleted && !showError && (
+                  <div className="ml-auto w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </button>
+              {index < steps.length - 1 && (
+                <div className="hidden sm:flex items-center">
+                  <ChevronRight className={`w-5 h-5 ${isCompleted ? 'text-emerald-400' : 'text-slate-300'}`} />
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
-      <Progress value={progress} className="h-2" />
+      <div className="mt-4">
+        <Progress value={progress} className="h-1.5 rounded-full" />
+      </div>
     </div>
   );
 
   const renderClientTab = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="border-0 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b">
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            {t('selectClient')}
-          </CardTitle>
-          <CardDescription>{t('chooseExistingClient')}</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex gap-3 mb-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* Client Selection Card */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('selectClient')}</h3>
+              <p className="text-xs sm:text-sm text-slate-500">{t('chooseExistingClient')}</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
             <div className="flex-1">
               <Input
                 placeholder={t('searchByNameOrPhone')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-12"
+                className="h-11 sm:h-12 rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 text-base"
               />
             </div>
             <Button
               onClick={() => setIsAddClientOpen(true)}
-              className="h-12 px-6"
+              className="h-11 sm:h-12 px-5 sm:px-6 rounded-xl bg-teal-600 hover:bg-teal-500 font-bold transition-all hover:scale-105 active:scale-95 text-sm sm:text-base shrink-0"
             >
-              <Plus className="h-5 w-5 mr-2" />
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               {t('newClient')}
             </Button>
           </div>
 
-          <div className="grid gap-4 max-h-[400px] overflow-y-auto">
+          <div className="space-y-2 sm:space-y-3 max-h-[350px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
             {filteredClients.slice(0, 8).map(client => (
-              <div
+              <button
                 key={client.id}
-                className={`p-4 rounded-lg border-2 transition-all cursor-pointer
-                  ${selectedClient === client.id
-                    ? 'border-primary bg-primary/5'
-                    : 'border-transparent bg-gray-50 hover:border-primary/20'}`}
+                className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all duration-200 cursor-pointer ${selectedClient === client.id
+                  ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-500/10'
+                  : 'border-transparent bg-slate-50 hover:border-teal-200 hover:bg-teal-50/30 hover:shadow-sm'
+                  }`}
                 onClick={() => handleClientSelect(client.id)}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{client.name}</h3>
-                    <p className="text-sm text-muted-foreground">{client.phone}</p>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedClient === client.id ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-500'
+                      }`}>
+                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-sm sm:text-base text-slate-900 truncate">{client.name}</h4>
+                      {client.phone && (
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-slate-500">
+                          <Phone className="w-3 h-3" />
+                          <span>{client.phone}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {selectedClient === client.id && (
-                    <div className="h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center">
-                      <Check className="h-4 w-4" />
+                    <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0">
+                      <Check className="h-3 w-3 sm:h-4 sm:w-4" />
                     </div>
                   )}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-lg overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b">
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            {t('prescriptionDetails')}
-          </CardTitle>
-          <CardDescription>{t('enterUpdatePrescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
-              <h3 className="text-lg font-medium mb-3 text-blue-900">{t('rightEye')}</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="rightSph">{t('sph')}</Label>
-                  <Input
-                    id="rightSph"
-                    type="text"
-                    inputMode="decimal"
-                    value={rightEye.sph}
-                    onChange={(e) => {
-                      setRightEye({ ...rightEye, sph: e.target.value });
-
-                      setItems(prevItems => prevItems.map(item => {
-                        if (item.linkedEye === 'RE' && item.productId) {
-                          const product = products.find(p => p.id === item.productId);
-                          if (product) {
-                            const markup = calculateMarkup(
-                              e.target.value ? parseFloat(e.target.value) : null,
-                              rightEye.cyl ? parseFloat(rightEye.cyl) : null
-                            );
-                            return {
-                              ...item,
-                              appliedMarkup: markup,
-                              price: product.price * (1 + markup / 100)
-                            };
-                          }
-                        }
-                        return item;
-                      }));
-                    }}
-                    className="bg-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="rightCyl">{t('cyl')}</Label>
-                  <Input
-                    id="rightCyl"
-                    type="text"
-                    inputMode="decimal"
-                    value={rightEye.cyl}
-                    onChange={(e) => {
-                      setRightEye({ ...rightEye, cyl: e.target.value });
-
-                      setItems(prevItems => prevItems.map(item => {
-                        if (item.linkedEye === 'RE' && item.productId) {
-                          const product = products.find(p => p.id === item.productId);
-                          if (product) {
-                            const markup = calculateMarkup(
-                              rightEye.sph ? parseFloat(rightEye.sph) : null,
-                              e.target.value ? parseFloat(e.target.value) : null
-                            );
-                            return {
-                              ...item,
-                              appliedMarkup: markup,
-                              price: product.price * (1 + markup / 100)
-                            };
-                          }
-                        }
-                        return item;
-                      }));
-                    }}
-                    className="bg-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="rightAxe">{t('axe')}</Label>
-                  <Input
-                    id="rightAxe"
-                    type="text"
-                    inputMode="numeric"
-                    value={rightEye.axe}
-                    onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
-                    className="bg-white"
-                  />
-                </div>
-              </div>
+      {/* Prescription Card */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-700" />
             </div>
-
-            <div className="bg-purple-50/50 rounded-lg p-4 border border-purple-100">
-              <h3 className="text-lg font-medium mb-3 text-purple-900">{t('leftEye')}</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="leftSph">{t('sph')}</Label>
-                  <Input
-                    id="leftSph"
-                    type="text"
-                    inputMode="decimal"
-                    value={leftEye.sph}
-                    onChange={(e) => {
-                      setLeftEye({ ...leftEye, sph: e.target.value });
-
-                      setItems(prevItems => prevItems.map(item => {
-                        if (item.linkedEye === 'LE' && item.productId) {
-                          const product = products.find(p => p.id === item.productId);
-                          if (product) {
-                            const markup = calculateMarkup(
-                              e.target.value ? parseFloat(e.target.value) : null,
-                              leftEye.cyl ? parseFloat(leftEye.cyl) : null
-                            );
-                            return {
-                              ...item,
-                              appliedMarkup: markup,
-                              price: product.price * (1 + markup / 100)
-                            };
-                          }
-                        }
-                        return item;
-                      }));
-                    }}
-                    className="bg-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="leftCyl">{t('cyl')}</Label>
-                  <Input
-                    id="leftCyl"
-                    type="text"
-                    inputMode="decimal"
-                    value={leftEye.cyl}
-                    onChange={(e) => {
-                      setLeftEye({ ...leftEye, cyl: e.target.value });
-
-                      setItems(prevItems => prevItems.map(item => {
-                        if (item.linkedEye === 'LE' && item.productId) {
-                          const product = products.find(p => p.id === item.productId);
-                          if (product) {
-                            const markup = calculateMarkup(
-                              leftEye.sph ? parseFloat(leftEye.sph) : null,
-                              e.target.value ? parseFloat(e.target.value) : null
-                            );
-                            return {
-                              ...item,
-                              appliedMarkup: markup,
-                              price: product.price * (1 + markup / 100)
-                            };
-                          }
-                        }
-                        return item;
-                      }));
-                    }}
-                    className="bg-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="leftAxe">{t('axe')}</Label>
-                  <Input
-                    id="leftAxe"
-                    type="text"
-                    inputMode="numeric"
-                    value={leftEye.axe}
-                    onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
-                    className="bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
-              <Label htmlFor="add">{t('add')}</Label>
-              <Input
-                id="add"
-                type="text"
-                value={add}
-                onChange={(e) => setAdd(e.target.value)}
-                placeholder={t('enterAddValue')}
-                className="bg-white"
-              />
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('prescriptionDetails')}</h3>
+              <p className="text-xs sm:text-sm text-slate-500">{t('enterUpdatePrescription')}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+          {/* Right Eye */}
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-blue-50/70 border border-blue-100">
+            <h4 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 text-blue-900 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-blue-200/60 flex items-center justify-center"><span className="text-xs">👁️</span></div>
+              {t('rightEye')}
+            </h4>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div>
+                <Label htmlFor="rightSph" className="text-xs font-semibold text-blue-800">{t('sph')}</Label>
+                <Input
+                  id="rightSph"
+                  type="text"
+                  inputMode="decimal"
+                  value={rightEye.sph}
+                  onChange={(e) => {
+                    setRightEye({ ...rightEye, sph: e.target.value });
+                    setItems(prevItems => prevItems.map(item => {
+                      if (item.linkedEye === 'RE' && item.productId) {
+                        const product = products.find(p => p.id === item.productId);
+                        if (product) {
+                          const markup = calculateMarkup(
+                            e.target.value ? parseFloat(e.target.value) : null,
+                            rightEye.cyl ? parseFloat(rightEye.cyl) : null
+                          );
+                          return { ...item, appliedMarkup: markup, price: product.price * (1 + markup / 100) };
+                        }
+                      }
+                      return item;
+                    }));
+                  }}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rightCyl" className="text-xs font-semibold text-blue-800">{t('cyl')}</Label>
+                <Input
+                  id="rightCyl"
+                  type="text"
+                  inputMode="decimal"
+                  value={rightEye.cyl}
+                  onChange={(e) => {
+                    setRightEye({ ...rightEye, cyl: e.target.value });
+                    setItems(prevItems => prevItems.map(item => {
+                      if (item.linkedEye === 'RE' && item.productId) {
+                        const product = products.find(p => p.id === item.productId);
+                        if (product) {
+                          const markup = calculateMarkup(
+                            rightEye.sph ? parseFloat(rightEye.sph) : null,
+                            e.target.value ? parseFloat(e.target.value) : null
+                          );
+                          return { ...item, appliedMarkup: markup, price: product.price * (1 + markup / 100) };
+                        }
+                      }
+                      return item;
+                    }));
+                  }}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rightAxe" className="text-xs font-semibold text-blue-800">{t('axe')}</Label>
+                <Input
+                  id="rightAxe"
+                  type="text"
+                  inputMode="numeric"
+                  value={rightEye.axe}
+                  onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Left Eye */}
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-purple-50/70 border border-purple-100">
+            <h4 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 text-purple-900 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-purple-200/60 flex items-center justify-center"><span className="text-xs">👁️</span></div>
+              {t('leftEye')}
+            </h4>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div>
+                <Label htmlFor="leftSph" className="text-xs font-semibold text-purple-800">{t('sph')}</Label>
+                <Input
+                  id="leftSph"
+                  type="text"
+                  inputMode="decimal"
+                  value={leftEye.sph}
+                  onChange={(e) => {
+                    setLeftEye({ ...leftEye, sph: e.target.value });
+                    setItems(prevItems => prevItems.map(item => {
+                      if (item.linkedEye === 'LE' && item.productId) {
+                        const product = products.find(p => p.id === item.productId);
+                        if (product) {
+                          const markup = calculateMarkup(
+                            e.target.value ? parseFloat(e.target.value) : null,
+                            leftEye.cyl ? parseFloat(leftEye.cyl) : null
+                          );
+                          return { ...item, appliedMarkup: markup, price: product.price * (1 + markup / 100) };
+                        }
+                      }
+                      return item;
+                    }));
+                  }}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="leftCyl" className="text-xs font-semibold text-purple-800">{t('cyl')}</Label>
+                <Input
+                  id="leftCyl"
+                  type="text"
+                  inputMode="decimal"
+                  value={leftEye.cyl}
+                  onChange={(e) => {
+                    setLeftEye({ ...leftEye, cyl: e.target.value });
+                    setItems(prevItems => prevItems.map(item => {
+                      if (item.linkedEye === 'LE' && item.productId) {
+                        const product = products.find(p => p.id === item.productId);
+                        if (product) {
+                          const markup = calculateMarkup(
+                            leftEye.sph ? parseFloat(leftEye.sph) : null,
+                            e.target.value ? parseFloat(e.target.value) : null
+                          );
+                          return { ...item, appliedMarkup: markup, price: product.price * (1 + markup / 100) };
+                        }
+                      }
+                      return item;
+                    }));
+                  }}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="leftAxe" className="text-xs font-semibold text-purple-800">{t('axe')}</Label>
+                <Input
+                  id="leftAxe"
+                  type="text"
+                  inputMode="numeric"
+                  value={leftEye.axe}
+                  onChange={(e) => setLeftEye({ ...leftEye, axe: e.target.value })}
+                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Add */}
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-emerald-50/70 border border-emerald-100">
+            <Label htmlFor="add" className="text-xs font-semibold text-emerald-800">{t('add')}</Label>
+            <Input
+              id="add"
+              type="text"
+              value={add}
+              onChange={(e) => setAdd(e.target.value)}
+              placeholder={t('enterAddValue')}
+              className="bg-white h-10 sm:h-11 rounded-lg text-base mt-1"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -939,20 +975,7 @@ const NewReceipt = () => {
           getFilteredProducts={getFilteredProducts}
           getEyeValues={getEyeValues}
           calculateMarkup={calculateMarkup}
-          checkOutOfStock={() => {
-            if (!items.length) return false;
-            for (const item of items) {
-              if (!item.productId) continue;
-              const product = products.find(p => p.id === item.productId);
-              if (product && product.stock_status === 'Out Of Stock') {
-                return true;
-              }
-            }
-            return false;
-          }}
-          setCheckOutOfStock={(checkOutOfStock: () => boolean) => {
-            checkOutOfStockRef.current = checkOutOfStock;
-          }}
+
           manualAdditionalCostsEnabled={manualAdditionalCostsEnabled}
           setManualAdditionalCostsEnabled={setManualAdditionalCostsEnabled}
           manualAdditionalCostsAmount={manualAdditionalCostsAmount}
@@ -960,15 +983,17 @@ const NewReceipt = () => {
           refreshProducts={refreshProducts}
         />
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gray-50 border-b">
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              {t('paymentDetails')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('paymentDetails')}</h3>
+            </div>
+          </div>
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <OrderSummary
                 subtotal={subtotal}
                 tax={tax}
@@ -1000,8 +1025,8 @@ const NewReceipt = () => {
                 updatePaymentStatus={updatePaymentStatus}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   };
@@ -1016,16 +1041,18 @@ const NewReceipt = () => {
     });
 
     return (
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gray-50 border-b">
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            {t('receiptSummary')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('receiptSummary')}</h3>
+          </div>
+        </div>
+        <div className="p-4 sm:p-6">
           {orderType === 'Unspecified' && (
-            <Alert className="mb-6 border-red-200 bg-red-50">
+            <Alert className="mb-4 sm:mb-6 border-red-200 bg-red-50 rounded-xl">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-700">
                 <strong>{t('orderTypeRequired')}:</strong> {t('orderTypeRequiredDesc')}
@@ -1033,7 +1060,7 @@ const NewReceipt = () => {
             </Alert>
           )}
           {outOfStockItems.length > 0 && (
-            <Alert className="mb-6 border-red-200 bg-red-50">
+            <Alert className="mb-4 sm:mb-6 border-red-200 bg-red-50 rounded-xl">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <AlertDescription className="text-red-700">
                 <strong>{t('outOfStockWarning')}:</strong> {t('outOfStockDesc')}
@@ -1051,77 +1078,89 @@ const NewReceipt = () => {
               </AlertDescription>
             </Alert>
           )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            {items.length === 0 && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>{t('noItems')}</AlertTitle>
-                <AlertDescription>{t('pleaseAddItems')}</AlertDescription>
-              </Alert>
-            )}
-            {selectedClient ? (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium mb-2">{t('clientInformation')}</h3>
-                <p className="text-sm">{t('name')}: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.name}</span></p>
-                <p className="text-sm">{t('phone')}: <span className="font-medium">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
-              </div>
-            ) : (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>{t('noClient')}</AlertTitle>
-                <AlertDescription>{t('pleaseSelectClient')}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">{t('prescription')}</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">{t('rightEye')}</p>
-                  <p>{t('sph')}: {rightEye.sph || 'N/A'}</p>
-                  <p>{t('cyl')}: {rightEye.cyl || 'N/A'}</p>
-                  <p>{t('axe')}: {rightEye.axe || 'N/A'}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-3 sm:space-y-4">
+              {items.length === 0 && (
+                <Alert variant="destructive" className="rounded-xl">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{t('noItems')}</AlertTitle>
+                  <AlertDescription>{t('pleaseAddItems')}</AlertDescription>
+                </Alert>
+              )}
+              {selectedClient ? (
+                <div className="bg-teal-50/70 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-teal-100">
+                  <h4 className="font-bold text-sm sm:text-base text-teal-900 mb-2 flex items-center gap-2">
+                    <User className="w-4 h-4" /> {t('clientInformation')}
+                  </h4>
+                  <p className="text-sm text-slate-700">{t('name')}: <span className="font-semibold">{clients.find(c => c.id === selectedClient)?.name}</span></p>
+                  <p className="text-sm text-slate-700">{t('phone')}: <span className="font-semibold">{clients.find(c => c.id === selectedClient)?.phone}</span></p>
                 </div>
-                <div>
-                  <p className="text-gray-500">{t('leftEye')}</p>
-                  <p>{t('sph')}: {leftEye.sph || 'N/A'}</p>
-                  <p>{t('cyl')}: {leftEye.cyl || 'N/A'}</p>
-                  <p>{t('axe')}: {leftEye.axe || 'N/A'}</p>
-                </div>
-              </div>
-              <p className="mt-2">{t('add')}: {add || 'N/A'}</p>
-            </div>
-          </div>
+              ) : (
+                <Alert variant="destructive" className="rounded-xl">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{t('noClient')}</AlertTitle>
+                  <AlertDescription>{t('pleaseSelectClient')}</AlertDescription>
+                </Alert>
+              )}
 
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">{t('orderSummary')}</h3>
-              <p className="text-sm">{t('orderType')}: <span className="font-medium">{t(orderType.toLowerCase())}</span></p>
-              <p className="text-sm">{t('totalItems')}: <span className="font-medium">{items.length}</span></p>
-              <p className="text-sm">{t('subtotal')}: <span className="font-medium">{subtotal.toFixed(2)} {t('dh')}</span></p>
-              <p className="text-sm">{t('total')}: <span className="font-medium text-primary">{total.toFixed(2)} {t('dh')}</span></p>
+              <div className="bg-slate-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-100">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 mb-2 flex items-center gap-2">
+                  <Eye className="w-4 h-4" /> {t('prescription')}
+                </h4>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">{t('rightEye')}</p>
+                    <p className="text-slate-700">{t('sph')}: <span className="font-medium">{rightEye.sph || 'N/A'}</span></p>
+                    <p className="text-slate-700">{t('cyl')}: <span className="font-medium">{rightEye.cyl || 'N/A'}</span></p>
+                    <p className="text-slate-700">{t('axe')}: <span className="font-medium">{rightEye.axe || 'N/A'}</span></p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-purple-600 mb-1">{t('leftEye')}</p>
+                    <p className="text-slate-700">{t('sph')}: <span className="font-medium">{leftEye.sph || 'N/A'}</span></p>
+                    <p className="text-slate-700">{t('cyl')}: <span className="font-medium">{leftEye.cyl || 'N/A'}</span></p>
+                    <p className="text-slate-700">{t('axe')}: <span className="font-medium">{leftEye.axe || 'N/A'}</span></p>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-slate-700">{t('add')}: <span className="font-medium">{add || 'N/A'}</span></p>
+              </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium mb-2">{t('paymentStatus')}</h3>
-              <p className="text-sm">{t('advancePayment')}: <span className="font-medium">{advancePayment.toFixed(2)} {t('dh')}</span></p>
-              <p className="text-sm">{t('balanceDue')}: <span className="font-medium">{balance.toFixed(2)} {t('dh')}</span></p>
-              <p className="text-sm">{t('status')}: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
-                paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {paymentStatus === 'Paid' ? t('paid') : 
-                 paymentStatus === 'Partially Paid' ? t('partiallyPaid') : 
-                 t('unpaid')}
-              </span></p>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="bg-slate-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-100">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 mb-2 flex items-center gap-2">
+                  <Receipt className="w-4 h-4" /> {t('orderSummary')}
+                </h4>
+                <div className="space-y-1.5 text-sm">
+                  <p className="text-slate-700">{t('orderType')}: <span className="font-semibold">{t(orderType.toLowerCase())}</span></p>
+                  <p className="text-slate-700">{t('totalItems')}: <span className="font-semibold">{items.length}</span></p>
+                  <p className="text-slate-700">{t('subtotal')}: <span className="font-semibold">{subtotal.toFixed(2)} {t('dh')}</span></p>
+                  <p className="text-slate-900 font-bold text-base sm:text-lg">{t('total')}: <span className="text-teal-700">{total.toFixed(2)} {t('dh')}</span></p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-100">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 mb-2 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" /> {t('paymentStatus')}
+                </h4>
+                <div className="space-y-1.5 text-sm">
+                  <p className="text-slate-700">{t('advancePayment')}: <span className="font-semibold">{advancePayment.toFixed(2)} {t('dh')}</span></p>
+                  <p className="text-slate-700">{t('balanceDue')}: <span className="font-semibold">{balance.toFixed(2)} {t('dh')}</span></p>
+                  <div className="pt-1">
+                    <span className={`inline-flex px-3 py-1.5 rounded-xl text-xs font-bold ${paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' :
+                      paymentStatus === 'Partially Paid' ? 'bg-amber-100 text-amber-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                      {paymentStatus === 'Paid' ? t('paid') :
+                        paymentStatus === 'Partially Paid' ? t('partiallyPaid') :
+                          t('unpaid')}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        </CardContent>
-      </Card>
+      </div>
     );
   };
 
@@ -1268,7 +1307,7 @@ const NewReceipt = () => {
 
             const { error: stockError } = await supabase
               .from('products')
-              .update({ 
+              .update({
                 stock: newStock,
                 stock_status: newStockStatus
               })
@@ -1283,8 +1322,8 @@ const NewReceipt = () => {
         }
       }
 
-      queryClient.invalidateQueries(['receipts', user.id]);
-      queryClient.invalidateQueries(['receipts', user.id, 'light']);
+      queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
       toast({
         title: t('success'),
         description: t('receiptSavedSuccessfully'),
@@ -1303,62 +1342,117 @@ const NewReceipt = () => {
   };
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4">
-      {renderStepIndicator()}
-
-      <div className="fixed top-1/2 left-[calc(var(--sidebar-width,_256px)_+_2rem)] right-8 -translate-y-1/2 flex justify-between items-center pointer-events-none z-50">
-        <Button
-          variant="outline"
-          onClick={() => {
-            const prevIndex = Math.max(0, currentStepIndex - 1);
-            setCurrentTab(steps[prevIndex].id);
-          }}
-          disabled={currentStepIndex === 0}
-          className="rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
-
-        <Button
-          className="bg-primary rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all pointer-events-auto"
-          onClick={() => {
-            if (currentStepIndex === steps.length - 1) {
-              handleSave();
-            } else {
-              // Check if currently on order tab and no items added
-              if (currentTab === 'order' && items.length === 0) {
-                toast({
-                  title: t('itemsRequired'),
-                  description: t('addItemsBeforeProceeding'),
-                  variant: "destructive",
-                });
-                return;
-              }
-              const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-              setCurrentTab(steps[nextIndex].id);
-            }
-          }}
-        >
-          {currentStepIndex === steps.length - 1 ? (
-            <Check className="h-6 w-6" />
-          ) : (
-            <ArrowRight className="h-6 w-6" />
-          )}
-        </Button>
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
+      {/* Hero Banner */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 relative z-10">
+        <div className="w-full bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600 text-white rounded-[24px] sm:rounded-[32px] py-6 sm:py-8 px-5 sm:px-8 md:px-10 shadow-xl relative overflow-hidden mb-6 sm:mb-8">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl opacity-50" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full -ml-40 -mb-40 blur-3xl" />
+          <div className="w-full relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6"
+            >
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
+                  <Receipt className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-none text-white uppercase mb-1">
+                    {t('newReceipt')}
+                  </h1>
+                  <p className="text-white/70 font-medium tracking-wide text-xs sm:text-sm uppercase">
+                    {t('step')} {currentStepIndex + 1} {t('of')} {steps.length} — {steps[currentStepIndex]?.label}
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate('/receipts')}
+                className="bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-xl rounded-2xl px-6 sm:px-8 h-10 sm:h-12 font-bold transition-all hover:scale-105 active:scale-95 shadow-xl w-fit"
+              >
+                <ArrowLeft className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" /> {t('backToReceipts') || 'Back'}
+              </Button>
+            </motion.div>
+          </div>
+        </div>
       </div>
 
-      <AnimatePresence mode="wait">
+      {/* Main Content */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 relative z-20">
+        {renderStepIndicator()}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {currentTab === 'client' && renderClientTab()}
+            {currentTab === 'order' && renderOrderTab()}
+            {currentTab === 'finalize' && renderFinalizeTab()}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Bottom Navigation Buttons */}
         <motion.div
-          key={currentTab}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pb-6"
         >
-          {currentTab === 'client' && renderClientTab()}
-          {currentTab === 'order' && renderOrderTab()}
-          {currentTab === 'finalize' && renderFinalizeTab()}
+          <Button
+            variant="outline"
+            onClick={() => {
+              const prevIndex = Math.max(0, currentStepIndex - 1);
+              setCurrentTab(steps[prevIndex].id);
+            }}
+            disabled={currentStepIndex === 0}
+            className="rounded-2xl h-12 sm:h-14 px-6 sm:px-8 font-bold text-base transition-all hover:scale-105 active:scale-95 disabled:opacity-40 border-2 order-2 sm:order-1"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            {t('back') || 'Back'}
+          </Button>
+
+          <Button
+            className={`rounded-2xl h-12 sm:h-14 px-8 sm:px-10 font-black text-base shadow-xl transition-all hover:scale-105 active:scale-95 order-1 sm:order-2 ${currentStepIndex === steps.length - 1
+              ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 shadow-emerald-500/30'
+              : 'bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 shadow-teal-500/30'
+              }`}
+            onClick={() => {
+              if (currentStepIndex === steps.length - 1) {
+                handleSave();
+              } else {
+                if (currentTab === 'order' && items.length === 0) {
+                  toast({
+                    title: t('itemsRequired'),
+                    description: t('addItemsBeforeProceeding'),
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                if (currentTab === 'client') {
+                  updateClientPrescription();
+                }
+                const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
+                setCurrentTab(steps[nextIndex].id);
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>{t('saving') || 'Saving...'}</>
+            ) : currentStepIndex === steps.length - 1 ? (
+              <><Check className="mr-2 h-5 w-5" /> {t('saveReceipt') || 'Save Receipt'}</>
+            ) : (
+              <>{t('nextStep') || 'Next Step'} <ArrowRight className="ml-2 h-5 w-5" /></>
+            )}
+          </Button>
         </motion.div>
-      </AnimatePresence>
+      </div>
 
       <AddClientDialog
         isOpen={isAddClientOpen}
@@ -1374,7 +1468,6 @@ const NewReceipt = () => {
         autoMontage={autoMontage}
         onAutoMontageChange={setAutoMontage}
       />
-
     </div>
   );
 };

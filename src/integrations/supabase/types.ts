@@ -999,6 +999,7 @@ export interface Invoice {
   client_name: string;
   client_phone?: string;
   client_address?: string;
+  client_assurance?: string;
   subtotal: number;
   tax_percentage: number;
   tax_amount: number;

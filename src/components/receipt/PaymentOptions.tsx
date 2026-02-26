@@ -134,14 +134,13 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
         </div>
 
         <div className="flex items-end pb-2">
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
-            paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
-          }`}>
-            {paymentStatus === 'Paid' ? t('paid') : 
-             paymentStatus === 'Partially Paid' ? t('partiallyPaid') : 
-             t('unpaid')}
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+              paymentStatus === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+            }`}>
+            {paymentStatus === 'Paid' ? t('paid') :
+              paymentStatus === 'Partially Paid' ? t('partiallyPaid') :
+                t('unpaid')}
           </div>
         </div>
       </div>

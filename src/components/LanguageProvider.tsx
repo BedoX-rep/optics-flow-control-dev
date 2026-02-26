@@ -1202,6 +1202,18 @@ const productTranslations: Translations = {
     en: 'Receipts Overview',
     fr: 'Aperçu des Reçus'
   },
+  backToReceipts: {
+    en: 'Back to Receipts',
+    fr: 'Retour aux Reçus'
+  },
+  backToClients: {
+    en: 'Back to Clients',
+    fr: 'Retour aux Clients'
+  },
+  nextStep: {
+    en: 'Next Step',
+    fr: 'Étape Suivante'
+  },
   manageOrders: {
     en: 'Manage and track all customer orders',
     fr: 'Gérez et suivez toutes les commandes clients'

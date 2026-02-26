@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FileText, Printer, User, Phone, Receipt, Package, ShoppingBag } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { format } from "date-fns"
 
 interface ReceiptDetailsDialogProps {
   isOpen: boolean
@@ -85,39 +86,35 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Delivery Status</p>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.delivery_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${receipt.delivery_status === 'Completed'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {receipt.delivery_status}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Montage Status</p>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.montage_status === 'Completed' 
-                        ? 'bg-emerald-100 text-emerald-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${receipt.montage_status === 'Completed'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {receipt.montage_status}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Payment Status</p>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
-                    }`}>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {receipt.payment_status}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Call Status</p>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.call_status === 'Called' ? 'bg-green-100 text-green-800' :
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${receipt.call_status === 'Called' ? 'bg-green-100 text-green-800' :
                       receipt.call_status === 'Unresponsive' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                        'bg-gray-100 text-gray-800'
+                      }`}>
                       {receipt.call_status || 'Not Called'}
                     </span>
                     {receipt.time_called && (
@@ -128,11 +125,10 @@ const ReceiptDetailsDialog = ({ isOpen, onClose, receipt }: ReceiptDetailsDialog
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Payment Status</p>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                      receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${receipt.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
                       receipt.payment_status === 'Partially Paid' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                        'bg-red-100 text-red-800'
+                      }`}>
                       {receipt.payment_status}
                     </span>
                   </div>

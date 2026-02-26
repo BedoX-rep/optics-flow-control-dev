@@ -21,13 +21,13 @@ import PrintInvoiceDialog from '@/components/PrintInvoiceDialog';
 import { Invoice } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
 
-const InvoiceCard = ({ 
-  invoice, 
-  onView, 
-  onEdit, 
+const InvoiceCard = ({
+  invoice,
+  onView,
+  onEdit,
   onDelete,
   onPrint,
-  onMarkAsPaid 
+  onMarkAsPaid
 }: {
   invoice: Invoice;
   onView: () => void;
@@ -111,27 +111,27 @@ const InvoiceCard = ({
                   {getStatusText(invoice.status)}
                 </Badge>
                 <div className="flex gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={onView}
                     className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
                     title={t('viewDetails') || 'View Details'}
                   >
                     <Eye className="h-3 w-3" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={onEdit}
                     className="h-7 w-7 hover:bg-blue-100 hover:text-blue-600"
                     title={t('edit') || 'Edit'}
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={onPrint}
                     className="h-7 w-7 hover:bg-green-100 hover:text-green-600"
                     title={t('print') || 'Print'}
@@ -139,9 +139,9 @@ const InvoiceCard = ({
                     <Printer className="h-3 w-3" />
                   </Button>
                   {invoice.status !== 'Paid' && invoice.balance > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={onMarkAsPaid}
                       className="h-7 w-7 hover:bg-emerald-100 hover:text-emerald-600"
                       title={t('markAsPaid') || 'Mark as Paid'}
@@ -149,9 +149,9 @@ const InvoiceCard = ({
                       <Check className="h-3 w-3" />
                     </Button>
                   )}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={onDelete}
                     className="h-7 w-7 hover:bg-red-100 hover:text-red-600"
                     title={t('delete') || 'Delete'}
@@ -161,7 +161,7 @@ const InvoiceCard = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Date Information */}
             <div className="flex items-center gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-1">
@@ -203,7 +203,7 @@ const InvoiceCard = ({
                   {invoice.tax_amount?.toFixed(2) || '0.00'} DH
                 </p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-3 border border-blue-200/50">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -289,7 +289,7 @@ const Invoices = () => {
       .order('invoice_date', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data as unknown as Invoice[]) || [];
   };
 
   const { data: invoices = [], isLoading } = useQuery({
@@ -307,7 +307,7 @@ const Invoices = () => {
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(invoice => 
+      filtered = filtered.filter(invoice =>
         invoice.client_name?.toLowerCase().includes(search) ||
         invoice.invoice_number?.toLowerCase().includes(search) ||
         invoice.client_phone?.toLowerCase().includes(search)
@@ -419,7 +419,7 @@ const Invoices = () => {
     try {
       const { error } = await supabase
         .from('invoices')
-        .update({ 
+        .update({
           status: 'Paid',
           balance: 0,
           advance_payment: invoice.total
@@ -431,8 +431,8 @@ const Invoices = () => {
       // Optimistically update cache
       queryClient.setQueryData(['invoices', user?.id], (oldData: Invoice[] | undefined) => {
         if (!oldData) return oldData;
-        return oldData.map(inv => 
-          inv.id === invoice.id 
+        return oldData.map(inv =>
+          inv.id === invoice.id
             ? { ...inv, status: 'Paid', balance: 0, advance_payment: invoice.total }
             : inv
         );
@@ -486,9 +486,9 @@ const Invoices = () => {
       <div className="mb-4 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder={t('searchInvoices') || 'Search invoices...'} 
+          <Input
+            type="text"
+            placeholder={t('searchInvoices') || 'Search invoices...'}
             className="pl-9 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -546,7 +546,7 @@ const Invoices = () => {
                   <div className="text-sm font-medium text-center border-b pb-2">
                     {t('selectDateRange') || 'Select Date Range'}
                   </div>
-                  
+
                   {/* Quick Preset Buttons */}
                   <div className="grid grid-cols-2 gap-2">
                     <Button
@@ -605,9 +605,9 @@ const Invoices = () => {
                       defaultMonth={dateRange?.from}
                       selected={{ from: dateRange.from, to: dateRange.to }}
                       onSelect={(range) => {
-                        setDateRange({ 
-                          from: range?.from, 
-                          to: range?.to 
+                        setDateRange({
+                          from: range?.from,
+                          to: range?.to
                         });
                       }}
                       numberOfMonths={2}
@@ -698,11 +698,11 @@ const Invoices = () => {
           <span className="text-xs font-medium text-gray-500">{t('active') || 'Active'}:</span>
           {(dateRange.from || dateRange.to) && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-700 rounded-md text-xs border border-purple-200">
-              {dateRange.from && dateRange.to 
+              {dateRange.from && dateRange.to
                 ? `${format(dateRange.from, 'MMM dd')} - ${format(dateRange.to, 'MMM dd')}`
-                : dateRange.from 
-                ? `From ${format(dateRange.from, 'MMM dd')}`
-                : `To ${format(dateRange.to!, 'MMM dd')}`
+                : dateRange.from
+                  ? `From ${format(dateRange.from, 'MMM dd')}`
+                  : `To ${format(dateRange.to!, 'MMM dd')}`
               }
               <X className="h-3 w-3 cursor-pointer hover:text-purple-900" onClick={() => setDateRange({ from: undefined, to: undefined })} />
             </span>
