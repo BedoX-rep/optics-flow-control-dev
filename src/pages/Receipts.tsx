@@ -854,7 +854,7 @@ const Receipts = () => {
     staleTime: 1000 * 60 * 3, // 3 minutes
     gcTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: 'always', // always reload when this view mounts, avoid stale/partial data
     refetchOnReconnect: false,
     retry: 1
   });

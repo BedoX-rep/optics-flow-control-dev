@@ -1284,6 +1284,7 @@ const NewReceipt = () => {
       }
 
       queryClient.invalidateQueries(['receipts', user.id]);
+      queryClient.invalidateQueries(['receipts', user.id, 'light']);
       toast({
         title: t('success'),
         description: t('receiptSavedSuccessfully'),

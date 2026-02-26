@@ -245,10 +245,13 @@ const PURCHASE_TYPES = [
             if (payload.eventType === 'UPDATE' && 
                 (payload.new?.montage_costs !== payload.old?.montage_costs || 
                  payload.new?.montage_status !== payload.old?.montage_status)) {
+              // bump both caches
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
               queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
             } else if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
               queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+              queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
               queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
             }
           }
@@ -399,9 +402,13 @@ const PURCHASE_TYPES = [
     enabled: !!user,
   });
 
-  // Fetch receipts
+  // Fetch a light version of receipts for purchase linking.  The query key is intentionally
+  // different from the full receipts list so we don't pollute the cache with objects that
+  // don't contain all of the fields needed by the receipts page.  When you navigate from
+  // Purchases → Receipts the cached data will no longer be reused, which avoids the empty
+  // list bug.
   const { data: receipts = [] } = useQuery({
-    queryKey: ['receipts', user?.id],
+    queryKey: ['receipts', user?.id, 'light'],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase

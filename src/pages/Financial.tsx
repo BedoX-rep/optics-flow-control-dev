@@ -173,6 +173,7 @@ const Financial = () => {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts', filter: `user_id=eq.${user.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
