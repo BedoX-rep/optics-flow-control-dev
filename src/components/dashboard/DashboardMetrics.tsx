@@ -122,14 +122,13 @@ const DashboardMetrics = ({ stats, isLoading }: DashboardMetricsProps) => {
 
     return (
         <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="flex h-3 w-3 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+            <div className="flex items-center gap-2 mb-6 ml-1">
+                <div className="h-6 w-6 rounded-lg bg-teal-50 flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5 text-teal-600" />
                 </div>
-                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
-                    {t('financialGrowth')} & {t('financialHealth')}
-                </h2>
+                <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase">
+                    {t('financialData')}
+                </h3>
             </div>
 
             <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden relative">

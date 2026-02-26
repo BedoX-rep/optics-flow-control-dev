@@ -30,7 +30,7 @@ const DashboardStockAlerts = ({ products, isLoading }: DashboardStockAlertsProps
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white border-none rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden h-full"
+            className="bg-white border-none rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
         >
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-40" />
 

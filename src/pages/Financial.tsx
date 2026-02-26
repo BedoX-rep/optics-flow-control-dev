@@ -280,7 +280,7 @@ const Financial = () => {
   const companies = useMemo(() => Array.from(new Set(receipts.flatMap(r => (r.receipt_items || []).map((i: any) => i.product?.company)).filter(Boolean))), [receipts]);
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto py-12 bg-slate-50/30 min-h-screen animate-in fade-in duration-700">
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
       <FinancialHeader
         dateFrom={dateFrom}
         dateTo={dateTo}
@@ -289,29 +289,31 @@ const Financial = () => {
         onQuickSelect={handleQuickSelect}
       />
 
-      <FinancialMetricsGrid metrics={metrics} />
+      <div className="w-full px-6 lg:px-10 relative z-20">
+        <FinancialMetricsGrid metrics={metrics} />
 
-      <QuickExpenditureAnalysis metrics={metrics} />
+        <QuickExpenditureAnalysis metrics={metrics} />
 
-      <OrdersAnalysisSection
-        receipts={filteredReceipts}
-        itemsLoading={receiptsLoading}
-        includePaidAtDelivery={includePaidAtDelivery}
-        setIncludePaidAtDelivery={setIncludePaidAtDelivery}
-        categories={categories as string[]}
-        companies={companies as string[]}
-      />
+        <OrdersAnalysisSection
+          receipts={filteredReceipts}
+          itemsLoading={receiptsLoading}
+          includePaidAtDelivery={includePaidAtDelivery}
+          setIncludePaidAtDelivery={setIncludePaidAtDelivery}
+          categories={categories as string[]}
+          companies={companies as string[]}
+        />
 
-      <DetailedExpenditureAnalysis
-        purchases={expenditurePurchases}
-        expenseTypeFilter={selectedExpenseType}
-        setExpenseTypeFilter={setSelectedExpenseType}
-        statusFilter={selectedPaymentStatus}
-        setStatusFilter={setSelectedPaymentStatus}
-        supplierFilter={selectedSupplier}
-        setSupplierFilter={setSelectedSupplier}
-        filteredSummary={expenditureSummary}
-      />
+        <DetailedExpenditureAnalysis
+          purchases={expenditurePurchases}
+          expenseTypeFilter={selectedExpenseType}
+          setExpenseTypeFilter={setSelectedExpenseType}
+          statusFilter={selectedPaymentStatus}
+          setStatusFilter={setSelectedPaymentStatus}
+          supplierFilter={selectedSupplier}
+          setSupplierFilter={setSelectedSupplier}
+          filteredSummary={expenditureSummary}
+        />
+      </div>
     </div>
   );
 };

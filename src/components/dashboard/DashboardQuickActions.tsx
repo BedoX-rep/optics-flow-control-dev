@@ -48,7 +48,7 @@ const DashboardQuickActions = () => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white border-none rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all duration-300 h-full"
+            className="bg-white border-none rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all duration-300"
         >
             <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-3">

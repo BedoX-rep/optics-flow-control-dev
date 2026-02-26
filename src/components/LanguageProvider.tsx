@@ -231,6 +231,10 @@ const dashboardTranslations: Translations = {
     en: "OPERATIONS OVERVIEW",
     fr: "APERÇU DES OPÉRATIONS"
   },
+  financialOverview: {
+    en: "FINANCIAL OVERVIEW",
+    fr: "APERÇU FINANCIER"
+  },
   revenuePerformance: {
     en: "REVENUE PERFORMANCE",
     fr: "PERFORMANCE DES REVENUS"
@@ -314,6 +318,10 @@ const dashboardTranslations: Translations = {
   financialHealth: {
     en: "FINANCIAL HEALTH & RISK",
     fr: "SANTÉ FINANCIÈRE ET RISQUE"
+  },
+  financialData: {
+    en: "FINANCIAL DATA",
+    fr: "DONNÉES FINANCIÈRES"
   }
 };
 

@@ -212,7 +212,7 @@ const Dashboard = () => {
         onAddClient={() => navigate('/clients')}
       />
 
-      <div className="max-w-[1700px] mx-auto px-6 lg:px-10 -mt-10 relative z-20">
+      <div className="w-full px-6 lg:px-10 relative z-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -255,14 +255,14 @@ const Dashboard = () => {
         <DashboardMetrics stats={stats} isLoading={isLoading} />
         <DashboardCharts revenueData={revenueData} categoryData={categoryData} />
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          <div className="xl:col-span-1 h-full">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+          <div className="xl:col-span-1">
             <DashboardQuickActions />
           </div>
-          <div className="xl:col-span-1 h-full">
+          <div className="xl:col-span-1">
             <DashboardStockAlerts products={products} isLoading={isLoading} />
           </div>
-          <div className="xl:col-span-1 h-full">
+          <div className="xl:col-span-1">
             <DashboardActivity activity={recentActivity} isLoading={isLoading} />
           </div>
         </div>
