@@ -161,9 +161,12 @@ const IndexPage = () => {
 
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter px-2">
                 {t('heroTitle').split(' ').map((word, i) => (
-                  <span key={i} className={i > 2 ? "text-teal-600 inline-block" : "inline-block"}>
-                    {word}{' '}
-                  </span>
+                  <React.Fragment key={i}>
+                    <span className={i > 2 ? "text-teal-600 inline-block" : "inline-block"}>
+                      {word}
+                    </span>
+                    {i < t('heroTitle').split(' ').length - 1 ? ' ' : ''}
+                  </React.Fragment>
                 ))}
               </h1>
 
