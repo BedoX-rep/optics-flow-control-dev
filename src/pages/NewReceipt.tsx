@@ -40,6 +40,17 @@ import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 import OrderItems from '@/components/receipt/OrderItems';
 import OrderSummary from '@/components/receipt/OrderSummary';
 import PaymentOptions from '@/components/receipt/PaymentOptions';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 interface Product {
   id: string;
@@ -195,14 +206,44 @@ const NewReceipt = () => {
   const [currentTab, setCurrentTab] = useState('client');
   const [checkOutOfStock, setCheckOutOfStock] = useState<() => boolean>(() => () => false);
   const checkOutOfStockRef = useRef<() => boolean>(() => false);
-  const [manualAdditionalCostsEnabled, setManualAdditionalCostsEnabled] = useState(false);
-  const [manualAdditionalCostsAmount, setManualAdditionalCostsAmount] = useState(0);
   const [personalisation, setPersonalisation] = useState({
     auto_additional_costs: true,
     sv_lens_cost: 10.00,
     progressive_lens_cost: 20.00,
     frames_cost: 10.00
   });
+
+  const [manualAdditionalCostsEnabled, setManualAdditionalCostsEnabled] = useState(false);
+  const [manualAdditionalCostsAmount, setManualAdditionalCostsAmount] = useState(0);
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [isConfirmSaveOpen, setIsConfirmSaveOpen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const paginate = (direction: number) => {
+    const nextIndex = currentStepIndex + direction;
+    if (nextIndex >= 0 && nextIndex < steps.length) {
+      if (currentTab === 'order' && direction === 1 && items.length === 0) {
+        toast({
+          title: t('itemsRequired'),
+          description: t('addItemsBeforeProceeding'),
+          variant: "destructive",
+        });
+        return;
+      }
+      if (currentTab === 'client' && direction === 1) {
+        updateClientPrescription();
+      }
+      setCurrentTab(steps[nextIndex].id);
+    }
+  };
+
 
   const steps = [
     { id: 'client', label: t('clientSelection'), icon: User },
@@ -1164,6 +1205,7 @@ const NewReceipt = () => {
     );
   };
 
+
   const handleSave = async () => {
     if (!user) {
       toast({
@@ -1202,7 +1244,7 @@ const NewReceipt = () => {
       return;
     }
 
-    await performSave();
+    setIsConfirmSaveOpen(true);
   };
 
   const performSave = async () => {
@@ -1368,12 +1410,28 @@ const NewReceipt = () => {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => navigate('/receipts')}
-                className="bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-xl rounded-2xl px-6 sm:px-8 h-10 sm:h-12 font-bold transition-all hover:scale-105 active:scale-95 shadow-xl w-fit"
-              >
-                <ArrowLeft className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" /> {t('backToReceipts') || 'Back'}
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  onClick={() => navigate('/receipts')}
+                  className="bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-xl rounded-2xl px-6 sm:px-8 h-10 sm:h-12 font-bold transition-all hover:scale-105 active:scale-95 shadow-xl w-fit"
+                >
+                  <ArrowLeft className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" /> {t('backToReceipts') || 'Back'}
+                </Button>
+
+                {currentTab === 'finalize' && (
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="bg-emerald-500 hover:bg-emerald-400 text-white border-2 border-emerald-400/50 rounded-2xl px-6 sm:px-8 h-10 sm:h-12 font-black transition-all hover:scale-110 active:scale-95 shadow-xl shadow-emerald-500/30 w-fit"
+                  >
+                    {isLoading ? (
+                      <>{t('saving') || 'Saving...'}</>
+                    ) : (
+                      <><Check className="mr-2 h-5 w-5" /> {t('saveReceipt') || 'Save Receipt'}</>
+                    )}
+                  </Button>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
@@ -1397,62 +1455,41 @@ const NewReceipt = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Bottom Navigation Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pb-6"
-        >
-          <Button
-            variant="outline"
-            onClick={() => {
-              const prevIndex = Math.max(0, currentStepIndex - 1);
-              setCurrentTab(steps[prevIndex].id);
-            }}
-            disabled={currentStepIndex === 0}
-            className="rounded-2xl h-12 sm:h-14 px-6 sm:px-8 font-bold text-base transition-all hover:scale-105 active:scale-95 disabled:opacity-40 border-2 order-2 sm:order-1"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            {t('back') || 'Back'}
-          </Button>
-
-          <Button
-            className={`rounded-2xl h-12 sm:h-14 px-8 sm:px-10 font-black text-base shadow-xl transition-all hover:scale-105 active:scale-95 order-1 sm:order-2 ${currentStepIndex === steps.length - 1
-              ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 shadow-emerald-500/30'
-              : 'bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 shadow-teal-500/30'
-              }`}
-            onClick={() => {
-              if (currentStepIndex === steps.length - 1) {
-                handleSave();
-              } else {
-                if (currentTab === 'order' && items.length === 0) {
-                  toast({
-                    title: t('itemsRequired'),
-                    description: t('addItemsBeforeProceeding'),
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                if (currentTab === 'client') {
-                  updateClientPrescription();
-                }
-                const nextIndex = Math.min(steps.length - 1, currentStepIndex + 1);
-                setCurrentTab(steps[nextIndex].id);
-              }
-            }}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>{t('saving') || 'Saving...'}</>
-            ) : currentStepIndex === steps.length - 1 ? (
-              <><Check className="mr-2 h-5 w-5" /> {t('saveReceipt') || 'Save Receipt'}</>
-            ) : (
-              <>{t('nextStep') || 'Next Step'} <ArrowRight className="ml-2 h-5 w-5" /></>
-            )}
-          </Button>
-        </motion.div>
       </div>
+
+      <AlertDialog open={isConfirmSaveOpen} onOpenChange={setIsConfirmSaveOpen}>
+        <AlertDialogContent className="max-w-sm bg-gradient-to-br from-teal-50 to-white border-2 border-teal-300 shadow-xl rounded-xl overflow-hidden p-0">
+          <div className="text-center pb-4 pt-8">
+            <div className="mx-auto w-14 h-14 bg-gradient-to-br from-teal-100 to-teal-200 rounded-full flex items-center justify-center mb-4 shadow-md border-2 border-teal-300">
+              <Check className="h-6 w-6 text-teal-700" />
+            </div>
+            <AlertDialogTitle className="text-lg font-bold text-teal-800 text-center uppercase tracking-tight">
+              {t('confirmSaveReceipt')}
+            </AlertDialogTitle>
+          </div>
+
+          <div className="text-center px-6 py-2">
+            <AlertDialogDescription className="text-teal-700 text-sm leading-relaxed">
+              {t('areYouSureSaveReceipt')}
+            </AlertDialogDescription>
+          </div>
+
+          <div className="flex gap-3 p-4 mt-4 bg-gradient-to-r from-teal-100 to-teal-50 border-t border-teal-200">
+            <AlertDialogCancel
+              className="flex-1 border-2 border-teal-400 text-teal-700 hover:bg-teal-200 hover:border-teal-500 font-medium py-2 h-auto rounded-lg transition-all duration-200"
+            >
+              {t('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={performSave}
+              className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white border-none shadow-md hover:shadow-lg transition-all duration-200 font-medium py-2 h-auto rounded-lg"
+            >
+              {t('save')}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <AddClientDialog
         isOpen={isAddClientOpen}

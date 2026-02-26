@@ -2032,6 +2032,22 @@ const receiptTranslations: Translations = {
     en: 'Receipt Summary',
     fr: 'Résumé du Reçu'
   },
+  swipeToSave: {
+    en: 'Swipe to Save',
+    fr: 'Glisser pour Enregistrer'
+  },
+  confirmSaveReceipt: {
+    en: 'Confirm Save Receipt',
+    fr: 'Confirmer l\'Enregistrement du Reçu'
+  },
+  areYouSureSaveReceipt: {
+    en: 'Are you sure you want to save this receipt?',
+    fr: 'Êtes-vous sûr de vouloir enregistrer ce reçu ?'
+  },
+  swipeToSaveReceipt: {
+    en: 'Swipe to save receipt',
+    fr: 'Glisser pour enregistrer le reçu'
+  },
   clientInformation: {
     en: 'Client Information',
     fr: 'Informations du Client'
