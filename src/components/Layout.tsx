@@ -411,7 +411,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100/50">
+            <div className="flex items-center justify-start gap-2 pt-1 border-t border-slate-100/50">
               <Button
                 variant="ghost"
                 size="icon"
