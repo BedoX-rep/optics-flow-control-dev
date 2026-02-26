@@ -171,7 +171,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex min-h-screen bg-[#F7FAFC]">
-      <MainNav />
+      <MainNav onAdminAccessClick={() => setAdminAccessDialogOpen(true)} />
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-72'
           }`}
@@ -408,39 +408,6 @@ const Layout = ({ children }: LayoutProps) => {
                     {sessionRole}
                   </Badge>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50">
-                <LanguageToggle />
-                {sessionRole === 'Store Staff' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setAdminAccessDialogOpen(true)}
-                    className="h-8 w-8 bg-white text-teal-700 rounded-lg shadow-sm"
-                  >
-                    <Shield className="h-4 w-4" />
-                  </Button>
-                )}
-                {sessionRole === 'Admin' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      exitAdminSession();
-                      toast({
-                        title: "Session Updated",
-                        description: "You are now signed out of the admin session",
-                      });
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 100);
-                    }}
-                    className="h-8 w-8 bg-white text-red-600 rounded-lg shadow-sm border border-red-50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                )}
               </div>
             </div>
 

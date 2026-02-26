@@ -19,8 +19,11 @@ import {
   ChevronUp,
   Menu,
   Palette,
-  Printer
+  Printer,
+  LogOut
 } from 'lucide-react';
+import LanguageToggle from './LanguageToggle';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './AuthProvider';
 import { useLanguage } from './LanguageProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -114,8 +117,9 @@ const NavigationContent = ({
   </nav>
 );
 
-const MainNav = () => {
-  const { user, subscription, permissions, sessionRole } = useAuth();
+const MainNav = ({ onAdminAccessClick }: { onAdminAccessClick?: () => void }) => {
+  const { user, subscription, permissions, sessionRole, exitAdminSession } = useAuth();
+  const { toast } = useToast();
   const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -179,7 +183,7 @@ const MainNav = () => {
           side="left"
           className="w-72 p-0 bg-gradient-to-br from-[#0B6E63] via-[#0D8276] to-[#14998B] border-none"
         >
-          <div className="min-h-full relative overflow-hidden">
+          <div className="min-h-full h-full relative flex flex-col overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
 
             <div className="p-6 flex items-center gap-3 border-b border-white/5 relative z-10">
@@ -189,13 +193,60 @@ const MainNav = () => {
               <h2 className="text-2xl font-black text-white tracking-tighter">Lensly</h2>
             </div>
 
-            <NavigationContent
-              filteredNavigation={filteredNavigation}
-              collapsed={false}
-              location={location}
-              t={t}
-              onNavigate={() => setMobileOpen(false)}
-            />
+            <div className="flex-1 overflow-y-auto">
+              <NavigationContent
+                filteredNavigation={filteredNavigation}
+                collapsed={false}
+                location={location}
+                t={t}
+                onNavigate={() => setMobileOpen(false)}
+              />
+            </div>
+
+            <div className="p-4 border-t border-white/10 relative z-10 mt-auto bg-white/5 backdrop-blur-md shrink-0">
+              <div className="flex flex-col gap-3">
+                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] px-1 text-center">Settings & Access</p>
+                <div className="bg-white/10 rounded-2xl p-1.5 flex justify-between items-center border border-white/20 shadow-inner">
+                  <div className="flex-1 pr-2 border-r border-white/10 flex justify-center [&_button]:bg-transparent [&_button]:text-white [&_button]:border-none [&_button:hover]:bg-white/20 [&_span.text-slate-900]:text-white [&_.text-slate-400]:text-white/70">
+                    <LanguageToggle />
+                  </div>
+                  <div className="pl-2 flex justify-center w-14">
+                    {sessionRole === 'Store Staff' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          onAdminAccessClick?.();
+                        }}
+                        className="h-10 w-10 bg-white/10 text-white rounded-xl hover:bg-white/20 hover:text-white shadow-sm border border-white/10 transition-all"
+                      >
+                        <Shield className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {sessionRole === 'Admin' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          exitAdminSession();
+                          toast({
+                            title: "Session Updated",
+                            description: "You are now signed out of the admin session",
+                          });
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 100);
+                        }}
+                        className="h-10 w-10 bg-rose-500/20 text-rose-200 rounded-xl hover:bg-rose-500/40 hover:text-white shadow-sm border border-rose-500/30 transition-all"
+                      >
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
