@@ -103,7 +103,8 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
         return {
             id: receipt.id,
             createdAt: receipt.created_at,
-            total: receipt.total || 0,
+            total: Number(receipt.total) || 0,
+            totalDiscount: Number(receipt.total_discount) || 0,
             customerName: receipt.clients?.name || 'Unknown',
             items: items.filter((item: any) => {
                 if (!includePaidAtDelivery && item.paidAtDelivery) return false;
@@ -118,6 +119,7 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
 
     const filteredTotalAmount = processedOrders.reduce((sum, order) => sum + order.total, 0);
     const filteredTotalItems = processedOrders.reduce((sum, order) => sum + order.items.length, 0);
+    const filteredTotalDiscount = processedOrders.reduce((sum, order) => sum + order.totalDiscount, 0);
 
     return (
         <div className="mb-12">
@@ -237,6 +239,11 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
                                                                     <span className="bg-slate-100 px-2 py-0.5 rounded-md text-teal-600">
                                                                         {order.items.length} {order.items.length === 1 ? 'ITEM' : 'ITEMS'}
                                                                     </span>
+                                                                    {order.totalDiscount > 0 && (
+                                                                        <span className="bg-yellow-50 border border-yellow-200 px-2 py-0.5 rounded-md text-yellow-700 font-bold">
+                                                                            -{order.totalDiscount.toLocaleString()} DH
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -308,7 +315,7 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
                                         <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/40 rounded-full -mr-24 -mt-24 blur-3xl transition-all" />
                                         <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/20 rounded-full -ml-20 -mb-20 blur-3xl transition-all" />
 
-                                        <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-8">
+                                        <div className="relative z-10 flex flex-col xl:flex-row justify-between xl:items-end gap-8">
                                             <div>
                                                 <span className="text-[10px] font-black text-teal-400 uppercase tracking-[0.2em] block mb-2">
                                                     {t('totalAmount')}
@@ -318,7 +325,16 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center gap-12">
+                                            <div className="flex flex-wrap items-center gap-6 md:gap-12">
+                                                <div className="relative pl-6">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 rounded-full" />
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">
+                                                        {t('totalDiscount') || 'Total Discount'}
+                                                    </span>
+                                                    <p className="text-2xl font-black text-yellow-400">
+                                                        {filteredTotalDiscount.toLocaleString()} <span className="text-sm font-bold text-slate-500">DH</span>
+                                                    </p>
+                                                </div>
                                                 <div className="relative pl-6">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-full" />
                                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-2">
@@ -337,7 +353,7 @@ const OrdersAnalysisSection: React.FC<OrdersAnalysisSectionProps> = ({
                                                         {processedOrders.length} <span className="text-sm font-bold text-slate-500">{t('orders')}</span>
                                                     </p>
                                                 </div>
-                                                <div className="hidden md:block h-5 w-5 bg-teal-500 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.8)] animate-pulse ml-4" />
+                                                <div className="hidden lg:block h-5 w-5 bg-teal-500 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.8)] animate-pulse ml-2" />
                                             </div>
                                         </div>
                                     </div>

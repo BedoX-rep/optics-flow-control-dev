@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -128,13 +128,13 @@ const DetailedExpenditureAnalysis: React.FC<DetailedExpenditureAnalysisProps> = 
 
                                                 // Theme colors matched precisely with QuickExpenditureAnalysis styling
                                                 const themeColor = {
-                                                    cardHover: isCapEx ? 'hover:border-indigo-500 hover:shadow-indigo-900/10' : 'hover:border-blue-500 hover:shadow-blue-900/10',
-                                                    iconArea: isCapEx ? 'bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white',
-                                                    pill: isCapEx ? 'text-indigo-600' : 'text-blue-600',
-                                                    progressLeft: isCapEx ? 'bg-indigo-100 group-hover/progress:bg-indigo-600' : 'bg-blue-100 group-hover/progress:bg-blue-600',
-                                                    progressBg: isCapEx ? 'bg-indigo-50' : 'bg-blue-50',
-                                                    progressFill: isCapEx ? 'bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.4)]' : 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]',
-                                                    textMain: isCapEx ? 'text-indigo-600' : 'text-blue-600',
+                                                    cardHover: isCapEx ? 'hover:border-teal-500 hover:shadow-teal-900/10' : 'hover:border-blue-500 hover:shadow-blue-900/10',
+                                                    iconArea: isCapEx ? 'bg-teal-50 border-teal-100 text-teal-600 group-hover:bg-teal-600 group-hover:text-white' : 'bg-blue-50 border-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white',
+                                                    pill: isCapEx ? 'text-teal-600' : 'text-blue-600',
+                                                    progressLeft: isCapEx ? 'bg-teal-100 group-hover/progress:bg-teal-600' : 'bg-blue-100 group-hover/progress:bg-blue-600',
+                                                    progressBg: isCapEx ? 'bg-teal-50' : 'bg-blue-50',
+                                                    progressFill: isCapEx ? 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.4)]' : 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]',
+                                                    textMain: isCapEx ? 'text-teal-600' : 'text-blue-600',
                                                 };
 
                                                 return (

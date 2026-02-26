@@ -129,7 +129,7 @@ const Financial = () => {
       const { data, error } = await supabase
         .from('receipts')
         .select(`
-          id, total, cost_ttc, products_cost, montage_costs, created_at, is_deleted, balance, advance_payment, delivery_status, montage_status, paid_at_delivery_cost,
+          id, total, total_discount, cost_ttc, products_cost, montage_costs, created_at, is_deleted, balance, advance_payment, delivery_status, montage_status, paid_at_delivery_cost,
           clients ( name ),
           receipt_items (
             cost, price, quantity, paid_at_delivery, custom_item_name,
@@ -137,6 +137,7 @@ const Financial = () => {
           )
         `)
         .eq('user_id', user.id)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -166,9 +167,14 @@ const Financial = () => {
   // Real-time subscription
   useEffect(() => {
     if (!user) return;
-    const channel = supabase.channel('fin-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `user_id=eq.${user.id}` }, () => {
-      queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
-    }).subscribe();
+    const channel = supabase.channel('fin-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts', filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
+      })
+      .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, queryClient]);
 
