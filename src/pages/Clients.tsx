@@ -18,6 +18,8 @@ import { useAuth } from "@/components/AuthProvider";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from "@/hooks/useDebounce";
 import { useLanguage } from '@/components/LanguageProvider';
+import ClientsHero from '@/components/clients/ClientsHero';
+import { Search } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -32,6 +34,8 @@ interface Client {
   left_eye_cyl?: number | null;
   left_eye_axe?: number | null;
   Add?: number | null;
+  need_renewal?: boolean;
+  renewal_date?: string | null;
   receipts?: Array<{
     id: string;
     created_at: string;
@@ -96,7 +100,7 @@ export default function Clients() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
+
     // Filter out deleted receipts from the client data
     return (allClients || []).map(client => ({
       ...client,
@@ -104,12 +108,12 @@ export default function Clients() {
     }));
   };
 
-  const { data: allClients = [], isLoading } = useQuery({
+  const { data: allClients = [], isLoading } = useQuery<Client[]>({
     queryKey: ['all-clients', user?.id],
     queryFn: fetchAllClients,
     enabled: !!user,
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
   });
 
   // Client-side filtering and pagination
@@ -139,6 +143,19 @@ export default function Clients() {
     return filtered;
   }, [allClients, debouncedSearchTerm, renewalFilter]);
 
+  const renewalCount = useMemo(() => allClients.filter(c => c.need_renewal).length, [allClients]);
+  const favoritesCount = useMemo(() => allClients.filter(c => c.is_favorite).length, [allClients]);
+  const [hasEditedClients, setHasEditedClients] = useState(false);
+
+  // Monitor DOM for edited cards (since cards handle their own local state)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const editedCards = document.querySelectorAll('[data-is-edited="true"]');
+      setHasEditedClients(editedCards.length > 0);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Client-side pagination
   const paginatedClients = useMemo(() => {
     const startIndex = page * ITEMS_PER_PAGE;
@@ -148,33 +165,13 @@ export default function Clients() {
 
   const totalPages = Math.ceil(filteredClients.length / ITEMS_PER_PAGE);
 
-  const handleAddClient = async (name: string, phone: string) => {
-    try {
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('clients')
-        .insert({
-          name,
-          phone,
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update the cache with the new client
-      queryClient.setQueryData(['all-clients', user.id], (oldData: Client[] | undefined) => {
-        if (!oldData) return [data];
-        return [data, ...oldData];
-      });
-
-      toast.success('Client added successfully!');
-      setIsAddClientOpen(false);
-    } catch (error: any) {
-      toast.error('Error adding client: ' + error.message);
-    }
+  const handleAddClient = async (newClient: any) => {
+    // Update the cache with the new client
+    queryClient.setQueryData(['all-clients', user?.id], (oldData: Client[] | undefined) => {
+      if (!oldData) return [newClient];
+      return [newClient, ...oldData];
+    });
+    setIsAddClientOpen(false);
   };
 
   const handleEditClient = (client: Client) => {
@@ -191,7 +188,7 @@ export default function Clients() {
       if (error) throw error;
 
       // Invalidate and refetch the cache to ensure consistency
-      await queryClient.invalidateQueries(['all-clients', user?.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user?.id] });
 
       toast.success('Client updated successfully!');
       setClientToEdit(null);
@@ -218,7 +215,7 @@ export default function Clients() {
       if (error) throw error;
 
       // Invalidate and refetch the cache to ensure consistency
-      await queryClient.invalidateQueries(['all-clients', user?.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user?.id] });
 
       toast.success(t('clientDeletedSuccessfully') || 'Client deleted successfully!');
       setIsDeleteDialogOpen(false);
@@ -366,7 +363,7 @@ export default function Clients() {
       });
 
       toast.success(`Saved changes for ${editedCards.length} clients`);
-      await queryClient.invalidateQueries(['all-clients', user?.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user?.id] });
     } catch (error: any) {
       toast.error("Failed to save all changes: " + error.message);
     }
@@ -410,7 +407,7 @@ export default function Clients() {
       if (error) throw error;
 
       // Invalidate and refetch the cache to ensure consistency
-      await queryClient.invalidateQueries(['all-clients', user?.id]);
+      await queryClient.invalidateQueries({ queryKey: ['all-clients', user?.id] });
 
       toast.success(`${clientsToDelete.length} duplicate clients removed`);
       setIsDuplicateDialogOpen(false);
@@ -429,9 +426,9 @@ export default function Clients() {
         const todayString = today.toISOString().split('T')[0];
 
         // Find clients that need renewal marking (renewal date has passed and not already marked)
-        const clientsToUpdate = allClients.filter(client => 
-          client.renewal_date && 
-          client.renewal_date <= todayString && 
+        const clientsToUpdate = allClients.filter(client =>
+          client.renewal_date &&
+          client.renewal_date <= todayString &&
           !client.need_renewal
         );
 
@@ -459,7 +456,7 @@ export default function Clients() {
         if (clientsToUpdate.length > 0) {
           toast.success(`${clientsToUpdate.length} client(s) have been marked for renewal.`);
           // Refresh the clients list
-          queryClient.invalidateQueries(['all-clients', user.id]);
+          queryClient.invalidateQueries({ queryKey: ['all-clients', user.id] });
         }
       } catch (error) {
         console.error('Error checking client renewals:', error);
@@ -471,284 +468,259 @@ export default function Clients() {
   }, [user, allClients, toast, queryClient]);
 
   return (
-    <div className="container px-2 sm:px-4 md:px-6 max-w-[1600px] mx-auto py-4 sm:py-6 min-w-[320px]">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 flex-wrap mb-6">
-        <div className="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={() => setIsAddClientOpen(true)}
-            className="rounded-xl font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-200"
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            {t('newClient')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSaveAllChanges}
-            className="rounded-xl border-neutral-200 shadow-sm"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {t('saveAllChanges')}
-          </Button>
-        </div>
-      </div>
+    <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
+      <ClientsHero
+        onNewClient={() => setIsAddClientOpen(true)}
+        onImport={() => setIsImportDialogOpen(true)}
+        onFindDuplicates={findDuplicateClients}
+        onSaveAll={handleSaveAllChanges}
+        hasEditedClients={hasEditedClients}
+        clientsCount={allClients.length}
+        renewalCount={renewalCount}
+        favoritesCount={favoritesCount}
+      />
 
-      <div className="mb-6 backdrop-blur-sm bg-white/5 rounded-2xl border border-white/10 p-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
-            <SearchInput
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder={t('searchClients')}
-              className="w-full"
-            />
-          </div>
+      <div className="w-full px-6 lg:px-10 relative z-20">
+        <div className="mb-10 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-sm">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center flex-1 min-w-[300px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 group focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+              <Search className="h-5 w-5 text-teal-600 mr-3 transition-transform group-focus-within:scale-110" />
+              <input
+                type="text"
+                placeholder={t('searchClients')}
+                className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-          <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
-            <Select value={renewalFilter} onValueChange={setRenewalFilter}>
-              <SelectTrigger className={`w-[140px] border-2 shadow-md rounded-xl gap-2 transition-all duration-200 min-w-0 flex-shrink-0 ${
-                renewalFilter !== 'all'
-                  ? 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200'
-                  : 'bg-white/10 hover:bg-white/20'
-              }`}>
-                {renewalFilter === 'all' ? (
-                  <>
-                    <Users className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{t('allClients')}</span>
-                  </>
-                ) : renewalFilter === 'need_renewal' ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{t('needRenewal')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Star className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{t('favorites')}</span>
-                  </>
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('allClients')}</SelectItem>
-                <SelectItem value="need_renewal">{t('needRenewal')}</SelectItem>
-                <SelectItem value="favorites">{t('favorites')}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="outline"
-              onClick={findDuplicateClients}
-              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('findDuplicates')}</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setIsImportDialogOpen(true)}
-              className="border-2 shadow-md rounded-xl gap-2 transition-all duration-200 bg-white/10 hover:bg-white/20 text-neutral-600 hover:text-neutral-900 flex-shrink-0"
-            >
-              <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('import')}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Client cards */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-neutral-200 animate-pulse" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
-                  <div className="h-3 w-32 bg-neutral-200 rounded animate-pulse" />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="h-8 bg-neutral-100 rounded animate-pulse" />
-                  <div className="h-8 bg-neutral-100 rounded animate-pulse" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="h-8 bg-neutral-100 rounded animate-pulse" />
-                  <div className="h-8 bg-neutral-100 rounded animate-pulse" />
-                </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-50/50 p-1.5 rounded-2xl border border-slate-100/50">
+                <Select value={renewalFilter} onValueChange={setRenewalFilter}>
+                  <SelectTrigger className="premium-filter-select w-[180px] bg-transparent border-none shadow-none focus:ring-0 font-bold text-slate-600">
+                    <SelectValue placeholder={t('allClients')} />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
+                    <SelectItem value="all">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-teal-500" />
+                        <span>{t('allClients')}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="need_renewal">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="h-4 w-4 text-amber-500" />
+                        <span>{t('needRenewal')}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="favorites">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-rose-500" />
+                        <span>{t('favorites')}</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          ))}
-        </div>
-      ) : filteredClients.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
-          <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
-            <UserPlus size={24} className="text-teal-600" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noClientsFound')}</h3>
-          <p className="text-gray-500 max-w-md mb-4">
-            {searchTerm
-              ? t('noClientsMatchSearch')
-              : t('noClientsYet')
-            }
-          </p>
-          {!searchTerm && (
-            <Button
-              onClick={() => setIsAddClientOpen(true)}
-              className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
-            >
-              <UserPlus size={16} className="mr-2" />
-              {t('addFirstClient')}
-            </Button>
-          )}
         </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
-            {paginatedClients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                onEdit={handleEditClient}
-                onDelete={openDeleteDialog}
-                onRefresh={() => queryClient.invalidateQueries(['all-clients'])}
-              />
+
+        {/* Client cards */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-neutral-200 animate-pulse" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-neutral-200 rounded animate-pulse" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-8 bg-neutral-100 rounded animate-pulse" />
+                    <div className="h-8 bg-neutral-100 rounded animate-pulse" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-8 bg-neutral-100 rounded animate-pulse" />
+                    <div className="h-8 bg-neutral-100 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
+        ) : filteredClients.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-lg">
+            <div className="w-16 h-16 mb-4 rounded-full bg-teal-100 flex items-center justify-center">
+              <UserPlus size={24} className="text-teal-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">{t('noClientsFound')}</h3>
+            <p className="text-gray-500 max-w-md mb-4">
+              {searchTerm
+                ? t('noClientsMatchSearch')
+                : t('noClientsYet')
+              }
+            </p>
+            {!searchTerm && (
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(Math.max(0, page - 1))}
-                disabled={page === 0 || isLoading}
-                className="flex items-center gap-1"
+                onClick={() => setIsAddClientOpen(true)}
+                className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500"
               >
-                <ChevronDown className="h-4 w-4 rotate-90" />
-                {t('previous')}
+                <UserPlus size={16} className="mr-2" />
+                {t('addFirstClient')}
               </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+              {paginatedClients.map((client) => (
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={handleEditClient}
+                  onDelete={openDeleteDialog}
+                  onRefresh={() => queryClient.invalidateQueries({ queryKey: ['all-clients', user?.id] })}
+                />
+              ))}
+            </div>
 
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i;
-                  } else if (page < 3) {
-                    pageNum = i;
-                  } else if (page > totalPages - 4) {
-                    pageNum = totalPages - 5 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0 || isLoading}
+                  className="flex items-center gap-1"
+                >
+                  <ChevronDown className="h-4 w-4 rotate-90" />
+                  {t('previous')}
+                </Button>
 
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={page === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPage(pageNum)}
-                      disabled={isLoading}
-                      className="w-10 h-8"
-                    >
-                      {pageNum + 1}
-                    </Button>
-                  );
-                })}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i;
+                    } else if (page < 3) {
+                      pageNum = i;
+                    } else if (page > totalPages - 4) {
+                      pageNum = totalPages - 5 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={page === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPage(pageNum)}
+                        disabled={isLoading}
+                        className="w-10 h-8"
+                      >
+                        {pageNum + 1}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                  disabled={page >= totalPages - 1 || isLoading}
+                  className="flex items-center gap-1"
+                >
+                  {t('next')}
+                  <ChevronDown className="h-4 w-4 -rotate-90" />
+                </Button>
               </div>
+            )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                disabled={page >= totalPages - 1 || isLoading}
-                className="flex items-center gap-1"
-              >
-                {t('next')}
-                <ChevronDown className="h-4 w-4 -rotate-90" />
-              </Button>
-            </div>
-          )}
+            {filteredClients.length > 0 && (
+              <div className="text-center text-sm text-gray-500 mt-4">
+                Showing {page * ITEMS_PER_PAGE + 1}-{Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
+              </div>
+            )}
+          </>
+        )}
 
-          {filteredClients.length > 0 && (
-            <div className="text-center text-sm text-gray-500 mt-4">
-              Showing {page * ITEMS_PER_PAGE + 1}-{Math.min((page + 1) * ITEMS_PER_PAGE, filteredClients.length)} of {filteredClients.length} clients
-            </div>
-          )}
-        </>
-      )}
+        {/* Floating action button */}
+        <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
 
-      {/* Floating action button */}
-      <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
-
-      {/* Add client dialog */}
-      <AddClientDialog
-        isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
-        onAddClient={handleAddClient}
-      />
-
-      {/* Edit client dialog */}
-      {clientToEdit && (
-        <EditClientDialog
-          client={clientToEdit}
-          isOpen={!!clientToEdit}
-          onClose={() => setClientToEdit(null)}
+        {/* Add client dialog */}
+        <AddClientDialog
+          isOpen={isAddClientOpen}
+          onClose={() => setIsAddClientOpen(false)}
+          onClientAdded={handleAddClient}
         />
-      )}
 
-      {/* Import clients dialog */}
-      <ImportClientsDialog
-        isOpen={isImportDialogOpen}
-        onClose={() => setIsImportDialogOpen(false)}
-        onImport={handleImportClients}
-      />
+        {/* Edit client dialog */}
+        {clientToEdit && (
+          <EditClientDialog
+            client={clientToEdit}
+            isOpen={!!clientToEdit}
+            onClose={() => setClientToEdit(null)}
+          />
+        )}
 
-      {/* Delete confirmation dialog */}
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          setIsDeleteDialogOpen(false);
-          setClientToDelete(null);
-        }}
-        onConfirm={handleDeleteClient}
-        title={t('deleteClient')}
-        message={t('deleteConfirmation', { clientName: clientToDelete?.name }) || `Are you sure you want to delete "${clientToDelete?.name}"? This action cannot be undone.`}
-        itemName={clientToDelete?.name}
-        isDeleting={isDeleting}
-      />
+        {/* Import clients dialog */}
+        <ImportClientsDialog
+          isOpen={isImportDialogOpen}
+          onClose={() => setIsImportDialogOpen(false)}
+          onImport={handleImportClients}
+        />
 
-      {/* Duplicates dialog */}
-      <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('duplicateClientsFound')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {duplicateClients.length > 0 && (
-                <>
-                  <p className="mb-2">
-                    Found {duplicateClients.length} duplicate clients with matching names and phone numbers. Would you like to remove the duplicates? (One client from each duplicate group will be kept.)
-                  </p>
-                  <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
-                    {duplicateClients.map(client => (
-                      <div key={client.id} className="py-1 border-b last:border-0">
-                        {client.name} ({client.phone})
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteDuplicates} className="bg-red-500 hover:bg-red-600">
-              {t('deleteDuplicates')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete confirmation dialog */}
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setClientToDelete(null);
+          }}
+          onConfirm={handleDeleteClient}
+          title={t('deleteClient')}
+          message={t('deleteConfirmation')?.replace('{clientName}', clientToDelete?.name || '') || `Are you sure you want to delete "${clientToDelete?.name}"? This action cannot be undone.`}
+          itemName={clientToDelete?.name}
+          isDeleting={isDeleting}
+        />
+
+        {/* Duplicates dialog */}
+        <AlertDialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('duplicateClientsFound')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {duplicateClients.length > 0 && (
+                  <>
+                    <p className="mb-2">
+                      Found {duplicateClients.length} duplicate clients with matching names and phone numbers. Would you like to remove the duplicates? (One client from each duplicate group will be kept.)
+                    </p>
+                    <div className="max-h-60 overflow-y-auto mt-4 border rounded p-2">
+                      {duplicateClients.map(client => (
+                        <div key={client.id} className="py-1 border-b last:border-0">
+                          {client.name} ({client.phone})
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteDuplicates} className="bg-red-500 hover:bg-red-600">
+                {t('deleteDuplicates')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
