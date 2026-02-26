@@ -14,6 +14,9 @@ import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanies } from '@/hooks/useCompanies';
 import { Save, Settings, DollarSign, Building2, Plus, Trash2, Edit } from 'lucide-react';
+import { Database } from '@/integrations/supabase/types';
+
+type UserInformationRow = Database['public']['Tables']['user_information']['Row'];
 
 interface PersonalisationData {
   auto_additional_costs: boolean;
@@ -76,7 +79,8 @@ const Personalisation = () => {
   const { allCompanies, customCompanies, createCompany, updateCompany, deleteCompany } = useCompanies();
 
   // Fetch user personalisation data using custom hook
-  const { data: personalisationInfo, isLoading } = useUserInformation();
+  const { data: rawPersonalisationInfo, isLoading } = useUserInformation();
+  const personalisationInfo = rawPersonalisationInfo as UserInformationRow | null;
 
   // Update form data when user personalisation is loaded
   useEffect(() => {
@@ -155,10 +159,10 @@ const Personalisation = () => {
         description: t('settingsSaved'),
       });
       setHasChanges(false);
-      
+
       // Update the query cache with the new data immediately
       queryClient.setQueryData(['user-information', user?.id], updatedData);
-      
+
       // Also invalidate to ensure consistency across all pages
       queryClient.invalidateQueries({ queryKey: ['user-information', user?.id] });
     },
@@ -263,8 +267,8 @@ const Personalisation = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <PageTitle 
-          title={t('personalisation')} 
+        <PageTitle
+          title={t('personalisation')}
           subtitle={t('managePersonalPreferences')}
         />
 

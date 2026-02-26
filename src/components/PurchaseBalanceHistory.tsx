@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface PurchaseBalanceHistoryProps {
   purchaseId: string;
@@ -14,11 +15,11 @@ interface BalanceHistoryItem {
   id: string;
   purchase_id: string;
   user_id: string;
-  previous_balance: number;
+  old_balance: number;
   new_balance: number;
-  amount_paid: number;
+  change_amount: number;
+  change_reason: string | null;
   change_date: string;
-  notes?: string;
 }
 
 const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchaseId, userId }) => {
@@ -26,14 +27,14 @@ const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchas
     queryKey: ['purchase-balance-history', purchaseId, userId],
     queryFn: async () => {
       if (!purchaseId || !userId) return [];
-      
+
       const { data, error } = await supabase
         .from('purchase_balance_history')
         .select('*')
         .eq('purchase_id', purchaseId)
         .eq('user_id', userId)
         .order('change_date', { ascending: false });
-      
+
       if (error) {
         console.error('Error fetching purchase balance history:', error);
         throw error;
@@ -110,23 +111,26 @@ const PurchaseBalanceHistory: React.FC<PurchaseBalanceHistoryProps> = ({ purchas
                 <span className="text-xs text-gray-500">
                   {formatDate(item.change_date)}
                 </span>
-                <span className="text-sm font-medium text-green-600">
-                  -{item.amount_paid.toFixed(2)} DH
+                <span className={cn(
+                  "text-sm font-medium",
+                  item.change_amount < 0 ? "text-green-600" : "text-red-600"
+                )}>
+                  {item.change_amount > 0 ? "+" : ""}{item.change_amount.toFixed(2)} DH
                 </span>
               </div>
               <div className="text-sm">
                 <span className="text-gray-600">Balance: </span>
                 <span className="line-through text-gray-400">
-                  {item.previous_balance.toFixed(2)} DH
+                  {item.old_balance.toFixed(2)} DH
                 </span>
                 <span className="mx-2">→</span>
                 <span className="font-medium">
                   {item.new_balance.toFixed(2)} DH
                 </span>
               </div>
-              {item.notes && (
+              {item.change_reason && (
                 <p className="text-xs text-gray-500 mt-1 italic">
-                  {item.notes}
+                  {item.change_reason}
                 </p>
               )}
             </div>

@@ -405,6 +405,8 @@ export type Database = {
           supplier_id: string | null
           description: string
           amount: number
+          amount_ht: number
+          amount_ttc: number
           category: string | null
           purchase_date: string | null
           receipt_number: string | null
@@ -414,36 +416,73 @@ export type Database = {
           created_at: string | null
           user_id: string
           purchase_type: string | null
+          advance_payment: number | null
+          balance: number | null
+          payment_status: string | null
+          payment_urgency: string | null
+          recurring_type: string | null
+          next_recurring_date: string | null
+          linked_receipts: string[] | null
+          link_date_from: string | null
+          link_date_to: string | null
+          already_recurred: boolean | null
+          tax_percentage: number | null
         }
         Insert: {
           id?: string
           supplier_id?: string | null
           description: string
           amount: number
+          amount_ht?: number
+          amount_ttc?: number
           category?: string | null
           purchase_date?: string | null
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
-          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id: string
+          purchase_type?: string | null
+          advance_payment?: number | null
+          balance?: number | null
+          payment_status?: string | null
+          payment_urgency?: string | null
+          recurring_type?: string | null
+          next_recurring_date?: string | null
+          linked_receipts?: string[] | null
+          link_date_from?: string | null
+          link_date_to?: string | null
+          already_recurred?: boolean | null
+          tax_percentage?: number | null
         }
         Update: {
           id?: string
           supplier_id?: string | null
           description?: string
           amount?: number
+          amount_ht?: number
+          amount_ttc?: number
           category?: string | null
           purchase_date?: string | null
           receipt_number?: string | null
           payment_method?: string | null
           notes?: string | null
-          purchase_type?: string | null
           is_deleted?: boolean | null
           created_at?: string | null
           user_id?: string
+          purchase_type?: string | null
+          advance_payment?: number | null
+          balance?: number | null
+          payment_status?: string | null
+          payment_urgency?: string | null
+          recurring_type?: string | null
+          next_recurring_date?: string | null
+          linked_receipts?: string[] | null
+          link_date_from?: string | null
+          link_date_to?: string | null
+          already_recurred?: boolean | null
+          tax_percentage?: number | null
         }
         Relationships: [
           {
@@ -451,6 +490,47 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_balance_history: {
+        Row: {
+          id: string
+          purchase_id: string
+          old_balance: number
+          new_balance: number
+          change_amount: number
+          change_reason: string | null
+          change_date: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          purchase_id: string
+          old_balance: number
+          new_balance: number
+          change_amount: number
+          change_reason?: string | null
+          change_date?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          purchase_id?: string
+          old_balance?: number
+          new_balance?: number
+          change_amount?: number
+          change_reason?: string | null
+          change_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_balance_history_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
             referencedColumns: ["id"]
           }
         ]
@@ -541,6 +621,28 @@ export type Database = {
           user_id: string
           vat_number: string | null
           website: string | null
+          auto_additional_costs: boolean | null
+          sv_lens_cost: number | null
+          progressive_lens_cost: number | null
+          frames_cost: number | null
+          markup_sph_range_1_min: number | null
+          markup_sph_range_1_max: number | null
+          markup_sph_range_1_markup: number | null
+          markup_sph_range_2_min: number | null
+          markup_sph_range_2_max: number | null
+          markup_sph_range_2_markup: number | null
+          markup_sph_range_3_min: number | null
+          markup_sph_range_3_max: number | null
+          markup_sph_range_3_markup: number | null
+          markup_cyl_range_1_min: number | null
+          markup_cyl_range_1_max: number | null
+          markup_cyl_range_1_markup: number | null
+          markup_cyl_range_2_min: number | null
+          markup_cyl_range_2_max: number | null
+          markup_cyl_range_2_markup: number | null
+          markup_cyl_range_3_min: number | null
+          markup_cyl_range_3_max: number | null
+          markup_cyl_range_3_markup: number | null
         }
         Insert: {
           address?: string | null
@@ -558,6 +660,28 @@ export type Database = {
           user_id: string
           vat_number?: string | null
           website?: string | null
+          auto_additional_costs?: boolean | null
+          sv_lens_cost?: number | null
+          progressive_lens_cost?: number | null
+          frames_cost?: number | null
+          markup_sph_range_1_min?: number | null
+          markup_sph_range_1_max?: number | null
+          markup_sph_range_1_markup?: number | null
+          markup_sph_range_2_min?: number | null
+          markup_sph_range_2_max?: number | null
+          markup_sph_range_2_markup?: number | null
+          markup_sph_range_3_min?: number | null
+          markup_sph_range_3_max?: number | null
+          markup_sph_range_3_markup?: number | null
+          markup_cyl_range_1_min?: number | null
+          markup_cyl_range_1_max?: number | null
+          markup_cyl_range_1_markup?: number | null
+          markup_cyl_range_2_min?: number | null
+          markup_cyl_range_2_max?: number | null
+          markup_cyl_range_2_markup?: number | null
+          markup_cyl_range_3_min?: number | null
+          markup_cyl_range_3_max?: number | null
+          markup_cyl_range_3_markup?: number | null
         }
         Update: {
           address?: string | null
@@ -575,6 +699,28 @@ export type Database = {
           user_id?: string
           vat_number?: string | null
           website?: string | null
+          auto_additional_costs?: boolean | null
+          sv_lens_cost?: number | null
+          progressive_lens_cost?: number | null
+          frames_cost?: number | null
+          markup_sph_range_1_min?: number | null
+          markup_sph_range_1_max?: number | null
+          markup_sph_range_1_markup?: number | null
+          markup_sph_range_2_min?: number | null
+          markup_sph_range_2_max?: number | null
+          markup_sph_range_2_markup?: number | null
+          markup_sph_range_3_min?: number | null
+          markup_sph_range_3_max?: number | null
+          markup_sph_range_3_markup?: number | null
+          markup_cyl_range_1_min?: number | null
+          markup_cyl_range_1_max?: number | null
+          markup_cyl_range_1_markup?: number | null
+          markup_cyl_range_2_min?: number | null
+          markup_cyl_range_2_max?: number | null
+          markup_cyl_range_2_markup?: number | null
+          markup_cyl_range_3_min?: number | null
+          markup_cyl_range_3_max?: number | null
+          markup_cyl_range_3_markup?: number | null
         }
         Relationships: []
       }
@@ -710,11 +856,70 @@ export type Database = {
         }
         Relationships: []
       }
+      permissions: {
+        Row: {
+          id: string
+          user_id: string
+          can_manage_products: boolean
+          can_manage_clients: boolean
+          can_manage_receipts: boolean
+          can_view_financial: boolean
+          can_manage_purchases: boolean
+          can_access_dashboard: boolean
+          can_manage_invoices: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          can_manage_products?: boolean
+          can_manage_clients?: boolean
+          can_manage_receipts?: boolean
+          can_view_financial?: boolean
+          can_manage_purchases?: boolean
+          can_access_dashboard?: boolean
+          can_manage_invoices?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          can_manage_products?: boolean
+          can_manage_clients?: boolean
+          can_manage_receipts?: boolean
+          can_view_financial?: boolean
+          can_manage_purchases?: boolean
+          can_access_dashboard?: boolean
+          can_manage_invoices?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_access_code: {
+        Args: {
+          input_access_code: string
+        }
+        Returns: {
+          valid: boolean
+          message: string
+        }[]
+      }
       check_and_renew_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -722,6 +927,17 @@ export type Database = {
       generate_unique_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_admin_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          can_manage_products: boolean
+          can_manage_clients: boolean
+          can_manage_receipts: boolean
+          can_view_financial: boolean
+          can_manage_purchases: boolean
+          can_access_dashboard: boolean
+        }[]
       }
       get_subscription_stats: {
         Args: Record<PropertyKey, never>
@@ -733,6 +949,12 @@ export type Database = {
           lifetime_revenue: number
           trial_count: number
         }[]
+      }
+      initialize_user_information: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: undefined
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -990,6 +1212,28 @@ export interface UserInformation {
   website?: string;
   created_at: string;
   updated_at: string;
+  auto_additional_costs?: boolean;
+  sv_lens_cost?: number;
+  progressive_lens_cost?: number;
+  frames_cost?: number;
+  markup_sph_range_1_min?: number;
+  markup_sph_range_1_max?: number;
+  markup_sph_range_1_markup?: number;
+  markup_sph_range_2_min?: number;
+  markup_sph_range_2_max?: number;
+  markup_sph_range_2_markup?: number;
+  markup_sph_range_3_min?: number;
+  markup_sph_range_3_max?: number;
+  markup_sph_range_3_markup?: number;
+  markup_cyl_range_1_min?: number;
+  markup_cyl_range_1_max?: number;
+  markup_cyl_range_1_markup?: number;
+  markup_cyl_range_2_min?: number;
+  markup_cyl_range_2_max?: number;
+  markup_cyl_range_2_markup?: number;
+  markup_cyl_range_3_min?: number;
+  markup_cyl_range_3_max?: number;
+  markup_cyl_range_3_markup?: number;
 }
 
 export interface Invoice {

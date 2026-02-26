@@ -36,7 +36,7 @@ const MIN_CALL_INTERVAL = 60 * 1000; // 1 minute
 const MAX_CALLS_PER_WINDOW = 3; // 3 calls per 5 minutes
 
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
-                         'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
+  'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
 interface UserSubscription {
   subscription_status: SubscriptionStatus;
@@ -47,6 +47,7 @@ interface UserSubscription {
   trial_used: boolean;
   store_name?: string;
   display_name?: string;
+  email?: string;
   referral_code?: string;
   referred_by?: string;
   access_code?: string;
@@ -124,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Rate limiting check for subscription API calls
   const canMakeSubscriptionCall = (userId: string): boolean => {
     const now = Date.now();
-    
+
     if (!rateLimitTracker[userId]) {
       rateLimitTracker[userId] = {
         lastCall: 0,
@@ -133,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const userTracker = rateLimitTracker[userId];
-    
+
     // Check minimum interval (1 call per minute)
     if (now - userTracker.lastCall < MIN_CALL_INTERVAL) {
       return false;
@@ -308,9 +309,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (timeSinceLastAttempt < cooldownPeriod) {
         const remainingTime = Math.ceil((cooldownPeriod - timeSinceLastAttempt) / 1000);
-        return { 
-          success: false, 
-          message: `Please wait ${remainingTime} seconds before trying again` 
+        return {
+          success: false,
+          message: `Please wait ${remainingTime} seconds before trying again`
         };
       }
 
@@ -322,13 +323,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
-        const result = data[0];
-        if (result.valid) {
-          updateSessionRole('Admin');
-          return { success: true, message: 'Successfully elevated to Admin for this session' };
-        } else {
-          return { success: false, message: result.message };
+      if (data) {
+        // rpc returns an array for TABLE return types
+        const results = data as unknown as { valid: boolean; message: string }[];
+        if (results.length > 0) {
+          const result = results[0];
+          if (result.valid) {
+            updateSessionRole('Admin');
+            return { success: true, message: 'Successfully elevated to Admin for this session' };
+          } else {
+            return { success: false, message: result.message };
+          }
         }
       }
 
@@ -440,13 +445,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      session, 
-      user, 
-      subscription, 
+    <AuthContext.Provider value={{
+      session,
+      user,
+      subscription,
       permissions,
       sessionRole,
-      isLoading, 
+      isLoading,
       signOut,
       refreshSubscription,
       promoteToAdmin,

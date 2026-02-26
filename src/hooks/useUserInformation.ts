@@ -2,6 +2,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
+import { Database } from '@/integrations/supabase/types';
+
+type UserInformationRow = Database['public']['Tables']['user_information']['Row'];
 
 export const useUserInformation = () => {
   const { user } = useAuth();
@@ -20,7 +23,7 @@ export const useUserInformation = () => {
           .single();
 
         if (existingInfo) {
-          return existingInfo;
+          return existingInfo as UserInformationRow;
         }
 
         // If no user information exists, initialize from subscription data
@@ -39,7 +42,7 @@ export const useUserInformation = () => {
             return null;
           }
 
-          return newInfo;
+          return newInfo as UserInformationRow;
         }
 
         if (fetchError) {
@@ -47,7 +50,7 @@ export const useUserInformation = () => {
           return null;
         }
 
-        return existingInfo;
+        return existingInfo as UserInformationRow;
       } catch (error) {
         console.error('Unexpected error:', error);
         return null;

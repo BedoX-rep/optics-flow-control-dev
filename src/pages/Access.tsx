@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import { Navigate } from 'react-router-dom';
 
 interface StaffMember {
@@ -99,20 +100,22 @@ const Access = () => {
         if (subscriptionsError) throw subscriptionsError;
         subscriptionsData = data;
       }
-      
+
       // Get all user IDs
       const userIds = subscriptionsData.map(staff => staff.user_id);
-      
+
       // Fetch all permissions in a single query
-      const { data: permissionsData, error: permissionsError } = await supabase
+      const { data: rawPermissions, error: permissionsError } = await supabase
         .from('permissions')
         .select('*')
         .in('user_id', userIds);
 
+      const permissionsData = (rawPermissions || []) as Database['public']['Tables']['permissions']['Row'][];
+
       if (permissionsError) {
         console.error('Error fetching permissions:', permissionsError);
       }
-      
+
       // Create a map of permissions by user_id for quick lookup
       const permissionsMap = new Map();
       if (permissionsData) {
@@ -120,7 +123,7 @@ const Access = () => {
           permissionsMap.set(perm.user_id, perm);
         });
       }
-      
+
       // Combine staff data with permissions
       const staffWithPermissions = subscriptionsData.map(staff => ({
         ...staff,
@@ -134,17 +137,17 @@ const Access = () => {
           can_manage_invoices: true,
         }
       }));
-      
+
       return staffWithPermissions as StaffMember[];
     },
     enabled: isAdmin,
     staleTime: 30 * 60 * 1000, // Cache for 30 minutes
-    cacheTime: 60 * 60 * 1000, // Keep in cache for 60 minutes
+    gcTime: 60 * 60 * 1000, // Keep in cache for 60 minutes
   });
 
   // Update own permissions mutation
   const updateOwnPermissionsMutation = useMutation({
-    mutationFn: async (newPermissions: Partial<typeof userPermissions>) => {
+    mutationFn: async (newPermissions: Partial<Database['public']['Tables']['permissions']['Update']>) => {
       const { error } = await supabase
         .from('permissions')
         .update(newPermissions)
@@ -286,7 +289,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_manage_products}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_manage_products', checked)
                   }
                 />
@@ -295,7 +298,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_manage_clients}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_manage_clients', checked)
                   }
                 />
@@ -304,7 +307,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_manage_receipts}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_manage_receipts', checked)
                   }
                 />
@@ -313,7 +316,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_view_financial}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_view_financial', checked)
                   }
                 />
@@ -322,7 +325,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_manage_purchases}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_manage_purchases', checked)
                   }
                 />
@@ -331,7 +334,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_access_dashboard}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_access_dashboard', checked)
                   }
                 />
@@ -340,7 +343,7 @@ const Access = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={userPermissions.can_manage_invoices}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleOwnPermissionChange('can_manage_invoices', checked)
                   }
                 />
