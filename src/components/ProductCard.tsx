@@ -32,7 +32,7 @@ interface ProductCardProps {
   onFieldChange: (productId: string, field: keyof Product, value: any) => void;
   onSave: (productId: string) => void;
   onEdit: (product: Product) => void;
-  onDelete: (productId: string) => void;
+  onDelete: (product: Product) => void;
   isSubmitting: boolean;
 }
 
@@ -164,8 +164,16 @@ const ProductCard = React.memo<ProductCardProps>(({
 
         {/* All Product Values - Information Grid */}
         <div className="flex-1 grid grid-cols-2 gap-y-4 gap-x-6">
-          <DetailItem label={t('index')} value={product.index || "—"} icon={Album} />
-          <DetailItem label={t('treatment')} value={product.treatment ? t(product.treatment.toLowerCase()) : "—"} icon={Filter} />
+          <DetailItem
+            label={t('index')}
+            value={["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(product.category || "") ? (product.index || "—") : "Ø"}
+            icon={Album}
+          />
+          <DetailItem
+            label={t('treatment')}
+            value={["Single Vision Lenses", "Progressive Lenses", "Sunglasses"].includes(product.category || "") ? (product.treatment ? t(product.treatment.toLowerCase()) : "—") : "Ø"}
+            icon={Filter}
+          />
           <DetailItem label={t('company')} value={product.company || "—"} icon={Building2} />
           <DetailItem label={t('gamma')} value={product.gamma || "—"} icon={Layers} />
           <DetailItem label={t('costTTC')} value={product.cost_ttc ? `${product.cost_ttc} DH` : "—"} icon={Coins} />
@@ -186,7 +194,7 @@ const ProductCard = React.memo<ProductCardProps>(({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onDelete(product.id)}
+              onClick={() => onDelete(product)}
               className="h-10 w-10 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
             >
               <Trash2 size={18} />
