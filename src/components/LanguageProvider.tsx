@@ -4038,10 +4038,6 @@ const accessTranslations: Translations = {
     en: 'Appointment Status',
     fr: 'Statut du Rendez-vous'
   },
-  viewResults: {
-    en: 'View Results',
-    fr: 'Voir les Résultats'
-  },
   viewresults: {
     en: 'View Results',
     fr: 'Voir les Résultats'
@@ -4796,6 +4792,82 @@ const allTranslations: Translations = {
   viewDetails: {
     en: 'View Details',
     fr: 'Voir les Détails'
+  },
+  noPhone: {
+    en: 'No phone',
+    fr: 'Pas de téléphone'
+  },
+  update: {
+    en: 'Update',
+    fr: 'Mettre à jour'
+  },
+  productConfigurationSuite: {
+    en: 'Product Configuration Suite',
+    fr: 'Suite de Configuration de Produits'
+  },
+  autoNaming: {
+    en: 'Auto-Naming',
+    fr: 'Nommage Automatique'
+  },
+  autoGenerateProducts: {
+    en: 'Auto Generate Products',
+    fr: 'Générer des produits automatiquement'
+  },
+  intelligentProductGeneration: {
+    en: 'Intelligent Product Generation Suite',
+    fr: 'Suite de Génération Intelligente de Produits'
+  },
+  selectCategoryPlaceholder: {
+    en: 'Select a category',
+    fr: 'Sélectionner une catégorie'
+  },
+  reset: {
+    en: 'Reset',
+    fr: 'Réinitialiser'
+  },
+  generate: {
+    en: 'Generate',
+    fr: 'Générer'
+  },
+  allMontageStatuses: {
+    en: 'All Montage Statuses',
+    fr: 'Tous les statuts de montage'
+  },
+  showing: {
+    en: 'Showing',
+    fr: 'Affichage'
+  },
+  markUnresponsive: {
+    en: 'Mark Unresponsive',
+    fr: 'Marquer comme sans réponse'
+  },
+  markUndelivered: {
+    en: 'Mark Undelivered',
+    fr: 'Marquer comme non livré'
+  },
+  view: {
+    en: 'View',
+    fr: 'Voir'
+  },
+  markCalled: {
+    en: 'Mark Called',
+    fr: 'Marquer comme appelé'
+  },
+  markPaid: {
+    en: 'Mark Paid',
+    fr: 'Marquer comme payé'
+  },
+  totalProducts: {
+    en: 'Total Products',
+    fr: 'Total des produits'
+  },
+  totalExpenses: {
+    en: 'Total Expenses',
+    fr: 'Total des dépenses'
+  },
+  expand: {
+    en: 'Expand',
+    fr: 'Agrandir'
   },
   print: {
     en: 'Print',

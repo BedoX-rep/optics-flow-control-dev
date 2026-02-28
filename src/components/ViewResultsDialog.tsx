@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from './LanguageProvider';
 import { Appointment } from '@/integrations/supabase/types';
-import { Eye, User, Save, X } from 'lucide-react';
+import { Eye, User, Save, X, ChevronRight, Activity } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ViewResultsDialogProps {
     isOpen: boolean;
@@ -68,50 +69,65 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
         });
     };
 
-    const inputClass = "rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-10 text-center font-mono text-sm";
+    const inputClass = "h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-center font-black text-slate-800 text-sm";
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[560px] rounded-[2rem] border-slate-200/60 shadow-2xl bg-white/95 backdrop-blur-xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
-                <DialogHeader className="p-6 pb-6 bg-slate-900 text-white relative">
-                    <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                        <Eye className="h-5 w-5 text-teal-400" />
-                        {t('viewresults') || 'View Results'}
-                    </DialogTitle>
-                    <DialogDescription className="text-white text-xs mt-1 font-bold uppercase tracking-widest opacity-90">
-                        {appointment.client_name} • {appointment.appointment_date}
-                    </DialogDescription>
+            <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] border-none shadow-2xl bg-[#E2E2DE] p-0 overflow-y-auto max-h-[96vh] min-h-[85vh] flex flex-col custom-scrollbar">
+                {/* Background Watermark Icons */}
+                <div className="absolute top-32 right-6 opacity-[0.05] pointer-events-none rotate-12">
+                    <Eye size={120} strokeWidth={1} />
+                </div>
+                <div className="absolute bottom-20 left-6 opacity-[0.03] pointer-events-none -rotate-12">
+                    <Activity size={100} strokeWidth={1} />
+                </div>
+
+                <DialogHeader className="p-6 pb-6 bg-gradient-to-b from-[#063D31] to-[#042F26] text-white relative rounded-b-[2.5rem] shadow-xl">
+                    <button
+                        onClick={onClose}
+                        className="absolute right-8 top-8 text-teal-200/50 hover:text-white transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+                    <div className="flex flex-col items-center text-center space-y-2">
+                        <DialogTitle className="text-2xl font-black tracking-[0.2em] uppercase leading-none">
+                            {t('viewresults') || 'View Results'}
+                        </DialogTitle>
+                        <DialogDescription className="text-teal-50/70 text-xs font-medium tracking-wide">
+                            {appointment.client_name} • {appointment.appointment_date}
+                        </DialogDescription>
+                    </div>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-5 relative z-10 custom-scrollbar flex-1 flex flex-col">
                     {/* Examiner Section */}
-                    <div className="space-y-3">
-                        <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-[#5C5C59] uppercase tracking-[0.15em] px-1 flex items-center gap-2">
                             <User className="h-3 w-3" /> {t('examinerName')}
                         </Label>
                         <Input
                             value={examinerName}
                             onChange={(e) => setExaminerName(e.target.value)}
                             placeholder={t('enterExaminerName')}
-                            className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-11 font-bold"
+                            className="h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-base font-black text-slate-800 placeholder:text-[#AAA]"
                         />
                     </div>
 
                     {/* Prescription Table */}
                     <div className="space-y-4">
-                        <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                        <Label className="text-[10px] font-black text-[#5C5C59] uppercase tracking-[0.15em] px-1 flex items-center gap-2">
                             <Eye className="h-3 w-3" /> {t('prescriptionResults')}
                         </Label>
 
                         {/* OD - Right Eye */}
-                        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-4">
-                            <p className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+                        <div className="bg-white/40 rounded-[1.5rem] p-4 border border-white/60 shadow-sm space-y-3 backdrop-blur-sm">
+                            <p className="text-[10px] font-black text-[#063D31] uppercase tracking-[0.2em] flex items-center gap-2 mb-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#063D31]" />
                                 {t('rightEyeShort')} (OD)
                             </p>
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">SPH</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">SPH</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -122,7 +138,7 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                                     />
                                 </div>
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">CYL</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">CYL</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -133,7 +149,7 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                                     />
                                 </div>
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">AXE</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">AXE</Label>
                                     <Input
                                         type="number"
                                         step="1"
@@ -147,14 +163,14 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                         </div>
 
                         {/* OS - Left Eye */}
-                        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-4">
-                            <p className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+                        <div className="bg-white/40 rounded-[1.5rem] p-4 border border-white/60 shadow-sm space-y-3 backdrop-blur-sm">
+                            <p className="text-[10px] font-black text-[#063D31] uppercase tracking-[0.2em] flex items-center gap-2 mb-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#063D31]" />
                                 {t('leftEyeShort')} (OS)
                             </p>
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">SPH</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">SPH</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -165,7 +181,7 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                                     />
                                 </div>
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">CYL</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">CYL</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -176,7 +192,7 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                                     />
                                 </div>
                                 <div className="space-y-1.5 text-center">
-                                    <Label className="text-[9px] font-black text-slate-900 uppercase tracking-widest">AXE</Label>
+                                    <Label className="text-[9px] font-black text-[#8E8E8A] uppercase tracking-widest">AXE</Label>
                                     <Input
                                         type="number"
                                         step="1"
@@ -190,44 +206,50 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                         </div>
 
                         {/* ADD Value */}
-                        <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-lg shadow-slate-900/20">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-[10px] font-black text-teal-400 uppercase tracking-[0.2em]">
+                        <div className="bg-[#063D31] rounded-[1.5rem] p-4 text-white flex items-center justify-between border border-[#042F26] shadow-xl shadow-teal-900/10">
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-md">
+                                    <ChevronRight className="h-4 w-4" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">
                                     {t('addPower') || 'ADD Power'}
-                                </Label>
-                                <Input
-                                    type="number"
-                                    step="0.25"
-                                    value={addValue}
-                                    onChange={(e) => setAddValue(e.target.value)}
-                                    placeholder="0.00"
-                                    className="rounded-xl border-slate-700 bg-slate-800 text-white focus:border-teal-400 focus:ring-teal-400/20 h-10 w-24 text-center font-mono text-sm"
-                                />
+                                </p>
                             </div>
+                            <Input
+                                type="number"
+                                step="0.25"
+                                value={addValue}
+                                onChange={(e) => setAddValue(e.target.value)}
+                                placeholder="0.00"
+                                className="h-10 w-24 rounded-[1rem] border-none bg-white text-[#063D31] shadow-xl text-center font-black text-base focus:ring-0"
+                            />
                         </div>
                     </div>
                 </form>
 
-                <div className="p-6 bg-slate-50 border-t border-slate-100 flex gap-3">
-                    <Button
+                <div className="p-6 pt-2 flex items-center justify-between z-20 mt-auto bg-gradient-to-t from-[#E2E2DE] via-[#E2E2DE] to-transparent">
+                    <button
                         type="button"
-                        variant="ghost"
                         onClick={onClose}
-                        className="flex-1 h-12 rounded-2xl font-black uppercase text-[10px] tracking-widest text-slate-900 hover:text-slate-600 hover:bg-slate-100"
+                        className="px-6 py-2 rounded-xl font-black uppercase text-xs tracking-[0.2em] text-[#063D31] hover:translate-y-[-2px] transition-all border-b-2 border-[#063D31]"
                     >
-                        <X className="h-4 w-4 mr-2" />
                         {t('close') || 'Close'}
-                    </Button>
+                    </button>
                     <Button
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSaving}
-                        className="flex-[2] h-12 rounded-2xl bg-teal-500 text-slate-950 hover:bg-teal-400 font-black uppercase text-[10px] tracking-widest shadow-xl shadow-teal-500/20 transition-all border-none"
+                        className={cn(
+                            "px-8 h-12 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] shadow-xl transition-all duration-500 active:scale-95 flex items-center gap-2 border-none",
+                            isSaving
+                                ? "bg-gradient-to-br from-[#8E8E8A] to-[#63635F] text-slate-900 opacity-50 cursor-not-allowed"
+                                : "bg-gradient-to-br from-[#063D31] to-[#042F26] text-white hover:shadow-teal-900/40 hover:translate-y-[-2px]"
+                        )}
                     >
                         {isSaving ? (
-                            <div className="h-4 w-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                            <div className="h-5 w-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <><Save className="h-4 w-4 mr-2" /> {t('saveChanges') || 'Save Changes'}</>
+                            <><Save className="h-5 w-5 mr-1" /> {t('saveChanges') || 'Save Changes'}</>
                         )}
                     </Button>
                 </div>

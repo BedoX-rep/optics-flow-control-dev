@@ -4,6 +4,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,7 +122,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                     <Eye size={120} strokeWidth={1} />
                 </div>
 
-                <DialogHeader className="p-10 pb-12 bg-gradient-to-b from-[#063D31] to-[#042F26] text-white relative rounded-b-[3rem] shadow-xl">
+                <DialogHeader className="p-6 pb-6 bg-gradient-to-b from-[#063D31] to-[#042F26] text-white relative rounded-b-[2.5rem] shadow-xl">
                     <button
                         onClick={onClose}
                         className="absolute right-8 top-8 text-teal-200/50 hover:text-white transition-colors"
@@ -129,23 +130,26 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                         <X size={24} />
                     </button>
                     <div className="flex flex-col items-center text-center space-y-2">
-                        <DialogTitle className="text-3xl font-black tracking-[0.2em] uppercase leading-none">
+                        <DialogTitle className="text-2xl font-black tracking-[0.2em] uppercase leading-none">
                             {isEditing ? t('editAppointment') : t('newAppointment')}
                         </DialogTitle>
-                        <p className="text-teal-50/60 text-base font-medium tracking-wide">
+                        <DialogDescription className="sr-only">
+                            {isEditing ? 'Update existing eye exam appointment details' : 'Schedule a new eye exam for a client'}
+                        </DialogDescription>
+                        <p className="text-teal-50/70 text-xs font-medium tracking-wide">
                             {isEditing ? t('updateAppointmentDetails') : t('scheduleNewEyeExam')}
                         </p>
                     </div>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-10 pt-8 space-y-8 relative z-10">
+                <form onSubmit={handleSubmit} className="p-6 pt-4 space-y-5 relative z-10 flex-1 flex flex-col">
                     {/* Client Selection Mode Toggle */}
                     {!isEditing && (
                         <div className="bg-[#B5B5B2] p-1.5 rounded-[2rem] shadow-inner flex gap-1 mx-auto max-w-md">
                             <button
                                 type="button"
                                 onClick={() => { setSelectionMode('existing'); setClientId(null); }}
-                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${selectionMode === 'existing' ? 'bg-[#063D31] text-white shadow-xl translate-y-[-1px]' : 'text-slate-100 hover:text-white'}`}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${selectionMode === 'existing' ? 'bg-[#063D31] text-white shadow-xl translate-y-[-1px]' : 'text-slate-100 hover:text-white'}`}
                             >
                                 <Users className="h-4 w-4" />
                                 {t('selectExistingClient')}
@@ -157,7 +161,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                     setClientId(null);
                                     if (clientSearch && !clientName) setClientName(clientSearch);
                                 }}
-                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${selectionMode === 'manual' ? 'bg-[#063D31] text-white shadow-xl translate-y-[-1px]' : 'text-slate-100 hover:text-white'}`}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[1.8rem] text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${selectionMode === 'manual' ? 'bg-[#063D31] text-white shadow-xl translate-y-[-1px]' : 'text-slate-100 hover:text-white'}`}
                             >
                                 <UserPlus className="h-4 w-4" />
                                 {t('manualEntry')}
@@ -183,7 +187,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                         }}
                                         onFocus={() => setShowClientDropdown(true)}
                                         onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
-                                        className="pl-12 h-14 rounded-[1.2rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-slate-800 font-medium text-lg placeholder:text-[#AAA]"
+                                        className="pl-12 h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-slate-800 font-medium text-base placeholder:text-[#AAA]"
                                     />
                                     {showClientDropdown && (
                                         <div className="absolute top-full left-0 right-0 mt-3 bg-[#E2E2DE] border border-black/5 rounded-[1.5rem] shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 backdrop-blur-md">
@@ -236,14 +240,14 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                         placeholder={t('clientName')}
                                         value={clientName}
                                         onChange={(e) => setClientName(e.target.value)}
-                                        className="h-14 rounded-[1.2rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-lg font-black text-slate-800"
+                                        className="h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-base font-black text-slate-800"
                                         required
                                     />
                                     <Input
                                         placeholder={t('phone')}
                                         value={clientPhone}
                                         onChange={(e) => setClientPhone(e.target.value)}
-                                        className="h-14 rounded-[1.2rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-lg font-bold text-slate-800"
+                                        className="h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-base font-bold text-slate-800"
                                     />
                                 </div>
                             )}
@@ -258,10 +262,10 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                         type="date"
                                         value={appointmentDate}
                                         onChange={(e) => setAppointmentDate(e.target.value)}
-                                        className="h-14 rounded-[1.2rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-lg font-black text-slate-800 pr-12 appearance-none"
+                                        className="h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-base font-black text-slate-800 pr-10 appearance-none"
                                         required
                                     />
-                                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E8A] pointer-events-none" />
+                                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E8A] pointer-events-none" />
                                 </div>
                             </div>
                             <div className="space-y-3">
@@ -271,10 +275,10 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                         type="time"
                                         value={appointmentTime}
                                         onChange={(e) => setAppointmentTime(e.target.value)}
-                                        className="h-14 rounded-[1.2rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-lg font-black text-slate-800 pr-12 appearance-none"
+                                        className="h-10 rounded-[1rem] border-none bg-black/[0.04] focus:bg-white focus:ring-2 focus:ring-[#063D31]/10 text-base font-black text-slate-800 pr-10 appearance-none"
                                         required
                                     />
-                                    <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8E8E8A] pointer-events-none" />
+                                    <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8E8A] pointer-events-none" />
                                 </div>
                             </div>
                         </div>
@@ -285,18 +289,18 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                             <textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
-                                className="w-full min-h-[140px] rounded-[1.5rem] border-none bg-black/[0.04] p-5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#063D31]/10 transition-all text-base font-bold text-slate-700 placeholder:text-[#AAA] shadow-inner"
+                                className="w-full min-h-[80px] rounded-[1rem] border-none bg-black/[0.04] p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#063D31]/10 transition-all text-sm font-bold text-slate-700 placeholder:text-[#AAA] shadow-inner"
                                 placeholder={t('addSpecialInstructions')}
                             />
                         </div>
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex items-center justify-between pt-8">
+                    <div className="flex items-center justify-between pt-4 mt-auto">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-8 py-3 rounded-xl font-black uppercase text-sm tracking-[0.2em] text-[#063D31] hover:translate-y-[-2px] transition-all border-b-2 border-[#063D31]"
+                            className="px-6 py-2 rounded-xl font-black uppercase text-xs tracking-[0.2em] text-[#063D31] hover:translate-y-[-2px] transition-all border-b-2 border-[#063D31]"
                         >
                             {t('cancel')}
                         </button>
@@ -304,7 +308,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                             type="submit"
                             disabled={isSaving || !clientName.trim()}
                             className={cn(
-                                "px-16 h-16 rounded-[2rem] font-black uppercase text-base tracking-[0.2em] shadow-2xl transition-all duration-500 active:scale-95 flex items-center gap-3 border-none",
+                                "px-8 h-12 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] shadow-xl transition-all duration-500 active:scale-95 flex items-center gap-2 border-none",
                                 (isSaving || !clientName.trim())
                                     ? "bg-gradient-to-br from-[#8E8E8A] to-[#63635F] text-slate-900 opacity-50 cursor-not-allowed"
                                     : "bg-gradient-to-br from-[#063D31] to-[#042F26] text-white hover:shadow-teal-900/40 hover:translate-y-[-2px]"
