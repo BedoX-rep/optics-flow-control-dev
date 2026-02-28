@@ -253,12 +253,12 @@ const IndexPage = () => {
             <div className="max-w-5xl mx-auto text-center space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom duration-1000">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter px-2">
                 {t('heroTitle').split(' ').map((word: string, i: number) => (
-                  <React.Fragment key={i}>
+                  <span key={i}>
                     <span className={i > 2 ? "text-teal-600 inline-block" : "inline-block"}>
                       {word}
                     </span>
                     {i < t('heroTitle').split(' ').length - 1 ? ' ' : ''}
-                  </React.Fragment>
+                  </span>
                 ))}
               </h1>
               <p className="text-base md:text-2xl text-gray-600 leading-relaxed max-w-2xl mx-auto font-medium px-2">

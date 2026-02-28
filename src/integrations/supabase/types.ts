@@ -867,6 +867,7 @@ export type Database = {
           can_manage_purchases: boolean
           can_access_dashboard: boolean
           can_manage_invoices: boolean
+          can_access_appointments: boolean
           created_at: string | null
           updated_at: string | null
         }
@@ -880,6 +881,7 @@ export type Database = {
           can_manage_purchases?: boolean
           can_access_dashboard?: boolean
           can_manage_invoices?: boolean
+          can_access_appointments?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -893,6 +895,7 @@ export type Database = {
           can_manage_purchases?: boolean
           can_access_dashboard?: boolean
           can_manage_invoices?: boolean
+          can_access_appointments?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -902,6 +905,83 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      appointments: {
+        Row: {
+          id: string
+          user_id: string
+          client_id: string | null
+          client_name: string
+          client_phone: string | null
+          appointment_date: string
+          appointment_time: string
+          status: string
+          notes: string | null
+          examiner_name: string | null
+          right_eye_sph: number | null
+          right_eye_cyl: number | null
+          right_eye_axe: number | null
+          left_eye_sph: number | null
+          left_eye_cyl: number | null
+          left_eye_axe: number | null
+          add_value: number | null
+          is_deleted: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          client_id?: string | null
+          client_name: string
+          client_phone?: string | null
+          appointment_date: string
+          appointment_time: string
+          status?: string
+          notes?: string | null
+          examiner_name?: string | null
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          client_id?: string | null
+          client_name?: string
+          client_phone?: string | null
+          appointment_date?: string
+          appointment_time?: string
+          status?: string
+          notes?: string | null
+          examiner_name?: string | null
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           }
         ]
@@ -1270,6 +1350,29 @@ export interface InvoiceItem {
   total_price: number;
   user_id: string;
   is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  user_id: string;
+  client_id?: string | null;
+  client_name: string;
+  client_phone?: string | null;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+  notes?: string | null;
+  examiner_name?: string | null;
+  right_eye_sph?: number | null;
+  right_eye_cyl?: number | null;
+  right_eye_axe?: number | null;
+  left_eye_sph?: number | null;
+  left_eye_cyl?: number | null;
+  left_eye_axe?: number | null;
+  add_value?: number | null;
+  is_deleted?: boolean | null;
   created_at: string;
   updated_at: string;
 }

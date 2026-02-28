@@ -679,7 +679,7 @@ const NewReceipt = () => {
           const showError = hasError && index < currentStepIndex;
 
           return (
-            <React.Fragment key={step.id}>
+            <div key={step.id} className="contents">
               <button
                 onClick={() => {
                   if (currentStepIndex === 1 && step.id === 'finalize') {
@@ -731,7 +731,7 @@ const NewReceipt = () => {
                   <ChevronRight className={`w-5 h-5 ${isCompleted ? 'text-emerald-400' : 'text-slate-300'}`} />
                 </div>
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>

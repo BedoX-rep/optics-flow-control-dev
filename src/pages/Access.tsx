@@ -26,6 +26,7 @@ interface StaffMember {
     can_manage_purchases: boolean;
     can_access_dashboard: boolean;
     can_manage_invoices: boolean;
+    can_access_appointments: boolean;
   };
 }
 
@@ -135,6 +136,7 @@ const Access = () => {
           can_manage_purchases: false,
           can_access_dashboard: true,
           can_manage_invoices: true,
+          can_access_appointments: true,
         }
       }));
 
@@ -302,7 +304,8 @@ const Access = () => {
                 { id: 'can_view_financial', label: t('viewFinancial') },
                 { id: 'can_manage_purchases', label: t('managePurchases') },
                 { id: 'can_access_dashboard', label: t('accessDashboard') },
-                { id: 'can_manage_invoices', label: t('manageInvoices') }
+                { id: 'can_manage_invoices', label: t('manageInvoices') },
+                { id: 'can_access_appointments', label: t('accessAppointments') }
               ].map((perm) => (
                 <div key={perm.id} className="flex items-center justify-between p-5 bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:border-teal-300 hover:shadow-md transition-all group">
                   <Label htmlFor={perm.id} className="text-sm font-bold text-slate-800 cursor-pointer group-hover:text-teal-700 transition-colors">{perm.label}</Label>

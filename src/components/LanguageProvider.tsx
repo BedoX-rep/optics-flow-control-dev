@@ -4030,6 +4030,154 @@ const accessTranslations: Translations = {
     en: 'Manage Invoices',
     fr: 'Gérer les Factures'
   },
+  accessAppointments: {
+    en: 'Access Appointments',
+    fr: 'Accéder aux Rendez-vous'
+  },
+  appointments: {
+    en: 'Appointments',
+    fr: 'Rendez-vous'
+  },
+  eyeExamAppointments: {
+    en: 'Eye Exam Appointments',
+    fr: 'Rendez-vous Examens de Vue'
+  },
+  eyeExamAppointmentsDesc: {
+    en: 'Schedule and manage client eye examinations',
+    fr: 'Planifiez et gérez les examens de vue des clients'
+  },
+  newAppointment: {
+    en: 'New Appointment',
+    fr: 'Nouveau Rendez-vous'
+  },
+  editAppointment: {
+    en: 'Edit Appointment',
+    fr: 'Modifier le Rendez-vous'
+  },
+  deleteAppointment: {
+    en: 'Delete Appointment',
+    fr: 'Supprimer le Rendez-vous'
+  },
+  searchAppointments: {
+    en: 'Search appointments...',
+    fr: 'Rechercher des rendez-vous...'
+  },
+  noAppointmentsFound: {
+    en: 'No appointments found',
+    fr: 'Aucun rendez-vous trouvé'
+  },
+  noAppointmentsForDay: {
+    en: 'No appointments for this day',
+    fr: 'Aucun rendez-vous pour ce jour'
+  },
+  appointmentDate: {
+    en: 'Appointment Date',
+    fr: 'Date du Rendez-vous'
+  },
+  appointmentTime: {
+    en: 'Appointment Time',
+    fr: 'Heure du Rendez-vous'
+  },
+  appointmentNotes: {
+    en: 'Notes',
+    fr: 'Notes'
+  },
+  appointmentStatus: {
+    en: 'Status',
+    fr: 'Statut'
+  },
+  scheduled: {
+    en: 'Scheduled',
+    fr: 'Planifié'
+  },
+  inProgress: {
+    en: 'In Progress',
+    fr: 'En Cours'
+  },
+  finished: {
+    en: 'Finished',
+    fr: 'Terminé'
+  },
+  cancelled: {
+    en: 'Cancelled',
+    fr: 'Annulé'
+  },
+  examinerName: {
+    en: 'Examiner / Optician',
+    fr: 'Examinateur / Opticien'
+  },
+  enterExaminerName: {
+    en: 'Enter examiner name',
+    fr: 'Entrer le nom de l\'examinateur'
+  },
+  finalizeAppointment: {
+    en: 'Finalize Appointment',
+    fr: 'Finaliser le Rendez-vous'
+  },
+  finalizeAppointmentDesc: {
+    en: 'Enter the prescription results and optician name to finalize this appointment',
+    fr: 'Entrez les résultats de la prescription et le nom de l\'opticien pour finaliser ce rendez-vous'
+  },
+  prescriptionResults: {
+    en: 'Prescription Results',
+    fr: 'Résultats de Prescription'
+  },
+  mustEnterExaminerName: {
+    en: 'Examiner name is required to finalize',
+    fr: 'Le nom de l\'examinateur est requis pour finaliser'
+  },
+  appointmentCreated: {
+    en: 'Appointment created successfully',
+    fr: 'Rendez-vous créé avec succès'
+  },
+  appointmentUpdated: {
+    en: 'Appointment updated successfully',
+    fr: 'Rendez-vous mis à jour avec succès'
+  },
+  appointmentDeleted: {
+    en: 'Appointment deleted successfully',
+    fr: 'Rendez-vous supprimé avec succès'
+  },
+  appointmentFinalized: {
+    en: 'Appointment finalized successfully',
+    fr: 'Rendez-vous finalisé avec succès'
+  },
+  failedToCreateAppointment: {
+    en: 'Failed to create appointment',
+    fr: 'Échec de la création du rendez-vous'
+  },
+  failedToUpdateAppointment: {
+    en: 'Failed to update appointment',
+    fr: 'Échec de la mise à jour du rendez-vous'
+  },
+  failedToDeleteAppointment: {
+    en: 'Failed to delete appointment',
+    fr: 'Échec de la suppression du rendez-vous'
+  },
+  confirmDeleteAppointment: {
+    en: 'Are you sure you want to delete this appointment?',
+    fr: 'Êtes-vous sûr de vouloir supprimer ce rendez-vous ?'
+  },
+  loadingAppointments: {
+    en: 'Loading appointments...',
+    fr: 'Chargement des rendez-vous...'
+  },
+  selectClient: {
+    en: 'Select Client',
+    fr: 'Sélectionner un Client'
+  },
+  todaysAppointments: {
+    en: 'Today\'s Appointments',
+    fr: 'Rendez-vous d\'Aujourd\'hui'
+  },
+  finalize: {
+    en: 'Finalize',
+    fr: 'Finaliser'
+  },
+  addPower: {
+    en: 'Add Power',
+    fr: 'Addition'
+  },
   loadingPermissions: {
     en: 'Loading your permissions...',
     fr: 'Chargement de vos autorisations...'

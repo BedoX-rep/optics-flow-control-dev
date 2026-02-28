@@ -20,7 +20,8 @@ import {
   Menu,
   Palette,
   Printer,
-  LogOut
+  LogOut,
+  CalendarDays
 } from 'lucide-react';
 import LanguageToggle from './LanguageToggle';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +40,7 @@ const getNavigation = (t: any) => [
   { name: t('invoices'), href: '/invoices', icon: Printer, permission: 'can_manage_invoices' },
   { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
   { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
+  { name: t('appointments'), href: '/appointments', icon: CalendarDays, permission: 'can_access_appointments' },
 ];
 
 const NavItem = ({ item, collapsed, isActive, onNavigate }: { item: any, collapsed: boolean, isActive: boolean, onNavigate?: () => void }) => (

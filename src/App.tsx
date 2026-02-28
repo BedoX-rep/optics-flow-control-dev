@@ -26,6 +26,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 import Invoices from './pages/Invoices';
+import Appointments from './pages/Appointments';
 
 // Create a client with caching options
 const queryClient = new QueryClient({
@@ -196,6 +197,12 @@ const AppRoutes = () => (
     <Route path="/invoices/*" element={
       <ProtectedRoute requiredPermission="can_manage_invoices">
         <Layout><Invoices /></Layout>
+      </ProtectedRoute>
+    } />
+
+    <Route path="/appointments/*" element={
+      <ProtectedRoute requiredPermission="can_access_appointments">
+        <Layout><Appointments /></Layout>
       </ProtectedRoute>
     } />
 
