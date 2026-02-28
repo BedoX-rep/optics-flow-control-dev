@@ -8,6 +8,7 @@ interface Receipt {
   payment_status?: string;
   balance: number;
   total: number;
+  montage_costs?: number;
 }
 
 interface ReceiptStatsSummaryProps {
@@ -19,7 +20,15 @@ const ReceiptStatsSummary: React.FC<ReceiptStatsSummaryProps> = ({ receipts }) =
   const total = receipts.length;
   const totalAmount = receipts.reduce((sum, r) => sum + (r.total || 0), 0);
   const totalBalance = receipts.reduce((sum, r) => sum + (r.balance || 0), 0);
-  
+
+  const unpaidAdditionalCosts = receipts.reduce((sum, r) => {
+    const cost = r.montage_costs || 0;
+    if (cost > 0 && ['InCutting', 'Ready'].includes(r.montage_status || '')) {
+      return sum + cost;
+    }
+    return sum;
+  }, 0);
+
   const stats = [
     {
       label: t('pending'),
@@ -31,11 +40,15 @@ const ReceiptStatsSummary: React.FC<ReceiptStatsSummaryProps> = ({ receipts }) =
     },
     {
       label: t('completed'),
-      count: receipts.filter(r => 
-        r.delivery_status === 'Completed' && 
-        r.montage_status === 'Completed' && 
+      count: receipts.filter(r =>
+        r.delivery_status === 'Completed' &&
+        r.montage_status === 'Completed' &&
         r.balance === 0
       ).length
+    },
+    {
+      label: t('additionalCostsToBePaid'),
+      count: `${unpaidAdditionalCosts.toFixed(2)} DH`
     }
   ];
 

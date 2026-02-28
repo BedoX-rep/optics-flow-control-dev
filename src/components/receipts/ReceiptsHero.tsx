@@ -23,13 +23,22 @@ const ReceiptsHero = ({
         return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     };
 
+    const unpaidAdditionalCosts = receipts.reduce((sum, r) => {
+        const cost = r.montage_costs || 0;
+        if (cost > 0 && ['InCutting', 'Ready'].includes(r.montage_status || '')) {
+            return sum + cost;
+        }
+        return sum;
+    }, 0);
+
     const stats = {
         total: receipts.length,
         unpaid: receipts.filter(r => r.balance > 0).length,
         pending: receipts.filter(r => r.delivery_status !== 'Completed').length,
         undeliveredMonth: receipts.filter(r => r.delivery_status !== 'Completed' && isCurrentMonth(r.created_at)).length,
         pendingMonth: receipts.filter(r => r.balance > 0 && isCurrentMonth(r.created_at)).length,
-        totalAmount: receipts.reduce((sum, r) => sum + (r.total || 0), 0)
+        totalAmount: receipts.reduce((sum, r) => sum + (r.total || 0), 0),
+        unpaidAdditionalCosts
     };
 
     return (
@@ -75,6 +84,10 @@ const ReceiptsHero = ({
                                 <div className="flex flex-col">
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-100/60 mb-1">Pending Receipts (Month)</span>
                                     <span className="text-2xl font-black text-amber-300">{stats.pendingMonth}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-100/60 mb-1">{t('additionalCostsToBePaid') || 'Additional Costs'}</span>
+                                    <span className="text-2xl font-black text-purple-300">{stats.unpaidAdditionalCosts.toFixed(2)} DH</span>
                                 </div>
                             </div>
                         </div>
