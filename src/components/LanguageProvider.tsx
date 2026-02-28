@@ -923,6 +923,10 @@ const productTranslations: Translations = {
     en: 'Manual Additional Costs',
     fr: 'Coûts Supplémentaires Manuels'
   },
+  PaidSHORT: {
+    en: 'Paid at delivery',
+    fr: 'Payé à la livraison'
+  },
   additionalCostsSettings: {
     en: 'Additional Costs Settings',
     fr: 'Paramètres des Coûts Supplémentaires'

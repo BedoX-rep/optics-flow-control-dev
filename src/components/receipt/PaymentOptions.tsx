@@ -16,8 +16,6 @@ interface PaymentOptionsProps {
   setTax: (value: number) => void;
   setTaxIndicator: (value: number) => void;
   setAdvancePayment: (value: number) => void;
-  setBalance: (value: number) => void;
-  updatePaymentStatus: (balance: number) => void;
 }
 
 const PaymentOptions: React.FC<PaymentOptionsProps> = ({
@@ -33,8 +31,6 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
   setTax,
   setTaxIndicator,
   setAdvancePayment,
-  setBalance,
-  updatePaymentStatus
 }) => {
   const { t } = useLanguage();
 
@@ -130,8 +126,6 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
                 onChange={(e) => {
                   const value = parseFloat(e.target.value) || 0;
                   setAdvancePayment(value);
-                  setBalance(total - value);
-                  updatePaymentStatus(total - value);
                 }}
                 className="teal-focus pr-10 h-10 rounded-xl border-teal-200 bg-white font-bold text-slate-900"
               />

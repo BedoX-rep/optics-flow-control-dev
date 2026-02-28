@@ -140,8 +140,6 @@ interface PaymentOptionsProps {
   setTax: (tax: number) => void;
   setTaxIndicator: (indicator: number) => void;
   setAdvancePayment: (payment: number) => void;
-  setBalance: (balance: number) => void;
-  updatePaymentStatus: (balance: number) => void;
 }
 
 const NewReceipt = () => {
@@ -178,8 +176,6 @@ const NewReceipt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [advancePayment, setAdvancePayment] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [paymentStatus, setPaymentStatus] = useState('Unpaid');
   const [autoMontage, setAutoMontage] = useState(() => {
     const saved = localStorage.getItem('autoMontage');
     return saved !== null ? JSON.parse(saved) : true;
@@ -562,6 +558,10 @@ const NewReceipt = () => {
   // Calculate profit
   const profit = total - totalCost - montageCosts;
 
+  // Derived values for balance and payment status
+  const balance = total - advancePayment;
+  const paymentStatus = balance <= 0 ? 'Paid' : balance < total ? 'Partially Paid' : 'Unpaid';
+
   const fetchClientPrescription = async (clientId: string) => {
     if (!user) return;
 
@@ -632,15 +632,7 @@ const NewReceipt = () => {
     fetchClientPrescription(clientId);
   };
 
-  const updatePaymentStatus = (newBalance: number) => {
-    if (newBalance <= 0) {
-      setPaymentStatus('Paid');
-    } else if (newBalance < total) {
-      setPaymentStatus('Partially Paid');
-    } else {
-      setPaymentStatus('Unpaid');
-    }
-  };
+
 
   const handleClientAdded = async (client: Client) => {
     if (!user) return;
@@ -1054,8 +1046,6 @@ const NewReceipt = () => {
                 setTax={setTax}
                 setTaxIndicator={setTaxIndicator}
                 setAdvancePayment={setAdvancePayment}
-                setBalance={setBalance}
-                updatePaymentStatus={updatePaymentStatus}
               />
             </div>
           </div>
