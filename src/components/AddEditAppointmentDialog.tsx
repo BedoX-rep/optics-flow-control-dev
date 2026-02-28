@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -8,13 +8,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from './LanguageProvider';
 import { useAuth } from './AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Clock, User, Phone, FileText, Search, X, Save } from 'lucide-react';
+import { Users, UserPlus, Search, X, CalendarDays, Clock, FileText } from 'lucide-react';
 import { Appointment, Client } from '@/integrations/supabase/types';
+import { format } from 'date-fns';
 
 interface AddEditAppointmentDialogProps {
     isOpen: boolean;
@@ -24,13 +24,12 @@ interface AddEditAppointmentDialogProps {
     isSaving?: boolean;
 }
 
-import { format } from 'date-fns';
-
 const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: AddEditAppointmentDialogProps) => {
     const { t } = useLanguage();
     const { user } = useAuth();
     const isEditing = !!appointment;
 
+    const [selectionMode, setSelectionMode] = useState<'existing' | 'manual'>('existing');
     const [clientName, setClientName] = useState('');
     const [clientPhone, setClientPhone] = useState('');
     const [clientId, setClientId] = useState<string | null>(null);
@@ -50,12 +49,20 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                 .select('id, name, phone')
                 .eq('user_id', user?.id)
                 .eq('is_deleted', false)
-                .order('name');
+                .order('created_at', { ascending: false });
             if (error) throw error;
             return data as Pick<Client, 'id' | 'name' | 'phone'>[];
         },
         enabled: !!user && isOpen,
     });
+
+    const filteredClients = useMemo(() => {
+        if (!clients || !clientSearch) return clients?.slice(0, 5) || [];
+        return clients.filter(c =>
+            c.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+            (c.phone && c.phone.includes(clientSearch))
+        ).slice(0, 5);
+    }, [clients, clientSearch]);
 
     useEffect(() => {
         if (isOpen) {
@@ -67,6 +74,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                 setAppointmentTime(appointment.appointment_time || '');
                 setNotes(appointment.notes || '');
                 setStatus(appointment.status || 'Scheduled');
+                setSelectionMode(appointment.client_id ? 'existing' : 'manual');
             } else {
                 setClientName('');
                 setClientPhone('');
@@ -75,186 +83,206 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                 setAppointmentTime('09:00');
                 setNotes('');
                 setStatus('Scheduled');
+                setSelectionMode('existing');
             }
             setClientSearch('');
             setShowClientDropdown(false);
         }
     }, [isOpen, appointment]);
 
-    const filteredClients = clients?.filter(c =>
-        c.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
-        (c.phone && c.phone.includes(clientSearch))
-    ) || [];
-
     const handleSelectClient = (client: Pick<Client, 'id' | 'name' | 'phone'>) => {
+        setClientId(client.id);
         setClientName(client.name);
         setClientPhone(client.phone || '');
-        setClientId(client.id);
         setClientSearch('');
         setShowClientDropdown(false);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!clientName.trim() || !appointmentDate || !appointmentTime) return;
-
         onSave({
-            client_name: clientName.trim(),
-            client_phone: clientPhone.trim() || null,
-            client_id: clientId,
+            client_id: selectionMode === 'existing' ? clientId : null,
+            client_name: clientName,
+            client_phone: clientPhone,
             appointment_date: appointmentDate,
             appointment_time: appointmentTime,
-            notes: notes.trim() || null,
+            notes,
             status,
         });
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[520px] rounded-3xl border-slate-200/60 shadow-2xl bg-white/95 backdrop-blur-xl p-0 overflow-hidden">
-                <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-teal-500 to-teal-600">
-                    <DialogTitle className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                        <CalendarDays className="h-5 w-5" />
+            <DialogContent className="sm:max-w-[500px] rounded-[2.5rem] border-slate-200/60 shadow-2xl bg-white/95 backdrop-blur-xl p-0 overflow-hidden">
+                <DialogHeader className="p-8 pb-6 bg-gradient-to-br from-teal-600 to-emerald-600 text-white">
+                    <DialogTitle className="text-2xl font-black tracking-tight uppercase">
                         {isEditing ? t('editAppointment') : t('newAppointment')}
                     </DialogTitle>
+                    <p className="text-teal-50/70 text-sm font-medium mt-1">
+                        {isEditing ? t('updateAppointmentDetails') : t('scheduleNewEyeExam')}
+                    </p>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    {/* Client Selection */}
-                    <div className="space-y-2">
-                        <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <User className="h-3 w-3" /> {t('client')}
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                value={showClientDropdown ? clientSearch : clientName}
-                                onChange={(e) => {
-                                    setClientSearch(e.target.value);
-                                    setClientName(e.target.value);
-                                    setClientId(null);
-                                    setShowClientDropdown(true);
-                                }}
-                                onFocus={() => setShowClientDropdown(true)}
-                                placeholder={t('selectClient')}
-                                className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-11"
-                                required
-                            />
-                            {showClientDropdown && filteredClients.length > 0 && (
-                                <div className="absolute z-50 top-full mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
-                                    {filteredClients.slice(0, 8).map((client) => (
-                                        <button
-                                            key={client.id}
-                                            type="button"
-                                            onClick={() => handleSelectClient(client)}
-                                            className="w-full text-left px-4 py-2.5 hover:bg-teal-50 flex items-center justify-between transition-colors first:rounded-t-xl last:rounded-b-xl"
-                                        >
-                                            <span className="font-semibold text-slate-800 text-sm">{client.name}</span>
-                                            <span className="text-xs text-slate-400">{client.phone}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                            {showClientDropdown && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowClientDropdown(false)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Phone */}
-                    <div className="space-y-2">
-                        <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <Phone className="h-3 w-3" /> {t('phone')}
-                        </Label>
-                        <Input
-                            value={clientPhone}
-                            onChange={(e) => setClientPhone(e.target.value)}
-                            placeholder="06XXXXXXXX"
-                            className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-11"
-                        />
-                    </div>
-
-                    {/* Date & Time */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                <CalendarDays className="h-3 w-3" /> {t('appointmentDate')}
-                            </Label>
-                            <Input
-                                type="date"
-                                value={appointmentDate}
-                                onChange={(e) => setAppointmentDate(e.target.value)}
-                                className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-11"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                <Clock className="h-3 w-3" /> {t('appointmentTime')}
-                            </Label>
-                            <Input
-                                type="time"
-                                value={appointmentTime}
-                                onChange={(e) => setAppointmentTime(e.target.value)}
-                                className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 h-11"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {/* Status (edit only) */}
-                    {isEditing && appointment?.status !== 'Finished' && (
-                        <div className="space-y-2">
-                            <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                                {t('appointmentStatus')}
-                            </Label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full h-11 rounded-xl border border-slate-200 px-3 text-sm focus:border-teal-400 focus:ring-1 focus:ring-teal-400/20 bg-white"
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    {/* Client Selection Mode Toggle */}
+                    {!isEditing && (
+                        <div className="bg-slate-50 p-1 rounded-2xl border border-slate-100 flex gap-1">
+                            <button
+                                type="button"
+                                onClick={() => { setSelectionMode('existing'); setClientId(null); }}
+                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'existing' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                <option value="Scheduled">{t('scheduled')}</option>
-                                <option value="In Progress">{t('inProgress')}</option>
-                                <option value="Cancelled">{t('cancelled')}</option>
-                            </select>
+                                <Users className="h-3 w-3 inline mr-2" />
+                                {t('selectExistingClient')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectionMode('manual');
+                                    setClientId(null);
+                                    if (clientSearch && !clientName) setClientName(clientSearch);
+                                }}
+                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'manual' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                            >
+                                <UserPlus className="h-3 w-3 inline mr-2" />
+                                {t('manualEntry')}
+                            </button>
                         </div>
                     )}
 
-                    {/* Notes */}
-                    <div className="space-y-2">
-                        <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <FileText className="h-3 w-3" /> {t('appointmentNotes')}
-                        </Label>
-                        <Textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder={t('appointmentNotes')}
-                            className="rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 min-h-[80px] resize-none"
-                        />
+                    <div className="space-y-4">
+                        {/* Client Info Section */}
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('clientInformation')}</Label>
+
+                            {selectionMode === 'existing' && !isEditing ? (
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Input
+                                        placeholder={t('clientSearchPlaceholder')}
+                                        value={clientSearch}
+                                        onChange={(e) => {
+                                            setClientSearch(e.target.value);
+                                            setShowClientDropdown(true);
+                                            if (clientId) setClientId(null);
+                                        }}
+                                        onFocus={() => setShowClientDropdown(true)}
+                                        className="pl-10 h-12 rounded-2xl border-slate-200 focus:ring-teal-500/20"
+                                    />
+                                    {showClientDropdown && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
+                                            {!clientSearch && (
+                                                <div className="px-4 py-2 bg-slate-50 border-b border-slate-100">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('recentlyAddedClients')}</p>
+                                                </div>
+                                            )}
+                                            {filteredClients.length > 0 ? (
+                                                filteredClients.map(c => (
+                                                    <button
+                                                        key={c.id}
+                                                        type="button"
+                                                        onClick={() => handleSelectClient(c)}
+                                                        className="w-full text-left px-4 py-3 hover:bg-teal-50 transition-colors border-b border-slate-50 last:border-0"
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="font-black text-slate-900 text-sm">{c.name}</p>
+                                                                {c.phone && <p className="text-[10px] text-slate-400 font-bold">{c.phone}</p>}
+                                                            </div>
+                                                            <Users className="h-3 w-3 text-slate-200" />
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <div className="p-4 text-center">
+                                                    <p className="text-xs text-slate-400 font-bold">{t('noClientsFound')}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {clientId && (
+                                        <div className="mt-3 bg-teal-50 border border-teal-100 rounded-2xl p-4 flex items-center justify-between">
+                                            <div>
+                                                <p className="text-xs font-black text-teal-800 uppercase tracking-tight">{clientName}</p>
+                                                <p className="text-[10px] text-teal-600 font-bold">{clientPhone || t('noPhone')}</p>
+                                            </div>
+                                            <button type="button" onClick={() => { setClientId(null); setClientName(''); }} className="text-teal-400 hover:text-teal-600">
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="grid gap-3">
+                                    <Input
+                                        placeholder={t('clientName')}
+                                        value={clientName}
+                                        onChange={(e) => setClientName(e.target.value)}
+                                        className="h-12 rounded-2xl border-slate-200 focus:ring-teal-500/20 font-bold"
+                                        required
+                                    />
+                                    <Input
+                                        placeholder={t('phone')}
+                                        value={clientPhone}
+                                        onChange={(e) => setClientPhone(e.target.value)}
+                                        className="h-12 rounded-2xl border-slate-200 focus:ring-teal-500/20 font-bold"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Date & Time Section */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentDate')}</Label>
+                                <Input
+                                    type="date"
+                                    value={appointmentDate}
+                                    onChange={(e) => setAppointmentDate(e.target.value)}
+                                    className="h-12 rounded-2xl border-slate-200 focus:ring-teal-500/20 font-mono text-sm"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentTime')}</Label>
+                                <Input
+                                    type="time"
+                                    value={appointmentTime}
+                                    onChange={(e) => setAppointmentTime(e.target.value)}
+                                    className="h-12 rounded-2xl border-slate-200 focus:ring-teal-500/20 font-mono text-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Notes Section */}
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentNotes')}</Label>
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                className="w-full min-h-[100px] rounded-2xl border border-slate-200 p-4 focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none text-sm font-medium text-slate-600 bg-white"
+                                placeholder={t('addSpecialInstructions')}
+                            />
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-2">
+                    {/* Footer Actions */}
+                    <div className="flex gap-3 pt-4">
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             onClick={onClose}
-                            className="flex-1 h-11 rounded-xl border-slate-200 hover:bg-slate-50 font-bold"
+                            className="flex-1 h-12 rounded-2xl font-black uppercase text-[10px] tracking-widest text-slate-400 hover:text-slate-600"
                         >
                             {t('cancel')}
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSaving || !clientName.trim() || !appointmentDate || !appointmentTime}
-                            className="flex-1 h-11 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold shadow-lg shadow-teal-500/20"
+                            disabled={isSaving || !clientName.trim()}
+                            className="flex-[2] h-12 rounded-2xl bg-slate-900 text-white hover:bg-teal-600 font-black uppercase text-[10px] tracking-widest shadow-xl shadow-slate-900/10 transition-all"
                         >
-                            <Save className="h-4 w-4 mr-2" />
-                            {isSaving ? '...' : (isEditing ? t('save') : t('newAppointment'))}
+                            {isSaving ? '...' : isEditing ? t('update') : t('create')}
                         </Button>
                     </div>
                 </form>

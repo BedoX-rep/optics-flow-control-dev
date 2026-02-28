@@ -21,7 +21,7 @@ import {
     ChevronRight,
     X,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subDays } from 'date-fns';
 import AppointmentCard from '@/components/AppointmentCard';
 
 const statusConfig: Record<string, { color: string; bgColor: string; borderColor: string }> = {
@@ -39,6 +39,7 @@ const Appointments = () => {
     const isMobile = useIsMobile();
 
     const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
+    const [viewMode, setViewMode] = useState<'today' | 'week' | 'month'>('week');
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
 
@@ -50,35 +51,64 @@ const Appointments = () => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deletingAppointment, setDeletingAppointment] = useState<Appointment | null>(null);
 
+    // Calculate start and end dates based on viewMode
+    const dateRange = useMemo(() => {
+        const baseDate = new Date(selectedDate + 'T00:00:00');
+        if (viewMode === 'today') {
+            return {
+                start: selectedDate,
+                end: selectedDate
+            };
+        } else if (viewMode === 'week') {
+            const start = startOfWeek(baseDate, { weekStartsOn: 1 });
+            const end = endOfWeek(baseDate, { weekStartsOn: 1 });
+            return {
+                start: format(start, 'yyyy-MM-dd'),
+                end: format(end, 'yyyy-MM-dd')
+            };
+        } else {
+            const start = startOfMonth(baseDate);
+            const end = endOfMonth(baseDate);
+            return {
+                start: format(start, 'yyyy-MM-dd'),
+                end: format(end, 'yyyy-MM-dd')
+            };
+        }
+    }, [selectedDate, viewMode]);
+
     // Generate week days around the selected date
     const weekDays = useMemo(() => {
         const date = new Date(selectedDate + 'T00:00:00');
-        const dayOfWeek = date.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const monday = new Date(date);
-        monday.setDate(date.getDate() + mondayOffset);
+        const start = startOfWeek(date, { weekStartsOn: 1 });
 
         const days = [];
         for (let i = 0; i < 7; i++) {
-            const d = new Date(monday);
-            d.setDate(monday.getDate() + i);
-            days.push(format(d, 'yyyy-MM-dd'));
+            days.push(format(addDays(start, i), 'yyyy-MM-dd'));
         }
         return days;
     }, [selectedDate]);
 
     // Fetch appointments
     const { data: appointments, isLoading } = useQuery({
-        queryKey: ['appointments', user?.id, selectedDate],
+        queryKey: ['appointments', user?.id, dateRange.start, dateRange.end],
         queryFn: async () => {
             if (!user?.id) return [];
-            const { data, error } = await supabase
+            let query = supabase
                 .from('appointments')
                 .select('*')
                 .eq('user_id', user.id)
-                .eq('appointment_date', selectedDate)
                 .eq('is_deleted', false)
+                .order('appointment_date', { ascending: true })
                 .order('appointment_time', { ascending: true });
+
+            if (dateRange.start === dateRange.end) {
+                query = query.eq('appointment_date', dateRange.start);
+            } else {
+                query = query.gte('appointment_date', dateRange.start)
+                    .lte('appointment_date', dateRange.end);
+            }
+
+            const { data, error } = await query;
             if (error) throw error;
             return data as Appointment[];
         },
@@ -107,7 +137,7 @@ const Appointments = () => {
         };
     }, [appointments]);
 
-    // Create appointment
+    // Mutations (Create, Update, Finalize, Delete)
     const createMutation = useMutation({
         mutationFn: async (data: any) => {
             const { error } = await supabase.from('appointments').insert({
@@ -127,7 +157,6 @@ const Appointments = () => {
         },
     });
 
-    // Update appointment
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: any }) => {
             const { error } = await supabase.from('appointments').update(data).eq('id', id);
@@ -144,7 +173,6 @@ const Appointments = () => {
         },
     });
 
-    // Finalize appointment
     const finalizeMutation = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: any }) => {
             const { error } = await supabase.from('appointments').update({
@@ -164,7 +192,6 @@ const Appointments = () => {
         },
     });
 
-    // Delete appointment (soft delete)
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
             const { error } = await supabase.from('appointments').update({ is_deleted: true }).eq('id', id);
@@ -214,111 +241,178 @@ const Appointments = () => {
     };
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 w-full max-w-none animate-fade-in">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-600 p-6 md:p-8 text-white shadow-xl shadow-teal-500/10">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -mr-40 -mt-40 blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-400/10 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none" />
+        <div className="flex-1 space-y-6 p-4 md:p-10 pt-6 w-full animate-fade-in pb-20">
+            {/* Header Section */}
+            <div className="relative group overflow-hidden rounded-[3rem] bg-gradient-to-br from-slate-900 via-teal-950 to-emerald-950 p-6 md:p-10 text-white shadow-2xl shadow-teal-900/40">
+                {/* Abstract Orbs */}
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], x: [0, 50, 0] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none"
+                />
+                <motion.div
+                    animate={{ scale: [1, 1.1, 1], x: [0, -30, 0] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"
+                />
 
                 <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-black tracking-tight">{t('eyeExamAppointments')}</h1>
-                            <p className="text-white/70 text-sm mt-1 font-medium">{t('eyeExamAppointmentsDesc')}</p>
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div className="space-y-2">
+                            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                                <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none mb-1">
+                                    {t('appointmentsOverview')}
+                                </h1>
+                                <p className="text-teal-100/60 text-base font-medium max-w-md">
+                                    {t('eyeExamAppointmentsDesc')}
+                                </p>
+                            </motion.div>
                         </div>
-                        <Button
-                            onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
-                            className="bg-white text-teal-700 hover:bg-white/90 font-bold rounded-2xl px-6 h-11 shadow-lg shadow-black/10 shrink-0"
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
-                            {t('newAppointment')}
-                        </Button>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Button
+                                onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
+                                className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-black rounded-2xl h-12 px-6 shadow-xl shadow-teal-500/20 group/btn transition-all duration-300"
+                            >
+                                <Plus className="h-4 w-4 mr-2 group-hover/btn:rotate-90 transition-transform" />
+                                {t('newAppointment')}
+                            </Button>
+                        </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-3 mt-6">
+                    {/* Stats Tiles */}
+                    <div className="grid grid-cols-3 gap-3 mt-8 max-w-2xl">
                         {[
-                            { label: t('todaysAppointments'), value: stats.total },
-                            { label: t('scheduled'), value: stats.scheduled },
-                            { label: t('finished'), value: stats.finished },
+                            { label: t('todaysAppointments'), value: stats.total, color: 'text-white' },
+                            { label: t('scheduled'), value: stats.scheduled, color: 'text-teal-400' },
+                            { label: t('finished'), value: stats.finished, color: 'text-emerald-400' },
                         ].map((stat, i) => (
-                            <div key={i} className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-4 border border-white/10">
-                                <p className="text-2xl md:text-3xl font-black">{stat.value}</p>
-                                <p className="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-wider mt-0.5">{stat.label}</p>
-                            </div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 * i }}
+                                key={i}
+                                className="bg-white/5 backdrop-blur-2xl rounded-3xl p-5 border border-white/10 hover:bg-white/10 transition-colors"
+                            >
+                                <p className={`text-3xl md:text-4xl font-black ${stat.color}`}>{stat.value}</p>
+                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">{stat.label}</p>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Day Navigation Strip */}
-            <div className="bg-white/60 backdrop-blur-xl rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/40 p-4 overflow-hidden">
-                <div className="flex items-center gap-2 mb-3">
-                    <button onClick={() => navigateWeek(-1)} className="p-2 rounded-xl hover:bg-slate-100 transition-colors">
-                        <ChevronLeft className="h-4 w-4 text-slate-600" />
-                    </button>
-                    <button
-                        onClick={goToToday}
-                        className="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-700 text-xs font-bold hover:bg-teal-100 transition-colors border border-teal-200"
-                    >
-                        {t('today')}
-                    </button>
-                    <button onClick={() => navigateWeek(1)} className="p-2 rounded-xl hover:bg-slate-100 transition-colors">
-                        <ChevronRight className="h-4 w-4 text-slate-600" />
-                    </button>
-                    <p className="text-sm font-bold text-slate-600 ml-auto hidden md:block">{formatDisplayDate(selectedDate)}</p>
-                </div>
+            {/* Navigation Strip Container - Overhauled */}
+            <div className="relative -mt-12 px-2 z-20">
+                <div className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] border border-slate-200/50 shadow-2xl shadow-slate-200/50 p-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                        <div className="flex items-center p-1 bg-slate-50 rounded-2xl border border-slate-100 w-full md:w-auto">
+                            {[
+                                { id: 'today', label: t('today') },
+                                { id: 'week', label: t('thisWeek') },
+                                { id: 'month', label: t('thisMonth') }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => setViewMode(mode.id as any)}
+                                    className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === mode.id
+                                            ? 'bg-white shadow-sm text-teal-600'
+                                            : 'text-slate-400 hover:text-slate-600'
+                                        }`}
+                                >
+                                    {mode.label}
+                                </button>
+                            ))}
+                        </div>
 
-                <div className="grid grid-cols-7 gap-2">
-                    {weekDays.map((day) => {
-                        const d = new Date(day + 'T00:00:00');
-                        const isSelected = day === selectedDate;
-                        const isToday = day === todayStr;
-                        return (
-                            <button
-                                key={day}
-                                onClick={() => setSelectedDate(day)}
-                                className={`flex flex-col items-center p-2 md:p-3 rounded-2xl transition-all duration-200 ${isSelected
-                                    ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20 scale-105'
-                                    : isToday
-                                        ? 'bg-teal-50 text-teal-700 border border-teal-200'
-                                        : 'hover:bg-slate-50 text-slate-600'
-                                    }`}
-                            >
-                                <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">
-                                    {dayNames[d.getDay()]}
-                                </span>
-                                <span className="text-lg font-black mt-0.5">{d.getDate()}</span>
-                            </button>
-                        );
-                    })}
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                            <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100">
+                                <button
+                                    onClick={() => {
+                                        const d = new Date(selectedDate + 'T00:00:00');
+                                        const newDate = viewMode === 'month' ? subDays(d, 30) : subDays(d, 7);
+                                        setSelectedDate(format(newDate, 'yyyy-MM-dd'));
+                                    }}
+                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-teal-600"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const d = new Date(selectedDate + 'T00:00:00');
+                                        const newDate = viewMode === 'month' ? addDays(d, 30) : addDays(d, 7);
+                                        setSelectedDate(format(newDate, 'yyyy-MM-dd'));
+                                    }}
+                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-teal-600"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
+                            <p className="text-slate-900 font-black tracking-tight text-lg whitespace-nowrap">{formatDisplayDate(selectedDate)}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-2 md:gap-4 h-24 md:h-28">
+                        {weekDays.map((day) => {
+                            const d = new Date(day + 'T00:00:00');
+                            const isSelected = day === selectedDate;
+                            const isToday = day === todayStr;
+                            return (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    key={day}
+                                    onClick={() => setSelectedDate(day)}
+                                    className={`relative flex flex-col items-center justify-center rounded-3xl transition-all duration-300 ${isSelected
+                                        ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/30'
+                                        : isToday
+                                            ? 'bg-teal-50 border-2 border-teal-500/30 text-teal-700'
+                                            : 'bg-slate-50 border border-slate-100 text-slate-400 hover:bg-white hover:border-teal-200 hover:text-teal-600'
+                                        }`}
+                                >
+                                    {isToday && !isSelected && (
+                                        <div className="absolute top-2 w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                                    )}
+                                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSelected ? 'text-teal-300' : 'opacity-60'}`}>
+                                        {dayNames[d.getDay()]}
+                                    </span>
+                                    <span className="text-xl md:text-2xl font-black mt-1 leading-none">{d.getDate()}</span>
+                                    {isSelected && (
+                                        <motion.div
+                                            layoutId="indicator"
+                                            className="absolute -bottom-1 w-12 h-1 bg-teal-400 rounded-full blur-[1px]"
+                                        />
+                                    )}
+                                </motion.button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
-            {/* Search & Filters */}
-            <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative flex-1">
+            {/* Filter Hub */}
+            <div className="flex flex-col md:flex-row items-center gap-4 bg-slate-50/50 p-2 rounded-3xl border border-slate-100">
+                <div className="relative flex-1 w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('searchAppointments')}
-                        className="pl-11 h-11 rounded-2xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 bg-white/80 backdrop-blur-sm"
+                        className="pl-11 h-12 rounded-2xl border-transparent bg-white shadow-sm focus:ring-2 focus:ring-teal-500/20 text-slate-800 font-medium"
                     />
                     {searchQuery && (
-                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600">
                             <X className="h-4 w-4" />
                         </button>
                     )}
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-slate-100 gap-1 overflow-x-auto w-full md:w-auto no-scrollbar">
                     {['All', 'Scheduled', 'In Progress', 'Finished', 'Cancelled'].map((status) => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${statusFilter === status
-                                ? 'bg-teal-500 text-white shadow-md shadow-teal-500/20'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:border-teal-300'
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${statusFilter === status
+                                ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20'
+                                : 'text-slate-400 hover:text-teal-600'
                                 }`}
                         >
                             {status === 'All' ? t('all') : t(status === 'In Progress' ? 'inProgress' : status.toLowerCase())}
@@ -327,8 +421,8 @@ const Appointments = () => {
                 </div>
             </div>
 
-            {/* Appointments List */}
-            <div className="space-y-3">
+            {/* Main Content Area */}
+            <div className="min-h-[400px]">
                 {isLoading ? (
                     <div className="flex items-center justify-center p-12">
                         <div className="w-8 h-8 border-3 border-teal-500 border-t-transparent rounded-full animate-spin" />

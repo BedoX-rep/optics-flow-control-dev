@@ -4042,6 +4042,22 @@ const accessTranslations: Translations = {
     en: 'Eye Exam Appointments',
     fr: 'Rendez-vous Examens de Vue'
   },
+  appointmentsOverview: {
+    en: 'Appointments Overview',
+    fr: 'Aperçu des Rendez-vous'
+  },
+  today: {
+    en: 'Today',
+    fr: 'Aujourd\'hui'
+  },
+  thisWeek: {
+    en: 'This Week',
+    fr: 'Cette Semaine'
+  },
+  thisMonth: {
+    en: 'This Month',
+    fr: 'Ce Mois'
+  },
   eyeExamAppointmentsDesc: {
     en: 'Schedule and manage client eye examinations',
     fr: 'Planifiez et gérez les examens de vue des clients'
@@ -4117,6 +4133,46 @@ const accessTranslations: Translations = {
   finalizeAppointmentDesc: {
     en: 'Enter the prescription results and optician name to finalize this appointment',
     fr: 'Entrez les résultats de la prescription et le nom de l\'opticien pour finaliser ce rendez-vous'
+  },
+  eyeClinicSchedule: {
+    en: 'Eye Clinic Schedule',
+    fr: 'Planning de la Clinique Ophtalmologique'
+  },
+  scheduleNewEyeExam: {
+    en: 'Schedule a new eye examination.',
+    fr: 'Planifiez un nouvel examen ophtalmologique.'
+  },
+  updateAppointmentDetails: {
+    en: 'Update the details of this appointment.',
+    fr: 'Mettez à jour les détails de ce rendez-vous.'
+  },
+  clientInformation: {
+    en: 'Client Information',
+    fr: 'Informations du Client'
+  },
+  addSpecialInstructions: {
+    en: 'Add any special instructions or observations...',
+    fr: 'Ajoutez des instructions spéciales ou des observations...'
+  },
+  selectExistingClient: {
+    en: 'Existing Client',
+    fr: 'Client Existant'
+  },
+  manualEntry: {
+    en: 'Manual Entry (Quick Add)',
+    fr: 'Saisie Manuelle (Ajout Rapide)'
+  },
+  clientType: {
+    en: 'Client Selection Type',
+    fr: 'Type de sélection du client'
+  },
+  recentlyAddedClients: {
+    en: 'Recently Added Clients',
+    fr: 'Clients Récemment Ajoutés'
+  },
+  clientSearchPlaceholder: {
+    en: 'Search by name or phone...',
+    fr: 'Rechercher par nom ou téléphone...'
   },
   prescriptionResults: {
     en: 'Prescription Results',
