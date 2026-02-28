@@ -746,6 +746,10 @@ const productTranslations: Translations = {
     en: 'Order Type',
     fr: 'Type de Commande'
   },
+  showfilters: {
+    en: 'Show Filters',
+    fr: 'Afficher les Filtres'
+  },
   montageStatus: {
     en: 'Montage Status',
     fr: 'Statut de Montage'
