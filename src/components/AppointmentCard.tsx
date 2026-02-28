@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Clock,
@@ -37,7 +37,7 @@ interface AppointmentCardProps {
     onUpdateResults?: (appt: Appointment, data: any) => void;
 }
 
-const AppointmentCard = ({
+const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
     appointment: appt,
     index,
     statusConfig,
@@ -48,7 +48,7 @@ const AppointmentCard = ({
     onStatusChange,
     onConvertToClient,
     onUpdateResults,
-}: AppointmentCardProps) => {
+}, ref) => {
     const { t } = useLanguage();
     const sc = statusConfig[appt.status] || statusConfig['Scheduled'];
     const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
@@ -64,6 +64,7 @@ const AppointmentCard = ({
 
     return (
         <motion.div
+            ref={ref}
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
@@ -262,14 +263,6 @@ const AppointmentCard = ({
                                                 <CheckCircle className="h-4 w-4 mr-2 text-teal-400" /> {t('finalize')}
                                             </Button>
 
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => onStatusChange(appt, 'Cancelled')}
-                                                className="h-12 w-12 min-w-[3rem] rounded-xl border-slate-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 active:scale-95 transition-all"
-                                            >
-                                                <XCircle className="h-5 w-5" />
-                                            </Button>
                                         </>
                                     ) : (
                                         <Button
@@ -297,6 +290,8 @@ const AppointmentCard = ({
             />
         </motion.div >
     );
-};
+});
+
+AppointmentCard.displayName = 'AppointmentCard';
 
 export default AppointmentCard;

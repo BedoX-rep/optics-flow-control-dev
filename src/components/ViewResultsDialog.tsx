@@ -76,7 +76,7 @@ const ViewResultsDialog = ({ isOpen, onClose, onSave, appointment, isSaving }: V
                 <DialogHeader className="p-6 pb-6 bg-slate-900 text-white relative">
                     <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
                         <Eye className="h-5 w-5 text-teal-400" />
-                        {t('viewResults') || 'View Results'}
+                        {t('viewresults') || 'View Results'}
                     </DialogTitle>
                     <DialogDescription className="text-white text-xs mt-1 font-bold uppercase tracking-widest opacity-90">
                         {appointment.client_name} • {appointment.appointment_date}

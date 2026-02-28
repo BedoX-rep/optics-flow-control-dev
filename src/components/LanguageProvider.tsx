@@ -4038,6 +4038,10 @@ const accessTranslations: Translations = {
     en: 'Appointment Status',
     fr: 'Statut du Rendez-vous'
   },
+  viewResults: {
+    en: 'View Results',
+    fr: 'Voir les Résultats'
+  },
   viewresults: {
     en: 'View Results',
     fr: 'Voir les Résultats'
@@ -4341,6 +4345,10 @@ const accessTranslations: Translations = {
   pleaseLoginToAccess: {
     en: 'Please log in to access this page.',
     fr: 'Veuillez vous connecter pour accéder à cette page.'
+  },
+  create: {
+    en: 'Create',
+    fr: 'Créer'
   },
   admin: {
     en: 'Admin',
