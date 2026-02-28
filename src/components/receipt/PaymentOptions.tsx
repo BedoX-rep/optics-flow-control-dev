@@ -44,11 +44,10 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
         <span className="w-1.5 h-6 bg-teal-500 rounded-full" />
         {t('paymentDetails')}
       </h3>
-
       <div className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="discount" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('percentageDiscount')} (%)</Label>
+            <Label htmlFor="discount" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('percentageDiscount')}</Label>
             <div className="relative">
               <Input
                 id="discount"
@@ -68,7 +67,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="numericDiscount" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('fixedDiscount')} (DH)</Label>
+            <Label htmlFor="numericDiscount" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('fixedDiscount')}</Label>
             <div className="relative">
               <Input
                 id="numericDiscount"
@@ -87,7 +86,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="tax" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('taxBase')} (DH)</Label>
+            <Label htmlFor="tax" className="text-xs font-bold text-slate-900 uppercase tracking-wider">{t('taxBase')}</Label>
             <div className="relative">
               <Input
                 id="tax"

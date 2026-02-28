@@ -1025,14 +1025,6 @@ const NewReceipt = () => {
         />
 
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('paymentDetails')}</h3>
-            </div>
-          </div>
           <div className="p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <OrderSummary
