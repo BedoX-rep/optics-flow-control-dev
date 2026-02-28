@@ -4034,6 +4034,14 @@ const accessTranslations: Translations = {
     en: 'Access Appointments',
     fr: 'Accéder aux Rendez-vous'
   },
+  appointmentStatusFilter: {
+    en: 'Appointment Status',
+    fr: 'Statut du Rendez-vous'
+  },
+  allStatuses: {
+    en: 'All Statuses',
+    fr: 'Tous les Statuts'
+  },
   appointments: {
     en: 'Appointments',
     fr: 'Rendez-vous'
@@ -4057,6 +4065,14 @@ const accessTranslations: Translations = {
   thisMonth: {
     en: 'This Month',
     fr: 'Ce Mois'
+  },
+  upcomingToday: {
+    en: 'Upcoming Today',
+    fr: 'Prévus Aujourd\'hui'
+  },
+  upcomingThisWeek: {
+    en: 'Upcoming This Week',
+    fr: 'Prévus Cette Semaine'
   },
   eyeExamAppointmentsDesc: {
     en: 'Schedule and manage client eye examinations',
@@ -4106,9 +4122,13 @@ const accessTranslations: Translations = {
     en: 'Scheduled',
     fr: 'Planifié'
   },
-  inProgress: {
-    en: 'In Progress',
-    fr: 'En Cours'
+  confirmed: {
+    en: 'Confirmation',
+    fr: 'Confirmation'
+  },
+  confirmationDate: {
+    en: 'Confirmation Date',
+    fr: 'Date de Confirmation'
   },
   finished: {
     en: 'Finished',
@@ -4117,6 +4137,58 @@ const accessTranslations: Translations = {
   cancelled: {
     en: 'Cancelled',
     fr: 'Annulé'
+  },
+  start: {
+    en: 'Start',
+    fr: 'Démarrer'
+  },
+  cancelConfirmation: {
+    en: 'Cancel Confirmation',
+    fr: 'Annuler la Confirmation'
+  },
+  convertToClient: {
+    en: 'Convert to Client',
+    fr: 'Convertir en Client'
+  },
+  clientConverted: {
+    en: 'Client converted successfully',
+    fr: 'Client converti avec succès'
+  },
+  optician: {
+    en: 'Optician',
+    fr: 'Opticien'
+  },
+  notSpecified: {
+    en: 'Not Specified',
+    fr: 'Non spécifié'
+  },
+  finalize: {
+    en: 'Finalize',
+    fr: 'Finaliser'
+  },
+  restore: {
+    en: 'Restore',
+    fr: 'Restaurer'
+  },
+  results: {
+    en: 'Results',
+    fr: 'Résultats'
+  },
+  eye: {
+    en: 'Eye',
+    fr: 'Œil'
+  },
+  sph: {
+    en: 'SPH',
+    fr: 'SPH'
+  },
+  cyl: {
+    en: 'CYL',
+    fr: 'CYL'
+  },
+  axe: {
+    en: 'AXE',
+    fr: 'AXE'
   },
   examinerName: {
     en: 'Examiner / Optician',
@@ -4225,10 +4297,6 @@ const accessTranslations: Translations = {
   todaysAppointments: {
     en: 'Today\'s Appointments',
     fr: 'Rendez-vous d\'Aujourd\'hui'
-  },
-  finalize: {
-    en: 'Finalize',
-    fr: 'Finaliser'
   },
   addPower: {
     en: 'Add Power',

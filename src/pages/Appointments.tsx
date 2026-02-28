@@ -20,13 +20,16 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
+    Filter,
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subDays } from 'date-fns';
 import AppointmentCard from '@/components/AppointmentCard';
+import DateRangeFilter from '@/components/ui/DateRangeFilter';
 
 const statusConfig: Record<string, { color: string; bgColor: string; borderColor: string }> = {
     'Scheduled': { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: 'border-teal-200' },
-    'In Progress': { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
+    'Confirmation': { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
     'Finished': { color: 'text-emerald-700', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-200' },
     'Cancelled': { color: 'text-slate-500', bgColor: 'bg-slate-50', borderColor: 'border-slate-200' },
 };
@@ -38,10 +41,47 @@ const Appointments = () => {
     const queryClient = useQueryClient();
     const isMobile = useIsMobile();
 
-    const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
-    const [viewMode, setViewMode] = useState<'today' | 'week' | 'month'>('week');
+    const [dateFilter, setDateFilter] = useState('all');
+    const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+        from: undefined,
+        to: undefined
+    });
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
+
+    // Calculate start and end dates based on filter
+    const activeRange = useMemo(() => {
+        if (dateFilter === 'custom' && dateRange.from) {
+            return {
+                start: format(dateRange.from, 'yyyy-MM-dd'),
+                end: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : format(dateRange.from, 'yyyy-MM-dd')
+            };
+        }
+
+        const now = new Date();
+        if (dateFilter === 'today') {
+            const d = format(now, 'yyyy-MM-dd');
+            return { start: d, end: d };
+        }
+        if (dateFilter === 'month') {
+            const start = startOfMonth(now);
+            const end = endOfMonth(now);
+            return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
+        }
+        if (dateFilter === 'year') {
+            const start = new Date(now.getFullYear(), 0, 1);
+            const end = new Date(now.getFullYear(), 11, 31);
+            return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
+        }
+        if (dateFilter === 'all') {
+            return { start: '1900-01-01', end: '2100-12-31' };
+        }
+
+        // Default to 'week' (current week)
+        const start = startOfWeek(now, { weekStartsOn: 1 });
+        const end = endOfWeek(now, { weekStartsOn: 1 });
+        return { start: format(start, 'yyyy-MM-dd'), end: format(end, 'yyyy-MM-dd') };
+    }, [dateFilter, dateRange]);
 
     // Dialog states
     const [addEditOpen, setAddEditOpen] = useState(false);
@@ -51,46 +91,9 @@ const Appointments = () => {
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deletingAppointment, setDeletingAppointment] = useState<Appointment | null>(null);
 
-    // Calculate start and end dates based on viewMode
-    const dateRange = useMemo(() => {
-        const baseDate = new Date(selectedDate + 'T00:00:00');
-        if (viewMode === 'today') {
-            return {
-                start: selectedDate,
-                end: selectedDate
-            };
-        } else if (viewMode === 'week') {
-            const start = startOfWeek(baseDate, { weekStartsOn: 1 });
-            const end = endOfWeek(baseDate, { weekStartsOn: 1 });
-            return {
-                start: format(start, 'yyyy-MM-dd'),
-                end: format(end, 'yyyy-MM-dd')
-            };
-        } else {
-            const start = startOfMonth(baseDate);
-            const end = endOfMonth(baseDate);
-            return {
-                start: format(start, 'yyyy-MM-dd'),
-                end: format(end, 'yyyy-MM-dd')
-            };
-        }
-    }, [selectedDate, viewMode]);
-
-    // Generate week days around the selected date
-    const weekDays = useMemo(() => {
-        const date = new Date(selectedDate + 'T00:00:00');
-        const start = startOfWeek(date, { weekStartsOn: 1 });
-
-        const days = [];
-        for (let i = 0; i < 7; i++) {
-            days.push(format(addDays(start, i), 'yyyy-MM-dd'));
-        }
-        return days;
-    }, [selectedDate]);
-
     // Fetch appointments
     const { data: appointments, isLoading } = useQuery({
-        queryKey: ['appointments', user?.id, dateRange.start, dateRange.end],
+        queryKey: ['appointments', user?.id, activeRange.start, activeRange.end],
         queryFn: async () => {
             if (!user?.id) return [];
             let query = supabase
@@ -101,11 +104,11 @@ const Appointments = () => {
                 .order('appointment_date', { ascending: true })
                 .order('appointment_time', { ascending: true });
 
-            if (dateRange.start === dateRange.end) {
-                query = query.eq('appointment_date', dateRange.start);
+            if (activeRange.start === activeRange.end) {
+                query = query.eq('appointment_date', activeRange.start);
             } else {
-                query = query.gte('appointment_date', dateRange.start)
-                    .lte('appointment_date', dateRange.end);
+                query = query.gte('appointment_date', activeRange.start)
+                    .lte('appointment_date', activeRange.end);
             }
 
             const { data, error } = await query;
@@ -129,11 +132,27 @@ const Appointments = () => {
 
     // Stats
     const stats = useMemo(() => {
-        if (!appointments) return { total: 0, scheduled: 0, finished: 0 };
+        if (!appointments) return { total: 0, scheduled: 0, finished: 0, upcomingToday: 0, upcomingThisWeek: 0 };
+
+        const now = new Date();
+        const todayStr = format(now, 'yyyy-MM-dd');
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
         return {
             total: appointments.length,
             scheduled: appointments.filter(a => a.status === 'Scheduled').length,
             finished: appointments.filter(a => a.status === 'Finished').length,
+            upcomingToday: appointments.filter(a =>
+                a.appointment_date === todayStr &&
+                (a.status === 'Scheduled' || a.status === 'Confirmation')
+            ).length,
+            upcomingThisWeek: appointments.filter(a => {
+                const apptDate = new Date(a.appointment_date + 'T00:00:00');
+                return apptDate >= weekStart &&
+                    apptDate <= weekEnd &&
+                    (a.status === 'Scheduled' || a.status === 'Confirmation');
+            }).length,
         };
     }, [appointments]);
 
@@ -222,28 +241,49 @@ const Appointments = () => {
         }
     };
 
-    const navigateWeek = (direction: number) => {
-        const d = new Date(selectedDate + 'T00:00:00');
-        d.setDate(d.getDate() + direction * 7);
-        setSelectedDate(format(d, 'yyyy-MM-dd'));
+    const handleStatusChange = (appt: Appointment, newStatus: string) => {
+        const data: any = { status: newStatus };
+        if (newStatus === 'Confirmation') {
+            data.confirmation_date = format(new Date(), 'yyyy-MM-dd');
+        } else if (newStatus === 'Scheduled') {
+            data.confirmation_date = null;
+        }
+        updateMutation.mutate({ id: appt.id, data });
     };
 
-    const goToToday = () => {
-        setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
-    };
+    const handleConvertToClient = async (appt: Appointment) => {
+        if (!user?.id) return;
 
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        try {
+            const { data: newClient, error } = await supabase
+                .from('clients')
+                .insert({
+                    name: appt.client_name,
+                    phone: appt.client_phone || '',
+                    user_id: user.id
+                })
+                .select()
+                .single();
 
-    const formatDisplayDate = (dateStr: string) => {
-        const d = new Date(dateStr + 'T00:00:00');
-        return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if (error) throw error;
+
+            // Link appointment to new client
+            await supabase
+                .from('appointments')
+                .update({ client_id: newClient.id })
+                .eq('id', appt.id);
+
+            queryClient.invalidateQueries({ queryKey: ['appointments'] });
+            toast({ title: t('success'), description: t('clientConverted') });
+        } catch (error) {
+            toast({ title: t('error'), description: t('failedToCreateClient'), variant: 'destructive' });
+        }
     };
 
     return (
         <div className="flex-1 space-y-6 p-4 md:p-10 pt-6 w-full animate-fade-in pb-20">
-            {/* Header Section */}
-            <div className="relative group overflow-hidden rounded-[3rem] bg-gradient-to-br from-slate-900 via-teal-950 to-emerald-950 p-6 md:p-10 text-white shadow-2xl shadow-teal-900/40">
+            {/* Header Section - More Compact & Horizontal */}
+            <div className="relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-teal-950 to-emerald-950 p-6 md:p-8 text-white shadow-2xl shadow-teal-900/40">
                 {/* Abstract Orbs */}
                 <motion.div
                     animate={{ scale: [1, 1.2, 1], x: [0, 50, 0] }}
@@ -257,167 +297,97 @@ const Appointments = () => {
                 />
 
                 <div className="relative z-10">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                        <div className="space-y-2">
-                            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                                <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none mb-1">
+                    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                        <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-inner">
+                                    <CalendarDays className="h-6 w-6 text-teal-400" />
+                                </div>
+                                <h1 className="text-2xl md:text-3xl font-black tracking-tighter leading-none text-white uppercase">
                                     {t('appointmentsOverview')}
                                 </h1>
-                                <p className="text-teal-100/60 text-base font-medium max-w-md">
-                                    {t('eyeExamAppointmentsDesc')}
-                                </p>
-                            </motion.div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <Button
-                                onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
-                                className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-black rounded-2xl h-12 px-6 shadow-xl shadow-teal-500/20 group/btn transition-all duration-300"
-                            >
-                                <Plus className="h-4 w-4 mr-2 group-hover/btn:rotate-90 transition-transform" />
-                                {t('newAppointment')}
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Stats Tiles */}
-                    <div className="grid grid-cols-3 gap-3 mt-8 max-w-2xl">
-                        {[
-                            { label: t('todaysAppointments'), value: stats.total, color: 'text-white' },
-                            { label: t('scheduled'), value: stats.scheduled, color: 'text-teal-400' },
-                            { label: t('finished'), value: stats.finished, color: 'text-emerald-400' },
-                        ].map((stat, i) => (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 * i }}
-                                key={i}
-                                className="bg-white/5 backdrop-blur-2xl rounded-3xl p-5 border border-white/10 hover:bg-white/10 transition-colors"
-                            >
-                                <p className={`text-3xl md:text-4xl font-black ${stat.color}`}>{stat.value}</p>
-                                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">{stat.label}</p>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Navigation Strip Container - Overhauled */}
-            <div className="relative -mt-12 px-2 z-20">
-                <div className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] border border-slate-200/50 shadow-2xl shadow-slate-200/50 p-6">
-                    <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-                        <div className="flex items-center p-1 bg-slate-50 rounded-2xl border border-slate-100 w-full md:w-auto">
-                            {[
-                                { id: 'today', label: t('today') },
-                                { id: 'week', label: t('thisWeek') },
-                                { id: 'month', label: t('thisMonth') }
-                            ].map((mode) => (
-                                <button
-                                    key={mode.id}
-                                    onClick={() => setViewMode(mode.id as any)}
-                                    className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === mode.id
-                                            ? 'bg-white shadow-sm text-teal-600'
-                                            : 'text-slate-400 hover:text-slate-600'
-                                        }`}
-                                >
-                                    {mode.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                            <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100">
-                                <button
-                                    onClick={() => {
-                                        const d = new Date(selectedDate + 'T00:00:00');
-                                        const newDate = viewMode === 'month' ? subDays(d, 30) : subDays(d, 7);
-                                        setSelectedDate(format(newDate, 'yyyy-MM-dd'));
-                                    }}
-                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-teal-600"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        const d = new Date(selectedDate + 'T00:00:00');
-                                        const newDate = viewMode === 'month' ? addDays(d, 30) : addDays(d, 7);
-                                        setSelectedDate(format(newDate, 'yyyy-MM-dd'));
-                                    }}
-                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-400 hover:text-teal-600"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
                             </div>
-                            <p className="text-slate-900 font-black tracking-tight text-lg whitespace-nowrap">{formatDisplayDate(selectedDate)}</p>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-7 gap-2 md:gap-4 h-24 md:h-28">
-                        {weekDays.map((day) => {
-                            const d = new Date(day + 'T00:00:00');
-                            const isSelected = day === selectedDate;
-                            const isToday = day === todayStr;
-                            return (
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    key={day}
-                                    onClick={() => setSelectedDate(day)}
-                                    className={`relative flex flex-col items-center justify-center rounded-3xl transition-all duration-300 ${isSelected
-                                        ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/30'
-                                        : isToday
-                                            ? 'bg-teal-50 border-2 border-teal-500/30 text-teal-700'
-                                            : 'bg-slate-50 border border-slate-100 text-slate-400 hover:bg-white hover:border-teal-200 hover:text-teal-600'
-                                        }`}
-                                >
-                                    {isToday && !isSelected && (
-                                        <div className="absolute top-2 w-1.5 h-1.5 bg-teal-500 rounded-full" />
-                                    )}
-                                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSelected ? 'text-teal-300' : 'opacity-60'}`}>
-                                        {dayNames[d.getDay()]}
-                                    </span>
-                                    <span className="text-xl md:text-2xl font-black mt-1 leading-none">{d.getDate()}</span>
-                                    {isSelected && (
-                                        <motion.div
-                                            layoutId="indicator"
-                                            className="absolute -bottom-1 w-12 h-1 bg-teal-400 rounded-full blur-[1px]"
-                                        />
-                                    )}
-                                </motion.button>
-                            );
-                        })}
+                            <div className="hidden md:block h-10 w-px bg-white/10" />
+
+                            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+                                {[
+                                    { label: t('total'), value: stats.total, color: 'text-white' },
+                                    { label: t('upcomingToday'), value: stats.upcomingToday, color: 'text-amber-400' },
+                                    { label: t('upcomingThisWeek'), value: stats.upcomingThisWeek, color: 'text-teal-400' },
+                                    { label: t('finished'), value: stats.finished, color: 'text-emerald-400' },
+                                ].map((stat, i) => (
+                                    <div key={i} className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-1 leading-none">{stat.label}</span>
+                                        <span className={`text-xl md:text-2xl font-black ${stat.color} leading-none`}>{stat.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Button
+                            onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
+                            className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-black rounded-2xl h-12 px-8 shadow-xl shadow-teal-500/20 group/btn transition-all duration-300 w-fit"
+                        >
+                            <Plus className="h-4 w-4 mr-2 group-hover/btn:rotate-90 transition-transform" />
+                            {t('newAppointment')}
+                        </Button>
                     </div>
                 </div>
             </div>
 
-            {/* Filter Hub */}
-            <div className="flex flex-col md:flex-row items-center gap-4 bg-slate-50/50 p-2 rounded-3xl border border-slate-100">
-                <div className="relative flex-1 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder={t('searchAppointments')}
-                        className="pl-11 h-12 rounded-2xl border-transparent bg-white shadow-sm focus:ring-2 focus:ring-teal-500/20 text-slate-800 font-medium"
-                    />
-                    {searchQuery && (
-                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600">
-                            <X className="h-4 w-4" />
-                        </button>
-                    )}
-                </div>
-                <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-slate-100 gap-1 overflow-x-auto w-full md:w-auto no-scrollbar">
-                    {['All', 'Scheduled', 'In Progress', 'Finished', 'Cancelled'].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setStatusFilter(status)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${statusFilter === status
-                                ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20'
-                                : 'text-slate-400 hover:text-teal-600'
-                                }`}
-                        >
-                            {status === 'All' ? t('all') : t(status === 'In Progress' ? 'inProgress' : status.toLowerCase())}
-                        </button>
-                    ))}
+            {/* Unified Filter Hub - Purchases Style */}
+            <div className="relative -mt-10 mb-8 p-3 bg-white/70 backdrop-blur-xl border border-slate-100 rounded-[32px] shadow-lg shadow-slate-200/40 z-30">
+                <div className="flex flex-wrap items-center gap-4">
+                    {/* Search Section */}
+                    <div className="flex items-center flex-1 min-w-[280px] px-5 py-3 bg-slate-50/50 shadow-inner rounded-2xl border border-slate-100/50 focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all group">
+                        <Search className="h-5 w-5 text-teal-600 mr-3 transition-transform group-focus-within:scale-110" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('searchAppointments')}
+                            className="bg-transparent border-none text-sm font-black text-slate-700 focus:ring-0 w-full outline-none placeholder:text-slate-400/70"
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="text-slate-300 hover:text-slate-600">
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="hidden lg:block h-10 w-px bg-slate-200/60" />
+
+                    {/* Filters Section */}
+                    <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                        {/* Date Filter Component - EXACT Style as Purchases */}
+                        <DateRangeFilter
+                            dateFilter={dateFilter}
+                            dateRange={dateRange}
+                            onFilterChange={(key, value) => {
+                                if (key === 'date') setDateFilter(value);
+                                else if (key === 'dateRange') setDateRange(value);
+                            }}
+                            accentColor="teal"
+                        />
+
+                        {/* Status Filter Select - Redesigned Label */}
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="h-12 w-[200px] border border-slate-100 shadow-sm rounded-2xl gap-2 font-black text-[10px] uppercase tracking-widest bg-slate-50/50 hover:bg-white transition-all text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4 text-emerald-600" />
+                                    <span>{statusFilter === 'All' ? t('appointmentStatusFilter') || 'Appointment Status' : t(statusFilter === 'Confirmation' ? 'confirmed' : statusFilter.toLowerCase())}</span>
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-slate-100 shadow-xl p-1">
+                                <SelectItem value="All">{t('appointmentStatusFilter') || 'Appointment Status'}</SelectItem>
+                                <SelectItem value="Scheduled">{t('scheduled')}</SelectItem>
+                                <SelectItem value="Confirmation">{t('confirmed')}</SelectItem>
+                                <SelectItem value="Finished">{t('finished')}</SelectItem>
+                                <SelectItem value="Cancelled">{t('cancelled')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </div>
 
@@ -430,7 +400,7 @@ const Appointments = () => {
                 ) : filteredAppointments.length === 0 ? (
                     <div className="text-center p-12 bg-white/60 backdrop-blur-xl rounded-3xl border border-slate-200/60">
                         <CalendarDays className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-slate-500 font-bold">{t('noAppointmentsForDay')}</p>
+                        <p className="text-slate-500 font-bold">{t('noAppointmentsFound')}</p>
                         <Button
                             onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
                             className="mt-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-2xl"
@@ -452,6 +422,8 @@ const Appointments = () => {
                                     onFinalize={(a) => { setFinalizingAppointment(a); setFinalizeOpen(true); }}
                                     onEdit={(a) => { setEditingAppointment(a); setAddEditOpen(true); }}
                                     onDelete={(a) => { setDeletingAppointment(a); setDeleteOpen(true); }}
+                                    onStatusChange={handleStatusChange}
+                                    onConvertToClient={handleConvertToClient}
                                 />
                             ))}
                         </AnimatePresence>

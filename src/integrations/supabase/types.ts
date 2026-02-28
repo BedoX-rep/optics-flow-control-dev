@@ -1372,6 +1372,7 @@ export interface Appointment {
   left_eye_cyl?: number | null;
   left_eye_axe?: number | null;
   add_value?: number | null;
+  confirmation_date?: string | null;
   is_deleted?: boolean | null;
   created_at: string;
   updated_at: string;
