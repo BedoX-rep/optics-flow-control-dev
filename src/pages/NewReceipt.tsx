@@ -1000,7 +1000,7 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24 md:pb-6">
         <OrderItems
           items={items}
           orderType={orderType}
@@ -1068,6 +1068,17 @@ const NewReceipt = () => {
             </div>
           </div>
         </div>
+
+        {isMobile && (
+          <div className="flex justify-center mt-10">
+            <Button
+              onClick={() => paginate(1)}
+              className="w-16 h-16 rounded-full bg-teal-600 hover:bg-teal-500 shadow-xl shadow-teal-600/20 border-2 border-white flex items-center justify-center transition-all scale-100 active:scale-95"
+            >
+              <ArrowRight className="h-8 w-8 text-white" />
+            </Button>
+          </div>
+        )}
       </div>
     );
   };

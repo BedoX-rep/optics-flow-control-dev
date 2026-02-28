@@ -418,7 +418,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
                         title={t('paidAtDelivery')}
                       >
                         <Wallet className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-extrabold uppercase tracking-tight">Paid</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-tight">{t('paidShort') || 'Paid'}</span>
                       </button>
                     )}
                     <button
