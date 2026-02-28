@@ -4038,6 +4038,10 @@ const accessTranslations: Translations = {
     en: 'Appointment Status',
     fr: 'Statut du Rendez-vous'
   },
+  viewresults: {
+    en: 'View Results',
+    fr: 'Voir les Résultats'
+  },
   allStatuses: {
     en: 'All Statuses',
     fr: 'Tous les Statuts'
@@ -4129,6 +4133,14 @@ const accessTranslations: Translations = {
   confirmationDate: {
     en: 'Confirmation Date',
     fr: 'Date de Confirmation'
+  },
+  awaitingConfirmation: {
+    en: 'Awaiting Confirmation',
+    fr: 'En attente de confirmation'
+  },
+  confirmationPendingDesc: {
+    en: 'Client has not yet confirmed their arrival',
+    fr: 'Le client n\'a pas encore confirmé son arrivée'
   },
   finished: {
     en: 'Finished',

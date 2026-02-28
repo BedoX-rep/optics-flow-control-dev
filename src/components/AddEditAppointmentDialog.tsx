@@ -118,7 +118,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                     <DialogTitle className="text-2xl font-black tracking-tight uppercase">
                         {isEditing ? t('editAppointment') : t('newAppointment')}
                     </DialogTitle>
-                    <p className="text-teal-50/70 text-sm font-medium mt-1">
+                    <p className="text-white text-sm font-medium mt-1 opacity-90">
                         {isEditing ? t('updateAppointmentDetails') : t('scheduleNewEyeExam')}
                     </p>
                 </DialogHeader>
@@ -130,7 +130,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                             <button
                                 type="button"
                                 onClick={() => { setSelectionMode('existing'); setClientId(null); }}
-                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'existing' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'existing' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-900 hover:text-slate-600'}`}
                             >
                                 <Users className="h-3 w-3 inline mr-2" />
                                 {t('selectExistingClient')}
@@ -142,7 +142,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                     setClientId(null);
                                     if (clientSearch && !clientName) setClientName(clientSearch);
                                 }}
-                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'manual' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectionMode === 'manual' ? 'bg-white shadow-sm text-teal-600' : 'text-slate-900 hover:text-slate-600'}`}
                             >
                                 <UserPlus className="h-3 w-3 inline mr-2" />
                                 {t('manualEntry')}
@@ -153,11 +153,11 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                     <div className="space-y-4">
                         {/* Client Info Section */}
                         <div className="space-y-3">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('clientInformation')}</Label>
+                            <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest px-1">{t('clientInformation')}</Label>
 
                             {selectionMode === 'existing' && !isEditing ? (
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900" />
                                     <Input
                                         placeholder={t('clientSearchPlaceholder')}
                                         value={clientSearch}
@@ -173,7 +173,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
                                             {!clientSearch && (
                                                 <div className="px-4 py-2 bg-slate-50 border-b border-slate-100">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('recentlyAddedClients')}</p>
+                                                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{t('recentlyAddedClients')}</p>
                                                 </div>
                                             )}
                                             {filteredClients.length > 0 ? (
@@ -187,7 +187,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                                         <div className="flex items-center justify-between">
                                                             <div>
                                                                 <p className="font-black text-slate-900 text-sm">{c.name}</p>
-                                                                {c.phone && <p className="text-[10px] text-slate-400 font-bold">{c.phone}</p>}
+                                                                {c.phone && <p className="text-[10px] text-slate-900 font-bold">{c.phone}</p>}
                                                             </div>
                                                             <Users className="h-3 w-3 text-slate-200" />
                                                         </div>
@@ -195,7 +195,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                                 ))
                                             ) : (
                                                 <div className="p-4 text-center">
-                                                    <p className="text-xs text-slate-400 font-bold">{t('noClientsFound')}</p>
+                                                    <p className="text-xs text-slate-900 font-bold">{t('noClientsFound')}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -234,7 +234,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                         {/* Date & Time Section */}
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentDate')}</Label>
+                                <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest px-1">{t('appointmentDate')}</Label>
                                 <Input
                                     type="date"
                                     value={appointmentDate}
@@ -244,7 +244,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentTime')}</Label>
+                                <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest px-1">{t('appointmentTime')}</Label>
                                 <Input
                                     type="time"
                                     value={appointmentTime}
@@ -257,7 +257,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
 
                         {/* Notes Section */}
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('appointmentNotes')}</Label>
+                            <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest px-1">{t('appointmentNotes')}</Label>
                             <textarea
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
@@ -273,7 +273,7 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="flex-1 h-12 rounded-2xl font-black uppercase text-[10px] tracking-widest text-slate-400 hover:text-slate-600"
+                            className="flex-1 h-12 rounded-2xl font-black uppercase text-[10px] tracking-widest text-slate-900 hover:text-slate-600"
                         >
                             {t('cancel')}
                         </Button>

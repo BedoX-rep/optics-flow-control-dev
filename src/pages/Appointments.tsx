@@ -27,11 +27,11 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subD
 import AppointmentCard from '@/components/AppointmentCard';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 
-const statusConfig: Record<string, { color: string; bgColor: string; borderColor: string }> = {
-    'Scheduled': { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: 'border-teal-200' },
-    'Confirmation': { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
-    'Finished': { color: 'text-emerald-700', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-200' },
-    'Cancelled': { color: 'text-slate-500', bgColor: 'bg-slate-50', borderColor: 'border-slate-200' },
+const statusConfig: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string }> = {
+    'Scheduled': { color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: 'border-teal-200', ringColor: 'ring-teal-500/5' },
+    'Confirmation': { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', ringColor: 'ring-blue-500/5' },
+    'Finished': { color: 'text-white', bgColor: 'bg-slate-900', borderColor: 'border-slate-800', ringColor: 'ring-slate-900/10' },
+    'Cancelled': { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: 'border-red-200', ringColor: 'ring-red-500/5' },
 };
 
 const Appointments = () => {
@@ -424,6 +424,7 @@ const Appointments = () => {
                                     onDelete={(a) => { setDeletingAppointment(a); setDeleteOpen(true); }}
                                     onStatusChange={handleStatusChange}
                                     onConvertToClient={handleConvertToClient}
+                                    onUpdateResults={(appt, data) => updateMutation.mutate({ id: appt.id, data })}
                                 />
                             ))}
                         </AnimatePresence>

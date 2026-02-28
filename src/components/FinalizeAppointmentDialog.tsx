@@ -101,7 +101,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                         <CheckCircle className="h-5 w-5" />
                         {t('finalizeAppointment')}
                     </DialogTitle>
-                    <DialogDescription className="text-white/80 text-sm mt-1">
+                    <DialogDescription className="text-white text-sm mt-1 opacity-90">
                         {t('finalizeAppointmentDesc')}
                     </DialogDescription>
                 </DialogHeader>
@@ -122,7 +122,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
 
                     {/* Examiner / Optician Name */}
                     <div className="space-y-2">
-                        <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Label className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
                             <User className="h-3 w-3" /> {t('examinerName')}
                         </Label>
                         <Input
@@ -137,7 +137,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
 
                     {/* Prescription Results */}
                     <div className="space-y-3">
-                        <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Label className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
                             <Eye className="h-3 w-3" /> {t('prescriptionResults')}
                         </Label>
 
@@ -148,7 +148,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                             </p>
                             <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">SPH</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">SPH</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -159,7 +159,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">CYL</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">CYL</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -170,7 +170,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">AXE</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">AXE</Label>
                                     <Input
                                         type="number"
                                         step="1"
@@ -190,7 +190,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                             </p>
                             <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">SPH</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">SPH</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -201,7 +201,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">CYL</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">CYL</Label>
                                     <Input
                                         type="number"
                                         step="0.25"
@@ -212,7 +212,7 @@ const FinalizeAppointmentDialog = ({ isOpen, onClose, onFinalize, appointment, i
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold text-slate-400 text-center block">AXE</Label>
+                                    <Label className="text-[10px] font-bold text-slate-900 text-center block">AXE</Label>
                                     <Input
                                         type="number"
                                         step="1"
