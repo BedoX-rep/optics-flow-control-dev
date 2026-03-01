@@ -58,9 +58,10 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
     const isCancelled = appt.status === 'Cancelled';
     const isFinished = appt.status === 'Finished';
     const isConfirmed = appt.status === 'Confirmation';
+    const isExpired = appt.status === 'Expired';
 
     // Status colors for the left indicator bar
-    const indicatorColor = isCancelled ? 'bg-red-500' : isFinished ? 'bg-slate-900' : isConfirmed ? 'bg-blue-500' : 'bg-teal-500';
+    const indicatorColor = isCancelled ? 'bg-red-500' : isFinished ? 'bg-slate-900' : isExpired ? 'bg-amber-500' : isConfirmed ? 'bg-blue-500' : 'bg-teal-500';
 
     return (
         <motion.div
@@ -190,7 +191,7 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
                         </div>
 
                         {/* Fixed Status/Alert Section */}
-                        {!isFinished && !isCancelled && (
+                        {!isFinished && !isCancelled && !isExpired && (
                             <div className="mt-auto space-y-3">
                                 {appt.confirmation_date ? (
                                     <div className="bg-blue-600 rounded-[1.25rem] p-3.5 text-white flex items-center justify-between border border-blue-400 shadow-xl shadow-blue-500/10">
@@ -235,6 +236,21 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
                                         <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{t('finished')}</span>
                                     </div>
                                 </div>
+                            ) : isExpired ? (
+                                <div className="flex-1 flex gap-2 w-full">
+                                    <Button
+                                        onClick={() => onEdit(appt)}
+                                        className="flex-1 h-12 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                                    >
+                                        <Clock className="h-4 w-4 mr-2" /> {t('reschedule') || 'Reschedule'}
+                                    </Button>
+                                    <Button
+                                        onClick={() => onFinalize(appt)}
+                                        className="flex-1 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 active:scale-95 transition-all"
+                                    >
+                                        <CheckCircle className="h-4 w-4 mr-2" /> {t('finalize')}
+                                    </Button>
+                                </div>
                             ) : (
                                 <>
                                     {!isCancelled ? (
@@ -258,9 +274,9 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
 
                                             <Button
                                                 onClick={() => onFinalize(appt)}
-                                                className="flex-1 h-12 rounded-xl bg-slate-900 hover:bg-black text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-900/10 active:scale-95 transition-all"
+                                                className="flex-1 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 active:scale-95 transition-all"
                                             >
-                                                <CheckCircle className="h-4 w-4 mr-2 text-teal-400" /> {t('finalize')}
+                                                <CheckCircle className="h-4 w-4 mr-2" /> {t('finalize')}
                                             </Button>
 
                                         </>

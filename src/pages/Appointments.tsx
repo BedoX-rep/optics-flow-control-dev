@@ -32,6 +32,7 @@ const statusConfig: Record<string, { color: string; bgColor: string; borderColor
     'Confirmation': { color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', ringColor: 'ring-blue-500/5' },
     'Finished': { color: 'text-white', bgColor: 'bg-slate-900', borderColor: 'border-slate-800', ringColor: 'ring-slate-900/10' },
     'Cancelled': { color: 'text-red-700', bgColor: 'bg-red-50', borderColor: 'border-red-200', ringColor: 'ring-red-500/5' },
+    'Expired': { color: 'text-amber-700', bgColor: 'bg-amber-50', borderColor: 'border-amber-200', ringColor: 'ring-amber-500/5' },
 };
 
 const Appointments = () => {
@@ -121,12 +122,35 @@ const Appointments = () => {
     // Filtered appointments
     const filteredAppointments = useMemo(() => {
         if (!appointments) return [];
-        return appointments.filter(appt => {
+
+        const now = new Date();
+        const processedAppointments = appointments.map(appt => {
+            if (appt.status === 'Scheduled' || appt.status === 'Confirmation') {
+                const apptDateTime = new Date(`${appt.appointment_date}T${appt.appointment_time}`);
+                if (apptDateTime < now) {
+                    return { ...appt, status: 'Expired' };
+                }
+            }
+            return appt;
+        });
+
+        const filtered = processedAppointments.filter(appt => {
             const matchesSearch = !searchQuery ||
                 appt.client_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (appt.client_phone && appt.client_phone.includes(searchQuery));
             const matchesStatus = statusFilter === 'All' || appt.status === statusFilter;
             return matchesSearch && matchesStatus;
+        });
+
+        // Ensure Finished are at the bottom, otherwise recent date first (if they didn't specify, descending makes sense, but the supabase API does ascending. 
+        // "Still filtered by the most recent date" -> Let's keep original order (which is ascending from DB) but push Finished to the bottom.
+        return filtered.sort((a, b) => {
+            if (a.status === 'Finished' && b.status !== 'Finished') return 1;
+            if (a.status !== 'Finished' && b.status === 'Finished') return -1;
+
+            const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`).getTime();
+            const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`).getTime();
+            return dateA - dateB;
         });
     }, [appointments, searchQuery, statusFilter]);
 
@@ -143,6 +167,7 @@ const Appointments = () => {
             total: appointments.length,
             scheduled: appointments.filter(a => a.status === 'Scheduled').length,
             finished: appointments.filter(a => a.status === 'Finished').length,
+            appointmentsToday: appointments.filter(a => a.appointment_date === todayStr).length,
             upcomingToday: appointments.filter(a =>
                 a.appointment_date === todayStr &&
                 (a.status === 'Scheduled' || a.status === 'Confirmation')
@@ -312,15 +337,19 @@ const Appointments = () => {
 
                             <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
                                 {[
-                                    { label: t('total'), value: stats.total, color: 'text-white' },
-                                    { label: t('upcomingToday'), value: stats.upcomingToday, color: 'text-amber-400' },
-                                    { label: t('upcomingThisWeek'), value: stats.upcomingThisWeek, color: 'text-teal-400' },
-                                    { label: t('finished'), value: stats.finished, color: 'text-emerald-400' },
+                                    { label: t('total'), value: stats.total, color: 'text-white', action: () => { setDateFilter('all'); setStatusFilter('All'); } },
+                                    { label: t('appointmentsToday') || 'Appointments Today', value: stats.appointmentsToday, color: 'text-blue-400', action: () => { setDateFilter('today'); setStatusFilter('All'); } },
+                                    { label: t('upcomingThisWeek'), value: stats.upcomingThisWeek, color: 'text-teal-400', action: () => { setDateFilter('week'); setStatusFilter('All'); } },
+                                    { label: t('finished'), value: stats.finished, color: 'text-emerald-400', action: () => { setDateFilter('all'); setStatusFilter('Finished'); } },
                                 ].map((stat, i) => (
-                                    <div key={i} className="flex flex-col">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-1 leading-none">{stat.label}</span>
+                                    <button
+                                        key={i}
+                                        onClick={stat.action}
+                                        className="flex flex-col text-left hover:scale-105 transition-transform group/stat"
+                                    >
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover/stat:text-white/60 mb-1 leading-none transition-colors">{stat.label}</span>
                                         <span className={`text-xl md:text-2xl font-black ${stat.color} leading-none`}>{stat.value}</span>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
                         </div>
@@ -385,6 +414,7 @@ const Appointments = () => {
                                 <SelectItem value="Confirmation">{t('confirmed')}</SelectItem>
                                 <SelectItem value="Finished">{t('finished')}</SelectItem>
                                 <SelectItem value="Cancelled">{t('cancelled')}</SelectItem>
+                                <SelectItem value="Expired">{t('expired') || 'Expired'}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
