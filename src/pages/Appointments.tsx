@@ -356,7 +356,7 @@ const Appointments = () => {
 
                         <Button
                             onClick={() => { setEditingAppointment(null); setAddEditOpen(true); }}
-                            className="bg-teal-500 hover:bg-teal-400 text-slate-950 font-black rounded-2xl h-12 px-8 shadow-xl shadow-teal-500/20 group/btn transition-all duration-300 w-fit"
+                            className="bg-teal-500 hover:bg-teal-400 text-white font-black rounded-2xl h-12 px-8 shadow-xl shadow-teal-500/20 group/btn transition-all duration-300 w-fit"
                         >
                             <Plus className="h-4 w-4 mr-2 group-hover/btn:rotate-90 transition-transform" />
                             {t('newAppointment')}

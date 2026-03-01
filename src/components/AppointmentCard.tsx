@@ -167,7 +167,7 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
                                                 variant="secondary"
                                                 size="sm"
                                                 onClick={() => setIsResultsDialogOpen(true)}
-                                                className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-teal-500 text-slate-950 hover:bg-teal-400 border-none rounded-xl shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+                                                className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-teal-500 text-white hover:bg-teal-400 border-none rounded-xl shadow-lg shadow-teal-500/20 transition-all active:scale-95"
                                             >
                                                 <Eye className="h-3.5 w-3.5 mr-2" />
                                                 {t('viewresults')}
@@ -246,7 +246,7 @@ const AppointmentCard = forwardRef<HTMLDivElement, AppointmentCardProps>(({
                                     </Button>
                                     <Button
                                         onClick={() => onFinalize(appt)}
-                                        className="flex-1 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 active:scale-95 transition-all"
+                                        className="flex-1 h-12 rounded-xl bg-teal-500 hover:bg-teal-400 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-teal-500/20 active:scale-95 transition-all"
                                     >
                                         <CheckCircle className="h-4 w-4 mr-2" /> {t('finalize')}
                                     </Button>
