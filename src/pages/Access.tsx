@@ -26,6 +26,7 @@ interface EmployeeWithPermissions {
   display_name: string | null;
   status: string;
   created_at: string;
+  temporary_password?: string | null;
   permissions: {
     can_manage_products: boolean;
     can_manage_clients: boolean;
@@ -49,7 +50,18 @@ const Access = () => {
   const [newEmployeePassword, setNewEmployeePassword] = useState('');
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showEmployeePasswords, setShowEmployeePasswords] = useState<{ [key: string]: boolean }>({});
   const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
+  const [newEmployeePermissions, setNewEmployeePermissions] = useState({
+    can_manage_products: true,
+    can_manage_clients: true,
+    can_manage_receipts: true,
+    can_view_financial: false,
+    can_manage_purchases: false,
+    can_access_dashboard: true,
+    can_manage_invoices: true,
+    can_access_appointments: true,
+  });
 
   const isOwner = userRole === 'owner';
 
@@ -163,6 +175,8 @@ const Access = () => {
             display_name: newEmployeeName,
             user_type: 'employee',
             store_id: store!.id,
+            password: newEmployeePassword,
+            permissions: newEmployeePermissions,
           },
         },
       });
@@ -180,6 +194,16 @@ const Access = () => {
       setNewEmployeeEmail('');
       setNewEmployeePassword('');
       setNewEmployeeName('');
+      setNewEmployeePermissions({
+        can_manage_products: true,
+        can_manage_clients: true,
+        can_manage_receipts: true,
+        can_view_financial: false,
+        can_manage_purchases: false,
+        can_access_dashboard: true,
+        can_manage_invoices: true,
+        can_access_appointments: true,
+      });
       setAddEmployeeOpen(false);
 
       // Refresh employee list
@@ -337,6 +361,21 @@ const Access = () => {
                         <Mail className="h-3 w-3" />
                         {employee.email}
                       </CardDescription>
+                      {employee.temporary_password && (
+                        <CardDescription className="text-xs font-medium flex items-center gap-1.5 mt-1 border border-teal-100 bg-teal-50 px-2 py-0.5 rounded-md w-fit">
+                          <span className="text-teal-700 font-bold">{t('password') || 'Password'}:</span>
+                          <span className="text-slate-600 font-mono">
+                            {showEmployeePasswords[employee.id] ? employee.temporary_password : '••••••••'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setShowEmployeePasswords(prev => ({ ...prev, [employee.id]: !prev[employee.id] }))}
+                            className="text-teal-400 hover:text-teal-600 ml-1"
+                          >
+                            {showEmployeePasswords[employee.id] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          </button>
+                        </CardDescription>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -409,7 +448,7 @@ const Access = () => {
 
       {/* Add Employee Dialog */}
       <Dialog open={addEmployeeOpen} onOpenChange={setAddEmployeeOpen}>
-        <DialogContent className="sm:max-w-md rounded-[32px] border-slate-200/50 shadow-3xl bg-white/95 backdrop-blur-xl p-8 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl rounded-[32px] border-slate-200/50 shadow-3xl bg-white/95 backdrop-blur-xl p-8 overflow-hidden max-h-[90vh] overflow-y-auto">
           <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full -mr-16 -mt-16 blur-2xl" />
           <DialogHeader className="relative z-10">
             <div className="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center mb-4 border border-teal-100">
@@ -481,6 +520,35 @@ const Access = () => {
               <p className="text-[10px] text-slate-400 font-medium">
                 {t('passwordMinLength') || 'Minimum 6 characters. Share this password with the employee.'}
               </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <Label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                {t('initialPermissions') || 'Initial Permissions'}
+              </Label>
+              <div className="grid grid-cols-2 gap-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                {permissionsList.map((perm) => (
+                  <div
+                    key={perm.id}
+                    className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-teal-200 transition-all"
+                  >
+                    <Label
+                      htmlFor={`new-${perm.id}`}
+                      className="text-[10px] font-bold text-slate-600 cursor-pointer"
+                    >
+                      {perm.label}
+                    </Label>
+                    <Switch
+                      id={`new-${perm.id}`}
+                      checked={newEmployeePermissions[perm.id as keyof typeof newEmployeePermissions]}
+                      onCheckedChange={(checked) =>
+                        setNewEmployeePermissions(prev => ({ ...prev, [perm.id]: checked }))
+                      }
+                      className="scale-75 data-[state=checked]:bg-teal-500"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="flex gap-3 pt-3">

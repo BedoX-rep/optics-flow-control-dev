@@ -1027,6 +1027,7 @@ export type Database = {
           email: string
           display_name: string | null
           status: string
+          temporary_password: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -1037,6 +1038,7 @@ export type Database = {
           email: string
           display_name?: string | null
           status?: string
+          temporary_password?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1047,6 +1049,7 @@ export type Database = {
           email?: string
           display_name?: string | null
           status?: string
+          temporary_password?: string | null
           created_at?: string | null
           updated_at?: string | null
         }

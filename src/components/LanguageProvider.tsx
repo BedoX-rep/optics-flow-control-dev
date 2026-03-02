@@ -4366,6 +4366,14 @@ const accessTranslations: Translations = {
     en: 'Add employees and manage their permissions',
     fr: 'Ajoutez des employés et gérez leurs autorisations'
   },
+  initialPermissions: {
+    en: 'Initial Permissions',
+    fr: 'Autorisations Initiales'
+  },
+  password: {
+    en: 'Password',
+    fr: 'Mot de passe'
+  },
   addEmployee: {
     en: 'Add Employee',
     fr: 'Ajouter un Employé'
