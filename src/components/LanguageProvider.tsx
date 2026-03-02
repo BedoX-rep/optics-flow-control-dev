@@ -1490,10 +1490,6 @@ const productTranslations: Translations = {
     en: 'Appointments Today',
     fr: 'Rendez-vous Aujourd\'hui'
   },
-  appointmentExpired: {
-    en: 'Appointment Expired',
-    fr: 'Rendez-vous Expiré'
-  },
   expired: {
     en: 'Expired',
     fr: 'Expiré'
@@ -4085,6 +4081,10 @@ const accessTranslations: Translations = {
   accessAppointments: {
     en: 'Access Appointments',
     fr: 'Accéder aux Rendez-vous'
+  },
+  appointmentExpired: {
+    en: 'Appointment Expired',
+    fr: 'Rendez-vous Expiré'
   },
   appointmentStatusFilter: {
     en: 'Appointment Status',
