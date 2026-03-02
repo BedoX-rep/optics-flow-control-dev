@@ -96,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
   const queryClient = useQueryClient();
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+  const userIdRef = useRef<string | null>(null);
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
@@ -414,9 +415,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           let role = userRoleRef.current;
           let storeId: string | null = null;
 
+          // Only force a fetch if we don't have a user yet, or the user identity has actually changed
+          const isUserChanged = !userIdRef.current || userIdRef.current !== currentSession.user.id;
+          const shouldForceFetch = forceSubscriptionFetch || isUserChanged;
+
+          userIdRef.current = currentSession.user.id;
+
           // Only fetch subscription on initial load or force
-          if (isInitialCheck || forceSubscriptionFetch) {
-            const userInfo = await fetchSubscription(currentSession.user.id, forceSubscriptionFetch);
+          if (isInitialCheck || shouldForceFetch) {
+            const userInfo = await fetchSubscription(currentSession.user.id, shouldForceFetch);
             role = userInfo?.role || role;
             storeId = userInfo?.userStoreId || null;
           }
@@ -454,9 +461,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Only handle specific auth events that actually require action
       if (event === 'SIGNED_IN') {
-        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+        // Only force if identity changed to avoid focus-refresh spam
+        const isNewIdentity = !userIdRef.current || userIdRef.current !== currentSession?.user?.id;
+        debouncedSessionCheck(currentSession, true, isNewIdentity);
       } else if (event === 'SIGNED_OUT') {
-        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
+        userIdRef.current = null;
+        debouncedSessionCheck(currentSession, false, false);
       } else if (event === 'TOKEN_REFRESHED') {
         // For token refresh, just update session without fetching subscription
         setSession(currentSession);

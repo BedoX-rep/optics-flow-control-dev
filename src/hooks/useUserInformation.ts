@@ -74,7 +74,7 @@ export const useUserInformation = () => {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,          // 5 minutes (matches global)
     gcTime: 30 * 60 * 1000,            // 30 minutes (gcTime is new name for cacheTime)
-    refetchOnWindowFocus: false,        // DOES refetch on window focus
+    refetchOnWindowFocus: false,        // DOES NOT refetch on window focus
     refetchOnMount: true,              // DOES refetch when component mounts
     refetchOnReconnect: true           // DOES refetch on reconnect
   });
