@@ -32,7 +32,7 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [referralCode, setReferralCode] = useState('');
-  const [accessCode, setAccessCode] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -90,7 +90,7 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !confirmPassword || !accessCode) {
+    if (!email || !password || !confirmPassword) {
       toast({
         title: t('error'),
         description: t('fillAllRequiredFields'),
@@ -115,7 +115,6 @@ const Auth = () => {
       const userData: any = {
         display_name: displayName || email.split('@')[0],
         store_name: storeName || 'Optique',
-        access_code: accessCode.toUpperCase()
       };
 
       // Add referral code to metadata if provided
@@ -135,7 +134,7 @@ const Auth = () => {
 
       console.log('Signup successful, user data:', data);
 
-      // The subscription will be created automatically by the database trigger
+      // The subscription + store will be created automatically by the database trigger
 
       toast({
         title: t('success'),
@@ -334,54 +333,31 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    {/* Access & Referral Section */}
+                    {/* Referral Section */}
                     <div className="space-y-4">
                       <div className="pb-2 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('accessAndReferral')}</h3>
-                        <p className="text-xs text-gray-500">{t('requiredCodesVerification')}</p>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('referralCode')}</h3>
+                        <p className="text-xs text-gray-500">{t('referralCodeOptionalDesc')}</p>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="access-code" className="text-gray-700 font-medium text-sm flex items-center">
-                            {t('accessCode')}*
-                            <span className="ml-1 text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="access-code"
-                            type="text"
-                            placeholder={t('accessCodePlaceholder')}
-                            maxLength={5}
-                            value={accessCode}
-                            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono text-center text-lg tracking-wider transition-all shadow-sm"
-                            required
-                          />
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-xs text-blue-700">
-                              {t('accessCodeRequired')}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="referral-code" className="text-gray-700 font-medium text-sm">
-                            {t('referralCode')}
-                            <span className="ml-1 text-gray-400">{t('referralCodeOptional')}</span>
-                          </Label>
-                          <Input
-                            id="referral-code"
-                            type="text"
-                            placeholder={t('referralCodePlaceholder')}
-                            maxLength={4}
-                            value={referralCode}
-                            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                            className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono text-center text-lg tracking-wider transition-all shadow-sm"
-                          />
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                            <p className="text-xs text-green-700">
-                              {t('referralCodeOptionalDesc')}
-                            </p>
-                          </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="referral-code" className="text-gray-700 font-medium text-sm">
+                          {t('referralCode')}
+                          <span className="ml-1 text-gray-400">{t('referralCodeOptional')}</span>
+                        </Label>
+                        <Input
+                          id="referral-code"
+                          type="text"
+                          placeholder={t('referralCodePlaceholder')}
+                          maxLength={4}
+                          value={referralCode}
+                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                          className="h-12 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-lg font-mono text-center text-lg tracking-wider transition-all shadow-sm"
+                        />
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <p className="text-xs text-green-700">
+                            {t('referralCodeOptionalDesc')}
+                          </p>
                         </div>
                       </div>
                     </div>

@@ -4353,6 +4353,110 @@ const accessTranslations: Translations = {
   storeStaff: {
     en: 'Store Staff',
     fr: 'Personnel du Magasin'
+  },
+  passwordMinLength: {
+    en: 'Minimum 6 characters. Share this password with the employee.',
+    fr: 'Minimum 6 caractères. Partagez ce mot de passe avec l\'employé.'
+  },
+  teamManagement: {
+    en: 'Team Management',
+    fr: 'Gestion de l\'Équipe'
+  },
+  manageEmployeeAccounts: {
+    en: 'Add employees and manage their permissions',
+    fr: 'Ajoutez des employés et gérez leurs autorisations'
+  },
+  addEmployee: {
+    en: 'Add Employee',
+    fr: 'Ajouter un Employé'
+  },
+  yourStore: {
+    en: 'Your Store',
+    fr: 'Votre Magasin'
+  },
+  employees: {
+    en: 'Employees',
+    fr: 'Employés'
+  },
+  noEmployeesYet: {
+    en: 'No employees yet',
+    fr: 'Pas encore d\'employés'
+  },
+  addFirstEmployee: {
+    en: 'Add your first employee to start managing your team',
+    fr: 'Ajoutez votre premier employé pour commencer à gérer votre équipe'
+  },
+  addEmployeeDescription: {
+    en: 'Create an account for your employee. They will receive an email verification.',
+    fr: 'Créez un compte pour votre employé. Il recevra une vérification par e-mail.'
+  },
+  temporaryPassword: {
+    en: 'Temporary Password',
+    fr: 'Mot de passe temporaire'
+  },
+  employee: {
+    en: 'Employee',
+    fr: 'Employé'
+  },
+  active: {
+    en: 'Active',
+    fr: 'Actif'
+  },
+  suspended: {
+    en: 'Suspended',
+    fr: 'Suspendu'
+  },
+  pendingVerification: {
+    en: 'Pending Verification',
+    fr: 'En Attente de Vérification'
+  },
+  confirmRemoveEmployee: {
+    en: 'Are you sure you want to remove this employee?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet employé ?'
+  },
+  employeeAccountCreated: {
+    en: 'Employee account created successfully. They will receive an email verification.',
+    fr: 'Compte d\'employé créé avec succès. Il recevra une vérification par e-mail.'
+  },
+  employeeAlreadyExists: {
+    en: 'An employee with this email already exists',
+    fr: 'Un employé avec cet e-mail existe déjà'
+  },
+  passwordTooShort: {
+    en: 'Password must be at least 6 characters',
+    fr: 'Le mot de passe doit comporter au moins 6 caractères'
+  },
+  employeeRemoved: {
+    en: 'Employee removed successfully',
+    fr: 'Employé supprimé avec succès'
+  },
+  failedToRemoveEmployee: {
+    en: 'Failed to remove employee',
+    fr: 'Échec de la suppression de l\'employé'
+  },
+  permissionsUpdated: {
+    en: 'Permissions updated successfully',
+    fr: 'Autorisations mises à jour avec succès'
+  },
+  permissionsAvailableAfterVerification: {
+    en: 'Permissions will be available once the employee verifies their email',
+    fr: 'Les autorisations seront disponibles une fois que l\'employé aura vérifié son e-mail'
+  },
+  creating: {
+    en: 'Creating...',
+    fr: 'Création...'
+  },
+  failedToCreateEmployee: {
+    en: 'Failed to create employee account',
+    fr: 'Échec de la création du compte employé'
+  },
+  owner: {
+    en: 'Owner',
+    fr: 'Propriétaire'
+  },
+  myStatus: {
+    en: 'My Status',
+    fr: 'Mon Statut'
   }
 };
 const financialTranslations: Translations = {

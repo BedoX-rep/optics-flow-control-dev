@@ -31,17 +31,31 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-const getNavigation = (t: any) => [
-  { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
-  { name: t('products'), href: '/products', icon: Package, permission: 'can_manage_products' },
-  { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
-  { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
-  { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
-  { name: t('invoices'), href: '/invoices', icon: Printer, permission: 'can_manage_invoices' },
-  { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
-  { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
-  { name: t('appointments'), href: '/appointments', icon: CalendarDays, permission: 'can_access_appointments' },
-];
+const getNavigation = (t: any, userRole: string) => {
+  const items = [
+    { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, permission: 'can_access_dashboard' },
+    { name: t('products'), href: '/products', icon: Package, permission: 'can_manage_products' },
+    { name: t('clients'), href: '/clients', icon: Users, permission: 'can_manage_clients' },
+    { name: t('receipts'), href: '/receipts', icon: Receipt, permission: 'can_manage_receipts' },
+    { name: t('newReceipt'), href: '/new-receipt', icon: FileText, permission: 'can_manage_receipts' },
+    { name: t('invoices'), href: '/invoices', icon: Printer, permission: 'can_manage_invoices' },
+    { name: t('purchases'), href: '/purchases', icon: ShoppingCart, permission: 'can_manage_purchases' },
+    { name: t('financial'), href: '/financial', icon: Calculator, permission: 'can_view_financial' },
+    { name: t('appointments'), href: '/appointments', icon: CalendarDays, permission: 'can_access_appointments' },
+  ];
+
+  // Add employee-only nav item
+  if (userRole === 'employee') {
+    items.push({
+      name: t('myStatus') || 'My Status',
+      href: '/my-status',
+      icon: Shield,
+      permission: null as any,
+    });
+  }
+
+  return items;
+};
 
 const NavItem = ({ item, collapsed, isActive, onNavigate }: { item: any, collapsed: boolean, isActive: boolean, onNavigate?: () => void }) => (
   <Link
@@ -119,8 +133,8 @@ const NavigationContent = ({
   </nav>
 );
 
-const MainNav = ({ onAdminAccessClick }: { onAdminAccessClick?: () => void }) => {
-  const { user, subscription, permissions, sessionRole, exitAdminSession } = useAuth();
+const MainNav = () => {
+  const { user, subscription, permissions, userRole } = useAuth();
   const { toast } = useToast();
   const { t, language } = useLanguage(); // Include language to trigger re-renders
   const location = useLocation();
@@ -128,8 +142,8 @@ const MainNav = ({ onAdminAccessClick }: { onAdminAccessClick?: () => void }) =>
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Regenerate navigation items when language changes
-  const navigation = useMemo(() => getNavigation(t), [t, language]);
+  // Regenerate navigation items when language or role changes
+  const navigation = useMemo(() => getNavigation(t, userRole), [t, language, userRole]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -153,19 +167,14 @@ const MainNav = ({ onAdminAccessClick }: { onAdminAccessClick?: () => void }) =>
     return navigation.filter(item => {
       if (item.permission === null) return true; // Always show items without permission requirements
 
-      // Special case for admin session requirement
-      if (item.permission === 'admin_session') {
-        return sessionRole === 'Admin';
-      }
-
-      // Admin session role bypasses all other permission checks
-      if (sessionRole === 'Admin') return true;
+      // Owner bypasses all permission checks
+      if (userRole === 'owner') return true;
 
       if (!permissions) return false; // Hide if permissions are not loaded
 
       return permissions[item.permission as keyof typeof permissions];
     });
-  }, [navigation, permissions, sessionRole]);
+  }, [navigation, permissions, userRole]);
 
 
   // Mobile Navigation
@@ -207,44 +216,10 @@ const MainNav = ({ onAdminAccessClick }: { onAdminAccessClick?: () => void }) =>
 
             <div className="p-4 border-t border-white/10 relative z-10 mt-auto bg-white/5 backdrop-blur-md shrink-0">
               <div className="flex flex-col gap-3">
-                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] px-1 text-center">Settings & Access</p>
-                <div className="bg-white/10 rounded-2xl p-1.5 flex justify-between items-center border border-white/20 shadow-inner">
-                  <div className="flex-1 pr-2 border-r border-white/10 flex justify-center [&_button]:bg-transparent [&_button]:text-white [&_button]:border-none [&_button:hover]:bg-white/20 [&_span.text-slate-900]:text-white [&_.text-slate-400]:text-white/70">
+                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] px-1 text-center">Settings</p>
+                <div className="bg-white/10 rounded-2xl p-1.5 flex justify-center items-center border border-white/20 shadow-inner">
+                  <div className="[&_button]:bg-transparent [&_button]:text-white [&_button]:border-none [&_button:hover]:bg-white/20 [&_span.text-slate-900]:text-white [&_.text-slate-400]:text-white/70">
                     <LanguageToggle />
-                  </div>
-                  <div className="pl-2 flex justify-center w-14">
-                    {sessionRole === 'Store Staff' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setMobileOpen(false);
-                          onAdminAccessClick?.();
-                        }}
-                        className="h-10 w-10 bg-white/10 text-white rounded-xl hover:bg-white/20 hover:text-white shadow-sm border border-white/10 transition-all"
-                      >
-                        <Shield className="h-4 w-4" />
-                      </Button>
-                    )}
-                    {sessionRole === 'Admin' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          exitAdminSession();
-                          toast({
-                            title: "Session Updated",
-                            description: "You are now signed out of the admin session",
-                          });
-                          setTimeout(() => {
-                            window.location.reload();
-                          }, 100);
-                        }}
-                        className="h-10 w-10 bg-rose-500/20 text-rose-200 rounded-xl hover:bg-rose-500/40 hover:text-white shadow-sm border border-rose-500/30 transition-all"
-                      >
-                        <LogOut className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
                 </div>
               </div>

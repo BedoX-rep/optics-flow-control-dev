@@ -557,6 +557,9 @@ export type Database = {
           | null
           trial_used: boolean | null
           user_id: string
+          role: string | null
+          store_id: string | null
+          access_code: string | null
         }
         Insert: {
           created_at?: string | null
@@ -579,6 +582,9 @@ export type Database = {
           | null
           trial_used?: boolean | null
           user_id: string
+          role?: string | null
+          store_id?: string | null
+          access_code?: string | null
         }
         Update: {
           created_at?: string | null
@@ -601,6 +607,9 @@ export type Database = {
           | null
           trial_used?: boolean | null
           user_id?: string
+          role?: string | null
+          store_id?: string | null
+          access_code?: string | null
         }
         Relationships: []
       }
@@ -986,20 +995,76 @@ export type Database = {
           }
         ]
       }
+      stores: {
+        Row: {
+          id: string
+          owner_id: string
+          name: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          name?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          name?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      store_employees: {
+        Row: {
+          id: string
+          store_id: string
+          user_id: string | null
+          email: string
+          display_name: string | null
+          status: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          user_id?: string | null
+          email: string
+          display_name?: string | null
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          store_id?: string
+          user_id?: string | null
+          email?: string
+          display_name?: string | null
+          status?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_employees_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      check_access_code: {
-        Args: {
-          input_access_code: string
-        }
-        Returns: {
-          valid: boolean
-          message: string
-        }[]
-      }
       check_and_renew_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1008,15 +1073,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_admin_permissions: {
+      get_user_store_role: {
         Args: Record<PropertyKey, never>
         Returns: {
-          can_manage_products: boolean
-          can_manage_clients: boolean
-          can_manage_receipts: boolean
-          can_view_financial: boolean
-          can_manage_purchases: boolean
-          can_access_dashboard: boolean
+          user_role: string
+          store_id: string
+          store_name: string
         }[]
       }
       get_subscription_stats: {
@@ -1035,10 +1097,6 @@ export type Database = {
           user_uuid: string
         }
         Returns: undefined
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
       }
     }
     Enums: {
