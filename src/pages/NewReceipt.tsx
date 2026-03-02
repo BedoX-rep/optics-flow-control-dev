@@ -262,7 +262,6 @@ const NewReceipt = () => {
       const { data: allProducts, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -275,8 +274,7 @@ const NewReceipt = () => {
             await supabase
               .from('products')
               .update({ stock_status: 'Out Of Stock' })
-              .eq('id', product.id)
-              .eq('user_id', user.id);
+              .eq('id', product.id);
           }
         });
       }
@@ -302,7 +300,6 @@ const NewReceipt = () => {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name', { ascending: true });
 

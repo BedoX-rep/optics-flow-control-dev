@@ -1060,6 +1060,30 @@ export type Database = {
           }
         ]
       }
+      companies: {
+        Row: {
+          id: string
+          name: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1410,6 +1434,7 @@ export interface InvoiceItem {
   is_deleted?: boolean;
   created_at: string;
   updated_at: string;
+  item_category?: string;
 }
 
 export interface Appointment {

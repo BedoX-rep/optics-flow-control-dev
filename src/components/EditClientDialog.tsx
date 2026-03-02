@@ -151,7 +151,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         })
         return;
       }
-      
+
       const clientData = {
         name: values.name,
         phone: values.phone,
@@ -175,15 +175,14 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
         .from('clients')
         .update(clientData)
         .eq('id', client.id)
-        .eq('user_id', user.id)
         .select()
         .single();
 
       if (error) throw error;
 
       // Invalidate and refetch queries
-      await queryClient.invalidateQueries({ queryKey: ['all-clients', user.id] });
-      
+      await queryClient.invalidateQueries({ queryKey: ['all-clients'] });
+
       toast({
         title: "Success",
         description: "Client updated successfully",
@@ -236,7 +235,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <h3 className="text-sm font-medium">{t('rightEyeShort')}</h3>
@@ -248,7 +247,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">SPH</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
@@ -275,7 +274,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">CYL</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
@@ -302,7 +301,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">AXE</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             inputMode="numeric"
                             value={field.value !== null ? field.value : ''}
@@ -316,7 +315,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
                               }
-                            }} 
+                            }}
                             className="h-8"
                           />
                         </FormControl>
@@ -337,7 +336,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">SPH</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
@@ -364,7 +363,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">CYL</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             value={field.value !== null ? field.value : ''}
                             onChange={(e) => {
@@ -391,7 +390,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                       <FormItem>
                         <FormLabel className="text-xs">AXE</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             type="text"
                             inputMode="numeric"
                             value={field.value !== null ? field.value : ''}
@@ -405,7 +404,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                               if (!isNaN(numValue)) {
                                 field.onChange(numValue);
                               }
-                            }} 
+                            }}
                             className="h-8"
                           />
                         </FormControl>
@@ -423,7 +422,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 <FormItem>
                   <FormLabel>Add</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       type="text"
                       value={field.value !== null ? field.value : ''}
                       onChange={(e) => {
@@ -443,7 +442,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
-            
+
             <div className="space-y-4 mt-6">
               <h3 className="text-md font-medium">{t('prescriptionStorage')}</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -507,7 +506,7 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                 </FormItem>
               )}
             />
-            
+
             <div className="space-y-4 mt-6">
               <h3 className="text-md font-medium">{t('renewalInformation')}</h3>
               <div className="grid grid-cols-3 gap-4">
@@ -557,9 +556,9 @@ const EditClientDialog = ({ isOpen, onClose, client }: EditClientDialogProps) =>
                   )}
                 />
               </div>
-              
-              </div>
-            
+
+            </div>
+
             <div className="flex justify-end gap-3 mt-6">
               <Button type="button" variant="outline" onClick={onClose}>
                 {t('cancel')}

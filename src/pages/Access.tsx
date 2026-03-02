@@ -139,30 +139,10 @@ const Access = () => {
     setIsCreatingEmployee(true);
 
     try {
-      // 1. Create the store_employees record first (before signUp triggers handle_new_user)
-      const { error: empError } = await supabase
-        .from('store_employees')
-        .insert({
-          store_id: store!.id,
-          email: newEmployeeEmail.toLowerCase(),
-          display_name: newEmployeeName,
-          status: 'active',
-        });
-
-      if (empError) {
-        if (empError.code === '23505') {
-          toast({
-            title: t('error') || 'Error',
-            description: t('employeeAlreadyExists') || 'An employee with this email already exists',
-            variant: 'destructive',
-          });
-          setIsCreatingEmployee(false);
-          return;
-        }
-        throw empError;
-      }
-
-      // 2. Create the auth user using a session-isolated Supabase client
+      // 1. Create the auth user using a session-isolated Supabase client
+      // We no longer pre-insert into store_employees here. 
+      // Instead, we pass store_id and user_type in metadata, and the handle_new_user trigger 
+      // will create the store_employees record automatically.
       const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://vbcdgubnvbilavetsjlr.supabase.co";
       const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiY2RndWJudmJpbGF2ZXRzamxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTE4MDYsImV4cCI6MjA2MDY2NzgwNn0.aNeLdgw7LTsVl73gzKIjxT5w0AyT99x1bh-BSV3HeCQ";
 
@@ -188,13 +168,6 @@ const Access = () => {
       });
 
       if (signUpError) {
-        // Clean up the store_employees record on sign-up failure
-        await supabase
-          .from('store_employees')
-          .delete()
-          .eq('store_id', store!.id)
-          .eq('email', newEmployeeEmail.toLowerCase())
-          .is('user_id', null);
         throw signUpError;
       }
 

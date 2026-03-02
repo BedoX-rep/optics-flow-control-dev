@@ -19,22 +19,22 @@ export const useUserInformation = () => {
         const { data: existingInfo, error: fetchError } = await supabase
           .from('user_information')
           .select('*')
-          .eq('user_id', user.id)
-          .single();
+          .order('store_name', { ascending: false, nullsFirst: false })
+          .limit(1)
+          .maybeSingle();
 
         if (existingInfo) {
           return existingInfo as UserInformationRow;
         }
 
         // If no user information exists, initialize from subscription data
-        if (fetchError && fetchError.code === 'PGRST116') {
+        if (!existingInfo && (!fetchError || fetchError.code === 'PGRST116')) {
           await supabase.rpc('initialize_user_information', { user_uuid: user.id });
 
           // Fetch the newly created record
           const { data: newInfo, error: newError } = await supabase
             .from('user_information')
             .select('*')
-            .eq('user_id', user.id)
             .single();
 
           if (newError) {

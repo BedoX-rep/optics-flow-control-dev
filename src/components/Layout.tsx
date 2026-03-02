@@ -49,9 +49,9 @@ const Layout = ({ children }: LayoutProps) => {
       if (!user) return [];
 
       const [clientsRes, receiptsRes, purchasesRes] = await Promise.all([
-        supabase.from('clients').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
-        supabase.from('receipts').select('*, clients(name)').eq('user_id', user.id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
-        supabase.from('purchases').select('*, supplier:supplier_id(name)').eq('user_id', user.id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5)
+        supabase.from('clients').select('*').order('created_at', { ascending: false }).limit(5),
+        supabase.from('receipts').select('*, clients(name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+        supabase.from('purchases').select('*, supplier:supplier_id(name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5)
       ]);
 
       const activity = [

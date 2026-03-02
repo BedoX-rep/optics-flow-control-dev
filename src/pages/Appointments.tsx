@@ -100,7 +100,6 @@ const Appointments = () => {
             let query = supabase
                 .from('appointments')
                 .select('*')
-                .eq('user_id', user.id)
                 .eq('is_deleted', false)
                 .order('appointment_date', { ascending: true })
                 .order('appointment_time', { ascending: true });

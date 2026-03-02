@@ -391,7 +391,6 @@ const Purchases = () => {
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
 
@@ -421,7 +420,6 @@ const Purchases = () => {
             name
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -453,7 +451,6 @@ const Purchases = () => {
             email
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
 

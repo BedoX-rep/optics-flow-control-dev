@@ -189,7 +189,7 @@ const AppRoutes = () => (
     } />
 
     <Route path="/subscriptions/*" element={
-      <ProtectedRoute requiresActiveSubscription={false}>
+      <ProtectedRoute requiresActiveSubscription={false} requiredPermission="owner_only">
         <Layout><Subscriptions /></Layout>
       </ProtectedRoute>
     } />

@@ -49,7 +49,6 @@ const AddEditAppointmentDialog = ({ isOpen, onClose, onSave, appointment, isSavi
             const { data, error } = await supabase
                 .from('clients')
                 .select('id, name, phone')
-                .eq('user_id', user?.id)
                 .eq('is_deleted', false)
                 .order('created_at', { ascending: false });
             if (error) throw error;

@@ -54,7 +54,6 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('receipts')
         .select(`*, clients(name), receipt_items(*, product:product_id(category))`)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -70,7 +69,6 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
@@ -82,7 +80,7 @@ const Dashboard = () => {
     queryKey: ['products-dashboard-brief', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase.from('products').select('*').eq('user_id', user.id).eq('is_deleted', false);
+      const { data, error } = await supabase.from('products').select('*').eq('is_deleted', false);
       if (error) throw error;
       return data || [];
     },
@@ -96,7 +94,6 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('purchases')
         .select(`*, supplier:supplier_id(name)`)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
         .limit(10);

@@ -95,7 +95,6 @@ export default function Clients() {
           receipt_items(*)
         )
       `)
-      .eq('user_id', user.id)
       .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 

@@ -40,8 +40,7 @@ BEGIN
       WHERE id = v_employee_record.id;
       v_store_id := v_employee_record.store_id;
     ELSE
-      -- Fallback: create the employee record if it doesn't exist but metadata says it's an employee
-      -- But only if we have a valid store_id
+      -- Fallback: create the employee record (e.g. if metadata passed store_id)
       IF v_store_id IS NOT NULL THEN
         INSERT INTO public.store_employees (store_id, user_id, email, display_name, status)
         VALUES (
@@ -50,27 +49,17 @@ BEGIN
           LOWER(NEW.email), 
           COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.email),
           'active'
-        ) RETURNING * INTO v_employee_record;
+        ) 
+        ON CONFLICT (store_id, email) DO UPDATE SET 
+          user_id = EXCLUDED.user_id,
+          updated_at = NOW()
+        RETURNING * INTO v_employee_record;
       END IF;
     END IF;
 
-    -- Create/Update subscription with employee role
-    -- Employees share the store owner's subscription conceptually, but they need a record 
-    -- in the subscriptions table to hold their role and store_id for RLS policies.
-    INSERT INTO public.subscriptions (
-      user_id, email, display_name, start_date, end_date,
-      subscription_type, subscription_status, trial_used,
-      store_name, role, store_id
-    ) VALUES (
-      NEW.id, NEW.email,
-      COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.email),
-      NOW(), NOW() + INTERVAL '7 days',
-      'Trial', 'Active', TRUE,
-      COALESCE((SELECT name FROM public.stores WHERE id = v_store_id), 'My Store'),
-      'employee', v_store_id
-    ) ON CONFLICT (user_id) DO UPDATE SET
-      role = 'employee',
-      store_id = v_store_id;
+    -- Linked the employee record to this user, that's enough for role identification
+    -- via get_user_store_role() RPC. Individual subscription rows for employees
+    -- are no longer needed as they share the store's primary subscription.
 
     -- Create restricted default permissions for employee
     INSERT INTO public.permissions (
@@ -97,12 +86,16 @@ BEGIN
 
     -- BYPASS EMAIL VERIFICATION for employees
     -- Mark email as confirmed immediately so they can log in without waiting
-    -- SECURITY DEFINER allows this update on auth.users
-    UPDATE auth.users 
-    SET email_confirmed_at = NOW(), 
-        confirmed_at = NOW(),
-        last_sign_in_at = NOW()
-    WHERE id = NEW.id;
+    BEGIN
+      UPDATE auth.users 
+      SET email_confirmed_at = NOW(), 
+          confirmed_at = NOW(),
+          last_sign_in_at = NOW()
+      WHERE id = NEW.id;
+    EXCEPTION WHEN OTHERS THEN
+      -- Log error if needed, but don't fail the signup transaction
+      RAISE WARNING 'Could not auto-confirm employee email: %', SQLERRM;
+    END;
 
   ELSE
     -- This is a new store owner signing up (no employee record and no employee metadata)
