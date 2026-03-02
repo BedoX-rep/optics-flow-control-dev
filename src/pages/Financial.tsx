@@ -136,7 +136,6 @@ const Financial = () => {
             product:product_id ( name, category, stock, stock_status, company )
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -154,7 +153,6 @@ const Financial = () => {
       const { data, error } = await supabase
         .from('purchases')
         .select('*, supplier:supplier_id ( name )')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
 
@@ -168,10 +166,10 @@ const Financial = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase.channel('fin-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `user_id=eq.${user.id}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases' }, () => {
         queryClient.invalidateQueries({ queryKey: ['purchases', user.id] });
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts', filter: `user_id=eq.${user.id}` }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'receipts' }, () => {
         queryClient.invalidateQueries({ queryKey: ['receipts', user.id] });
         queryClient.invalidateQueries({ queryKey: ['receipts', user.id, 'light'] });
       })

@@ -10,8 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Copy, Plus, Receipt, Trash, AlertCircle, Package } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Copy, Plus, PlusCircle, Trash, AlertCircle, Package, ChevronDown, ChevronUp, Wallet } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -55,6 +54,20 @@ interface OrderItemsProps {
   refreshProducts?: () => void;
 }
 
+const ORDER_TYPE_CONFIG: Record<string, { color: string; dot: string; label: string }> = {
+  Unspecified: { color: 'text-red-600', dot: 'bg-red-500', label: 'unspecified' },
+  Montage: { color: 'text-emerald-700', dot: 'bg-emerald-500', label: 'montage' },
+  Retoyage: { color: 'text-blue-700', dot: 'bg-blue-500', label: 'retoyage' },
+  Sell: { color: 'text-indigo-700', dot: 'bg-indigo-500', label: 'sell' },
+};
+
+const STOCK_BADGE: Record<string, string> = {
+  inStock: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  'Out Of Stock': 'bg-red-50 text-red-700 border border-red-200',
+  Order: 'bg-amber-50 text-amber-700 border border-amber-200',
+  Fabrication: 'bg-blue-50 text-blue-700 border border-blue-200',
+};
+
 const OrderItems: React.FC<OrderItemsProps> = ({
   items,
   orderType,
@@ -76,7 +89,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   setManualAdditionalCostsEnabled,
   manualAdditionalCostsAmount,
   setManualAdditionalCostsAmount,
-  refreshProducts
+  refreshProducts,
 }) => {
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -85,795 +98,545 @@ const OrderItems: React.FC<OrderItemsProps> = ({
   const [outOfStockProducts, setOutOfStockProducts] = useState<string[]>([]);
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const addItem = (type: 'product' | 'custom') => {
     if (type === 'product') {
-      setItems(prevItems => [...prevItems, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
+      setItems(prev => [...prev, { id: `item-${Date.now()}`, quantity: 1, price: 0, cost: 0 }]);
     } else {
-      setItems(prevItems => [...prevItems, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
+      setItems(prev => [...prev, { id: `custom-${Date.now()}`, customName: '', quantity: 1, price: 0, cost: 0 }]);
     }
   };
 
   const handleProductSubmit = async (values: ProductFormValues) => {
     if (!user) {
-      toast({
-        title: t('error'),
-        description: t('mustBeLoggedIn'),
-        variant: "destructive",
-      });
+      toast({ title: t('error'), description: t('mustBeLoggedIn'), variant: 'destructive' });
       return;
     }
-
     try {
       setIsSubmitting(true);
-
-      const productData = {
-        ...values,
-        user_id: user.id,
-        is_deleted: false,
-        created_at: new Date().toISOString()
-      };
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('products')
-        .insert(productData)
+        .insert({ ...values, user_id: user.id, is_deleted: false, created_at: new Date().toISOString() })
         .select()
         .single();
-
       if (error) throw error;
-
-      toast({
-        title: t('success'),
-        description: t('productCreatedSuccessfully'),
-      });
-
+      toast({ title: t('success'), description: t('productCreatedSuccessfully') });
       setIsProductFormOpen(false);
-
-      // Refresh the products list
-      if (refreshProducts) {
-        await refreshProducts();
-      }
-
-    } catch (error) {
-      console.error('Error creating product:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToCreateProduct'),
-        variant: "destructive",
-      });
+      if (refreshProducts) await refreshProducts();
+    } catch (err) {
+      console.error(err);
+      toast({ title: t('error'), description: t('failedToCreateProduct'), variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleFilterChange = (newFilters: Record<string, string>) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      ...newFilters
-    }));
+    setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
-  // Filter products based on selected filters
-  const filteredProducts = products.filter(product => {
-    if (filters.category && filters.category !== "all_categories" && product.category !== filters.category) {
-      return false;
-    }
-    if (filters.index && filters.index !== "all_indexes" && product.index !== filters.index) {
-      return false;
-    }
-    if (filters.treatment && filters.treatment !== "all_treatments" && product.treatment !== filters.treatment) {
-      return false;
-    }
-    if (filters.company && filters.company !== "all_companies" && product.company !== filters.company) {
-      return false;
-    }
-    if (filters.stock_status && filters.stock_status !== "all_stock_statuses" && product.stock_status !== filters.stock_status) {
-      return false;
-    }
-    return true;
-  });
-
   const checkAndShowOutOfStockWarning = () => {
-    const outOfStockItems = items.filter(item => {
-      if (item.productId) {
-        const product = products.find(p => p.id === item.productId);
-        return product?.stock_status === 'Out Of Stock';
-      }
-      return false;
+    const oos = items.filter(item => {
+      if (!item.productId) return false;
+      return products.find(p => p.id === item.productId)?.stock_status === 'Out Of Stock';
     });
-
-    if (outOfStockItems.length > 0) {
-      const outOfStockNames = outOfStockItems.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return product?.name || 'Unknown Product';
-      });
-      setOutOfStockProducts(outOfStockNames);
+    if (oos.length > 0) {
+      setOutOfStockProducts(oos.map(i => products.find(p => p.id === i.productId)?.name || 'Unknown'));
       setShowOutOfStockWarning(true);
       return true;
     }
     return false;
   };
 
-  // Expose the check function to parent component
   React.useEffect(() => {
-    if (checkOutOfStockWarning) {
-      checkOutOfStockWarning.current = checkAndShowOutOfStockWarning;
-    }
+    if (checkOutOfStockWarning) checkOutOfStockWarning.current = checkAndShowOutOfStockWarning;
   }, [items, products, checkOutOfStockWarning]);
 
-  const outOfStockItems = items.filter(item => {
-    if (item.productId) {
-      const product = products.find(p => p.id === item.productId);
-      return product?.stock_status === 'Out Of Stock';
-    }
-    return false;
-  });
+  const outOfStockItems = items.filter(item =>
+    item.productId && products.find(p => p.id === item.productId)?.stock_status === 'Out Of Stock'
+  );
 
   return (
-    <Card className="border-0 shadow-lg">
-      {outOfStockItems.length > 0 && (
-        <Alert className="m-4 border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-700">
-            <strong>{t('outOfStockWarning')}:</strong> {t('outOfStockDesc')}
-            <ul className="mt-1 list-disc list-inside">
-              {outOfStockItems.map(item => {
-                const product = products.find(p => p.id === item.productId);
-                return (
-                  <li key={item.id} className="text-sm">
-                    {product?.name || t('unknownProduct')}
-                  </li>
-                );
-              })}
-            </ul>
-            {t('canStillProceed')}
-          </AlertDescription>
-        </Alert>
-      )}
-      <CardHeader className="bg-gray-50/80 border-b p-4">
-        {/* Mobile Layout */}
-        <div className="block md:hidden space-y-4">
+    <div className="font-sans">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+        .order-items-root { font-family: 'DM Sans', sans-serif; }
+        .mono { font-family: 'DM Mono', monospace; }
+        .item-card { transition: box-shadow 0.2s, border-color 0.2s; }
+        .item-card:hover { box-shadow: 0 4px 24px 0 rgba(13,148,136,0.10); }
+        .teal-focus:focus { outline: none; border-color: #0d9488 !important; box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
+        .action-btn { transition: background 0.15s, color 0.15s, transform 0.1s; }
+        .action-btn:active { transform: scale(0.95); }
+        .badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em; }
+        .order-type-pill { display: inline-flex; align-items: center; gap: 6px; }
+        .collapse-section { overflow: hidden; transition: max-height 0.3s ease; }
+        @keyframes slideIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.22s ease both; }
+      `}</style>
+
+      <div className="order-items-root bg-white rounded-2xl shadow-sm border-2 border-teal-500 overflow-hidden relative">
+
+        {/* Out of Stock Banner */}
+        {outOfStockItems.length > 0 && (
+          <div className="mx-4 mt-4 p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-700">{t('outOfStockWarning')}</p>
+              <p className="text-xs text-red-600 mt-0.5">{t('outOfStockDesc')}</p>
+              <ul className="mt-2 space-y-1">
+                {outOfStockItems.map(item => {
+                  const product = products.find(p => p.id === item.productId);
+                  return (
+                    <li key={item.id} className="text-xs font-medium text-red-700 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+                      {product?.name || t('unknownProduct')}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="text-xs text-red-500 mt-2 italic">{t('canStillProceed')}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Header ── */}
+        <div className="bg-[#115e59] border-b border-teal-700/50 p-4 sm:p-6 space-y-4">
+
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 gap-3">
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-                <Plus className="h-4 w-4 mr-2" /> {t('addProduct')}
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="default">
-                <Plus className="h-4 w-4 mr-2" /> {t('addCustomItem')}
-              </Button>
-            </div>
-            <Button onClick={() => setIsProductFormOpen(true)} variant="outline" size="default" className="border-green-300 text-green-700 hover:bg-green-50 w-full">
-              <Package className="h-4 w-4 mr-2" /> {t('newProduct')}
-            </Button>
-          </div>
+          {/* Action Buttons (Desktop only) */}
+          <div className="hidden sm:flex flex-row items-center gap-3">
+            <button
+              onClick={() => addItem('product')}
+              className="action-btn flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl h-11 px-5 font-semibold text-sm shadow-sm shadow-teal-200"
+            >
+              <Plus className="h-4 w-4" />
+              {t('addProduct')}
+            </button>
+            <button
+              onClick={() => addItem('custom')}
+              className="action-btn flex items-center justify-center gap-2 bg-white border border-teal-200 hover:border-teal-400 hover:bg-teal-50 text-slate-600 hover:text-teal-700 rounded-xl h-11 px-5 font-semibold text-sm"
+            >
+              <Plus className="h-4 w-4" />
+              {t('addCustomItem')}
+            </button>
 
-          {/* Order Type */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">{t('orderType')}:</Label>
-            <Select value={orderType} onValueChange={setOrderType}>
-              <SelectTrigger className={`w-full ${orderType === 'Unspecified'
-                ? 'bg-red-50 border-red-300 text-red-700'
-                : 'bg-white border-gray-300'
-                }`}>
-                <SelectValue placeholder={t('selectOrderType')}>
-                  <div className="flex items-center gap-2">
-                    {orderType === 'Unspecified' && (
-                      <AlertCircle className="w-4 h-4 text-red-500" />
-                    )}
-                    <span className="truncate">{t(orderType.toLowerCase())}</span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Unspecified">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-500" />
-                    {t('unspecified')}
-                  </div>
-                </SelectItem>
-                <SelectItem value="Montage">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    {t('montage')}
-                  </div>
-                </SelectItem>
-                <SelectItem value="Retoyage">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    {t('retoyage')}
-                  </div>
-                </SelectItem>
-                <SelectItem value="Sell">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    {t('sell')}
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Manual Additional Costs Override */}
-          <div className="space-y-2 p-3 bg-blue-50 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium text-blue-900">
-                {t('manualAdditionalCosts')}
-              </Label>
+            {/* Global Search (Desktop) */}
+            <div className="flex-1 max-w-[300px] relative">
               <input
-                type="checkbox"
-                checked={manualAdditionalCostsEnabled}
-                onChange={(e) => setManualAdditionalCostsEnabled(e.target.checked)}
-                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                placeholder={t('searchProducts') || 'Search products...'}
+                value={productSearchTerms['global'] || ''}
+                onChange={e => setProductSearchTerms(prev => ({ ...prev, global: e.target.value }))}
+                className="teal-focus w-full h-11 rounded-xl border border-teal-100 bg-white px-4 pr-10 text-sm font-medium text-slate-700 focus:border-teal-500 shadow-sm"
               />
-            </div>
-            {manualAdditionalCostsEnabled && (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={manualAdditionalCostsAmount}
-                  onChange={(e) => setManualAdditionalCostsAmount(parseFloat(e.target.value) || 0)}
-                  className="flex-1 h-10"
-                  placeholder="0.00"
-                />
-                <span className="text-sm text-gray-600">DH</span>
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-teal-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               </div>
-            )}
-          </div>
-
-          {/* Product Filters */}
-          <div className="space-y-2">
-            <ProductFilters filters={filters} onChange={handleFilterChange} />
-          </div>
-        </div>
-
-        {/* Desktop Layout */}
-        <div className="hidden md:block">
-          <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
-            <div className="flex items-center gap-4 flex-1">
-              <Button onClick={() => addItem('product')} size="default" className="bg-black hover:bg-neutral-800">
-                <Plus className="h-4 w-4 mr-2" /> {t('addProduct')}
-              </Button>
-              <Button onClick={() => addItem('custom')} variant="outline" size="default">
-                <Plus className="h-4 w-4 mr-2" /> {t('addCustomItem')}
-              </Button>
-              <Button onClick={() => setIsProductFormOpen(true)} variant="outline" size="default" className="border-green-300 text-green-700 hover:bg-green-50">
-                <Package className="h-4 w-4 mr-2" /> {t('newProduct')}
-              </Button>
             </div>
+
+            <button
+              onClick={() => setIsProductFormOpen(true)}
+              className="action-btn ml-auto flex items-center justify-center gap-2 bg-white border border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-600 rounded-xl h-11 px-5 font-semibold text-sm"
+            >
+              <Package className="h-4 w-4" />
+              {t('newProduct')}
+            </button>
           </div>
 
-          {/* Second row with Order Type and Manual Additional Costs */}
-          <div className="flex flex-wrap items-center gap-4 justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('orderType')}:</Label>
+          {/* Controls Row */}
+          <div className="bg-teal-900/30 backdrop-blur-md border border-teal-700/50 rounded-xl p-3 sm:p-4 space-y-3 shadow-inner shadow-black/10">
+
+            {/* Mobile Actions Header */}
+            <div className="flex sm:hidden items-center justify-between gap-4 pb-2 border-b border-teal-50/50">
+              <button
+                onClick={() => addItem('product')}
+                className="flex-1 flex items-center justify-center h-12 rounded-xl bg-teal-600 text-white shadow-sm active:scale-95 transition-transform"
+                title={t('addProduct')}
+              >
+                <Plus className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => addItem('custom')}
+                className="flex-1 flex items-center justify-center h-12 rounded-xl bg-white border-2 border-teal-500 text-teal-600 active:scale-95 transition-transform"
+                title={t('addCustomItem')}
+              >
+                <PlusCircle className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setIsProductFormOpen(true)}
+                className="flex-1 flex items-center justify-center h-12 rounded-xl bg-blue-600 text-white shadow-sm active:scale-95 transition-transform"
+                title={t('newProduct')}
+              >
+                <Package className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Order Type + Search + Manual Costs */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+
+              {/* Order Type */}
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap shrink-0">
+                  {t('orderType')}
+                </span>
                 <Select value={orderType} onValueChange={setOrderType}>
-                  <SelectTrigger className={`w-[140px] ${orderType === 'Unspecified'
-                    ? 'bg-red-50 border-red-300 text-red-700'
-                    : 'bg-white border-gray-300'
+                  <SelectTrigger className={`teal-focus w-full sm:w-[164px] h-9 rounded-lg border text-sm font-semibold ${orderType === 'Unspecified'
+                    ? 'border-red-300 bg-red-50 text-red-600'
+                    : 'border-teal-200 bg-white text-slate-900'
                     }`}>
-                    <SelectValue placeholder={t('selectOrderType')}>
-                      <div className="flex items-center gap-1">
-                        {orderType === 'Unspecified' && (
-                          <AlertCircle className="w-3 h-3 text-red-500" />
-                        )}
-                        <span className="truncate">{t(orderType.toLowerCase())}</span>
-                      </div>
+                    <SelectValue>
+                      <span className="order-type-pill">
+                        {orderType === 'Unspecified'
+                          ? <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                          : <span className={`w-2 h-2 rounded-full ${ORDER_TYPE_CONFIG[orderType]?.dot || 'bg-slate-400'}`} />
+                        }
+                        {t(ORDER_TYPE_CONFIG[orderType]?.label || orderType.toLowerCase())}
+                      </span>
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Unspecified">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                        {t('unspecified')}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Montage">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        {t('montage')}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Retoyage">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        {t('retoyage')}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Sell">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        {t('sell')}
-                      </div>
-                    </SelectItem>
+                  <SelectContent className="rounded-xl border-teal-200 shadow-xl bg-white">
+                    {Object.entries(ORDER_TYPE_CONFIG).map(([val, cfg]) => (
+                      <SelectItem key={val} value={val} className="rounded-lg cursor-pointer text-sm">
+                        <span className="order-type-pill">
+                          {val === 'Unspecified'
+                            ? <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                            : <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                          }
+                          <span className={`font-semibold ${cfg.color}`}>{t(cfg.label)}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Manual Additional Costs Override */}
-              <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg border">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-blue-900 whitespace-nowrap">
-                    {t('manualAdditionalCosts')}:
-                  </Label>
-                  <input
-                    type="checkbox"
-                    checked={manualAdditionalCostsEnabled}
-                    onChange={(e) => setManualAdditionalCostsEnabled(e.target.checked)}
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
+              {/* Filters toggle (Desktop) */}
+              <div className="hidden sm:block">
+                <button
+                  onClick={() => setShowFilters(v => !v)}
+                  className="flex items-center gap-2 text-xs font-bold text-teal-800 hover:text-teal-600 transition-colors py-2 px-3 bg-white border border-teal-200 rounded-xl shadow-sm hover:bg-teal-50"
+                >
+                  {showFilters ? <ChevronUp className="h-3.5 w-3.5 text-teal-500" /> : <ChevronDown className="h-3.5 w-3.5 text-teal-500" />}
+                  <span className="uppercase tracking-wider">{showFilters ? t('hideFilters') || 'Hide Filters' : t('showfilters') || 'Show Filters'}</span>
+                </button>
+              </div>
+
+              {/* Mobile Search only */}
+              <div className="flex-1 sm:hidden min-w-[200px] relative">
+                <input
+                  placeholder={t('searchProducts') || 'Search products...'}
+                  value={productSearchTerms['global'] || ''}
+                  onChange={e => setProductSearchTerms(prev => ({ ...prev, global: e.target.value }))}
+                  className="teal-focus w-full h-9 rounded-lg border border-teal-100 bg-white px-3 pr-9 text-sm font-medium text-slate-700 focus:border-teal-500"
+                />
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-teal-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
+              </div>
+
+              {/* Manual Additional Costs */}
+              <label className="flex items-center gap-3 py-2 px-3 sm:px-4 bg-white hover:bg-teal-50 border border-teal-200 rounded-xl cursor-pointer transition-colors shadow-sm select-none">
+                <input
+                  type="checkbox"
+                  checked={manualAdditionalCostsEnabled}
+                  onChange={e => setManualAdditionalCostsEnabled(e.target.checked)}
+                  className="h-4 w-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500 cursor-pointer bg-white"
+                />
+                <span className="text-xs font-bold text-teal-800 whitespace-nowrap">{t('manualAdditionalCosts')}</span>
                 {manualAdditionalCostsEnabled && (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={manualAdditionalCostsAmount}
-                      onChange={(e) => setManualAdditionalCostsAmount(parseFloat(e.target.value) || 0)}
-                      className="w-20 h-8"
-                      placeholder="0.00"
-                    />
-                    <span className="text-sm text-gray-600">DH</span>
+                  <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={manualAdditionalCostsAmount}
+                        onChange={e => setManualAdditionalCostsAmount(parseFloat(e.target.value) || 0)}
+                        className="teal-focus w-20 h-8 rounded-lg border border-teal-100 bg-white text-right pr-8 pl-2 text-sm font-semibold text-slate-900 focus:border-teal-500"
+                        placeholder="0.00"
+                      />
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-teal-400">DH</span>
+                    </div>
                   </div>
                 )}
-              </div>
+              </label>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <ProductFilters filters={filters} onChange={handleFilterChange} />
+            {/* Filters toggle (Mobile) */}
+            <div className="sm:hidden pt-1">
+              <button
+                onClick={() => setShowFilters(v => !v)}
+                className="flex items-center gap-2 text-xs font-bold text-teal-800 hover:text-teal-600 transition-colors"
+              >
+                {showFilters ? <ChevronUp className="h-4 w-4 text-teal-500" /> : <ChevronDown className="h-4 w-4 text-teal-500" />}
+                {showFilters ? t('hideFilters') || 'Hide Filters' : t('showfilters') || 'Show Filters'}
+              </button>
+            </div>
+
+            {showFilters && (
+              <div className="mt-3 overflow-x-auto pb-1 no-scrollbar animate-in fade-in slide-in-from-top-2 duration-300">
+                <ProductFilters filters={filters} onChange={handleFilterChange} />
+              </div>
+            )}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {items.map((item) => (
-            <Card key={item.id} className="border border-gray-100 shadow-sm">
-              <CardContent className="p-3">
-                <div className="space-y-4">
-                  {/* Mobile Layout */}
-                  <div className="block md:hidden space-y-3">
-                    {/* Product/Custom Name - Full Width */}
-                    {item.customName !== undefined ? (
-                      <div>
-                        <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
-                        <Input
-                          id={`custom-${item.id}`}
-                          value={item.customName || ''}
-                          onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
-                        <div className="space-y-2 mt-1">
-                          <Select
-                            value={item.productId}
-                            onValueChange={(value) => updateItem(item.id, 'productId', value)}
-                          >
-                            <SelectTrigger id={`product-${item.id}`} className="w-full">
-                              <SelectValue placeholder={t('selectProduct')} />
-                            </SelectTrigger>
-                            <SelectContent className="min-w-[350px]">
-                              {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  <div className="flex flex-col w-full gap-1">
-                                    <span className="truncate">{product.name}</span>
-                                    <div className="flex items-center gap-2 text-xs">
-                                      {product.stock_status === 'inStock' ? (
-                                        <span className="text-green-600">
-                                          {t('stock')}: {product.stock || 0}
-                                        </span>
-                                      ) : (
-                                        <span className={`${product.stock_status === 'Out Of Stock' ? 'text-red-600' :
-                                          product.stock_status === 'Order' ? 'text-orange-600' :
-                                            'text-blue-600'
-                                          }`}>
-                                          {product.stock_status === 'inStock' ? t('inStock') :
-                                            product.stock_status === 'Out Of Stock' ? t('outOfStock') :
-                                              product.stock_status === 'Order' ? t('order') :
-                                                product.stock_status === 'Fabrication' ? t('fabrication') :
-                                                  product.stock_status}
-                                        </span>
-                                      )}
-                                      <span className="text-blue-600">{product.price.toFixed(2)} DH</span>
+
+        {/* ── Items List ── */}
+        <div className="p-4 sm:p-6 space-y-3">
+          {items.map((item, index) => {
+            const linkedProduct = item.productId ? products.find(p => p.id === item.productId) : null;
+            const isLens = linkedProduct?.category?.includes('Lenses');
+            const isOrderFab = linkedProduct && (linkedProduct.stock_status === 'Order' || linkedProduct.stock_status === 'Fabrication');
+            const isOOS = linkedProduct?.stock_status === 'Out Of Stock';
+
+            return (
+              <div
+                key={item.id}
+                className={`item-card slide-in bg-white border-2 rounded-2xl overflow-hidden ${isOOS ? 'border-red-200' : 'border-blue-400 shadow-sm shadow-blue-50'}`}
+              >
+                {/* Card Header Bar */}
+                <div className={`flex items-center justify-between px-4 py-2.5 border-b ${isOOS ? 'bg-red-50 border-red-100' : 'bg-blue-50/30 border-blue-100'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="mono text-xs font-semibold text-slate-900">#{String(index + 1).padStart(2, '0')}</span>
+                    {item.customName !== undefined && (
+                      <span className="badge bg-blue-100 text-blue-700 border border-blue-200">Custom</span>
+                    )}
+                    {isOOS && (
+                      <span className="badge bg-red-100 text-red-700 border border-red-200 flex items-center gap-1">
+                        <AlertCircle className="h-2.5 w-2.5" /> Out of Stock
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {isOrderFab && (
+                      <button
+                        onClick={() => updateItem(item.id, 'paid_at_delivery', !item.paid_at_delivery)}
+                        className={`action-btn h-8 w-auto min-w-[32px] px-2 flex items-center justify-center gap-1.5 rounded-lg transition-all border ${item.paid_at_delivery
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
+                          : 'text-slate-400 border-transparent hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100'
+                          }`}
+                        title={t('paidAtDelivery')}
+                      >
+                        <Wallet className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-extrabold uppercase tracking-tight">{t('paidShort') || 'Paid'}</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        const dup = { ...item, id: `item-${Date.now()}`, linkedEye: item.linkedEye === 'RE' ? 'LE' : item.linkedEye === 'LE' ? 'RE' : undefined };
+                        setItems(prev => [...prev, dup]);
+                      }}
+                      className="action-btn h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+                      title="Duplicate"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="action-btn h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      title="Remove"
+                    >
+                      <Trash className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 space-y-4">
+
+                  {/* Product / Custom Name */}
+                  {item.customName !== undefined ? (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('customItemName')}</label>
+                      <input
+                        value={item.customName || ''}
+                        onChange={e => updateItem(item.id, 'customName', e.target.value)}
+                        className="teal-focus w-full h-10 rounded-xl border border-teal-200 px-3 text-sm font-medium text-slate-900 bg-white focus:border-teal-500"
+                        placeholder={t('enterCustomItemName') || 'Enter item name…'}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('productName')}</label>
+                      <div className="flex gap-2">
+                        <Select value={item.productId} onValueChange={val => updateItem(item.id, 'productId', val)}>
+                          <SelectTrigger className="teal-focus flex-1 h-10 rounded-xl border-teal-200 bg-white text-sm font-medium text-slate-900 min-w-0">
+                            <SelectValue placeholder={t('selectProduct')} />
+                          </SelectTrigger>
+                          <SelectContent className="min-w-[320px] sm:min-w-[420px] rounded-xl shadow-xl bg-white border-teal-200">
+                            {getFilteredProducts(productSearchTerms['global'] || '').map(product => {
+                              const stockCls = STOCK_BADGE[product.stock_status] || 'bg-slate-100 text-slate-600';
+                              return (
+                                <SelectItem key={product.id} value={product.id} className="rounded-lg cursor-pointer py-2.5">
+                                  <div className="flex items-center justify-between w-full gap-3 min-w-0">
+                                    <span className="truncate font-medium text-slate-800 flex-1">{product.name}</span>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className={`badge ${stockCls}`}>
+                                        {product.stock_status === 'inStock'
+                                          ? `${t('stock')}: ${product.stock || 0}`
+                                          : product.stock_status === 'Out Of Stock' ? t('outOfStock')
+                                            : product.stock_status === 'Order' ? t('order')
+                                              : product.stock_status === 'Fabrication' ? t('fabrication')
+                                                : product.stock_status}
+                                      </span>
+                                      <span className="text-xs font-bold text-slate-900 bg-slate-50 border border-slate-300 px-2 py-0.5 rounded-lg whitespace-nowrap">
+                                        {product.price.toFixed(2)} DH
+                                      </span>
                                     </div>
                                   </div>
                                 </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            placeholder={t('searchProducts')}
-                            value={productSearchTerms[item.id] || ''}
-                            onChange={(e) => {
-                              setProductSearchTerms(prev => ({
-                                ...prev,
-                                [item.id]: e.target.value
-                              }));
-                            }}
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quantity and Actions Row */}
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1">
-                        <Label className="text-xs">{t('quantity')}</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const duplicatedItem = {
-                              ...item,
-                              id: `item-${Date.now()}`,
-                              linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
-                            };
-                            setItems(prevItems => [...prevItems, duplicatedItem]);
-                          }}
-                          className="h-10 w-10"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                          className="h-10 w-10"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
+                  )}
 
-                    {/* Price and Cost Grid */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex-1">
-                        <Label className="text-xs">{t('unitPrice')}</Label>
-                        <Input
+                  {/* Qty / Price / Cost / Total grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('quantity')}</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={e => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                        className="teal-focus w-full h-10 rounded-xl border border-teal-200 px-3 text-sm font-semibold text-slate-900 bg-white text-center"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('unitPrice')}</label>
+                      <div className="relative">
+                        <input
                           type="number"
                           min="0"
                           step="0.01"
                           value={item.price}
-                          onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                          className="mt-1"
+                          onChange={e => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                          className="teal-focus w-full h-10 rounded-xl border border-teal-200 pr-9 pl-3 text-sm font-semibold text-slate-900 bg-white text-right"
                         />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-teal-400 pointer-events-none">DH</span>
                       </div>
-                      <div className="flex-1">
-                        <Label className="text-xs">{t('unitCost')}</Label>
-                        <Input
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('unitCost')}</label>
+                      <div className="relative">
+                        <input
                           type="number"
                           min="0"
                           step="0.01"
                           value={item.cost}
-                          onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                          className="mt-1"
+                          onChange={e => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                          className="teal-focus w-full h-10 rounded-xl border border-teal-200 pr-9 pl-3 text-sm font-medium text-slate-900 bg-white text-right"
                         />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-teal-400 pointer-events-none">DH</span>
                       </div>
                     </div>
-                    {/* Total */}
+
                     <div>
-                      <Label className="text-xs">{t('total')}</Label>
-                      <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-center text-lg">
-                        {(item.price * item.quantity).toFixed(2)} {t('dh')}
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('total')}</label>
+                      <div className="h-10 rounded-xl bg-slate-900 px-3 flex items-center justify-end gap-1 shadow-sm">
+                        <span className="text-sm font-extrabold text-white tracking-tight">{(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-xs font-bold text-slate-400">DH</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Desktop Layout */}
-                  <div className="hidden md:grid md:grid-cols-12 gap-4 items-start">
-                    {item.customName !== undefined ? (
-                      <div className="col-span-6">
-                        <Label htmlFor={`custom-${item.id}`} className="text-xs">{t('customItemName')}</Label>
-                        <Input
-                          id={`custom-${item.id}`}
-                          value={item.customName || ''}
-                          onChange={(e) => updateItem(item.id, 'customName', e.target.value)}
-                          className="mt-1"
-                        />
-                      </div>
-                    ) : (
-                      <div className="col-span-7">
-                        <Label htmlFor={`product-${item.id}`} className="text-xs">{t('productName')}</Label>
-                        <div className="flex gap-2 mt-1">
-                          <Select
-                            value={item.productId}
-                            onValueChange={(value) => updateItem(item.id, 'productId', value)}
-                          >
-                            <SelectTrigger id={`product-${item.id}`} className="flex-1">
-                              <SelectValue placeholder={t('selectProduct')} />
-                            </SelectTrigger>
-                            <SelectContent className="min-w-[400px]">
-                              {getFilteredProducts(productSearchTerms[item.id] || '').map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  <div className="flex justify-between items-center w-full gap-4">
-                                    <span className="truncate flex-1">{product.name}</span>
-                                    <div className="flex items-center gap-3">
-                                      {product.stock_status === 'inStock' ? (
-                                        <span className="text-xs text-green-600 whitespace-nowrap">
-                                          {t('stock')}: {product.stock || 0}
-                                        </span>
-                                      ) : (
-                                        <span className={`text-xs whitespace-nowrap ${product.stock_status === 'Out Of Stock' ? 'text-red-600' :
-                                          product.stock_status === 'Order' ? 'text-orange-600' :
-                                            'text-blue-600'
-                                          }`}>
-                                          {product.stock_status === 'inStock' ? t('inStock') :
-                                            product.stock_status === 'Out Of Stock' ? t('outOfStock') :
-                                              product.stock_status === 'Order' ? t('order') :
-                                                product.stock_status === 'Fabrication' ? t('fabrication') :
-                                                  product.stock_status}
-                                        </span>
-                                      )}
-                                      <span className="text-sm text-blue-600 whitespace-nowrap">{product.price.toFixed(2)} DH</span>
-                                    </div>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            placeholder={t('searchProducts')}
-                            value={productSearchTerms[item.id] || ''}
-                            onChange={(e) => {
-                              setProductSearchTerms(prev => ({
-                                ...prev,
-                                [item.id]: e.target.value
-                              }));
-                            }}
-                            className="w-32"
-                          />
-                        </div>
-                      </div>
-                    )}
+                  {/* Eye Link + Markup section */}
+                  {(isLens || item.appliedMarkup > 0) && (
+                    <div className="pt-3 border-t border-slate-300 flex flex-wrap items-center gap-3">
 
-                    <div className="col-span-1">
-                      <Label className="text-xs">{t('quantity')}</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <Label className="text-xs">{t('unitPrice')}</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.price}
-                        onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <Label className="text-xs">{t('unitCost')}</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.cost}
-                        onChange={(e) => updateItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <Label className="text-xs">{t('total')}</Label>
-                      <div className="h-10 px-3 py-2 mt-1 rounded-md bg-gray-50 font-medium text-right">
-                        {(item.price * item.quantity).toFixed(2)} {t('dh')}
-                      </div>
-                    </div>
-
-                    <div className="col-span-1 flex items-end gap-1 h-full pb-[5px]">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const duplicatedItem = {
-                            ...item,
-                            id: `item-${Date.now()}`,
-                            linkedEye: item.linkedEye ? (item.linkedEye === 'RE' ? 'LE' : 'RE') : undefined
-                          };
-                          setItems(prevItems => [...prevItems, duplicatedItem]);
-                        }}
-                        className="h-8 w-8"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                        className="h-8 w-8"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Eye linking and Paid at Delivery section */}
-                  <div className="mt-3 space-y-3">
-                    {/* Eye Linking for Lenses and Paid at Delivery in the same row */}
-                    {item.productId && products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">{t('linkToEye')}:</span>
-                            <div className="flex gap-2">
-                              <Button
-                                type="button"
-                                variant={item.linkedEye === 'LE' ? 'default' : 'ghost'}
-                                size="sm"
-                                className={`h-8 ${item.linkedEye === 'LE' ? 'bg-black text-white' : ''}`}
-                                onClick={() => {
-                                  const product = products.find(p => p.id === item.productId);
-                                  if (!product) return;
-
-                                  const isUnlinking = item.linkedEye === 'LE';
-                                  const updatedItem = {
-                                    ...item,
-                                    linkedEye: isUnlinking ? undefined : 'LE',
-                                    appliedMarkup: 0,
-                                    price: product.price
-                                  };
-
-                                  if (!isUnlinking) {
-                                    const { sph, cyl } = getEyeValues('LE');
-                                    if (sph !== null && cyl !== null) {
-                                      const markup = calculateMarkup(sph, cyl);
-                                      updatedItem.appliedMarkup = markup;
-                                      updatedItem.price = product.price * (1 + markup / 100);
-                                    }
+                      {isLens && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-900">{t('linkToEye')}:</span>
+                          {(['LE', 'RE'] as const).map(eye => (
+                            <button
+                              key={eye}
+                              type="button"
+                              onClick={() => {
+                                if (!linkedProduct) return;
+                                const isUnlinking = item.linkedEye === eye;
+                                const updated: any = { ...item, linkedEye: isUnlinking ? undefined : eye, appliedMarkup: 0, price: linkedProduct.price };
+                                if (!isUnlinking) {
+                                  const { sph, cyl } = getEyeValues(eye);
+                                  if (sph !== null && cyl !== null) {
+                                    const markup = calculateMarkup(sph, cyl);
+                                    updated.appliedMarkup = markup;
+                                    updated.price = linkedProduct.price * (1 + markup / 100);
                                   }
-
-                                  setItems(prevItems =>
-                                    prevItems.map(i => i.id === item.id ? updatedItem : i)
-                                  );
-                                }}
-                              >
-                                👁️ LE
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={item.linkedEye === 'RE' ? 'default' : 'ghost'}
-                                size="sm"
-                                className={`h-8 ${item.linkedEye === 'RE' ? 'bg-black text-white' : ''}`}
-                                onClick={() => {
-                                  const product = products.find(p => p.id === item.productId);
-                                  if (!product) return;
-
-                                  const isUnlinking = item.linkedEye === 'RE';
-                                  const updatedItem = {
-                                    ...item,
-                                    linkedEye: isUnlinking ? undefined : 'RE',
-                                    appliedMarkup: 0,
-                                    price: product.price
-                                  };
-
-                                  if (!isUnlinking) {
-                                    const { sph, cyl } = getEyeValues('RE');
-                                    if (sph !== null && cyl !== null) {
-                                      const markup = calculateMarkup(sph, cyl);
-                                      updatedItem.appliedMarkup = markup;
-                                      updatedItem.price = product.price * (1 + markup / 100);
-                                    }
-                                  }
-
-                                  setItems(prevItems =>
-                                    prevItems.map(i => i.id === item.id ? updatedItem : i)
-                                  );
-                                }}
-                              >
-                                👁️ RE
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Paid at Delivery checkbox for Order/Fabrication items - aligned horizontally */}
-                          {(() => {
-                            const product = products.find(p => p.id === item.productId);
-                            return product && (product.stock_status === 'Order' || product.stock_status === 'Fabrication');
-                          })() && (
-                              <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 rounded border border-yellow-200">
-                                <input
-                                  type="checkbox"
-                                  id={`paid-delivery-${item.id}`}
-                                  checked={item.paid_at_delivery || false}
-                                  onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
-                                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                                />
-                                <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
-                                  {t('paidAtDelivery')}
-                                </Label>
-                              </div>
-                            )}
-                        </div>
-                        {item.appliedMarkup > 0 && (
-                          <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded">
-                            {t('markupApplied')}: +{item.appliedMarkup}% {t('markup')}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Paid at Delivery checkbox for non-lens Order/Fabrication items */}
-                    {item.productId && !products.find(p => p.id === item.productId)?.category?.includes('Lenses') && (() => {
-                      const product = products.find(p => p.id === item.productId);
-                      return product && (product.stock_status === 'Order' || product.stock_status === 'Fabrication');
-                    })() && (
-                        <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-                          <input
-                            type="checkbox"
-                            id={`paid-delivery-${item.id}`}
-                            checked={item.paid_at_delivery || false}
-                            onChange={(e) => updateItem(item.id, 'paid_at_delivery', e.target.checked)}
-                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                          />
-                          <Label htmlFor={`paid-delivery-${item.id}`} className="text-sm font-medium">
-                            {t('paidAtDelivery')}
-                          </Label>
+                                }
+                                setItems(prev => prev.map(i => i.id === item.id ? updated : i));
+                              }}
+                              className={`action-btn h-8 px-3 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${item.linkedEye === eye
+                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm shadow-teal-200'
+                                : 'bg-white text-slate-600 border-teal-200 hover:border-teal-400 hover:bg-teal-50 hover:text-teal-700'
+                                }`}
+                            >
+                              👁 {eye}
+                            </button>
+                          ))}
                         </div>
                       )}
-                  </div>
+                      {item.appliedMarkup > 0 && (
+                        <div className="w-full flex items-center gap-2 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-2 rounded-lg">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          {t('markupApplied')}: +{item.appliedMarkup}% {t('markup')}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
 
+          {/* Empty State */}
           {items.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>{t('noItemsInOrder')}</p>
-              <p className="text-sm mt-1">{t('addFirstItem')}</p>
+            <div className="flex flex-col items-center justify-center py-10 px-6 rounded-2xl border-2 border-dashed border-slate-300 bg-white">
+              <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-300 flex items-center justify-center mb-4">
+                <Package className="w-7 h-7 text-slate-900" />
+              </div>
+              <p className="text-base font-bold text-slate-900">{t('noItemsInOrder')}</p>
+              <p className="text-sm text-slate-600 mt-1">{t('addFirstItem')}</p>
+              <button
+                onClick={() => addItem('product')}
+                className="action-btn mt-5 flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl h-10 px-5 text-sm font-semibold shadow-sm shadow-teal-200"
+              >
+                <Plus className="h-4 w-4" /> {t('addProduct')}
+              </button>
             </div>
           )}
         </div>
-      </CardContent>
+      </div>
 
+      {/* ── Out of Stock Dialog ── */}
       <AlertDialog open={showOutOfStockWarning} onOpenChange={setShowOutOfStockWarning}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl border-teal-200 shadow-2xl bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('outOfStockWarning')}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-slate-800 font-bold">{t('outOfStockWarning')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500">
               {t('outOfStockDesc')}
-              <ul className="mt-2 list-disc list-inside">
-                {outOfStockProducts.map((productName, index) => (
-                  <li key={index} className="text-red-600">{productName}</li>
+              <ul className="mt-3 space-y-1.5">
+                {outOfStockProducts.map((name, i) => (
+                  <li key={i} className="flex items-center gap-2 text-red-600 font-semibold text-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> {name}
+                  </li>
                 ))}
               </ul>
-              {t('canStillProceed')}
+              <p className="mt-3 text-slate-400 text-xs">{t('canStillProceed')}</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowOutOfStockWarning(false)}>
+            <AlertDialogCancel className="rounded-xl border-teal-200 text-slate-600 hover:bg-slate-50">
               {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                setShowOutOfStockWarning(false);
-                onProceedWithOutOfStock?.();
-              }}
-              className="bg-red-600 hover:bg-red-700"
+              onClick={() => { setShowOutOfStockWarning(false); onProceedWithOutOfStock?.(); }}
+              className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
             >
               {t('continue')}
             </AlertDialogAction>
@@ -881,6 +644,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* ── New Product Dialog ── */}
       <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <ProductForm
           initialValues={{}}
@@ -889,7 +653,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({
           disabled={isSubmitting}
         />
       </Dialog>
-    </Card>
+    </div>
   );
 };
 

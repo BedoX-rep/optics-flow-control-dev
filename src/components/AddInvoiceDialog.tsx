@@ -61,7 +61,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
   // Category options for items
   const CATEGORY_OPTIONS = [
     'Single Vision Lenses',
-    'Progressive Lenses', 
+    'Progressive Lenses',
     'Frames',
     'Sunglasses',
     'Contact Lenses',
@@ -77,7 +77,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name', { ascending: true });
 
@@ -128,7 +127,6 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             )
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -152,7 +150,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     if (!clientSearchTerm.trim()) return allClients;
 
     const searchLower = clientSearchTerm.toLowerCase();
-    return allClients.filter(client => 
+    return allClients.filter(client =>
       client.name?.toLowerCase().includes(searchLower) ||
       client.phone?.toLowerCase().includes(searchLower)
     );
@@ -163,7 +161,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     if (!clientSearchTerm.trim()) return allReceipts;
 
     const searchLower = clientSearchTerm.toLowerCase();
-    return allReceipts.filter(receipt => 
+    return allReceipts.filter(receipt =>
       receipt.client_name?.toLowerCase().includes(searchLower) ||
       receipt.client_phone?.toLowerCase().includes(searchLower)
     );
@@ -248,11 +246,11 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     const selectedReceipt = receipts.find(r => r.id === receiptId);
 
     if (selectedReceipt) {
-      const itemsTotal = selectedReceipt.receipt_items?.reduce((sum, item) => 
+      const itemsTotal = selectedReceipt.receipt_items?.reduce((sum, item) =>
         sum + ((item.quantity || 1) * (item.price || 0)), 0) || 0;
 
-      const assuranceTotal = (selectedReceipt.tax && selectedReceipt.tax > 0) 
-        ? selectedReceipt.tax 
+      const assuranceTotal = (selectedReceipt.tax && selectedReceipt.tax > 0)
+        ? selectedReceipt.tax
         : itemsTotal;
 
       setInvoiceData(prev => ({
@@ -354,8 +352,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
 
     // Store original prices if not already stored or if items have changed
     let baselinePrices = { ...originalPrices };
-    let needsNewBaseline = Object.keys(baselinePrices).length === 0 || 
-                          Object.keys(baselinePrices).length !== invoiceItems.length;
+    let needsNewBaseline = Object.keys(baselinePrices).length === 0 ||
+      Object.keys(baselinePrices).length !== invoiceItems.length;
 
     if (needsNewBaseline) {
       baselinePrices = {};
@@ -750,7 +748,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
     // 1. Must have exact assurance total match
     // 2. Higher score (more items ending in 0, no decimals)
     const validSolutions = solutions.filter(s => s.isValid && s.exactMatch);
-    const bestSolution = validSolutions.length > 0 
+    const bestSolution = validSolutions.length > 0
       ? validSolutions.reduce((best, current) => current.score > best.score ? current : best)
       : solutions.find(s => s.exactMatch); // Fallback to any exact match even if has decimals
 
@@ -945,10 +943,10 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
             <AlertDescription className="text-orange-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <strong>Assurance Total Mismatch:</strong> The assurance total ({invoiceData.assurance_total.toFixed(2)} DH) 
+                  <strong>Assurance Total Mismatch:</strong> The assurance total ({invoiceData.assurance_total.toFixed(2)} DH)
                   doesn't match the items total ({subtotal.toFixed(2)} DH).
                 </div>
-                <Button 
+                <Button
                   onClick={adjustItemPrices}
                   size="sm"
                   className="ml-4 bg-orange-600 hover:bg-orange-700 text-white"
@@ -1146,7 +1144,7 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
                         <div className="space-y-1">
                           <Label className="text-teal-700 font-medium text-xs">SPH</Label>
                           <Input
-                            type="number"step="0.25"
+                            type="number" step="0.25"
                             value={prescriptionData.right_eye_sph}
                             onChange={(e) => setPrescriptionData(prev => ({ ...prev, right_eye_sph: e.target.value }))}
                             placeholder="0.00"
@@ -1425,9 +1423,8 @@ const AddInvoiceDialog: React.FC<AddInvoiceDialogProps> = ({ isOpen, onClose }) 
           <Button
             onClick={handleSave}
             disabled={isLoading || isAssuranceMismatch}
-            className={`px-8 py-3 text-white font-medium ${
-              isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'
-            }`}
+            className={`px-8 py-3 text-white font-medium ${isAssuranceMismatch ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'
+              }`}
           >
             {isLoading ? 'Saving...' : (
               <>

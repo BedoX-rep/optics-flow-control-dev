@@ -746,6 +746,10 @@ const productTranslations: Translations = {
     en: 'Order Type',
     fr: 'Type de Commande'
   },
+  showfilters: {
+    en: 'Show Filters',
+    fr: 'Afficher les Filtres'
+  },
   montageStatus: {
     en: 'Montage Status',
     fr: 'Statut de Montage'
@@ -918,6 +922,10 @@ const productTranslations: Translations = {
   manualAdditionalCosts: {
     en: 'Manual Additional Costs',
     fr: 'Coûts Supplémentaires Manuels'
+  },
+  PaidSHORT: {
+    en: 'Paid at delivery',
+    fr: 'Payé à la livraison'
   },
   additionalCostsSettings: {
     en: 'Additional Costs Settings',
@@ -1434,6 +1442,34 @@ const productTranslations: Translations = {
     en: 'Edit Client',
     fr: 'Modifier le Client'
   },
+  addClient: {
+    en: 'Add Client',
+    fr: 'Ajouter un Client'
+  },
+  modifyClientDetails: {
+    en: 'Modify Client Details',
+    fr: 'Modifier les Détails du Client'
+  },
+  createNewClientRecord: {
+    en: 'Create New Client Record',
+    fr: 'Créer un Nouveau Dossier Client'
+  },
+  chooseRenewalMethod: {
+    en: 'Choose Renewal Method',
+    fr: 'Choisir la Méthode de Renouvellement'
+  },
+  customRenewalDate: {
+    en: 'Custom Date',
+    fr: 'Date Personnalisée'
+  },
+  renewalTimesCount: {
+    en: 'Number of Renewals',
+    fr: 'Nombre de Renouvellements'
+  },
+  saveClient: {
+    en: 'Save Client',
+    fr: 'Enregistrer le Client'
+  },
   stored: {
     en: 'Store Prescription',
     fr: 'Optique Prescrit'
@@ -1445,6 +1481,26 @@ const productTranslations: Translations = {
   addedToFavorites: {
     en: 'Added to favorites',
     fr: 'Ajouté aux favoris'
+  },
+  reschedule: {
+    en: 'Reschedule',
+    fr: 'Reprogrammer'
+  },
+  appointmentsToday: {
+    en: 'Appointments Today',
+    fr: 'Rendez-vous Aujourd\'hui'
+  },
+  expired: {
+    en: 'Expired',
+    fr: 'Expiré'
+  },
+  confirm: {
+    en: 'Confirm',
+    fr: 'Confirmer'
+  },
+  upgradeYourPlanToday: {
+    en: 'Upgrade your plan today',
+    fr: 'Mettez à jour votre forfait aujourd\'hui'
   },
   // Invoice translations
   invoices: {
@@ -4022,6 +4078,294 @@ const accessTranslations: Translations = {
     en: 'Manage Invoices',
     fr: 'Gérer les Factures'
   },
+  accessAppointments: {
+    en: 'Access Appointments',
+    fr: 'Accéder aux Rendez-vous'
+  },
+  appointmentExpired: {
+    en: 'Appointment Expired',
+    fr: 'Rendez-vous Expiré'
+  },
+  appointmentStatusFilter: {
+    en: 'Appointment Status',
+    fr: 'Statut du Rendez-vous'
+  },
+  viewresults: {
+    en: 'View Results',
+    fr: 'Voir les Résultats'
+  },
+  allStatuses: {
+    en: 'All Statuses',
+    fr: 'Tous les Statuts'
+  },
+  appointments: {
+    en: 'Appointments',
+    fr: 'Rendez-vous'
+  },
+  eyeExamAppointments: {
+    en: 'Eye Exam Appointments',
+    fr: 'Rendez-vous Examens de Vue'
+  },
+  appointmentsOverview: {
+    en: 'Appointments Overview',
+    fr: 'Aperçu des Rendez-vous'
+  },
+  today: {
+    en: 'Today',
+    fr: 'Aujourd\'hui'
+  },
+  thisWeek: {
+    en: 'This Week',
+    fr: 'Cette Semaine'
+  },
+  thisMonth: {
+    en: 'This Month',
+    fr: 'Ce Mois'
+  },
+  upcomingToday: {
+    en: 'Upcoming Today',
+    fr: 'Prévus Aujourd\'hui'
+  },
+  upcomingThisWeek: {
+    en: 'Upcoming This Week',
+    fr: 'Prévus Cette Semaine'
+  },
+  eyeExamAppointmentsDesc: {
+    en: 'Schedule and manage client eye examinations',
+    fr: 'Planifiez et gérez les examens de vue des clients'
+  },
+  newAppointment: {
+    en: 'New Appointment',
+    fr: 'Nouveau Rendez-vous'
+  },
+  editAppointment: {
+    en: 'Edit Appointment',
+    fr: 'Modifier le Rendez-vous'
+  },
+  deleteAppointment: {
+    en: 'Delete Appointment',
+    fr: 'Supprimer le Rendez-vous'
+  },
+  searchAppointments: {
+    en: 'Search appointments...',
+    fr: 'Rechercher des rendez-vous...'
+  },
+  noAppointmentsFound: {
+    en: 'No appointments found',
+    fr: 'Aucun rendez-vous trouvé'
+  },
+  noAppointmentsForDay: {
+    en: 'No appointments for this day',
+    fr: 'Aucun rendez-vous pour ce jour'
+  },
+  appointmentDate: {
+    en: 'Appointment Date',
+    fr: 'Date du Rendez-vous'
+  },
+  appointmentTime: {
+    en: 'Appointment Time',
+    fr: 'Heure du Rendez-vous'
+  },
+  appointmentNotes: {
+    en: 'Notes',
+    fr: 'Notes'
+  },
+  appointmentStatus: {
+    en: 'Status',
+    fr: 'Statut'
+  },
+  scheduled: {
+    en: 'Scheduled',
+    fr: 'Planifié'
+  },
+  confirmed: {
+    en: 'Confirmation',
+    fr: 'Confirmation'
+  },
+  confirmationDate: {
+    en: 'Confirmation Date',
+    fr: 'Date de Confirmation'
+  },
+  awaitingConfirmation: {
+    en: 'Awaiting Confirmation',
+    fr: 'En attente de confirmation'
+  },
+  confirmationPendingDesc: {
+    en: 'Client has not yet confirmed their arrival',
+    fr: 'Le client n\'a pas encore confirmé son arrivée'
+  },
+  finished: {
+    en: 'Finished',
+    fr: 'Terminé'
+  },
+  cancelled: {
+    en: 'Cancelled',
+    fr: 'Annulé'
+  },
+  start: {
+    en: 'Start',
+    fr: 'Démarrer'
+  },
+  cancelConfirmation: {
+    en: 'Cancel Confirmation',
+    fr: 'Annuler la Confirmation'
+  },
+  convertToClient: {
+    en: 'Convert to Client',
+    fr: 'Convertir en Client'
+  },
+  clientConverted: {
+    en: 'Client converted successfully',
+    fr: 'Client converti avec succès'
+  },
+  optician: {
+    en: 'Optician',
+    fr: 'Opticien'
+  },
+  notSpecified: {
+    en: 'Not Specified',
+    fr: 'Non spécifié'
+  },
+  finalize: {
+    en: 'Finalize',
+    fr: 'Finaliser'
+  },
+  restore: {
+    en: 'Restore',
+    fr: 'Restaurer'
+  },
+  results: {
+    en: 'Results',
+    fr: 'Résultats'
+  },
+  eye: {
+    en: 'Eye',
+    fr: 'Œil'
+  },
+  sph: {
+    en: 'SPH',
+    fr: 'SPH'
+  },
+  cyl: {
+    en: 'CYL',
+    fr: 'CYL'
+  },
+  axe: {
+    en: 'AXE',
+    fr: 'AXE'
+  },
+  examinerName: {
+    en: 'Examiner / Optician',
+    fr: 'Examinateur / Opticien'
+  },
+  enterExaminerName: {
+    en: 'Enter examiner name',
+    fr: 'Entrer le nom de l\'examinateur'
+  },
+  finalizeAppointment: {
+    en: 'Finalize Appointment',
+    fr: 'Finaliser le Rendez-vous'
+  },
+  finalizeAppointmentDesc: {
+    en: 'Enter the prescription results and optician name to finalize this appointment',
+    fr: 'Entrez les résultats de la prescription et le nom de l\'opticien pour finaliser ce rendez-vous'
+  },
+  eyeClinicSchedule: {
+    en: 'Eye Clinic Schedule',
+    fr: 'Planning de la Clinique Ophtalmologique'
+  },
+  scheduleNewEyeExam: {
+    en: 'Schedule a new eye examination.',
+    fr: 'Planifiez un nouvel examen ophtalmologique.'
+  },
+  updateAppointmentDetails: {
+    en: 'Update the details of this appointment.',
+    fr: 'Mettez à jour les détails de ce rendez-vous.'
+  },
+  clientInformation: {
+    en: 'Client Information',
+    fr: 'Informations du Client'
+  },
+  addSpecialInstructions: {
+    en: 'Add any special instructions or observations...',
+    fr: 'Ajoutez des instructions spéciales ou des observations...'
+  },
+  selectExistingClient: {
+    en: 'Existing Client',
+    fr: 'Client Existant'
+  },
+  manualEntry: {
+    en: 'Manual Entry (Quick Add)',
+    fr: 'Saisie Manuelle (Ajout Rapide)'
+  },
+  clientType: {
+    en: 'Client Selection Type',
+    fr: 'Type de sélection du client'
+  },
+  recentlyAddedClients: {
+    en: 'Recently Added Clients',
+    fr: 'Clients Récemment Ajoutés'
+  },
+  clientSearchPlaceholder: {
+    en: 'Search by name or phone...',
+    fr: 'Rechercher par nom ou téléphone...'
+  },
+  prescriptionResults: {
+    en: 'Prescription Results',
+    fr: 'Résultats de Prescription'
+  },
+  mustEnterExaminerName: {
+    en: 'Examiner name is required to finalize',
+    fr: 'Le nom de l\'examinateur est requis pour finaliser'
+  },
+  appointmentCreated: {
+    en: 'Appointment created successfully',
+    fr: 'Rendez-vous créé avec succès'
+  },
+  appointmentUpdated: {
+    en: 'Appointment updated successfully',
+    fr: 'Rendez-vous mis à jour avec succès'
+  },
+  appointmentDeleted: {
+    en: 'Appointment deleted successfully',
+    fr: 'Rendez-vous supprimé avec succès'
+  },
+  appointmentFinalized: {
+    en: 'Appointment finalized successfully',
+    fr: 'Rendez-vous finalisé avec succès'
+  },
+  failedToCreateAppointment: {
+    en: 'Failed to create appointment',
+    fr: 'Échec de la création du rendez-vous'
+  },
+  failedToUpdateAppointment: {
+    en: 'Failed to update appointment',
+    fr: 'Échec de la mise à jour du rendez-vous'
+  },
+  failedToDeleteAppointment: {
+    en: 'Failed to delete appointment',
+    fr: 'Échec de la suppression du rendez-vous'
+  },
+  confirmDeleteAppointment: {
+    en: 'Are you sure you want to delete this appointment?',
+    fr: 'Êtes-vous sûr de vouloir supprimer ce rendez-vous ?'
+  },
+  loadingAppointments: {
+    en: 'Loading appointments...',
+    fr: 'Chargement des rendez-vous...'
+  },
+  selectClient: {
+    en: 'Select Client',
+    fr: 'Sélectionner un Client'
+  },
+  todaysAppointments: {
+    en: 'Today\'s Appointments',
+    fr: 'Rendez-vous d\'Aujourd\'hui'
+  },
+  addPower: {
+    en: 'Add Power',
+    fr: 'Addition'
+  },
   loadingPermissions: {
     en: 'Loading your permissions...',
     fr: 'Chargement de vos autorisations...'
@@ -4050,6 +4394,10 @@ const accessTranslations: Translations = {
     en: 'Please log in to access this page.',
     fr: 'Veuillez vous connecter pour accéder à cette page.'
   },
+  create: {
+    en: 'Create',
+    fr: 'Créer'
+  },
   admin: {
     en: 'Admin',
     fr: 'Administrateur'
@@ -4057,6 +4405,118 @@ const accessTranslations: Translations = {
   storeStaff: {
     en: 'Store Staff',
     fr: 'Personnel du Magasin'
+  },
+  passwordMinLength: {
+    en: 'Minimum 6 characters. Share this password with the employee.',
+    fr: 'Minimum 6 caractères. Partagez ce mot de passe avec l\'employé.'
+  },
+  teamManagement: {
+    en: 'Team Management',
+    fr: 'Gestion de l\'Équipe'
+  },
+  manageEmployeeAccounts: {
+    en: 'Add employees and manage their permissions',
+    fr: 'Ajoutez des employés et gérez leurs autorisations'
+  },
+  initialPermissions: {
+    en: 'Initial Permissions',
+    fr: 'Autorisations Initiales'
+  },
+  password: {
+    en: 'Password',
+    fr: 'Mot de passe'
+  },
+  addEmployee: {
+    en: 'Add Employee',
+    fr: 'Ajouter un Employé'
+  },
+  yourStore: {
+    en: 'Your Store',
+    fr: 'Votre Magasin'
+  },
+  employees: {
+    en: 'Employees',
+    fr: 'Employés'
+  },
+  noEmployeesYet: {
+    en: 'No employees yet',
+    fr: 'Pas encore d\'employés'
+  },
+  addFirstEmployee: {
+    en: 'Add your first employee to start managing your team',
+    fr: 'Ajoutez votre premier employé pour commencer à gérer votre équipe'
+  },
+  addEmployeeDescription: {
+    en: 'Create an account for your employee. They will receive an email verification.',
+    fr: 'Créez un compte pour votre employé. Il recevra une vérification par e-mail.'
+  },
+  temporaryPassword: {
+    en: 'Temporary Password',
+    fr: 'Mot de passe temporaire'
+  },
+  employee: {
+    en: 'Employee',
+    fr: 'Employé'
+  },
+  active: {
+    en: 'Active',
+    fr: 'Actif'
+  },
+  suspended: {
+    en: 'Suspended',
+    fr: 'Suspendu'
+  },
+  pendingVerification: {
+    en: 'Pending Verification',
+    fr: 'En Attente de Vérification'
+  },
+  confirmRemoveEmployee: {
+    en: 'Are you sure you want to remove this employee?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cet employé ?'
+  },
+  employeeAccountCreated: {
+    en: 'Employee account created successfully. They will receive an email verification.',
+    fr: 'Compte d\'employé créé avec succès. Il recevra une vérification par e-mail.'
+  },
+  employeeAlreadyExists: {
+    en: 'An employee with this email already exists',
+    fr: 'Un employé avec cet e-mail existe déjà'
+  },
+  passwordTooShort: {
+    en: 'Password must be at least 6 characters',
+    fr: 'Le mot de passe doit comporter au moins 6 caractères'
+  },
+  employeeRemoved: {
+    en: 'Employee removed successfully',
+    fr: 'Employé supprimé avec succès'
+  },
+  failedToRemoveEmployee: {
+    en: 'Failed to remove employee',
+    fr: 'Échec de la suppression de l\'employé'
+  },
+  permissionsUpdated: {
+    en: 'Permissions updated successfully',
+    fr: 'Autorisations mises à jour avec succès'
+  },
+  permissionsAvailableAfterVerification: {
+    en: 'Permissions will be available once the employee verifies their email',
+    fr: 'Les autorisations seront disponibles une fois que l\'employé aura vérifié son e-mail'
+  },
+  creating: {
+    en: 'Creating...',
+    fr: 'Création...'
+  },
+  failedToCreateEmployee: {
+    en: 'Failed to create employee account',
+    fr: 'Échec de la création du compte employé'
+  },
+  owner: {
+    en: 'Owner',
+    fr: 'Propriétaire'
+  },
+  myStatus: {
+    en: 'My Status',
+    fr: 'Mon Statut'
   }
 };
 const financialTranslations: Translations = {
@@ -4470,6 +4930,50 @@ const authTranslations: Translations = {
     fr: 'Une erreur s\'est produite lors de l\'inscription.'
   }
 };
+
+const employeeStatusTranslations: Translations = {
+  inventoryStable: {
+    en: 'Inventory Stable',
+    fr: 'Inventaire Stable'
+  },
+  viewYourPermissions: {
+    en: 'View Your Permissions',
+    fr: 'Voir Vos Permissions'
+  },
+  yourRole: {
+    en: 'Your Role',
+    fr: 'Votre Rôle'
+  },
+  role: {
+    en: 'Role',
+    fr: 'Rôle'
+  },
+  store: {
+    en: 'Store',
+    fr: 'Magasin'
+  },
+  permissionsGrantedByOwner: {
+    en: 'Permissions Granted by Owner',
+    fr: 'Permissions Accordées par le Propriétaire'
+  },
+  granted: {
+    en: 'Granted',
+    fr: 'Accordé'
+  },
+  storeSubscriptionExpired: {
+    en: 'Store Subscription Expired',
+    fr: 'Abonnement du Magasin Expiré'
+  },
+  storeSubscriptionExpiredDesc: {
+    en: 'Your store subscription has expired. Please renew your subscription to continue using the service.',
+    fr: 'Votre abonnement de magasin a expiré. Veuillez renouveler votre abonnement pour continuer à utiliser le service.'
+  },
+  restricted: {
+    en: 'Restricted',
+    fr: 'Restreint'
+  }
+
+};
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
@@ -4484,6 +4988,7 @@ const allTranslations: Translations = {
   ...accessTranslations,
   ...financialTranslations,
   ...authTranslations,
+  ...employeeStatusTranslations,
   // Invoice translations
   addInvoice: {
     en: 'Add Invoice',
@@ -4496,6 +5001,82 @@ const allTranslations: Translations = {
   viewDetails: {
     en: 'View Details',
     fr: 'Voir les Détails'
+  },
+  noPhone: {
+    en: 'No phone',
+    fr: 'Pas de téléphone'
+  },
+  update: {
+    en: 'Update',
+    fr: 'Mettre à jour'
+  },
+  productConfigurationSuite: {
+    en: 'Product Configuration Suite',
+    fr: 'Suite de Configuration de Produits'
+  },
+  autoNaming: {
+    en: 'Auto-Naming',
+    fr: 'Nommage Automatique'
+  },
+  autoGenerateProducts: {
+    en: 'Auto Generate Products',
+    fr: 'Générer des produits automatiquement'
+  },
+  intelligentProductGeneration: {
+    en: 'Intelligent Product Generation Suite',
+    fr: 'Suite de Génération Intelligente de Produits'
+  },
+  selectCategoryPlaceholder: {
+    en: 'Select a category',
+    fr: 'Sélectionner une catégorie'
+  },
+  reset: {
+    en: 'Reset',
+    fr: 'Réinitialiser'
+  },
+  generate: {
+    en: 'Generate',
+    fr: 'Générer'
+  },
+  allMontageStatuses: {
+    en: 'All Montage Statuses',
+    fr: 'Tous les statuts de montage'
+  },
+  showing: {
+    en: 'Showing',
+    fr: 'Affichage'
+  },
+  markUnresponsive: {
+    en: 'Mark Unresponsive',
+    fr: 'Marquer comme sans réponse'
+  },
+  markUndelivered: {
+    en: 'Mark Undelivered',
+    fr: 'Marquer comme non livré'
+  },
+  view: {
+    en: 'View',
+    fr: 'Voir'
+  },
+  markCalled: {
+    en: 'Mark Called',
+    fr: 'Marquer comme appelé'
+  },
+  markPaid: {
+    en: 'Mark Paid',
+    fr: 'Marquer comme payé'
+  },
+  totalProducts: {
+    en: 'Total Products',
+    fr: 'Total des produits'
+  },
+  totalExpenses: {
+    en: 'Total Expenses',
+    fr: 'Total des dépenses'
+  },
+  expand: {
+    en: 'Expand',
+    fr: 'Agrandir'
   },
   print: {
     en: 'Print',

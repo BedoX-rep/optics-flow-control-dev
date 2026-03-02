@@ -208,8 +208,6 @@ const Purchases = () => {
           return;
         }
 
-        console.log('Recurring purchases check result:', data);
-
         if (data?.processed > 0) {
           toast({
             title: "Recurring Purchases Renewed",
@@ -309,8 +307,6 @@ const Purchases = () => {
         throw error;
       }
 
-      console.log('Recurring purchase renewal result:', data);
-
       toast({
         title: "Success",
         description: "Recurring purchase renewed successfully",
@@ -395,7 +391,6 @@ const Purchases = () => {
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name');
 
@@ -425,7 +420,6 @@ const Purchases = () => {
             name
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -445,7 +439,6 @@ const Purchases = () => {
     queryKey: ['purchases', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      console.log('Fetching purchases for user:', user.id);
       const { data, error } = await supabase
         .from('purchases')
         .select(`
@@ -458,7 +451,6 @@ const Purchases = () => {
             email
           )
         `)
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('purchase_date', { ascending: false });
 
@@ -466,7 +458,6 @@ const Purchases = () => {
         console.error('Error fetching purchases:', error);
         throw error;
       }
-      console.log('Fetched purchases count:', data?.length || 0);
       return data || [];
     },
     enabled: !!user,

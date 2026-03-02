@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,7 +8,7 @@ import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save } from "lucide-react";
+import { UploadIcon, Sparkles, Package, DollarSign, Building, Layers, Eye, Palette, Truck, Archive, Tag, Hash, Wrench, Save, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,49 +162,72 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
   };
 
   return (
-    <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-white rounded-[32px] shadow-2xl animate-in zoom-in-95 duration-300">
-      <form onSubmit={onFormSubmit} className="flex flex-col h-full bg-slate-50/30">
-        {/* Top Header Section */}
-        <div className="relative p-8 bg-gradient-to-r from-teal-600 to-emerald-600 overflow-hidden">
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-500/20 rounded-full -ml-24 -mb-24 blur-2xl" />
+    <DialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-[#E2E2DE] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300 max-h-[96vh] flex flex-col custom-scrollbar overflow-y-auto">
+      {/* Background Watermark Icons */}
+      <div className="absolute top-40 right-10 opacity-[0.03] pointer-events-none rotate-12">
+        <Package size={240} strokeWidth={1} />
+      </div>
+      <div className="absolute bottom-40 left-10 opacity-[0.02] pointer-events-none -rotate-12">
+        <Layers size={200} strokeWidth={1} />
+      </div>
 
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="h-16 w-16 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
-                <Package className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <DialogTitle className="text-3xl font-black text-white tracking-tight">
+      <form onSubmit={onFormSubmit} className="flex flex-col flex-1 relative z-10">
+        {/* Top Header Section */}
+        <div className="p-10 pb-12 bg-gradient-to-b from-[#063D31] to-[#042F26] text-white relative rounded-b-[3rem] shadow-xl">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="absolute right-8 top-8 text-teal-200/50 hover:text-white transition-colors"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="flex flex-col items-center text-center md:items-start md:text-left gap-6 md:flex-row md:justify-between">
+            <div className="flex flex-col items-center md:items-start gap-3">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-md">
+                  <Package className="h-6 w-6 text-teal-100" />
+                </div>
+                <DialogTitle className="text-3xl font-black tracking-[0.15em] uppercase leading-none">
                   {initialValues.name ? t('editProduct') : t('addProduct')}
                 </DialogTitle>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />
-                  <p className="text-teal-50 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Product Configuration Suite
-                  </p>
-                </div>
+                <DialogDescription className="sr-only">
+                  {initialValues.name ? 'Update existing product information' : 'Create a new product record'}
+                </DialogDescription>
               </div>
+              <p className="text-teal-50/60 text-sm font-medium tracking-[0.1em] uppercase">
+                {t('productConfigurationSuite') || 'Product Configuration Suite'}
+              </p>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-2xl px-5 py-2.5 border border-white/20">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/10">
                 <Switch
                   checked={autoName}
                   onCheckedChange={setAutoName}
-                  className="data-[state=checked]:bg-emerald-400"
+                  className="data-[state=checked]:bg-[#063D31]"
                 />
-                <span className="text-[10px] font-black text-white uppercase tracking-wider">Auto-Naming</span>
+                <span className="text-[11px] font-black text-white uppercase tracking-widest">{t('autoNaming') || 'Auto-Naming'}</span>
               </div>
 
               <Button
                 type="submit"
-                disabled={disabled || uploading}
-                className="bg-white text-teal-700 hover:bg-teal-50 rounded-2xl px-8 h-12 font-black shadow-xl shadow-black/10 transition-all active:scale-95 group"
+                disabled={disabled || uploading || !form.name?.trim()}
+                className={cn(
+                  "px-10 h-14 rounded-2xl font-black uppercase text-sm tracking-[0.2em] shadow-2xl transition-all duration-500 active:scale-95 flex items-center gap-3 border-none",
+                  (disabled || uploading || !form.name?.trim())
+                    ? "bg-white/10 text-white/40 cursor-not-allowed"
+                    : "bg-white text-[#063D31] hover:bg-teal-50 hover:shadow-white/20 hover:translate-y-[-2px]"
+                )}
               >
-                <Save className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
-                {t('save')}
+                {uploading ? (
+                  <div className="h-5 w-5 border-3 border-[#063D31] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save className="h-5 w-5" />
+                    {t('save')}
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -400,7 +423,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialValues, onSubmit, onCa
       <style dangerouslySetInnerHTML={{
         __html: `
         .premium-input {
-          @apply bg-white border-slate-200 rounded-2xl h-12 shadow-sm transition-all focus:ring-teal-500/20 focus:border-teal-500 !important;
+          @apply bg-black/[0.04] border-none rounded-[1.2rem] h-14 shadow-none transition-all focus:ring-2 focus:ring-[#063D31]/10 focus:bg-white text-lg font-bold text-slate-800 placeholder:text-[#AAA] !important;
         }
       `}} />
     </DialogContent>
@@ -417,12 +440,12 @@ const FormSection = ({ title, icon: Icon, children, variant = 'teal' }: any) => 
   return (
     <div className="group space-y-4">
       <div className="flex items-center gap-3">
-        <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center border transition-all group-hover:scale-110 shadow-sm", themes[variant])}>
-          <Icon className="h-4 w-4" />
+        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center border transition-all group-hover:scale-110 shadow-sm", themes[variant])}>
+          <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">{title}</h3>
+        <h3 className="text-sm font-black text-[#5C5C59] uppercase tracking-[0.2em]">{title}</h3>
       </div>
-      <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm shadow-slate-200/50 hover:shadow-lg hover:shadow-slate-200 transition-all duration-500">
+      <div className="bg-white/40 p-8 rounded-[2rem] border border-white/60 shadow-sm backdrop-blur-md hover:shadow-xl hover:shadow-black/5 transition-all duration-500">
         {children}
       </div>
     </div>
@@ -430,8 +453,8 @@ const FormSection = ({ title, icon: Icon, children, variant = 'teal' }: any) => 
 };
 
 const FormGroup = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="space-y-2.5">
-    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">{label}</Label>
+  <div className="space-y-3">
+    <Label className="text-[11px] font-black uppercase text-[#8E8E8A] tracking-[0.15em] pl-1 font-sans">{label}</Label>
     {children}
   </div>
 );

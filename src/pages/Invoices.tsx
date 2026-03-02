@@ -51,7 +51,6 @@ const Invoices = () => {
         *,
         invoice_items (*)
       `)
-      .eq('user_id', user.id)
       .eq('is_deleted', false)
       .order('invoice_date', { ascending: false });
 

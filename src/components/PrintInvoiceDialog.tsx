@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
@@ -44,8 +45,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const { user } = useAuth();
   const { toast } = useToast();
   const isFrench = language === 'fr';
-  
-  const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
+
   const [invoiceData, setInvoiceData] = useState({
     invoice_number: '',
     client_name: '',
@@ -60,11 +60,11 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     showClientPhone: false,
     colorTheme: 'default'
   });
-  
+
   // Category options for items
   const CATEGORY_OPTIONS = [
     'Single Vision Lenses',
-    'Progressive Lenses', 
+    'Progressive Lenses',
     'Frames',
     'Sunglasses',
     'Contact Lenses',
@@ -81,33 +81,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     add_value: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Fetch user information
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('user_information')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user info:', error);
-        } else {
-          setUserInfo(data);
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-      }
-    };
-
-    if (isOpen && user) {
-      fetchUserInfo();
-    }
-  }, [isOpen, user]);
+  const { data: userInfo, isLoading: isUserLoading } = useUserInformation();
 
   // Load invoice data when dialog opens
   useEffect(() => {
@@ -191,7 +165,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const downloadPDF = async () => {
     const validationErrors = validateForPrint();
-    
+
     if (validationErrors.length > 0) {
       toast({
         title: "Validation Error",
@@ -202,16 +176,16 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     }
 
     setIsLoading(true);
-    
+
     try {
       const printContent = generatePrintContent();
-      
+
       // Create a new window for PDF generation
       const pdfWindow = window.open('', '_blank');
       if (pdfWindow) {
         pdfWindow.document.write(printContent);
         pdfWindow.document.close();
-        
+
         // Wait for content to load
         pdfWindow.onload = () => {
           // Focus the window and trigger print dialog (user can save as PDF)
@@ -238,7 +212,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const handlePrint = async () => {
     const validationErrors = validateForPrint();
-    
+
     if (validationErrors.length > 0) {
       toast({
         title: "Validation Error",
@@ -249,17 +223,17 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     }
 
     setIsLoading(true);
-    
+
     try {
       // Generate the print content
       const printContent = generatePrintContent();
-      
+
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(printContent);
         printWindow.document.close();
-        
+
         // Wait for content to load before printing
         printWindow.onload = () => {
           printWindow.print();
@@ -271,7 +245,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
         title: "Success",
         description: "Invoice sent to printer successfully",
       });
-      
+
       onClose();
     } catch (error) {
       console.error('Error printing invoice:', error);
@@ -287,7 +261,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
 
   const translateCategory = (category: string) => {
     if (!isFrench) return category;
-    
+
     const translations: { [key: string]: string } = {
       'Single Vision Lenses': 'Verres Unifocaux',
       'Progressive Lenses': 'Verres Progressifs',
@@ -296,14 +270,14 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
       'Contact Lenses': 'Lentilles de Contact',
       'Accessories': 'Accessoires'
     };
-    
+
     return translations[category] || category;
   };
 
   const generatePrintContent = () => {
     const total = calculateTotal();
     const currentDate = format(new Date(), 'dd/MM/yyyy');
-    const logoUrl = userInfo?.business_logo || '/placeholder.svg';
+    const logoUrl = (userInfo as any)?.logo_url || '/placeholder.svg';
     const purchaseType = getPurchaseType();
     const isFrench = language === 'fr';
 
@@ -718,7 +692,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
                       <p className="text-xl font-bold text-teal-800 text-center">
                         Total: {total.toFixed(2)} DH
@@ -765,7 +739,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                         className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-teal-300 rounded"
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <Label htmlFor="showBalance" className="text-sm font-medium text-teal-700">
                         {isFrench ? 'Afficher le solde restant' : 'Show balance due'}
@@ -831,20 +805,20 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
                     </h4>
                     <div className="text-xs text-teal-600 space-y-1">
                       <div>
-                        {printOptions.showProductNames 
+                        {printOptions.showProductNames
                           ? (isFrench ? '✓ Noms complets des produits' : '✓ Full product names')
                           : (isFrench ? '✗ Seules les catégories' : '✗ Categories only')
                         }
                       </div>
                       <div>
-                        {printOptions.showClientPhone 
+                        {printOptions.showClientPhone
                           ? (isFrench ? '✓ Téléphone du client' : '✓ Client phone number')
                           : (isFrench ? '✗ Téléphone du client masqué' : '✗ Client phone hidden')
                         }
                       </div>
                       <div>
-                        {isFrench ? `Thème: ${printOptions.colorTheme === 'default' ? 'Défaut' : printOptions.colorTheme === 'blue' ? 'Bleu' : 'Vert'}` 
-                                  : `Theme: ${printOptions.colorTheme === 'default' ? 'Default' : printOptions.colorTheme.charAt(0).toUpperCase() + printOptions.colorTheme.slice(1)}`}
+                        {isFrench ? `Thème: ${printOptions.colorTheme === 'default' ? 'Défaut' : printOptions.colorTheme === 'blue' ? 'Bleu' : 'Vert'}`
+                          : `Theme: ${printOptions.colorTheme === 'default' ? 'Default' : printOptions.colorTheme.charAt(0).toUpperCase() + printOptions.colorTheme.slice(1)}`}
                       </div>
                     </div>
                   </div>
@@ -859,8 +833,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
           <Button variant="outline" onClick={onClose} className="border-teal-300 text-teal-700 hover:bg-teal-50">
             {isFrench ? 'Annuler' : 'Cancel'}
           </Button>
-          <Button 
-            onClick={downloadPDF} 
+          <Button
+            onClick={downloadPDF}
             disabled={isLoading}
             variant="outline"
             className="border-teal-600 text-teal-600 hover:bg-teal-50"
@@ -868,8 +842,8 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
             <Download className="h-4 w-4 mr-2" />
             {isLoading ? (isFrench ? 'Génération...' : 'Generating...') : (isFrench ? 'Télécharger PDF' : 'Download PDF')}
           </Button>
-          <Button 
-            onClick={handlePrint} 
+          <Button
+            onClick={handlePrint}
             disabled={isLoading}
             className="bg-teal-600 hover:bg-teal-700 text-white px-8"
           >

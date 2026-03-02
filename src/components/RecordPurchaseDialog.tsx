@@ -358,8 +358,7 @@ const RecordPurchaseDialog: React.FC<RecordPurchaseDialogProps> = ({
         const { error } = await supabase
           .from('purchases')
           .update(purchaseData)
-          .eq('id', editingPurchase.id)
-          .eq('user_id', user.id);
+          .eq('id', editingPurchase.id);
 
         if (error) {
           throw error;

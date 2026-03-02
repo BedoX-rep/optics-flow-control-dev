@@ -189,27 +189,17 @@ const Subscriptions = () => {
                 <CardFooter className="pt-8 pb-8 px-8 flex flex-col gap-3">
                   <Button
                     onClick={() => setContactDialogOpen(true)}
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-2 border-teal-200/60 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 h-12 rounded-2xl font-bold transition-all"
-                  >
-                    <Phone className="h-4 w-4" />
-                    {t('payViaBankTransfer')}
-                  </Button>
-
-                  <Button
-                    onClick={() => setContactDialogOpen(true)}
                     disabled={currentSubscription?.subscription_type === type}
                     className={`
-                    w-full h-12 rounded-2xl font-bold transition-all shadow-lg active:scale-95
+                    w-full h-14 rounded-2xl font-black transition-all shadow-lg active:scale-95 uppercase tracking-widest text-[11px]
                     ${type === 'Quarterly' ?
                         'bg-teal-600 hover:bg-teal-700 shadow-teal-500/25' :
                         'bg-slate-900 hover:bg-slate-800 shadow-slate-900/20'}
                   `}
                   >
-                    <CreditCard className="h-4 w-4 mr-2" />
                     {currentSubscription?.subscription_type === type ?
                       t('currentPlan') :
-                      t('payWithCardPayPal')}
+                      t('upgradeYourPlanToday')}
                   </Button>
                 </CardFooter>
               </Card>

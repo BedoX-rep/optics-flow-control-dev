@@ -26,7 +26,8 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { LanguageProvider } from "./components/LanguageProvider";
 import Invoices from './pages/Invoices';
-
+import Appointments from './pages/Appointments';
+import EmployeeStatus from './pages/EmployeeStatus';
 // Create a client with caching options
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,24 +54,24 @@ const ProtectedRoute = ({
   requiresActiveSubscription?: boolean;
   requiredPermission?: string;
 }) => {
-  const { user, subscription, isLoading, permissions, sessionRole } = useAuth();
+  const { user, subscription, isLoading, permissions, userRole } = useAuth();
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
 
-  // Effect to handle instant redirects when sessionRole changes
+  // Effect to handle instant redirects when userRole changes
   useEffect(() => {
     if (isLoading || !user) return;
 
     // Check permission requirements
     if (requiredPermission) {
-      // Special case for admin session requirement
-      if (requiredPermission === 'admin_session') {
-        if (sessionRole !== 'Admin') {
+      // Special case for owner-only pages
+      if (requiredPermission === 'owner_only') {
+        if (userRole !== 'owner') {
           setShouldRedirect('/dashboard');
           return;
         }
       }
-      // Check regular permissions for non-admin sessions
-      else if (sessionRole !== 'Admin') {
+      // Check regular permissions for non-owner users
+      else if (userRole !== 'owner') {
         // Wait for permissions to be loaded before making a redirection decision
         if (!permissions) return;
 
@@ -85,17 +86,17 @@ const ProtectedRoute = ({
     if (requiresActiveSubscription && subscription) {
       const subStatus = subscription.subscription_status.toLowerCase();
       if (subStatus !== 'active') {
-        setShouldRedirect('/subscriptions');
+        setShouldRedirect(userRole === 'owner' ? '/subscriptions' : '/my-status');
         return;
       }
     }
 
     // Clear redirect if all checks pass
     setShouldRedirect(null);
-  }, [sessionRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
+  }, [userRole, permissions, subscription, requiredPermission, requiresActiveSubscription, isLoading, user]);
 
   // Show loading state while initial auth check or required data (permissions/subscription) is loading
-  const isDataLoading = isLoading || (user && sessionRole !== 'Admin' && requiredPermission && !permissions);
+  const isDataLoading = isLoading || (user && userRole !== 'owner' && requiredPermission && !permissions);
 
   if (isDataLoading) {
     return (
@@ -164,7 +165,7 @@ const AppRoutes = () => (
       </ProtectedRoute>
     } />
     <Route path="/access/*" element={
-      <ProtectedRoute requiredPermission="admin_session">
+      <ProtectedRoute requiredPermission="owner_only">
         <Layout><Access /></Layout>
       </ProtectedRoute>
     } />
@@ -176,19 +177,19 @@ const AppRoutes = () => (
     } />
 
     <Route path="/optician-settings/*" element={
-      <ProtectedRoute requiredPermission="admin_session">
+      <ProtectedRoute requiredPermission="owner_only">
         <Layout><OpticianSettings /></Layout>
       </ProtectedRoute>
     } />
 
     <Route path="/personalisation/*" element={
-      <ProtectedRoute requiredPermission="admin_session">
+      <ProtectedRoute requiredPermission="owner_only">
         <Layout><Personalisation /></Layout>
       </ProtectedRoute>
     } />
 
     <Route path="/subscriptions/*" element={
-      <ProtectedRoute requiresActiveSubscription={false}>
+      <ProtectedRoute requiresActiveSubscription={false} requiredPermission="owner_only">
         <Layout><Subscriptions /></Layout>
       </ProtectedRoute>
     } />
@@ -196,6 +197,18 @@ const AppRoutes = () => (
     <Route path="/invoices/*" element={
       <ProtectedRoute requiredPermission="can_manage_invoices">
         <Layout><Invoices /></Layout>
+      </ProtectedRoute>
+    } />
+
+    <Route path="/appointments/*" element={
+      <ProtectedRoute requiredPermission="can_access_appointments">
+        <Layout><Appointments /></Layout>
+      </ProtectedRoute>
+    } />
+
+    <Route path="/my-status/*" element={
+      <ProtectedRoute requiresActiveSubscription={false}>
+        <Layout><EmployeeStatus /></Layout>
       </ProtectedRoute>
     } />
 

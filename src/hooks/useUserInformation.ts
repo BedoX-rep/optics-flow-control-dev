@@ -7,27 +7,42 @@ import { Database } from '@/integrations/supabase/types';
 type UserInformationRow = Database['public']['Tables']['user_information']['Row'];
 
 export const useUserInformation = () => {
-  const { user } = useAuth();
+  const { user, userRole, storeId } = useAuth();
 
   return useQuery({
-    queryKey: ['user-information', user?.id],
+    queryKey: ['user-information', user?.id, userRole, storeId],
     queryFn: async () => {
       if (!user) return null;
 
       try {
-        // First, try to get existing user information
+        let targetUserId = user.id;
+
+        // If the user is an employee, we want to fetch the store owner's information
+        if (userRole === 'employee' && storeId) {
+          const { data: storeData, error: storeError } = await supabase
+            .from('stores')
+            .select('owner_id')
+            .eq('id', storeId)
+            .maybeSingle();
+
+          if (storeData?.owner_id) {
+            targetUserId = storeData.owner_id;
+          }
+        }
+
+        // Try to get user information for the target user (self or owner)
         const { data: existingInfo, error: fetchError } = await supabase
           .from('user_information')
           .select('*')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', targetUserId)
+          .maybeSingle();
 
         if (existingInfo) {
           return existingInfo as UserInformationRow;
         }
 
-        // If no user information exists, initialize from subscription data
-        if (fetchError && fetchError.code === 'PGRST116') {
+        // Only initialize user information if the user is an owner and data is missing
+        if (!existingInfo && userRole === 'owner' && (!fetchError || fetchError.code === 'PGRST116')) {
           await supabase.rpc('initialize_user_information', { user_uuid: user.id });
 
           // Fetch the newly created record
@@ -50,7 +65,7 @@ export const useUserInformation = () => {
           return null;
         }
 
-        return existingInfo as UserInformationRow;
+        return null;
       } catch (error) {
         console.error('Unexpected error:', error);
         return null;
@@ -59,7 +74,7 @@ export const useUserInformation = () => {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,          // 5 minutes (matches global)
     gcTime: 30 * 60 * 1000,            // 30 minutes (gcTime is new name for cacheTime)
-    refetchOnWindowFocus: false,        // DOES refetch on window focus
+    refetchOnWindowFocus: false,        // DOES NOT refetch on window focus
     refetchOnMount: true,              // DOES refetch when component mounts
     refetchOnReconnect: true           // DOES refetch on reconnect
   });

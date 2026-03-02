@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 
 export const HARDCODED_COMPANIES = [
   "Indo",
-  "ABlens", 
+  "ABlens",
   "Essilor",
   "GLASSANDLENS",
   "Optifak"
@@ -25,21 +25,20 @@ export const useCompanies = () => {
 
   // Fetch user's custom companies
   const { data: customCompanies = [], isLoading } = useQuery({
-    queryKey: ['companies', user?.id],
+    queryKey: ['companies'],
     queryFn: async () => {
       if (!user) return [];
-      
+
       const { data, error } = await supabase
         .from('companies')
         .select('*')
-        .eq('user_id', user.id)
         .order('name');
-        
+
       if (error) {
         console.error('Error fetching companies:', error);
         return [];
       }
-      
+
       return data as Company[];
     },
     enabled: !!user,
@@ -55,18 +54,18 @@ export const useCompanies = () => {
   const createCompany = useMutation({
     mutationFn: async (name: string) => {
       if (!user) throw new Error('User not authenticated');
-      
+
       const { data, error } = await supabase
         .from('companies')
         .insert({ name, user_id: user.id })
         .select()
         .single();
-        
+
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['companies', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
     }
   });
 
@@ -79,12 +78,12 @@ export const useCompanies = () => {
         .eq('id', id)
         .select()
         .single();
-        
+
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['companies', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
     }
   });
 
@@ -95,11 +94,11 @@ export const useCompanies = () => {
         .from('companies')
         .delete()
         .eq('id', id);
-        
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['companies', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
     }
   });
 

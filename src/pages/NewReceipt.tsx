@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check, User, Phone, Eye, Receipt, CreditCard } from 'lucide-react';
+import { Plus, Trash, ChevronDown, X, Copy, FileText, Settings, ChevronRight, AlertCircle, ArrowLeft, ArrowRight, Check, User, Phone, Eye, Receipt, CreditCard, Search, PlusCircle } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import {
   Alert,
@@ -35,7 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useUserInformation } from '@/hooks/useUserInformation';
-import AddClientDialog from '@/components/AddClientDialog';
+import ClientDialog from '@/components/ClientDialog';
 import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 import OrderItems from '@/components/receipt/OrderItems';
 import OrderSummary from '@/components/receipt/OrderSummary';
@@ -140,8 +140,6 @@ interface PaymentOptionsProps {
   setTax: (tax: number) => void;
   setTaxIndicator: (indicator: number) => void;
   setAdvancePayment: (payment: number) => void;
-  setBalance: (balance: number) => void;
-  updatePaymentStatus: (balance: number) => void;
 }
 
 const NewReceipt = () => {
@@ -178,8 +176,6 @@ const NewReceipt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [advancePayment, setAdvancePayment] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [paymentStatus, setPaymentStatus] = useState('Unpaid');
   const [autoMontage, setAutoMontage] = useState(() => {
     const saved = localStorage.getItem('autoMontage');
     return saved !== null ? JSON.parse(saved) : true;
@@ -266,7 +262,6 @@ const NewReceipt = () => {
       const { data: allProducts, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
 
@@ -279,8 +274,7 @@ const NewReceipt = () => {
             await supabase
               .from('products')
               .update({ stock_status: 'Out Of Stock' })
-              .eq('id', product.id)
-              .eq('user_id', user.id);
+              .eq('id', product.id);
           }
         });
       }
@@ -306,7 +300,6 @@ const NewReceipt = () => {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_deleted', false)
         .order('name', { ascending: true });
 
@@ -562,6 +555,10 @@ const NewReceipt = () => {
   // Calculate profit
   const profit = total - totalCost - montageCosts;
 
+  // Derived values for balance and payment status
+  const balance = total - advancePayment;
+  const paymentStatus = balance <= 0 ? 'Paid' : balance < total ? 'Partially Paid' : 'Unpaid';
+
   const fetchClientPrescription = async (clientId: string) => {
     if (!user) return;
 
@@ -632,15 +629,7 @@ const NewReceipt = () => {
     fetchClientPrescription(clientId);
   };
 
-  const updatePaymentStatus = (newBalance: number) => {
-    if (newBalance <= 0) {
-      setPaymentStatus('Paid');
-    } else if (newBalance < total) {
-      setPaymentStatus('Partially Paid');
-    } else {
-      setPaymentStatus('Unpaid');
-    }
-  };
+
 
   const handleClientAdded = async (client: Client) => {
     if (!user) return;
@@ -687,7 +676,7 @@ const NewReceipt = () => {
           const showError = hasError && index < currentStepIndex;
 
           return (
-            <React.Fragment key={step.id}>
+            <div key={step.id} className="contents">
               <button
                 onClick={() => {
                   if (currentStepIndex === 1 && step.id === 'finalize') {
@@ -696,7 +685,7 @@ const NewReceipt = () => {
                   setCurrentTab(step.id);
                 }}
                 className={`group flex-1 flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${isActive
-                  ? 'bg-gradient-to-r from-teal-600 to-teal-500 border-teal-400 text-white shadow-lg shadow-teal-500/25 scale-[1.02]'
+                  ? 'bg-teal-600 border-teal-400 text-white shadow-lg shadow-teal-500/25 scale-[1.02]'
                   : showError
                     ? 'bg-red-50 border-red-200 text-red-700 hover:border-red-300 hover:shadow-md'
                     : isCompleted
@@ -739,7 +728,7 @@ const NewReceipt = () => {
                   <ChevronRight className={`w-5 h-5 ${isCompleted ? 'text-emerald-400' : 'text-slate-300'}`} />
                 </div>
               )}
-            </React.Fragment>
+            </div>
           );
         })}
       </div>
@@ -752,98 +741,134 @@ const NewReceipt = () => {
   const renderClientTab = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       {/* Client Selection Card */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-6">
+        {/* ── Header ── */}
+        <div className="bg-[#115e59] border-b border-teal-700/50 p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-100 flex items-center justify-center">
-              <User className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('selectClient')}</h3>
-              <p className="text-xs sm:text-sm text-slate-500">{t('chooseExistingClient')}</p>
+              <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight leading-none mb-1">{t('selectClient')}</h3>
+              <p className="text-white/70 text-xs sm:text-sm font-medium uppercase tracking-wide">{t('chooseExistingClient')}</p>
             </div>
           </div>
         </div>
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6 p-4 sm:p-6 bg-teal-50/30 border-b border-teal-100 backdrop-blur-sm">
+            <div className="flex-1 relative">
               <Input
                 placeholder={t('searchByNameOrPhone')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 sm:h-12 rounded-xl border-slate-200 focus:border-teal-400 focus:ring-teal-400/20 text-base"
+                className="h-11 sm:h-12 rounded-xl border-teal-200 bg-white pl-10 focus:border-teal-500 focus:ring-teal-500/20 text-base"
               />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-teal-500" />
             </div>
             <Button
               onClick={() => setIsAddClientOpen(true)}
-              className="h-11 sm:h-12 px-5 sm:px-6 rounded-xl bg-teal-600 hover:bg-teal-500 font-bold transition-all hover:scale-105 active:scale-95 text-sm sm:text-base shrink-0"
+              className="h-11 sm:h-12 px-5 sm:px-8 rounded-xl bg-teal-600 hover:bg-teal-500 font-black text-white uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/20"
             >
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               {t('newClient')}
             </Button>
           </div>
 
-          <div className="space-y-2 sm:space-y-3 max-h-[350px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
-            {filteredClients.slice(0, 8).map(client => (
-              <button
-                key={client.id}
-                className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all duration-200 cursor-pointer ${selectedClient === client.id
-                  ? 'border-teal-500 bg-teal-50 shadow-md shadow-teal-500/10'
-                  : 'border-transparent bg-slate-50 hover:border-teal-200 hover:bg-teal-50/30 hover:shadow-sm'
-                  }`}
-                onClick={() => handleClientSelect(client.id)}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${selectedClient === client.id ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-500'
-                      }`}>
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-semibold text-sm sm:text-base text-slate-900 truncate">{client.name}</h4>
-                      {client.phone && (
-                        <div className="flex items-center gap-1 text-xs sm:text-sm text-slate-500">
-                          <Phone className="w-3 h-3" />
-                          <span>{client.phone}</span>
+          <div className="space-y-3 max-h-[350px] sm:max-h-[400px] overflow-y-auto custom-scrollbar pr-1 p-4 sm:p-6">
+            {/* ── Selected Client (Always Visible) ── */}
+            {selectedClient && clients.find(c => c.id === selectedClient) && (
+              <div className="mb-4">
+                <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 px-1">Selected Client</div>
+                {(() => {
+                  const client = clients.find(c => c.id === selectedClient);
+                  if (!client) return null;
+                  return (
+                    <button
+                      key={`selected-${client.id}`}
+                      className="w-full text-left p-4 rounded-2xl border-2 border-blue-400 bg-blue-50/50 shadow-md shadow-blue-50 transition-all duration-300 cursor-pointer"
+                      onClick={() => handleClientSelect(client.id)}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all bg-blue-500 text-white">
+                            <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-semibold text-sm sm:text-base text-slate-900 truncate">{client.name}</h4>
+                            {client.phone && (
+                              <div className="flex items-center gap-1 text-xs sm:text-sm text-slate-500">
+                                <Phone className="w-3 h-3" />
+                                <span>{client.phone}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
+                        <div className="h-8 w-8 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/30">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })()}
+                <div className="mt-4 border-b border-slate-100" />
+              </div>
+            )}
+
+            {/* ── Search Results ── */}
+            {filteredClients
+              .filter(client => client.id !== selectedClient)
+              .slice(0, 8).map(client => (
+                <button
+                  key={client.id}
+                  className="w-full text-left p-4 rounded-2xl border-2 border-slate-100 bg-white hover:border-teal-200 hover:bg-teal-50/30 hover:shadow-sm transition-all duration-300 cursor-pointer"
+                  onClick={() => handleClientSelect(client.id)}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all bg-slate-100 text-slate-400">
+                        <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-sm sm:text-base text-slate-900 truncate">{client.name}</h4>
+                        {client.phone && (
+                          <div className="flex items-center gap-1 text-xs sm:text-sm text-slate-500">
+                            <Phone className="w-3 h-3" />
+                            <span>{client.phone}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {selectedClient === client.id && (
-                    <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0">
-                      <Check className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
           </div>
         </div>
       </div>
 
       {/* Prescription Card */}
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+        {/* ── Header ── */}
+        <div className="bg-[#115e59] border-b border-teal-700/50 p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-              <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-700" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+              <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('prescriptionDetails')}</h3>
-              <p className="text-xs sm:text-sm text-slate-500">{t('enterUpdatePrescription')}</p>
+              <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight leading-none mb-1">{t('prescriptionDetails')}</h3>
+              <p className="text-white/70 text-xs sm:text-sm font-medium uppercase tracking-wide">{t('enterUpdatePrescription')}</p>
             </div>
           </div>
         </div>
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+        <div className="p-4 sm:p-6 space-y-5">
           {/* Right Eye */}
-          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-blue-50/70 border border-blue-100">
-            <h4 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 text-blue-900 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-blue-200/60 flex items-center justify-center"><span className="text-xs">👁️</span></div>
+          <div className="rounded-2xl p-4 sm:p-6 bg-white border-2 border-blue-400 shadow-sm shadow-blue-50">
+            <h4 className="text-sm sm:text-base font-black mb-4 text-blue-900 uppercase tracking-widest flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/20"><Eye className="h-4 w-4" /></div>
               {t('rightEye')}
             </h4>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="rightSph" className="text-xs font-semibold text-blue-800">{t('sph')}</Label>
+                <Label htmlFor="rightSph" className="text-[10px] font-black uppercase tracking-widest text-blue-700 mb-1.5 block">{t('sph')}</Label>
                 <Input
                   id="rightSph"
                   type="text"
@@ -865,11 +890,11 @@ const NewReceipt = () => {
                       return item;
                     }));
                   }}
-                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                  className="bg-slate-50 h-11 sm:h-12 rounded-xl border-blue-100 text-base font-bold text-slate-900 focus:border-blue-500 focus:ring-blue-500/20 text-center"
                 />
               </div>
               <div>
-                <Label htmlFor="rightCyl" className="text-xs font-semibold text-blue-800">{t('cyl')}</Label>
+                <Label htmlFor="rightCyl" className="text-[10px] font-black uppercase tracking-widest text-blue-700 mb-1.5 block">{t('cyl')}</Label>
                 <Input
                   id="rightCyl"
                   type="text"
@@ -891,32 +916,32 @@ const NewReceipt = () => {
                       return item;
                     }));
                   }}
-                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                  className="bg-slate-50 h-11 sm:h-12 rounded-xl border-blue-100 text-base font-bold text-slate-900 focus:border-blue-500 focus:ring-blue-500/20 text-center"
                 />
               </div>
               <div>
-                <Label htmlFor="rightAxe" className="text-xs font-semibold text-blue-800">{t('axe')}</Label>
+                <Label htmlFor="rightAxe" className="text-[10px] font-black uppercase tracking-widest text-blue-700 mb-1.5 block">{t('axe')}</Label>
                 <Input
                   id="rightAxe"
                   type="text"
                   inputMode="numeric"
                   value={rightEye.axe}
                   onChange={(e) => setRightEye({ ...rightEye, axe: e.target.value })}
-                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                  className="bg-slate-50 h-11 sm:h-12 rounded-xl border-blue-100 text-base font-bold text-slate-900 focus:border-blue-500 focus:ring-blue-500/20 text-center"
                 />
               </div>
             </div>
           </div>
 
           {/* Left Eye */}
-          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-purple-50/70 border border-purple-100">
-            <h4 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 text-purple-900 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-purple-200/60 flex items-center justify-center"><span className="text-xs">👁️</span></div>
+          <div className="rounded-2xl p-4 sm:p-6 bg-white border-2 border-purple-400 shadow-sm shadow-purple-50">
+            <h4 className="text-sm sm:text-base font-black mb-4 text-purple-900 uppercase tracking-widest flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-lg shadow-purple-500/20"><Eye className="h-4 w-4" /></div>
               {t('leftEye')}
             </h4>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="leftSph" className="text-xs font-semibold text-purple-800">{t('sph')}</Label>
+                <Label htmlFor="leftSph" className="text-[10px] font-black uppercase tracking-widest text-purple-700 mb-1.5 block">{t('sph')}</Label>
                 <Input
                   id="leftSph"
                   type="text"
@@ -938,11 +963,11 @@ const NewReceipt = () => {
                       return item;
                     }));
                   }}
-                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                  className="bg-slate-50 h-11 sm:h-12 rounded-xl border-purple-100 text-base font-bold text-slate-900 focus:border-purple-500 focus:ring-purple-500/20 text-center"
                 />
               </div>
               <div>
-                <Label htmlFor="leftCyl" className="text-xs font-semibold text-purple-800">{t('cyl')}</Label>
+                <Label htmlFor="leftCyl" className="text-[10px] font-black uppercase tracking-widest text-purple-700 mb-1.5 block">{t('cyl')}</Label>
                 <Input
                   id="leftCyl"
                   type="text"
@@ -964,11 +989,11 @@ const NewReceipt = () => {
                       return item;
                     }));
                   }}
-                  className="bg-white h-10 sm:h-11 rounded-lg text-base"
+                  className="bg-slate-50 h-11 sm:h-12 rounded-xl border-purple-100 text-base font-bold text-slate-900 focus:border-purple-500 focus:ring-purple-500/20 text-center"
                 />
               </div>
               <div>
-                <Label htmlFor="leftAxe" className="text-xs font-semibold text-purple-800">{t('axe')}</Label>
+                <Label htmlFor="leftAxe" className="text-[10px] font-black uppercase tracking-widest text-purple-700 mb-1.5 block">{t('axe')}</Label>
                 <Input
                   id="leftAxe"
                   type="text"
@@ -982,16 +1007,18 @@ const NewReceipt = () => {
           </div>
 
           {/* Add */}
-          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 bg-emerald-50/70 border border-emerald-100">
-            <Label htmlFor="add" className="text-xs font-semibold text-emerald-800">{t('add')}</Label>
-            <Input
-              id="add"
-              type="text"
-              value={add}
-              onChange={(e) => setAdd(e.target.value)}
-              placeholder={t('enterAddValue')}
-              className="bg-white h-10 sm:h-11 rounded-lg text-base mt-1"
-            />
+          <div className="rounded-2xl p-4 sm:p-6 bg-white border-2 border-emerald-400 shadow-sm shadow-emerald-50">
+            <Label htmlFor="add" className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mb-2 block">{t('add')}</Label>
+            <div className="relative">
+              <Input
+                id="add"
+                type="text"
+                value={add}
+                onChange={(e) => setAdd(e.target.value)}
+                placeholder={t('enterAddValue')}
+                className="bg-slate-50 h-11 sm:h-12 rounded-xl border-emerald-100 text-base font-bold text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1000,7 +1027,7 @@ const NewReceipt = () => {
 
   const renderOrderTab = () => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24 md:pb-6">
         <OrderItems
           items={items}
           orderType={orderType}
@@ -1025,14 +1052,6 @@ const NewReceipt = () => {
         />
 
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('paymentDetails')}</h3>
-            </div>
-          </div>
           <div className="p-4 sm:p-6">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <OrderSummary
@@ -1062,12 +1081,21 @@ const NewReceipt = () => {
                 setTax={setTax}
                 setTaxIndicator={setTaxIndicator}
                 setAdvancePayment={setAdvancePayment}
-                setBalance={setBalance}
-                updatePaymentStatus={updatePaymentStatus}
               />
             </div>
           </div>
         </div>
+
+        {isMobile && (
+          <div className="flex justify-center mt-10">
+            <Button
+              onClick={() => paginate(1)}
+              className="w-16 h-16 rounded-full bg-teal-600 hover:bg-teal-500 shadow-xl shadow-teal-600/20 border-2 border-white flex items-center justify-center transition-all scale-100 active:scale-95"
+            >
+              <ArrowRight className="h-8 w-8 text-white" />
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
@@ -1083,21 +1111,30 @@ const NewReceipt = () => {
 
     return (
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="px-5 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+        {/* ── Header ── */}
+        <div className="bg-[#115e59] border-b border-teal-700/50 p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('receiptSummary')}</h3>
+            <div>
+              <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight leading-none mb-1">{t('receiptSummary')}</h3>
+              <p className="text-white/70 text-xs sm:text-sm font-medium uppercase tracking-wide">{t('reviewDetailsBeforeSaving') || 'Review details before saving'}</p>
+            </div>
           </div>
         </div>
         <div className="p-4 sm:p-6">
           {orderType === 'Unspecified' && (
-            <Alert className="mb-4 sm:mb-6 border-red-200 bg-red-50 rounded-xl">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-700">
-                <strong>{t('orderTypeRequired')}:</strong> {t('orderTypeRequiredDesc')}
-              </AlertDescription>
+            <Alert className="mb-6 border-red-200 bg-red-50 rounded-2xl p-4 shadow-sm animate-in zoom-in-95 duration-300">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h4 className="font-black text-red-900 uppercase tracking-wider text-xs">{t('orderTypeRequired')}</h4>
+                  <p className="text-red-700 text-sm">{t('orderTypeRequiredDesc')}</p>
+                </div>
+              </div>
             </Alert>
           )}
           {outOfStockItems.length > 0 && (
@@ -1387,7 +1424,7 @@ const NewReceipt = () => {
     <div className="w-full min-h-screen bg-slate-50/50 pb-20 overflow-x-hidden animate-in fade-in duration-700">
       {/* Hero Banner */}
       <div className="w-full px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 relative z-10">
-        <div className="w-full bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600 text-white rounded-[24px] sm:rounded-[32px] py-6 sm:py-8 px-5 sm:px-8 md:px-10 shadow-xl relative overflow-hidden mb-6 sm:mb-8">
+        <div className="w-full bg-[#115e59] text-white rounded-[24px] sm:rounded-[32px] py-6 sm:py-8 px-5 sm:px-8 md:px-10 shadow-xl relative overflow-hidden mb-6 sm:mb-8">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl opacity-50" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full -ml-40 -mb-40 blur-3xl" />
           <div className="w-full relative z-10">
@@ -1491,7 +1528,7 @@ const NewReceipt = () => {
       </AlertDialog>
 
 
-      <AddClientDialog
+      <ClientDialog
         isOpen={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
         onClientAdded={handleClientAdded}

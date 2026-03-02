@@ -35,11 +35,9 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { user, subscription, sessionRole, promoteToAdmin, signOut, exitAdminSession } = useAuth();
+  const { user, subscription, userRole, signOut } = useAuth();
   const { toast } = useToast();
   const [referralDialogOpen, setReferralDialogOpen] = useState(false);
-  const [adminAccessDialogOpen, setAdminAccessDialogOpen] = useState(false);
-  const [accessCodeInput, setAccessCodeInput] = useState('');
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
   const { t } = useLanguage();
   const isMobile = useIsMobile();
@@ -51,9 +49,9 @@ const Layout = ({ children }: LayoutProps) => {
       if (!user) return [];
 
       const [clientsRes, receiptsRes, purchasesRes] = await Promise.all([
-        supabase.from('clients').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
-        supabase.from('receipts').select('*, clients(name)').eq('user_id', user.id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
-        supabase.from('purchases').select('*, supplier:supplier_id(name)').eq('user_id', user.id).eq('is_deleted', false).order('created_at', { ascending: false }).limit(5)
+        supabase.from('clients').select('*').order('created_at', { ascending: false }).limit(5),
+        supabase.from('receipts').select('*, clients(name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5),
+        supabase.from('purchases').select('*, supplier:supplier_id(name)').eq('is_deleted', false).order('created_at', { ascending: false }).limit(5)
       ]);
 
       const activity = [
@@ -145,33 +143,12 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
-  const handlePromoteToAdmin = async () => {
-    if (!accessCodeInput.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter an access code",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const result = await promoteToAdmin(accessCodeInput.trim().toUpperCase());
-
-    toast({
-      title: result.success ? "Success" : "Error",
-      description: result.message,
-      variant: result.success ? "default" : "destructive",
-    });
-
-    if (result.success) {
-      setAccessCodeInput('');
-      setAdminAccessDialogOpen(false);
-    }
-  };
+  const isOwner = userRole === 'owner';
+  const roleLabel = isOwner ? t('owner') || 'Owner' : t('employee') || 'Employee';
 
   return (
     <div className="flex min-h-screen bg-[#F7FAFC]">
-      <MainNav onAdminAccessClick={() => setAdminAccessDialogOpen(true)} />
+      <MainNav />
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-20' : 'ml-72'
           }`}
@@ -190,13 +167,13 @@ const Layout = ({ children }: LayoutProps) => {
                     {currentDate}
                   </div>
                   <Badge
-                    variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
-                    className={`text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-0.5 rounded-full shadow-sm ${sessionRole === 'Admin'
+                    variant={isOwner ? 'default' : 'secondary'}
+                    className={`text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-0.5 rounded-full shadow-sm ${isOwner
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none'
                       : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-none'
                       }`}
                   >
-                    {sessionRole}
+                    {roleLabel}
                   </Badge>
                 </div>
               </div>
@@ -205,53 +182,22 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="flex items-center gap-4">
               {/* Controls Group */}
               <div className="flex items-center bg-slate-100/50 p-1 rounded-2xl border border-slate-200/50 backdrop-blur-sm">
-                {sessionRole === 'Store Staff' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setAdminAccessDialogOpen(true)}
-                    className="h-9 bg-white text-teal-700 hover:bg-teal-50 hover:text-teal-800 px-4 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all active:scale-95"
-                  >
-                    <Shield className="h-3.5 w-3.5 mr-2" />
-                    {t('accessAsAdmin') || 'Accès Admin'}
-                  </Button>
-                )}
-
-                {sessionRole === 'Admin' && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      exitAdminSession();
-                      toast({
-                        title: "Session Updated",
-                        description: "You are now signed out of the admin session",
-                      });
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 100);
-                    }}
-                    className="h-9 bg-white text-red-600 hover:bg-red-50 px-4 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm transition-all active:scale-95 border border-red-100"
-                  >
-                    Exit Admin Session
-                  </Button>
-                )}
-
-                <div className="w-px h-4 bg-slate-200 mx-1" />
                 <LanguageToggle />
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setReferralDialogOpen(true)}
-                  className="h-10 w-10 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"
-                  title="Your referral code"
-                >
-                  <Users className="h-5 w-5" />
-                </Button>
+                {isOwner && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setReferralDialogOpen(true)}
+                    className="h-10 w-10 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"
+                    title="Your referral code"
+                  >
+                    <Users className="h-5 w-5" />
+                  </Button>
+                )}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -340,19 +286,21 @@ const Layout = ({ children }: LayoutProps) => {
                       <p className="text-xs font-bold text-slate-900 truncate">{user?.email}</p>
                     </div>
 
-                    <Link to="/subscriptions">
-                      <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
-                        <Bell className="h-4 w-4" />
-                        <span>{t('subscriptions')}</span>
-                      </DropdownMenuItem>
-                    </Link>
+                    {isOwner && (
+                      <Link to="/subscriptions">
+                        <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
+                          <Bell className="h-4 w-4" />
+                          <span>{t('subscriptions')}</span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
 
-                    {sessionRole === 'Admin' && (
+                    {isOwner && (
                       <>
                         <Link to="/access">
                           <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
-                            <Shield className="h-4 w-4" />
-                            <span>{t('access')}</span>
+                            <Users className="h-4 w-4" />
+                            <span>{t('teamManagement') || 'Team Management'}</span>
                           </DropdownMenuItem>
                         </Link>
                         <Link to="/optician-settings">
@@ -368,6 +316,15 @@ const Layout = ({ children }: LayoutProps) => {
                           </DropdownMenuItem>
                         </Link>
                       </>
+                    )}
+
+                    {!isOwner && (
+                      <Link to="/my-status">
+                        <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
+                          <Shield className="h-4 w-4" />
+                          <span>{t('myStatus') || 'My Status'}</span>
+                        </DropdownMenuItem>
+                      </Link>
                     )}
 
                     <div className="h-px bg-slate-100 my-1" />
@@ -399,27 +356,29 @@ const Layout = ({ children }: LayoutProps) => {
                     {currentDate}
                   </div>
                   <Badge
-                    variant={sessionRole === 'Admin' ? 'default' : 'secondary'}
-                    className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-sm ${sessionRole === 'Admin'
+                    variant={isOwner ? 'default' : 'secondary'}
+                    className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-sm ${isOwner
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
                       : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                       }`}
                   >
-                    {sessionRole}
+                    {roleLabel}
                   </Badge>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center justify-start gap-2 pt-1 border-t border-slate-100/50">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setReferralDialogOpen(true)}
-                className="h-9 w-9 rounded-lg text-slate-400"
-              >
-                <Users className="h-4 w-4" />
-              </Button>
+              {isOwner && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setReferralDialogOpen(true)}
+                  className="h-9 w-9 rounded-lg text-slate-400"
+                >
+                  <Users className="h-4 w-4" />
+                </Button>
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -472,19 +431,21 @@ const Layout = ({ children }: LayoutProps) => {
                     <p className="text-xs font-bold text-slate-900 truncate">{user?.email}</p>
                   </div>
 
-                  <Link to="/subscriptions">
-                    <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
-                      <Bell className="h-4 w-4" />
-                      <span>{t('subscriptions')}</span>
-                    </DropdownMenuItem>
-                  </Link>
+                  {isOwner && (
+                    <Link to="/subscriptions">
+                      <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
+                        <Bell className="h-4 w-4" />
+                        <span>{t('subscriptions')}</span>
+                      </DropdownMenuItem>
+                    </Link>
+                  )}
 
-                  {sessionRole === 'Admin' && (
+                  {isOwner && (
                     <>
                       <Link to="/access">
                         <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
-                          <Shield className="h-4 w-4" />
-                          <span>{t('access')}</span>
+                          <Users className="h-4 w-4" />
+                          <span>{t('teamManagement') || 'Team Management'}</span>
                         </DropdownMenuItem>
                       </Link>
                       <Link to="/optician-settings">
@@ -500,6 +461,15 @@ const Layout = ({ children }: LayoutProps) => {
                         </DropdownMenuItem>
                       </Link>
                     </>
+                  )}
+
+                  {!isOwner && (
+                    <Link to="/my-status">
+                      <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        <span>{t('myStatus') || 'My Status'}</span>
+                      </DropdownMenuItem>
+                    </Link>
                   )}
 
                   <div className="h-px bg-slate-100 my-1" />
@@ -545,51 +515,6 @@ const Layout = ({ children }: LayoutProps) => {
                 <Copy className="h-4 w-4" />
                 Copy Referral Code
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={adminAccessDialogOpen} onOpenChange={setAdminAccessDialogOpen}>
-          <DialogContent className="sm:max-w-md rounded-[32px] border-slate-200/50 shadow-3xl bg-white/95 backdrop-blur-xl p-8 overflow-hidden">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-rose-500/10 rounded-full -ml-16 -mt-16 blur-2xl" />
-            <DialogHeader className="relative z-10">
-              <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 border border-rose-100">
-                <Shield className="h-6 w-6 text-rose-500" />
-              </div>
-              <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">
-                {t('accessAsAdmin') || 'Accès Admin'}
-              </DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
-                {t('enterAccessCodeToElevate') || 'Entrez votre code d\'accès pour élever vos privilèges Admin pour cette session.'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="relative z-10 space-y-6 mt-8">
-              <div className="space-y-3">
-                <Label htmlFor="admin-access-code" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('accessCode') || 'Code d\'Accès'}</Label>
-                <Input
-                  id="admin-access-code"
-                  placeholder="• • • • •"
-                  value={accessCodeInput}
-                  onChange={(e) => setAccessCodeInput(e.target.value.toUpperCase())}
-                  maxLength={5}
-                  className="h-16 text-center text-3xl font-black tracking-[0.5em] bg-slate-50 border-slate-200 rounded-2xl focus:ring-rose-500 focus:border-rose-500 transition-all placeholder:text-slate-200"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="ghost"
-                  className="flex-1 h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-50"
-                  onClick={() => setAdminAccessDialogOpen(false)}
-                >
-                  {t('cancel') || 'Annuler'}
-                </Button>
-                <Button
-                  className="flex-1 h-12 rounded-xl bg-teal-600 text-white hover:bg-teal-700 shadow-lg shadow-teal-600/20 font-black uppercase tracking-widest text-xs transition-all active:scale-95"
-                  onClick={handlePromoteToAdmin}
-                >
-                  {t('elevateAccess') || 'Élever l\'Accès'}
-                </Button>
-              </div>
             </div>
           </DialogContent>
         </Dialog>

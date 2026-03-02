@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Permissions cache
 interface PermissionsCache {
@@ -38,6 +39,8 @@ const MAX_CALLS_PER_WINDOW = 3; // 3 calls per 5 minutes
 type SubscriptionStatus = 'active' | 'suspended' | 'cancelled' | 'inactive' | 'expired' |
   'Active' | 'Suspended' | 'Cancelled' | 'inActive' | 'Expired';
 
+type UserRole = 'owner' | 'employee';
+
 interface UserSubscription {
   subscription_status: SubscriptionStatus;
   subscription_type: 'Trial' | 'Monthly' | 'Quarterly' | 'Lifetime';
@@ -51,6 +54,8 @@ interface UserSubscription {
   referral_code?: string;
   referred_by?: string;
   access_code?: string;
+  role?: UserRole;
+  store_id?: string;
 }
 
 interface UserPermissions {
@@ -61,6 +66,7 @@ interface UserPermissions {
   can_manage_purchases: boolean;
   can_access_dashboard: boolean;
   can_manage_invoices: boolean;
+  can_access_appointments: boolean;
 }
 
 interface AuthContextType {
@@ -68,13 +74,11 @@ interface AuthContextType {
   user: User | null;
   subscription: UserSubscription | null;
   permissions: UserPermissions | null;
-  sessionRole: 'Admin' | 'Store Staff';
+  userRole: UserRole;
+  storeId: string | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
   refreshSubscription: (force?: boolean) => Promise<void>;
-  promoteToAdmin: (accessCode: string) => Promise<{ success: boolean; message: string }>;
-  setSessionRole: (role: 'Admin' | 'Store Staff') => void;
-  exitAdminSession: () => void;
   invalidatePermissionsCache: (userId?: string) => void;
 }
 
@@ -85,13 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [permissions, setPermissions] = useState<UserPermissions | null>(null);
-  const [sessionRole, setSessionRole] = useState<'Admin' | 'Store Staff'>(
-    (typeof window !== 'undefined' && localStorage.getItem('sessionRole')) as 'Admin' | 'Store Staff' || 'Store Staff'
-  );
-  const sessionRoleRef = useRef(sessionRole);
+  const [userRole, setUserRole] = useState<UserRole>('employee');
+  const [storeId, setStoreId] = useState<string | null>(null);
+  const userRoleRef = useRef(userRole);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
-  const [lastAccessCodeAttempt, setLastAccessCodeAttempt] = useState<number>(0);
+  const queryClient = useQueryClient();
+  const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+  const userIdRef = useRef<string | null>(null);
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
@@ -120,6 +125,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         delete permissionsCache[key];
       });
     }
+  };
+
+  const clearAllCaches = () => {
+    // Clear permissions cache
+    invalidatePermissionsCache();
+
+    // Clear subscription cache
+    Object.keys(subscriptionCache).forEach(key => {
+      delete subscriptionCache[key];
+    });
+
+    // Clear rate limit tracker
+    Object.keys(rateLimitTracker).forEach(key => {
+      delete rateLimitTracker[key];
+    });
   };
 
   // Rate limiting check for subscription API calls
@@ -163,12 +183,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check if we have cached data and it's still fresh (unless forced)
     if (!force && getCurrentSubscription() && now - lastRefreshTime < REFRESH_INTERVAL) {
-      return; // Skip if recently fetched and not forced
+      return { role: userRoleRef.current, userStoreId: null }; // Skip if recently fetched
     }
 
-    // Apply rate limiting for API calls
-    if (!canMakeSubscriptionCall(userId)) {
-      return; // Skip API call due to rate limiting
+    // Apply rate limiting for API calls (skip if forced)
+    if (!force && !canMakeSubscriptionCall(userId)) {
+      return { role: userRoleRef.current, userStoreId: null }; // Skip API call
     }
 
     try {
@@ -179,40 +199,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       rateLimitTracker[userId].lastCall = now;
       rateLimitTracker[userId].callsInWindow.push(now);
 
-      const { data: subscriptionData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
+      // 1. Get user role and store directly from helper function
+      const { data: storeRoleData, error: storeRoleError } = await supabase.rpc('get_user_store_role');
+      if (storeRoleError) throw storeRoleError;
 
-      if (subError) throw subError;
+      const role = (storeRoleData?.[0]?.user_role as UserRole) || 'owner';
+      const userStoreId = storeRoleData?.[0]?.store_id || null;
 
-      setSubscription(subscriptionData);
+      setUserRole(role);
+      userRoleRef.current = role;
+      setStoreId(userStoreId);
+
+      // 2. Fetch the corresponding subscription based on role
+      let subscriptionQuery = supabase.from('subscriptions').select('*');
+
+      if (role === 'employee' && userStoreId) {
+        subscriptionQuery = subscriptionQuery.eq('store_id', userStoreId).eq('role', 'owner');
+      } else {
+        subscriptionQuery = subscriptionQuery.eq('user_id', userId);
+      }
+
+      const { data: subscriptionData, error: subError } = await subscriptionQuery.single();
+
+      if (subError && role === 'owner') {
+        throw subError; // Owners must have a subscription, employees might not if owner data is broken
+      }
+
+      if (subscriptionData) {
+        setSubscription(subscriptionData as UserSubscription);
+      } else {
+        setSubscription(null);
+      }
+
       setLastRefreshTime(now);
+
+      return { role, userStoreId };
     } catch (error) {
       console.error('Error fetching subscription:', error);
       setSubscription(null);
+      return { role: userRoleRef.current, userStoreId: null };
     }
   };
 
-  // Real-time subscription handler
-  const setupRealtimeSubscription = (userId: string) => {
+  // Real-time subscription and permissions handler
+  const setupRealtimeSubscription = (userId: string, role: string, storeId: string | null) => {
+    let subFilterString = `user_id=eq.${userId}`;
+    if (role === 'employee' && storeId) {
+      subFilterString = `store_id=eq.${storeId}`;
+    }
+
     const channel = supabase
-      .channel(`subscription-${userId}`)
+      .channel(`user-data-${userId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'subscriptions',
+          filter: subFilterString,
+        },
+        (payload) => {
+          if (role === 'employee' && (payload.new as any)?.role !== 'owner') {
+            return; // Ignore updates to any non-owner subscription
+          }
+
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const newData = payload.new as UserSubscription;
+            setSubscription(newData);
+            setLastRefreshTime(Date.now());
+          } else if (payload.eventType === 'DELETE') {
+            setSubscription(null);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'permissions',
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            setSubscription(payload.new as UserSubscription);
-            setLastRefreshTime(Date.now());
-          } else if (payload.eventType === 'DELETE') {
-            setSubscription(null);
+            const newPerms = payload.new as UserPermissions;
+            setPermissions(newPerms);
+            setCachedPermissions(userId, newPerms);
           }
         }
       )
@@ -221,10 +293,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return channel;
   };
 
-  const updatePermissionsForRole = (userId: string, role: 'Admin' | 'Store Staff') => {
-    if (role === 'Admin') {
-      // Admin gets all permissions immediately
-      const adminPermissions = {
+  const updatePermissionsForRole = (userId: string, role: UserRole) => {
+    if (role === 'owner') {
+      // Owner gets all permissions immediately
+      const ownerPermissions = {
         can_manage_products: true,
         can_manage_clients: true,
         can_manage_receipts: true,
@@ -232,18 +304,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         can_manage_purchases: true,
         can_access_dashboard: true,
         can_manage_invoices: true,
+        can_access_appointments: true,
       };
-      setPermissions(adminPermissions);
-      setCachedPermissions(userId, adminPermissions);
+      setPermissions(ownerPermissions);
+      setCachedPermissions(userId, ownerPermissions);
     } else {
-      // Check cache first for Store Staff
+      // Check cache first for employees
       const cachedPermissions = getCachedPermissions(userId);
       if (cachedPermissions) {
         setPermissions(cachedPermissions);
         return;
       }
 
-      // Fetch actual permissions for Store Staff
+      // Fetch actual permissions for employee
       supabase
         .from('permissions')
         .select('*')
@@ -252,7 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .then(({ data: permissionsData, error: permError }) => {
           if (permError) {
             console.error('Error fetching permissions:', permError);
-            // Set default Store Staff permissions if none exist
+            // Set default employee permissions if none exist
             const defaultPermissions = {
               can_manage_products: true,
               can_manage_clients: true,
@@ -261,6 +334,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               can_manage_purchases: false,
               can_access_dashboard: true,
               can_manage_invoices: true,
+              can_access_appointments: true,
             };
             setPermissions(defaultPermissions);
             setCachedPermissions(userId, defaultPermissions);
@@ -294,53 +368,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('sessionRole');
-    setSessionRole('Store Staff'); // Reset to default role
-    invalidatePermissionsCache(); // Clear entire cache on sign out
-  };
-
-  const promoteToAdmin = async (accessCode: string) => {
     try {
-      // Anti-spam protection: 10 seconds cooldown
-      const now = Date.now();
-      const timeSinceLastAttempt = now - lastAccessCodeAttempt;
-      const cooldownPeriod = 10 * 1000; // 10 seconds
-
-      if (timeSinceLastAttempt < cooldownPeriod) {
-        const remainingTime = Math.ceil((cooldownPeriod - timeSinceLastAttempt) / 1000);
-        return {
-          success: false,
-          message: `Please wait ${remainingTime} seconds before trying again`
-        };
-      }
-
-      setLastAccessCodeAttempt(now);
-
-      const { data, error } = await supabase.rpc('check_access_code', {
-        input_access_code: accessCode
-      });
-
-      if (error) throw error;
-
-      if (data) {
-        // rpc returns an array for TABLE return types
-        const results = data as unknown as { valid: boolean; message: string }[];
-        if (results.length > 0) {
-          const result = results[0];
-          if (result.valid) {
-            updateSessionRole('Admin');
-            return { success: true, message: 'Successfully elevated to Admin for this session' };
-          } else {
-            return { success: false, message: result.message };
-          }
-        }
-      }
-
-      return { success: false, message: 'Unknown error occurred' };
+      await supabase.auth.signOut();
     } catch (error) {
-      console.error('Error elevating to admin:', error);
-      return { success: false, message: 'Failed to elevate to admin' };
+      console.error('Error during sign out:', error);
+    } finally {
+      // Clear all React state immediately
+      setSession(null);
+      setUser(null);
+      setSubscription(null);
+      setPermissions(null);
+      setUserRole('employee');
+      setStoreId(null);
+      setLastRefreshTime(0);
+      userRoleRef.current = 'employee';
+
+      // Clean up real-time subscription immediately
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
+      }
+
+      // Clear all internal caches and rate limits
+      clearAllCaches();
+
+      // Clear TanStack Query cache
+      queryClient.clear();
     }
   };
 
@@ -354,30 +407,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(sessionCheckTimeout);
       }
 
-      sessionCheckTimeout = setTimeout(() => {
+      sessionCheckTimeout = setTimeout(async () => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
+          let role = userRoleRef.current;
+          let storeId: string | null = null;
+
+          // Only force a fetch if we don't have a user yet, or the user identity has actually changed
+          const isUserChanged = !userIdRef.current || userIdRef.current !== currentSession.user.id;
+          const shouldForceFetch = forceSubscriptionFetch || isUserChanged;
+
+          userIdRef.current = currentSession.user.id;
+
           // Only fetch subscription on initial load or force
-          if (isInitialCheck || forceSubscriptionFetch) {
-            fetchSubscription(currentSession.user.id, false);
+          if (isInitialCheck || shouldForceFetch) {
+            const userInfo = await fetchSubscription(currentSession.user.id, shouldForceFetch);
+            role = userInfo?.role || role;
+            storeId = userInfo?.userStoreId || null;
           }
-          updatePermissionsForRole(currentSession.user.id, sessionRoleRef.current);
+
+          updatePermissionsForRole(currentSession.user.id, role as UserRole);
 
           // Set up real-time subscription for existing session if not already set up
-          if (!realtimeChannel) {
-            realtimeChannel = setupRealtimeSubscription(currentSession.user.id);
+          if (!realtimeChannelRef.current) {
+            realtimeChannelRef.current = setupRealtimeSubscription(currentSession.user.id, role, storeId);
           }
         } else {
           setSubscription(null);
           setPermissions(null);
-          setSessionRole('Store Staff');
+          setUserRole('employee');
+          setStoreId(null);
 
           // Clean up real-time subscription when logged out
-          if (realtimeChannel) {
-            supabase.removeChannel(realtimeChannel);
-            realtimeChannel = null;
+          if (realtimeChannelRef.current) {
+            supabase.removeChannel(realtimeChannelRef.current);
+            realtimeChannelRef.current = null;
           }
         }
         setIsLoading(false);
@@ -388,16 +454,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       // Clean up existing real-time subscription on auth change
-      if (realtimeChannel && event === 'SIGNED_OUT') {
-        await supabase.removeChannel(realtimeChannel);
-        realtimeChannel = null;
+      if (realtimeChannelRef.current && event === 'SIGNED_OUT') {
+        await supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
       }
 
       // Only handle specific auth events that actually require action
       if (event === 'SIGNED_IN') {
-        debouncedSessionCheck(currentSession, true, true); // Force subscription fetch for new sign-in
+        // Only force if identity changed to avoid focus-refresh spam
+        const isNewIdentity = !userIdRef.current || userIdRef.current !== currentSession?.user?.id;
+        debouncedSessionCheck(currentSession, true, isNewIdentity);
       } else if (event === 'SIGNED_OUT') {
-        debouncedSessionCheck(currentSession, false, false); // Don't fetch subscription for sign-out
+        userIdRef.current = null;
+        debouncedSessionCheck(currentSession, false, false);
       } else if (event === 'TOKEN_REFRESHED') {
         // For token refresh, just update session without fetching subscription
         setSession(currentSession);
@@ -416,8 +485,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       authSubscription.unsubscribe();
-      if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
       }
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
@@ -425,24 +494,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []); // Empty dependency array to run only once
 
-  // Handle instant permission updates when sessionRole changes
+  // Handle instant permission updates when userRole changes
   useEffect(() => {
-    sessionRoleRef.current = sessionRole;
+    userRoleRef.current = userRole;
     if (user && !isLoading) {
-      updatePermissionsForRole(user.id, sessionRole);
+      updatePermissionsForRole(user.id, userRole);
     }
-  }, [sessionRole, user, isLoading]);
-
-  const updateSessionRole = (role: 'Admin' | 'Store Staff') => {
-    setSessionRole(role);
-    sessionRoleRef.current = role;
-    localStorage.setItem('sessionRole', role);
-  };
-
-  const exitAdminSession = () => {
-    setSessionRole('Store Staff');
-    localStorage.removeItem('sessionRole');
-  };
+  }, [userRole, user, isLoading]);
 
   return (
     <AuthContext.Provider value={{
@@ -450,13 +508,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       subscription,
       permissions,
-      sessionRole,
+      userRole,
+      storeId,
       isLoading,
       signOut,
       refreshSubscription,
-      promoteToAdmin,
-      setSessionRole: updateSessionRole,
-      exitAdminSession,
       invalidatePermissionsCache
     }}>
       {children}

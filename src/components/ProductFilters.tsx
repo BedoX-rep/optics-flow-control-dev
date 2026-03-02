@@ -36,10 +36,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Category Filter */}
       <Select value={filters.category || "all_categories"} onValueChange={v => onChange({ category: v })}>
         <SelectTrigger className={cn(
-          "h-12 w-[130px] sm:w-[150px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
+          "h-12 w-[130px] sm:w-[150px] border shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
           filters.category !== 'all_categories'
             ? "bg-teal-50 text-teal-700 border-teal-200 shadow-teal-100/50"
-            : "bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-md text-slate-600"
+            : "bg-white border-teal-100 hover:border-teal-200 hover:shadow-md text-slate-600"
         )}>
           <div className="flex items-center gap-2 truncate">
             <Glasses className={cn("h-4 w-4 flex-shrink-0", filters.category !== 'all_categories' ? "text-teal-600" : "text-slate-400")} />
@@ -69,10 +69,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Index Filter */}
       <Select value={filters.index || "all_indexes"} onValueChange={v => onChange({ index: v })}>
         <SelectTrigger className={cn(
-          "h-12 w-[110px] sm:w-[130px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
+          "h-12 w-[110px] sm:w-[130px] border shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
           filters.index !== 'all_indexes'
             ? "bg-indigo-50 text-indigo-700 border-indigo-200 shadow-indigo-100/50"
-            : "bg-slate-50/50 hover:bg-white hover:border-indigo-200 hover:shadow-md text-slate-600"
+            : "bg-white border-indigo-100 hover:border-indigo-200 hover:shadow-md text-slate-600"
         )}>
           <div className="flex items-center gap-2 truncate">
             <Album className={cn("h-4 w-4 flex-shrink-0", filters.index !== 'all_indexes' ? "text-indigo-600" : "text-slate-400")} />
@@ -102,10 +102,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Treatment Filter */}
       <Select value={filters.treatment || "all_treatments"} onValueChange={v => onChange({ treatment: v })}>
         <SelectTrigger className={cn(
-          "h-12 w-[130px] sm:w-[150px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
+          "h-12 w-[130px] sm:w-[150px] border shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
           filters.treatment !== 'all_treatments'
             ? "bg-purple-50 text-purple-700 border-purple-200 shadow-purple-100/50"
-            : "bg-slate-50/50 hover:bg-white hover:border-purple-200 hover:shadow-md text-slate-600"
+            : "bg-white border-purple-100 hover:border-purple-200 hover:shadow-md text-slate-600"
         )}>
           <div className="flex items-center gap-2 truncate">
             <Filter className={cn("h-4 w-4 flex-shrink-0", filters.treatment !== 'all_treatments' ? "text-purple-600" : "text-slate-400")} />
@@ -135,10 +135,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Company Filter */}
       <Select value={filters.company || "all_companies"} onValueChange={v => onChange({ company: v })}>
         <SelectTrigger className={cn(
-          "h-12 w-[130px] sm:w-[150px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
+          "h-12 w-[130px] sm:w-[150px] border shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
           filters.company !== 'all_companies'
             ? "bg-amber-50 text-amber-700 border-amber-200 shadow-amber-100/50"
-            : "bg-slate-50/50 hover:bg-white hover:border-amber-200 hover:shadow-md text-slate-600"
+            : "bg-white border-amber-100 hover:border-amber-200 hover:shadow-md text-slate-600"
         )}>
           <div className="flex items-center gap-2 truncate">
             <Building2 className={cn("h-4 w-4 flex-shrink-0", filters.company !== 'all_companies' ? "text-amber-600" : "text-slate-400")} />
@@ -168,10 +168,10 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onChange }) =>
       {/* Stock Status Filter */}
       <Select value={filters.stock_status || "all_stock_statuses"} onValueChange={v => onChange({ stock_status: v })}>
         <SelectTrigger className={cn(
-          "h-12 w-[120px] sm:w-[140px] border border-slate-100 shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
+          "h-12 w-[120px] sm:w-[140px] border shadow-sm rounded-2xl gap-2 transition-all duration-300 min-w-0 flex-shrink-0 font-bold text-xs uppercase tracking-tight",
           filters.stock_status !== 'all_stock_statuses'
             ? "bg-rose-50 text-rose-700 border-rose-200 shadow-rose-100/50"
-            : "bg-slate-50/50 hover:bg-white hover:border-rose-200 hover:shadow-md text-slate-600"
+            : "bg-white border-rose-100 hover:border-rose-200 hover:shadow-md text-slate-600"
         )}>
           <div className="flex items-center gap-2 truncate">
             <Package className={cn("h-4 w-4 flex-shrink-0", filters.stock_status !== 'all_stock_statuses' ? "text-rose-600" : "text-slate-400")} />

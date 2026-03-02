@@ -557,6 +557,9 @@ export type Database = {
           | null
           trial_used: boolean | null
           user_id: string
+          role: string | null
+          store_id: string | null
+          access_code: string | null
         }
         Insert: {
           created_at?: string | null
@@ -579,6 +582,9 @@ export type Database = {
           | null
           trial_used?: boolean | null
           user_id: string
+          role?: string | null
+          store_id?: string | null
+          access_code?: string | null
         }
         Update: {
           created_at?: string | null
@@ -601,6 +607,9 @@ export type Database = {
           | null
           trial_used?: boolean | null
           user_id?: string
+          role?: string | null
+          store_id?: string | null
+          access_code?: string | null
         }
         Relationships: []
       }
@@ -867,6 +876,7 @@ export type Database = {
           can_manage_purchases: boolean
           can_access_dashboard: boolean
           can_manage_invoices: boolean
+          can_access_appointments: boolean
           created_at: string | null
           updated_at: string | null
         }
@@ -880,6 +890,7 @@ export type Database = {
           can_manage_purchases?: boolean
           can_access_dashboard?: boolean
           can_manage_invoices?: boolean
+          can_access_appointments?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -893,6 +904,7 @@ export type Database = {
           can_manage_purchases?: boolean
           can_access_dashboard?: boolean
           can_manage_invoices?: boolean
+          can_access_appointments?: boolean
           created_at?: string | null
           updated_at?: string | null
         }
@@ -906,20 +918,180 @@ export type Database = {
           }
         ]
       }
+      appointments: {
+        Row: {
+          id: string
+          user_id: string
+          client_id: string | null
+          client_name: string
+          client_phone: string | null
+          appointment_date: string
+          appointment_time: string
+          status: string
+          notes: string | null
+          examiner_name: string | null
+          right_eye_sph: number | null
+          right_eye_cyl: number | null
+          right_eye_axe: number | null
+          left_eye_sph: number | null
+          left_eye_cyl: number | null
+          left_eye_axe: number | null
+          add_value: number | null
+          is_deleted: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          client_id?: string | null
+          client_name: string
+          client_phone?: string | null
+          appointment_date: string
+          appointment_time: string
+          status?: string
+          notes?: string | null
+          examiner_name?: string | null
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          client_id?: string | null
+          client_name?: string
+          client_phone?: string | null
+          appointment_date?: string
+          appointment_time?: string
+          status?: string
+          notes?: string | null
+          examiner_name?: string | null
+          right_eye_sph?: number | null
+          right_eye_cyl?: number | null
+          right_eye_axe?: number | null
+          left_eye_sph?: number | null
+          left_eye_cyl?: number | null
+          left_eye_axe?: number | null
+          add_value?: number | null
+          is_deleted?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      stores: {
+        Row: {
+          id: string
+          owner_id: string
+          name: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          name?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          name?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      store_employees: {
+        Row: {
+          id: string
+          store_id: string
+          user_id: string | null
+          email: string
+          display_name: string | null
+          status: string
+          temporary_password: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          user_id?: string | null
+          email: string
+          display_name?: string | null
+          status?: string
+          temporary_password?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          store_id?: string
+          user_id?: string | null
+          email?: string
+          display_name?: string | null
+          status?: string
+          temporary_password?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_employees_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      companies: {
+        Row: {
+          id: string
+          name: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      check_access_code: {
-        Args: {
-          input_access_code: string
-        }
-        Returns: {
-          valid: boolean
-          message: string
-        }[]
-      }
       check_and_renew_subscriptions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -928,15 +1100,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_admin_permissions: {
+      get_user_store_role: {
         Args: Record<PropertyKey, never>
         Returns: {
-          can_manage_products: boolean
-          can_manage_clients: boolean
-          can_manage_receipts: boolean
-          can_view_financial: boolean
-          can_manage_purchases: boolean
-          can_access_dashboard: boolean
+          user_role: string
+          store_id: string
+          store_name: string
         }[]
       }
       get_subscription_stats: {
@@ -955,10 +1124,6 @@ export type Database = {
           user_uuid: string
         }
         Returns: undefined
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
       }
     }
     Enums: {
@@ -1258,6 +1423,13 @@ export interface Invoice {
   invoice_items?: InvoiceItem[];
   advance_payment?: number;
   balance?: number;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  add_value?: number;
 }
 
 export interface InvoiceItem {
@@ -1270,6 +1442,31 @@ export interface InvoiceItem {
   total_price: number;
   user_id: string;
   is_deleted?: boolean;
+  created_at: string;
+  updated_at: string;
+  item_category?: string;
+}
+
+export interface Appointment {
+  id: string;
+  user_id: string;
+  client_id?: string | null;
+  client_name: string;
+  client_phone?: string | null;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+  notes?: string | null;
+  examiner_name?: string | null;
+  right_eye_sph?: number | null;
+  right_eye_cyl?: number | null;
+  right_eye_axe?: number | null;
+  left_eye_sph?: number | null;
+  left_eye_cyl?: number | null;
+  left_eye_axe?: number | null;
+  add_value?: number | null;
+  confirmation_date?: string | null;
+  is_deleted?: boolean | null;
   created_at: string;
   updated_at: string;
 }
