@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Permissions cache
 interface PermissionsCache {
@@ -93,6 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const userRoleRef = useRef(userRole);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  const queryClient = useQueryClient();
+  const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
 
   const REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
 
@@ -121,6 +124,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         delete permissionsCache[key];
       });
     }
+  };
+
+  const clearAllCaches = () => {
+    // Clear permissions cache
+    invalidatePermissionsCache();
+
+    // Clear subscription cache
+    Object.keys(subscriptionCache).forEach(key => {
+      delete subscriptionCache[key];
+    });
+
+    // Clear rate limit tracker
+    Object.keys(rateLimitTracker).forEach(key => {
+      delete rateLimitTracker[key];
+    });
   };
 
   // Rate limiting check for subscription API calls
@@ -167,8 +185,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { role: userRoleRef.current, userStoreId: null }; // Skip if recently fetched
     }
 
-    // Apply rate limiting for API calls
-    if (!canMakeSubscriptionCall(userId)) {
+    // Apply rate limiting for API calls (skip if forced)
+    if (!force && !canMakeSubscriptionCall(userId)) {
       return { role: userRoleRef.current, userStoreId: null }; // Skip API call
     }
 
@@ -349,9 +367,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUserRole('employee');
-    invalidatePermissionsCache(); // Clear entire cache on sign out
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    } finally {
+      // Clear all React state immediately
+      setSession(null);
+      setUser(null);
+      setSubscription(null);
+      setPermissions(null);
+      setUserRole('employee');
+      setStoreId(null);
+      setLastRefreshTime(0);
+      userRoleRef.current = 'employee';
+
+      // Clean up real-time subscription immediately
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
+      }
+
+      // Clear all internal caches and rate limits
+      clearAllCaches();
+
+      // Clear TanStack Query cache
+      queryClient.clear();
+    }
   };
 
   useEffect(() => {
@@ -374,7 +416,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Only fetch subscription on initial load or force
           if (isInitialCheck || forceSubscriptionFetch) {
-            const userInfo = await fetchSubscription(currentSession.user.id, false);
+            const userInfo = await fetchSubscription(currentSession.user.id, forceSubscriptionFetch);
             role = userInfo?.role || role;
             storeId = userInfo?.userStoreId || null;
           }
@@ -382,8 +424,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updatePermissionsForRole(currentSession.user.id, role as UserRole);
 
           // Set up real-time subscription for existing session if not already set up
-          if (!realtimeChannel) {
-            realtimeChannel = setupRealtimeSubscription(currentSession.user.id, role, storeId);
+          if (!realtimeChannelRef.current) {
+            realtimeChannelRef.current = setupRealtimeSubscription(currentSession.user.id, role, storeId);
           }
         } else {
           setSubscription(null);
@@ -392,9 +434,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setStoreId(null);
 
           // Clean up real-time subscription when logged out
-          if (realtimeChannel) {
-            supabase.removeChannel(realtimeChannel);
-            realtimeChannel = null;
+          if (realtimeChannelRef.current) {
+            supabase.removeChannel(realtimeChannelRef.current);
+            realtimeChannelRef.current = null;
           }
         }
         setIsLoading(false);
@@ -405,9 +447,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       // Clean up existing real-time subscription on auth change
-      if (realtimeChannel && event === 'SIGNED_OUT') {
-        await supabase.removeChannel(realtimeChannel);
-        realtimeChannel = null;
+      if (realtimeChannelRef.current && event === 'SIGNED_OUT') {
+        await supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
       }
 
       // Only handle specific auth events that actually require action
@@ -433,8 +475,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       authSubscription.unsubscribe();
-      if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
       }
       if (sessionCheckTimeout) {
         clearTimeout(sessionCheckTimeout);
