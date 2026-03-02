@@ -286,12 +286,14 @@ const Layout = ({ children }: LayoutProps) => {
                       <p className="text-xs font-bold text-slate-900 truncate">{user?.email}</p>
                     </div>
 
-                    <Link to="/subscriptions">
-                      <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
-                        <Bell className="h-4 w-4" />
-                        <span>{t('subscriptions')}</span>
-                      </DropdownMenuItem>
-                    </Link>
+                    {isOwner && (
+                      <Link to="/subscriptions">
+                        <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-3">
+                          <Bell className="h-4 w-4" />
+                          <span>{t('subscriptions')}</span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
 
                     {isOwner && (
                       <>
@@ -429,12 +431,14 @@ const Layout = ({ children }: LayoutProps) => {
                     <p className="text-xs font-bold text-slate-900 truncate">{user?.email}</p>
                   </div>
 
-                  <Link to="/subscriptions">
-                    <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
-                      <Bell className="h-4 w-4" />
-                      <span>{t('subscriptions')}</span>
-                    </DropdownMenuItem>
-                  </Link>
+                  {isOwner && (
+                    <Link to="/subscriptions">
+                      <DropdownMenuItem className="cursor-pointer h-10 rounded-xl text-slate-700 focus:text-slate-900 focus:bg-slate-50 transition-colors font-bold flex items-center gap-2">
+                        <Bell className="h-4 w-4" />
+                        <span>{t('subscriptions')}</span>
+                      </DropdownMenuItem>
+                    </Link>
+                  )}
 
                   {isOwner && (
                     <>

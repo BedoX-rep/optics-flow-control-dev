@@ -4870,6 +4870,50 @@ const authTranslations: Translations = {
     fr: 'Une erreur s\'est produite lors de l\'inscription.'
   }
 };
+
+const employeeStatusTranslations: Translations = {
+  inventoryStable: {
+    en: 'Inventory Stable',
+    fr: 'Inventaire Stable'
+  },
+  viewYourPermissions: {
+    en: 'View Your Permissions',
+    fr: 'Voir Vos Permissions'
+  },
+  yourRole: {
+    en: 'Your Role',
+    fr: 'Votre Rôle'
+  },
+  role: {
+    en: 'Role',
+    fr: 'Rôle'
+  },
+  store: {
+    en: 'Store',
+    fr: 'Magasin'
+  },
+  permissionsGrantedByOwner: {
+    en: 'Permissions Granted by Owner',
+    fr: 'Permissions Accordées par le Propriétaire'
+  },
+  granted: {
+    en: 'Granted',
+    fr: 'Accordé'
+  },
+  storeSubscriptionExpired: {
+    en: 'Store Subscription Expired',
+    fr: 'Abonnement du Magasin Expiré'
+  },
+  storeSubscriptionExpiredDesc: {
+    en: 'Your store subscription has expired. Please renew your subscription to continue using the service.',
+    fr: 'Votre abonnement de magasin a expiré. Veuillez renouveler votre abonnement pour continuer à utiliser le service.'
+  },
+  restricted: {
+    en: 'Restricted',
+    fr: 'Restreint'
+  }
+
+};
 const allTranslations: Translations = {
   ...homeTranslations,
   ...dashboardTranslations,
@@ -4884,6 +4928,7 @@ const allTranslations: Translations = {
   ...accessTranslations,
   ...financialTranslations,
   ...authTranslations,
+  ...employeeStatusTranslations,
   // Invoice translations
   addInvoice: {
     en: 'Add Invoice',
