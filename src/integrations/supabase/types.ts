@@ -1420,6 +1420,13 @@ export interface Invoice {
   invoice_items?: InvoiceItem[];
   advance_payment?: number;
   balance?: number;
+  right_eye_sph?: number;
+  right_eye_cyl?: number;
+  right_eye_axe?: number;
+  left_eye_sph?: number;
+  left_eye_cyl?: number;
+  left_eye_axe?: number;
+  add_value?: number;
 }
 
 export interface InvoiceItem {
