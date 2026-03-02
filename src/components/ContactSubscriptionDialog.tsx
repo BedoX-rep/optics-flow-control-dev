@@ -15,7 +15,7 @@ const ContactSubscriptionDialog = ({ isOpen, onClose }: ContactSubscriptionDialo
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const phoneNumber = "0627026249";
+  const phoneNumber = "0634270408";
 
   const copyToClipboard = async () => {
     try {
@@ -45,7 +45,7 @@ const ContactSubscriptionDialog = ({ isOpen, onClose }: ContactSubscriptionDialo
             {t('contactSubscriptionDesc') || "Pour procéder à la mise à jour de votre abonnement, veuillez nous contacter au numéro ci-dessous."}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="flex flex-col gap-4">
           <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
             <p className="text-sm text-gray-600 mb-2">
@@ -64,11 +64,11 @@ const ContactSubscriptionDialog = ({ isOpen, onClose }: ContactSubscriptionDialo
               </Button>
             </div>
           </div>
-          
+
           <p className="text-sm text-gray-600">
             {t('subscriptionContactNote') || "Notre équipe vous assistera dans le processus de mise à jour de votre abonnement et répondra à toutes vos questions."}
           </p>
-          
+
           <Button onClick={onClose} className="w-full">
             {t('understood') || "Compris"}
           </Button>

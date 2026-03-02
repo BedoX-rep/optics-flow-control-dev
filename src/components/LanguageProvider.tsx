@@ -1502,6 +1502,10 @@ const productTranslations: Translations = {
     en: 'Confirm',
     fr: 'Confirmer'
   },
+  upgradeYourPlanToday: {
+    en: 'Upgrade your plan today',
+    fr: 'Mettez à jour votre forfait aujourd\'hui'
+  },
   // Invoice translations
   invoices: {
     en: 'Invoices',
