@@ -35,7 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useUserInformation } from '@/hooks/useUserInformation';
-import AddClientDialog from '@/components/AddClientDialog';
+import ClientDialog from '@/components/ClientDialog';
 import MarkupSettingsDialog from '@/components/MarkupSettingsDialog';
 import OrderItems from '@/components/receipt/OrderItems';
 import OrderSummary from '@/components/receipt/OrderSummary';
@@ -1528,7 +1528,7 @@ const NewReceipt = () => {
       </AlertDialog>
 
 
-      <AddClientDialog
+      <ClientDialog
         isOpen={isAddClientOpen}
         onClose={() => setIsAddClientOpen(false)}
         onClientAdded={handleClientAdded}

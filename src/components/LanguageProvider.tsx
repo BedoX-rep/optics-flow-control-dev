@@ -1442,6 +1442,34 @@ const productTranslations: Translations = {
     en: 'Edit Client',
     fr: 'Modifier le Client'
   },
+  addClient: {
+    en: 'Add Client',
+    fr: 'Ajouter un Client'
+  },
+  modifyClientDetails: {
+    en: 'Modify Client Details',
+    fr: 'Modifier les Détails du Client'
+  },
+  createNewClientRecord: {
+    en: 'Create New Client Record',
+    fr: 'Créer un Nouveau Dossier Client'
+  },
+  chooseRenewalMethod: {
+    en: 'Choose Renewal Method',
+    fr: 'Choisir la Méthode de Renouvellement'
+  },
+  customRenewalDate: {
+    en: 'Custom Date',
+    fr: 'Date Personnalisée'
+  },
+  renewalTimesCount: {
+    en: 'Number of Renewals',
+    fr: 'Nombre de Renouvellements'
+  },
+  saveClient: {
+    en: 'Save Client',
+    fr: 'Enregistrer le Client'
+  },
   stored: {
     en: 'Store Prescription',
     fr: 'Optique Prescrit'

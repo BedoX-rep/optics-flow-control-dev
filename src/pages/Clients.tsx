@@ -6,9 +6,8 @@ import { ClientCard } from "@/components/ClientCard";
 import { SearchInput } from "@/components/SearchInput";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import PageTitle from "@/components/PageTitle";
-import EditClientDialog from "@/components/EditClientDialog";
+import ClientDialog from "@/components/ClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
-import AddClientDialog from "@/components/AddClientDialog";
 import { UserPlus, Upload, ChevronDown, Save, Users, RefreshCw, Star, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
@@ -649,24 +648,16 @@ export default function Clients() {
           </>
         )}
 
-        {/* Floating action button */}
-        <FloatingActionButton onClick={() => setIsAddClientOpen(true)} />
-
-        {/* Add client dialog */}
-        <AddClientDialog
-          isOpen={isAddClientOpen}
-          onClose={() => setIsAddClientOpen(false)}
-          onClientAdded={handleAddClient}
+        {/* Client dialog (Add/Edit) */}
+        <ClientDialog
+          isOpen={isAddClientOpen || !!clientToEdit}
+          onClose={() => {
+            setIsAddClientOpen(false);
+            setClientToEdit(null);
+          }}
+          onClientAdded={isAddClientOpen ? handleAddClient : undefined}
+          client={clientToEdit}
         />
-
-        {/* Edit client dialog */}
-        {clientToEdit && (
-          <EditClientDialog
-            client={clientToEdit}
-            isOpen={!!clientToEdit}
-            onClose={() => setClientToEdit(null)}
-          />
-        )}
 
         {/* Import clients dialog */}
         <ImportClientsDialog
