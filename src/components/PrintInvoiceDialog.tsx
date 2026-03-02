@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useUserInformation } from '@/hooks/useUserInformation';
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
@@ -45,7 +46,6 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const { toast } = useToast();
   const isFrench = language === 'fr';
 
-  const [userInfo, setUserInfo] = useState<UserInformation | null>(null);
   const [invoiceData, setInvoiceData] = useState({
     invoice_number: '',
     client_name: '',
@@ -81,32 +81,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
     add_value: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  // Fetch user information
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!user) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('user_information')
-          .select('*')
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user info:', error);
-        } else {
-          setUserInfo(data);
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-      }
-    };
-
-    if (isOpen && user) {
-      fetchUserInfo();
-    }
-  }, [isOpen, user]);
+  const { data: userInfo, isLoading: isUserLoading } = useUserInformation();
 
   // Load invoice data when dialog opens
   useEffect(() => {
@@ -302,7 +277,7 @@ const PrintInvoiceDialog: React.FC<PrintInvoiceDialogProps> = ({ isOpen, onClose
   const generatePrintContent = () => {
     const total = calculateTotal();
     const currentDate = format(new Date(), 'dd/MM/yyyy');
-    const logoUrl = userInfo?.business_logo || '/placeholder.svg';
+    const logoUrl = (userInfo as any)?.logo_url || '/placeholder.svg';
     const purchaseType = getPurchaseType();
     const isFrench = language === 'fr';
 
