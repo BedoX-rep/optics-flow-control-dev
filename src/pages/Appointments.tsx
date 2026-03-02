@@ -143,10 +143,23 @@ const Appointments = () => {
 
         // Ensure Finished are at the bottom, otherwise recent date first (if they didn't specify, descending makes sense, but the supabase API does ascending. 
         // "Still filtered by the most recent date" -> Let's keep original order (which is ascending from DB) but push Finished to the bottom.
+        // Sorting logic: Active > Expired > Finished
         return filtered.sort((a, b) => {
-            if (a.status === 'Finished' && b.status !== 'Finished') return 1;
-            if (a.status !== 'Finished' && b.status === 'Finished') return -1;
+            // Define priority weights (lower weight = higher in list)
+            const getPriority = (status: string) => {
+                if (status === 'Finished') return 3;
+                if (status === 'Expired') return 2;
+                return 1; // Scheduled, Confirmation, Cancelled
+            };
 
+            const priorityA = getPriority(a.status);
+            const priorityB = getPriority(b.status);
+
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
+            // Secondary sort: chronological
             const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`).getTime();
             const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`).getTime();
             return dateA - dateB;

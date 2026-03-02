@@ -1482,6 +1482,26 @@ const productTranslations: Translations = {
     en: 'Added to favorites',
     fr: 'Ajouté aux favoris'
   },
+  reschedule: {
+    en: 'Reschedule',
+    fr: 'Reprogrammer'
+  },
+  appointmentsToday: {
+    en: 'Appointments Today',
+    fr: 'Rendez-vous Aujourd\'hui'
+  },
+  appointmentExpired: {
+    en: 'Appointment Expired',
+    fr: 'Rendez-vous Expiré'
+  },
+  expired: {
+    en: 'Expired',
+    fr: 'Expiré'
+  },
+  confirm: {
+    en: 'Confirm',
+    fr: 'Confirmer'
+  },
   // Invoice translations
   invoices: {
     en: 'Invoices',
